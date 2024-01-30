@@ -12,6 +12,10 @@ Can be run locally as a standard go program or via docker container. The default
 
 There is not yet anything for the web service side of things, nor does the web client work yet.
 
+Certain admin in-game commands can be destructive. For example, the `build` command is notoriously finicky if you don't understand what you are doing. Although there is some documentation, it doesn't mean stuff won't get missed, plus it's possible to accidentally mess up typing something and then can be tricky to fix if you don't first understand the underlying mechanisms.
+
+Plans later when a network-layer overhaul takes place is to enable exclusive graphics modes (full screen takeover without scrollback) for some stuff, as well as a multi-prompt interaction, where all input/output is isolated until a series of prompts are completed (or aborted). This will allow for better tools which won't require all information to be present in one command, or split into multiple individual commands. It will also allow for confirmation dialogs etc.
+
 # There is one default user created:
 
 *Username:* _admin_
