@@ -1,0 +1,15 @@
+itemid: 20015
+name: royal ring
+namesimple: ring
+description: Though ancient, the ring is in terrific shape.
+type: ring
+subtype: wearable
+damagereduction: 2
+statmods:
+  strength: 1
+  speed: 2
+  smarts: 1
+  vitality: 5
+  mysticism: 2
+  perception: 8
+cursed: true

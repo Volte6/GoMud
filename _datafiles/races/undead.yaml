@@ -1,0 +1,19 @@
+raceid: 6
+name: Undead
+description: A dead creature animated by magical means.
+size: medium
+unarmedname: claws
+tnlscale: 1.0
+angrycommands: 
+  - emote is looking dead...ly.
+  - emote lets out a blood curdling scream.
+stats:
+  mysticism:
+    base: 3
+  perception:
+    base: 1
+  strength:
+    base: 2
+damage:
+  diceroll: 1d3
+disabledslots: []

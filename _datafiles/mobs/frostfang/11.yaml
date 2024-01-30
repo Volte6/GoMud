@@ -1,0 +1,35 @@
+mobid: 11
+itemdropchance: 2
+hostile: false
+groups: 
+  - frostfang-npc
+idlecommands:
+  - 'say type `list` to see my wares'
+  - 'say If you''re looking to sell something, I may be interested... as long as it''s not too special or unique'
+  - emote shuffles some papers
+  - emote is counting her coins;restock gold
+  - emote is watching you
+  - restock 30001/3
+  - restock 20005/1
+  - restock 6/3
+  - restock 50000/4
+  - restock 8/1
+activitylevel: 1
+character:
+  name: brynja snowdeal
+  description: 'With a reputation for fair dealings and an uncanny ability to procure the rarest of items, Brynja is well-regarded among the Emporium''s patrons. Her quick wit and sharp tongue are as legendary as her bargaining skills, ensuring that negotiations with Brynja are always an interesting affair. Despite her tough exterior, she possesses a keen sense of her customers'' needs, often pointing them towards the item they didn''t even realize they were looking for.'
+  raceid: 1
+  level: 20
+  gold: 50
+  equipment:
+    weapon:
+      itemid: 10005
+    body:
+      itemid: 20012
+    neck:
+      itemid: 20002
+    feet:
+      itemid: 20003
+  items:
+    - itemid: 30001
+ismerchant: true

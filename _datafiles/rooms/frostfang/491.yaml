@@ -1,0 +1,21 @@
+roomid: 491
+zone: Frostfang
+title: Thieves Den
+description: The thieves' den, hidden in the labyrinthine backstreets of the city,
+  is a hive of whispered schemes and furtive glances. Entering this dimly lit sanctuary
+  of the underworld feels like stepping into another realm, where the rules of the
+  outside world hold no sway. The air is thick with the smoke of cheap tobacco and
+  the scent of stale ale, mingling with the underlying musk of unwashed bodies and
+  damp stone.
+biome: city
+exits:
+  west:
+    roomid: 490
+spawninfo:
+- mobid: 30
+  cooldown: 300
+  message: A sneaky fellow enters from a back room.
+skilltraining:
+  skulduggery:
+    min: 1
+    max: 4

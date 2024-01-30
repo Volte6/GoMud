@@ -1,0 +1,17 @@
+roomid: 5
+zone: Frostfang
+title: Cobblestone Way
+description: Almost at the end of Cobblestone Way, the stones paventment underfoot
+  is slick with ice, reflecting the soft glow of lanterns that line the path. The
+  trees have receded, replaced by statues of figures posed in moments of triumph,
+  each one covered in a layer of frost. The music is now a symphony, with flutes and
+  violins joining the lute and drum, creating a melody that speaks of hope and destiny.
+  The castle's entrance is just ahead, its massive doors adorned with intricate carvings.
+biome: city
+exits:
+  east:
+    roomid: 270
+  north:
+    roomid: 6
+  south:
+    roomid: 4

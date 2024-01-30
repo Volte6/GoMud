@@ -1,0 +1,16 @@
+roomid: 226
+zone: Mirror Caves
+title: Inside the Cave
+description: In this secluded part of The Mirror Caves, you come across a chamber
+  that echoes the bewildering beauty of the labyrinth. The room is spacious, its walls
+  smooth and gently undulating, adorned with mineral veins that catch the dim light,
+  casting a subtle glow. Here, the stalactites and stalagmites are less pronounced,
+  creating an illusion of a less cluttered, more open space. Yet, their presence,
+  along with the occasional drip of water from the ceiling, maintains the cave's enigmatic
+  ambiance. The air is fresh, carrying a hint of moisture and earth, a silent testament
+  to the ever-present, unseen forces shaping the cavern's depths.
+exits:
+  east:
+    roomid: 227
+  west:
+    roomid: 225

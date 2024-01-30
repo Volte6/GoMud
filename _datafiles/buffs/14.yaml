@@ -1,0 +1,16 @@
+buffid: 14
+name: Minor Heal
+description: A magical healing aura washes over you.
+roundinterval: 1
+triggercount: 1
+healthroll: 1d10
+messages:
+  start:
+    user: A magical healing aura washes over you.
+    room: '{username} is surrounded by a healing glow.'
+  effect:
+    user: You heal for {hitpoints} damage!
+    room: '{username} is healing from the effects of a heal spell.'
+  end:
+    user: The healing aura fades away.
+    room: '{username}''s healing aura fades away.'

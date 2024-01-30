@@ -1,0 +1,15 @@
+roomid: 211
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: The relentless snowstorm of the Whispering Wastes creates a world of
+  white isolation. The sky, a deep twilight, barely penetrates the storm's fury. The
+  haunting calls of unseen birds pierce the wind's howl, their cries adding to the
+  desolate atmosphere. The ground is a treacherous tapestry of snow and ice, with
+  shadowy forms of forgotten shrines dotting the landscape, their eerie presence felt
+  more than seen.
+biome: snow
+exits:
+  east:
+    roomid: 210
+idlemessages:
+- The wind howls from every direction

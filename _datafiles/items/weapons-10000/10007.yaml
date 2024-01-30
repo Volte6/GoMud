@@ -1,0 +1,11 @@
+itemid: 10007
+name: finely crafted shortsword
+namesimple: shortsword
+description: The finely crafted shortsword boasts a perfectly balanced blade, its gleaming steel edge honed to a razor-sharp finish, while the ornate hilt fits snugly in the hand, promising precision and grace in every strike.
+type: weapon
+hands: 1
+subtype: slashing
+damage:
+  diceroll: 1d6+1
+
+

@@ -1,0 +1,29 @@
+roomid: 242
+zone: Mirror Caves
+title: Cave Exit
+description: Deeper within The Mirror Caves, you find yourself in a chamber that feels
+  both spacious and intimate. The walls here curve gently, creating a dome-like effect
+  overhead, where clusters of stalactites hang like delicate stone curtains. The floor
+  is remarkably smooth, with scattered mineral formations that sparkle subtly under
+  the soft light, resembling a starlit sky reflected on a tranquil lake. The sound
+  of a distant underground stream adds a soothing backdrop to this natural sanctuary.
+  The air, cool and crisp, fills the chamber with a sense of purity and untouched
+  antiquity, a quiet ode to the enduring beauty of these subterranean depths.
+props:
+- verbs: [out]
+  requirements:
+  - type: nomobs
+    rejectionmessage: The way out is block by denizens of the cave.
+mapsymbol: X
+maplegend: Exit
+exits:
+  north:
+    roomid: 241
+  out:
+    roomid: 241
+spawninfo:
+- mobid: 25
+  cooldown: 30
+  message: Your head reels for a brief moment and a tentacled creature slithers into
+    the light.
+  forcehostile: true

@@ -1,0 +1,20 @@
+roomid: 261
+zone: Frostfang
+title: The Residential District
+description: "The district's pathways, lined with cobblestones polished by endless
+  passersby, snake through the area, mirroring the course of petrified streams. A
+  minor yet noticeable split in the path leading northward arrests the attention of
+  those who are alert. Around this junction, the golden radiance from lanterns perched
+  on iron stands casts an inviting aura, highlighting this split, and bringing into
+  relief the snow-draped ground and the determined faces of the locals. These residents,
+  bundled in layers of fur and heavy garments, breathe out transient wisps of mist
+  in the biting air, their footfalls subtly indicating an intriguing, seldom-seen
+  house concealed close to the districtb\0\x19s northern boundary."
+biome: city
+exits:
+  east:
+    roomid: 262
+  north:
+    roomid: 267
+  west:
+    roomid: 260

@@ -1,0 +1,12 @@
+itemid: 20027
+name: gnarled wood ring
+namesimple: ring
+description: A hand crafted ring from an unidenfiable wood.
+type: ring
+subtype: wearable
+damagereduction: 2
+statmods:
+  speed: 5
+  vitality: 1
+  mysticism: 9
+  perception: 8

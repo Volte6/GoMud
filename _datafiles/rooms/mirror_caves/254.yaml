@@ -1,0 +1,14 @@
+roomid: 254
+zone: Mirror Caves
+title: Inside the Cave
+description: In a quieter section of The Mirror Caves, you encounter a chamber that
+  exudes a sense of ancient stillness. The walls here are broad and expansive, streaked
+  with minerals that have formed delicate, web-like patterns over eons. Soft, diffused
+  light seeps in from unknown sources, casting a serene glow over the array of stalactites
+  and stalagmites, some of which have joined to create natural arches. The air is
+  still, almost sacred, only disturbed by the occasional sound of water droplets,
+  each echoing like a whisper from the past, reverberating through the timeless expanse
+  of the cave.
+exits:
+  south:
+    roomid: 253

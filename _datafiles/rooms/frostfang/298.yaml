@@ -1,0 +1,19 @@
+roomid: 298
+zone: Frostfang
+title: The Old Road
+description: The towering trees now form a dense, impenetrable barrier, their branches
+  intertwining overhead to create an ominous canopy. The road itself becomes increasingly
+  overgrown, with moss-covered cobblestones peeking through the underbrush. The distant
+  sounds of civilization are but a distant memory, replaced by an unsettling silence
+  that seems to emanate from the heart of the forest.
+exits:
+  east:
+    roomid: 299
+  northwest:
+    roomid: 303
+  southwest:
+    roomid: 297
+idlemessages:
+- You hear the wind howling outside the gate.
+- The wind whistles through the arrow slits in the watchtowers.
+- The gate creaks in the wind.

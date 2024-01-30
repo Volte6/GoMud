@@ -1,0 +1,29 @@
+mobid: 38
+itemdropchance: 2
+hostile: false
+maxwander: 0
+groups: 
+  - frostfang-npc
+idlecommands:
+  - 'say You can <ansi fg="command">ask</ansi> me to do stuff.'
+  - 'say Killing stuff is a great way to get stronger, but don''t pick a fight with the locals!'
+  - 'say Let go kill some rats... but watch out for the big ones.'
+  - 'say There are rats to the south of Town Square.'
+  - 'say You can <ansi fg="command">attack</ansi> rats.'
+  - 'say Did you know you can party up with other players? <ansi fg="command">help party</ansi> to learn more about it.'
+  - 'say Type <ansi fg="command">status</ansi> to learn about yourself.'
+  - 'say Type <ansi fg="command">help</ansi> to see many of the commands available to you.'
+activitylevel: 1
+character:
+  name: player guide
+  description: 'In combat, the Guide proves to be a steadfast protector, always ready to lend a helping hand when danger looms. They are a skilled warrior, wielding their frost-forged weapon with precision and using their keen senses to anticipate threats. New players can rely on the Guide to watch their back in the heat of battle, providing both tactical advice and unwavering support to ensure their safety.'
+  raceid: 1
+  level: 10
+  gold: 3
+  equipment:
+    weapon:
+      itemid: 10002
+    neck:
+      itemid: 20002
+    feet:
+      itemid: 20003

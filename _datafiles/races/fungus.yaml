@@ -1,0 +1,16 @@
+raceid: 12
+name: Fungus
+description: A mushroomy entity.
+size: medium
+unarmedname: spores
+angrycommands: [emote pulsates.]
+tnlscale: 1
+stats:
+  vitality:
+    base: 4
+damage:
+  diceroll: 1d4
+  critbuffids: 
+  - 13
+disabledslots: ['weapon', 'offhand', 'belt', 'gloves', 'ring']
+

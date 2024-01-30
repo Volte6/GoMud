@@ -1,0 +1,38 @@
+mobid: 21
+itemdropchance: 2
+hostile: false
+maxwander: -1
+groups: 
+  - catacombs-npc
+idlecommands:
+  - 'say can I interest you in some help?'
+  - 'say These bones don''t sell themselves.'
+  - 'say You never know when you might need a little extra help.'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - 'wander'
+  - 'wander'
+  - restockservant 15/2/250
+activitylevel: 1
+character:
+  name: bonecrafter
+  description: 'The necromancer known as the Bonecrafter practices his grim craft. Cloaked in a robe that seems woven from the very darkness around him, his presence is an unnerving calm in the chaos of decay. His face, pale and gaunt, is marked with lines of concentration and arcane knowledge, with eyes that gleam with a morbid fascination for the dead. His fingers, long and delicate, dance with precision as he conducts the macabre ritual to awaken the bones that lie silent in the tombs. The necromancer''s lips whisper incantations that have not been heard by the living for centuries, and with each word, the skeletons jerk into a semblance of life, ready to serve those willing to pay his price.'
+  raceid: 1
+  level: 10
+  equipment:
+    weapon: 
+      itemid: 10011
+    offhand: 
+      itemid: 10011
+    head:
+      itemid: 20023
+    feet:
+      itemid: 20003
+    belt:
+      itemid: 20009
+    body:
+      itemid: 20022
+ismerchant: true

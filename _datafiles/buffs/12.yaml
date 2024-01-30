@@ -1,0 +1,20 @@
+buffid: 12
+name: Tackled
+description: You've been tackled to the ground!
+secret: false
+roundinterval: 1
+triggercount: 2
+messages:
+  start:
+    user: You're on the ground.
+    room: '{username} is on the ground'
+  effect:
+    user: You're trying to get up.
+    room: '{username} is getting up.'
+  end:
+    user: You're standing again.
+    room: '{username} is standing again.'
+flags:
+  - no-combat
+  - no-flee
+  - no-go

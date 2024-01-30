@@ -1,0 +1,28 @@
+roomid: 181
+zone: Whispering Wastes
+title: Hermits Outpost
+description: Secluded within the Whispering Wastes, a solitary camp emerges, a rare
+  sanctuary amidst the unyielding blizzard. This is the abode of an old hermit, once
+  a scout of the wintery realm, now living in self-imposed exile. The camp, nestled
+  in a natural hollow protected by snowdrifts, consists of a single, weather-beaten
+  tent. Its fabric, faded and frayed by the elements, still stands resilient against
+  the howling winds. A small, smoldering fire pit outside the tent offers meager warmth,
+  its smoke curling up into the twilight sky, dissolving into the endless white. The
+  camp is sparse, with no more than the essentials for survival and solitude. A few
+  rudimentary tools and a worn cooking pot are neatly arranged beside the tent. This
+  solitary haven, surrounded by the vast, frozen landscape, is the hermit's refuge,
+  a place of isolation and contemplation, far removed from the outside world.
+mapsymbol: H
+maplegend: Hermit
+biome: snow
+exits:
+  west:
+    roomid: 180
+spawninfo:
+- mobid: 27
+  cooldown: 225
+  itemtrades:
+  - accepteditemids: [4]
+    prizequestids: [5-end]
+idlemessages:
+- The wind howls from every direction

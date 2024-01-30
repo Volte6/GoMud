@@ -1,0 +1,21 @@
+roomid: 57
+zone: Frostfang
+title: The Eastwind Promenade
+description: Eastwind Promenade is the bustling artery that stretches directly to
+  the East Frostfang Gate. Lined with cobblestones worn smooth by countless footsteps
+  and cart wheels, the road is flanked by a myriad of alleyways and side streets,
+  each leading to vibrant market squares and clusters of shops. From blacksmiths forging
+  tools to apothecaries mixing potions, the Promenade is a sensory overload of sights,
+  sounds, and scents. As travelers make their way to and from the gate, merchants
+  hawk their wares, creating a lively tapestry of commerce and community that embodies
+  the spirit of Frostfang.
+biome: city
+exits:
+  east:
+    roomid: 58
+  north:
+    roomid: 62
+  south:
+    roomid: 61
+  west:
+    roomid: 56

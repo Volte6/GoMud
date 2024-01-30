@@ -1,0 +1,12 @@
+itemid: 20028
+name: padded shoes
+namesimple: shoes
+description: Hand cobbled shoes made for traversing a forest.
+type: feet
+subtype: wearable
+damagereduction: 2
+statmods:
+  speed: 3
+  vitality: -1
+  mysticism: 3
+  perception: 8

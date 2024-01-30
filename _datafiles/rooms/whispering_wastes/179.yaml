@@ -1,0 +1,16 @@
+roomid: 179
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: The Whispering Wastes are engulfed in a relentless snowstorm, the sky
+  a dim twilight. The wind carries ghostly whispers, as if the air itself holds ancient
+  secrets. Visibility is reduced to a mere few feet, and each step is a risk on the
+  ice-covered ground. In the distance, the shadows of bizarre structures and frozen
+  spires loom, their forms blurred by the swirling snow.
+biome: snow
+exits:
+  east:
+    roomid: 178
+  south:
+    roomid: 180
+idlemessages:
+- The wind howls from every direction

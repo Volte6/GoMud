@@ -1,0 +1,17 @@
+roomid: 329
+zone: Frost Lake
+title: Frost Lake Shore
+description: The frigid waters of the lake stretch out before you, their surface glistening
+  with a layer of ice that sparkles like diamonds in the pale winter sunlight. Tall,
+  snow-covered trees surround the lake, their branches laden with icicles that chime
+  softly in the breeze. In the center of the lake, a small island emerges, crowned
+  with a lone, ancient pine tree. The tree's needles are a deep shade of green, providing
+  a stark contrast to the otherwise monochromatic landscape. It stands as a symbol
+  of resilience in the face of winter's unyielding grip.
+mapsymbol: "~"
+maplegend: Shore
+exits:
+  northeast:
+    roomid: 330
+  west:
+    roomid: 328

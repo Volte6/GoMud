@@ -1,0 +1,13 @@
+roomid: 825
+zone: Frost Lake
+title: Wading Channel
+description: The water here is somewhat shallow, but frigid. You think you might be
+  able to make it to the north shore, or head back to the south. Either way, you should
+  get out of this cold water quickly.
+mapsymbol: "~"
+maplegend: Shore
+exits:
+  north:
+    roomid: 753
+  south:
+    roomid: 764

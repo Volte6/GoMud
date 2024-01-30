@@ -1,0 +1,14 @@
+roomid: 257
+zone: Mirror Caves
+title: Inside the Cave
+description: Further into The Mirror Caves, you discover a chamber that maintains
+  the labyrinth's mysterious charm. The walls here are more rugged, with patches of
+  raw stone visible between the smooth surfaces, offering a glimpse into the cave's
+  natural formation. The play of light against these rough textures creates a contrast
+  of shadows and highlights, adding depth to the room. Stalagmites rise up like ancient
+  statues, while overhead, stalactites drip slowly, their rhythmic patter a gentle
+  reminder of the cave's quiet dynamism. The air here is tinged with a cool dampness,
+  carrying the essence of the deep earth.
+exits:
+  east:
+    roomid: 237

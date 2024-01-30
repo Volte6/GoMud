@@ -1,0 +1,27 @@
+roomid: 51
+zone: Frostfang
+title: East Wing Storage Closet
+description: Hidden within the depths of Frostfang Castle, the storage closet is a
+  compact, dimly lit chamber. Upon opening its heavy wooden door, one is immediately
+  met with the musty scent of old parchment and aged wood. Rows of wooden shelves,
+  darkened by time, stretch from floor to ceiling, mostly empty. A lantern hangs on
+  the wall, but doesn't appear to be in working order. As you step inside, faint murmurs,
+  their origin unclear, seem to echo from the walls or perhaps beyond them, adding
+  an air of mystery to the room's quiet seclusion.
+props:
+- nouns: [lantern]
+  verbs: [touch, fix, pull, light, take, get, move, adjust, turn, rub, clean, dust,
+    wipe, polish, repair, break, smash, ignite, light]
+  description: The lantern is old, and doesn't appear to be in working order. It's
+    hanging on the wall, but the glass is cracked and the wick is missing.
+  trigger:
+    roomid: 50
+    affected: player
+    descriptionplayer: You adjust the latern, and a passage way reveals itself in
+      the wall. Just as you step through the passage, it closes behind you.
+    descriptionroom: <ansi fg="username">%s</ansi> does something with the lantern,
+      and a secret passage opens! He disappears through the passage just as it closes.
+biome: city
+exits:
+  east:
+    roomid: 43

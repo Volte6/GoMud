@@ -1,0 +1,12 @@
+roomid: 715
+zone: Mystarion
+title: The east road
+description: You are on the main eastern road. This road leads to the farmland of
+  the stormshards. The road itself is well travelled, as this is the road the farmers
+  take to sell their crops. The eastern part of the city has many shops and merchants
+  to explore.
+exits:
+  east:
+    roomid: 685
+  west:
+    roomid: 724

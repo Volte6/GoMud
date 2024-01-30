@@ -1,0 +1,10 @@
+itemid: 30005
+name: mutton stew
+namesimple: stew
+description: A bit gamey.
+type: food
+subtype: edible
+uses: 1
+value: 20
+buffids: 
+- 18

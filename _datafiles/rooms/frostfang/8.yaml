@@ -1,0 +1,16 @@
+roomid: 8
+zone: Frostfang
+title: The west road
+description: This ancient street, lined with gnarled trees and dimly lit lanterns,
+  guides adventurers from the town's central square, where a discreet bank stands
+  guard to the north, and into the unknown. As you traverse this enigmatic path, your
+  mind races with riddles whispered by the wind of nefarious creatures lurking in
+  the shadows.
+biome: city
+exits:
+  east:
+    roomid: 7
+  north:
+    roomid: 166
+  west:
+    roomid: 9

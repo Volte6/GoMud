@@ -1,0 +1,10 @@
+itemid: 20025
+name: sophie's locket
+namesimple: locket
+description: A locket with a drawing inside.
+type: neck
+subtype: wearable
+damagereduction: 3
+statmods:
+  mysticism: 5
+  perception: 10

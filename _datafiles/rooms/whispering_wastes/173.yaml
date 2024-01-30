@@ -1,0 +1,18 @@
+roomid: 173
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: The Whispering Wastes are a realm of eternal winter, where the sky remains
+  a perpetual twilight. The blizzard muffles the world in white, and the wind whispers
+  tales of yore. The ground is a treacherous sheet of ice, and strange, shadowy structures
+  appear like mirages in the distance. The cold is bone-deep, a reminder of the solitude
+  and dangers that lurk in this forsaken landscape.
+biome: snow
+exits:
+  east:
+    roomid: 172
+  northwest:
+    roomid: 174
+  southwest:
+    roomid: 175
+idlemessages:
+- The wind howls from every direction

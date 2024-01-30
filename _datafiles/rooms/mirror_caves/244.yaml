@@ -1,0 +1,16 @@
+roomid: 244
+zone: Mirror Caves
+title: Inside the Cave
+description: Within the labyrinth of The Mirror Caves, you find yourself in yet another
+  enigmatic chamber. This room, like many before it, is a confusing blend of natural
+  beauty and disorienting sameness. The walls, smooth and curving, are lined with
+  streaks of mineral deposits that shimmer faintly, reflecting the sparse light in
+  a kaleidoscope of muted colors. Stalactites and stalagmites dot the space, some
+  meeting in the middle to form natural pillars that add to the maze-like quality
+  of the cave. The air is cool and echoes with the distant, indistinct sounds of water
+  droplets hitting stone, a constant reminder of the cave's deep, hidden life.
+exits:
+  north:
+    roomid: 243
+  south:
+    roomid: 244

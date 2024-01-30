@@ -1,0 +1,26 @@
+mobid: 9
+itemdropchance: 2
+hostile: false
+maxwander: 2
+groups: 
+  - frostfang-npc
+idlecommands:
+  - 'emote surveys the area for trouble'
+  - 'emote looks at you suspiciously'
+  - 'emote examines his sword carefully'
+  - ''
+  - ''
+activitylevel: 2
+character:
+  name: king's guard
+  description: 'The King''s Guard stands resolute, a formidable perception in the royal throne room. Clad in meticulously maintained armor that gleams under the soft lighting, they exude an air of unwavering loyalty and strength. The guard''s helmet obscures their face, adding an element of mystery and intimidation, while their posture remains erect and vigilant, ready to spring into action at a moment''s notice. A well-polished broadsword hangs at their side, its perception a silent promise to defend the king and the kingdom with their life.'
+  raceid: 1
+  level: 25
+  gold: 30
+  equipment:
+    weapon:
+      itemid: 10002
+    neck:
+      itemid: 20002
+    feet:
+      itemid: 20003

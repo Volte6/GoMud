@@ -1,0 +1,18 @@
+roomid: 14
+zone: Frostfang
+title: Beggars lane
+description: 'To the east, a beacon of hope stands amidst the desolation: a temple
+  with tall, stone spires that pierce the gray sky. Its heavy wooden doors are slightly
+  ajar, revealing a warm, golden light from within. The faint sound of chanting can
+  be heard, and the scent of burning incense wafts out, mingling with the cold air.
+  A sign above the entrance reads, Sanctuary of the Benevolent Heart: All Are Welcome.
+  A priest in humble robes stands by the entrance, offering bread and warm soup to
+  those in need.'
+biome: city
+exits:
+  east:
+    roomid: 17
+  north:
+    roomid: 13
+  south:
+    roomid: 15

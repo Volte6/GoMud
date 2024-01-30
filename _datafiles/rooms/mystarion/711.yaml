@@ -1,0 +1,14 @@
+roomid: 711
+zone: Mystarion
+title: City gate
+description: Crafted from massive slabs of stone that gleam with an inner light, the
+  gate towers above, etched with intricate runes and symbols that shimmer with an
+  ethereal energy. The heavy doors, made of a dark, ageless wood banded with iron,
+  are thrown open, inviting yet imposing, as if challenging the worthiness of those
+  who seek entry.
+mapsymbol: G
+exits:
+  north:
+    roomid: 712
+  south:
+    roomid: 668

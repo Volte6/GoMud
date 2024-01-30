@@ -1,0 +1,21 @@
+roomid: 62
+zone: Frostfang
+title: Icy Emporium
+description: 'Nestled among the snow-draped structures of Frostfang, the Icy Emporium
+  beckons adventurers and townsfolk alike. Its wooden faC''ade, painted a deep blue,
+  contrasts with the frosty surroundings, while a sign, carved in the shape of a snowflake,
+  gently sways in the cold breeze. Inside, the warm glow of lanterns illuminates shelves
+  laden with an array of items: from enchanted vials and scrolls to practical gear
+  like ropes and torches. The air is filled with the mingled scents of dried herbs,
+  leather, and a hint of woodsmoke. Behind a polished counter, the shopkeeper, a wise
+  old woman with sparkling eyes, offers both goods and occasional tidbits of advice,
+  making the Emporium a must-visit for those traversing Frostfang''s icy expanse.'
+mapsymbol: $
+biome: city
+exits:
+  south:
+    roomid: 57
+spawninfo:
+- mobid: 11
+  cooldown: 20
+  message: Brynja Snowdeal enters from a back room.

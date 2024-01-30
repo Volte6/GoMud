@@ -1,0 +1,18 @@
+roomid: 76
+zone: Frostfang
+title: Ivar Froststeel's Hacking Hut
+description: The walls of the Hacking Hut are adorned with an impressive array of
+  weaponry, each piece a testament to Ivar's mastery over metal and magic. From viciously
+  curved daggers encrusted with frost to mighty greatswords that seem to hum with
+  a hidden power, every weapon bears the unique signature of Ivar's craftsmanship.
+  Ivar's creations are not just tools of war; they are pieces of art, imbued with
+  the essence of the frigid wilderness and forged to perfection.
+mapsymbol: $
+biome: city
+exits:
+  north:
+    roomid: 55
+spawninfo:
+- mobid: 10
+  cooldown: 20
+  message: A Ivar Froststeel enters from a back room.

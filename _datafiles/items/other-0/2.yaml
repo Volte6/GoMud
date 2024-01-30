@@ -1,0 +1,6 @@
+itemid: 2
+name: map
+namesimple: paper
+description: This map was once readable, but no longer. Maybe you can get a new one?
+type: readable
+subtype: blobcontent

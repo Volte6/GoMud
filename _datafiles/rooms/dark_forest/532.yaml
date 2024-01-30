@@ -1,0 +1,18 @@
+roomid: 532
+zone: Dark Forest
+title: Forest Road
+description: As you venture further along the old road, it leads you into the heart
+  of the foreboding Dark Forest. The transition from the tranquil Frost Lake to this
+  shadowy realm is abrupt and palpable. The once-clear path is now obscured by gnarled,
+  twisted branches that reach out like skeletal fingers from ancient trees, their
+  bark as black as night.
+biome: forest
+exits:
+  northeast:
+    roomid: 533
+  southwest:
+    roomid: 531
+spawninfo:
+- mobid: 32
+  cooldown: 150
+  message: A fungal growth emerges from the ground.

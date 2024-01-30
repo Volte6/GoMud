@@ -1,0 +1,12 @@
+itemid: 20029
+name: leather pants
+namesimple: pants
+description: A pair of hand stitched leather pants.
+type: legs
+subtype: wearable
+damagereduction: 2
+statmods:
+  speed: 1
+  vitality: 1
+  mysticism: 1
+  perception: 1

@@ -1,0 +1,17 @@
+roomid: 17
+zone: Frostfang
+title: Sanctuary Doors
+description: The Sanctuary of the Benevolent Heart stands as a solemn monument amidst
+  the bleakness of Beggars Lane. Its tall, stone spires, darkened by years of exposure
+  to Frostfang's harsh climate, rise defiantly against the gray sky, while intricate
+  carvings of benevolent deities and scenes of charity adorn its facade. The temple's
+  heavy wooden doors, always slightly ajar, invite all into its warm embrace, where
+  golden light from countless candles illuminates the hallowed interior, and the ever-present
+  scent of burning incense serves as a comforting reminder of hope and sanctuary in
+  a world often devoid of both.
+biome: city
+exits:
+  east:
+    roomid: 18
+  west:
+    roomid: 14

@@ -1,0 +1,17 @@
+roomid: 175
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: A relentless storm rages in the Whispering Wastes, the world lost under
+  a blanket of snow. The twilight sky casts a surreal luminescence, and the wind whispers
+  secrets of the past. Visibility is reduced to a few feet, each step on the ice-laden
+  ground uncertain. In the distance, strange structures and spires rise, their shapes
+  distorted by the snowstorm. The cold here is more than a physical sensation; it's
+  a stark reminder of the isolation and dangers hidden in this desolate, frozen wilderness.
+biome: snow
+exits:
+  northeast:
+    roomid: 173
+  west:
+    roomid: 176
+idlemessages:
+- The wind howls from every direction

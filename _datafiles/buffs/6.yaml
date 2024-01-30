@@ -1,0 +1,15 @@
+buffid: 6
+name: Power leveling
+description: You feel like you've been training in 100x gravity.
+secret: false
+roundinterval: 15 # Every one minute
+triggercount: 30 # 30 times = 30 minutes
+statmods:
+  xpscale: 200
+messages:
+  start:
+    user: You feel like you've been training in 100x gravity.
+    room: ''
+  end:
+    user: You no longer feel like you've been training in 100x gravity.
+    room: ''

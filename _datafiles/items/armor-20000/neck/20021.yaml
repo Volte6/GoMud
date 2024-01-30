@@ -1,0 +1,9 @@
+itemid: 20021
+name: tattered cape
+namesimple: cape
+description: A cape eaten by moths and rats.
+type: neck
+subtype: wearable
+damagereduction: 2
+statmods:
+  perception: -1

@@ -1,0 +1,15 @@
+itemid: 10009
+name: ancient royal scepter
+namesimple: scepter
+description: It's old and crude, but was once the symbol of a king. 
+type: weapon
+hands: 1
+subtype: bludgeoning
+damage:
+  diceroll: 2d8+2
+  critbuffids: 
+  - 10
+statmods:
+  perception: 15
+cursed: true
+

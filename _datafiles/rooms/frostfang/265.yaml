@@ -1,0 +1,56 @@
+roomid: 265
+zone: Frostfang
+title: Inside a Residence
+description: As you step inside the residence, warmth envelops you, a stark contrast
+  to the biting cold of Frostfang's streets. The interior exudes a rustic charm, with
+  thick wooden beams supporting the low ceiling and walls adorned with tapestries
+  depicting scenes of snow-covered forests and mythical creatures. The floor is covered
+  with woven rugs, soft underfoot, adding splashes of color to the otherwise earthy
+  tones of the room.
+biome: house
+exits:
+  south:
+    roomid: 263
+spawninfo:
+- mobid: 26
+  cooldown: 60
+  message: sophie steps out from another room.
+  name: sophie
+  idlecommands:
+  - ifnotquest 1 emote looks sad.
+  itemtrades:
+  - accepteditemids: [20025]
+    prizeitemids: [20033]
+    prizequestids: [1-end]
+  asksubjects:
+  - ifquest: ""
+    ifnotquest: 1-start
+    asknouns:
+    - quest
+    - locket
+    - sad
+    - sadness
+    - necklace
+    replycommands:
+    - emote sighs.
+    - say I lost my locket. I think it was when I was gardening.
+    - givequest 1-start {userid}
+  - ifquest: 1-start
+    ifnotquest: ""
+    asknouns:
+    - garden
+    - where
+    - gardening
+    replycommands:
+    - emote thinks hard for a moment.
+    - say I was trimming the hedges out back the last time I remember wearing it.
+  - ifquest: 1-end
+    ifnotquest: ""
+    asknouns:
+    - locket
+    - sad
+    - sadness
+    - necklace
+    replycommands:
+    - emote sighs.
+    - say I'm so absent minded sometimes. I'm glad you found it.

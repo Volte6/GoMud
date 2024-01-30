@@ -1,0 +1,11 @@
+itemid: 20014
+name: rotting boots
+namesimple: boots
+description: The boots of a king. A dead one, anyways.
+type: feet
+subtype: wearable
+damagereduction: 2
+statmods:
+  speed: 1
+  vitality: 2
+  perception: -2

@@ -1,0 +1,19 @@
+buffid: 23
+name: Warriors Respite
+description: You are focused on recovering.
+roundinterval: 1
+triggercount: 20
+healthroll: 1d4
+messages:
+  start:
+    user: You enter a focused state of rest.
+    room: '{username} begins to meditate.'
+  effect:
+    user: You heal for {hitpoints} damage!
+    room: '{username} is healing while they meditate.'
+  end:
+    user: Your restful state abides.
+    room: '{username} is done meditating.'
+flags:
+  - cancel-on-combat
+  - cancel-on-action

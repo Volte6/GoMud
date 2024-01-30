@@ -1,0 +1,19 @@
+buffid: 16
+name: Well Rested
+description: You feel very well rested.
+roundinterval: 1
+triggercount: 75 # lasts 5 minutes?
+healthroll: 1d2
+statmods:
+  xpscale: 5
+  strength: 1
+  speed: 1
+  smarts: 1
+  vitality: 1
+  mysticism: 1
+  perception: 1
+messages:
+  start:
+    user: You feel very well rested.
+    room: '{username} looks very well rested.'
+

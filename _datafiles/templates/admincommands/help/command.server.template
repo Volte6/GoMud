@@ -1,0 +1,13 @@
+The <ansi fg="command">server</ansi> command can be used in the following ways:
+
+<ansi fg="command">server reload-ansi</ansi>      Reloads aliases from the ansi alias file
+<ansi fg="command">server stats</ansi>            Get stats on the server
+<ansi fg="command">server ansi-passthrough</ansi> Do nothing with ansi tags
+<ansi fg="command">server ansi-strip</ansi>       Strip out ansi tags
+<ansi fg="command">server ansi-mono</ansi>        Process ansi tags but remove color
+<ansi fg="command">server ansi-preparse</ansi>    Process ansi tags before template logic
+<ansi fg="command">server ansi-normal</ansi>      Reset ansi server setting
+
+<ansi fg="command">server set</ansi>              Lists all server configuration settings
+<ansi fg="command">server set [name] [value]</ansi> Sets a configuration settings (and saves it)
+

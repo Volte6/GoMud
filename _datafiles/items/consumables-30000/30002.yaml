@@ -1,0 +1,9 @@
+itemid: 30002
+name: ambrosia potion
+namesimple: bottle
+description: Rumored to be from the gods themselves.
+type: potion
+subtype: drinkable
+uses: 1
+buffids: 
+- 6

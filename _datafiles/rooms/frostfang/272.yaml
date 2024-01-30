@@ -1,0 +1,14 @@
+roomid: 272
+zone: Frostfang
+title: Inside of the Bushes
+description: The ground here is a soft tapestry of moss and fallen leaves, a stark
+  contrast to the hard cobblestones of the city. Dappled sunlight filters through
+  the gaps in the foliage, casting a kaleidoscope of light and shadow that dances
+  across the ground and the hedge walls. The air is fresh and earthy, filled with
+  the scent of damp wood and greenery, a natural aroma that soothes the senses.
+biome: city
+exits:
+  northeast:
+    roomid: 273
+  south:
+    roomid: 258

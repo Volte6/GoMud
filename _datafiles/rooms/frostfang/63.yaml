@@ -1,0 +1,22 @@
+roomid: 63
+zone: Frostfang
+title: Steelwhisper Armory
+description: 'Tucked into a stone-clad corner of Frostfang, the Steelwhisper Armory
+  stands as a testament to the town''s martial heritage. Its robust oak door, branded
+  with the emblem of twin crossed swords, opens to reveal walls lined with meticulously
+  crafted weapons, from razor-sharp daggers to imposing battle-axes. Adjacent stands
+  are draped with armors of varying designs: chainmail shimmering like liquid silver,
+  plate armor cold and unyielding, and leather pieces imbued with protective runes.
+  The rhythmic sound of hammering echoes from the back, where the master blacksmith,
+  known for melding ancient techniques with innovative designs, forges masterpieces.
+  For warriors and guardians of Frostfang, Steelwhisper is not just a shop, but a
+  bastion of defense and honor.'
+mapsymbol: $
+biome: city
+exits:
+  south:
+    roomid: 55
+spawninfo:
+- mobid: 5
+  cooldown: 20
+  message: The armorer enters from a back room.

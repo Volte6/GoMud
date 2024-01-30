@@ -1,0 +1,16 @@
+roomid: 196
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: In the heart of the Whispering Wastes, the snowstorm reigns supreme,
+  turning day into an endless twilight. The wind's haunting howl carries echoes of
+  ancient legends, and the ground beneath is a treacherous canvas of ice and snow.
+  Shadowy forms of strange, frost-encrusted monoliths loom in the distance, their
+  outlines barely discernible in the tempest.
+biome: snow
+exits:
+  southeast:
+    roomid: 195
+  west:
+    roomid: 197
+idlemessages:
+- The wind howls from every direction

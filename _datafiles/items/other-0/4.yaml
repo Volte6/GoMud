@@ -1,0 +1,8 @@
+itemid: 4
+name: winterfire crystal
+namesimple: gemstone
+description: These crystal is extraordinarily rare and capable of generating a localized, gentle warmth when activated.
+type: object
+questtoken: 5-return
+subtype: mundane
+value: 300

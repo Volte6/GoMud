@@ -1,0 +1,13 @@
+roomid: 723
+zone: Mystarion
+title: Main road west
+description: You are on the main western road, which leads out of Mysterion and down
+  the mountain range. The flat road ends here and quickly becomes a bridge that climbs
+  up and over a canal that runs through the city.
+mapsymbol: B
+maplegend: Bridge
+exits:
+  up:
+    roomid: 730
+  west:
+    roomid: 722

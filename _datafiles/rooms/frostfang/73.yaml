@@ -1,0 +1,18 @@
+roomid: 73
+zone: Frostfang
+title: The Frost Garden
+description: The Frost Garden is a mesmerizing blend of nature's resilience and ethereal
+  beauty. Amidst the icy realm of Frostfang, this garden thrives in quiet defiance.
+  Silver-blue ferns and frost-touched roses stretch towards the pale sun, their petals
+  and leaves glistening with delicate ice crystals. Towering evergreens, draped in
+  snow, stand sentinel, their boughs sheltering clusters of winterberries and snowdrops.
+  At the garden's heart lies a frozen pond, its surface a mirror of glass, reflecting
+  the dance of snowflakes and the occasional aurora that paints the night sky. Winding
+  pathways, carved through snowdrifts and lined with luminescent moonflowers, guide
+  visitors through this chilly yet enchanting sanctuary.
+mapsymbol: P
+maplegend: Pond
+biome: city
+exits:
+  west:
+    roomid: 72

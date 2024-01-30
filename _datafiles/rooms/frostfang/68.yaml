@@ -1,0 +1,14 @@
+roomid: 68
+zone: Frostfang
+title: Garden Path
+description: The path, lined with cobblestones and bordered by tall willows, leads
+  steadily towards the garden grounds. Wildflowers occasionally peek between the stones,
+  and the subtle fragrance of blooming flowers grows stronger with each step. As the
+  trail unfolds, it reveals a vast expanse of organized flower beds, shrubs, and the
+  distant sound of trickling water, signaling the heart of the garden.
+biome: city
+exits:
+  east:
+    roomid: 69
+  northwest:
+    roomid: 67

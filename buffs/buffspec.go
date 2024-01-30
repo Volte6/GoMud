@@ -1,0 +1,198 @@
+package buffs
+
+import (
+	"fmt"
+	"log/slog"
+	"math"
+	"strings"
+	"time"
+
+	"github.com/volte6/mud/fileloader"
+	"github.com/volte6/mud/util"
+)
+
+// Something temporarily attached to a character
+// That modifies some aspect of their status
+/*
+Examples:
+Fast Healing - increased natural health recovery for 10 rounds
+Poison - add -10 health every round for 5 rounds
+*/
+
+const buffDataFilesFolderPath = "_datafiles/buffs"
+
+type Flag string
+
+const (
+	All Flag = ``
+
+	// Behavioral flags
+	NoCombat       Flag = `no-combat`
+	NoMovement     Flag = `no-go`
+	NoFlee         Flag = `no-flee`
+	CancelIfCombat Flag = `cancel-on-combat`
+	CancelOnAction Flag = `cancel-on-action`
+	CancelOnWater  Flag = `cancel-on-water`
+
+	// Harmful flags
+	Poison Flag = `poison`
+	Drunk  Flag = `drunk`
+
+	// Useful flags
+	Hidden   Flag = `hidden`
+	Accuracy Flag = `accuracy`
+	Blink    Flag = `blink`
+)
+
+var (
+	buffs map[int]*BuffSpec = make(map[int]*BuffSpec)
+)
+
+type BuffSpec struct {
+	BuffId        int    // Unique identifier for this buff spec
+	Name          string // The name of the buff
+	Description   string // A description of the buff
+	Secret        bool   // Whether or not the buff is secret (not displayed to the user)
+	TriggerNow    bool   `yaml:"triggernow,omitempty"`    // if true, buff triggers once right when it is applied
+	RoundInterval int    `yaml:"roundinterval,omitempty"` // triggers every x rounds
+	TriggerCount  int    `yaml:"triggercount,omitempty"`  // How many times it triggers before it is removed
+	// These modify hp/mp recovery by a specific amount
+	HealthRecovery int `yaml:"healrecovery,omitempty"`
+	ManaRecovery   int `yaml:"manarecovery,omitempty"`
+	// These modify hp/mp directly
+	HealthRoll string `yaml:"healthroll,omitempty"` // How much hp is added (or removed) per trigger
+	ManaRoll   string `yaml:"manaroll,omitempty"`   // How much mp is added (or removed) per trigger
+	// These modify stats like strength etc. directly (strength, healthmax, etc).
+	// See Character.Validate() for what is actually used.
+	DecaysInto []int          `yaml:"decaysinto,omitempty"` // A list of buffs that this buff adds when it expires
+	StatMods   map[string]int `yaml:"statmods,omitempty"`   // stat mods for the duration of the buff
+	Messages   BuffMessages   `yaml:"messages,omitempty"`   // All messages for the buff
+	Flags      []Flag         `yaml:"flags,omitempty"`      // A list of actions and such that this buff prevents or enables
+}
+
+// Calculates the value of this buff
+func (b *BuffSpec) GetValue() int {
+	val := 0
+
+	if b.HealthRoll != `` {
+		cnt, count, sides, bonus, buffs := util.ParseDiceRoll(b.HealthRoll)
+		addlVal := cnt * (sides*count + bonus)
+		if addlVal < 0 {
+			addlVal *= -1
+		}
+		val += addlVal + len(buffs)*5
+	}
+
+	if b.ManaRoll != `` {
+		cnt, count, sides, bonus, buffs := util.ParseDiceRoll(b.ManaRoll)
+		addlVal := cnt * (sides*count + bonus)
+		if addlVal < 0 {
+			addlVal *= -1
+		}
+		val += addlVal + len(buffs)*5
+	}
+
+	for _, v := range b.StatMods {
+		val += int(math.Abs(float64(v)))
+	}
+
+	freqVal := 5 - b.RoundInterval
+	if freqVal < 0 {
+		freqVal = 0
+	}
+	val += freqVal
+	val += len(b.Flags) * 5
+
+	if b.TriggerCount > 0 {
+		val *= b.TriggerCount
+	}
+
+	return val
+}
+
+type BuffMessage struct {
+	User string
+	Room string
+}
+
+type BuffMessages struct {
+	Start  BuffMessage
+	Effect BuffMessage
+	End    BuffMessage
+}
+
+func GetBuffSpec(buffId int) *BuffSpec {
+	if buffId < 0 {
+		buffId *= -1
+	}
+	if buff, ok := buffs[buffId]; ok {
+		return buff
+	}
+	return nil
+}
+
+func GetAllBuffIds() []int {
+
+	var results []int = make([]int, 0, len(buffs))
+	for _, buff := range buffs {
+		results = append(results, buff.BuffId)
+	}
+
+	return results
+}
+
+// Searches for buffs whos name contain text and returns thehr Ids
+func SearchBuffs(searchTerm string) []int {
+
+	searchTerm = strings.TrimSpace(strings.ToLower(searchTerm))
+
+	var results []int = make([]int, 0, 2)
+
+	for _, buff := range buffs {
+		if strings.Contains(strings.ToLower(buff.Name), searchTerm) {
+			results = append(results, buff.BuffId)
+		} else if strings.Contains(strings.ToLower(buff.Description), searchTerm) {
+			results = append(results, buff.BuffId)
+		}
+	}
+
+	return results
+}
+
+// Presumably to ensure the datafile hasn't messed something up.
+func (b *BuffSpec) Id() int {
+	return b.BuffId
+}
+
+// Presumably to ensure the datafile hasn't messed something up.
+func (b *BuffSpec) Validate() error {
+	if b.TriggerCount < 1 {
+		return fmt.Errorf("buffId %d (%s) has a TriggersCount of < 1, must be at least 1", b.BuffId, b.Name)
+	}
+	if b.RoundInterval < 1 {
+		return fmt.Errorf("buffId %d (%s) has a RoundInterval of < 1, must be at least 1", b.BuffId, b.Name)
+	}
+	return nil
+}
+
+func (b *BuffSpec) Filename() string {
+	return fmt.Sprintf("%d.yaml", b.BuffId)
+}
+
+func (b *BuffSpec) Filepath() string {
+	return b.Filename()
+}
+
+// file self loads due to init()
+func LoadDataFiles() {
+
+	start := time.Now()
+
+	var err error
+	buffs, err = fileloader.LoadAllFlatFiles[int, *BuffSpec](buffDataFilesFolderPath)
+	if err != nil {
+		panic(err)
+	}
+
+	slog.Info("buffSpec.LoadDataFiles()", "loadedCount", len(buffs), "Time Taken", time.Since(start))
+}

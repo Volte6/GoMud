@@ -1,0 +1,21 @@
+roomid: 618
+zone: Dark Forest
+title: Web strewn path
+description: The distant sound of rustling leaves and the ominous sensation of being
+  watched slowly intensify. With each step, the forest road narrows until it opens
+  abruptly into a nightmarish landscape. Massive webs glisten like silver threads,
+  spanning the trees and the path ahead, and the ominous skittering of giant arachnids
+  echoes through the oppressive silence.
+biome: forest
+exits:
+  north:
+    roomid: 550
+  south:
+    roomid: 619
+spawninfo:
+- mobid: 35
+  cooldown: 100
+  message: A small spider hatches from a nearby egg.
+- mobid: 35
+  cooldown: 100
+  message: A small spider hatches from a nearby egg.

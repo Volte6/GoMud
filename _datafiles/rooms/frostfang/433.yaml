@@ -1,0 +1,22 @@
+roomid: 433
+zone: Frostfang
+title: Bank Vault
+description: The Bank of Frostfang Vault, upon closer inspection, reveals itself as
+  a modest chamber, quite unassuming compared to the grandeur one might expect. The
+  air inside is cool and slightly musty, suggesting infrequent use. Sparse light filters
+  in from above, casting long, slanting shadows across the room. The walls, made of
+  thick, sturdy stone, are lined with a handful of small, reinforced steel safes,
+  most of which stand open and empty, their contents likely transferred to more secure
+  locations. In the center of the room, a sturdy table holds a few scattered coins
+  and bits of jewelry, remnants of transactions in progress or items awaiting relocation.
+biome: city
+exits:
+  down:
+    roomid: 111
+  west:
+    roomid: 166
+items:
+- itemid: 5
+spawninfo:
+- itemid: 5
+  cooldown: 21600

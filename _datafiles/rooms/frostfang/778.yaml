@@ -1,0 +1,18 @@
+roomid: 778
+zone: Frostfang
+title: The Residential District
+description: The cobblestone streets, worn smooth by a myriad of footsteps, weave
+  through the district, echoing the meandering paths of frozen rivers. Lanterns perched
+  on wrought-iron posts shed a soft, golden light, which dances across the uneven
+  snow-covered ground, occasionally revealing patches of worn earth where diligent
+  maintenance has lapsed. The ground near the bushes to the north appears worn.
+biome: city
+exits:
+  east:
+    roomid: 777
+  north:
+    roomid: 784
+    lock:
+      difficulty: 5
+  west:
+    roomid: 779

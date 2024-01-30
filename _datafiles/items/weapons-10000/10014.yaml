@@ -1,0 +1,10 @@
+itemid: 10014
+name: sling
+namesimple: sling
+description: A couple of leather straps and a pouch to hold a rock.  What more could you want?
+type: weapon
+hands: 2
+subtype: shooting
+waitrounds: 1
+damage:
+  diceroll: 1d4

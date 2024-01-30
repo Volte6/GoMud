@@ -1,0 +1,16 @@
+roomid: 195
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: The world is lost in a sea of white as the blizzard sweeps over the Whispering
+  Wastes. The sky, a perpetual dim grey, adds a layer of mystery to the landscape.
+  The wind seems to murmur secrets of a forgotten age, and each step is a cautious
+  dance on the treacherous, icy ground. In the distance, the remnants of a once-great
+  civilization peek through the snow, their shapes warped by the relentless storm.
+biome: snow
+exits:
+  northeast:
+    roomid: 194
+  northwest:
+    roomid: 196
+idlemessages:
+- The wind howls from every direction

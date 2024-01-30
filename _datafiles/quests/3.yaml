@@ -1,0 +1,8 @@
+questid: 3
+name: Frostfang Incantation
+description: You uttered the phrase that lets you pass the western gate safely.
+secret: true
+steps:
+  - id: end 
+    description: You uttered the phrase that lets you pass the western gate safely.
+  

@@ -1,0 +1,9 @@
+itemid: 30003
+name: abyssal nectar
+namesimple: bottle
+description: Imbibable essence of the abyss itself.
+type: potion
+subtype: drinkable
+uses: 3
+buffids: 
+- 20

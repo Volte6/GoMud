@@ -1,0 +1,21 @@
+roomid: 217
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: Standing at the entrance of a cave in the heart of the Whispering Wastes,
+  the contrast between the relentless blizzard outside and the stillness within is
+  stark. The cave's mouth, a jagged maw in the rugged stone, is framed by icicles
+  that glisten like crystal teeth under the twilight sky. The wind's howl diminishes
+  here, its ghostly whispers unable to penetrate the cave's threshold. Peering into
+  the darkness, you sense a profound depth, the air emanating a cold that seems older
+  and deeper than the blizzard's chill. Snowflakes dance at the edge of the cave,
+  reluctant to enter, as if respecting an ancient boundary.
+mapsymbol: M
+maplegend: Cave
+biome: snow
+exits:
+  cave:
+    roomid: 218
+  north:
+    roomid: 216
+idlemessages:
+- The wind howls from every direction

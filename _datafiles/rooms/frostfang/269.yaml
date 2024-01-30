@@ -1,0 +1,18 @@
+roomid: 269
+zone: Frostfang
+title: Inside a Residence
+description: This residence exudes a feeling of old-world luxury and refinement. The
+  floors are covered with plush, deep-red carpets, and the walls are draped in rich,
+  embroidered tapestries, depicting historic battles and legendary heroes of Frostfang.
+  Heavy, carved wooden furniture, including a massive four-poster bed and an ornately
+  decorated wardrobe, fill the bedroom. The main living area features a large, stone
+  hearth with a roaring fire, over which hangs a family crest. Intricate stained glass
+  windows add a colorful play of light to the room, and a small but well-stocked bar
+  suggests a taste for fine spirits and leisurely evenings spent in quiet conversation.
+biome: house
+exits:
+  south:
+    roomid: 259
+spawninfo:
+- mobid: 26
+  cooldown: 60

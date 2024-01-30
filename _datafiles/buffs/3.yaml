@@ -1,0 +1,13 @@
+buffid: 3
+name: Inner Flame
+description: You are able to withstand harsh winter weather.
+secret: false
+roundinterval: 5
+triggercount: 10
+messages:
+  start:
+    user: You feel warm inside. You feel that you could take on even the harshest winter weather.
+  effect:
+    user: You feel warm inside.
+  end:
+    user: Your inner warmth subsides.

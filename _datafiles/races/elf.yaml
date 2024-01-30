@@ -1,0 +1,22 @@
+raceid: 2
+name: Elf
+description: A magical being with pointy ears.
+size: medium
+unarmedname: fists
+angrycommands: 
+  - emote narrows their eyes, looking for trouble.
+  - emote looks around, suspiciously.
+  - shout i take no pleasure in your defeat!
+selectable: true
+knowsfirstaid: true
+tnlscale: 1.2
+stats:
+  speed:
+    base: 1
+  smarts:
+    base: 1
+  mysticism:
+    base: 2
+damage:
+  diceroll: 1d3
+disabledslots: []

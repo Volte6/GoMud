@@ -1,0 +1,16 @@
+buffid: 5
+name: Minor Potion Healing
+description: A small healing effect is working on you
+roundinterval: 2
+triggercount: 3
+healthroll: 1d5
+messages:
+  start:
+    user: The potion warms you as you drink it down.
+    room: ''
+  effect:
+    user: You heal for {hitpoints} damage!
+    room: '{username} is healing from the effects of a potion.'
+  end:
+    user: The potions effect runs out.
+    room: ''

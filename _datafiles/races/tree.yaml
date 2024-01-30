@@ -1,0 +1,15 @@
+raceid: 13
+name: Tree
+description: A massive wooden lifeform.
+size: large
+unarmedname: branches
+tnlscale: 1
+angrycommands: [emote creeks and sways with intent.]
+stats:
+  strength:
+    base: 3
+  vitality:
+    base: 2
+damage:
+  diceroll: 1d6+4
+disabledslots: [ 'belt', 'gloves', 'ring', 'feet']

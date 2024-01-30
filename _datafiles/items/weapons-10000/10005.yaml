@@ -1,0 +1,11 @@
+itemid: 10005
+name: obsidian dagger
+namesimple: dagger
+description: The dagger, forged from pure obsidian, possesses an enigmatic allure with its glossy, jet-black blade that glistens ominously in the light.
+type: weapon
+hands: 1
+subtype: stabbing
+damage:
+  diceroll: 2d4
+statmods:
+  speed: 3

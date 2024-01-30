@@ -1,0 +1,20 @@
+roomid: 161
+zone: Catacombs
+title: Incomplete Tunnel
+description: The rough-hewn walls of this aborted corridor tell a tale of sudden abandonment,
+  with jagged stone and support beams protruding like the ribs of a giant beast. Tools
+  of ancient make lay scattered on the ground, left behind in a moment of urgent departure,
+  now rusted and covered in the dust of ages. The air here is heavy with the earthy
+  scent of undisturbed soil and the mustiness of neglect. The tunnel's end is abrupt,
+  a darkened void where the light from the catacombs does not reach, giving the unnerving
+  impression of an impenetrable barrier to the unknown. Echoes seem to die a little
+  too quickly in this space, as if the very air is reluctant to travel down its length,
+  and the shadows cling a bit too greedily to the crevices and corners, hinting at
+  secrets that were never meant to be unearthed. There is a hole big enough to crawl
+  through.
+exits:
+  hole:
+    roomid: 162
+    mapdirection: east-gap
+  southwest:
+    roomid: 130

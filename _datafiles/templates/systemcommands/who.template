@@ -1,0 +1,7 @@
+<ansi bold="true" fg="yellow">{{ pad 40 "Who's Online" " " }}</ansi>
+<ansi fg="black" bold="true">       {{ padRight 16 "User" }}   {{ padRight 12 "Role" }}</ansi>
+<ansi fg="black" bold="true">┌─{{ pad 36 "" "─" }}─┐</ansi>
+{{ range $index, $element := . -}}
+<ansi fg="black" bold="true">│</ansi> [#{{ sub $index -1 }}] <ansi bold="true" fg="yellow">{{ padRight 16 $element.Username }}</ansi> <ansi fg="black" bold="true">│</ansi> <ansi fg="magenta">{{ padRight 12 $element.Permission }}</ansi> <ansi fg="black" bold="true">│</ansi>
+{{ end -}}
+<ansi fg="black" bold="true">└─{{- pad 36 "" "─" }}─┘</ansi>

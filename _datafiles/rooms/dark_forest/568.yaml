@@ -1,0 +1,14 @@
+roomid: 568
+zone: Dark Forest
+title: Forest bridge
+description: The cut in the bridge is clean, as if sliced by a giant blade, leaving
+  a jagged scar that speaks of sudden, deliberate destruction rather than gradual
+  decay. The remaining section clings to the forested bank, overgrown with moss and
+  ivy, the wood rotting and the stones crumbled, as if surrendering to the inevitable
+  embrace of the forest. The far side, now unreachable, disappears into the dense
+  tangle of trees and undergrowth, hinting at forgotten paths and lost journeys.
+mapsymbol: B
+maplegend: Bridge
+exits:
+  east:
+    roomid: 567

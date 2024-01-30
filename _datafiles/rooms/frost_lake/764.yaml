@@ -1,0 +1,19 @@
+roomid: 764
+zone: Frost Lake
+title: Lake Island
+description: The beach stretches out before you, covered in a pristine blanket of
+  snow, unmarred by the footprints of previous adventurers. To the north, you can
+  see an enticing island on the horizon. However, a closer look reveals a challenging
+  terrain, with hints of jagged rocks and turbulent waters surrounding it. It might
+  be possible to find a way to that distant island, but it would undoubtedly be a
+  perilous journey.
+mapsymbol: "~"
+maplegend: Shore
+exits:
+  north:
+    roomid: 825
+    secret: true
+  south:
+    roomid: 369
+  west:
+    roomid: 752

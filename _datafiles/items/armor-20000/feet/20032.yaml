@@ -1,0 +1,10 @@
+itemid: 20032
+name: swimming flippers
+namesimple: flippers
+description: Specially crated shoes that allow you to swim in deep water.
+type: feet
+subtype: wearable
+damagereduction: 4
+statmods:
+  speed: -1
+

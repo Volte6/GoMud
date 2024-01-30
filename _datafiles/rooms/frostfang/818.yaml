@@ -1,0 +1,17 @@
+roomid: 818
+zone: Frostfang
+title: City Battlements
+description: Encircling the city of Frostfang, the ramparts stand as a formidable
+  barrier against the harsh wilderness beyond. Constructed from massive blocks of
+  stone, they rise imposingly, their surfaces weathered by the relentless bite of
+  the winter winds.
+mapsymbol: ♜
+maplegend: Wall
+biome: city
+exits:
+  east:
+    roomid: 817
+    mapdirection: east-x2
+  north:
+    roomid: 819
+    mapdirection: north-x2

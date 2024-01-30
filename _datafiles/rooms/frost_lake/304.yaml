@@ -1,0 +1,17 @@
+roomid: 304
+zone: Frost Lake
+zoneroot: true
+title: Frost Lake Shore
+description: The stillness here is profound, the world holding its breath in reverence
+  for this enchanting realm. The silence is broken only by the soft, melodic chime
+  of the ice crystals as they tinkle with each subtle movement. It's as if the Frost
+  Lake itself welcomes your presence, whispering secrets of untold wonders.
+mapsymbol: "~"
+maplegend: Shore
+exits:
+  north:
+    roomid: 361
+  northwest:
+    roomid: 296
+  southwest:
+    roomid: 306

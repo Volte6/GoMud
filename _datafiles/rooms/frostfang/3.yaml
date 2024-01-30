@@ -1,0 +1,23 @@
+roomid: 3
+zone: Frostfang
+title: Cobblestone Way
+description: As you continue along Cobblestone Way, the stone walls on either side
+  seem to grow taller, their mossy exteriors now adorned with icicles that shimmer
+  in the pale sunlight. The elms overhead are bare, their branches covered in a blanket
+  of snow, glistening like silver. The stone houses become fewer, replaced by small
+  merchant stalls displaying woolen fabrics and frosty trinkets. The scent of freshly
+  baked bread mingles with the crisp, cold air, and the distant sound of a lute grows
+  louder, its notes now accompanied by the soft hum of voices. The castle of Frostfang,
+  once a distant silhouette, now stands larger and more defined against the snowy
+  backdrop, its stone walls and turrets standing as silent witnesses to the city's
+  storied past.
+biome: city
+exits:
+  east:
+    roomid: 258
+  north:
+    roomid: 4
+  south:
+    roomid: 2
+  west:
+    roomid: 776

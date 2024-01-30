@@ -1,0 +1,15 @@
+roomid: 663
+zone: Mystarion
+title: The battlements
+description: Turning your gaze from the western panorama and towards the north, your
+  eyes are met with a sight that takes your breath away. The Stormshards, a majestic
+  mountain range that pierces the heavens, stretches out before you in all its splendor.
+  As you survey the range, you notice that the Stormshards are not static, but rather
+  constantly shifting and changing. Clouds swirl around the peaks, casting shadows
+  that dance and writhe across the landscape. Lightning flashes, illuminating the
+  mountains with an otherworldly glow.
+exits:
+  east:
+    roomid: 664
+  west:
+    roomid: 662

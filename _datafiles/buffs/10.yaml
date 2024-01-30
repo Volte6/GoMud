@@ -1,0 +1,20 @@
+buffid: 10
+name: Weakness
+description: You are trembling with weakness.
+secret: false
+roundinterval: 2
+triggercount: 2
+statmods:
+  strength: -15
+  speed: -15
+  vitality: -15
+  perception: -10
+messages:
+  start:
+    user: Weakness overtakes your body!
+    room: '{username} looks a little shakey.'
+  effect:
+    user: You're feeling weak!
+    room: '{username} looks a little shakey.'
+  end:
+    user: You feel a little more like yourself.

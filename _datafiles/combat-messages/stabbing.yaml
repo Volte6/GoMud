@@ -1,0 +1,74 @@
+# Possible tokens: 
+# {itemname}    - name of weapon/object e.g. 'sword'
+# {source}      - name of mob or user e.g. 'goblin'
+# {sourcetype}  - 'user' or 'mob'
+# {target}      - name of mob or user e.g. 'goblin'
+# {targettype}  - 'user' or 'mob'
+# {damage}      - damage dealt as an integer e.g. '5'
+# {exitname}    - name of exit for attack e.g. 'north'
+# {entrancename}- name of entrance for attack e.g. 'south'
+optionid: stabbing
+options:
+  prepare:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'You prepare to enter into mortal combat with <ansi fg="{targettype}">{target}</ansi>.'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}</ansi> prepares to fight you with their <ansi fg="item">{itemname}</ansi>.'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}</ansi> prepares to attack <ansi fg="{targettype}">{target}</ansi> with their <ansi fg="item">{itemname}</ansi>.'
+  wait:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'You aim carefully at <ansi fg="{targettype}">{target}</ansi>.'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}</ansi> circles dangerously.'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}</ansi> circles <ansi fg="{targettype}">{target}</ansi> with cruel intentions.'
+  miss:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'You thrust at <ansi fg="{targettype}">{target}</ansi> with your <ansi fg="item">{itemname}</ansi> but miss!'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}</ansi> thrusts their <ansi fg="item">{itemname}</ansi> at you, but misses!'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}</ansi> thrusts their <ansi fg="item">{itemname}</ansi> at <ansi fg="{targettype}">{target}</ansi>, but misses!'
+  weak:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'You jab your <ansi fg="item">{itemname}</ansi> into <ansi fg="{targettype}">{target}</ansi> causing <ansi fg="damage">{damage} damage</ansi>.'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}</ansi> jabs their <ansi fg="item">{itemname}</ansi> into you, causing <ansi fg="damage">{damage} damage</ansi>.'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}</ansi> jabs their <ansi fg="item">{itemname}</ansi> into <ansi fg="{targettype}">{target}</ansi>.'
+  normal:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'You stab <ansi fg="{targettype}">{target}</ansi> with your <ansi fg="item">{itemname}</ansi> and do <ansi fg="damage">{damage} damage</ansi>!'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}</ansi> stabs you with their <ansi fg="item">{itemname}</ansi> and does <ansi fg="damage">{damage} damage</ansi>!'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}</ansi> stabs <ansi fg="{targettype}">{target}</ansi> with their <ansi fg="item">{itemname}</ansi>!'
+  heavy:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'You impale <ansi fg="{targettype}">{target}</ansi> with your <ansi fg="item">{itemname}</ansi>, causing an impressive <ansi fg="damage">{damage} damage</ansi>!'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}</ansi> impales you with their <ansi fg="item">{itemname}</ansi>, causing an impressive <ansi fg="damage">{damage} damage</ansi>!'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}</ansi> impales <ansi fg="{targettype}">{target}</ansi> with their <ansi fg="item">{itemname}</ansi>!'
+  critical:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'Your <ansi fg="item">{itemname}</ansi> <ansi fg="cyan" bold="true">CRITICALLY IMPALES</ansi> <ansi fg="{targettype}">{target}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> <ansi fg="cyan" bold="true">CRITICALLY IMPALES</ansi> you for <ansi fg="damage">{damage} damage</ansi>!'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> <ansi fg="cyan" bold="true">CRITICALLY IMPALES</ansi> <ansi fg="{targettype}">{target}</ansi>!'

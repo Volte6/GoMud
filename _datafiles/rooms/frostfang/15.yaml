@@ -1,0 +1,18 @@
+roomid: 15
+zone: Frostfang
+title: Beggars lane
+description: The cold wind of Frostfang whistles through the narrow, snow-dusted streets
+  of Beggars Lane. The cobblestones underfoot are slick with ice, making each step
+  a cautious endeavor. The buildings here are old, their wooden facades weathered
+  and gray, bearing the scars of many harsh winters. The windows, few and far between,
+  are mostly boarded up, but from some, faint glimmers of candlelight seep out, casting
+  eerie shadows on the snow. A dark alley twists and turns to the east, a foreboding
+  place.
+biome: city
+exits:
+  east:
+    roomid: 20
+  north:
+    roomid: 14
+  south:
+    roomid: 16

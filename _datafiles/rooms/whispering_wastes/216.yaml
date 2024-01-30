@@ -1,0 +1,16 @@
+roomid: 216
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: Nearing the rocky expanse in the Whispering Wastes, the blizzard's intensity
+  wanes slightly, allowing glimpses of the surroundings. The twilight sky casts a
+  muted glow over the snow-laden landscape, now broken by rugged outcrops of stone.
+  The wind, while still biting, carries an echo of deep, hollow spaces beyond. Approaching
+  the rocky barrier, you notice the entrance to a cave getting nearer.
+biome: snow
+exits:
+  northeast:
+    roomid: 215
+  south:
+    roomid: 217
+idlemessages:
+- The wind howls from every direction

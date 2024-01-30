@@ -1,0 +1,15 @@
+questid: 4
+name: Deliver Lunch
+description: A soldier in Frostfang forgot his lunch.
+steps:
+  - id: start 
+    description: Find a cheese sandwich for the Frostfang Soldier in the barracks.
+    hint: They sell some food at the Inn in Frostfang.
+  - id: return 
+    description: Deliver the sandwich to the Frostfang Soldier in the barracks.
+    hint: The barracks are just north of the Town Square.
+  - id: end 
+    description: You helped a Frostfang soldier get through his day.
+rewards:
+  experience: 1000
+  gold: 100

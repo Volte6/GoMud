@@ -1,0 +1,16 @@
+roomid: 53
+zone: Frostfang
+title: Frostfang Castle Kitchen
+description: Adjacent to the banquet hall, the kitchen of Frostfang Castle is a bustling
+  hub of activity and culinary craftsmanship. Dominated by a massive stone hearth,
+  its flames constantly stoked, the room is filled with the harmonious clatter of
+  pots, pans, and utensils. Wooden countertops, stained with years of use, are laden
+  with fresh produce, spices, and an array of ingredients from the region. Chefs and
+  kitchen hands move with practiced precision, their coordinated dance a testament
+  to countless feasts prepared. Hanging herbs and smoked meats scent the air, while
+  the warmth from ovens and stovetops creates a comforting contrast to the castle's
+  typically cool ambiance.
+biome: city
+exits:
+  east:
+    roomid: 52

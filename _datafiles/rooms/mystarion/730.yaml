@@ -1,0 +1,9 @@
+roomid: 730
+zone: Mystarion
+title: Canal Bridge
+description: a bridge over the canal
+exits:
+  down-east:
+    roomid: 729
+  down-west:
+    roomid: 723

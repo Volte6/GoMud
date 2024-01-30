@@ -1,0 +1,15 @@
+roomid: 299
+zone: Frostfang
+title: The Old Road
+description: Brambles and thorns encroach upon the path, making progress slow and
+  arduous. The air grows heavy with a sense of impending dread, and the first eerie
+  cries of unseen creatures pierce the silence. You stand at the very threshold of
+  the unknown, ready to step into the foreboding depths of the Dark Forest.
+exits:
+  east:
+    roomid: 300
+  west:
+    roomid: 298
+idlemessages:
+- A great stag appears at the forestline, and then quickly disappears back into the
+  thick of the trees

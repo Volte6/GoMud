@@ -1,0 +1,14 @@
+roomid: 49
+zone: Frostfang
+title: East Wing Storage Closet
+description: 'Tucked away in the East Wing, the storage closet is a modest, dimly
+  lit space. Its sturdy wooden door, slightly worn at the edges, opens to reveal shelves
+  lined with neatly arranged supplies: jars of preserved herbs, rolled parchments,
+  and bundles of dried wood for kindling. The scent of aged wood and dried lavender
+  permeates the air, while the stone floor, cold to the touch, hints at the closet''s
+  seldom use. A single, small window at the top allows a sliver of light, casting
+  a muted glow over the room''s contents.'
+biome: city
+exits:
+  west:
+    roomid: 43

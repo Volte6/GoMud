@@ -1,0 +1,19 @@
+roomid: 202
+zone: Whispering Wastes
+title: Stormwatchers Keep
+description: Standing at the edge of the Stormwatcher's Keep, the world unfolds in
+  a breathtaking panorama. The landscape, a striking contrast of rugged, snow-capped
+  mountains and deep, shadowed valleys, stretches into the horizon. The sky, a deep
+  cerulean, is alive with the dance of swirling snowflakes, reflecting the sun's rays
+  in a myriad of sparkling lights. The air is crisp and invigorating, filled with
+  the scent of pine and the distant echo of the howling wind. The Keep itself, a formidable
+  structure of stone and iron, stands sentinel against the backdrop of the wilderness,
+  its towers reaching skyward like fingers grasping at the clouds.
+mapsymbol: K
+maplegend: Keep
+biome: snow
+exits:
+  southwest:
+    roomid: 201
+idlemessages:
+- The wind howls from every direction

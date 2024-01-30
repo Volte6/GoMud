@@ -1,0 +1,17 @@
+roomid: 215
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: As you traverse the relentless blizzard of the Whispering Wastes, the
+  landscape begins to subtly change. The sky remains a dusky twilight, but the wind's
+  howl softens, carrying a hint of something different, something hidden. The snow
+  underfoot becomes uneven, hinting at rocky terrain beneath. In the distance, a jagged
+  line of frost-coated rocks emerges, forming a natural barrier. Among these rocks,
+  the faint outline of an opening becomes visible, half-concealed by snowdrifts.
+biome: snow
+exits:
+  north:
+    roomid: 214
+  southwest:
+    roomid: 216
+idlemessages:
+- The wind howls from every direction

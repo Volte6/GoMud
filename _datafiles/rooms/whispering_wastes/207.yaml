@@ -1,0 +1,15 @@
+roomid: 207
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: Amidst the Whispering Wastes, the blizzard weaves a white tapestry, the
+  sky a dim echo of daylight. The wind's mournful cry carries the distant roar of
+  ice dragons, their presence felt but unseen. The ground is a minefield of snowdrifts
+  and hidden crevasses.
+biome: snow
+exits:
+  east:
+    roomid: 206
+  northwest:
+    roomid: 208
+idlemessages:
+- The wind howls from every direction

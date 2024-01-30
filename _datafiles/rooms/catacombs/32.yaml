@@ -1,0 +1,28 @@
+roomid: 32
+zone: Catacombs
+zoneroot: true
+title: Entrance to the Catacombs
+description: Beneath the Sanctuary of the Benevolent Heart lies the labyrinthine expanse
+  known as the Catacombs. A network of narrow, winding tunnels and chambers, the Catacombs
+  are carved from the cold, unyielding stone of Frostfang's bedrock. The air within
+  is thick with age and whispers of the past, carrying a palpable weight of reverence
+  and mystery. Walls are lined with alcoves, each holding the remains of the departed,
+  their final resting places marked with inscriptions and symbols of their beliefs.
+  Faintly glowing lanterns, placed at irregular intervals, cast eerie illuminations
+  on the ancient bones and artifacts, while the distant echo of dripping water serves
+  as a haunting reminder of the passage of time in this sacred underworld.
+mapsymbol: E
+maplegend: Entrance
+exits:
+  east:
+    roomid: 77
+  north:
+    roomid: 118
+  up:
+    roomid: 31
+  west:
+    roomid: 81
+spawninfo:
+- mobid: 21
+  cooldown: 120
+  message: A dark robed figure slinks into view.

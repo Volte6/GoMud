@@ -1,0 +1,34 @@
+roomid: 490
+zone: Frostfang
+title: Dead end
+description: 'Tucked away in the heart of Frostfang''s sprawling slums, a dimly lit
+  alleyway meanders from the bustling Beggars Lane. This concealed corner, a world
+  apart from the temple''s tranquility, boasts ramshackle shanties crafted from discarded
+  wood, rusted metal sheets, and tattered fabric. Makeshift tents of mismatched fabrics
+  and fraying ropes dot the gaps between these structures. The uneven ground is littered
+  with remnants of daily life: discarded meal bones, worn-out shoes, and glimmers
+  from shattered glass. Muffled whispers and subtle movements hint at the precarious
+  lives within, hidden deep in the slums, yet a stone''s throw from a place of refuge.'
+biome: city
+exits:
+  shadows:
+    roomid: 491
+    secret: true
+    mapdirection: east
+  south:
+    roomid: 472
+spawninfo:
+- mobid: 31
+  cooldown: 50
+  message: A dog walks up and sits.
+  forcehostile: true
+- mobid: 31
+  cooldown: 60
+  message: A dog walks up and sits.
+  forcehostile: true
+- mobid: 31
+  cooldown: 45
+  message: A dog walks up and sits.
+  forcehostile: true
+idlemessages:
+- Some movement stirs in the edge of your vision, and then is lost.

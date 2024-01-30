@@ -1,0 +1,6 @@
+itemid: 20020
+name: leather cap
+description: A leather cap that provides minimal protection.
+type: head
+subtype: wearable
+damagereduction: 3

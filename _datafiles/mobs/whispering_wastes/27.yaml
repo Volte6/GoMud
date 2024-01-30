@@ -1,0 +1,43 @@
+mobid: 27
+itemdropchance: 2
+activitylevel: 3
+maxwander: 0
+idlecommands:
+  - ifnotquest 5-end emote shivers silently.
+  - ifnotquest 5-end say I'm so c.c.c...cold...
+character:
+  name: hermit
+  description: The hermit's presence exudes an aura of endurance and frost-hardened wisdom, and they regard you with a knowing yet weary expression, as if they have endured the very worst that winter can offer.
+  raceid: 1
+  level: 5
+  gold: 1
+  equipment:
+    weapon: 
+      itemid: 10004
+    body:
+      itemid: 20008
+    neck:
+      itemid: 20024
+    feet:
+      itemid: 20003
+asksubjects:
+  - ifquest: ""
+    ifnotquest: 5-start
+    asknouns:
+    - quest
+    - freezing
+    - cold
+    - help
+    replycommands:
+    - say I've been waiting for a shipment of winterfire crystals. They should have been here months ago.
+    - say I'll never abandon my post! Can you find out what happened to my crystals?
+    - givequest 5-start
+  - ifquest: 5-start
+    ifnotquest: ""
+    asknouns:
+    - crystals
+    - winterfire
+    - where
+    replycommands:
+    - say The shipment was supposed to come from the far east city of Mystarion. I'm not sure what happened to it.
+    - givequest 5-lookeast

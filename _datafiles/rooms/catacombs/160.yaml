@@ -1,0 +1,26 @@
+roomid: 160
+zone: Catacombs
+title: Dark Acolyte's Chamber
+description: This sacred room is illuminated by the ghostly glow of greenish-blue
+  flames that flicker from wall-mounted braziers, casting long, dancing shadows across
+  the walls, which are etched with forgotten runes and the faces of the long-departed.
+  At the center stands a black stone altar, encrusted with dark crystals that pulse
+  with an otherworldly energy. Here, the dark acolyte, cloaked in midnight robes,
+  meditates, his eyes reflecting the cryptic light, waiting to impart forbidden knowledge
+  to those daring enough to seek it. Skeleton sentinels line the perimeter, their
+  bony fingers clutching rusted weapons, forever guarding the secrets contained within
+  these ancient stones.
+mapsymbol: '%'
+maplegend: Trainer
+exits:
+  east:
+    roomid: 110
+spawninfo:
+- mobid: 6
+  cooldown: 180
+  message: A dark acolyte steps into the room.
+  name: dark acolyte trainer
+skilltraining:
+  scribe:
+    min: 1
+    max: 4

@@ -1,0 +1,13 @@
+buffid: 1
+name: Admin Hidden
+description: You are super well hidden!
+secret: false
+roundinterval: 10
+triggercount: 100
+messages:
+  start:
+    user: You are hidden by the admin.
+  end:
+    user: You are no longer admin hidden.
+flags:
+  - hidden

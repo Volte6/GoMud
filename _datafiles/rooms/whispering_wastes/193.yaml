@@ -1,0 +1,17 @@
+roomid: 193
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: In the grip of an eternal blizzard, the Whispering Wastes are a landscape
+  of endless white. The sky, a dim twilight, illuminates the snow-covered ground.
+  The wind carries with it faint, spectral whispers, and the ground is perilous with
+  ice. Distant structures emerge from the storm, their forms twisted and indistinct.
+biome: snow
+exits:
+  east:
+    roomid: 192
+  northwest:
+    roomid: 194
+  south:
+    roomid: 214
+idlemessages:
+- The wind howls from every direction

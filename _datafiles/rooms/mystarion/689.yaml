@@ -1,0 +1,15 @@
+roomid: 689
+zone: Mystarion
+title: The battlements
+description: As you shift your gaze eastward, the imposing Stormshards give way to
+  a panorama of tranquility. Below you stretches an expanse of fertile farmland, a
+  tapestry of emerald fields and winding streams that paint the plateau with vibrant
+  hues. The air is filled with the sweet scent of wildflowers and the soothing murmur
+  of the breeze rustling through the tall grasses. As you stand upon the battlements,
+  you feel a profound appreciation for the harmony that exists between humanity and
+  nature.
+exits:
+  north:
+    roomid: 688
+  south:
+    roomid: 690

@@ -1,0 +1,7 @@
+itemid: 8
+name: lockpick kit
+namesimple: lockpicks
+description: A set of lockpicks. You can use these to unlock doors and chests.
+type: lockpicks
+subtype: generic
+uses: 3

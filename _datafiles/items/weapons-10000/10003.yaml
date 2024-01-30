@@ -1,0 +1,9 @@
+itemid: 10003
+name: captain's broadsword
+namesimple: broadsword
+description: This broadsword has special decorations commemorating a captains promotion.
+type: weapon
+hands: 1
+subtype: slashing
+damage:
+  diceroll: 1d6+1

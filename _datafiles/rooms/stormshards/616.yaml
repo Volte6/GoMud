@@ -1,0 +1,15 @@
+roomid: 616
+zone: Stormshards
+title: Top of the Mountain
+description: Standing atop the Stormshard Mountains, you are struck by a profound
+  sense of awe and humility. The world seems both vast and intimate from this vantage
+  point, a realm of untold stories and unexplored horizons. The sense of accomplishment
+  is palpable, not just in the physical feat of the climb, but in the spiritual journey
+  undertaken. Here, on the roof of the world, it feels like a place where earth meets
+  sky, where the mysteries of the old, wild world linger, and where every gust of
+  wind and every shift in the clouds tells a story of the ancient, rugged bones of
+  the earth.
+biome: mountains
+exits:
+  north:
+    roomid: 609

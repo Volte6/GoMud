@@ -1,0 +1,10 @@
+itemid: 30007
+name: mushroom
+namesimple: mushroom
+description: It seems safe to eat.
+type: food
+subtype: edible
+uses: 1
+value: 20
+buffids: 
+- 17

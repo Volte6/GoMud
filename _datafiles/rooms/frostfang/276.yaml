@@ -1,0 +1,40 @@
+roomid: 276
+zone: Frostfang
+title: Residential Hedge
+description: Within the hedge, the atmosphere is one of serene isolation. The foliage
+  is thick and lush, absorbing sound and creating a sense of profound stillness. The
+  ground, a tapestry of fallen leaves and small sprouts of grass, is soft and yielding.
+  Occasional gaps in the foliage reveal glimpses of the sky above, a canvas of shifting
+  clouds or twinkling stars. This hidden enclave feels like a world apart, a tranquil
+  haven untouched by the passage of time.
+props:
+- nouns: [leaves, glimmer, light, locket]
+  requirements:
+  - type: notquesttoken
+    idstring: 1-return
+    rejectionmessage: You don't see that here anymore.
+  description: Nestled inside a pile of leaves is some sort of golden object.
+- nouns: [gold, golden, golden locket, locket, sophie's locket, object]
+  verbs: [get, take, grab]
+  requirements:
+  - type: questtoken
+    idstring: 1-start
+    rejectionmessage: You don't see anything worth taking.
+  - type: notquesttoken
+    idstring: 1-return
+    rejectionmessage: You don't see anything worth taking.
+  description: It appears to be a <ansi fg="itemname">golden locket</ansi>.
+  trigger:
+    itemid: 20025
+    questtoken: 1-return
+    affected: player
+    descriptionplayer: You brush aside the leaves and take the <ansi fg="itemname">golden
+      locket</ansi>.
+    descriptionroom: <ansi fg="username">%s</ansi> takes a <ansi fg="itemname">golden
+      locket</ansi> from the pile of leaves.
+biome: city
+exits:
+  west:
+    roomid: 275
+idlemessages:
+- A glimmer catches your eye in a pile of leaves.

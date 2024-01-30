@@ -1,0 +1,45 @@
+<ansi fg="black" bold="true">.:</ansi> <ansi fg="magenta">Additional help for </ansi><ansi fg="command">picklock</ansi>
+
+<ansi fg="yellow">Example: </ansi>
+
+    <ansi fg="black" bold="true">[HP:66/66 MP:35/35]:</ansi> <ansi fg="command">pick north down</ansi>
+    <ansi fg="green" bold="true">A satisfying *click* tells you that you're making progress...</ansi>
+
+    <ansi fg="black" bold="true">.:</ansi> <ansi fg="table-title">The Lock Sequence Looks like:</ansi>
+        <ansi fg="yellow" bold="true">╔═══════╦═══════╦═══════╦═══════╦═══════╗
+        ║       ║       ║       ║       ║       ║
+        ║   <ansi fg="green" bold="true">↓</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║
+        ║   <ansi fg="green" bold="true">D</ansi>   ║       ║       ║       ║       ║
+        ╚═══════╩═══════╩═══════╩═══════╩═══════╝</ansi>
+
+
+    <ansi fg="black" bold="true">[HP:66/66 MP:35/35]:</ansi> <ansi fg="command">pick north up</ansi>
+    <ansi fg="green" bold="true">A satisfying *click* tells you that you're making progress...</ansi>
+
+    <ansi fg="black" bold="true">.:</ansi> <ansi fg="table-title">The Lock Sequence Looks like:</ansi>
+        <ansi fg="yellow" bold="true">╔═══════╦═══════╦═══════╦═══════╦═══════╗
+        ║       ║   <ansi fg="green" bold="true">U</ansi>   ║       ║       ║       ║
+        ║   <ansi fg="green" bold="true">↓</ansi>   ║   <ansi fg="green" bold="true">↑</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║
+        ║   <ansi fg="green" bold="true">D</ansi>   ║       ║       ║       ║       ║
+        ╚═══════╩═══════╩═══════╩═══════╩═══════╝</ansi>
+
+
+    <ansi fg="black" bold="true">[HP:66/66 MP:35/35]:</ansi> <ansi fg="command">pick north up</ansi>
+    <ansi fg="yellow" bold="true">***</ansi> <ansi fg="red" bold="true">Oops! Your <ansi fg="item">lockpicks</ansi> break off in the lock, resetting the lock. You'll 
+    have to start all over.</ansi> <ansi fg="yellow" bold="true">***</ansi>
+
+    <ansi fg="black" bold="true">.:</ansi> <ansi fg="table-title">The Lock Sequence Looks like:</ansi>
+        <ansi fg="yellow" bold="true">╔═══════╦═══════╦═══════╦═══════╦═══════╗
+        ║       ║       ║       ║       ║       ║
+        ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║
+        ║       ║       ║       ║       ║       ║
+        ╚═══════╩═══════╩═══════╩═══════╩═══════╝</ansi>
+
+<ansi fg="red">Note:</ansi> When you complete an entire sequence, you will see the following:
+
+    <ansi fg="yellow" bold="true">***</ansi> <ansi fg="green" bold="true">You Successfully picked the lock!</ansi> <ansi fg="yellow" bold="true">***</ansi>
+    <ansi fg="yellow" bold="true">***</ansi> <ansi fg="green" bold="true">You can automatically pick this lock any time as long as you carry 
+    <ansi fg="item">lockpicks</ansi>!</ansi> <ansi fg="yellow" bold="true">***</ansi>
+
+<ansi fg="magenta" bold="true">See also:</ansi> <ansi fg="command">help keyring</ansi>
+

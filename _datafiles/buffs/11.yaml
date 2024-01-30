@@ -1,0 +1,14 @@
+buffid: 11
+name: touched
+description: You've been touched by the Gods and receive a bonus to experience.
+roundinterval: 1
+triggercount: 100
+statmods:
+  xpscale: 25
+messages:
+  start:
+    user: You are touched by the gods.
+    room: '{username} is touched by the gods.'
+  end:
+    user: The gods forget about you.
+

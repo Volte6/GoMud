@@ -1,0 +1,10 @@
+itemid: 6
+name: sleeping bag
+namesimple: sleeping bag
+description: Use this to get some quick sleep
+type: object
+subtype: usable
+uses: 5
+value: 200
+buffids: 
+- 15

@@ -1,0 +1,16 @@
+roomid: 302
+zone: Frostfang
+title: The Old Road
+description: As you explore the cleared offshoot, you can't help but marvel at the
+  resilience of nature. The fallen trees, once formidable barriers, now lie neatly
+  stacked at the side of the trail, revealing a picturesque path that winds through
+  the heart of the forest. The sunlight filters through the gaps in the trees, creating
+  patterns of light and shadow on the ground. Fresh animal tracks crisscross the path,
+  a testament to the return of life to this rejuvenated area.
+exits:
+  northeast:
+    roomid: 303
+  west:
+    roomid: 301
+idlemessages:
+- a snowhare runs across the road.

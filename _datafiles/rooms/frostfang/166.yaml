@@ -1,0 +1,38 @@
+roomid: 166
+zone: Frostfang
+isbank: true
+title: Bank of Frostfang
+description: The bank of Frostfang stands as a bastion of security and order amidst
+  the bustling commerce of the city. Its walls, built from the same enduring stone
+  that fortifies the city's ramparts, rise stoically against the frostbitten sky.
+  The heavy wooden doors, reinforced with iron bands and studs, open to reveal an
+  interior that is both grand and austere. Inside, the air is tinged with the scent
+  of ink and parchment, and the sound of coins clinking resonates softly in the hushed
+  atmosphere.
+props:
+- verbs: [vault]
+  requirements:
+  - type: buff-flag
+    idstring: hidden
+    rejectionmessage: A guard blocks you from entering the vault.
+mapsymbol: ★
+maplegend: Bank
+biome: city
+exits:
+  south:
+    roomid: 8
+  vault:
+    roomid: 433
+    mapdirection: east
+    lock:
+      difficulty: 8
+  west:
+    roomid: 642
+spawninfo:
+- mobid: 2
+  cooldown: 120
+  message: A town guard walks into the bank.
+  idlecommands:
+  - ""
+  - ""
+  - emote watches you carefully.

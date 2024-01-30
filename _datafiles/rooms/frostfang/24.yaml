@@ -1,0 +1,20 @@
+roomid: 24
+zone: Frostfang
+title: Dark alley
+description: 'Adjacent to the Sanctuary of the Benevolent Heart, a narrow, shadowed
+  alleyway snakes away from the main thoroughfare of Beggars Lane. This hidden crevice
+  of Frostfang is a stark contrast to the temple''s solemnity. Ramshackle shanties,
+  pieced together from discarded wood, rusted metal sheets, and tattered cloth, huddle
+  closely together, as if seeking warmth from one another. Makeshift tents, crafted
+  from mismatched fabrics and reinforced with fraying ropes, dot the gaps between
+  the shanties. The ground is uneven, littered with remnants of daily life: discarded
+  bones from meager meals, worn-out shoes, and the occasional glint of a broken bottle.
+  Faint whispers and the soft rustling of movement can be heard from within the shelters,
+  hinting at the lives precariously balanced in this hidden enclave, a stone''s throw
+  away from a place of worship and refuge.'
+biome: city
+exits:
+  east:
+    roomid: 25
+  south:
+    roomid: 23

@@ -1,0 +1,12 @@
+roomid: 362
+zone: Frost Lake
+title: Old Dock
+description: The dock stretches a short distance into the lake, its wooden planks
+  creaking softly with every step. Some boards have rotted away, leaving gaps that
+  hint at the lake's depths below. A railing, partially covered in frost and ice,
+  runs along the sides, offering a frail sense of security to those who venture out.
+exits:
+  east:
+    roomid: 333
+  west:
+    roomid: 363

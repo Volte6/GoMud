@@ -1,0 +1,14 @@
+buffid: 21
+name: Explosion
+description: A bomb exploded near you!
+secret: false
+triggernow: true
+roundinterval: 1
+triggercount: 1
+healthroll: -2d9+2
+messages:
+  effect:
+    user: Fiery shrapnel hits you for <ansi fg="damage">{hitpoints} damage</ansi>!
+    room: Fiery shrapnel hits {username}!
+decaysinto:
+  - 22 # On fire

@@ -1,0 +1,47 @@
+roomid: 26
+zone: Frostfang
+title: Dark alley
+description: 'Adjacent to the Sanctuary of the Benevolent Heart, a narrow, shadowed
+  alleyway snakes away from the main thoroughfare of Beggars Lane. This hidden crevice
+  of Frostfang is a stark contrast to the temple''s solemnity. In the dim light of
+  the alleyway, the faded colors of a mural catch your eye. It depicts a raven, its
+  wings spread wide as if in flight, painted with such detail that it almost seems
+  ready to leap from the wall. The raven''s eyes, crafted from a material darker and
+  more lustrous than the surrounding paint, gleam with an uncanny intensity. The ground
+  is uneven, littered with remnants of daily life: discarded bones from meager meals,
+  worn-out shoes, and the occasional glint of a broken bottle. Faint whispers and
+  the soft rustling of movement can be heard from within the shelters, hinting at
+  the lives precariously balanced in this hidden enclave, a stone''s throw away from
+  a place of worship and refuge.'
+props:
+- nouns: [trash]
+  description: Trash lines the alley.
+- nouns: [raven, eyes, bird]
+  verbs: [touch, push, press, take, rub, polish]
+  cooldown: 20
+  description: Looking more closely, the eyes of the raven are made of onyx. They
+    are clean and clear, as if polished.
+  trigger:
+    roomid: 31
+    questtoken: 2-investigate
+    affected: player
+    descriptionplayer: You press the eyes of the raven, and follow a secret entrance
+      to the west!
+    descriptionroom: <ansi fg="username">%s</ansi> presses in the eyes of the raven,
+      and falls through into a room to the west!
+biome: city
+exits:
+  north:
+    roomid: 27
+  south:
+    roomid: 25
+spawninfo:
+- mobid: 1
+  cooldown: 10
+  message: A rat scurries out from a dark hole and wiggles its whiskers.
+- mobid: 12
+  cooldown: 20
+  message: A massive rat saunters out from the shadows.
+- mobid: 1
+  cooldown: 14
+  message: A rat falls from the sky.

@@ -1,0 +1,13 @@
+itemid: 10011
+name: spider fang
+namesimple: fang
+description: The fang of a large spider.
+type: weapon
+hands: 1
+subtype: stabbing
+damage:
+  diceroll: 1d4+1
+  critbuffids: 
+  - 13
+statmods:
+  speed: 6

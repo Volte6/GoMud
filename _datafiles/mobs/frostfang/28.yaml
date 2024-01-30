@@ -1,0 +1,36 @@
+mobid: 28
+itemdropchance: 2
+hostile: true
+maxwander: 3
+groups: 
+  - slum-ruffians
+idlecommands:
+  - 'wander'
+activitylevel: 1
+character:
+  name: ruffian
+  description: 'The ruffian looms in the dimly lit alleyway of the slums, a menacing figure carved out of the shadows. His rough, weather-beaten face is partly obscured by a tattered hood, but his eyes gleam with a predatory sharpness, scanning the surroundings with a mix of suspicion and brazen confidence. Broad-shouldered and solidly built, his presence is intimidating, the result of a life hardened by the unforgiving streets of the slums. His clothes are a patchwork of leather and cloth, well-worn and stained, telling a silent tale of numerous brawls and escapades.'
+  roomid: 0
+  zone: Nowhere
+  raceid: 1
+  level: 20
+  gold: 10
+  equipment:
+    head:
+      itemid: 20010
+    weapon:
+      itemid: 10008
+    offhand:
+      itemid: 10008
+    hands:
+      itemid: 20016
+    belt:
+      itemid: 20009
+    body:
+      itemid: 20008
+    legs: 
+      itemid: 20006
+    neck:
+      itemid: 20002
+    feet:
+      itemid: 20003

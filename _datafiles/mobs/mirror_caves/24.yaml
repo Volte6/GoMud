@@ -1,0 +1,23 @@
+mobid: 24
+itemdropchance: 2
+hostile: true
+maxwander: -1
+groups: 
+  - stalker
+idlecommands:
+  - 'sneak'
+  - 'wander'
+  - 'wander'
+combatcommands:
+  - ''
+  - ''
+  - ''
+  - 'sneak'
+  - 'sneak;;;backstab'
+  - 'sneak;;;backstab'
+activitylevel: 8
+character:
+  name: cave stalker
+  description: 'Stealthy and agile, these lizard-like predators blend seamlessly into the rocky environment.'
+  raceid: 7
+  level: 25

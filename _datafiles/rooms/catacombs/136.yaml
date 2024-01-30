@@ -1,0 +1,37 @@
+roomid: 136
+zone: Catacombs
+title: Crypt of the Ancient Sovereign
+description: Within the labyrinthine silence of the catacombs, The Crypt of the Ancient
+  Sovereign is a somber testament to forgotten majesty. At its heart lies a menacing
+  sarcophagus, its existence almost an affront to the living, crafted from stone that
+  whispers of aeons past. The lid bears the visage of a ruler whose eyes are set with
+  precious stones that glint with a malevolent spark, as if still surveying a long-lost
+  kingdom. Runes of a lost language mar the surface, their meanings obscured by time,
+  yet they emanate a chilling resonance, suggesting a dormant power that best not
+  be awakened. The air here is a chilling draft of history, thick with the dust of
+  centuries and the weight of a legacy that was once feared and revered. In this crypt,
+  the past feels alive, and the perception of the ancient sovereign looms as large
+  and as ominous as the day the tomb was sealed.
+props:
+- nouns: [sarcophagus]
+  verbs: [touch, push, hit, kick, open]
+  description: The sarcophagus lies solemn and imposing, its ancient stone surface
+    etched with enigmatic runes and the stern visage of the entombed sovereign, exuding
+    an air of timeless dominion and whispered dread.
+  trigger:
+    roomid: 138
+    affected: room
+    descriptionplayer: The room begins to tremble, and a trap door opens beneath your
+      feet! You fall into the room below!
+    descriptionroom: '%s has triggered some sort of trap! the room begins to tremble
+      and a trap door opens beneath your feet. You fall into the darkness below!'
+exits:
+  north:
+    roomid: 132
+spawninfo:
+- mobid: 17
+  cooldown: 90
+  message: A dark acolyte steps into the room.
+- mobid: 18
+  cooldown: 90
+  message: A dark acolyte steps into the room.

@@ -1,0 +1,17 @@
+roomid: 40
+zone: Frostfang
+title: Frostfang Castle West Wing
+description: The West Wing of Frostfang Castle stands in stark contrast to the rest
+  of the fortress. Bathed in natural light, it boasts expansive windows that offer
+  panoramic views of the surrounding landscapes. This wing is home to the castle's
+  vast library, with towering shelves filled with ancient tomes, scrolls, and maps
+  from distant lands. Adjacent chambers house collections of rare artifacts, from
+  ornate armors to delicate pottery, each piece telling of trade, exploration, or
+  conquest. The floors are covered in plush carpets, and the walls are adorned with
+  vibrant tapestries depicting serene landscapes and maritime adventures.
+biome: city
+exits:
+  east:
+    roomid: 39
+  north:
+    roomid: 41

@@ -1,0 +1,15 @@
+roomid: 186
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: A blanket of snow and ice transforms the Whispering Wastes into a realm
+  of white. The sky, in twilight gloom, adds a surreal touch, while the wind's eerie
+  whispers fill the air. The icy ground is fraught with danger, and shadowy shapes
+  of strange structures are barely visible in the distance.
+biome: snow
+exits:
+  east:
+    roomid: 187
+  northwest:
+    roomid: 185
+idlemessages:
+- The wind howls from every direction

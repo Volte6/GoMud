@@ -1,0 +1,19 @@
+roomid: 47
+zone: Frostfang
+title: Frostfang Castle North Hallway
+description: The North Hallway serves as the vital artery connecting the East and
+  West Wings of Frostfang Castle. Broad and imposing, its stone floor is lined with
+  intricately designed mosaics that trace the castle's architectural lineage. Flanked
+  by towering columns, the hallway is illuminated by sconces bearing blue flames,
+  casting a soft, ethereal glow. Along its length, grand tapestries hang, depicting
+  significant events in Frostfang's history, their colors still vibrant despite the
+  passage of time. Every few steps, arched windows punctuate the walls, offering fleeting
+  views of the castle's outer grounds. The ambient sound of whispered conversations
+  from adjoining rooms and the occasional echo of footsteps serve as a reminder of
+  the hallway's significance in bridging the castle's two distinct wings.
+biome: city
+exits:
+  east:
+    roomid: 46
+  west:
+    roomid: 42

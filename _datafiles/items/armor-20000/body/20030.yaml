@@ -1,0 +1,12 @@
+itemid: 20030
+name: leather vest
+namesimple: vest
+description: A crudely fashioned leather vest.
+type: body
+subtype: wearable
+damagereduction: 8
+statmods:
+  speed: 4
+  vitality: 2
+  perception: 3
+  mysticism: 5

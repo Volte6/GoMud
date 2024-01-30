@@ -1,0 +1,23 @@
+roomid: 621
+zone: Dark Forest
+title: Web covered tree
+description: As you cautiously approach the massive tree at the heart of the Spider's
+  Web Thicket, the oppressive stillness of the forest is punctuated by the haunting
+  melodies of the wind, which weaves through the intricate webs that enshroud the
+  colossal trunk. The tree itself is a gnarled and ancient giant, its bark obscured
+  by layers upon layers of glistening silk cocoons.
+biome: forest
+exits:
+  east:
+    roomid: 622
+  up:
+    roomid: 623
+  west:
+    roomid: 620
+spawninfo:
+- mobid: 35
+  cooldown: 100
+  message: A small spider hatches from a nearby egg.
+- mobid: 35
+  cooldown: 100
+  message: A small spider hatches from a nearby egg.

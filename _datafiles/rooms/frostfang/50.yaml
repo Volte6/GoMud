@@ -1,0 +1,60 @@
+roomid: 50
+zone: Frostfang
+title: Frostfang Throne Room
+description: The Throne Room of Frostfang Castle exudes an aura of cold majesty. High,
+  vaulted ceilings loom overhead, with pale light filtering through tall windows that
+  reflect the icy landscape outside. At the room's heart, on an obsidian throne elevated
+  on a black marble dais, sits the king. His once-strong posture now slightly slumped,
+  his face etched with lines of fatigue and eyes that speak of years battling the
+  harsh elements and enemies, both external and internal. The weight of his reign,
+  marked by relentless challenges, is evident in his weary demeanor. Flanking the
+  throne, braziers with blue flames cast an ethereal glow, their light contrasting
+  starkly with the imposing stone surroundings, underscoring the room's potent authority.
+mapsymbol: '!'
+maplegend: Throneroom
+biome: city
+exits:
+  south:
+    roomid: 36
+spawninfo:
+- mobid: 8
+  cooldown: 100
+  message: The King has decided to make an appearance!
+  idlecommands:
+  - ifnotquest 2 say I really don't trust the arch-bishop.
+  - emote grumbles under his breath
+  itemtrades:
+  - accepteditemids: [20018]
+    prizeitemids: [20018]
+    prizequestids: [2-end]
+    prizecommands: [say Thank you for taking care of that problem.]
+  asksubjects:
+  - ifquest: ""
+    ifnotquest: 2-start
+    asknouns:
+    - quest
+    - bishop
+    - arch-bishop
+    - trust
+    replycommands:
+    - say Don't let the Sanctuary of the Benevolent Heart fool you... they are up
+      to something.
+    - say My spies haven't been able to discover anything suspicious about their behavior,
+      which is the first clue something is up.
+    - say Maybe you could snoop around there a bit and see if you can discover anything.
+      They are south of Town Square.
+    - givequest 2-start
+  - ifquest: 2-inform
+    ifnotquest: ""
+    asknouns:
+    - lich
+    - old king
+    - evil king
+    replycommands:
+    - say An ancient lich king eh? Do you have any proof that what you say is true?
+- mobid: 9
+  cooldown: 100
+  message: A guardsman takes his position at the side of the King
+- mobid: 9
+  cooldown: 100
+  message: A guardsman takes his position at the side of the King

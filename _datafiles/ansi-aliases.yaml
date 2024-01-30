@@ -1,0 +1,80 @@
+# Look up the numeric codes if it's easier here: https://en.wikipedia.org/wiki/ANSI_escape_code
+# Under 3-bit and 4-bit colors (Until 256 color support added)
+color:
+  table-title: green
+  userid: black
+  username: 93 # Bright yellow
+  username-aggro: red
+  username-downed: 90 # Bright black
+  mobname: cyan 
+  mobname-aggro: 91 # Bright red
+  mobname-downed: red
+  spellname: magenta
+  nameprefix-pet: 92
+  role: 90
+  role-admin: 91
+  role-mod: 31
+  role-user: 32
+  role-guest: 90
+  hp-dead: red
+  hp-alive: cyan
+  hpdead: red
+  hpalive: cyan
+  command: cyan
+  command-admin: 9
+  skill: 93
+  container: 94 # Bright blue
+  exit: 92 # Bright green
+  secret-exit: 90 # Bright black
+  zone: red
+  map-shop: green
+  map-bank: 92
+  map-you: 96
+  map-secret: 90 # Bright black
+  map-temple: 90 # Bright black BG
+  mapbg-temple: 97 # Bright blwhiteack BG
+  map-water: 94 # Bright blue
+  map-shore: 94 # Bright blue
+  map-forest: green
+  map-trainer: 94 # Bright blue
+  map-player: 93 # Bright yellow
+  map-friend: 93 # Bright green
+  map-mob: 91 # Bright red
+  map-npc: 36 # Bright cyan
+  map-here: 95 # Bright magenta
+  description: white
+  map-default: 90
+  map-room: 97 # Bright white
+  map-target: 91 # Bright red
+  map-city: 97 # Bright white
+  map-snow: 97 # Bright white
+  map-house: yellow
+  map-mountains:  yellow
+  map-wall:  cyan # Bright black
+  trail-dead: 90
+  trail-weak: 37
+  trail-good: 32
+  trail-warm: 31
+  trail-hot: 91
+  item: green
+  itemname: green
+  questname: cyan
+  xp: 93 # Bright yellow
+  experience: 93 # Bright yellow
+  gold: 93 # Bright yellow
+  statmod: 36 # Bright cyan
+  damage: 91 # Bright red
+  shop-qty: 97 # Bright white
+  shop-name: green
+  shop-price: yellow
+  uses-left: 90 # Bright black
+  holy: 96 # Bright cyan
+  good: 36 # cyan
+  virtuous: 94 # bright blue
+  lawful: 37 # green
+  neutral: 90 # bright black
+  misguided: 33 # yellow
+  corrupt: 35 # magenta
+  evil: 91 # bright red
+  unholy: 31 # red
+  

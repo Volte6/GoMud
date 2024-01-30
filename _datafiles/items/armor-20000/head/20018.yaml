@@ -1,0 +1,11 @@
+itemid: 20018
+name: circlet
+description: The circlet of an ancient king.
+type: head
+subtype: wearable
+damagereduction: 1
+questtoken: 2-inform
+statmods:
+  speed: 4
+  mysticism: 4
+  perception: 8

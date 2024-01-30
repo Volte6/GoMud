@@ -1,0 +1,19 @@
+roomid: 4
+zone: Frostfang
+title: Cobblestone Way
+description: Further down Cobblestone Way, the path narrows, and the stone walls give
+  way to iron-wrought fences, guarding grand manors with snow-covered gardens. The
+  bare elms are now interspersed with evergreens, their needles heavy with snow. The
+  merchant stalls have transformed into bustling shops, their windows showcasing gleaming
+  armor, ornate jewelry, and scrolls filled with knowledge. The lute's melody is now
+  joined by the rhythmic beat of a drum, creating a lively tune that beckons you forward.
+  The castle's grandeur is undeniable, its massive gates and fortified walls standing
+  as a testament to Frostfang's history.
+biome: city
+exits:
+  north:
+    roomid: 5
+  south:
+    roomid: 3
+  west:
+    roomid: 74

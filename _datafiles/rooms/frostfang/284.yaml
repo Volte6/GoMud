@@ -1,0 +1,13 @@
+roomid: 284
+zone: Frostfang
+title: The Old Road
+description: The trees on either side of the road grow taller and denser, casting
+  longer shadows that seem to reach out toward you. The sunlight filtering through
+  the leaves takes on a muted, eerie quality, bathing the path in a dim, twilight
+  glow. The once-frequent travelers' footprints are now scarce, and the air carries
+  a hint of foreboding.
+exits:
+  east:
+    roomid: 297
+  west:
+    roomid: 283

@@ -1,0 +1,15 @@
+mobid: 23
+itemdropchance: 2
+hostile: false
+maxwander: -1
+groups: 
+  - bats
+idlecommands:
+  - 'emote hangs from the ceiling.'
+  - 'wander'
+activitylevel: 1
+character:
+  name: echo bats
+  description: 'Navigating through echolocation, these oversized bats swarm in the darker recesses of the caves.'
+  raceid: 7
+  level: 25

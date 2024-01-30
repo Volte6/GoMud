@@ -1,0 +1,29 @@
+roomid: 634
+zone: Dark Forest
+title: The hatchery
+description: The Hatchery is a surreal and haunting expanse of darkness and silk.
+  The air is thick with the overpowering scent of decay and dampness, while the walls
+  and ceiling are obscured by layer upon layer of glistening webbing. Moonlight, filtered
+  through the silk, casts eerie, shifting shadows that dance like specters on the
+  chamber's walls.
+biome: forest
+exits:
+  east:
+    roomid: 633
+spawninfo:
+- mobid: 35
+  cooldown: 30
+  message: A small spider hatches from a nearby egg.
+  maxwander: 1
+- mobid: 35
+  cooldown: 30
+  message: A small spider hatches from a nearby egg.
+  maxwander: 1
+- mobid: 35
+  cooldown: 30
+  message: A small spider hatches from a nearby egg.
+  maxwander: 1
+- mobid: 35
+  cooldown: 30
+  message: A small spider hatches from a nearby egg.
+  maxwander: 1

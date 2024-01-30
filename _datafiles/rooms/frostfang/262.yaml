@@ -1,0 +1,19 @@
+roomid: 262
+zone: Frostfang
+title: The Residential District
+description: Cobblestone streets, worn smooth by endless travel, meander through the
+  district, reminiscent of icy streams. Notably, a slight but noticeable fork leading
+  northward captures the observant eye. In this area, lanterns suspended from iron
+  posts shed a warm, inviting light, subtly drawing attention to this fork in the
+  road, as they illuminate the snowy terrain and the faces of purposeful residents.
+  Clad in heavy furs and cloaks, the people of this area exhale brief vapors in the
+  chilly air, their footsteps subtly suggesting the presence of a seldom-visited but
+  captivating abode discreetly situated near the district's northern exit.
+biome: city
+exits:
+  east:
+    roomid: 263
+  north:
+    roomid: 266
+  west:
+    roomid: 261

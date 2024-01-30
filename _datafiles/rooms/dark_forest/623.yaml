@@ -1,0 +1,15 @@
+roomid: 623
+zone: Dark Forest
+title: Web covered tree
+description: As you ascend the massive tree in the heart of the thicket, the branches
+  broaden into wide, sturdy ledges, allowing you to traverse this colossal arboreal
+  labyrinth with relative ease. Each step feels firm and secure beneath your feet,
+  despite the silk-draped surroundings. The moonlight filters through the dense canopy
+  above, casting sporadic beams of ghostly light that dance upon the silken strands,
+  creating a surreal, shimmering tapestry around you.
+biome: forest
+exits:
+  down:
+    roomid: 621
+  west:
+    roomid: 624

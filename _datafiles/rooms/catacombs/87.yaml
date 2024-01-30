@@ -1,0 +1,20 @@
+roomid: 87
+zone: Catacombs
+title: Inside of the Catacombs
+description: Moisture weeps from the stones, and the air is laced with the musty scent
+  of mold and the iron tang of ancient rusted iron that once graced the doors of now-vanished
+  tombs. The dim, flickering light from your lantern causes the shadows to dance macabrely,
+  creating the unsettling illusion of movement just at the periphery of your vision.
+  Each step echoes off the damp, stone walls where skeletal remnants peer out from
+  shadowed niches, their hollowed gazes following in silent judgment. This part of
+  the catacombs feels untamed, as if the living are mere trespassers in a realm where
+  the echoes of the departed reign in eternal, somber dominion.
+exits:
+  east:
+    roomid: 88
+  west:
+    roomid: 86
+spawninfo:
+- mobid: 15
+  cooldown: 160
+  message: The bones in the room stir, and a skeleton rises from the dirt.

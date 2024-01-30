@@ -1,0 +1,10 @@
+The <ansi fg="command">build</ansi> command can be used in the following ways:
+
+<ansi fg="command">build zone [zone_name]</ansi> - e.g. <ansi fg="command">build zone "Smash land"</ansi>
+Create a new zone with the supplied name. An empty room will be created inside
+of it.
+
+<ansi fg="command">build room [exit1] [exit2(optional)]</ansi> - e.g. <ansi fg="command">build room north</ansi>
+Create a new empty room, and connect this room to it using the exit name 
+supplied. If a second exit name is supplied, the  room will be linked back 
+using that exit name.

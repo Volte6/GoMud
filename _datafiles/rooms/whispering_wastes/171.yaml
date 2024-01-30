@@ -1,0 +1,17 @@
+roomid: 171
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: In the Whispering Wastes, snow and wind dominate, the sky a constant
+  dusk, shedding a ghostly light over the land. The wind's howl is punctuated by eerie
+  whispers, making every shadow seem alive. The ground is a slippery trap of ice,
+  and distant, indistinct shapes hint at unknown dangers. The cold here is more than
+  physical; it's a chilling reminder of the desolation surrounding you, a test for
+  the daring and a trap for the unwary.
+biome: snow
+exits:
+  east:
+    roomid: 170
+  west:
+    roomid: 172
+idlemessages:
+- The wind howls from every direction

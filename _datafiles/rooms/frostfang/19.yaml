@@ -1,0 +1,19 @@
+roomid: 19
+zone: Frostfang
+title: Beggars lane
+description: The cold wind of Frostfang whistles through the narrow, snow-dusted streets
+  of Beggars Lane. The cobblestones underfoot are slick with ice, making each step
+  a cautious endeavor. The buildings here are old, their wooden facades weathered
+  and gray, bearing the scars of many harsh winters. The windows, few and far between,
+  are mostly boarded up, but from some, faint glimmers of candlelight seep out, casting
+  eerie shadows on the snow.
+biome: city
+exits:
+  north:
+    roomid: 20
+  west:
+    roomid: 16
+spawninfo:
+- mobid: 1
+  cooldown: 30
+  message: A rat wanders out from nowhere and looks at you.

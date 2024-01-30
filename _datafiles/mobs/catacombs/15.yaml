@@ -1,0 +1,29 @@
+mobid: 15
+itemdropchance: 15
+hostile: true
+maxwander: -1
+groups: 
+  - catacomb-denizen
+idlecommands:
+  - 'wander'
+activitylevel: 1
+character:
+  name: skeleton
+  description: 'The skeleton before you is a grim tapestry of warfare past, its bones bleached by time and clattering in the still air of the catacombs. Clad in the tattered remnants of its battle regalia, it stands guard, a silent sentinel animated by some unfathomable necromancy. Each movement it makes is a haunting echo of its martial prowess, the rusted sword it grips is unwavering and ready, a testament to its undying vigilance and the undying will that drives it.'
+  raceid: 6
+  level: 15
+  gold: 3
+  equipment:
+    weapon:
+      itemid: 10002
+    offhand:
+      itemid: 20004
+    head:
+      itemid: 20020
+    neck:
+      itemid: 20021
+    legs:
+      itemid: 20006
+    feet:
+      itemid: 20003
+

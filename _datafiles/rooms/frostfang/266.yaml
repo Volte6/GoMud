@@ -1,0 +1,19 @@
+roomid: 266
+zone: Frostfang
+title: Inside a Residence
+description: Upon entering this residence, you're greeted by an air of sophisticated
+  warmth, a welcome reprieve from Frostfang's icy exterior. The interior boasts elegant,
+  dark wood paneling and floors polished to a high sheen, reflecting the flickering
+  light from an ornate fireplace. The walls are lined with bookshelves, filled with
+  ancient tomes and curious artifacts from distant lands, hinting at the owner's scholarly
+  pursuits. Plush velvet curtains drape over the windows, and a grand chandelier hangs
+  from the ceiling, casting a soft, ambient glow over the room. In the center, a large
+  oak table surrounded by high-backed chairs suggests a space where intellectual debates
+  and plans for adventure are equally at home.
+biome: house
+exits:
+  south:
+    roomid: 262
+spawninfo:
+- mobid: 26
+  cooldown: 60

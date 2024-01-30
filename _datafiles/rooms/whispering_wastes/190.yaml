@@ -1,0 +1,13 @@
+roomid: 190
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: In the Whispering Wastes, the blizzard obscures the world in a veil of
+  white. The sky, a twilight grey, creates an eerie atmosphere. The wind howls with
+  faint, ghostly echoes, and the ice-covered ground challenges every step. Distant
+  structures appear as distorted shadows through the swirling snow.
+biome: snow
+exits:
+  northwest:
+    roomid: 187
+idlemessages:
+- The wind howls from every direction

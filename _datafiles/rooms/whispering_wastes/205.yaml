@@ -1,0 +1,18 @@
+roomid: 205
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: In the heart of the Whispering Wastes, the blizzard's fury is unrelenting.
+  The twilight sky broods overhead, casting a dim, spectral light. Through the howling
+  wind, faint cries of unseen creatures echo, their forms hidden in the snowstorm.
+  The ground is a treacherous labyrinth of ice, with ominous shapes of frozen monoliths
+  barely visible in the distance, their surfaces etched with ancient runes.
+biome: snow
+exits:
+  northwest:
+    roomid: 206
+  southeast:
+    roomid: 204
+  southwest:
+    roomid: 212
+idlemessages:
+- The wind howls from every direction

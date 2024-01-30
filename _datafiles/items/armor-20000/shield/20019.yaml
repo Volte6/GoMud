@@ -1,0 +1,10 @@
+itemid: 20019
+name: iron shield
+namesimple: shield
+description: A heavy, decorative iron shield.
+type: offhand
+subtype: wearable
+damagereduction: 10
+statmods:
+  speed: -15
+cursed: true

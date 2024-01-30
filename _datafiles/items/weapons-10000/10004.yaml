@@ -1,0 +1,11 @@
+itemid: 10004
+name: dagger
+namesimple: dagger
+description: A plain dagger that still has a bit of a stabby end left.
+type: weapon
+hands: 1
+subtype: stabbing
+damage:
+  diceroll: 1d4
+statmods:
+  speed: 1

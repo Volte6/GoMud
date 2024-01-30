@@ -1,0 +1,14 @@
+The <ansi fg="command">spawn</ansi> command can be used in the following ways:
+
+<ansi fg="command">spawn item [ItemId]</ansi> - e.g. <ansi fg="command">spawn item 1</ansi>
+Spawn an item from thin air by id
+
+<ansi fg="command">spawn item [ItemName]</ansi> - e.g. <ansi fg="command">spawn item stick</ansi>
+Spawn an item by name. Trickier since many items may match your item name.
+
+<ansi fg="command">spawn mob [MobId]</ansi> - e.g. <ansi fg="command">spawn mob 1</ansi>
+Spawns a mob in the room.
+
+<ansi fg="command">spawn mob [MobName]</ansi> - e.g. <ansi fg="command">spawn mob goblin</ansi>
+Spawns a mob in the room. Trickier since many mobs may match your mob name.
+

@@ -1,0 +1,89 @@
+roomid: 18
+zone: Frostfang
+title: The Sanctuary of the Benevolent Heart
+description: Inside the Sanctuary of the Benevolent Heart, a serene ambiance envelops
+  visitors. Vaulted ceilings, supported by thick stone pillars, echo with the soft
+  murmurs of prayer and the distant harmonies of a choir. The walls, adorned with
+  faded tapestries depicting acts of kindness and compassion, seem to absorb the golden
+  glow from strategically placed candles, their flames dancing in quiet reverence.
+  At the temple's heart, a large, ornate altar stands, draped in white cloth and surrounded
+  by offerings of fresh flowers and bowls of incense, their fragrant smoke spiraling
+  upwards in delicate tendrils, creating an atmosphere of peace and reflection.
+props:
+- nouns: [tapestries, tapestry, walls]
+  description: The tapestries within the Sanctuary of the Benevolent Heart are vibrant
+    masterpieces, each weaving tales of Frostfang's history and the temple's legacy.
+    From scenes of townsfolk uniting during harsh winters to the legend of a priestess
+    drawing water from a mysterious source. One tapestry stands out with its strangely
+    ominous depiction. It portrays shadowy catacombs, where torches cast eerie glows
+    on ancient bones and forgotten relics. Dyed with natural pigments and crafted
+    with unparalleled skill, these artworks serve as visual scriptures, illustrating
+    religious teachings, historical legends, and mysterious tales.
+- nouns: [altar]
+  verbs: [look]
+  description: The altar of the Sanctuary of the Benevolent Heart is an enigmatic
+    sight. Crafted from a dark, veined marble, it stands in stark contrast to the
+    temple's otherwise luminous interior. The altar's edges are adorned with intricate,
+    almost hypnotic patterns that seem to shift and swirl when stared at for too long.
+    At its center, a golden censer continuously emits a fragrant incense. The scent,
+    both sweet and slightly musky, is so captivating that any initial unease evoked
+    by the altar's appearance is quickly replaced by a sense of calm and tranquility,
+    lulling visitors into a state of peaceful oblivion.
+  trigger:
+    buffid: 2
+    affected: player
+    descriptionplayer: The smell of the insense fills your nostrels, numbing your
+      senses.
+mapsymbol: +
+maplegend: Temple
+biome: city
+exits:
+  west:
+    roomid: 17
+spawninfo:
+- mobid: 4
+  cooldown: 25
+  message: A priest emerges from a confession booth
+  idlecommands:
+  - say Have you taken the time to help the poor today?
+  - say For a <ansi fg="gold">100 gold</ansi> donation, I will remove any curses afflicting
+    your party.
+  - say To make a donation, simply give the gold to me.
+  itemtrades:
+  - acceptedgold: 100
+    prizecommands: [say Thank you for your donation., emote claps his hands together
+        in prayer and beging to chant., uncurse]
+  asksubjects:
+  - ifquest: ""
+    ifnotquest: 2-start
+    asknouns:
+    - quest
+    - bishop
+    - arch-bishop
+    - trust
+    replycommands:
+    - say Don't let the Sanctuary of the Benevolent Heart fool you... they are up
+      to something.
+    - say My spies haven't been able to discover anything suspicious about their behavior,
+      which is the first clue something is up.
+    - say Maybe you could snoop around there a bit and see if you can discover anything.
+      They are south of Town Square.
+    - givequest 2-start
+  - ifquest: 1-start
+    ifnotquest: ""
+    asknouns:
+    - garden
+    - gardening
+    replycommands:
+    - emote thinks hard for a moment.
+    - say I was trimming the hedges out back the last time I remember wearing it.
+  - ifquest: 1-end
+    ifnotquest: ""
+    asknouns:
+    - locket
+    - sad
+    - sadness
+    - necklace
+    replycommands:
+    - emote sighs.
+    - say I'm so absent minded sometimes. I'm glad you found it.

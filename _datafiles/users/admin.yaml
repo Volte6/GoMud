@@ -1,0 +1,81 @@
+userid: 1
+permission: admin
+username: admin
+password: password
+macros:
+  =1: e;e;e;e;e;e;e;e
+character:
+  name: Admin
+  description: Admin possesses the ability to manipulate the very fabric of the universe,
+    bending it to his will with a mere thought. He can create and destroy, alter reality,
+    and shape the world around him as he sees fit. His knowledge of the world is unparalleled,
+    as he has access to its innermost workings and understands its deepest secrets.
+    With a wave of his hand, Admin can bestow blessings upon other adventurers, granting
+    them strength, wisdom, or fortune beyond their wildest dreams. Conversely, he
+    can also mete out justice to those who would seek to disrupt the balance of the
+    world, swiftly and decisively.
+  roomid: 7
+  zone: Frostfang
+  raceid: 1
+  stats:
+    strength:
+      base: 1
+    speed:
+      training: 3
+    smarts:
+      base: 1
+    vitality:
+      training: 1
+      base: 1
+    mysticism: {}
+    perception:
+      base: 1
+  level: 28
+  experience: 550846
+  trainingpoints: 26
+  statpoints: 27
+  health: 150
+  alignment: 0
+  mana: 94
+  gold: 0
+  bank: 0
+  items:
+  - itemid: 10004
+  - itemid: 8
+    uses: 3
+  - itemid: 10012
+  - itemid: 10014
+  - itemid: 10004
+  - itemid: 30002
+    uses: 1
+  - itemid: 30007
+    uses: 1
+  - itemid: 10006
+  equipment:
+    offhand:
+      itemid: 20004
+    belt:
+      itemid: 20011
+    gloves:
+      itemid: 20001
+    ring:
+      itemid: 20015
+      uncursed: true
+  skills:
+    dual-wield: 2
+    inspect: 4
+    map: 5
+    peep: 1
+    protection: 4
+    skulduggery: 1
+  questprogress:
+    1: return
+    2: investigate
+    4: end
+  keyring:
+    784-chest: DUU
+    key-110-west: "3"
+itemstorage:
+  items:
+  - itemid: 20011
+roommemoryblob: H4sIAAAAAAAA/5yQQU5EMQxDL/QWjfMTp/e/GGo1SCAGFqhObMm1F4lu7lAPVXSeXU2Z1mv/gfL9/Bl0/4jHN/2kDr3F6Rpq0wt5kDeahSbQCE2iedA22oP2Jtcip8gxtfryO/2f+eUmgUjsxjb2vLhJjhsikngIE4OaDPI6X5Kn3rgOrjrvIwAA//8aP9gMjgEAAA==

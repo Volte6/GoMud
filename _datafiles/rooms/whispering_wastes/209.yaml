@@ -1,0 +1,17 @@
+roomid: 209
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: In the grip of an eternal blizzard, the Whispering Wastes stretch out
+  like a frozen ocean. The sky, a perpetual twilight, sheds a faint, otherworldly
+  light. The wind carries the distant screeches of winged creatures, their dark forms
+  occasionally silhouetted against the grey sky. The snow-covered ground is uneven,
+  hiding dangers beneath its pristine surface. The ruins of old watchtowers emerge
+  from the snow, their once-mighty forms now bowed by time and weather.
+biome: snow
+exits:
+  east:
+    roomid: 208
+  northwest:
+    roomid: 210
+idlemessages:
+- The wind howls from every direction

@@ -1,0 +1,23 @@
+roomid: 218
+zone: Mirror Caves
+zoneroot: true
+title: Cave Entrance
+description: "As you cautiously step into the entrance of the mirror caves, a chilling
+  draft greets you, carrying the faint scent of earth and ancient stone. The cave's
+  entrance chamber is vast, with walls glistening from the moisture that seeps through
+  them. Dimly lit by the sporadic glow of bioluminescent lichen, these walls seem
+  to dance with elusive shadows, creating an eerie play of light that gives the cave
+  its name. The ground beneath your feet is uneven, a mosaic of rocks and pebbles
+  worn smooth by time. The sound of your footsteps echoes, as if mimicked by an unseen
+  presence, adding to the caveb\0\x19s mysterious allure. Ahead, multiple passages
+  branch off in different directions, each cloaked in darkness, hinting at the labyrinthine
+  nature of these caves."
+mapsymbol: E
+maplegend: Entrance
+exits:
+  east:
+    roomid: 220
+  out:
+    roomid: 217
+  west:
+    roomid: 219

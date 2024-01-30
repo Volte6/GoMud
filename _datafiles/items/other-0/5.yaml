@@ -1,0 +1,7 @@
+itemid: 5
+name: amethyst
+namesimple: gemstone
+description: The amethyst crystal is a beautiful hue of purple.
+type: object
+value: 200
+subtype: mundane

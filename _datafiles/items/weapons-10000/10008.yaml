@@ -1,0 +1,9 @@
+itemid: 10008
+name: wooden claw
+namesimple: claw
+description: The Wooden Claw is a unique hand-to-hand combat weapon, meticulously carved from durable hardwood. 
+type: weapon
+hands: 1
+subtype: claws
+damage:
+  diceroll: 1d4

@@ -1,0 +1,18 @@
+roomid: 31
+zone: Frostfang
+title: The Shadow Vault
+description: 'The air is cool and slightly damp, with walls of rough-hewn stone that
+  bear the marks of age and secrecy. Sparse torches affixed to the walls emit a flickering,
+  amber glow, revealing a space filled with wooden chests, clay pots, and ancient
+  artifacts. A large, worn tapestry hangs on one wall, depicting a scene that hints
+  at forgotten rituals or hidden histories of Frostfang. The room''s very existence
+  suggests a dual purpose: a safe haven for those in need from the alley and a repository
+  for the temple''s most sacred and guarded treasures.'
+biome: city
+exits:
+  down:
+    roomid: 32
+  east:
+    roomid: 26
+  west:
+    roomid: 18

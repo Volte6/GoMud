@@ -1,0 +1,7 @@
+itemid: 7
+name: residence key
+namesimple: key
+description: A key to a residence in Frostfang. It's a bit rusty, but it should still work.
+type: key
+subtype: generic
+keylockid: 778-north

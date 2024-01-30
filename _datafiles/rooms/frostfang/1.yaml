@@ -1,0 +1,55 @@
+roomid: 1
+zone: Frostfang
+zoneroot: true
+title: Town Square
+description: In the shimmering heart of Frostfang, a city wrapped in a perpetual blanket
+  of snow and illuminated by the ethereal glow of the auroras, lies the Town Square.
+  Your gaze is drawn to a prominent sign adorned with a detailed map, providing an
+  essential guide to the area's layout. You find yourself amidst the hustle and bustle
+  of the Square, where icicle-laden stalls display wares from around the frozen realm,
+  and citizens clad in thick furs exchange stories of their encounters with mystical
+  creatures.
+props:
+- nouns: [sign, map]
+  verbs: [look, read]
+  trigger:
+    skillinfo: map:1
+    affected: player
+    descriptionplayer: You look at the map nailed to the sign.
+    descriptionroom: <ansi fg="username">%s</ansi> looks at the map nailed to the
+      sign.
+    mapinfo: roomid=1/size=normal/height=22/width=38/secrets=false/name=Map of Frostfang/markers=1:×-Here
+      Center
+mapsymbol: T
+maplegend: Townsquare
+biome: city
+exits:
+  east:
+    roomid: 54
+  north:
+    roomid: 2
+  south:
+    roomid: 12
+  west:
+    roomid: 7
+spawninfo:
+- mobid: 2
+  cooldown: 85
+  message: A town guard emerges from a nearby building.
+  idlecommands:
+  - say did you know there's a sign in the Townsquare with a map of the area?
+  - ""
+  - ""
+  - ""
+  - wander
+idlemessages:
+- A <ansi fg="mobname">citizen</ansi> walks up and examines the <ansi fg="itemname">map</ansi>
+  posted to the <ansi fg="itemname">sign</ansi>.
+- A <ansi fg="mobname">guard</ansi> is looking at the <ansi fg="itemname">sign</ansi>.
+- A <ansi fg="mobname">craftsman</ansi> gives the <ansi fg="itemname">sign</ansi>
+  a little kick, nodding in approval.
+- A couple of <ansi fg="mobname">townspeople</ansi> are arguing about the accuracy
+  of the <ansi fg="itemname">map</ansi> posted to the <ansi fg="itemname">sign</ansi>
+  here.
+- A <ansi fg="mobname">guard</ansi> brushes off some of the snow that has accumulated
+  on the <ansi fg="itemname">sign</ansi>.

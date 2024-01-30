@@ -1,0 +1,10 @@
+itemid: 10012
+name: crowbar
+namesimple: crowbar
+description: A long and thin bar of iron. Useful for prying.
+type: weapon
+hands: 1
+questtoken: 5-usecrowbar
+subtype: bludgeoning
+damage:
+  diceroll: 1d2

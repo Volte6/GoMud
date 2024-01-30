@@ -1,0 +1,21 @@
+raceid: 4
+name: Troll
+description: A massive creature .
+size: large
+unarmedname: massive fists
+tnlscale: 1
+angrycommands: 
+  - emote is looking for its next meal.
+  - say me want num nums!
+stats:
+  strength:
+    base: 1
+  smarts:
+    base: 1
+  vitality:
+    base: 1
+  perception:
+    base: 1
+damage:
+  diceroll: 1d6+4
+disabledslots: [ 'ring' ]

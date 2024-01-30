@@ -1,0 +1,13 @@
+roomid: 275
+zone: Frostfang
+title: Residential Hedge
+description: From this vantage point, the backs of the houses are visible, their gardens
+  and back doors providing a different perspective of the residents' lives. You can
+  catch snippets of conversation, the clatter of dishes, or the laughter of children
+  playing, yet these sounds seem distant, muffled by the hedge's dense foliage.
+biome: city
+exits:
+  east:
+    roomid: 276
+  west:
+    roomid: 274

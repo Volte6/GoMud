@@ -1,0 +1,13 @@
+roomid: 11
+zone: Frostfang
+title: The west road
+description: This ancient street, lined with gnarled trees and dimly lit lanterns,
+  leads adventurers out of the familiar comforts of town and into the unknown. As
+  you traverse this enigmatic path, your mind races with riddles whispered by the
+  wind of nefarious creatures lurking in the shadows.
+biome: city
+exits:
+  east:
+    roomid: 10
+  west:
+    roomid: 35

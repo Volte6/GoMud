@@ -1,0 +1,13 @@
+roomid: 706
+zone: Mystarion
+title: The battlements
+description: As you turn your gaze southward, the familiar peaks of the Stormshards
+  gradually diminish in size until they finally give way to a breathtaking panorama
+  of the open sea. The boundless expanse of the ocean stretches out before you, its
+  surface a shimmering expanse of turquoise and azure, dotted with distant islands
+  that seem to float like mirages on the horizon.
+exits:
+  east:
+    roomid: 705
+  west:
+    roomid: 707

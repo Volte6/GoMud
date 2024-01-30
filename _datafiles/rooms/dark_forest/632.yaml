@@ -1,0 +1,23 @@
+roomid: 632
+zone: Dark Forest
+title: Spider queens nest
+description: The Spider Queen's Nest is a place of profound darkness and peril. The
+  air is thick with the pungent scent of decay, and the oppressive stillness is broken
+  only by the eerie hum of the spider's chittering and the occasional drip of venom
+  from the ceiling. Around the chamber, countless victims ensnared in the spider's
+  silk cocoons hang in macabre suspension, their struggles long since silenced. The
+  ground is treacherous, a web-covered graveyard where the bones and remnants of the
+  Queen's prey lie hidden.
+biome: forest
+exits:
+  north:
+    roomid: 631
+  web:
+    roomid: 633
+spawninfo:
+- mobid: 36
+  cooldown: 120
+  message: A giant spider descends from a web.
+- mobid: 37
+  cooldown: 16000
+  message: The queen has arrived.

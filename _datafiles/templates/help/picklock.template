@@ -1,0 +1,33 @@
+<ansi fg="black" bold="true">.:</ansi> <ansi fg="magenta">Help for </ansi><ansi fg="command">picklock</ansi>
+
+The <ansi fg="command">picklock</ansi> command attempts to pick the lock of any exit or container.
+You'll need a set of <ansi fg="item">lockpicks</ansi>.
+
+<ansi fg="yellow">Usage: </ansi>
+
+  <ansi fg="command">picklock [exit name/container name]</ansi> - This inspects the lock and gives you an
+  idea of the difficulty.
+  <ansi fg="command">picklock [exit name/container name] [up/down]</ansi> - This inspects the lock and gives
+  you an idea of the difficulty.
+
+<ansi fg="yellow">Examples: </ansi>
+
+    <ansi fg="black" bold="true">[HP:66/66 MP:35/35]:</ansi> <ansi fg="command">north</ansi>
+    There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to
+    <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.
+
+
+    <ansi fg="black" bold="true">[HP:66/66 MP:35/35]:</ansi> <ansi fg="command">pick north</ansi>
+
+    <ansi fg="black" bold="true">.:</ansi> <ansi fg="table-title">The Lock Sequence Looks like:</ansi>
+        <ansi fg="yellow" bold="true">╔═══════╦═══════╦═══════╦═══════╦═══════╗
+        ║       ║       ║       ║       ║       ║
+        ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║   <ansi fg="red" bold="true">?</ansi>   ║
+        ║       ║       ║       ║       ║       ║
+        ╚═══════╩═══════╩═══════╩═══════╩═══════╝</ansi>
+
+<ansi fg="red">Note:</ansi> <ansi fg="yellow">Each <ansi fg="red" bold="true">?</ansi> symbol represents an UP or DOWN you must guess in the sequence.</ansi>
+      (i.e. <ansi fg="command">pick north DOWN</ansi> or <ansi fg="command">pick north UP</ansi>)
+
+<ansi fg="magenta" bold="true">See also:</ansi> <ansi fg="command">help picklock-example</ansi>, <ansi fg="command">help keyring</ansi>
+

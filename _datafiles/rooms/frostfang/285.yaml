@@ -1,0 +1,12 @@
+roomid: 285
+zone: Frostfang
+title: The Southern Road
+description: The Southern Road is flanked by ancient, snow-covered trees, their gnarled
+  branches reaching out like skeletal fingers against the white canvas of the land.
+  The path itself is a narrow trail, partially obscured by layers of snow, with the
+  occasional set of footprints, both human and animal, marking the way.
+exits:
+  northwest:
+    roomid: 278
+  southeast:
+    roomid: 286

@@ -1,0 +1,16 @@
+roomid: 281
+zone: Frostfang
+title: The Old Road
+description: You leave behind the city's borders and enter the tranquil Frostfang
+  countryside. The road is flanked by meadows blanketed in pristine, glistening snow,
+  and the occasional rustic cottage peeks out from behind frosted trees. The distant
+  echoes of laughter and the clinking of tankards from the city's taverns are replaced
+  by the hushed whispers of the winter wind and the soft crunch of your boots in the
+  snow.
+exits:
+  east:
+    roomid: 282
+  west:
+    roomid: 280
+idlemessages:
+- a snowhare runs across the road.

@@ -1,0 +1,16 @@
+roomid: 208
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: The Whispering Wastes are a symphony of white, the blizzard a relentless
+  conductor. The twilight sky casts a gloomy pall over the snow-clad terrain. In the
+  distance, the ghostly howls of snow beasts blend with the wind's whispers, creating
+  an eerie chorus. The ground, covered in a thick layer of snow, hides treacherous
+  icy patches.
+biome: snow
+exits:
+  southeast:
+    roomid: 207
+  west:
+    roomid: 209
+idlemessages:
+- The wind howls from every direction

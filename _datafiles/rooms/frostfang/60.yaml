@@ -1,0 +1,15 @@
+roomid: 60
+zone: Frostfang
+title: Outside the East Gate
+description: The East Frostfang Gate stands as a formidable sentinel, marking the
+  eastern entrance to the castle grounds. Crafted from massive slabs of dark, weathered
+  stone, it's adorned with intricate carvings of ice dragons and winter warriors.
+  Two imposing watchtowers flank the gate, their arrow slits ever vigilant. The gate
+  itself, reinforced with iron and bearing the scars of past skirmishes, serves as
+  both a welcoming point for allies and a stark deterrent for foes, embodying the
+  resilience and legacy of Frostfang.
+exits:
+  east:
+    roomid: 278
+  west:
+    roomid: 59

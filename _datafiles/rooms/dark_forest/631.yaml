@@ -1,0 +1,26 @@
+roomid: 631
+zone: Dark Forest
+title: Top of the tree
+description: From this lofty perch, you can see the entire expanse of the Spider's
+  Web Thicket spread out like a haunting tapestry. The massive webs below glisten
+  in the moonlight, their silken threads shimmering like a sea of silver. Giant spiders
+  skitter about, their movements resembling tiny specters in the night. In the distance,
+  the dark forest stretches far into the distance. To the west you can see the winter-locked
+  city of Frostfang, and to the east the stormshard mountains, where the city of Mystarion
+  resides.
+biome: forest
+exits:
+  down:
+    roomid: 630
+  south:
+    roomid: 632
+spawninfo:
+- mobid: 36
+  cooldown: 120
+  message: A giant spider descends from a web.
+- mobid: 35
+  cooldown: 100
+  message: A small spider hatches from a nearby egg.
+- mobid: 35
+  cooldown: 100
+  message: A small spider hatches from a nearby egg.

@@ -1,0 +1,8 @@
+itemid: 20023
+name: spider exoskeleton
+description: The empty husk of a spider.
+type: head
+subtype: wearable
+damagereduction: 9
+statmods:
+  speed: 7

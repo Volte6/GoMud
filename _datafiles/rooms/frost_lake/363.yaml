@@ -1,0 +1,16 @@
+roomid: 363
+zone: Frost Lake
+title: Old Dock
+description: This once-sturdy structure now bears the unmistakable signs of time's
+  passage, with its timbers worn and gray from exposure to the elements. At the end
+  of the dock, you find a weathered wooden bench, its surface worn smooth by countless
+  visitors who sought solace and contemplation in this tranquil setting. Facing the
+  lake, the bench offers a perfect vantage point to take in the breathtaking vista
+  that surrounds you. And there, at the very end of the dock, a small boat with a
+  single tattered sail is anchored, gently rocking on the frozen waters.
+exits:
+  boat:
+    roomid: 364
+    mapdirection: west-gap2
+  east:
+    roomid: 362

@@ -1,0 +1,20 @@
+buffid: 7
+name: Hamstrung
+description: You've been crippled by a hamstring attack!
+secret: false
+roundinterval: 1
+triggercount: 3
+messages:
+  start:
+    user: You've been hamstrung!
+    room: '{username} has been hamstrung'
+  effect:
+    user: You're hamstrung!
+    room: '{username} is hamstrung!'
+  end:
+    user: Your leg heals enough that you can fight again.
+    room: '{username} is no longer hamstrung.'
+flags:
+  - no-combat
+  - no-flee
+  - no-go

@@ -1,0 +1,14 @@
+roomid: 729
+zone: Mystarion
+title: The east road
+description: You are on the main eastern road. This road leads to the farmland of
+  the stormshards. The road itself is well travelled, as this is the road the farmers
+  take to sell their crops. Here the road ends at a bridge which crosses a canal that
+  splits parts of Mystarion.
+mapsymbol: B
+maplegend: Bridge
+exits:
+  east:
+    roomid: 728
+  up:
+    roomid: 730

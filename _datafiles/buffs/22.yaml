@@ -1,0 +1,20 @@
+buffid: 22
+name: On Fire
+description: You're on fire!
+secret: false
+triggernow: true
+roundinterval: 2
+triggercount: 5
+healthroll: -2d6
+messages:
+  start:
+    user: You catch on <ansi fg="red">fire</ansi>!
+    room: '{username} caught on <ansi fg="red">fire</ansi>!'
+  effect:
+    user: Flames envelop you, causing <ansi fg="damage">{hitpoints} damage</ansi> while you writh in pain!
+    room: '{username} is enveloped in <ansi fg="red">flames</ansi>.'
+  end:
+    user: You are no longer on fire.
+    room: '{username} is no longer on fire.'
+flags:
+  - cancel-on-water

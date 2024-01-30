@@ -1,0 +1,9 @@
+itemid: 20011
+name: giant rat tail
+namesimple: animal tail
+description: Just big enough to use as a belt.
+type: belt
+subtype: wearable
+damagereduction: 1
+statmods:
+  speed: 1

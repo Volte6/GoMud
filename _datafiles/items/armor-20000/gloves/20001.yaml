@@ -1,0 +1,7 @@
+itemid: 20001
+name: rat pelt
+namesimple: animal skin
+description: The skin of a dead rat. Maybe you can get a few coins for it.
+type: gloves
+subtype: wearable
+damagereduction: 1

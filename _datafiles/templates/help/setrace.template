@@ -1,0 +1,17 @@
+<ansi fg="black" bold="true">.:</ansi> <ansi fg="magenta">Help for </ansi><ansi fg="command">setrace</ansi>
+
+The <ansi fg="command">setrace</ansi> sets your race in the ld, and only when in the void. 
+
+<ansi fg="yellow">Usage: </ansi>
+
+  <ansi fg="command">setrace</ansi>        - This help you are seeing
+  <ansi fg="command">setrace [race]</ansi> - Set your race and begin playing.
+
+Currently the races available are:
+
+{{ $longest := 0 }}{{ range $index, $raceInfo := . }}{{ if gt (len $raceInfo.Name) $longest }}{{ $longest = (len $raceInfo.Name)}}{{ end }}{{ end }}
+{{ range $index, $raceInfo := . }} <ansi fg="yellow">{{ padLeft $longest $raceInfo.Name }}</ansi> - {{ $raceInfo.Description }}
+{{ end }}
+
+<ansi fg="magenta" bold="true">See also:</ansi> <ansi fg="command">help races</ansi>, <ansi fg="command">help race [racename]</ansi>
+

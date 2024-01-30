@@ -1,0 +1,13 @@
+roomid: 614
+zone: Mystarion
+title: Main road
+description: The road itself becomes a cobblestone path, the stones worn smooth by
+  centuries of use, each one seemingly placed with intention, leading inexorably towards
+  the city gates. Intricate runes and symbols are carved into the stones at irregular
+  intervals, glowing faintly with an otherworldly light, guiding the way through the
+  increasing fog.
+exits:
+  east:
+    roomid: 617
+  west:
+    roomid: 613

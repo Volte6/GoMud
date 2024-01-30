@@ -1,0 +1,10 @@
+itemid: 20026
+name: spiked collar
+namesimple: dog collar
+description: A leather collar with metal spikes.
+type: neck
+subtype: wearable
+damagereduction: 3
+statmods:
+  strength: 3
+  perception: 10

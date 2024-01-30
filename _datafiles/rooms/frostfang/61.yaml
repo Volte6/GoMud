@@ -1,0 +1,30 @@
+roomid: 61
+zone: Frostfang
+title: Frostfire Inn
+description: The Frostfire Inn stands as a beacon of warmth and respite amidst Frostfang's
+  icy embrace. Its sturdy timbered walls, stained a rich mahogany, rise two stories
+  high, with smoke curling invitingly from a stout chimney. Inside, a roaring hearth
+  casts a golden glow over well-worn wooden tables and plush chairs, where travelers
+  share tales over mugs of steaming mead. The scent of roasted meats and freshly baked
+  bread wafts from the kitchen, promising hearty meals to weary souls. Upstairs, cozy
+  rooms with thick fur blankets await, offering solace from the chill. With its jovial
+  atmosphere and the innkeeper's renowned hospitality, the Frostfire has become a
+  beloved haven for both locals and wanderers alike.
+props:
+- nouns: [""]
+  verbs: [sleep]
+  trigger:
+    roomid: 432
+    buffid: 15
+    affected: player
+    descriptionplayer: You are directed to a room upstairs with a large bed. How inviting....
+mapsymbol: I
+maplegend: Inn
+biome: city
+exits:
+  north:
+    roomid: 57
+spawninfo:
+- mobid: 7
+  cooldown: 20
+  message: A serving wench enters from a back room.

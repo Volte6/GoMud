@@ -1,0 +1,15 @@
+raceid: 5
+name: Goblin
+description: A small magical being with pointy ears.
+size: small
+unarmedname: claws
+tnlscale: 2.0
+angrycommands: [emote cackles maniacally.]
+stats:
+  speed:
+    base: 2
+  mysticism:
+    base: 2
+damage:
+  diceroll: 1d3
+disabledslots: ['neck']

@@ -1,0 +1,22 @@
+roomid: 167
+zone: Frostfang
+title: Outside The West Gate
+description: Outside of the frost-covered gates to the west of Frostfang, the biting
+  chill of the Whispering Wastes engulfs you. Towering snowdrifts and icy winds dominate
+  the bleak landscape, where visibility is a constant struggle against the swirling
+  snow. The path ahead is a treacherous mix of ice and fragmented stone, barely discernible
+  under the thick blanket of white. The howling wind carries faint, eerie whispers,
+  hinting at the mysteries and dangers hidden within this relentless winter storm.
+  To your left and right, the silhouettes of frozen structures emerge sporadically
+  from the blizzard, like ghostly sentinels watching over this desolate expanse. Here,
+  at the threshold of the Whispering Wastes, you feel a profound sense of isolation,
+  standing in a world where few dare to tread.
+exits:
+  east:
+    roomid: 35
+  west:
+    roomid: 168
+idlemessages:
+- The icy wind envelopes you.
+- The gate creaks in the wind.
+- Townspeople nervously watch you from the safety of the town.

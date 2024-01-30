@@ -1,0 +1,18 @@
+roomid: 771
+zone: Frost Lake
+title: Lake Island
+description: The island's surface is covered in a soft blanket of snow, untouched
+  by the footprints of those who have ventured here before you. Tall, ancient pine
+  trees stand sentinel, their branches heavy with snow and icicles that shimmer like
+  crystal chandeliers in the gentle breeze.
+mapsymbol: "~"
+maplegend: Shore
+exits:
+  east:
+    roomid: 762
+  northeast:
+    roomid: 770
+  south:
+    roomid: 772
+  west:
+    roomid: 766

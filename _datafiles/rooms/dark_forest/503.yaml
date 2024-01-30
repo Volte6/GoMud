@@ -1,0 +1,16 @@
+roomid: 503
+zone: Dark Forest
+title: Forest Road
+description: As you venture further along the old road, it leads you into the heart
+  of the foreboding Dark Forest. The transition from the tranquil Frost Lake to this
+  shadowy realm is abrupt and palpable. The once-clear path is now obscured by gnarled,
+  twisted branches that reach out like skeletal fingers from ancient trees, their
+  bark as black as night.
+biome: forest
+exits:
+  east:
+    roomid: 504
+  southwest:
+    roomid: 502
+  west:
+    roomid: 506

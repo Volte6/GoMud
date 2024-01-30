@@ -1,0 +1,14 @@
+itemid: 10010
+name: cudgel
+namesimple: club
+description: The cudgel is a robust, unassuming weapon, fashioned from sturdy oak hardened by time and use. It has a heft to it that feels solid in the grip, reassuring the wielder of its reliability in combat. The wood bears the scars of countless clashes, its surface marred with nicks and stains that speak to its history of service. 
+type: weapon
+hands: 1
+subtype: bludgeoning
+damage:
+  diceroll: 1d8
+statmods:
+  strength: 2
+  speed: 2
+  mysticism: 2
+

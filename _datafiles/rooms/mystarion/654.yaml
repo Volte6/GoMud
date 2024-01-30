@@ -1,0 +1,15 @@
+roomid: 654
+zone: Mystarion
+title: The battlements
+description: As you peer over the battlements of Mystarion, your eyes fall upon the
+  rugged mountainside that plummets towards the Dark Forest, a treacherous path that
+  only the most daring adventurers would dare to traverse. The slope is a tapestry
+  of jagged rocks, gnarled trees, and treacherous crevices, a stark contrast to the
+  lush greenery of the forest below. The air here is heavy with the scent of damp
+  earth and decaying leaves, and a chill wind whips through the narrow gorges, sending
+  a shiver down your spine.
+exits:
+  north:
+    roomid: 655
+  south:
+    roomid: 653

@@ -1,0 +1,29 @@
+roomid: 36
+zone: Frostfang
+title: Frostfang Castle
+description: Inside Frostfang Castle, the grand entrance hall is a testament to power
+  and legacy. Tall, narrow windows allow only slivers of light to pierce the dimness,
+  casting long shadows on the cold marble floors. The glow from austere chandeliers
+  barely illuminates the walls, which are lined with dark tapestries depicting fierce
+  battles and moments of dominance in Frostfang's history. The high, vaulted ceiling
+  looms overhead, with frescoes that hint at stormy skies and mythical beasts. Statues
+  of past rulers, stern and unyielding, stand sentinel on either side, their imposing
+  perception demanding respect. In a distant corner, the somber tones of a live ensemble
+  resonate, their haunting melody echoing through the hall.
+props:
+- verbs: [north]
+  requirements:
+  - type: questtoken
+    idstring: 2-start
+    rejectionmessage: The guards block your path. "You must be invited to enter the
+      throne room," they say. "We cannot let you pass."
+biome: city
+exits:
+  east:
+    roomid: 37
+  north:
+    roomid: 50
+  south:
+    roomid: 6
+  west:
+    roomid: 39

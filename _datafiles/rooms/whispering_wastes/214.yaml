@@ -1,0 +1,16 @@
+roomid: 214
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: The Whispering Wastes are cloaked in a perpetual snowstorm, the landscape
+  a monochrome world of snow and ice. The sky, locked in a state of twilight, gives
+  the snow a ghostly luminescence. The wind carries the distant howling of phantom
+  wolves, their calls adding to the land's haunted ambiance. The ground beneath is
+  a hazardous mix of snow and hidden ice sheets.
+biome: snow
+exits:
+  north:
+    roomid: 193
+  south:
+    roomid: 215
+idlemessages:
+- The wind howls from every direction

@@ -1,0 +1,19 @@
+roomid: 267
+zone: Frostfang
+title: Inside a Residence
+description: This residence strikes you with its practical, yet homely feel. The main
+  room is spacious, with a high ceiling supported by visible rafters, from which dried
+  herbs and garlic hang, filling the air with a comforting aroma. The furniture is
+  sturdy and functional, made of pine, giving the room a light, airy feel. A large
+  kitchen area dominates one end, showcasing an impressive array of cooking tools
+  and a large, well-used wooden table, suggesting this is a home that values hearty
+  meals and communal cooking. Simple, hand-sewn curtains frame the windows, and a
+  collection of hand-made pottery and local artwork gives the space a personal, lived-in
+  atmosphere.
+biome: house
+exits:
+  south:
+    roomid: 261
+spawninfo:
+- mobid: 26
+  cooldown: 60

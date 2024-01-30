@@ -1,0 +1,16 @@
+buffid: 17
+name: Well fed
+description: You feel full.
+roundinterval: 1
+triggercount: 75 # lasts 5 minutes?
+statmods:
+  strength: 1
+  speed: 1
+  smarts: 1
+  vitality: 1
+  mysticism: 1
+  perception: 1
+messages:
+  start:
+    user: You feel well fed.
+

@@ -1,0 +1,15 @@
+roomid: 606
+zone: Stormshards
+title: Mountain path
+description: As you approach the crest of the Stormshard Mountains, the trail becomes
+  an arduous climb, pushing you to the limits of your endurance. The air thins, each
+  breath a labor, and the biting cold gnaws persistently, an ever-present challenge
+  against your resolve. The sky, a vast expanse of cobalt and streaks of amber from
+  the rising or setting sun, stretches above in an overwhelming canopy, as if you
+  are reaching the very edge of the world.
+biome: mountains
+exits:
+  northeast:
+    roomid: 607
+  south:
+    roomid: 605

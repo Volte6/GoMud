@@ -1,0 +1,14 @@
+roomid: 270
+zone: Frostfang
+title: Soldiers Barracks
+description: The Soldiers Barracks in Frostfang is a bastion of military discipline
+  and camaraderie, standing solid and imposing with its stone walls and heavy wooden
+  doors. Upon entering, the air is filled with a blend of leather, metal, and the
+  faint scent of wood smoke from the central hearth that heats the large communal
+  area.
+biome: city
+exits:
+  northeast:
+    roomid: 271
+  west:
+    roomid: 5

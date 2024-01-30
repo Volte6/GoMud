@@ -1,0 +1,38 @@
+mobid: 14
+itemdropchance: 15
+hostile: true
+maxwander: 0
+groups: 
+  - catacomb-denizen
+idlecommands:
+  - 'emote creaks and sways'
+activitylevel: 1
+character:
+  name: lich
+  description: 'The lich, once a king of unparalleled might, now stands as a gaunt figure shrouded in tattered royal vestments that cling to its skeletal frame. Its hollow eye sockets burn with an eldritch fire, a testament to the dark sorcery that anchors its undying spirit to the mortal plane, and in its withered hand, it clutches an ancient and malevolent scepter, casting an aura of fear and decay over the realm it refuses to relinquish.'
+  raceid: 6
+  level: 30
+  gold: 50
+  equipment:
+    weapon:
+      itemid: 10009
+    offhand:
+      itemid: 20019
+    head:
+      itemid: 20018
+    neck:
+      itemid: 20017
+    body:
+      itemid: 20012
+    belt: 
+      itemid: 20013
+    gloves:
+      itemid: 20016
+    ring:
+      itemid: 20015
+    legs:
+      itemid: 20006
+    feet:
+      itemid: 20014
+  items:
+    - itemid: 3

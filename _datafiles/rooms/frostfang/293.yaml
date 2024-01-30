@@ -1,0 +1,13 @@
+roomid: 293
+zone: Frostfang
+title: The Southern Road
+description: As you continue your journey along the path, the glimpses of the Frost
+  Lake become more frequent and enchanting. Between the towering trees, you catch
+  uninterrupted views of its vast, icy expanse. The surface of the lake appears like
+  a flawless mirror, reflecting the azure sky and the surrounding winter landscape
+  with breathtaking clarity.
+exits:
+  northwest:
+    roomid: 292
+  south:
+    roomid: 294

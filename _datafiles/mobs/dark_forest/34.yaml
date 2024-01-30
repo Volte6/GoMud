@@ -1,0 +1,27 @@
+mobid: 34
+itemdropchance: 5
+hostile: true
+maxwander: -1
+groups: 
+  - forest-creature
+idlecommands:
+  - 'emote creeks and sways'
+combatcommands:
+  - 'callforhelp calls upon the forest denizens for help!'
+activitylevel: 1
+character:
+  name: ent
+  description: 'Thick, mossy growths cling to its rough surface, and lush vines and ivy drape from its branches, creating an awe-inspiring spectacle. The Ent''s eyes, deep and wise, are set within the rough texture of its bark, shining with a profound intelligence that spans centuries.'
+  raceid: 13
+  level: 35
+  gold: 12
+  equipment:
+    weapon:
+      itemid: 10013
+    offhand:
+      itemid: 20004
+    body:
+      itemid: 10013
+    neck:
+      itemid: 20027
+

@@ -1,0 +1,21 @@
+roomid: 627
+zone: Dark Forest
+title: Web covered tree
+description: "From this lofty vantage point, you can see the entire expanse of the
+  Spider's Web Thicket sprawled beneath youb\0\x14a nightmarish maze of glistening
+  webs, shadowy trees, and skittering arachnids. The tangled forest stretches in all
+  directions, an eerie and surreal landscape that seems both haunting and strangely
+  beautiful from this height."
+biome: forest
+exits:
+  down:
+    roomid: 626
+  west:
+    roomid: 628
+spawninfo:
+- mobid: 35
+  cooldown: 100
+  message: A small spider hatches from a nearby egg.
+- mobid: 35
+  cooldown: 100
+  message: A small spider hatches from a nearby egg.

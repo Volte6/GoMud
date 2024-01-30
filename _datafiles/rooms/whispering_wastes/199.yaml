@@ -1,0 +1,16 @@
+roomid: 199
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: In the Whispering Wastes, the blizzard transforms the world into a white
+  wilderness. The sky, a canvas of twilight blues and greys, casts a spectral glow.
+  The wind's eerie song is laced with the murmurs of ancient secrets, and the ice-covered
+  ground is a labyrinth of hidden dangers. Enigmatic shapes of long-lost monuments
+  emerge in the distance, shrouded by the storm's embrace.
+biome: snow
+exits:
+  northeast:
+    roomid: 200
+  southwest:
+    roomid: 198
+idlemessages:
+- The wind howls from every direction

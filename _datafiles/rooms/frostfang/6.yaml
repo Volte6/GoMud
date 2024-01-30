@@ -1,0 +1,25 @@
+roomid: 6
+zone: Frostfang
+title: The Castle Gates
+description: Standing at the castle gates of Frostfang, Cobblestone Way concludes
+  its winding journey. The towering doors loom above you, their dark wood and iron
+  bindings covered in a layer of frost. Torchlight flickers from the walls, casting
+  shadows that dance and play on the snow-covered ground. From within the castle,
+  the sound of music reaches your ears, a beautiful melody that seems to beckon you
+  closer.
+biome: city
+exits:
+  north:
+    roomid: 36
+  south:
+    roomid: 5
+spawninfo:
+- mobid: 2
+  cooldown: 85
+  message: A town guard emerges from a nearby building.
+- mobid: 3
+  cooldown: 85
+  message: The captain of the guard arrives.
+- mobid: 2
+  cooldown: 85
+  message: A guard has returned from his break.

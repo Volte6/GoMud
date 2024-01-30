@@ -1,0 +1,19 @@
+roomid: 263
+zone: Frostfang
+title: The Residential District
+description: The streets, paved with cobblestone smoothed by countless footsteps,
+  wind through the district like frozen rivers. Among these, a subtle but distinct
+  divergence to the north draws a keen eye. Here, the lanterns hanging from wrought-iron
+  posts cast a soft, golden glow that seems to beckon towards this divergence, illuminating
+  the snow-covered ground and the faces of residents moving about with purpose. Wrapped
+  in furs and thick cloaks, these inhabitants form fleeting clouds with their breath
+  in the cold air, their steps hinting at a less frequented yet intriguing dwelling
+  located discreetly near the north exit of the district.
+biome: city
+exits:
+  north:
+    roomid: 265
+  south:
+    roomid: 264
+  west:
+    roomid: 262

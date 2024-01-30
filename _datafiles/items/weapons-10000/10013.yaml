@@ -1,0 +1,14 @@
+itemid: 10013
+name: tree trunk
+namesimple: trunk
+description: A massive wooden trunk.
+type: weapon
+hands: 2
+subtype: bludgeoning
+damagereduction: 3
+statmods:
+  strength: 5
+  speed: -12
+  vitality: 10
+damage:
+  diceroll: 1d8+2

@@ -1,0 +1,144 @@
+# Possible tokens: 
+# {itemname}    - name of weapon/object e.g. 'sword'
+# {source}      - name of mob or user e.g. 'goblin'
+# {sourcetype}  - 'user' or 'mob'
+# {target}      - name of mob or user e.g. 'goblin'
+# {targettype}  - 'user' or 'mob'
+# {damage}      - damage dealt as an integer e.g. '5'
+# {exitname}    - name of exit for attack e.g. 'north'
+# {entrancename}- name of entrance for attack e.g. 'south'
+optionid: generic
+options:
+  prepare:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'You prepare to enter into mortal combat with <ansi fg="{targettype}">{target}</ansi>.'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}</ansi> prepares to fight you with their <ansi fg="item">{itemname}</ansi>.'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}</ansi> prepares to attack <ansi fg="{targettype}">{target}</ansi> with their <ansi fg="item">{itemname}</ansi>.'
+    # messages for when they are in different rooms, such as with projectiles
+    separate:
+      toattacker:
+      - ''
+      todefender:
+      - ''
+      toattackerroom:
+      - ''
+      todefenderroom:
+      - ''
+  wait:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'You aim carefully at <ansi fg="{targettype}">{target}</ansi>.'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}</ansi> circles you dangerously.'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}</ansi> circles <ansi fg="{targettype}">{target}</ansi> cruel intentions.'
+    # messages for when they are in different rooms, such as with projectiles
+    separate:
+      toattacker:
+      - ''
+      todefender:
+      - ''
+      toattackerroom:
+      - ''
+      todefenderroom:
+      - ''
+  miss:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'You miss with your <ansi fg="item">{itemname}</ansi>.'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}</ansi> missed you with their <ansi fg="item">{itemname}</ansi>.'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}</ansi> missed <ansi fg="{targettype}">{target}</ansi> with their <ansi fg="item">{itemname}</ansi>.'
+    # messages for when they are in different rooms, such as with projectiles
+    separate:
+      toattacker:
+      - ''
+      todefender:
+      - ''
+      toattackerroom:
+      - ''
+      todefenderroom:
+      - ''
+  weak:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'Your <ansi fg="item">{itemname}</ansi> barely manages to damage <ansi fg="{targettype}">{target}</ansi> for <ansi fg="damage">{damage} damage</ansi>.'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> manages to weakly hit you for <ansi fg="damage">{damage} damage</ansi>.'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> manages to weakly hit <ansi fg="{targettype}">{target}</ansi>.'
+    # messages for when they are in different rooms, such as with projectiles
+    separate:
+      toattacker:
+      - ''
+      todefender:
+      - ''
+      toattackerroom:
+      - ''
+      todefenderroom:
+      - ''
+  normal:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'Your <ansi fg="item">{itemname}</ansi> connects with <ansi fg="{targettype}">{target}</ansi> for <ansi fg="damage">{damage} damage</ansi>.'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> connects with you for <ansi fg="damage">{damage} damage</ansi>.'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> connects with <ansi fg="{targettype}">{target}</ansi>.'
+    # messages for when they are in different rooms, such as with projectiles
+    separate:
+      toattacker:
+      - ''
+      todefender:
+      - ''
+      toattackerroom:
+      - ''
+      todefenderroom:
+      - ''
+  heavy:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'You wallop {target} with your <ansi fg="item">{itemname}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}</ansi> wallops you with their <ansi fg="item">{itemname}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}</ansi> wallops <ansi fg="{targettype}">{target}</ansi> with their <ansi fg="item">{itemname}</ansi>!'
+    # messages for when they are in different rooms, such as with projectiles
+    separate:
+      toattacker:
+      - ''
+      todefender:
+      - ''
+      toattackerroom:
+      - ''
+      todefenderroom:
+      - ''
+  critical:
+    # messages for when they are in the same room
+    together:
+      toattacker:
+      - 'You <ansi fg="cyan" bold="true">CRITICALLY HIT</ansi> <ansi fg="{targettype}">{target}</ansi> with <ansi fg="item">{itemname}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
+      todefender:
+      - '<ansi fg="{sourcetype}">{source}</ansi> <ansi fg="cyan" bold="true">CRITICALLY HITS</ansi> you with their <ansi fg="item">{itemname}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
+      toroom:
+      - '<ansi fg="{sourcetype}">{source}</ansi> <ansi fg="cyan" bold="true">CRITICALLY HITS</ansi> <ansi fg="{targettype}">{target}</ansi> with their <ansi fg="item">{itemname}</ansi>!'
+    # messages for when they are in different rooms, such as with projectiles
+    separate:
+      toattacker:
+      - ''
+      todefender:
+      - ''
+      toattackerroom:
+      - ''
+      todefenderroom:
+      - ''

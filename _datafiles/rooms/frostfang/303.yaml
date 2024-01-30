@@ -1,0 +1,19 @@
+roomid: 303
+zone: Frostfang
+title: The Old Road
+description: As you stand at the fork in the road, your choices become apparent. To
+  the northwest, the path that was once blocked and now cleared beckons you, with
+  a broken-down caravan in the distance, its skeletal frame a testament to past travelers'
+  misfortune. To the east, the foreboding presence of the Dark Forest looms, its dense,
+  snowy trees casting long shadows over a worn and overgrown road.
+exits:
+  east:
+    roomid: 305
+  southeast:
+    roomid: 298
+  southwest:
+    roomid: 302
+idlemessages:
+- You hear the wind howling outside the gate.
+- The wind whistles through the arrow slits in the watchtowers.
+- The gate creaks in the wind.

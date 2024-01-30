@@ -1,0 +1,13 @@
+roomid: 274
+zone: Frostfang
+title: Residential Hedge
+description: The hedge itself is thick and lush, its branches woven together so tightly
+  that they form a barrier against the outside world. Small birds flit through the
+  leaves, their chirps and songs adding a serene soundtrack to this hidden alcove.
+  The hedge's interior is surprisingly spacious, allowing for quiet movement and exploration.
+biome: city
+exits:
+  east:
+    roomid: 275
+  west:
+    roomid: 273

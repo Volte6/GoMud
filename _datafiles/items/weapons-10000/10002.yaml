@@ -1,0 +1,9 @@
+itemid: 10002
+name: guardsman's broadsword
+namesimple: broadsword
+description: The standard issue weapon of a guardsman.
+type: weapon
+hands: 1
+subtype: slashing
+damage:
+  diceroll: 1d6

@@ -1,0 +1,24 @@
+questid: 2
+name: The King's Shadow
+description: The King is uneasy. Something stirs.
+steps:
+  - id: start 
+    description: The king suspects something is up at the Sanctuary of the Benevolent Heart. He wants you to investigate.
+    hint: The priest in the Sanctuary may have some useful information.
+  - id: catacombs 
+    description: Rumor has it that there is a secret entrance to the ancient catacombs beneath the city at the Sanctuary.
+    hint: Try searching around the perimeter of the Sanctuary.
+  - id: investigate 
+    description: Explore and invesetigate the catacombs.
+    hint: Look for an ancient crypt deep within the catacombs.
+  - id: inform 
+    description: Return to the King and show him what you found.
+    hint: The King is north of the Town Square in Frostfang.
+  - id: end 
+    description: You helped the king stop a malevolent force.
+rewards:
+  playermessage: 'The King finally has some peace!'
+  roommessage: 'The King seems a little bit more at ease.'
+  experience: 15000
+  gold: 1000
+  

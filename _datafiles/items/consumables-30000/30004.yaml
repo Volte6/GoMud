@@ -1,0 +1,11 @@
+itemid: 30004
+name: cheese sandwich
+namesimple: sandwich
+description: A tasty cheese sandwich.
+type: food
+subtype: edible
+questtoken: 4-return
+uses: 3
+value: 20
+buffids: 
+- 17

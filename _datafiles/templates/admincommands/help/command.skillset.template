@@ -1,0 +1,5 @@
+The <ansi fg="command">skillset</ansi> can be used in the following ways:
+
+<ansi fg="command">skillset [skillName] [skillLevel]</ansi> Sets the skillName provided to the level number provided.
+The skillName must be an actual skill, and the skillLevel must be between 0 and 4.
+

@@ -1,0 +1,14 @@
+roomid: 575
+zone: Stormshards
+zoneroot: true
+title: Mountain path
+description: As the path ascends, the terrain becomes more rugged; the trees thin
+  out, giving way to rocky outcrops and steep, craggy inclines. The earth underfoot
+  changes to a mix of loose shale and solid stone, and the incline sharpens, challenging
+  even the most seasoned travelers.
+biome: mountains
+exits:
+  east:
+    roomid: 576
+  west:
+    roomid: 574

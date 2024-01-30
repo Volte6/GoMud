@@ -1,0 +1,18 @@
+roomid: 2
+zone: Frostfang
+title: Cobblestone Way
+description: Before you stretches Cobblestone Way, an ancient thoroughfare flanked
+  by moss-covered stone walls, their surfaces glistening with morning dew. Tall elms
+  line the path, their leaves casting dappled patterns of light and shade on the ground.
+  Small stone houses with thatched roofs dot the sides, their chimneys emitting a
+  faint trail of smoke, carrying with it the scent of burning wood. The distant sound
+  of a lute can be heard, a melancholic tune that adds to the serenity of the scene.
+  At the end of the street, looming in majesty and mystery, the castle's imposing
+  silhouette stands, its turrets reaching for the sky. A gentle breeze rustles the
+  leaves and carries with it whispered tales of knights, dragons, and long-lost treasures.
+biome: city
+exits:
+  north:
+    roomid: 3
+  south:
+    roomid: 1

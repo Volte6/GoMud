@@ -1,0 +1,20 @@
+raceid: 11
+name: Dog
+description: A canine.
+size: medium
+unarmedname: jaws
+tnlscale: 1
+angrycommands: 
+  - emote growls aggressively.
+  - emote howls.
+knowsfirstaid: true
+stats:
+  strength:
+    base: 1
+  speed:
+    base: 1
+  vitality:
+    base: 1
+damage:
+  diceroll: 2@1d4
+disabledslots: ['weapon', 'offhand', 'head', 'belt', 'gloves', 'ring', 'legs', 'feet']

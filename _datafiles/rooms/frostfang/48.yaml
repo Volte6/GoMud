@@ -1,0 +1,15 @@
+roomid: 48
+zone: Frostfang
+title: Frostfang Library
+description: The Frostfang Castle library, ensconced within the West Wing, is a blend
+  of rugged tradition and quiet curiosity. Dark stone walls enclose shelves laden
+  with leather-bound tomes, scrolls wrapped in animal skins, and rare texts from distant
+  lands. Thick pelts cover the floor, offering warmth against the cold, while a grand
+  stone fireplace serves as the room's heart, its flames flickering amidst wooden
+  chairs and tables. Amidst this stark simplicity, an ornate astrolabe stands in a
+  corner, symbolizing the region's enduring thirst for knowledge and the mysteries
+  of the cosmos.
+biome: city
+exits:
+  east:
+    roomid: 41

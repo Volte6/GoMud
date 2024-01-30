@@ -1,0 +1,19 @@
+buffid: 19
+name: Drunk
+description: You're feeling kind tipsy.
+secret: false
+roundinterval: 3
+triggercount: 12
+messages:
+  start:
+    user: You're feeling a little drunk!
+    room: '{username} is drunk!'
+  effect:
+    user: You hiccup.
+    room: '{username} hiccups.'
+  end:
+    user: Your vision straightens out.
+    room: '{username} looks sober again.'
+flags:
+  - drunk
+

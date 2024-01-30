@@ -1,0 +1,68 @@
+roomid: 35
+zone: Frostfang
+title: The West Gate
+description: The West Gate of Frostfang stands as a formidable sentinel at the terminus
+  of the West Road. Crafted from massive blocks of gray stone, it's adorned with intricate
+  frost patterns and ancient runes. Two towering statues of guardian beasts flank
+  the gate, their stone eyes seeming to watch over all who pass. Beyond the gate,
+  the vast expanse of the frozen tundra stretches out, its icy plains shimmering under
+  the pale light, offering both a breathtaking view and a stark reminder of the harsh
+  wilderness that lies just beyond Frostfang's protective walls.
+props:
+- verbs: [west]
+  requirements:
+  - type: questtoken
+    idstring: 3-end
+    rejectionmessage: The icy wind howls through the gate, and you feel a chill run
+      down your spine. You sense that you are not yet ready to face the dangers that
+      lie beyond.
+- nouns: [runes]
+  description: The runes on the gate aren't just decorative; they appear to be part
+    of an old language, possibly used for protective spells or rituals. The runes
+    are only partially readable, and two of the words are scratched out. All you can
+    make out is "Z-p---l lumara -ort--s."
+- nouns: [statue, statues]
+  description: The statues of the guardian beasts stand as imposing monoliths on either
+    side of the West Gate. Carved from a deep-gray, almost black stone, they depict
+    creatures that seem to be a blend of myth and reality. The one on the left is
+    known as Zyphrial, and on the right is Vorthos.
+- nouns: [zyphrial, left, first]
+  description: The statue on the left, named Zyphrial, has the body of a lion, muscular
+    and poised, but its head is that of a majestic eagle with sharp, piercing eyes
+    and a beak that looks ready to snap. Its wings, though folded, span wide, hinting
+    at the power they hold when unfurled.
+- nouns: [vorthos, right, second]
+  description: The statue on the right, known as Vorthos, is serpentine, its long,
+    coiled body reminiscent of a dragon. It has the scales of a reptile, but its face
+    is almost humanoid, with deep-set eyes and a wise, contemplative expression. Twin
+    horns spiral upwards from its forehead, and its clawed feet grip the base as if
+    it's ready to pounce.
+- nouns: [zyphrial lumara vorthos]
+  verbs: [say]
+  trigger:
+    questtoken: 3-end
+    affected: player
+    descriptionplayer: The eyes of the stone statues glow as you say the words aloud.
+      You feel a sense of wamth wash over you, and are the biting cold air no longer
+      bothers you.
+    descriptionroom: <ansi fg="username">%s</ansi> chants something unintelligible,
+      and the eyes of the stone statues glow briefly before fading back to ordinary
+      stone.
+mapsymbol: G
+maplegend: West-Gate
+biome: city
+exits:
+  east:
+    roomid: 11
+  north:
+    roomid: 782
+  northwest:
+    roomid: 788
+  southwest:
+    roomid: 824
+  west:
+    roomid: 167
+idlemessages:
+- You hear the wind howling outside the gate.
+- The wind whistles through the arrow slits in the watchtowers.
+- The gate creaks in the wind.

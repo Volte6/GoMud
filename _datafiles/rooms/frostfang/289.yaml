@@ -1,0 +1,9 @@
+roomid: 289
+zone: Frostfang
+title: The Southern Road
+description: The southern road
+exits:
+  southeast:
+    roomid: 290
+  west:
+    roomid: 288

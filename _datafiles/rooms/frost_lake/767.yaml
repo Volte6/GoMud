@@ -1,0 +1,14 @@
+roomid: 767
+zone: Frost Lake
+title: Lake Island
+description: The island's surface is covered in a soft blanket of snow, untouched
+  by the footprints of those who have ventured here before you. Tall, ancient pine
+  trees stand sentinel, their branches heavy with snow and icicles that shimmer like
+  crystal chandeliers in the gentle breeze.
+exits:
+  east:
+    roomid: 773
+  northeast:
+    roomid: 768
+  south:
+    roomid: 766

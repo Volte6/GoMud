@@ -1,0 +1,17 @@
+roomid: 170
+zone: Whispering Wastes
+title: Frozen Wasteland
+description: The blizzard engulfs everything in a whiteout, the sky a dim, haunting
+  twilight. The wind moans, carrying whispers that sound like lost souls. Visibility
+  is mere steps away, the ice-slick ground treacherous at every turn. Eerie structures
+  emerge faintly in the distance, their outlines blurred by the snow. The cold bites
+  deep, embodying the solitude and peril of the Whispering Wastes, a realm for only
+  the bold and the brave.
+biome: snow
+exits:
+  southeast:
+    roomid: 169
+  west:
+    roomid: 171
+idlemessages:
+- The wind howls from every direction

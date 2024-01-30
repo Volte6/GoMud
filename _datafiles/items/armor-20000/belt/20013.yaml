@@ -1,0 +1,10 @@
+itemid: 20013
+name: rotting belt
+description: The belt, once an item of great craftsmanship, is now decayed and rotting.
+type: belt
+subtype: wearable
+damagereduction: 3
+statmods:
+  speed: 2
+  vitality: 4
+  perception: -3

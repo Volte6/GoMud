@@ -1,0 +1,29 @@
+roomid: 432
+zone: Frostfang
+title: A Room at the Inn
+description: The dim glow of a crackling hearth in one corner bathes the wooden walls
+  in a flickering amber light, casting dancing shadows that play across the room.
+  A metal rod leans against the hearth, and a rustic, sturdy bed with a soft down
+  mattress stands against the opposite wall, adorned with thick blankets and plush
+  pillows that invite restful slumber. A small, snow-covered window lets in a gentle,
+  wintry breeze, and the room is adorned with tasteful decorations that add a touch
+  of charm to the ambiance. It's a perfect haven for weary adventurers seeking respite
+  from the cold and a peaceful night's rest in the heart of Frostfang.
+props:
+- nouns: [crowbar, rod, metal, bar]
+  verbs: [get, take]
+  cooldown: 120
+  description: A crowbar leans besides the fireplace. Probably used for poking the
+    fire and moving the logs around.
+  trigger:
+    itemid: 10012
+    affected: player
+    descriptionplayer: You take the crowbar. They probably won't miss it.
+    descriptionroom: <ansi fg="username">%s</ansi> takes the crowbar from beside the
+      fireplace.
+mapsymbol: I
+maplegend: Inn
+biome: city
+exits:
+  leave:
+    roomid: 61

@@ -1,0 +1,11 @@
+itemid: 20033
+name: sophie's old locket
+namesimple: locket
+description: An old locket
+type: neck
+subtype: wearable
+damagereduction: 3
+statmods:
+  mysticism: 4
+  perception: 8
+  speed: 2

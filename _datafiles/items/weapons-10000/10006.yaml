@@ -1,0 +1,12 @@
+itemid: 10006
+name: glowing battleaxe
+namesimple: battleaxe
+description: The battleaxe, robust and formidable, commands attention with its radiant glow that emanates from the core of its blade.
+type: weapon
+hands: 2
+subtype: cleaving
+damage:
+  diceroll: 2d10+1
+statmods:
+  speed: -10
+cursed: true

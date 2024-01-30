@@ -1,0 +1,7 @@
+roomid: 712
+zone: Mystarion
+title: The north road
+description: The north road
+exits:
+  south:
+    roomid: 711

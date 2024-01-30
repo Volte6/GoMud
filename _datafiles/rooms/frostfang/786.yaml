@@ -1,0 +1,18 @@
+roomid: 786
+zone: Frostfang
+title: Inside a Residence
+description: As you step into this residence, a sense of artistic flair is immediately
+  apparent. The room is filled with eclectic decorations, from vibrant, hand-painted
+  murals on the walls to an assortment of colorful cushions and throws scattered across
+  a low, informal seating area. The light from various candles and lanterns casts
+  a warm, inviting glow, and small plants in ornate pots add a touch of greenery.
+  An array of musical instruments, from lutes to flutes, rests against one wall, suggesting
+  the owner's artistic inclinations. This home feels like a personal retreat, a place
+  for creativity and relaxation amidst the harshness of Frostfang.
+biome: house
+exits:
+  south:
+    roomid: 780
+spawninfo:
+- mobid: 26
+  cooldown: 60

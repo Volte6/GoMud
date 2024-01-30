@@ -1,0 +1,26 @@
+roomid: 164
+zone: Catacombs
+title: Spider Den
+description: This area is draped in thick, silken webs that canopy the ceiling and
+  cascade down the walls like curtains of white lace. The sticky strands glisten with
+  the moisture of the underground air, ensnaring particles and small insects that
+  venture too close. The floor is littered with the desiccated remains of previous
+  meals, creating a macabre carpet that crunches softly underfoot. Stalactites and
+  stalagmites are encased in this silk, transformed into ghostly sculptures by the
+  spider's relentless weaving. In the dim light, the undulating webbing seems to breathe,
+  as if the den itself were alive. At the center of this eerie chamber, the brooding
+  presence of the spider looms, its many eyes reflecting a world reduced to shades
+  of grey and its prey reduced to mere sustenance for survival in the echoing depths
+  of the catacombs.
+biome: spiderweb
+exits:
+  northwest:
+    roomid: 163
+  southwest:
+    roomid: 165
+  west:
+    roomid: 162
+spawninfo:
+- mobid: 19
+  cooldown: 60
+  message: The webs hum as a spider descends into the room.

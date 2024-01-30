@@ -1,0 +1,10 @@
+roomid: 714
+zone: Mystarion
+title: The east road
+description: Outside of Mysterion you can now see how rough the farmers have it. The
+  soil is stripped nearly bare, hammered by the incessant storms of the stormshard
+  mountain range. Things seem calm now, but you get the sense it could change at any
+  moment.
+exits:
+  west:
+    roomid: 713

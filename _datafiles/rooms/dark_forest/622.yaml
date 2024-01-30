@@ -1,0 +1,21 @@
+roomid: 622
+zone: Dark Forest
+title: Spiders web thicket
+description: The air is heavy with a musty, earthy scent, and the soft rustling of
+  leaves and webs creates an unsettling symphony. Massive spiderwebs, some spanning
+  entire clearings, glisten like silver threads in the dim light. The thicket is alive
+  with the unsettling skittering of giant spiders, their eight legs moving with unnerving
+  grace.
+biome: forest
+exits:
+  northwest:
+    roomid: 619
+  west:
+    roomid: 621
+spawninfo:
+- mobid: 35
+  cooldown: 100
+  message: A small spider hatches from a nearby egg.
+- mobid: 35
+  cooldown: 100
+  message: A small spider hatches from a nearby egg.

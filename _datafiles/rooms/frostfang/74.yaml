@@ -1,0 +1,51 @@
+roomid: 74
+zone: Frostfang
+title: Frostwarden Rangers
+description: The headquarters of the Frostwarden Rangers is a blend of rugged practicality
+  and respect for the wild. Dark timber walls showcase maps and organized weaponry,
+  while a central stone table, illuminated by an antler chandelier, serves as the
+  hub for strategy discussions. Alcoves offer fur-lined bunks for rest, and shelves
+  brim with scrolls detailing Frostfang's nature and lore. The ever-present scent
+  of pine and leather mingles with the smoky warmth of a constantly burning hearth,
+  embodying the guild's vigilant spirit.
+mapsymbol: '%'
+maplegend: Trainer
+biome: city
+exits:
+  east:
+    roomid: 4
+spawninfo:
+- mobid: 6
+  cooldown: 20
+  message: A trainer enters from a back room.
+skilltraining:
+  brawling:
+    min: 1
+    max: 4
+  dual-wield:
+    min: 1
+    max: 4
+  enchant:
+    min: 1
+    max: 4
+  inspect:
+    min: 1
+    max: 4
+  map:
+    min: 2
+    max: 4
+  peep:
+    min: 1
+    max: 4
+  portal:
+    min: 1
+    max: 4
+  protection:
+    min: 1
+    max: 4
+  search:
+    min: 1
+    max: 1
+  track:
+    min: 1
+    max: 4

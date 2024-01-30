@@ -1,0 +1,36 @@
+
+<ansi fg="yellow" bold="true">RoomId:</ansi>         {{ .RoomId }}{{ if .ZoneRoot }} (This is the zone root.){{ end }}
+<ansi fg="yellow" bold="true">Filepath:</ansi>       {{ .Filepath }}
+<ansi fg="yellow" bold="true">Zone:</ansi>           {{ .Zone }}
+<ansi fg="yellow" bold="true">Title:</ansi>          {{ .Title }}
+<ansi fg="yellow" bold="true">Description:</ansi> 
+{{ .GetDescription }}
+<ansi fg="yellow" bold="true">MapSymbol:</ansi>      {{ .MapSymbol }}
+<ansi fg="yellow" bold="true">MapLegend:</ansi>      {{ .MapLegend }}
+<ansi fg="yellow" bold="true">Exits:</ansi>          {{ if eq (len .Exits) 0 }}None{{ else }}{{- range $command, $exitInfo := .Exits }}[<ansi fg="{{ if $exitInfo.Secret }}secret-{{ end }}exit">{{ $command }} ⇒ {{ $exitInfo.RoomId }}</ansi>] {{ end -}}{{ end }}
+<ansi fg="yellow" bold="true">Training:</ansi>       {{ if eq (len .SkillTraining) 0 }}None{{ else }}{{- range $index, $skill := .SkillTraining }}[{{ $skill }}] {{ end -}}{{ end }}
+<ansi fg="yellow" bold="true">Props:</ansi>          
+{{ range $i, $a := .Props -}}
+- <ansi fg="yellow">Nouns:</ansi>                    {{ range $k, $v := .Nouns }}[ {{ $v }} ]{{ end }}
+  <ansi fg="yellow">Verbs:</ansi>                    {{ range $k, $v := .Verbs }}[ {{ $v }} ]{{ end }}
+  <ansi fg="yellow">Description:</ansi>              {{ .Description }}
+  <ansi fg="yellow">Requirements:</ansi>             {{ range $x, $req := .Requirements -}}{{ $req.Type }}:{{ $req.IdNumber }}{{ $req.IdString }} - ( {{ $req.RejectionMessage }} ){{ end }}
+  <ansi fg="yellow">Cooldown</ansi>                  {{ .Cooldown }}
+  <ansi fg="yellow">Trigger:</ansi>
+  {{- with .Trigger }}
+    <ansi fg="yellow">Affected</ansi>:               {{ .Affected }}
+    <ansi fg="yellow">Move RoomId</ansi>:            {{ .RoomId }}
+    <ansi fg="yellow">BuffId</ansi>:                 {{ .BuffId }} {{ if gt .BuffId 0 }}(Give){{ end }}{{ if lt .BuffId 0 }}(Take){{ end }}
+    <ansi fg="yellow">ItemId</ansi>:                 {{ .ItemId }} {{ if gt .ItemId 0 }}(Give){{ end }}{{ if lt .ItemId 0 }}(Take){{ end }}
+    <ansi fg="yellow">QuestToken</ansi>:             {{ .QuestToken }} {{ if eq .QuestToken "" }}{{ else }}{{ if eq (firstletter .QuestToken) "-" }}(Take){{ else }}(Give){{ end }}{{ end }}
+    <ansi fg="yellow">DescriptionPlayer</ansi>:      {{ .DescriptionPlayer }}
+    <ansi fg="yellow">DescriptionRoom</ansi>:        {{ .DescriptionRoom }}
+  {{ end }}
+{{ end -}}
+{{ if gt (len .IdleMessages) 0 }}
+<ansi fg="yellow" bold="true">IdleMessages:</ansi>   
+{{ range $i, $a := .IdleMessages }}                {{ $a }}
+{{ end -}}
+{{ end -}}
+<ansi fg="yellow" bold="true">Players here:</ansi>   {{ range $i, $a := .GetPlayers -}}<ansi fg="username">{{- $char := uidToCharacter $a -}}{{ $char.Name }}</ansi>, {{- end }}
+<ansi fg="yellow" bold="true">Mobs here:</ansi>      {{ range $i, $a := .GetMobs -}}<ansi fg="username">{{- $mobName := idToMobCharacter $a -}}#{{ $a }}{{ $mobName }}</ansi>, {{- end }}
