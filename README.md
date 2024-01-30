@@ -8,6 +8,8 @@ The network layer still needs to be cleaned up, since it start with very differe
 
 Screenshots for some of the features can be found [here](https://imgur.com/a/90y6OGS).
 
+Colorization is handled through extensive use of my [ansitags](https://github.com/Volte6/ansitags) library.
+
 Can be run locally as a standard go program or via docker container. The default port is 33333.
 
 There is not yet anything for the web service side of things, nor does the web client work yet.
