@@ -168,6 +168,7 @@ var (
 		`key`:          `keyring`,
 		`wield`:        `equip`,
 		`wear`:         `equip`,
+		`score`:        `status`,
 	}
 
 	userCommands map[string]CommandAccess = map[string]CommandAccess{
@@ -277,6 +278,7 @@ var (
 		`sta`:       `status`,
 		`stat`:      `status`,
 		`stats`:     `status`,
+		`score`:     `status`,
 		`i`:         `inventory`,
 		`inv`:       `inventory`,
 		`eq`:        `inventory`,
