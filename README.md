@@ -8,7 +8,7 @@ The network layer still needs to be cleaned up, since it start with very differe
 
 Screenshots for some of the features can be found [here](https://imgur.com/a/90y6OGS).
 
-Colorization is handled through extensive use of my [ansitags](https://github.com/Volte6/ansitags) library.
+Colorization is handled through extensive use of my [github.com/Volte6/ansitags](https://github.com/Volte6/ansitags) library.
 
 Can be run locally as a standard go program or via docker container. The default port is 33333.
 
@@ -18,21 +18,22 @@ Certain admin in-game commands can be destructive. For example, the `build` comm
 
 Plans later when a network-layer overhaul takes place is to enable exclusive graphics modes (full screen takeover without scrollback) for some stuff, as well as a multi-prompt interaction, where all input/output is isolated until a series of prompts are completed (or aborted). This will allow for better tools which won't require all information to be present in one command, or split into multiple individual commands. It will also allow for confirmation dialogs etc.
 
-# There is one default user created:
+# Quick Start
+
+You can compile and run it locally with:
+> `go run .`
+
+From there you should see some logging, and once ready, connect to port 33333 with a telnet client and use the default `admin` login:
 
 *Username:* _admin_
 
 *Password:* _password_
 
-## Running locally:
-
-You can compile and run it locally with:
-> `go run .`
-
 ## Makefile usage
 
-docker run -u root --name tmp -it alpine:3.14;docker rm tmp
-exec -it <container name> /bin/bash
+There are a number of make targets that might be useful for building/running the MUD.
+
+You can type `make help` to see a couple make targets worth knowing about.
 
 _________________
 
@@ -49,6 +50,9 @@ Run in a container (port 33333):
 Connect to running container via a container client:
 > `make client`
 
+Build the `go-mud-server` binary:
+> `make build`
+
 _________________
 
 ### **To Restart Docker Daemon**
@@ -64,7 +68,7 @@ _These require Docker to be installed locally_
 
 Build/Run in Docker container:
 
-_Will run on port 8080 in the container and publicly exposes port 8080 ( per docker-compose.yml ):_
+_Will run on port 33333 in the container and publicly exposes port 33333 ( per [provisioning/dockerdocker-compose.yml](dockerdocker-compose.yml) ):_
 
 >  `make run`
 

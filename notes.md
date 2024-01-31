@@ -2,6 +2,17 @@
 
 * Consider changing `usercommands` and `mobcommands` to use a plugin architecture.
 
+# Embedded scripting
+
+* Made an attempt to embed a javascript scripting engine (https://github.com/dop251/goja) but it would hang indefinitely when compiling on a `raspberry pi zero 2 w`, and I removed this for the time being.
+* I would like to be able to write generic scripting rules with defined interfaces and exported variables.
+
+# Thoughts on a magic system
+
+* Generic magic as usual might be uninteresting. Consider some other ideas.
+* Maybe regularly changing magic phrases that have to be memorized or scribed to a magic book, when chanted they are cast and removed from the book.
+* The spells can be rewritten from whatever source, where the magic phrase will have changed? 
+
 # Macros
 
 Implement macros as follows
