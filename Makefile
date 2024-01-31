@@ -10,8 +10,8 @@ export GOSUMDB := off
 
 ## Build Targets
 
-.PHONY: docker_build ### Build image.
-docker_build:
+.PHONY: docker_build 
+docker_build: 
 	TAG=$(VERSION) $(DOCKER_COMPOSE) build server
 
 DOCKER_CMD ?= bash
@@ -35,12 +35,12 @@ clean:
 
 ## Run Targets
 
-.PHONY: run ### Build and run server.
-run:
+.PHONY: run 
+run: ### Build and run server.
 	$(DOCKER_COMPOSE) up --build --remove-orphans server
 
-.PHONY: client ### Build and run client terminal client
-client:
+.PHONY: client
+client: ### Build and run client terminal client
 	$(DOCKER_COMPOSE) run --rm terminal telnet go-mud-server 33333
 
 
@@ -68,8 +68,8 @@ shell:
 .PHONY: validate
 validate: fmtcheck vet
 
-.PHONY: build
-build: validate build_only
+.PHONY: build_only
+build: validate build_only  ### Validate the code and build the binary.
 
 .PHONY: build_only
 build_only:
