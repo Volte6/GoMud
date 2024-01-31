@@ -20,8 +20,15 @@ Plans later when a network-layer overhaul takes place is to enable exclusive gra
 
 # Quick Start
 
+A youtube playlist to getting started has been set up here:
+
+[![Getting Started Videos](https://i.ytimg.com/vi/OOZqX01aHt8/hqdefault.jpg)](https://www.youtube.com/watch?v=OOZqX01aHt8&list=PL20JEmG_bxBuaOE9oFziAhAmx1pyXhQ1p)
+
 You can compile and run it locally with:
 > `go run .`
+
+Or if you have docker installed:
+> `docker-compose -f provisioning/docker-compose.yml up --build --remove-orphans server`
 
 From there you should see some logging, and once ready, connect to port 33333 with a telnet client and use the default `admin` login:
 
