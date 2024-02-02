@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/prompt"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/util"
 	//
@@ -91,26 +92,35 @@ func (u *UserRecord) GetConnectTime() time.Time {
 
 func (u *UserRecord) GetPrompt(fullRedraw bool) string {
 
-	//slog.Info("GetPrompt:", u.Username)
+	ansiPrompt := ``
 
-	hpFG := `alive`
-	hpBold := `false`
-	mpBold := `false`
-	if u.Character.Health < 1 {
-		hpFG = `dead`
-	} else if u.Character.Health == u.Character.HealthMax.Value {
-		hpBold = `true`
-	}
-	if u.Character.Mana == u.Character.ManaMax.Value {
-		mpBold = `true`
+	if cmdPrompt := prompt.Get(u.UserId); cmdPrompt != nil {
+		if activeQuestion := cmdPrompt.GetNextQuestion(); activeQuestion != nil {
+			ansiPrompt = activeQuestion.String()
+		}
 	}
 
-	ansiPrompt := fmt.Sprintf(promptFormat,
-		hpFG, hpBold,
-		u.Character.Health, u.Character.HealthMax.Value,
-		mpBold,
-		u.Character.Mana, u.Character.ManaMax.Value,
-	)
+	if ansiPrompt == `` {
+
+		hpFG := `alive`
+		hpBold := `false`
+		mpBold := `false`
+		if u.Character.Health < 1 {
+			hpFG = `dead`
+		} else if u.Character.Health == u.Character.HealthMax.Value {
+			hpBold = `true`
+		}
+		if u.Character.Mana == u.Character.ManaMax.Value {
+			mpBold = `true`
+		}
+
+		ansiPrompt = fmt.Sprintf(promptFormat,
+			hpFG, hpBold,
+			u.Character.Health, u.Character.HealthMax.Value,
+			mpBold,
+			u.Character.Mana, u.Character.ManaMax.Value,
+		)
+	}
 
 	if fullRedraw {
 		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + ansiPrompt + u.GetUnsentText()
@@ -164,6 +174,25 @@ func (u *UserRecord) SetUsername(un string) error {
 	if u.Character.Name == "" {
 		u.Character.Name = un
 	}
+
+	return nil
+}
+
+func (u *UserRecord) SetCharacterName(cn string) error {
+
+	if len(cn) < minimumUsernameLength || len(cn) > maximumUsernameLength {
+		return fmt.Errorf("username must be between %d and %d characters long", minimumUsernameLength, maximumUsernameLength)
+	}
+
+	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(cn[:1]) {
+		return errors.New("username starts with a non alpha character")
+	}
+
+	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(cn) {
+		return errors.New("username contains non alphanumeric or underscore characters")
+	}
+
+	u.Character.Name = cn
 
 	return nil
 }

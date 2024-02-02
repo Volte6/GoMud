@@ -7,5 +7,3 @@
   {{ range $rowIndex, $row := .Rows }}
 {{- range $i, $col := $row }}║<ansi fg="locksequence">{{ repeat " " $padding }}{{ printf "%-*s" (index $columnWidths $i) ($tableData.GetCell $rowIndex $i) }}{{ repeat " " $padding }}</ansi>{{ end }}║
   {{ end }}╚{{ range $i, $w := $columnWidths }}{{ repeat "═" $padding }}{{ repeat "═" $w }}{{ repeat "═" $padding }}{{ if ne (sub (len $columnWidths) 1) $i }}╩{{ end }}{{ end }}╝</ansi>
-Type `<ansi fg="command">help picklock</ansi>` for more information on picking locks.
-
