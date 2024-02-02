@@ -17,6 +17,7 @@ import (
 	"github.com/volte6/mud/mobcommands"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
+	"github.com/volte6/mud/prompt"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
@@ -149,6 +150,8 @@ func (w *World) LeaveWorld(userId int) {
 		connectionIds := users.GetConnectionIds(room.GetPlayers())
 		tplTxt, _ := templates.Process("player-despawn", user.Character.Name)
 		w.connectionPool.SendTo([]byte(tplTxt), connectionIds...)
+
+		prompt.Clear(userId)
 	}
 
 }
@@ -265,6 +268,26 @@ func (w *World) processInput(wi WorldInput) {
 
 	connId := user.ConnectionId()
 
+	var activeQuestion *prompt.Question = nil
+
+	if cmdPrompt := prompt.Get(wi.FromId); cmdPrompt != nil {
+
+		if activeQuestion = cmdPrompt.GetNextQuestion(); activeQuestion != nil {
+
+			activeQuestion.Answer(string(wi.InputText))
+			wi.InputText = ``
+
+			// set the input buffer to invoke the command prompt it was relevant to
+			if cmdPrompt.Command != `` {
+				wi.InputText = cmdPrompt.Command + " " + cmdPrompt.Rest
+			}
+		} else {
+			// If a prompt was found, but no pending questions, clear it.
+			prompt.Clear(wi.FromId)
+		}
+
+	}
+
 	for {
 		command := ``
 		remains := ``
@@ -307,7 +330,7 @@ func (w *World) processInput(wi WorldInput) {
 					command = wi.InputText
 				}
 
-				//slog.Info("World received input", "InputText", (wi.InputText))
+				slog.Info("World received input", "InputText", (wi.InputText))
 				commandResponse, err = usercommands.TryCommand(command, remains, wi.FromId, w)
 				if err != nil {
 					slog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
@@ -359,7 +382,6 @@ func (w *World) processInput(wi WorldInput) {
 		break
 	}
 
-	// Usually top it off by sending a prompt to the user
 	worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(user.GetPrompt(true))), connId)
 
 }

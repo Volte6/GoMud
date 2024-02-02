@@ -22,6 +22,5 @@ exits:
     roomid: -1
     secret: true
 idlemessages:
-- Type <ansi fg="command">setrace</ansi> to see a list of available races.
-- Type <ansi fg="command">setrace [race]</ansi> to begin playing.
-- The available races currently are `human` and `elf`.
+- Type <ansi fg="command">help races</ansi> to see a list of available races.
+- Type <ansi fg="command">start</ansi> to begin playing.

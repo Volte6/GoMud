@@ -54,32 +54,6 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		return response, nil
 	}
 
-	goldName := `gold`
-
-	if args[0] == goldName || (len(args[0]) < 5 && goldName[0:len(args[0])-1] == args[0]) {
-
-		if room.Gold < 1 {
-			response.SendUserMessage(userId, "There's no gold to grab.", true)
-		} else {
-
-			user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
-
-			goldAmt := room.Gold
-			user.Character.Gold += goldAmt
-			room.Gold -= goldAmt
-
-			response.SendUserMessage(userId,
-				fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi>.`, goldAmt),
-				true)
-			response.SendRoomMessage(room.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, goldAmt),
-				true)
-		}
-
-		response.Handled = true
-		return response, nil
-	}
-
 	getFromStash := false
 	containerName := ``
 
@@ -117,6 +91,33 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 	if containerName != `` {
 		container := room.Containers[containerName]
+
+		goldName := `gold`
+		if args[0] == goldName || (len(args[0]) < 5 && goldName[0:len(args[0])-1] == args[0]) {
+
+			if container.Gold < 1 {
+				response.SendUserMessage(userId, "There's no gold to grab.", true)
+			} else {
+
+				user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
+
+				goldAmt := container.Gold
+				user.Character.Gold += goldAmt
+				container.Gold -= goldAmt
+				room.Containers[containerName] = container
+
+				response.SendUserMessage(userId,
+					fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi>.`, goldAmt),
+					true)
+				response.SendRoomMessage(room.RoomId,
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, goldAmt),
+					true)
+			}
+
+			response.Handled = true
+			return response, nil
+		}
+
 		matchItem, found := container.FindItem(rest)
 
 		if !found {
@@ -145,6 +146,31 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		}
 
 	} else {
+
+		goldName := `gold`
+		if args[0] == goldName || (len(args[0]) < 5 && goldName[0:len(args[0])-1] == args[0]) {
+
+			if room.Gold < 1 {
+				response.SendUserMessage(userId, "There's no gold to grab.", true)
+			} else {
+
+				user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
+
+				goldAmt := room.Gold
+				user.Character.Gold += goldAmt
+				room.Gold -= goldAmt
+
+				response.SendUserMessage(userId,
+					fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi>.`, goldAmt),
+					true)
+				response.SendRoomMessage(room.RoomId,
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, goldAmt),
+					true)
+			}
+
+			response.Handled = true
+			return response, nil
+		}
 
 		// Check whether the user has an item in their inventory that matches
 		matchItem, found := room.FindOnFloor(rest, getFromStash)

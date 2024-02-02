@@ -105,7 +105,7 @@ func Help(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			helpVars = emoteAliases
 		}
 
-		if helpName == `races` || helpName == `setrace` {
+		if helpName == `races` {
 			helpVars = getRaceOptions(helpRest)
 		}
 

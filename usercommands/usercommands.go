@@ -80,7 +80,6 @@ var (
 		{`sell`, `command`, `shops`, false},
 		{`server`, `command`, ``, true},
 		{`set`, `command`, `configuration`, false},
-		{`setrace`, `command`, `configuration`, false},
 		{`share`, `command`, `parties`, false},
 		{`shoot`, `command`, `combat`, false},
 		{`shout`, `command`, `general`, false},
@@ -221,7 +220,7 @@ var (
 		`macros`:     {Macros, true, false},
 		`motd`:       {Motd, true, false},
 		`offer`:      {Offer, false, false},
-		`online`:     {Online, false, true},
+		`online`:     {Online, true, false},
 		`party`:      {Party, true, false},
 		`peep`:       {Peep, false, false},
 		`picklock`:   {Picklock, false, false},
@@ -246,7 +245,6 @@ var (
 		`sell`:       {Sell, false, false},
 		`server`:     {Server, false, true}, // Admin only
 		`set`:        {Set, true, false},
-		`setrace`:    {SetRace, true, false},
 		`share`:      {Share, false, false},
 		`shoot`:      {Shoot, false, false},
 		`shout`:      {Shout, true, false},
@@ -270,6 +268,8 @@ var (
 		`whisper`:    {Whisper, true, false},
 		`who`:        {Who, true, false},
 		`zap`:        {Zap, false, true}, // Admin only
+		// Special command only used upon creating a new account
+		`start`: {Start, false, false},
 	}
 
 	aliases map[string]string = map[string]string{

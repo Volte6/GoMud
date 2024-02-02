@@ -109,7 +109,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 	clientInput := &connection.ClientInput{
 		ConnectionId: connDetails.ConnectionId(),
 		DataIn:       []byte{},
-		Buffer:       make([]byte, 0, connection.ReadBufferSize),
+		Buffer:       make([]byte, 0, connection.ReadBufferSize), // DataIn is appended to this buffer after processing
 		EnterPressed: false,
 		Clipboard:    []byte{},
 		History:      connection.InputHistory{},
