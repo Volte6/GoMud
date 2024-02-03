@@ -619,3 +619,15 @@ func FilePath(pathParts ...string) string {
 	}
 	return filepath.FromSlash(strings.Join(pathParts, ``))
 }
+
+func BreakIntoParts(full string) []string {
+	result := []string{full}
+
+	parts := strings.Split(full, ` `)
+	partCt := len(parts)
+	for i := 1; i < partCt; i++ {
+		result = append(result, strings.Join(parts[i:], ` `))
+	}
+
+	return result
+}

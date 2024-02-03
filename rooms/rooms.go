@@ -159,6 +159,10 @@ func (c *Container) FindItem(itemName string) (items.Item, bool) {
 }
 
 // Keep as non pointer receiver for template usage
+func (l GameLock) IsLockable() bool {
+	return l.Difficulty > 0
+}
+
 func (l GameLock) IsLocked() bool {
 	return l.Difficulty > 0 && l.UnlockedUntil < util.GetRoundCount()
 }
@@ -644,6 +648,21 @@ func (r *Room) RemoveItem(i items.Item, stash bool) {
 		}
 	}
 
+}
+
+func (r *Room) GetAllFloorItems(stash bool) []items.Item {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	found := []items.Item{}
+
+	if stash {
+		found = append(found, r.Stash...)
+	}
+
+	found = append(found, r.Items...)
+
+	return found
 }
 
 func (r *Room) FindOnFloor(itemName string, stash bool) (items.Item, bool) {

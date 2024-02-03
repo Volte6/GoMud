@@ -192,10 +192,10 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 	}
 
 	isAdmin := user.Permission == users.PermissionAdmin
-
 	parts := strings.Split(inputText, ` `)
+
 	// If only one part, probably a command
-	if len(parts) == 1 {
+	if len(parts) < 2 {
 
 		suggestions = append(suggestions, usercommands.GetCmdSuggestions(parts[0], isAdmin)...)
 
@@ -209,41 +209,214 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 				}
 			}
 		}
-	} else if strings.ToLower(parts[0]) == `help` {
+	} else {
 
-		targetName := parts[len(parts)-1]
-		suggestions = append(suggestions, usercommands.GetHelpSuggestions(targetName, isAdmin)...)
+		cmd := keywords.TryCommandAlias(parts[0])
+		targetName := strings.ToLower(strings.Join(parts[1:], ` `))
+		targetNameLen := len(targetName)
 
-	} else if keywords.TryCommandAlias(parts[0]) == `look` {
+		itemList := []items.Item{}
+		itemTypeSearch := []items.ItemType{}
+		itemSubtypeSearch := []items.ItemSubType{}
 
-		targetName := strings.ToLower(parts[len(parts)-1])
+		if cmd == `help` {
 
-		// Inventory objects?
-		bpItemTracker := map[string]int{}
-		for _, item := range user.Character.GetAllBackpackItems() {
-			iSpec := item.GetSpec()
-			if strings.HasPrefix(strings.ToLower(iSpec.Name), targetName) {
-				name := iSpec.Name[len(targetName):]
+			suggestions = append(suggestions, usercommands.GetHelpSuggestions(targetName, isAdmin)...)
 
-				bpItemTracker[name] = bpItemTracker[name] + 1
+		} else if cmd == `look` || cmd == `drop` || cmd == `trash` || cmd == `sell` || cmd == `store` || cmd == `inspect` || cmd == `enchant` || cmd == `appraise` {
 
-				if bpItemTracker[name] > 1 {
-					name += `#` + strconv.Itoa(bpItemTracker[name])
+			itemList = user.Character.GetAllBackpackItems()
+
+			if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+				for exitName, exitInfo := range room.Exits {
+					if exitInfo.Secret {
+						continue
+					}
+					if strings.HasPrefix(strings.ToLower(exitName), targetName) {
+						suggestions = append(suggestions, exitName[targetNameLen:])
+					}
 				}
-				suggestions = append(suggestions, name)
+
+				for containerName, _ := range room.Containers {
+					if strings.HasPrefix(strings.ToLower(containerName), targetName) {
+						suggestions = append(suggestions, containerName[targetNameLen:])
+					}
+				}
 			}
+
+		} else if cmd == `equip` {
+
+			itemList = user.Character.GetAllBackpackItems()
+			itemSubtypeSearch = append(itemSubtypeSearch, items.Wearable)
+
+		} else if cmd == `remove` {
+
+			itemList = user.Character.GetAllWornItems()
+
+		} else if cmd == `get` {
+
+			// all items on the floor
+			if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+				itemList = room.GetAllFloorItems(false)
+			}
+
+			// Matches for things in containers
+			if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+				for containerName, containerInfo := range room.Containers {
+					if containerInfo.Lock.IsLocked() {
+						continue
+					}
+
+					for _, item := range containerInfo.Items {
+						iSpec := item.GetSpec()
+						if strings.HasPrefix(strings.ToLower(iSpec.Name), targetName) {
+							suggestions = append(suggestions, iSpec.Name[targetNameLen:]+` from `+containerName)
+						}
+					}
+
+				}
+			}
+
+		} else if cmd == `eat` {
+
+			itemList = user.Character.GetAllBackpackItems()
+			itemSubtypeSearch = append(itemSubtypeSearch, items.Edible)
+
+		} else if cmd == `drink` {
+
+			itemList = user.Character.GetAllBackpackItems()
+			itemSubtypeSearch = append(itemSubtypeSearch, items.Drinkable)
+
+		} else if cmd == `use` {
+
+			itemList = user.Character.GetAllBackpackItems()
+			itemSubtypeSearch = append(itemSubtypeSearch, items.Usable)
+
+		} else if cmd == `throw` {
+
+			itemList = user.Character.GetAllBackpackItems()
+			itemSubtypeSearch = append(itemSubtypeSearch, items.Throwable)
+
+		} else if cmd == `picklock` || cmd == `unlock` || cmd == `lock` {
+
+			if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+				for exitName, exitInfo := range room.Exits {
+					if exitInfo.Secret || !exitInfo.Lock.IsLockable() {
+						continue
+					}
+					if strings.HasPrefix(strings.ToLower(exitName), targetName) {
+						suggestions = append(suggestions, exitName[targetNameLen:])
+					}
+				}
+
+				for containerName, containerInfo := range room.Containers {
+					if containerInfo.Lock.IsLockable() {
+						if strings.HasPrefix(strings.ToLower(containerName), targetName) {
+							suggestions = append(suggestions, containerName[targetNameLen:])
+						}
+					}
+				}
+			}
+
+		} else if cmd == `attack` || cmd == `consider` {
+
+			// Get all mobs in the room who are not charmed
+			if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+
+				mobNameTracker := map[string]int{}
+
+				for _, mobInstId := range room.GetMobs() {
+					if mob := mobs.GetInstance(mobInstId); mob != nil {
+						if mob.Character.IsCharmed() && (mob.Character.Aggro == nil || mob.Character.Aggro.UserId != userId) {
+							continue
+						}
+						if strings.HasPrefix(strings.ToLower(mob.Character.Name), targetName) {
+							name := mob.Character.Name[targetNameLen:]
+
+							mobNameTracker[name] = mobNameTracker[name] + 1
+
+							if mobNameTracker[name] > 1 {
+								name += `#` + strconv.Itoa(mobNameTracker[name])
+							}
+							suggestions = append(suggestions, name)
+
+						}
+					}
+				}
+
+			}
+		} else if cmd == `buy` {
+
+			if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+				for _, mobInstId := range room.GetMobs(rooms.FindMerchant) {
+
+					mob := mobs.GetInstance(mobInstId)
+					if mob == nil {
+						continue
+					}
+
+					for itemId := range mob.ShopStock {
+						item := items.New(itemId)
+						if item.ItemId > 0 {
+							itemList = append(itemList, item)
+						}
+					}
+				}
+			}
+
 		}
 
-		// backpack objects?
-		for _, item := range user.Character.GetAllWornItems() {
-			iSpec := item.GetSpec()
-			if strings.HasPrefix(strings.ToLower(iSpec.Name), targetName) {
-				suggestions = append(suggestions, iSpec.Name[len(targetName):])
+		itmCt := len(itemList)
+		if itmCt > 0 {
+
+			// Keep track of how many times this name occurs to ennumerate the names in suggestions
+			// Example: dagger, dagger#2, dagger#3 etc
+			bpItemTracker := map[string]int{}
+
+			typeSearchCt := len(itemTypeSearch)
+			subtypeSearchCt := len(itemSubtypeSearch)
+
+			for _, item := range itemList {
+				iSpec := item.GetSpec()
+
+				skip := false
+				if typeSearchCt > 0 || subtypeSearchCt > 0 {
+					skip = true
+
+					for i := 0; i < typeSearchCt; i++ {
+						if iSpec.Type == itemTypeSearch[i] {
+							skip = false
+						}
+					}
+
+					for i := 0; i < subtypeSearchCt; i++ {
+						if iSpec.Subtype == itemSubtypeSearch[i] {
+							skip = false
+						}
+					}
+
+					if skip {
+						continue
+					}
+				}
+
+				for _, testName := range util.BreakIntoParts(iSpec.Name) {
+					if strings.HasPrefix(strings.ToLower(testName), targetName) {
+						name := testName[targetNameLen:]
+
+						bpItemTracker[name] = bpItemTracker[name] + 1
+
+						if bpItemTracker[name] > 1 {
+							name += `#` + strconv.Itoa(bpItemTracker[name])
+						}
+						suggestions = append(suggestions, name)
+					}
+				}
 			}
+
 		}
 
 	}
-
 	// Sort by shortest matches first
 	sort.Slice(suggestions, func(i, j int) bool {
 		return len(suggestions[i]) < len(suggestions[j])
