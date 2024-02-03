@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -14,6 +15,7 @@ import (
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobcommands"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
@@ -154,6 +156,100 @@ func (w *World) LeaveWorld(userId int) {
 		prompt.Clear(userId)
 	}
 
+}
+
+func (w *World) GetAutoComplete(userId int, inputText string) []string {
+
+	suggestions := []string{}
+
+	if inputText == `` {
+		return suggestions
+	}
+
+	user := users.GetByUserId(userId)
+	if user == nil {
+		return suggestions
+	}
+
+	// If engaged in a prompt just try and match an option
+	if promptInfo := prompt.Get(userId); promptInfo != nil {
+		if qInfo := promptInfo.GetNextQuestion(); qInfo != nil {
+
+			if len(qInfo.Options) > 0 {
+				if len(inputText) > 0 {
+					for _, opt := range qInfo.Options {
+						s1 := strings.ToLower(opt)
+						s2 := strings.ToLower(inputText)
+						if s1 != s2 && strings.HasPrefix(s1, s2) {
+							suggestions = append(suggestions, s1[len(s2):])
+						}
+					}
+				}
+
+				return suggestions
+			}
+		}
+	}
+
+	isAdmin := user.Permission == users.PermissionAdmin
+
+	parts := strings.Split(inputText, ` `)
+	// If only one part, probably a command
+	if len(parts) == 1 {
+
+		suggestions = append(suggestions, usercommands.GetCmdSuggestions(parts[0], isAdmin)...)
+
+		if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+			for exitName, exitInfo := range room.Exits {
+				if exitInfo.Secret {
+					continue
+				}
+				if strings.HasPrefix(strings.ToLower(exitName), strings.ToLower(parts[0])) {
+					suggestions = append(suggestions, exitName[len(parts[0]):])
+				}
+			}
+		}
+	} else if strings.ToLower(parts[0]) == `help` {
+
+		targetName := parts[len(parts)-1]
+		suggestions = append(suggestions, usercommands.GetHelpSuggestions(targetName, isAdmin)...)
+
+	} else if keywords.TryCommandAlias(parts[0]) == `look` {
+
+		targetName := strings.ToLower(parts[len(parts)-1])
+
+		// Inventory objects?
+		bpItemTracker := map[string]int{}
+		for _, item := range user.Character.GetAllBackpackItems() {
+			iSpec := item.GetSpec()
+			if strings.HasPrefix(strings.ToLower(iSpec.Name), targetName) {
+				name := iSpec.Name[len(targetName):]
+
+				bpItemTracker[name] = bpItemTracker[name] + 1
+
+				if bpItemTracker[name] > 1 {
+					name += `#` + strconv.Itoa(bpItemTracker[name])
+				}
+				suggestions = append(suggestions, name)
+			}
+		}
+
+		// backpack objects?
+		for _, item := range user.Character.GetAllWornItems() {
+			iSpec := item.GetSpec()
+			if strings.HasPrefix(strings.ToLower(iSpec.Name), targetName) {
+				suggestions = append(suggestions, iSpec.Name[len(targetName):])
+			}
+		}
+
+	}
+
+	// Sort by shortest matches first
+	sort.Slice(suggestions, func(i, j int) bool {
+		return len(suggestions[i]) < len(suggestions[j])
+	})
+
+	return suggestions
 }
 
 const (

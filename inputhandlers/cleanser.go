@@ -18,6 +18,9 @@ func CleanserInputHandler(clientInput *connection.ClientInput, connectionPool *c
 	dIn := clientInput.DataIn[len(clientInput.DataIn)-1]
 
 	if dIn == term.ASCII_DELETE || dIn == term.ASCII_BACKSPACE {
+
+		clientInput.BSPressed = true
+
 		//connectionPool.SendTo([]byte(term.AnsiMoveCursorBackward.String()+" "+term.AnsiMoveCursorBackward.String()), connDetails.UniqueId())
 		// send backspace, space, backspace
 		if len(clientInput.Buffer) > 0 {
@@ -28,10 +31,14 @@ func CleanserInputHandler(clientInput *connection.ClientInput, connectionPool *c
 		return true
 	}
 
-	// Check if the last byte is a CR or LF or NULL
-	if dIn <= 13 {
-		if clientInput.DataIn[len(clientInput.DataIn)-1] == 0 || clientInput.DataIn[len(clientInput.DataIn)-1] == 10 || clientInput.DataIn[len(clientInput.DataIn)-1] == 13 {
-			clientInput.EnterPressed = true
+	if dIn == term.ASCII_TAB {
+		clientInput.TabPressed = true
+	} else {
+		// Check if the last byte is a CR or LF or NULL
+		if dIn <= term.ASCII_CR {
+			if clientInput.DataIn[len(clientInput.DataIn)-1] == term.ASCII_NULL || clientInput.DataIn[len(clientInput.DataIn)-1] == term.ASCII_LF || clientInput.DataIn[len(clientInput.DataIn)-1] == term.ASCII_CR {
+				clientInput.EnterPressed = true
+			}
 		}
 	}
 

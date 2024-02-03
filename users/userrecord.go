@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"sync"
 	"time"
 
 	"github.com/volte6/mud/characters"
@@ -41,10 +42,12 @@ type UserRecord struct {
 	Character      *characters.Character
 	ItemStorage    Storage `yaml:"itemstorage,omitempty"`
 	unsentText     string
+	suggestText    string
 	AdminCommands  []string `yaml:"admincommands,omitempty"`
 	RoomMemoryBlob string   `yaml:"roommemoryblob,omitempty"`
 	configOptions  map[string]any
 	connectionTime time.Time
+	lock           sync.RWMutex
 }
 
 func NewUserRecord(userId int, connectionId uint64) *UserRecord {
@@ -59,6 +62,7 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 		Character:      characters.New(),
 		configOptions:  map[string]any{},
 		connectionTime: time.Now(),
+		lock:           sync.RWMutex{},
 	}
 }
 
@@ -92,6 +96,9 @@ func (u *UserRecord) GetConnectTime() time.Time {
 
 func (u *UserRecord) GetPrompt(fullRedraw bool) string {
 
+	u.lock.RLock()
+	defer u.lock.RUnlock()
+
 	ansiPrompt := ``
 
 	if cmdPrompt := prompt.Get(u.UserId); cmdPrompt != nil {
@@ -123,7 +130,11 @@ func (u *UserRecord) GetPrompt(fullRedraw bool) string {
 	}
 
 	if fullRedraw {
-		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + ansiPrompt + u.GetUnsentText()
+		unsent, suggested := u.GetUnsentText()
+		if len(suggested) > 0 {
+			suggested = `<ansi fg="black" bold="true">` + suggested + `</ansi>`
+		}
+		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + ansiPrompt + unsent + suggested
 	}
 
 	return ansiPrompt
@@ -133,20 +144,25 @@ func (u *UserRecord) RoundTick() {
 
 }
 
-// The purpose of AddUnsentText(), ClearUnsentText(), GetUnsentText() is to
+// The purpose of SetUnsentText(), GetUnsentText() is to
 // Capture what the user is typing so that when we redraw the
 // "prompt" or status bar, we can redraw what they were in the middle
 // of typing.
 // I don't like the idea of capturing it every time they hit a key though
 // There is probably a better way.
-func (u *UserRecord) SetUnsentText(t string) {
+func (u *UserRecord) SetUnsentText(t string, suggest string) {
+	u.lock.Lock()
+	defer u.lock.Unlock()
+
 	u.unsentText = t
+	u.suggestText = suggest
 }
-func (u *UserRecord) ClearUnsentText() {
-	u.unsentText = ""
-}
-func (u *UserRecord) GetUnsentText() string {
-	return u.unsentText
+
+func (u *UserRecord) GetUnsentText() (unsent string, suggestion string) {
+	u.lock.RLock()
+	defer u.lock.RUnlock()
+
+	return u.unsentText, u.suggestText
 }
 
 // Replace a characters information with another.

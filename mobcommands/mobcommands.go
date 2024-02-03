@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/util"
 )
@@ -56,42 +57,6 @@ var (
 		"uncurse": {Uncurse, false},
 		"wander":  {Wander, false},
 	}
-
-	aliases map[string]string = map[string]string{
-		".":       "say",
-		`l`:       `look`,
-		`examine`: `look`,
-		"enter":   "go",
-		"wield":   "equip",
-		"wear":    "equip",
-		"rem":     "remove",
-		"unequip": "remove",
-		"unwear":  "remove",
-		"unwield": "remove",
-		"toss":    "throw",
-		"a":       "attack",
-		"fight":   "attack",
-		"kill":    "attack",
-		"k":       "attack",
-		"g":       "get",
-		"lft":     "lookfortrouble",
-		`yell`:    `shout`,
-		`scream`:  `shout`,
-		`holler`:  `shout`,
-	}
-
-	directionalAliases map[string]string = map[string]string{
-		`n`:  `north`,
-		`s`:  `south`,
-		`e`:  `east`,
-		`w`:  `west`,
-		`u`:  `up`,
-		`d`:  `down`,
-		`nw`: `northwest`,
-		`ne`: `northeast`,
-		`sw`: `southwest`,
-		`se`: `southeast`,
-	}
 )
 
 func GetAllMobCommands() []string {
@@ -109,9 +74,8 @@ func TryCommand(cmd string, rest string, mobId int, cmdQueue util.CommandQueue) 
 	cmd = strings.ToLower(cmd)
 	rest = strings.TrimSpace(rest)
 
-	if alias, ok := aliases[cmd]; ok {
-		cmd = alias
-	}
+	cmd = keywords.TryCommandAlias(cmd)
+
 	mobDisabled := false
 
 	if mob := mobs.GetInstance(mobId); mob != nil {
@@ -163,13 +127,4 @@ func TryCommand(cmd string, rest string, mobId int, cmdQueue util.CommandQueue) 
 	}
 
 	return NewMobCommandResponse(mobId), nil
-}
-
-func init() {
-
-	// Put directional aliases into the alias map
-	for cmd, alias := range directionalAliases {
-		aliases[cmd] = alias
-	}
-
 }

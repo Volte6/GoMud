@@ -23,6 +23,7 @@ type config struct {
 	FolderUserData               string   `yaml:"FolderUserData"`
 	FolderTemplates              string   `yaml:"FolderTemplates"`
 	FileAnsiAliases              string   `yaml:"FileAnsiAliases"`
+	FileKeywords                 string   `yaml:"FileKeywords"`
 	CarefulSaveFiles             bool     `yaml:"CarefulSaveFiles"`
 	PVPEnabled                   bool     `yaml:"PVPEnabled"`
 	XPScale                      float64  `yaml:"XPScale"`
@@ -228,6 +229,10 @@ func (c *config) validate() {
 
 	if c.FileAnsiAliases == `` {
 		c.FileAnsiAliases = `_datafiles/ansi-aliases.yaml` // default
+	}
+
+	if c.FileKeywords == `` {
+		c.FileKeywords = `_datafiles/keywords.yaml` // default
 	}
 
 	// Nothing to do with CarefulSaveFiles

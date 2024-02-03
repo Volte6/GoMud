@@ -6,6 +6,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
@@ -125,7 +126,7 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 		// If nothing found, consider directional aliases
 		if throwRoomId == 0 {
-			if alias, ok := directionalAliases[throwWhere]; ok {
+			if alias := keywords.TryDirectionAlias(throwWhere); alias != throwWhere {
 				exitName, throwRoomId = room.FindExitByName(alias)
 				if throwRoomId != 0 {
 					throwWhere = alias

@@ -1,0 +1,190 @@
+# Help targets for the help  help <target>
+# Looks for a template file: _datafiles/templates/help/<command>.template 
+
+
+help:
+  command:
+    configuration:
+      - alias
+      - macros
+      - set
+    character:
+      - alignment
+      - armor
+      - conditions
+      - cooldowns
+      - experience
+      - inventory
+      - jobs
+      - keyring
+      - skills
+      - status
+    shops:
+      - appraise
+      - bank
+      - buy
+      - deposit
+      - hire
+      - list
+      - offer
+      - sell
+      - store
+      - unstore
+      - withdraw
+    quests:
+      - ask
+      - quests
+    combat:
+      - attack
+      - break
+      - consider
+      - flee
+      - shoot
+    information:
+      - biome
+      - exits
+      - help
+      - look
+      - online
+      - races
+      - who
+    items:
+      - drop
+      - drink
+      - eat
+      - equip
+      - get
+      - give
+      - remove
+      - stash
+      - throw
+      - trash
+      - use
+    general:
+      - emote
+      - go
+      - read
+      - say
+      - shout
+      - train
+      - whisper
+    parties:
+      - follow
+      - party
+      - share
+    locks:
+      - lock
+      - picklock
+      - unlock
+  skill:
+    all:
+      - aid
+      - backstab
+      - brawling
+      - bump
+      - dual-wield
+      - tackle
+      - disarm
+      - recover
+      - enchant
+      - inspect
+      - map
+      - peep
+      - pickpocket
+      - portal
+      - pray
+      - rank
+      - scribe
+      - search
+      - skulduggery
+      - sneak
+      - track
+      - unenchant
+      - uncurse
+  admin:
+    all:
+      - build
+      - buff
+      - command
+      - locate
+      - prepare
+      - questtoken
+      - reload
+      - rename
+      - room
+      - server
+      - skillset
+      - spawn
+      - zap
+# Aliases for keywords when typing: help <keyword>
+# Key is the target keyword, value is the list of aliases
+help-aliases:
+  brawling:         [tackle, brawl, disarm, recover, throw]
+  enchant:          [unenchant, uncurse]
+  skulduggery:      [sneak, bump, backstab, pickpocket]
+  bank:             [deposit, withdraw]
+  storage:          [store, unstore]
+  strength:         [str]
+  vitality:         [vit]
+  speed:            [spd, spe]
+  mysticism:        [mys, myst]
+  smarts:           [smt, sma]
+  perception:       [per, percep, percept]
+  health:           [hp]
+  mana:             [mp]
+  races:            [race]
+  protection:       [rank, backrank, frontrank, aid]
+  picklock:         [pick]
+  picklock-example: [pick-example]
+  keyring:          [key, keys]
+  equip:            [wear, wield]
+  status:           [score]
+# Default aliases for commands
+# For example: inv -> inventory
+# They can be command + argument aliases
+# Key is the target command, value is the list of aliases
+command-aliases:
+  say:              ['.']
+  broadcast:        ['`']
+  status:           ['sta', 'stat', 'stats', 'score']
+  inventory:        ['i', 'inv', 'eq']
+  look:             ['l', 'examine']
+  go:               ['enter']
+  experience:       ['exp', 'xp', 'tnl']
+  map:              ['m']
+  conditions:       ['c', 'cond', 'conds']
+  skills:           ['sk', 'skill']
+  scribe:           ['scribble', 'write']
+  equip:            ['wear', 'wield']
+  remove:           ['rem', 'unequip', 'unwear', 'unwield']
+  throw:            ['toss']
+  attack:           ['a', 'k', 'kill', 'fight']
+  get:              ['g', 'take']
+  command:          ['cmd']
+  macros:           ['=?']
+  sneak:            ['sn']
+  backstab:         ['bs']
+  quests:           ['q', 'quest']
+  shout:            ['yell', 'scream', 'holler']
+  picklock:         ['pick', 'lockpick']
+  keyring:          ['key', 'keys']
+  whisper:          ['/w']
+  'party chat':     ['pchat', 'psay']
+  'bank deposit':   ['deposit']
+  'bank withdraw':  ['withdraw']
+  'storage add':    ['store']
+  'storage remove': ['unstore']
+  'rank back':      ['backrank']
+  'rank front':     ['frontrank']
+  # Direction aliases
+direction-aliases:
+  n:  north
+  s:  south
+  e:  east
+  w:  west
+  u:  up
+  d:  down
+  nw: northwest
+  ne: northeast
+  sw: southwest
+  se: southeast

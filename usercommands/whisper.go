@@ -20,6 +20,12 @@ func Whisper(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 
 	args := util.SplitButRespectQuotes(rest)
 
+	if len(args) < 1 {
+		response.SendUserMessage(userId, "Whisper to who?", true)
+		response.Handled = true
+		return response, nil
+	}
+
 	whisperName := args[0]
 	if len(rest) < len(whisperName)+1 {
 		response.SendUserMessage(userId, "You need to specify a message.", true)
