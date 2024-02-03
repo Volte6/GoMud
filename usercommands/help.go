@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
@@ -47,15 +48,14 @@ func Help(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			Admin:    make(map[string][]helpCommand),
 		}
 
-		for i := 0; i < len(helpCommands); i++ {
+		for _, command := range keywords.GetAllHelpTopicInfo() {
 
-			category := helpCommands[i].Category
-
-			command := helpCommands[i]
-			templateFile := `help/` + command.Command
-			if newHelp, ok := helpAliases[command.Command]; ok {
-				templateFile = `help/` + newHelp
+			category := command.Category
+			if category == `all` {
+				category = ``
 			}
+
+			templateFile := `help/` + keywords.TryHelpAlias(command.Command)
 
 			if command.AdminOnly {
 				if user.Permission == users.PermissionAdmin || user.HasAdminCommand(command.Command) {
@@ -69,12 +69,13 @@ func Help(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			hlpCmd := helpCommand{Command: command.Command, Type: command.Type, Missing: !templates.Exists(templateFile)}
 
-			if command.Type == "skill" {
+			if command.Type == `skill` {
 				helpCommandList.Skills[category] = append(helpCommandList.Skills[category], hlpCmd)
 				continue
 			}
 
 			helpCommandList.Commands[category] = append(helpCommandList.Commands[category], hlpCmd)
+
 		}
 
 		helpTxt, err = templates.Process("help/help", helpCommandList)
@@ -95,9 +96,7 @@ func Help(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		// replace any non alpha/numeric characters in "rest"
 		helpName = regexp.MustCompile(`[^a-zA-Z0-9\\-]+`).ReplaceAllString(helpName, ``)
 
-		if newHelp, ok := helpAliases[helpName]; ok {
-			helpName = newHelp
-		}
+		helpName = keywords.TryHelpAlias(helpName)
 
 		var helpVars any = nil
 

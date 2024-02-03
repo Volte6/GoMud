@@ -4,9 +4,13 @@ import "fmt"
 
 type TerminalCommandPayloadParser func(b []byte) []byte
 
+const ASCII_NULL = 0
 const ASCII_BACKSPACE = 8
 const ASCII_SPACE = 32
 const ASCII_DELETE = 127
+const ASCII_TAB = 9
+const ASCII_CR = 13
+const ASCII_LF = 10
 
 var (
 	CRLF    = []byte{13, 10}

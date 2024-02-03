@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -22,7 +23,8 @@ func Alias(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	// biuld array and look up table for sorting purposes
 	allOutCmds := []string{}
 	reverseLookup := map[string][]string{}
-	for inCmd, outCmd := range aliases {
+
+	for inCmd, outCmd := range keywords.GetAllCommandAliases() {
 		if _, ok := reverseLookup[outCmd]; !ok {
 			reverseLookup[outCmd] = []string{}
 			allOutCmds = append(allOutCmds, outCmd)

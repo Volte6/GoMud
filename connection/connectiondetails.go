@@ -98,6 +98,8 @@ type ClientInput struct {
 	Clipboard     []byte       // Text that can be easily pasted with ctrl-v
 	LastSubmitted []byte       // The last thing submitted
 	EnterPressed  bool         // Did they hit enter? It's stripped from the buffer/input FYI
+	BSPressed     bool         // Did they hit backspace?
+	TabPressed    bool         // Did they hit tab?
 	History       InputHistory // A list of the last 10 things they typed
 }
 
@@ -108,7 +110,7 @@ func (ci *ClientInput) Reset() {
 	ci.EnterPressed = false
 }
 
-type InputHandler func(ci *ClientInput, ct *ConnectionTracker, handlerState map[string]any) (nextHandler bool)
+type InputHandler func(ci *ClientInput, ct *ConnectionTracker, handlerState map[string]any) (doNextHandler bool)
 
 type ConnectionDetails struct {
 	connectionId      ConnectionId
@@ -130,25 +132,25 @@ func (cd *ConnectionDetails) GetSettings() ClientSettings {
 }
 
 // If HandleInput receives an error, we shouldn't pass input to the game logic
-func (cd *ConnectionDetails) HandleInput(ci *ClientInput, ct *ConnectionTracker, handlerState map[string]any) (okContinue bool, lastHandler string, err error) {
+func (cd *ConnectionDetails) HandleInput(ci *ClientInput, ct *ConnectionTracker, handlerState map[string]any) (doNextHandler bool, lastHandler string, err error) {
 	cd.handlerMutex.Lock()
 	defer cd.handlerMutex.Unlock()
 
 	cd.lastInputTime = time.Now()
 
-	if len(cd.inputHandlers) < 1 {
+	handlerCt := len(cd.inputHandlers)
+	if handlerCt < 1 {
 		return false, lastHandler, errors.New("no input handlers")
 	}
 
 	for i, inputHandler := range cd.inputHandlers {
 		lastHandler = cd.inputHandlerNames[i]
-		if ok := inputHandler(ci, ct, handlerState); !ok {
+		if runNextHandler := inputHandler(ci, ct, handlerState); !runNextHandler {
 			// If it's the last one in the chain, ignore any aborts
-			if i == len(cd.inputHandlers)-1 {
-				return false, lastHandler, nil
-			}
+			// if i == handlerCt-1 {
+			// 	return false, lastHandler, nil
+			// }
 			return false, lastHandler, nil
-			//return fmt.Errorf("%s ended input handlers early", cd.inputHandlerNames[i-1])
 		}
 	}
 	return true, lastHandler, nil

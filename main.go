@@ -19,6 +19,7 @@ import (
 	"github.com/volte6/mud/connection"
 	"github.com/volte6/mud/inputhandlers"
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/races"
@@ -41,6 +42,36 @@ var (
 
 	worldManager = NewWorld(sigChan)
 )
+
+type Suggestions struct {
+	suggestions []string
+	pos         int
+}
+
+func (s *Suggestions) Count() int {
+	return len(s.suggestions)
+}
+
+func (s *Suggestions) Clear() {
+	s.suggestions = []string{}
+	s.pos = 0
+}
+
+func (s *Suggestions) Set(suggestions []string) {
+	s.suggestions = suggestions
+	s.pos = 0
+}
+
+func (s *Suggestions) Next() string {
+	if len(s.suggestions) < 1 {
+		return ``
+	}
+	if s.pos >= len(s.suggestions) {
+		s.pos = 0
+	}
+	s.pos++
+	return s.suggestions[s.pos-1]
+}
 
 func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.WaitGroup) {
 	defer func() {
@@ -122,13 +153,15 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 	inputhandlers.LoginInputHandler(clientInput, worldManager.GetConnectionPool(), sharedState)
 
 	var userObject *users.UserRecord
-
+	var suggestions Suggestions
 	lastInput := time.Now()
 	for {
 
 		c := configs.GetConfig()
 
 		clientInput.EnterPressed = false // Default state is always false
+		clientInput.TabPressed = false   // Default state is always false
+		clientInput.BSPressed = false    // Default state is always false
 
 		n, err := connDetails.Read(inputBuffer)
 		if err != nil {
@@ -153,17 +186,77 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 		clientInput.DataIn = inputBuffer[:n]
 
 		// Input handler processes any special commands, transforms input, sets flags from input, etc
-		if ok, lastHandler, err := connDetails.HandleInput(clientInput, worldManager.GetConnectionPool(), sharedState); err != nil {
+		okContinue, lastHandler, err := connDetails.HandleInput(clientInput, worldManager.GetConnectionPool(), sharedState)
+
+		// Was there an error? If so, we should probably just stop processing input
+		if err != nil {
 			logger.Warn("InputHandler", "error", err)
 			continue
-		} else if !ok {
+		}
+
+		// If a handler aborted processing, just keep track of where we are so
+		// far and jump back to waiting.
+		if !okContinue {
 			if userObject != nil {
-				// Capturing and resetting the unsent text is purely to allow us to
-				// Keep updating the prompt without losing the typed in text.
-				userObject.SetUnsentText(string(clientInput.Buffer))
+
+				_, suggested := userObject.GetUnsentText()
+
+				redrawPrompt := false
+				if clientInput.BSPressed {
+					// If a suggestion is pending, remove it
+					// otherwise just do a normal backspace operation
+					if suggested != `` {
+						userObject.SetUnsentText(string(clientInput.Buffer), ``)
+						suggested = ``
+						suggestions.Clear()
+						redrawPrompt = true
+					}
+
+				}
+
+				if clientInput.TabPressed {
+
+					if suggestions.Count() < 1 {
+						suggestions.Set(worldManager.GetAutoComplete(userObject.UserId, string(clientInput.Buffer)))
+					}
+
+					if suggestions.Count() > 0 {
+						suggested = suggestions.Next()
+						userObject.SetUnsentText(string(clientInput.Buffer), suggested)
+						redrawPrompt = true
+					}
+
+				} else {
+
+					if suggested != `` {
+
+						// If they hit space, accept the suggestion
+						if len(clientInput.Buffer) > 0 && clientInput.Buffer[len(clientInput.Buffer)-1] == term.ASCII_SPACE {
+							clientInput.Buffer = append(clientInput.Buffer[0:len(clientInput.Buffer)-1], []byte(suggested)...)
+							clientInput.Buffer = append(clientInput.Buffer[0:len(clientInput.Buffer)], []byte(` `)...)
+							redrawPrompt = true
+							userObject.SetUnsentText(string(clientInput.Buffer), ``)
+							suggestions.Clear()
+						} else {
+							suggested = ``
+							suggestions.Clear()
+							// Otherwise, just keep the suggestion
+							userObject.SetUnsentText(string(clientInput.Buffer), suggested)
+							redrawPrompt = true
+						}
+					}
+
+				}
+
+				if redrawPrompt {
+					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetPrompt(true))), clientInput.ConnectionId)
+				}
+
 			}
 			continue
-		} else if lastHandler == "LoginInputHandler" {
+		}
+
+		if lastHandler == "LoginInputHandler" {
 			// Remove the login handler
 			connDetails.RemoveInputHandler("LoginInputHandler")
 			// Replace it with a regular echo handler.
@@ -205,9 +298,21 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 				// Capturing and resetting the unsent text is purely to allow us to
 				// Keep updating the prompt without losing the typed in text.
-				userObject.ClearUnsentText()
+				userObject.SetUnsentText(``, ``)
 
 			} else {
+
+				_, suggested := userObject.GetUnsentText()
+
+				if len(suggested) > 0 {
+					// solidify it in the render for UX reasons
+
+					clientInput.Buffer = append(clientInput.Buffer, []byte(suggested)...)
+					suggestions.Clear()
+					userObject.SetUnsentText(string(clientInput.Buffer), ``)
+					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetPrompt(true))), clientInput.ConnectionId)
+
+				}
 
 				wi := WorldInput{
 					FromId:    userObject.UserId,
@@ -221,7 +326,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 				// Capturing and resetting the unsent text is purely to allow us to
 				// Keep updating the prompt without losing the typed in text.
-				userObject.ClearUnsentText()
+				userObject.SetUnsentText(``, ``)
 
 				lastInput = time.Now()
 			}
@@ -278,6 +383,8 @@ func main() {
 	mobs.LoadDataFiles()
 	quests.LoadDataFiles()
 	templates.LoadAliases()
+	keywords.LoadAliases()
+
 	//
 	slog.Info(`========================`)
 	//

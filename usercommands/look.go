@@ -6,6 +6,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
@@ -84,7 +85,8 @@ func Look(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		// If nothing found, consider directional aliases
 		if lookRoomId == 0 {
-			if alias, ok := directionalAliases[lookAt]; ok {
+
+			if alias := keywords.TryDirectionAlias(lookAt); alias != lookAt {
 				exitName, lookRoomId = room.FindExitByName(alias)
 				if lookRoomId != 0 {
 					lookAt = alias

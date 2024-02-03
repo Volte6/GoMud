@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
@@ -115,9 +116,7 @@ func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 		if mob.Character.IsCharmed(userId) {
 			// If an alias was entered, conovert it
-			if newCmd, ok := aliases[cmd]; ok {
-				cmd = newCmd
-			}
+			cmd := keywords.TryCommandAlias(cmd)
 
 			if cmd == `attack` {
 				if pid, _ := room.FindByName(rest); pid > 0 {

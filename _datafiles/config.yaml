@@ -38,6 +38,10 @@ FolderAttackMessageData: _datafiles/combat-messages
 # - FolderRoomData -
 #   Maps common aliases to specific ansi color codes
 FileAnsiAliases: _datafiles/ansi-aliases.yaml 
+# - FileKeywords -
+#   Keywords are used to match commands to actions
+#   Also used for aliases
+FileKeywords: _datafiles/keywords.yaml
 # - CarefulSaveFiles -
 #   If true, save files will be written to a temporary file and then saved over
 #   the actual file. This takes longer, but helps prevent file corruption if
