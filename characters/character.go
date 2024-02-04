@@ -32,10 +32,16 @@ var (
 	descriptionCache = map[string]string{} // key is a hash, value is the description
 )
 
+type NameRenderFlag uint8
+
 const (
 	AlignmentMinimum int8 = -100
 	AlignmentNeutral int8 = 0
 	AlignmentMaximum int8 = 100
+
+	RenderHealth NameRenderFlag = iota
+	RenderAggro
+	RenderQuest
 )
 
 type Character struct {
@@ -343,7 +349,7 @@ func (c *Character) GetDefense() int {
 	return reduction
 }
 
-func (c *Character) GetMobName(viewingUserId int, includeHealthFlag ...bool) FormattedName {
+func (c *Character) GetMobName(viewingUserId int, renderFlags ...NameRenderFlag) FormattedName {
 
 	f := FormattedName{
 		Name: c.Name,
@@ -355,8 +361,19 @@ func (c *Character) GetMobName(viewingUserId int, includeHealthFlag ...bool) For
 	}
 
 	includeHealth := false
-	if len(includeHealthFlag) > 0 {
-		includeHealth = includeHealthFlag[0]
+	includeQuest := false
+
+	for _, f := range renderFlags {
+		if f == RenderHealth {
+			includeHealth = true
+		} else if f == RenderQuest {
+			includeQuest = true
+		}
+
+	}
+
+	if includeQuest {
+		f.Flags = append(f.Flags, `!`)
 	}
 
 	if includeHealth {
@@ -373,7 +390,7 @@ func (c *Character) GetMobName(viewingUserId int, includeHealthFlag ...bool) For
 	return f
 }
 
-func (c *Character) GetPlayerName(viewingUserId int, includeHealthFlag ...bool) FormattedName {
+func (c *Character) GetPlayerName(viewingUserId int, renderFlags ...NameRenderFlag) FormattedName {
 
 	f := FormattedName{
 		Name: c.Name,
@@ -381,8 +398,11 @@ func (c *Character) GetPlayerName(viewingUserId int, includeHealthFlag ...bool) 
 	}
 
 	includeHealth := false
-	if len(includeHealthFlag) > 0 {
-		includeHealth = includeHealthFlag[0]
+	for _, f := range renderFlags {
+		if f == RenderHealth {
+			includeHealth = true
+		}
+
 	}
 
 	if includeHealth {
@@ -829,6 +849,17 @@ func (c *Character) RememberRoom(roomId int) {
 		c.roomHistory = c.roomHistory[len(c.roomHistory)-(mapHistory-1):]
 	}
 	c.roomHistory = append(c.roomHistory, roomId)
+}
+
+func (c *Character) IsQuestDone(questToken string) bool {
+	testQuestId, _ := quests.TokenToParts(questToken)
+	if c.QuestProgress == nil {
+		c.QuestProgress = make(map[int]string)
+	}
+
+	stage := c.QuestProgress[testQuestId]
+
+	return stage == `end`
 }
 
 func (c *Character) HasQuest(questToken string) bool {

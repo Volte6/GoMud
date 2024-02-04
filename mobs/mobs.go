@@ -87,6 +87,25 @@ type Mob struct {
 	datastub        map[string]any // Generic storage stub for maintaining state between behaviors
 }
 
+// If a character is provided, will only return true if character has the quest
+func (m *Mob) HasQuestWaiting(c *characters.Character) bool {
+
+	for _, subject := range m.AskSubjects {
+
+		if len(subject.IfQuest) > 0 {
+			if c == nil || c.HasQuest(subject.IfQuest) {
+				return true
+			}
+		} else if len(subject.IfNotQuest) > 0 {
+			if c == nil || c.HasQuest(subject.IfNotQuest) {
+				return !c.IsQuestDone(subject.IfNotQuest)
+			}
+		}
+	}
+
+	return false
+}
+
 func MobIdByName(mobName string) MobId {
 
 	mobMutex.Lock()

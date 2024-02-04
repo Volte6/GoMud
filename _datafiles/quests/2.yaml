@@ -9,7 +9,7 @@ steps:
     description: Rumor has it that there is a secret entrance to the ancient catacombs beneath the city at the Sanctuary.
     hint: Try searching around the perimeter of the Sanctuary.
   - id: investigate 
-    description: Explore and invesetigate the catacombs.
+    description: Explore and investigate the catacombs.
     hint: Look for an ancient crypt deep within the catacombs.
   - id: inform 
     description: Return to the King and show him what you found.
