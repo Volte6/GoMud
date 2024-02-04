@@ -6,6 +6,7 @@
 
 * Made an attempt to embed a javascript scripting engine (https://github.com/dop251/goja) but it would hang indefinitely when compiling on a `raspberry pi zero 2 w`, and I removed this for the time being.
 * I would like to be able to write generic scripting rules with defined interfaces and exported variables.
+* LUA is the best candidate right now, using https://github.com/yuin/gopher-lua
 
 # Thoughts on a magic system
 
@@ -13,6 +14,25 @@
 * Maybe regularly changing magic phrases that have to be memorized or scribed to a magic book, when chanted they are cast and removed from the book.
 * The spells can be rewritten from whatever source, where the magic phrase will have changed? 
 
+# Command help
+
+* Currently have helpfiles
+* Currently have tab-induced auto-complete that works okay.
+* Might consider some sort of secondary "suggestion" for auto-complete that includes argument details.
+* When accepted it would not submit any of the secondary suggestions.
+
+Example:
+> `shoot `
+
+AutoComplete:
+> `shoot [target-name] [exit-name]`
+
+Example:
+> `shoot goblin `
+
+AutoComplete:
+> `shoot goblin [exit-name]`
+ 
 # Macros
 
 Implement macros as follows

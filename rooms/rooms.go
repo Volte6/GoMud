@@ -120,9 +120,9 @@ type GameLock struct {
 	UnlockedUntil uint64 `yaml:"-"`                    // What round it was unlocked at, when util.GetRoundCount() > UnlockedUntil, it is relocked (set to zero).
 }
 type Container struct {
-	Lock  GameLock     `yaml:"lock,omitempty"`  // 0 - no lock. greater than zero = difficulty to unlock.
-	Items []items.Item `yaml:"items,omitempty"` // What is found inside of the chest.
-	Gold  int          `yaml:"gold,omitempty"`  // How much gold is found inside of the chest.
+	Lock  GameLock     `yaml:"lock,omitempty"` // 0 - no lock. greater than zero = difficulty to unlock.
+	Items []items.Item `yaml:"-"`              // Don't save contents, let room prep handle. What is found inside of the chest.
+	Gold  int          `yaml:"-"`              // Don't save contents, let room prep handle. How much gold is found inside of the chest.
 }
 
 func (c Container) HasLock() bool {
@@ -481,7 +481,6 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 					if item := items.New(spawnInfo.ItemId); item.ItemId != 0 {
 						if _, alreadyExists := container.FindItem(fmt.Sprintf(`!%d`, item.ItemId)); !alreadyExists {
 							container.AddItem(item)
-							r.Containers[containerName] = container
 						}
 					}
 
@@ -490,6 +489,8 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 							container.Gold = spawnInfo.Gold
 						}
 					}
+
+					r.Containers[containerName] = container
 				}
 
 				spawnInfo.CooldownLeft = spawnInfo.Cooldown

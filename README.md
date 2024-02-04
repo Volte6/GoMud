@@ -10,13 +10,13 @@ Screenshots for some of the features can be found [here](https://imgur.com/a/90y
 
 Colorization is handled through extensive use of my [github.com/Volte6/ansitags](https://github.com/Volte6/ansitags) library.
 
-Can be run locally as a standard go program or via docker container. The default port is 33333.
+Can be run locally as a standard go program or via docker container. The default port is `33333`.
 
-There is not yet anything for the web service side of things, nor does the web client work yet.
+There is some stubbed out folders/files/code bits for a web service and web client, but nothing substantial or even moderately functional yet. Later this should use websockets to connect, and be able to server game-aware pages up.
 
-Certain admin in-game commands can be destructive. For example, the `build` command is notoriously finicky if you don't understand what you are doing. Although there is some documentation, it doesn't mean stuff won't get missed, plus it's possible to accidentally mess up typing something and then can be tricky to fix if you don't first understand the underlying mechanisms.
+Certain admin in-game commands can be destructive. For example, the `build` command is notoriously finicky if you don't understand what you are doing. Although there is some documentation, it doesn't mean stuff won't get missed, plus it's possible to accidentally mess up typing something and then can be tricky to fix if you don't first understand the underlying mechanisms. Now that there is a user prompt system working this can probably be improved considerably in the near future, and building or modifying a room can be a series of prompts.
 
-Plans later when a network-layer overhaul takes place is to enable exclusive graphics modes (full screen takeover without scrollback) for some stuff, as well as a multi-prompt interaction, where all input/output is isolated until a series of prompts are completed (or aborted). This will allow for better tools which won't require all information to be present in one command, or split into multiple individual commands. It will also allow for confirmation dialogs etc.
+The network layer will eventually be overhauled and possibly include support for the `alternative screen buffer` mode at some point.
 
 # Quick Start
 
@@ -27,14 +27,19 @@ A youtube playlist to getting started has been set up here:
 You can compile and run it locally with:
 > `go run .`
 
+Or you can just build the binary if you prefer:
+> `go build -o GoMudServer`
+
+> `./GoMudServer`
+
 Or if you have docker installed:
 > `docker-compose -f provisioning/docker-compose.yml up --build --remove-orphans server`
 
-From there you should see some logging, and once ready, connect to port 33333 with a telnet client and use the default `admin` login:
+From there you should see some logging, and once ready, connect to `localhost` on port `33333` with a telnet client and use the default admin login:
 
-*Username:* _admin_
+**Username:** _admin_
 
-*Password:* _password_
+**Password:** _password_
 
 ## Makefile usage
 
@@ -75,7 +80,7 @@ _These require Docker to be installed locally_
 
 Build/Run in Docker container:
 
-_Will run on port 33333 in the container and publicly exposes port 33333 ( per [provisioning/dockerdocker-compose.yml](dockerdocker-compose.yml) ):_
+_Will run on port `33333` in the container and publicly exposes port `33333` ( per [provisioning/dockerdocker-compose.yml](dockerdocker-compose.yml) ):_
 
 >  `make run`
 

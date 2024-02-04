@@ -262,6 +262,12 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 
 			// Matches for things in containers
 			if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+				if room.Gold > 0 {
+					goldName := `gold`
+					if strings.HasPrefix(goldName, targetName) {
+						suggestions = append(suggestions, goldName[targetNameLen:])
+					}
+				}
 				for containerName, containerInfo := range room.Containers {
 					if containerInfo.Lock.IsLocked() {
 						continue
@@ -271,6 +277,15 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 						iSpec := item.GetSpec()
 						if strings.HasPrefix(strings.ToLower(iSpec.Name), targetName) {
 							suggestions = append(suggestions, iSpec.Name[targetNameLen:]+` from `+containerName)
+						}
+					}
+
+					if containerInfo.Gold > 0 {
+						goldName := `gold from ` + containerName
+						for _, testName := range util.BreakIntoParts(goldName) {
+							if strings.HasPrefix(testName, targetName) {
+								suggestions = append(suggestions, testName[targetNameLen:])
+							}
 						}
 					}
 
