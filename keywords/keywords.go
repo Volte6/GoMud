@@ -49,7 +49,7 @@ func (a *Aliases) Validate() error {
 		for helpCategory, helpList := range helpTypes {
 			for _, helpCommand := range helpList {
 
-				helpCommand = strings.Title(strings.ToLower(helpCommand))
+				helpCommand = strings.ToLower(helpCommand)
 
 				entry := HelpTopic{
 					Command:   helpCommand,
@@ -79,9 +79,9 @@ func (a *Aliases) Validate() error {
 		}
 	}
 
-	//for alias, direction := range a.DirectionAliases {
-	//	a.commandAliases[strings.ToLower(alias)] = direction
-	//}
+	for alias, direction := range a.DirectionAliases {
+		a.commandAliases[strings.ToLower(alias)] = direction
+	}
 
 	return nil
 }

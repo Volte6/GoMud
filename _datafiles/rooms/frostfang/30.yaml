@@ -18,6 +18,9 @@ exits:
     roomid: 29
   west:
     roomid: 13
+items:
+- itemid: 20001
+- itemid: 20001
 spawninfo:
 - mobid: 1
   cooldown: 20

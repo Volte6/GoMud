@@ -139,7 +139,7 @@ func GetWaitMessages(stepType items.Intensity, sourceChar *characters.Character,
 		}
 	}
 
-	if sourceChar.Equipment.Weapon.ItemId != 0 {
+	if sourceChar.Equipment.Weapon.ItemId > 0 {
 		tokenReplacements[items.TokenItemName] = sourceChar.Equipment.Weapon.Name()
 	}
 
@@ -199,11 +199,11 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 		dualWieldLevel := sourceChar.GetSkillLevel(skills.DualWield)
 
-		if sourceChar.Equipment.Weapon.ItemId != 0 {
+		if sourceChar.Equipment.Weapon.ItemId > 0 {
 			attackWeapons = append(attackWeapons, sourceChar.Equipment.Weapon)
 		}
 
-		if sourceChar.Equipment.Offhand.ItemId != 0 && sourceChar.Equipment.Offhand.GetSpec().Type == items.Weapon {
+		if sourceChar.Equipment.Offhand.ItemId > 0 && sourceChar.Equipment.Offhand.GetSpec().Type == items.Weapon {
 			attackWeapons = append(attackWeapons, sourceChar.Equipment.Offhand)
 		}
 
@@ -277,7 +277,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 			// Get default racial dice rolls
 			attacks, dCount, dSides, dBonus, critBuffs := sourceChar.GetDefaultDiceRoll()
 
-			if weapon.ItemId != 0 {
+			if weapon.ItemId > 0 {
 
 				itemSpec := weapon.GetSpec()
 
@@ -376,7 +376,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 					}
 				}
 
-				if sourceChar.Equipment.Weapon.ItemId != 0 {
+				if sourceChar.Equipment.Weapon.ItemId > 0 {
 					tokenReplacements[items.TokenItemName] = sourceChar.Equipment.Weapon.Name()
 				}
 

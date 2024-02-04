@@ -248,6 +248,7 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 
 			itemList = user.Character.GetAllBackpackItems()
 			itemSubtypeSearch = append(itemSubtypeSearch, items.Wearable)
+			itemTypeSearch = append(itemTypeSearch, items.Weapon)
 
 		} else if cmd == `remove` {
 
@@ -282,10 +283,8 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 
 					if containerInfo.Gold > 0 {
 						goldName := `gold from ` + containerName
-						for _, testName := range util.BreakIntoParts(goldName) {
-							if strings.HasPrefix(testName, targetName) {
-								suggestions = append(suggestions, testName[targetNameLen:])
-							}
+						if strings.HasPrefix(goldName, targetName) {
+							suggestions = append(suggestions, goldName[targetNameLen:])
 						}
 					}
 
@@ -342,9 +341,16 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 
 				for _, mobInstId := range room.GetMobs() {
 					if mob := mobs.GetInstance(mobInstId); mob != nil {
+
 						if mob.Character.IsCharmed() && (mob.Character.Aggro == nil || mob.Character.Aggro.UserId != userId) {
 							continue
 						}
+
+						if targetName == `` {
+							suggestions = append(suggestions, mob.Character.Name)
+							continue
+						}
+
 						if strings.HasPrefix(strings.ToLower(mob.Character.Name), targetName) {
 							name := mob.Character.Name[targetNameLen:]
 
@@ -413,6 +419,11 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 					if skip {
 						continue
 					}
+				}
+
+				if targetName == `` {
+					suggestions = append(suggestions, iSpec.Name)
+					continue
 				}
 
 				for _, testName := range util.BreakIntoParts(iSpec.Name) {
