@@ -1508,7 +1508,11 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		RoomLegend:     roomLegend,
 	}
 
-	showHealth := user.Character.GetSkillLevel(skills.Peep) > 0
+	nameFlags := []characters.NameRenderFlag{}
+	if user.Character.GetSkillLevel(skills.Peep) > 0 {
+		nameFlags = append(nameFlags, characters.RenderHealth)
+	}
+
 	for _, playerId := range r.players {
 		if playerId != user.UserId {
 			player := users.GetByUserId(playerId)
@@ -1518,7 +1522,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 					continue
 				}
 
-				pName := player.Character.GetPlayerName(user.UserId, showHealth)
+				pName := player.Character.GetPlayerName(user.UserId, nameFlags...)
 				details.VisiblePlayers = append(details.VisiblePlayers, pName)
 			}
 		}
@@ -1533,7 +1537,14 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 				continue
 			}
 
-			mobName := mob.Character.GetMobName(user.UserId, showHealth)
+			tmpNameFlags := nameFlags
+
+			if mob.HasQuestWaiting(user.Character) {
+				tmpNameFlags = append(tmpNameFlags, characters.RenderQuest)
+			}
+
+			mobName := mob.Character.GetMobName(user.UserId, tmpNameFlags...)
+
 			if mob.Character.IsCharmed() {
 				visibleFriendlyMobs = append(visibleFriendlyMobs, mobName)
 			} else {

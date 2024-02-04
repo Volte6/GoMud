@@ -223,7 +223,28 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 
 			suggestions = append(suggestions, usercommands.GetHelpSuggestions(targetName, isAdmin)...)
 
-		} else if cmd == `look` || cmd == `drop` || cmd == `trash` || cmd == `sell` || cmd == `store` || cmd == `inspect` || cmd == `enchant` || cmd == `appraise` {
+		} else if cmd == `look` {
+
+			itemList = user.Character.GetAllBackpackItems()
+
+			if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+				for exitName, exitInfo := range room.Exits {
+					if exitInfo.Secret {
+						continue
+					}
+					if strings.HasPrefix(strings.ToLower(exitName), targetName) {
+						suggestions = append(suggestions, exitName[targetNameLen:])
+					}
+				}
+
+				for containerName, _ := range room.Containers {
+					if strings.HasPrefix(strings.ToLower(containerName), targetName) {
+						suggestions = append(suggestions, containerName[targetNameLen:])
+					}
+				}
+			}
+
+		} else if cmd == `drop` || cmd == `trash` || cmd == `sell` || cmd == `store` || cmd == `inspect` || cmd == `enchant` || cmd == `appraise` {
 
 			itemList = user.Character.GetAllBackpackItems()
 
@@ -422,7 +443,16 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 				}
 
 				if targetName == `` {
-					suggestions = append(suggestions, iSpec.Name)
+
+					name := iSpec.Name
+
+					bpItemTracker[name] = bpItemTracker[name] + 1
+
+					if bpItemTracker[name] > 1 {
+						name += `#` + strconv.Itoa(bpItemTracker[name])
+					}
+					suggestions = append(suggestions, name)
+
 					continue
 				}
 
