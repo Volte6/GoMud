@@ -14,9 +14,6 @@ containers:
   chest:
     lock:
       difficulty: 3
-    items:
-    - itemid: 30002
-      uses: 1
 exits:
   south:
     roomid: 778
@@ -25,4 +22,5 @@ spawninfo:
   cooldown: 60
 - container: chest
   itemid: 30002
+  gold: 75
   cooldown: 21600

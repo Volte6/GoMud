@@ -107,10 +107,10 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 				room.Containers[containerName] = container
 
 				response.SendUserMessage(userId,
-					fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi>.`, goldAmt),
+					fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi> from the <ansi fg="container">%s</ansi>.`, goldAmt, containerName),
 					true)
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, goldAmt),
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up some <ansi fg="gold">gold</ansi> from the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName),
 					true)
 			}
 
@@ -164,7 +164,7 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 					fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi>.`, goldAmt),
 					true)
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, goldAmt),
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up some <ansi fg="gold">gold</ansi>.`, user.Character.Name),
 					true)
 			}
 

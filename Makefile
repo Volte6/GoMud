@@ -53,7 +53,6 @@ image_tag:
 port:
 	@$(eval PORT := $(shell $(DOCKER_COMPOSE) port server 8080))
 	@echo $(PORT)
-# @$(eval PORT := $(shell docker-compose port server 8080 | cut -d: -f2))
 
 .PHONY: shell
 shell:
