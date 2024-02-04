@@ -202,17 +202,6 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 				_, suggested := userObject.GetUnsentText()
 
 				redrawPrompt := false
-				if clientInput.BSPressed {
-					// If a suggestion is pending, remove it
-					// otherwise just do a normal backspace operation
-					if suggested != `` {
-						userObject.SetUnsentText(string(clientInput.Buffer), ``)
-						suggested = ``
-						suggestions.Clear()
-						redrawPrompt = true
-					}
-
-				}
 
 				if clientInput.TabPressed {
 
@@ -223,6 +212,16 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 					if suggestions.Count() > 0 {
 						suggested = suggestions.Next()
 						userObject.SetUnsentText(string(clientInput.Buffer), suggested)
+						redrawPrompt = true
+					}
+
+				} else if clientInput.BSPressed {
+					// If a suggestion is pending, remove it
+					// otherwise just do a normal backspace operation
+					userObject.SetUnsentText(string(clientInput.Buffer), ``)
+					if suggested != `` {
+						suggested = ``
+						suggestions.Clear()
 						redrawPrompt = true
 					}
 
@@ -246,6 +245,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 						}
 					}
 
+					userObject.SetUnsentText(string(clientInput.Buffer), suggested)
 				}
 
 				if redrawPrompt {

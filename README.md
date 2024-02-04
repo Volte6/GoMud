@@ -18,6 +18,14 @@ Certain admin in-game commands can be destructive. For example, the `build` comm
 
 The network layer will eventually be overhauled and possibly include support for the `alternative screen buffer` mode at some point.
 
+## Small Feature Demos
+
+- [Auto-complete input](https://youtu.be/7sG-FFHdhtI)
+- [In-game maps](https://youtu.be/navCCH-mz_8)
+- [Quests / Quest Progress](https://youtu.be/3zIClk3ewTU)
+- [Lockpicking](https://youtu.be/-zgw99oI0XY)
+- [Hired Mercs](https://youtu.be/semi97yokZE)
+
 # Quick Start
 
 A youtube playlist to getting started has been set up here:

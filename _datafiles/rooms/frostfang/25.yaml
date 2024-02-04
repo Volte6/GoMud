@@ -22,6 +22,7 @@ exits:
     roomid: 24
 items:
 - itemid: 20011
+- itemid: 20011
 spawninfo:
 - mobid: 1
   cooldown: 10

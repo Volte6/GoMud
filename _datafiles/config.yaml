@@ -193,6 +193,10 @@ Motd: Welcome to the Mud!
 BannedNames:
 - "*admin*"
 - "*moderator*"
+- "player*"
+- "user*"
+- "me"
+- "self"
 # - NextRoomID -
 # This number is auto-updated to the highest number of rooms in the game. 
 #   If creating your own rooms but don't want to risk an update conflicting, 
