@@ -28,8 +28,6 @@ func (c *ConnectionTracker) Add(conn net.Conn) *ConnectionDetails {
 
 	uId := ConnectionId(atomic.AddUint64(&c.connectCounter, 1))
 
-	atomic.AddUint64(&c.connectCounter, 1)
-
 	connDetails := NewConnectionDetails(
 		uId,
 		conn,
