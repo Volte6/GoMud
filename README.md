@@ -1,5 +1,7 @@
 # GoMud
 
+![image](images/login.png)
+
 This is an early version of GoMud, having only been in development a couple of months.
 
 It has been refactored on the fly, which is why some aspects might seem less than ideal.
