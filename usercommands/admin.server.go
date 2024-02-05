@@ -43,7 +43,7 @@ func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 			headers := []string{"Name", "Value"}
 			rows := [][]string{}
-			formatting := []string{`<ansi fg="yellow" bold="true">%s</ansi>`, `<ansi fg="red" bold="true">%s</ansi>`}
+			formatting := []string{`<ansi fg="yellow-bold">%s</ansi>`, `<ansi fg="red-bold">%s</ansi>`}
 
 			response.SendUserMessage(userId, ``, true)
 
@@ -116,7 +116,7 @@ func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		// General Go stats
 		//
 		response.SendUserMessage(userId, ``, true)
-		response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="yellow" bold="true">IP/Port:</ansi>    <ansi fg="red">%s</ansi>`, util.GetServerAddress()), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="yellow-bold">IP/Port:</ansi>    <ansi fg="red">%s</ansi>`, util.GetServerAddress()), true)
 		response.SendUserMessage(userId, ``, true)
 
 		//
@@ -124,7 +124,7 @@ func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		//
 		headers := []string{"Routine", "Avg", "Low", "High", "Ct", "/sec"}
 		rows := [][]string{}
-		formatting := []string{`<ansi fg="yellow" bold="true">%s</ansi>`, `<ansi fg="cyan" bold="true">%s</ansi>`, `<ansi fg="cyan" bold="true">%s</ansi>`, `<ansi fg="cyan" bold="true">%s</ansi>`, `<ansi fg="black" bold="true">%s</ansi>`, `<ansi fg="black" bold="true">%s</ansi>`}
+		formatting := []string{`<ansi fg="yellow-bold">%s</ansi>`, `<ansi fg="cyan-bold">%s</ansi>`, `<ansi fg="cyan-bold">%s</ansi>`, `<ansi fg="cyan-bold">%s</ansi>`, `<ansi fg="black-bold">%s</ansi>`, `<ansi fg="black-bold">%s</ansi>`}
 
 		allTimers := map[string]util.Accumulator{}
 		allNames := []string{}
@@ -157,12 +157,12 @@ func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		// Alternative rendering
 		//
 		memRepHeaders := []string{"Section  ", "Items    ", "KB       ", "MB       ", "GB       ", "Change   "}
-		memRepFormatting := []string{`<ansi fg="yellow" bold="true">%s</ansi>`,
-			`<ansi fg="black" bold="true">%s</ansi>`,
-			`<ansi fg="cyan" bold="true">%s</ansi>`,
+		memRepFormatting := []string{`<ansi fg="yellow-bold">%s</ansi>`,
+			`<ansi fg="black-bold">%s</ansi>`,
+			`<ansi fg="cyan-bold">%s</ansi>`,
 			`<ansi fg="red">%s</ansi>`,
-			`<ansi fg="red" bold="true">%s</ansi>`,
-			`<ansi fg="black" bold="true">%s</ansi>`}
+			`<ansi fg="red-bold">%s</ansi>`,
+			`<ansi fg="black-bold">%s</ansi>`}
 
 		memRepRows := [][]string{}
 		memRepTotalTotal := uint64(0)

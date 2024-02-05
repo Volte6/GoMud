@@ -100,7 +100,7 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 					if goldStolen > 0 {
 						m.Character.Gold -= goldStolen
 						user.Character.Gold += goldStolen
-						stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="yellow" bold="true">%d gold</ansi>`, goldStolen))
+						stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="yellow-bold">%d gold</ansi>`, goldStolen))
 					}
 				}
 
@@ -187,7 +187,7 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 					if goldStolen > 0 {
 						p.Character.Gold -= goldStolen
 						user.Character.Gold += goldStolen
-						stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="yellow" bold="true">%d gold</ansi>`, goldStolen))
+						stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="yellow-bold">%d gold</ansi>`, goldStolen))
 					}
 				}
 

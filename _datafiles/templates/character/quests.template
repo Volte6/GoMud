@@ -1,6 +1,6 @@
- ┌─ <ansi fg="black" bold="true">.:</ansi><ansi fg="blue">Quests {{ printf "(%2d/%-2d)" .QuestsFound .QuestsTotal }}</ansi> ───────────────────────────────────────────────────────┐
- {{ $nlLen := sub (len .Records) 1 }}{{ range $idx, $qInfo := .Records }}  <ansi fg="questname">{{ padRight 56 $qInfo.Name }}</ansi> <ansi fg="green">{{ $qInfo.BarFull }}</ansi><ansi fg="black" bold="true">{{ $qInfo.BarEmpty }}</ansi> <ansi fg="cyan" bold="true">{{ padRight 4 $qInfo.Completion }}</ansi>
-   <ansi fg="white" bold="true">{{ splitstring $qInfo.Description 72 "   " }}</ansi>{{ if lt $idx $nlLen }}{{ "\n" }}{{ end }}
+ ┌─ <ansi fg="black-bold">.:</ansi><ansi fg="blue">Quests {{ printf "(%2d/%-2d)" .QuestsFound .QuestsTotal }}</ansi> ───────────────────────────────────────────────────────┐
+ {{ $nlLen := sub (len .Records) 1 }}{{ range $idx, $qInfo := .Records }}  <ansi fg="questname">{{ padRight 56 $qInfo.Name }}</ansi> <ansi fg="green">{{ $qInfo.BarFull }}</ansi><ansi fg="black-bold">{{ $qInfo.BarEmpty }}</ansi> <ansi fg="cyan-bold">{{ padRight 4 $qInfo.Completion }}</ansi>
+   <ansi fg="white-bold">{{ splitstring $qInfo.Description 72 "   " }}</ansi>{{ if lt $idx $nlLen }}{{ "\n" }}{{ end }}
  {{ end -}}
  └──────────────────────────────────────────────────────────────────────────┘
  

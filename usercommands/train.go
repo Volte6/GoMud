@@ -77,11 +77,11 @@ func Train(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		} else if currentLevel >= trainingRange.Min-1 && currentLevel < trainingRange.Max {
 			opt.Cost = user.Character.GetSkillLevelCost(currentLevel + 1)
 			if currentLevel == 0 {
-				opt.CurrentStatus = `<ansi fg="cyan" bold="true">Unknown</ansi>`
-				opt.Message = fmt.Sprintf(`<ansi fg="cyan" bold="true">Learn this skill here for </ansi><ansi fg="yellow">%d training points</ansi><ansi fg="cyan" bold="true">.</ansi>`, opt.Cost)
+				opt.CurrentStatus = `<ansi fg="cyan-bold">Unknown</ansi>`
+				opt.Message = fmt.Sprintf(`<ansi fg="cyan-bold">Learn this skill here for </ansi><ansi fg="yellow">%d training points</ansi><ansi fg="cyan-bold">.</ansi>`, opt.Cost)
 			} else {
-				opt.CurrentStatus = fmt.Sprintf(`<ansi fg="cyan" bold="true">Level %d</ansi>`, currentLevel)
-				opt.Message = fmt.Sprintf(`<ansi fg="cyan" bold="true">Upgrade this skill here for </ansi><ansi fg="yellow">%d training points</ansi><ansi fg="cyan" bold="true">.</ansi>`, opt.Cost)
+				opt.CurrentStatus = fmt.Sprintf(`<ansi fg="cyan-bold">Level %d</ansi>`, currentLevel)
+				opt.Message = fmt.Sprintf(`<ansi fg="cyan-bold">Upgrade this skill here for </ansi><ansi fg="yellow">%d training points</ansi><ansi fg="cyan-bold">.</ansi>`, opt.Cost)
 			}
 
 			opt.Cost = currentLevel + 1

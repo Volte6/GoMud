@@ -26,7 +26,7 @@ Set a property of the room. This updates basic properties of the room you are in
 
 <ansi fg="command">room exit [exit_name] [room_id]</ansi> - e.g. <ansi fg="command">room exit west 159</ansi>
 This will create a new exit that links to a specific room_id using the exit_name provided.
-<ansi fg="red" bold="true">!Beware!</ansi> if the spacial relationship with compass direction rooms is done incorrectly, 
+<ansi fg="red-bold">!Beware!</ansi> if the spacial relationship with compass direction rooms is done incorrectly, 
 movement could confuse players and maps may generate strangely.
 It is recommended that this only be used to link rooms with non-compass directions, such as "inside" or "cave"
 

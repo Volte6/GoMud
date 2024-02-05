@@ -1,4 +1,4 @@
-<ansi fg="black" bold="true">.:</ansi> <ansi fg="magenta">Help for </ansi>Item Names
+<ansi fg="black-bold">.:</ansi> <ansi fg="magenta">Help for </ansi>Item Names
 
 When referring to items by name, to <ansi fg="command">use</ansi>, <ansi fg="command">get</ansi>, <ansi fg="command">drop</ansi>, <ansi fg="command">read</ansi>, etc you may use
 partial names to refer to items. For example, "<ansi fg="item">a heavy sword</ansi>" can be referred

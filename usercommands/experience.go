@@ -81,7 +81,7 @@ func Experience(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 		rows := [][]string{}
 
 		formatting := []string{
-			`<ansi fg="white" bold="true">%s</ansi>`,
+			`<ansi fg="white-bold">%s</ansi>`,
 			`<ansi fg="red">%s</ansi>`,
 			`<ansi fg="yellow">%s</ansi>`,
 			`<ansi fg="yellow">%s</ansi>`,

@@ -253,7 +253,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 		// If they are backstabbing it's a free crit
 		if sourceChar.Aggro.Type == characters.BackStab {
 			attackResult.Crit = true
-			attackMessagePrefix = `<ansi fg="magenta" bold="true">*[BACKSTAB]*</ansi> `
+			attackMessagePrefix = `<ansi fg="magenta-bold">*[BACKSTAB]*</ansi> `
 			// Failover to the default attack
 			sourceChar.SetAggro(sourceChar.Aggro.UserId, sourceChar.Aggro.MobInstanceId, characters.DefaultAttack)
 		}
@@ -398,11 +398,11 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 				}
 
 				if attackResult.Crit {
-					toAttackerMsg = items.ItemMessage(`<ansi fg="yellow" bold="true">***</ansi> ` + string(toAttackerMsg) + ` <ansi fg="yellow" bold="true">***</ansi>`)
-					toDefenderMsg = items.ItemMessage(`<ansi fg="yellow" bold="true">***</ansi> ` + string(toDefenderMsg) + ` <ansi fg="yellow" bold="true">***</ansi>`)
-					toAttackerRoomMsg = items.ItemMessage(`<ansi fg="yellow" bold="true">***</ansi> ` + string(toAttackerRoomMsg) + ` <ansi fg="yellow" bold="true">***</ansi>`)
+					toAttackerMsg = items.ItemMessage(`<ansi fg="yellow-bold">***</ansi> ` + string(toAttackerMsg) + ` <ansi fg="yellow-bold">***</ansi>`)
+					toDefenderMsg = items.ItemMessage(`<ansi fg="yellow-bold">***</ansi> ` + string(toDefenderMsg) + ` <ansi fg="yellow-bold">***</ansi>`)
+					toAttackerRoomMsg = items.ItemMessage(`<ansi fg="yellow-bold">***</ansi> ` + string(toAttackerRoomMsg) + ` <ansi fg="yellow-bold">***</ansi>`)
 					if len(string(toDefenderRoomMsg)) > 0 {
-						toDefenderRoomMsg = items.ItemMessage(`<ansi fg="yellow" bold="true">***</ansi> ` + string(toDefenderRoomMsg) + ` <ansi fg="yellow" bold="true">***</ansi>`)
+						toDefenderRoomMsg = items.ItemMessage(`<ansi fg="yellow-bold">***</ansi> ` + string(toDefenderRoomMsg) + ` <ansi fg="yellow-bold">***</ansi>`)
 					}
 				}
 

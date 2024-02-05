@@ -1,4 +1,4 @@
-<ansi fg="black" bold="true">.:</ansi> <ansi fg="magenta">Help for </ansi><ansi fg="command">health</ansi>
+<ansi fg="black-bold">.:</ansi> <ansi fg="magenta">Help for </ansi><ansi fg="command">health</ansi>
 
 The <ansi fg="command">health</ansi> (Hitpoints/HP) stat represents how much damage you can take.
 

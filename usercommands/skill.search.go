@@ -77,7 +77,7 @@ func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			if !item.IsValid() {
 				room.RemoveItem(item, true)
 			}
-			name := item.Name() + ` <ansi fg="black" bold="true">(stashed)</ansi>`
+			name := item.Name() + ` <ansi fg="black-bold">(stashed)</ansi>`
 			stashedItems = append(stashedItems, name)
 		}
 
@@ -95,7 +95,7 @@ func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 				if roll < searchOddsIn100 {
 					if p.Character.HasBuffFlag(buffs.Hidden) {
-						hiddenPlayers = append(hiddenPlayers, p.Character.Name+` <ansi fg="black" bold="true">(hiding)</ansi>`)
+						hiddenPlayers = append(hiddenPlayers, p.Character.Name+` <ansi fg="black-bold">(hiding)</ansi>`)
 					}
 				}
 			}
@@ -132,7 +132,7 @@ func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 				if roll < searchOddsIn100 {
 					if m.Character.HasBuffFlag(buffs.Hidden) {
-						hiddenMobs = append(hiddenPlayers, m.Character.Name+` <ansi fg="black" bold="true">(hiding)</ansi>`)
+						hiddenMobs = append(hiddenPlayers, m.Character.Name+` <ansi fg="black-bold">(hiding)</ansi>`)
 					}
 				}
 			}

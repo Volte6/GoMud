@@ -1,7 +1,7 @@
 {{ $cooldowns := .SkillCooldowns }}
- ┌─ <ansi fg="black" bold="true">.:</ansi><ansi fg="blue">Skills</ansi> ─────────────────────────────────────────────────────────────────┐
- {{ range $skillName, $skillLevel := .SkillList }}  <ansi fg="yellow" bold="true">{{ padRight 12 $skillName }}</ansi> {{ if eq $skillLevel 4 }}<ansi fg="white">[MAXIMUM]</ansi>{{ else }}{{ if eq $skillLevel 0 }}[Unknown]{{ else }}<ansi fg="white">[Level {{ $skillLevel }}]</ansi>{{ end }}{{ end }}    {{ if eq (index $cooldowns $skillName) 0 }}{{ else }}Cooling down for {{ index $cooldowns $skillName }} more round(s){{ end }}
+ ┌─ <ansi fg="black-bold">.:</ansi><ansi fg="blue">Skills</ansi> ─────────────────────────────────────────────────────────────────┐
+ {{ range $skillName, $skillLevel := .SkillList }}  <ansi fg="yellow-bold">{{ padRight 12 $skillName }}</ansi> {{ if eq $skillLevel 4 }}<ansi fg="white">[MAXIMUM]</ansi>{{ else }}{{ if eq $skillLevel 0 }}[Unknown]{{ else }}<ansi fg="white">[Level {{ $skillLevel }}]</ansi>{{ end }}{{ end }}    {{ if eq (index $cooldowns $skillName) 0 }}{{ else }}Cooling down for {{ index $cooldowns $skillName }} more round(s){{ end }}
  {{ end -}}{{ if eq (len .SkillList) 0 }}  No Skills! Visit a guild or training center to train.{{ end -}}
  └────────────────────────────────────────────────────────────────────────────┘
- You have <ansi fg="{{ if eq .TrainingPoints 0 }}red{{ else }}yellow{{ end }}" bold="true">{{ .TrainingPoints }} Training Points</ansi>. Level up to earn more.
+ You have <ansi fg="{{ if eq .TrainingPoints 0 }}red{{ else }}yellow{{ end }}-bold">{{ .TrainingPoints }} Training Points</ansi>. Level up to earn more.
 

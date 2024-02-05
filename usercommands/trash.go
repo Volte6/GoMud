@@ -49,7 +49,7 @@ func Trash(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		}
 
 		response.SendUserMessage(user.UserId,
-			fmt.Sprintf(`You gained <ansi fg="yellow" bold="true">%d experience points</ansi>%s!`, grantXP, xpMsgExtra),
+			fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi>%s!`, grantXP, xpMsgExtra),
 			true)
 
 	}

@@ -72,7 +72,7 @@ func Consider(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 
 			prediction := `Unknown`
 			if ratio > 4 {
-				prediction = `<ansi fg="blue" bold="true">Very Favorable</ansi>`
+				prediction = `<ansi fg="blue-bold">Very Favorable</ansi>`
 			} else if ratio > 3 {
 				prediction = `<ansi fg="green">Favorable</ansi>`
 			} else if ratio > 2 {
@@ -80,11 +80,11 @@ func Consider(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 			} else if ratio > 1 {
 				prediction = `<ansi fg="yellow">Okay</ansi>`
 			} else if ratio > 0.5 {
-				prediction = `<ansi fg="red" bold="true">Bad</ansi>`
+				prediction = `<ansi fg="red-bold">Bad</ansi>`
 			} else if ratio > 0 {
-				prediction = `<ansi fg="red" bold="true">Very Bad</ansi>`
+				prediction = `<ansi fg="red-bold">Very Bad</ansi>`
 			} else {
-				prediction = `<ansi fg="red" bold="true">YOU WILL DIE</ansi>`
+				prediction = `<ansi fg="red-bold">YOU WILL DIE</ansi>`
 			}
 
 			response.SendUserMessage(userId,

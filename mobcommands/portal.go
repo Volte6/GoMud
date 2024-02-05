@@ -88,7 +88,7 @@ func Portal(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 	newPortalExitName := `dark portal`
 	newPortal := rooms.TemporaryRoomExit{
 		RoomId:  portalTargetRoomId,
-		Title:   fmt.Sprintf(`<ansi fg="black" bold="true">%s</ansi>`, newPortalExitName),
+		Title:   fmt.Sprintf(`<ansi fg="black-bold">%s</ansi>`, newPortalExitName),
 		UserId:  0,
 		Expires: time.Now().Add(time.Duration(configs.GetConfig().RoundSeconds*2) * time.Second), // lasts for 2 rounds
 	}

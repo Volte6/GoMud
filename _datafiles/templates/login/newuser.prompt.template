@@ -1,1 +1,1 @@
-<ansi bold="true" fg="yellow">Create new user?</ansi> <ansi fg="black" bold="true">[y/<ansi fg="white">n</ansi>]: </ansi>
+<ansi bold="true" fg="yellow">Create new user?</ansi> <ansi fg="black-bold">[y/<ansi fg="white">n</ansi>]: </ansi>

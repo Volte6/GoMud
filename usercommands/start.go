@@ -94,7 +94,7 @@ func Start(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			return response, nil
 		}
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You will be known as <ansi fg="yellow" bold="true">%s</ansi>!%s`, user.Character.Name, term.CRLFStr), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You will be known as <ansi fg="yellow-bold">%s</ansi>!%s`, user.Character.Name, term.CRLFStr), true)
 	}
 
 	response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="magenta">Suddenly, a vortex appears before you, drawing you in before you have any chance to react!</ansi>%s`, term.CRLFStr), true)

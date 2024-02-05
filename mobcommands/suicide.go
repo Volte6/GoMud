@@ -97,7 +97,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 	if len(partyTracker) > 0 {
 
-		xpMsg := `You gained <ansi fg="yellow" bold="true">%d experience points</ansi>%s!`
+		xpMsg := `You gained <ansi fg="yellow-bold">%d experience points</ansi>%s!`
 		for leaderId, xp := range partyTracker {
 			if p := parties.Get(leaderId); p != nil {
 
@@ -154,7 +154,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 	}
 
 	if mob.Character.Gold > 0 {
-		msg := fmt.Sprintf(`<ansi fg="yellow" bold="true">%d gold</ansi> drops to the ground.`, mob.Character.Gold)
+		msg := fmt.Sprintf(`<ansi fg="yellow-bold">%d gold</ansi> drops to the ground.`, mob.Character.Gold)
 		response.SendRoomMessage(mob.Character.RoomId, msg, true)
 		room.Gold += mob.Character.Gold
 	}

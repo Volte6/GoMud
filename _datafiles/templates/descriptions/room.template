@@ -1,21 +1,21 @@
 {{ $mapSymbol := "" -}}
 {{ if ne .RoomSymbol "" -}}
-   {{ $mapSymbol = printf `<ansi fg="black" bold="true">[</ansi><ansi fg="map-%s">%s</ansi><ansi fg="black" bold="true">]</ansi> ` (lowercase .RoomLegend) .RoomSymbol }}
+   {{ $mapSymbol = printf `<ansi fg="black-bold">[</ansi><ansi fg="map-%s">%s</ansi><ansi fg="black-bold">]</ansi> ` (lowercase .RoomLegend) .RoomSymbol }}
 {{- end }}
-<ansi fg="black" bold="true">.:</ansi> {{ $mapSymbol }}<ansi fg="magenta">{{ .Room.Title }}</ansi>{{ if ne .Room.Zone ""}} <ansi fg="red">[{{ .Room.Zone }}]</ansi>{{ end }}
+<ansi fg="black-bold">.:</ansi> {{ $mapSymbol }}<ansi fg="room-title">{{ .Room.Title }}</ansi>{{ if ne .Room.Zone ""}} <ansi fg="room-zone">[{{ .Room.Zone }}]</ansi>{{ end }}
 <ansi fg="description">{{ splitstring .Room.GetDescription 80 }}</ansi>
 {{ if ne (len .Room.SkillTraining) 0 }}
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>
-      <ansi fg="yellow" bold="true">You can train here!</ansi> Type <ansi fg="command">train</ansi> to see what training is available. 
+      <ansi fg="yellow-bold">You can train here!</ansi> Type <ansi fg="command">train</ansi> to see what training is available. 
     <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
 {{ end }}
 {{- if .Room.IsBank }}
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>
-                <ansi fg="yellow" bold="true">This is a bank!</ansi> Type <ansi fg="command">bank</ansi> to deposit/withdraw. 
+                <ansi fg="yellow-bold">This is a bank!</ansi> Type <ansi fg="command">bank</ansi> to deposit/withdraw. 
     <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
 {{ end }}
 {{- if .Room.IsStorage }}
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>
-       <ansi fg="yellow" bold="true">This is an item storage location!</ansi> Type <ansi fg="command">storage</ansi> to store/unstore. 
+       <ansi fg="yellow-bold">This is an item storage location!</ansi> Type <ansi fg="command">storage</ansi> to store/unstore. 
     <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
 {{ end }}

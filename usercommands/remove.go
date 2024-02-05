@@ -38,14 +38,14 @@ func Remove(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		if matchItem.IsCursed() && user.Character.Health > 0 {
 			if user.Character.GetSkillLevel(skills.Enchant) < 4 {
 				response.SendUserMessage(userId,
-					fmt.Sprintf(`You can't seem to remove your <ansi fg="item">%s</ansi>... It's <ansi fg="red" bold="true">CURSED!</ansi>`, matchItem.Name()),
+					fmt.Sprintf(`You can't seem to remove your <ansi fg="item">%s</ansi>... It's <ansi fg="red-bold">CURSED!</ansi>`, matchItem.Name()),
 					true)
 
 				response.Handled = true
 				return response, nil
 			} else {
 				response.SendUserMessage(userId,
-					`It's <ansi fg="red" bold="true">CURSED</ansi> but luckily your <ansi fg="skillname">enchant</ansi> skill level allows you to remove it.`,
+					`It's <ansi fg="red-bold">CURSED</ansi> but luckily your <ansi fg="skillname">enchant</ansi> skill level allows you to remove it.`,
 					true)
 			}
 		}

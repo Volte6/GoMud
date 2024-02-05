@@ -146,7 +146,7 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 		} else {
 			// Tell the player they are moving
 			if isSneaking {
-				response.SendUserMessage(userId, fmt.Sprintf(`You <ansi fg="black" bold="true">sneak</ansi> towards the %s exit.`, exitName), true)
+				response.SendUserMessage(userId, fmt.Sprintf(`You <ansi fg="black-bold">sneak</ansi> towards the %s exit.`, exitName), true)
 			} else {
 				response.SendUserMessage(userId, fmt.Sprintf(`You head towards the <ansi fg="exit">%s</ansi> exit.`, exitName), true)
 

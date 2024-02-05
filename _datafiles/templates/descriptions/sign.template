@@ -1,1 +1,1 @@
-           A sign reads: [<ansi fg="green" bold="true">{{ .DisplayText }}</ansi>]
+           A sign reads: [<ansi fg="green-bold">{{ .DisplayText }}</ansi>]

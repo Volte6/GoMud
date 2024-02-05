@@ -125,18 +125,18 @@ options:
     # messages for when they are in the same room
     together:
       toattacker:
-      - 'Your <ansi fg="item">{itemname}</ansi> <ansi fg="cyan" bold="true">CRITICALLY SNIPES</ansi> <ansi fg="{targettype}">{target}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
+      - 'Your <ansi fg="item">{itemname}</ansi> <ansi fg="cyan-bold">CRITICALLY SNIPES</ansi> <ansi fg="{targettype}">{target}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
       todefender:
-      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> <ansi fg="cyan" bold="true">CRITICALLY SNIPES</ansi> you for <ansi fg="damage">{damage} damage</ansi>!'
+      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> <ansi fg="cyan-bold">CRITICALLY SNIPES</ansi> you for <ansi fg="damage">{damage} damage</ansi>!'
       toroom:
-      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> <ansi fg="cyan" bold="true">CRITICALLY SNIPES</ansi> <ansi fg="{targettype}">{target}</ansi>!'
+      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> <ansi fg="cyan-bold">CRITICALLY SNIPES</ansi> <ansi fg="{targettype}">{target}</ansi>!'
     # messages for when they are in different rooms, such as with projectiles
     separate:
       toattacker:
-      - 'Your <ansi fg="item">{itemname}</ansi> <ansi fg="cyan" bold="true">CRITICALLY SNIPES</ansi> <ansi fg="{targettype}">{target}</ansi> through the <ansi fg="exit">{exitname}</ansi> direction for <ansi fg="damage">{damage} damage</ansi>!'
+      - 'Your <ansi fg="item">{itemname}</ansi> <ansi fg="cyan-bold">CRITICALLY SNIPES</ansi> <ansi fg="{targettype}">{target}</ansi> through the <ansi fg="exit">{exitname}</ansi> direction for <ansi fg="damage">{damage} damage</ansi>!'
       todefender:
-      - 'A <ansi fg="item">{itemname}</ansi> shot from the <ansi fg="exit">{entrancename}</ansi> direction <ansi fg="cyan" bold="true">CRITICALLY SNIPES</ansi> you for <ansi fg="damage">{damage} damage</ansi>!'
+      - 'A <ansi fg="item">{itemname}</ansi> shot from the <ansi fg="exit">{entrancename}</ansi> direction <ansi fg="cyan-bold">CRITICALLY SNIPES</ansi> you for <ansi fg="damage">{damage} damage</ansi>!'
       toattackerroom:
       - '<ansi fg="{sourcetype}">{source}</ansi> fires their <ansi fg="item">{itemname}</ansi> towards the <ansi fg="exit">{exitname}</ansi> direction.'
       todefenderroom:
-      - 'A shot from a <ansi fg="item">{itemname}</ansi> flies in from the <ansi fg="exit">{entrancename}</ansi>, and <ansi fg="cyan" bold="true">CRITICALLY SNIPES</ansi> <ansi fg="{targettype}">{target}</ansi>.'
+      - 'A shot from a <ansi fg="item">{itemname}</ansi> flies in from the <ansi fg="exit">{entrancename}</ansi>, and <ansi fg="cyan-bold">CRITICALLY SNIPES</ansi> <ansi fg="{targettype}">{target}</ansi>.'

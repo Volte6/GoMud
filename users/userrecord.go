@@ -20,16 +20,16 @@ var (
 	PermissionMod   string = "mod"   // Logged in has limited special powers
 	PermissionAdmin string = "admin" // Logged in and has special powers
 
-	promptFormat = `<ansi fg="black" bold="true">[</ansi><ansi fg="white">HP:</ansi>` +
+	promptFormat = `<ansi fg="black-bold">[</ansi><ansi fg="white">HP:</ansi>` +
 		`<ansi fg="hp-%s" bold="%s">` +
-		`%d<ansi fg="black" bold="true">/</ansi>%d` +
+		`%d<ansi fg="black-bold">/</ansi>%d` +
 		`</ansi>` +
 		` ` +
 		`<ansi fg="white">MP:</ansi>` +
 		`<ansi fg="magenta" bold="%s">` +
-		`%d<ansi fg="black" bold="true">/</ansi>%d` +
+		`%d<ansi fg="black-bold">/</ansi>%d` +
 		`</ansi>` +
-		`<ansi fg="black" bold="true">]:</ansi>`
+		`<ansi fg="black-bold">]:</ansi>`
 )
 
 type UserRecord struct {
@@ -132,7 +132,7 @@ func (u *UserRecord) GetPrompt(fullRedraw bool) string {
 	if fullRedraw {
 		unsent, suggested := u.GetUnsentText()
 		if len(suggested) > 0 {
-			suggested = `<ansi fg="black" bold="true">` + suggested + `</ansi>`
+			suggested = `<ansi fg="black-bold">` + suggested + `</ansi>`
 		}
 		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + ansiPrompt + unsent + suggested
 	}

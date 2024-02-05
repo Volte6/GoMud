@@ -233,15 +233,15 @@ func (q *Question) String() string {
 	defer q.lock.Unlock()
 
 	ret := strings.Builder{}
-	ret.WriteString(`<ansi fg="black" bold="true">.:</ansi> `) // Prompt prefix
-	ret.WriteString(`<ansi fg="yellow" bold="true">`)
+	ret.WriteString(`<ansi fg="black-bold">.:</ansi> `) // Prompt prefix
+	ret.WriteString(`<ansi fg="yellow-bold">`)
 	ret.WriteString(q.Question) // Actual question
 	ret.WriteString(`</ansi>`)
 
 	optLen := len(q.Options)
 	if optLen > 0 {
 
-		ret.WriteString(` <ansi fg="black" bold="true">[</ansi>`)
+		ret.WriteString(` <ansi fg="black-bold">[</ansi>`)
 		for i := 0; i < optLen; i++ {
 
 			if q.DefaultResponse != `` {
@@ -249,7 +249,7 @@ func (q *Question) String() string {
 				if q.Options[i] == q.DefaultResponse {
 					ret.WriteString(`<ansi fg="white">`)
 				} else {
-					ret.WriteString(`<ansi fg="black" bold="true">`)
+					ret.WriteString(`<ansi fg="black-bold">`)
 				}
 
 				ret.WriteString(q.Options[i])
@@ -261,10 +261,10 @@ func (q *Question) String() string {
 			}
 
 			if i < optLen-1 {
-				ret.WriteString(`<ansi fg="black" bold="true">/</ansi>`)
+				ret.WriteString(`<ansi fg="black-bold">/</ansi>`)
 			}
 		}
-		ret.WriteString(`<ansi fg="black" bold="true">]</ansi>`)
+		ret.WriteString(`<ansi fg="black-bold">]</ansi>`)
 	}
 	ret.WriteString(` `)
 	return ret.String()
