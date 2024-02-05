@@ -1,4 +1,4 @@
-<ansi bold="true" fg="yellow">{{.prompt}}</ansi> <ansi fg="black-bold">[
+<ansi fg="yellow-bold">{{.prompt}}</ansi> <ansi fg="black-bold">[
 {{- $default := .default -}}
 {{- $length := len .options -}}
 {{- $lastIndex := sub $length 1 -}}

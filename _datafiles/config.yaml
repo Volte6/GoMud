@@ -119,12 +119,15 @@ MaxMobBoredom: 150
 #   Custom network settings for the server. If you are running the server
 #
 ################################################################################
+# - MaxTelnetConnections - 
+#   The maximum number of telnet connections the server will accept.
+MaxTelnetConnections: 50
 # - TelnetPort -
 #   The port the server listens on for telnet connections
-TelnetPort: 33333 
+TelnetPort: 33333
 # - WebPort -
 #   The port the server listens on for web requests
-WebPort: 80 
+WebPort: 80
 ################################################################################
 #
 #   LOOT GOBLIN CONFIGURATIONS

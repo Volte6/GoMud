@@ -31,6 +31,7 @@ type config struct {
 	RoundSeconds                 int      `yaml:"RoundSeconds"`
 	RoundsPerAutoSave            int      `yaml:"RoundsPerAutoSave"`
 	MaxMobBoredom                int      `yaml:"MaxMobBoredom"`
+	MaxTelnetConnections         int      `yaml:"MaxTelnetConnections"`         // Maximum number of telnet connections to accept
 	TelnetPort                   int      `yaml:"TelnetPort"`                   // Port used to accept telnet connections
 	WebPort                      int      `yaml:"WebPort"`                      // Port used for web requests
 	NextRoomId                   int      `yaml:"NextRoomId"`                   // The next room id to use when creating a new room
@@ -277,6 +278,10 @@ func (c *config) validate() {
 
 	if c.MaxMobBoredom < 1 {
 		c.MaxMobBoredom = 150 // default
+	}
+
+	if c.MaxTelnetConnections < 1 {
+		c.MaxTelnetConnections = 50 // default
 	}
 
 	if c.TelnetPort < 1 {

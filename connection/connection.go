@@ -132,6 +132,17 @@ func sliceContains(slice []ConnectionId, id ConnectionId) bool {
 	return false
 }
 
+// make this more efficient later
+func (c *ConnectionTracker) ActiveConnectionCount() int {
+	ct := 0
+	c.netConnections.Range(func(key, cd interface{}) (processNext bool) {
+		ct++
+		return true
+	})
+	return ct
+
+}
+
 func (c *ConnectionTracker) Stats() (connections uint64, disconnections uint64) {
 	return atomic.LoadUint64(&c.connectCounter), atomic.LoadUint64(&c.disconnectCounter)
 }

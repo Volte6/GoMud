@@ -1,1 +1,1 @@
-<ansi bold="true" fg="black">username: </ansi>
+<ansi fg="39">username</ansi><ansi fg="black-bold">: </ansi>
