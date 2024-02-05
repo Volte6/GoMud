@@ -127,11 +127,11 @@ options:
     # messages for when they are in the same room
     together:
       toattacker:
-      - 'You <ansi fg="cyan" bold="true">CRITICALLY HIT</ansi> <ansi fg="{targettype}">{target}</ansi> with <ansi fg="item">{itemname}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
+      - 'You <ansi fg="cyan-bold">CRITICALLY HIT</ansi> <ansi fg="{targettype}">{target}</ansi> with <ansi fg="item">{itemname}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
       todefender:
-      - '<ansi fg="{sourcetype}">{source}</ansi> <ansi fg="cyan" bold="true">CRITICALLY HITS</ansi> you with their <ansi fg="item">{itemname}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
+      - '<ansi fg="{sourcetype}">{source}</ansi> <ansi fg="cyan-bold">CRITICALLY HITS</ansi> you with their <ansi fg="item">{itemname}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
       toroom:
-      - '<ansi fg="{sourcetype}">{source}</ansi> <ansi fg="cyan" bold="true">CRITICALLY HITS</ansi> <ansi fg="{targettype}">{target}</ansi> with their <ansi fg="item">{itemname}</ansi>!'
+      - '<ansi fg="{sourcetype}">{source}</ansi> <ansi fg="cyan-bold">CRITICALLY HITS</ansi> <ansi fg="{targettype}">{target}</ansi> with their <ansi fg="item">{itemname}</ansi>!'
     # messages for when they are in different rooms, such as with projectiles
     separate:
       toattacker:

@@ -6,6 +6,6 @@ This is a general testing tool for:
   1. Load testing
   2. Putting NPC into motion without having to visit all of the rooms.
 
-<ansi fg="red" bold="true">WARNING!</ansi> - This may be cpu/memory intensive. 
+<ansi fg="red-bold">WARNING!</ansi> - This may be cpu/memory intensive. 
 Consider using <ansi fg="command">server stats</ansi> before and after to compare the impact.
 

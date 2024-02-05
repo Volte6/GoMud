@@ -396,13 +396,13 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			}
 
 			if blockedByMob != `` {
-				messageQueue.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="red" bold="true"><ansi fg="mobname">%s</ansi> blocks you from fleeing!</ansi>`, blockedByMob), true)
+				messageQueue.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="red-bold"><ansi fg="mobname">%s</ansi> blocks you from fleeing!</ansi>`, blockedByMob), true)
 				messageQueue.SendRoomMessage(roomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is blocked from fleeing by <ansi fg="mobname">%s</ansi>!`, user.Character.Name, blockedByMob), true, userId)
 				continue
 			}
 
 			if blockedByPlayer != `` {
-				messageQueue.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="red" bold="true"><ansi fg="username">%s</ansi> blocks you from fleeing!</ansi>`, blockedByPlayer), true)
+				messageQueue.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="red-bold"><ansi fg="username">%s</ansi> blocks you from fleeing!</ansi>`, blockedByPlayer), true)
 				messageQueue.SendRoomMessage(roomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is blocked from fleeing by <ansi fg="username">%s</ansi>!`, user.Character.Name, blockedByPlayer), true, userId)
 				continue
 			}
@@ -524,13 +524,13 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 					defUser.Character.Health = 1
 
 					messageQueue.SendUserMessage(user.UserId,
-						fmt.Sprintf(`<ansi fg="green" bold="true">+</ansi> You apply first aid to <ansi fg="username">%s</ansi>. <ansi fg="green" bold="true">+</ansi>`, defUser.Character.Name),
+						fmt.Sprintf(`<ansi fg="green-bold">+</ansi> You apply first aid to <ansi fg="username">%s</ansi>. <ansi fg="green-bold">+</ansi>`, defUser.Character.Name),
 						true)
 					messageQueue.SendUserMessage(defUser.UserId,
-						fmt.Sprintf(`<ansi fg="green" bold="true">+</ansi> <ansi fg="username">%s</ansi> applies first aid and stops the bleeding. <ansi fg="green" bold="true">+</ansi>`, user.Character.Name),
+						fmt.Sprintf(`<ansi fg="green-bold">+</ansi> <ansi fg="username">%s</ansi> applies first aid and stops the bleeding. <ansi fg="green-bold">+</ansi>`, user.Character.Name),
 						true)
 					messageQueue.SendRoomMessage(user.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="green" bold="true">+</ansi> <ansi fg="username">%s</ansi> applies first aid to <ansi fg="username">%s</ansi> and stops the bleeding. <ansi fg="green" bold="true">+</ansi>`, user.Character.Name, defUser.Character.Name),
+						fmt.Sprintf(`<ansi fg="green-bold">+</ansi> <ansi fg="username">%s</ansi> applies first aid to <ansi fg="username">%s</ansi> and stops the bleeding. <ansi fg="green-bold">+</ansi>`, user.Character.Name, defUser.Character.Name),
 						true,
 						user.UserId,
 						defUser.UserId)
@@ -888,10 +888,10 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 					defUser.Character.Health = 1
 
 					messageQueue.SendUserMessage(defUser.UserId,
-						fmt.Sprintf(`<ansi fg="green" bold="true">+</ansi> <ansi fg="mobname">%s</ansi> applies first aid and stops the bleeding. <ansi fg="green" bold="true">+</ansi>`, mob.Character.Name),
+						fmt.Sprintf(`<ansi fg="green-bold">+</ansi> <ansi fg="mobname">%s</ansi> applies first aid and stops the bleeding. <ansi fg="green-bold">+</ansi>`, mob.Character.Name),
 						true)
 					messageQueue.SendRoomMessage(mob.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="green" bold="true">+</ansi> <ansi fg="mobname">%s</ansi> applies first aid to <ansi fg="username">%s</ansi> and stops the bleeding. <ansi fg="green" bold="true">+</ansi>`, mob.Character.Name, defUser.Character.Name),
+						fmt.Sprintf(`<ansi fg="green-bold">+</ansi> <ansi fg="mobname">%s</ansi> applies first aid to <ansi fg="username">%s</ansi> and stops the bleeding. <ansi fg="green-bold">+</ansi>`, mob.Character.Name, defUser.Character.Name),
 						true,
 						defUser.UserId)
 				}
@@ -1284,7 +1284,7 @@ func (w *World) HandleShadowRealm(roundNumber uint64) util.MessageQueue {
 			}
 			// Spawn a portal in the room that leads to the portal location
 			deadRoom.AddTemporaryExit("shimmering portal", tmpExit)
-			messageQueue.SendRoomMessage(75, `<ansi fg="magenta" bold="true">A shimmering portal appears in the room.</ansi>`, true)
+			messageQueue.SendRoomMessage(75, `<ansi fg="magenta-bold">A shimmering portal appears in the room.</ansi>`, true)
 		}
 	}
 
@@ -1340,7 +1340,7 @@ func (w *World) CheckForLevelUps() util.MessageQueue {
 				messageQueue.SendUserMessage(user.UserId, levelUpStr, true)
 
 				w.Broadcast(
-					templates.AnsiParse(fmt.Sprintf(`<ansi fg="magenta" bold="true">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has leveled up to level %d!</ansi> <ansi fg="magenta" bold="true">***</ansi>%s`, user.Character.Name, user.Character.Level, term.CRLFStr)),
+					templates.AnsiParse(fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has leveled up to level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, user.Character.Level, term.CRLFStr)),
 				)
 
 				go users.SaveUser(*user)

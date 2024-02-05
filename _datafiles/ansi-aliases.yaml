@@ -1,6 +1,6 @@
 # Look up the numeric codes if it's easier here: https://en.wikipedia.org/wiki/ANSI_escape_code
 # Under 3-bit and 4-bit colors (Until 256 color support added)
-color:
+color8:
   table-title: green
   userid: black
   username: 93 # Bright yellow
@@ -32,7 +32,7 @@ color:
   map-you: 96
   map-secret: 90 # Bright black
   map-temple: 90 # Bright black BG
-  mapbg-temple: 97 # Bright blwhiteack BG
+  mapbg-temple: 97 # Bright black
   map-water: 94 # Bright blue
   map-shore: 94 # Bright blue
   map-forest: green
@@ -51,6 +51,7 @@ color:
   map-house: yellow
   map-mountains:  yellow
   map-wall:  cyan # Bright black
+  map-legend: 90
   trail-dead: 90
   trail-weak: 37
   trail-good: 32
@@ -77,4 +78,99 @@ color:
   corrupt: 35 # magenta
   evil: 91 # bright red
   unholy: 31 # red
-  
+  item-nothing: 90 # Bright black
+  item-flags:  90 # Bright black
+  item-enchanted: cyan
+  item-cursed: red
+  item-bonus-damage: cyan-bold
+  name-flags-wrapper: black-bold
+  name-flags: black-bold
+  room-title: magenta
+  room-zone: red
+color256:
+  table-title: green
+  userid: black
+  username: 11 # Bright yellow
+  username-aggro: red
+  username-downed: 8 # Bright black
+  mobname: cyan 
+  mobname-aggro: 9 # Bright red
+  mobname-downed: red
+  spellname: magenta
+  nameprefix-pet: 10
+  role: 8
+  role-admin: 9
+  role-mod: 1
+  role-user: 2
+  role-guest: 8
+  hp-dead: red
+  hp-alive: cyan
+  hpdead: red
+  hpalive: cyan
+  command: cyan
+  command-admin: 9
+  skill: 11
+  container: 12 # Bright blue
+  exit: 10 # Bright green
+  secret-exit: 8 # Bright black
+  zone: red
+  map-shop: green
+  map-bank: 10
+  map-you: 14
+  map-secret: 8 # Bright black
+  map-temple: 8 # Bright black BG
+  mapbg-temple: 15 # Bright black
+  map-water: 12 # Bright blue
+  map-shore: 12 # Bright blue
+  map-forest: green
+  map-trainer: 12 # Bright blue
+  map-player: 11 # Bright yellow
+  map-friend: 11 # Bright green
+  map-mob: 9 # Bright red
+  map-npc: 6 # Bright cyan
+  map-here: 13 # Bright magenta
+  description: white
+  map-default: 8
+  map-room: 15 # Bright white
+  map-target: 9 # Bright red
+  map-city: 15 # Bright white
+  map-snow: 15 # Bright white
+  map-house: yellow
+  map-mountains:  yellow
+  map-wall:  cyan # Bright black
+  map-legend: 8
+  trail-dead: 8
+  trail-weak: 7
+  trail-good: 2
+  trail-warm: 1
+  trail-hot: 9
+  item: green
+  itemname: green
+  questname: cyan
+  xp: 11 # Bright yellow
+  experience: 11 # Bright yellow
+  gold: 220 # light yellow
+  statmod: 6 # Bright cyan
+  damage: 9 # Bright red
+  shop-qty: 15 # Bright white
+  shop-name: green
+  shop-price: yellow
+  uses-left: 8 # Bright black
+  holy: 21 # Bright cyan
+  good: 33 # cyan
+  virtuous: 45 # bright blue
+  lawful: 123 # green
+  neutral: 8 # bright black
+  misguided: 219 # yellow
+  corrupt: 198 # magenta
+  evil: 88 # bright red
+  unholy: 160 # red
+  item-nothing: 237 # darkish black
+  item-flags: 7 # light gray
+  item-enchanted: 147
+  item-cursed: 54
+  item-bonus-damage: 49
+  name-flags-wrapper: 240
+  name-flag: 246
+  room-title: 91
+  room-zone: 52

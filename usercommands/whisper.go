@@ -42,7 +42,7 @@ func Whisper(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		return response, nil
 	}
 
-	response.SendUserMessage(toUser.UserId, fmt.Sprintf(`<ansi fg="white">***</ansi> <ansi fg="black" bold="true"><ansi fg="username">%s</ansi> whispers, "%s"</ansi> <ansi fg="white">***</ansi>`, user.Character.Name, rest), true)
+	response.SendUserMessage(toUser.UserId, fmt.Sprintf(`<ansi fg="white">***</ansi> <ansi fg="black-bold"><ansi fg="username">%s</ansi> whispers, "%s"</ansi> <ansi fg="white">***</ansi>`, user.Character.Name, rest), true)
 
 	response.Handled = true
 	return response, nil

@@ -86,7 +86,7 @@ func Status(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		user.Character.Validate()
 
 		response.SendUserMessage(userId,
-			fmt.Sprintf(`Your base <ansi fg="yellow">%s</ansi> improves from <ansi fg="cyan">%d</ansi> to <ansi fg="cyan" bold="true">%d</ansi>!`, match, before, after),
+			fmt.Sprintf(`Your base <ansi fg="yellow">%s</ansi> improves from <ansi fg="cyan">%d</ansi> to <ansi fg="cyan-bold">%d</ansi>!`, match, before, after),
 			true)
 		response.Handled = true
 		return response, nil

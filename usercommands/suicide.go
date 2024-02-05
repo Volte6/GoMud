@@ -30,7 +30,7 @@ func Suicide(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		return response, errors.New(`already dead`)
 	}
 
-	response.SendRoomMessage(0, fmt.Sprintf(`<ansi fg="magenta" bold="true">***</ansi> <ansi fg="username">%s</ansi> has <ansi fg="red" bold="true">DIED!</ansi> <ansi fg="magenta" bold="true">***</ansi>`, user.Character.Name), true)
+	response.SendRoomMessage(0, fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> has <ansi fg="red-bold">DIED!</ansi> <ansi fg="magenta-bold">***</ansi>`, user.Character.Name), true)
 
 	if config.OnDeathEquipmentDropChance >= 0 {
 		chanceInt := int(config.OnDeathEquipmentDropChance * 100)

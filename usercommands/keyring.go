@@ -32,30 +32,30 @@ func KeyRing(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 	}
 
 	containerKeyFormatting := []string{
-		`<ansi fg="white" bold="true">%s</ansi>`,
-		`<ansi fg="magenta">%s</ansi>`,
+		`<ansi fg="white-bold">%s</ansi>`,
+		`<ansi fg="room-title">%s</ansi>`,
 		`<ansi fg="container">%s</ansi>`,
-		`<ansi fg="black" bold="true">%s</ansi>`,
+		`<ansi fg="black-bold">%s</ansi>`,
 	}
 	containerPickFormatting := []string{
-		`<ansi fg="white" bold="true">%s</ansi>`,
-		`<ansi fg="magenta">%s</ansi>`,
+		`<ansi fg="white-bold">%s</ansi>`,
+		`<ansi fg="room-title">%s</ansi>`,
 		`<ansi fg="container">%s</ansi>`,
-		`<ansi fg="green" bold="true">%s</ansi>`,
+		`<ansi fg="green-bold">%s</ansi>`,
 	}
 
 	exitKeyFormatting := []string{
-		`<ansi fg="white" bold="true">%s</ansi>`,
-		`<ansi fg="magenta">%s</ansi>`,
+		`<ansi fg="white-bold">%s</ansi>`,
+		`<ansi fg="room-title">%s</ansi>`,
 		`<ansi fg="exit">%s</ansi>`,
-		`<ansi fg="black" bold="true">%s</ansi>`,
+		`<ansi fg="black-bold">%s</ansi>`,
 	}
 
 	exitPickFormatting := []string{
-		`<ansi fg="white" bold="true">%s</ansi>`,
-		`<ansi fg="magenta">%s</ansi>`,
+		`<ansi fg="white-bold">%s</ansi>`,
+		`<ansi fg="room-title">%s</ansi>`,
 		`<ansi fg="exit">%s</ansi>`,
-		`<ansi fg="green" bold="true">%s</ansi>`,
+		`<ansi fg="green-bold">%s</ansi>`,
 	}
 
 	// Different row entries lets us easily sort them by type

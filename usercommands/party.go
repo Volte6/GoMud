@@ -267,12 +267,12 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			}
 
 			tableFormatting := []string{`<ansi fg="username">%s</ansi>`,
-				`<ansi fg="white" bold="true">%s</ansi>`,
+				`<ansi fg="white-bold">%s</ansi>`,
 				`<ansi fg="yellow">%s</ansi>`,
-				`<ansi fg="cyan" bold="true">%s</ansi>`,
-				`<ansi fg="black" bold="true">%s</ansi>`,
-				`<ansi fg="magenta" bold="true">%s</ansi>`,
-				`<ansi fg="white" bold="true">%s</ansi>`}
+				`<ansi fg="cyan-bold">%s</ansi>`,
+				`<ansi fg="black-bold">%s</ansi>`,
+				`<ansi fg="magenta-bold">%s</ansi>`,
+				`<ansi fg="white-bold">%s</ansi>`}
 
 			partyTableData := templates.GetTable(`Party Members`, headers, rows, tableFormatting)
 			partyTxt, _ := templates.Process("tables/generic", partyTableData)

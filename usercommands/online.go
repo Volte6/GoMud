@@ -68,9 +68,9 @@ func Online(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 				`<ansi fg="username">%s</ansi>`,
 				`<ansi fg="red">%s</ansi>`,
 				`<ansi fg="` + user.Character.AlignmentName() + `">%s</ansi>`,
-				`<ansi fg="white" bold="true">%s</ansi>`,
+				`<ansi fg="white-bold">%s</ansi>`,
 				`<ansi fg="magenta">%s</ansi>`,
-				`<ansi fg="role-` + user.Permission + `" bold="true">%s</ansi>`,
+				`<ansi fg="role-` + user.Permission + `-bold">%s</ansi>`,
 			}
 
 			allFormatting = append(allFormatting, formatting)

@@ -170,7 +170,7 @@ Seed: "Mud"
 #   Commands to run when a user logs in. These commands are run by the user
 #   and can be anything they have access to.
 OnLoginCommands:
-- 'emote @appears before you in a flash of <ansi fg="yellow" bold="true">⚡l<ansi fg="white" bold="true">i</ansi>gh<ansi fg="white" bold="true">tn</ansi>i<ansi fg="white" bold="true">n</ansi>g⚡</ansi>!'
+- 'emote @appears before you in a flash of <ansi fg="yellow-bold">⚡l<ansi fg="white-bold">i</ansi>gh<ansi fg="white-bold">tn</ansi>i<ansi fg="white-bold">n</ansi>g⚡</ansi>!'
 - print
 - motd 
 - print

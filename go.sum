@@ -1,5 +1,7 @@
-github.com/Volte6/ansitags v0.0.0-20230922021518-843ec7a1a35e h1:oc19y8MKdzHZthfvNpMz09HEst4/aqftXQY/e02acwU=
-github.com/Volte6/ansitags v0.0.0-20230922021518-843ec7a1a35e/go.mod h1:HYqj2Ir8TI2pOL8q2xTP+Ai6Fp42nZVb/gT116IoG8I=
+github.com/Volte6/ansitags v0.0.0-20240205000433-e914ab0f24fd h1:eV0/30SUz6moG33nh/aqwJUQNXBZR/q40tQBadp6j74=
+github.com/Volte6/ansitags v0.0.0-20240205000433-e914ab0f24fd/go.mod h1:HYqj2Ir8TI2pOL8q2xTP+Ai6Fp42nZVb/gT116IoG8I=
+github.com/Volte6/ansitags v0.0.0-20240205002851-61e010ad9511 h1:JdOAPj8Umv4fATEdn641MGvKcn5BSIbat5AYs9dKMRg=
+github.com/Volte6/ansitags v0.0.0-20240205002851-61e010ad9511/go.mod h1:HYqj2Ir8TI2pOL8q2xTP+Ai6Fp42nZVb/gT116IoG8I=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

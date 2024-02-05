@@ -1,4 +1,4 @@
-<ansi bold="true" fg="yellow">{{.prompt}}</ansi> <ansi fg="black" bold="true">[
+<ansi bold="true" fg="yellow">{{.prompt}}</ansi> <ansi fg="black-bold">[
 {{- $default := .default -}}
 {{- $length := len .options -}}
 {{- $lastIndex := sub $length 1 -}}
@@ -6,7 +6,7 @@
     {{- if eq $element $default -}}
         <ansi fg="white">{{$element}}</ansi>
     {{- else -}}
-        <ansi fg="black" bold="true">{{$element}}</ansi>
+        <ansi fg="black-bold">{{$element}}</ansi>
     {{- end -}}
     {{- if ne $index $lastIndex -}}
         /

@@ -261,6 +261,9 @@ func LoadAliases() {
 		return
 	}
 
+	// Set to 256 color mode
+	ansitags.SetColorMode(ansitags.Color256)
+
 	ansiLock.Lock()
 	defer ansiLock.Unlock()
 

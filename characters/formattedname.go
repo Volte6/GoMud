@@ -23,14 +23,14 @@ func (c FormattedName) String() string {
 	output := fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, ansiAlias, c.Name)
 
 	if len(c.Flags) > 0 {
-		output += fmt.Sprintf(` <ansi fg="black" bold="true">(%s)</ansi>`, strings.Join(c.Flags, `, `))
+		output += fmt.Sprintf(` <ansi fg="name-flags-wrapper">(<ansi fg="name-flag">%s</ansi>)</ansi>`, strings.Join(c.Flags, `</ansi>, <ansi fg="name-flag">`))
 	}
 
 	if c.HealthDisplay != `` {
 		if c.HealthDisplay == `downed` {
 			output = fmt.Sprintf(`%s <ansi fg="red">(downed)</ansi>`, output)
 		} else {
-			output = fmt.Sprintf(`%s <ansi fg="black" bold="true">(%s)</ansi>`, output, c.HealthDisplay)
+			output = fmt.Sprintf(`%s <ansi fg="black-bold">(%s)</ansi>`, output, c.HealthDisplay)
 		}
 	}
 	return output

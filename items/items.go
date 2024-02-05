@@ -227,26 +227,26 @@ func (i *Item) AttrString() string {
 	flags := []string{}
 
 	if i.IsCursed() {
-		flags = append(flags, `<ansi fg="red">c</ansi>`)
+		flags = append(flags, `<ansi fg="item-cursed">c</ansi>`)
 	}
 	if i.IsEnchanted() {
-		flags = append(flags, `<ansi fg="cyan">e</ansi>`)
+		flags = append(flags, `<ansi fg="item-enchanted">e</ansi>`)
 	}
 
 	if len(flags) == 0 {
 		return ``
 	}
 
-	return fmt.Sprintf(`<ansi fg="black" bold="true">[%s]</ansi>`, strings.Join(flags, ``))
+	return fmt.Sprintf(`<ansi fg="item-flags">[%s]</ansi>`, strings.Join(flags, ``))
 }
 
 func (i *Item) Name() string {
 
 	if i.ItemId < 1 { // Used to represent item slots that are disabled
 		if i.ItemId == 0 { // Used to represent item slots that are empty
-			return `<ansi fg="black" bold="true">-nothing-</ansi>`
+			return `<ansi fg="item-nothing">-nothing-</ansi>`
 		} else {
-			return `<ansi fg="black" bold="true">***disabled***</ansi>`
+			return `<ansi fg="item-nothing">***disabled***</ansi>`
 		}
 	}
 
@@ -257,9 +257,9 @@ func (i *Item) NameSimple() string {
 
 	if i.ItemId < 1 { // Used to represent item slots that are disabled
 		if i.ItemId == 0 { // Used to represent item slots that are empty
-			return `<ansi fg="black" bold="true">-nothing-</ansi>`
+			return `<ansi fg="item-nothing">-nothing-</ansi>`
 		} else {
-			return `<ansi fg="black" bold="true">***disabled***</ansi>`
+			return `<ansi fg="item-nothing">***disabled***</ansi>`
 		}
 	}
 
@@ -270,16 +270,16 @@ func (i *Item) NameComplex() string {
 
 	if i.ItemId < 1 { // Used to represent item slots that are disabled
 		if i.ItemId == 0 { // Used to represent item slots that are empty
-			return `<ansi fg="black" bold="true">-nothing-</ansi>`
+			return `<ansi fg="item-nothing">-nothing-</ansi>`
 		} else {
-			return `<ansi fg="black" bold="true">***disabled***</ansi>`
+			return `<ansi fg="item-nothing">***disabled***</ansi>`
 		}
 	}
 
 	nm := i.GetSpec().Name
 
 	if i.GetSpec().Damage.BonusDamage > 0 {
-		nm = fmt.Sprintf(`%s <ansi fg="cyan" bold="true">+%d</ansi>`, nm, i.GetSpec().Damage.BonusDamage)
+		nm = fmt.Sprintf(`%s <ansi fg="item-bonus-damage">+%d</ansi>`, nm, i.GetSpec().Damage.BonusDamage)
 	}
 	flagsStr := i.AttrString()
 	if flagsStr != `` {

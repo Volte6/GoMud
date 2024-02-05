@@ -67,8 +67,8 @@ options:
     # messages for when they are in the same room
     together:
       toattacker:
-      - 'Your <ansi fg="item">{itemname}</ansi> <ansi fg="cyan" bold="true">CRITICALLY PULVERIZES</ansi> <ansi fg="{targettype}">{target}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
+      - 'Your <ansi fg="item">{itemname}</ansi> <ansi fg="cyan-bold">CRITICALLY PULVERIZES</ansi> <ansi fg="{targettype}">{target}</ansi> for <ansi fg="damage">{damage} damage</ansi>!'
       todefender:
-      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> <ansi fg="cyan" bold="true">CRITICALLY PULVERIZES</ansi> you for <ansi fg="damage">{damage} damage</ansi>!'
+      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> <ansi fg="cyan-bold">CRITICALLY PULVERIZES</ansi> you for <ansi fg="damage">{damage} damage</ansi>!'
       toroom:
-      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> <ansi fg="cyan" bold="true">CRITICALLY PULVERIZES</ansi> <ansi fg="{targettype}">{target}</ansi>!'
+      - '<ansi fg="{sourcetype}">{source}''s</ansi> <ansi fg="item">{itemname}</ansi> <ansi fg="cyan-bold">CRITICALLY PULVERIZES</ansi> <ansi fg="{targettype}">{target}</ansi>!'

@@ -1,9 +1,9 @@
 
-<ansi fg="black" bold="true">.:</ansi> <ansi fg="username" bold="true">{{ .Character.Name }}</ansi>
+<ansi fg="black-bold">.:</ansi> <ansi fg="username">{{ .Character.Name }}</ansi>
 {{- $tnl := .Character.XPTNL -}}
 {{- $pct := (pct .Character.Experience $tnl ) -}}
 {{- $exp := printf "%d/%d (%d%%)" .Character.Experience $tnl $pct }}
- ┌─ <ansi fg="black" bold="true">.:</ansi><ansi fg="blue">Description</ansi> ────────────────────────────────────────────────────────────┐
+ ┌─ <ansi fg="black-bold">.:</ansi><ansi fg="blue">Description</ansi> ────────────────────────────────────────────────────────────┐
    {{ splitstring .Character.GetDescription 72 "   "}}
    {{ .Character.GetHealthAppearance }}
  └────────────────────────────────────────────────────────────────────────────┘

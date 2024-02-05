@@ -43,12 +43,12 @@ func ServerStats() string {
 	runtime.ReadMemStats(&m)
 
 	memStats := fmt.Sprintf(
-		`<ansi fg="yellow" bold="true">Heap:</ansi>       <ansi fg="green" bold="true">%dMB</ansi> <ansi fg="yellow" bold="true">Largest Heap:</ansi>  <ansi fg="green" bold="true">%dMB</ansi>`+term.CRLFStr+
-			`<ansi fg="yellow" bold="true">Stack:</ansi>      <ansi fg="green" bold="true">%dMB</ansi>`+term.CRLFStr+
-			`<ansi fg="yellow" bold="true">Total Mem:</ansi>  <ansi fg="green" bold="true">%dMB</ansi>`+term.CRLFStr+
-			`<ansi fg="yellow" bold="true">GC ct:</ansi>      <ansi fg="green" bold="true">%d</ansi>`+term.CRLFStr+
-			`<ansi fg="yellow" bold="true">NumCPU:</ansi>     <ansi fg="green" bold="true">%d</ansi>`+term.CRLFStr+
-			`<ansi fg="yellow" bold="true">Goroutines:</ansi> <ansi fg="green" bold="true">%d</ansi>`,
+		`<ansi fg="yellow-bold">Heap:</ansi>       <ansi fg="green-bold">%dMB</ansi> <ansi fg="yellow-bold">Largest Heap:</ansi>  <ansi fg="green-bold">%dMB</ansi>`+term.CRLFStr+
+			`<ansi fg="yellow-bold">Stack:</ansi>      <ansi fg="green-bold">%dMB</ansi>`+term.CRLFStr+
+			`<ansi fg="yellow-bold">Total Mem:</ansi>  <ansi fg="green-bold">%dMB</ansi>`+term.CRLFStr+
+			`<ansi fg="yellow-bold">GC ct:</ansi>      <ansi fg="green-bold">%d</ansi>`+term.CRLFStr+
+			`<ansi fg="yellow-bold">NumCPU:</ansi>     <ansi fg="green-bold">%d</ansi>`+term.CRLFStr+
+			`<ansi fg="yellow-bold">Goroutines:</ansi> <ansi fg="green-bold">%d</ansi>`,
 		m.HeapAlloc/1024/1024, m.HeapSys/1024/1024,
 		m.StackSys/1024/1024,
 		m.Sys/1024/1024,

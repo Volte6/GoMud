@@ -1,4 +1,4 @@
-<ansi fg="black" bold="true">.:</ansi> <ansi fg="magenta">Help for </ansi><ansi fg="command">races</ansi>
+<ansi fg="black-bold">.:</ansi> <ansi fg="magenta">Help for </ansi><ansi fg="command">races</ansi>
 
 <ansi fg="command">races</ansi> represent the type of creature someone is. Humans, Elves, insects, and
 everything else.
@@ -21,11 +21,11 @@ Here is a list of available races and some basic information about them:
   <ansi fg="yellow">Unarmed:</ansi>     {{ $raceInfo.UnarmedName }} (<ansi fg="red">{{ $raceInfo.Damage.DiceRoll }}</ansi>)
   <ansi fg="yellow">First Aid:</ansi>   {{ if $raceInfo.KnowsFirstAid }}Yes{{ else }}No{{ end }}
   <ansi fg="yellow">Gear:</ansi>        {{ range $slotIndex, $slotName := $raceInfo.GetEnabledSlots }}{{if gt $slotIndex 0 }}{{ if eq (mod $slotIndex 5) 0 }}{{ printf "\n               " }}{{ end }}{{ end }}<ansi fg="green">{{ padRight 9 (uc $slotName) }}</ansi>{{ end }}
-  <ansi fg="yellow">Stat Gains:</ansi>  <ansi fg="{{ if gt $raceInfo.Stats.Strength.Base 0   }}cyan{{ else}}black{{end}}" bold="true">Str: {{ $raceInfo.Stats.Strength.Base   }}</ansi>{{- ` ` -}}
-                                        <ansi fg="{{ if gt $raceInfo.Stats.Speed.Base 0      }}cyan{{ else}}black{{end}}" bold="true">Spd: {{ $raceInfo.Stats.Speed.Base      }}</ansi>{{- ` ` -}}
-                                        <ansi fg="{{ if gt $raceInfo.Stats.Smarts.Base 0     }}cyan{{ else}}black{{end}}" bold="true">Smt: {{ $raceInfo.Stats.Smarts.Base     }}</ansi>{{- ` ` -}}
-                                        <ansi fg="{{ if gt $raceInfo.Stats.Vitality.Base 0   }}cyan{{ else}}black{{end}}" bold="true">Vit: {{ $raceInfo.Stats.Vitality.Base   }}</ansi>{{- ` ` -}}
-                                        <ansi fg="{{ if gt $raceInfo.Stats.Mysticism.Base 0  }}cyan{{ else}}black{{end}}" bold="true">Mys: {{ $raceInfo.Stats.Mysticism.Base  }}</ansi>{{- ` ` -}}
-                                        <ansi fg="{{ if gt $raceInfo.Stats.Perception.Base 0 }}cyan{{ else}}black{{end}}" bold="true">Per: {{ $raceInfo.Stats.Perception.Base }}</ansi>
+  <ansi fg="yellow">Stat Gains:</ansi>  <ansi fg="{{ if gt $raceInfo.Stats.Strength.Base 0   }}cyan{{ else}}black{{end}}-bold">Str: {{ $raceInfo.Stats.Strength.Base   }}</ansi>{{- ` ` -}}
+                                        <ansi fg="{{ if gt $raceInfo.Stats.Speed.Base 0      }}cyan{{ else}}black{{end}}-bold">Spd: {{ $raceInfo.Stats.Speed.Base      }}</ansi>{{- ` ` -}}
+                                        <ansi fg="{{ if gt $raceInfo.Stats.Smarts.Base 0     }}cyan{{ else}}black{{end}}-bold">Smt: {{ $raceInfo.Stats.Smarts.Base     }}</ansi>{{- ` ` -}}
+                                        <ansi fg="{{ if gt $raceInfo.Stats.Vitality.Base 0   }}cyan{{ else}}black{{end}}-bold">Vit: {{ $raceInfo.Stats.Vitality.Base   }}</ansi>{{- ` ` -}}
+                                        <ansi fg="{{ if gt $raceInfo.Stats.Mysticism.Base 0  }}cyan{{ else}}black{{end}}-bold">Mys: {{ $raceInfo.Stats.Mysticism.Base  }}</ansi>{{- ` ` -}}
+                                        <ansi fg="{{ if gt $raceInfo.Stats.Perception.Base 0 }}cyan{{ else}}black{{end}}-bold">Per: {{ $raceInfo.Stats.Perception.Base }}</ansi>
 {{ end }}
 

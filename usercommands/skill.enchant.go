@@ -224,7 +224,7 @@ func Enchant(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 			true)
 
 		if cursed {
-			response.SendUserMessage(userId, fmt.Sprintf(`%14s  %s`, ``, `<ansi fg="red" bold="true">CURSED!</ansi>`), true)
+			response.SendUserMessage(userId, fmt.Sprintf(`%14s  %s`, ``, `<ansi fg="red-bold">CURSED!</ansi>`), true)
 		}
 
 		if damageBonus > 0 {

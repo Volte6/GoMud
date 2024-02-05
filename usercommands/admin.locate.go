@@ -33,7 +33,7 @@ func Locate(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		}
 
 		response.SendUserMessage(userId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> is in room #<ansi fg="yellow" bold="true">%d</ansi> - <ansi fg="magenta">%s</ansi> <ansi fg="red">【%s】</ansi>`, locateUser.Character.Name, room.RoomId, room.Title, locateUser.Character.Zone),
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> is in room #<ansi fg="yellow-bold">%d</ansi> - <ansi fg="magenta">%s</ansi> <ansi fg="red">【%s】</ansi>`, locateUser.Character.Name, room.RoomId, room.Title, locateUser.Character.Zone),
 			true)
 
 		response.SendUserMessage(locateUser.UserId,
