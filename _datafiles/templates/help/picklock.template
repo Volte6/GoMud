@@ -5,10 +5,8 @@ You'll need a set of <ansi fg="item">lockpicks</ansi>.
 
 <ansi fg="yellow">Usage: </ansi>
 
-  <ansi fg="command">picklock [exit name/container name]</ansi> - This inspects the lock and gives you an
-  idea of the difficulty.
-  <ansi fg="command">picklock [exit name/container name] [up/down]</ansi> - This inspects the lock and gives
-  you an idea of the difficulty.
+  <ansi fg="command">picklock [exit name/container name]</ansi> - This picks the lock. You can also use 
+  it to inspect the lock and select `quit` without attempting to pick it.
 
 <ansi fg="yellow">Examples: </ansi>
 
@@ -20,14 +18,14 @@ You'll need a set of <ansi fg="item">lockpicks</ansi>.
     <ansi fg="black-bold">[HP:66/66 MP:35/35]:</ansi> <ansi fg="command">pick north</ansi>
 
     <ansi fg="black-bold">.:</ansi> <ansi fg="table-title">The Lock Sequence Looks like:</ansi>
-        <ansi fg="yellow-bold">╔═══════╦═══════╦═══════╦═══════╦═══════╗
-        ║       ║       ║       ║       ║       ║
-        ║   <ansi fg="red-bold">?</ansi>   ║   <ansi fg="red-bold">?</ansi>   ║   <ansi fg="red-bold">?</ansi>   ║   <ansi fg="red-bold">?</ansi>   ║   <ansi fg="red-bold">?</ansi>   ║
-        ║       ║       ║       ║       ║       ║
-        ╚═══════╩═══════╩═══════╩═══════╩═══════╝</ansi>
+    <ansi fg="yellow-bold">╔═══════╦═══════╦═══════╦═══════╦═══════╗
+    ║       ║       ║       ║       ║       ║
+    ║   <ansi fg="red-bold">?</ansi>   ║   <ansi fg="red-bold">?</ansi>   ║   <ansi fg="red-bold">?</ansi>   ║   <ansi fg="red-bold">?</ansi>   ║   <ansi fg="red-bold">?</ansi>   ║
+    ║       ║       ║       ║       ║       ║
+    ╚═══════╩═══════╩═══════╩═══════╩═══════╝</ansi>
+    <ansi fg="black-bold">.:</ansi> <ansi fg="yellow-bold">Move your lockpick?</ansi> <ansi fg="black-bold">[</ansi>UP<ansi fg="black-bold">/</ansi>DOWN<ansi fg="black-bold">/</ansi>quit<ansi fg="black-bold">]</ansi>
 
 <ansi fg="red">Note:</ansi> <ansi fg="yellow">Each <ansi fg="red-bold">?</ansi> symbol represents an UP or DOWN you must guess in the sequence.</ansi>
-      (i.e. <ansi fg="command">pick north DOWN</ansi> or <ansi fg="command">pick north UP</ansi>)
 
 <ansi fg="magenta-bold">See also:</ansi> <ansi fg="command">help picklock-example</ansi>, <ansi fg="command">help keyring</ansi>
 

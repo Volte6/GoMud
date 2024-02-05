@@ -199,7 +199,10 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 	if partyCommand == `list` {
 
-		headers := []string{"Name", "Status", "Lvl", "Health", "%", "Location", "Position"}
+		//headers := []string{"Name", "Status", "Lvl", "Health", "%", "Location", "Position"}
+		headers := []string{"Name", "Status", "Lvl", "Health", "Location", "Position"}
+		formatting := [][]string{}
+
 		rows := [][]string{}
 
 		if currentParty != nil {
@@ -215,42 +218,66 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 				u := users.GetByUserId(uid)
 				uLevel := fmt.Sprintf(`%d`, u.Character.Level)
 				uRoom := rooms.LoadRoom(u.Character.RoomId)
-				uHealth := fmt.Sprintf(`%d/%d`, u.Character.Health, u.Character.HealthMax.Value)
-				uHealthPct := fmt.Sprintf(`%d%%`, int(math.Floor((float64(u.Character.Health)/float64(u.Character.HealthMax.Value))*100)))
+				//uHealth := fmt.Sprintf(`%d/%d`, u.Character.Health, u.Character.HealthMax.Value)
+				uHealthPct := int(math.Floor((float64(u.Character.Health) / float64(u.Character.HealthMax.Value)) * 100))
+				uHealthPctStr := fmt.Sprintf(`%d%%`, uHealthPct)
 				uLoc := uRoom.Title
 				rank := currentParty.GetRank(u.UserId)
+				healthClass := util.HealthClass(u.Character.Health, u.Character.HealthMax.Value)
 
 				if isInvited {
 					uLevel = `-`
-					uHealth = `-`
+					//uHealth = `-`
 					uLoc = `-`
-					uHealthPct = `-`
+					uHealthPctStr = `-`
 					rank = `-`
+					healthClass = `black-bold`
 				}
 
 				rows = append(rows, []string{
 					u.Character.Name,
 					uStatus,
 					uLevel,
-					uHealth,
-					uHealthPct,
+					//uHealth,
+					uHealthPctStr,
 					uLoc,
 					rank,
 				})
+
+				rowFormat := []string{`<ansi fg="username">%s</ansi>`,
+					`<ansi fg="white-bold">%s</ansi>`,
+					`<ansi fg="yellow">%s</ansi>`,
+					//`<ansi fg="cyan-bold">%s</ansi>`,
+					`<ansi fg="` + healthClass + `">%s</ansi>`,
+					`<ansi fg="magenta-bold">%s</ansi>`,
+					`<ansi fg="white-bold">%s</ansi>`}
+
+				formatting = append(formatting, rowFormat)
 			}
 
 			for _, mobInstanceId := range currentParty.GetMobs() {
 				m := mobs.GetInstance(mobInstanceId)
 				mRoom := rooms.LoadRoom(m.Character.RoomId)
+				mHealthPct := int(math.Floor((float64(m.Character.Health) / float64(m.Character.HealthMax.Value)) * 100))
 				rows = append(rows, []string{
 					m.Character.Name,
 					`Friend`,
 					fmt.Sprintf(`%d`, m.Character.Level),
-					fmt.Sprintf(`%d/%d`, m.Character.Health, m.Character.HealthMax.Value),
-					fmt.Sprintf(`%d%%`, int(math.Floor((float64(m.Character.Health)/float64(m.Character.HealthMax.Value))*100))),
+					//fmt.Sprintf(`%d/%d`, m.Character.Health, m.Character.HealthMax.Value),
+					fmt.Sprintf(`%d%%`, mHealthPct),
 					mRoom.Title,
 					`-`,
 				})
+
+				rowFormat := []string{`<ansi fg="username">%s</ansi>`,
+					`<ansi fg="white-bold">%s</ansi>`,
+					`<ansi fg="yellow">%s</ansi>`,
+					//`<ansi fg="cyan-bold">%s</ansi>`,
+					`<ansi fg="` + util.HealthClass(m.Character.Health, m.Character.HealthMax.Value) + `">%s</ansi>`,
+					`<ansi fg="magenta-bold">%s</ansi>`,
+					`<ansi fg="white-bold">%s</ansi>`}
+
+				formatting = append(formatting, rowFormat)
 			}
 
 			for _, uid := range currentParty.InviteUserIds {
@@ -260,21 +287,24 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 					`Invited`,
 					`-`,
 					`-`,
-					`-`,
+					//`-`,
 					`-`,
 					`-`,
 				})
+
+				rowFormat := []string{`<ansi fg="username">%s</ansi>`,
+					`<ansi fg="white-bold">%s</ansi>`,
+					`<ansi fg="yellow">%s</ansi>`,
+					//`<ansi fg="cyan-bold">%s</ansi>`,
+					`<ansi fg="black-bold">%s</ansi>`,
+					`<ansi fg="magenta-bold">%s</ansi>`,
+					`<ansi fg="white-bold">%s</ansi>`}
+
+				formatting = append(formatting, rowFormat)
+
 			}
 
-			tableFormatting := []string{`<ansi fg="username">%s</ansi>`,
-				`<ansi fg="white-bold">%s</ansi>`,
-				`<ansi fg="yellow">%s</ansi>`,
-				`<ansi fg="cyan-bold">%s</ansi>`,
-				`<ansi fg="black-bold">%s</ansi>`,
-				`<ansi fg="magenta-bold">%s</ansi>`,
-				`<ansi fg="white-bold">%s</ansi>`}
-
-			partyTableData := templates.GetTable(`Party Members`, headers, rows, tableFormatting)
+			partyTableData := templates.GetTable(`Party Members`, headers, rows, formatting...)
 			partyTxt, _ := templates.Process("tables/generic", partyTableData)
 			response.SendUserMessage(userId, partyTxt, true)
 
