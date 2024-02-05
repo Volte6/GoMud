@@ -439,6 +439,13 @@ func main() {
 				continue
 			}
 
+			connCt := worldManager.GetConnectionPool().ActiveConnectionCount()
+			if connCt >= configs.GetConfig().MaxTelnetConnections {
+				conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", connCt)))
+				conn.Close()
+				continue
+			}
+
 			wg.Add(1)
 			// hand off the connection to a handler goroutine so that we can continue handling new connections
 			go handleTelnetConnection(

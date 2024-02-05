@@ -28,6 +28,8 @@ func (c *ConnectionTracker) Add(conn net.Conn) *ConnectionDetails {
 
 	uId := ConnectionId(atomic.AddUint64(&c.connectCounter, 1))
 
+	atomic.AddUint64(&c.connectCounter, 1)
+
 	connDetails := NewConnectionDetails(
 		uId,
 		conn,
@@ -130,6 +132,17 @@ func sliceContains(slice []ConnectionId, id ConnectionId) bool {
 		}
 	}
 	return false
+}
+
+// make this more efficient later
+func (c *ConnectionTracker) ActiveConnectionCount() int {
+	ct := 0
+	c.netConnections.Range(func(key, cd interface{}) (processNext bool) {
+		ct++
+		return true
+	})
+	return ct
+
 }
 
 func (c *ConnectionTracker) Stats() (connections uint64, disconnections uint64) {
