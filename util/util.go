@@ -631,3 +631,14 @@ func BreakIntoParts(full string) []string {
 
 	return result
 }
+
+func HealthClass(health int, maxHealth int) string {
+
+	if health <= 0 {
+		return `health-dead`
+	}
+	// quantize to 10s
+	healthPercent := int(math.Floor(float64(health)/float64(maxHealth)*10)) * 10
+
+	return fmt.Sprintf(`health-%d`, healthPercent)
+}

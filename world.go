@@ -162,10 +162,6 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 
 	suggestions := []string{}
 
-	if inputText == `` {
-		return suggestions
-	}
-
 	user := users.GetByUserId(userId)
 	if user == nil {
 		return suggestions
@@ -176,19 +172,28 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 		if qInfo := promptInfo.GetNextQuestion(); qInfo != nil {
 
 			if len(qInfo.Options) > 0 {
-				if len(inputText) > 0 {
-					for _, opt := range qInfo.Options {
-						s1 := strings.ToLower(opt)
-						s2 := strings.ToLower(inputText)
-						if s1 != s2 && strings.HasPrefix(s1, s2) {
-							suggestions = append(suggestions, s1[len(s2):])
-						}
+
+				for _, opt := range qInfo.Options {
+
+					if inputText == `` {
+						suggestions = append(suggestions, opt)
+						continue
+					}
+
+					s1 := strings.ToLower(opt)
+					s2 := strings.ToLower(inputText)
+					if s1 != s2 && strings.HasPrefix(s1, s2) {
+						suggestions = append(suggestions, s1[len(s2):])
 					}
 				}
 
 				return suggestions
 			}
 		}
+	}
+
+	if inputText == `` {
+		return suggestions
 	}
 
 	isAdmin := user.Permission == users.PermissionAdmin

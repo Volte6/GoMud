@@ -288,25 +288,27 @@ func (c *Character) AddFollower(uId int) {
 
 // USERNAME appears to be <BLANK>
 func (c *Character) GetHealthAppearance() string {
+
+	className := util.HealthClass(c.Health, c.HealthMax.Value)
 	pct := int(float64(c.Health) / float64(c.HealthMax.Value) * 100)
 
 	if pct < 15 {
-		return fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="red">looks like they're about to die!</ansi>`, c.Name)
+		return fmt.Sprintf(`<ansi fg="username">%s</ansi> looks like they're <ansi fg="%s">about to die!</ansi>`, c.Name, className)
 	}
 
 	if pct < 50 {
-		return fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="yellow">looks to be in pretty bad shape.</ansi>`, c.Name)
+		return fmt.Sprintf(`<ansi fg="username">%s</ansi> looks to be in <ansi fg="%s">pretty bad shape.</ansi>`, c.Name, className)
 	}
 
 	if pct < 80 {
-		return fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="yellow">has some cuts and bruises.</ansi>`, c.Name)
+		return fmt.Sprintf(`<ansi fg="username">%s</ansi> has some <ansi fg="%s">cuts and bruises.</ansi>`, c.Name, className)
 	}
 
 	if pct < 100 {
-		return fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="yellow">has a few scratches.</ansi>`, c.Name)
+		return fmt.Sprintf(`<ansi fg="username">%s</ansi> has <ansi fg="%s">a few scratches.</ansi>`, c.Name, className)
 	}
 
-	return fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="green">is in perfect health.</ansi>`, c.Name)
+	return fmt.Sprintf(`<ansi fg="username">%s</ansi> is in <ansi fg="%s">perfect health.</ansi>`, c.Name, className)
 }
 
 func (c *Character) GetFollowers() []int {

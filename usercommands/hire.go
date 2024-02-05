@@ -93,6 +93,8 @@ func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			room.AddMob(newMob.InstanceId)
 			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
 				partyInfo.AddMob(newMob.InstanceId)
+			} else {
+				cmdQueue.QueueCommand(user.UserId, 0, `party start`)
 			}
 
 			response.SendUserMessage(user.UserId,

@@ -1,4 +1,5 @@
 # Look up the numeric codes if it's easier here: https://en.wikipedia.org/wiki/ANSI_escape_code
+# Also useful: https://www.hackitu.de/termcolor256/
 # Under 3-bit and 4-bit colors (Until 256 color support added)
 color8:
   table-title: green
@@ -16,10 +17,6 @@ color8:
   role-mod: 31
   role-user: 32
   role-guest: 90
-  hp-dead: red
-  hp-alive: cyan
-  hpdead: red
-  hpalive: cyan
   command: cyan
   command-admin: 9
   skill: 93
@@ -87,6 +84,23 @@ color8:
   name-flags: black-bold
   room-title: magenta
   room-zone: red
+  health-good: 92 # Bright green
+  health-ok: 32 # green
+  health-mid: 33 # yellow
+  health-bad: 31 # red
+  health-danger: 91 # bright red
+  health-100: 92
+  health-90: 92
+  health-80: 32
+  health-70: 32
+  health-60: 33
+  health-50: 33
+  health-40: 33
+  health-30: 31
+  health-20: 31
+  health-10: 91
+  health-0: 91
+  health-dead: 8
 color256:
   table-title: green
   userid: black
@@ -103,10 +117,6 @@ color256:
   role-mod: 1
   role-user: 2
   role-guest: 8
-  hp-dead: red
-  hp-alive: cyan
-  hpdead: red
-  hpalive: cyan
   command: cyan
   command-admin: 9
   skill: 11
@@ -174,3 +184,15 @@ color256:
   name-flag: 246
   room-title: 91
   room-zone: 52
+  health-100: 46
+  health-90: 82
+  health-80: 118
+  health-70: 154
+  health-60: 190
+  health-50: 226
+  health-40: 220
+  health-30: 214
+  health-20: 208
+  health-10: 202
+  health-0: 196
+  health-dead: 8

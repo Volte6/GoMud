@@ -20,15 +20,10 @@ var (
 	PermissionMod   string = "mod"   // Logged in has limited special powers
 	PermissionAdmin string = "admin" // Logged in and has special powers
 
-	promptFormat = `<ansi fg="black-bold">[</ansi><ansi fg="white">HP:</ansi>` +
-		`<ansi fg="hp-%s" bold="%s">` +
-		`%d<ansi fg="black-bold">/</ansi>%d` +
-		`</ansi>` +
+	promptFormat = `<ansi fg="black-bold">[</ansi>` +
+		`<ansi fg="white">HP:</ansi><ansi fg="%s">%d<ansi fg="black-bold">/</ansi>%d</ansi>` +
 		` ` +
-		`<ansi fg="white">MP:</ansi>` +
-		`<ansi fg="magenta" bold="%s">` +
-		`%d<ansi fg="black-bold">/</ansi>%d` +
-		`</ansi>` +
+		`<ansi fg="white">MP:</ansi><ansi fg="magenta" bold="%s">%d<ansi fg="black-bold">/</ansi>%d</ansi>` +
 		`<ansi fg="black-bold">]:</ansi>`
 )
 
@@ -109,20 +104,13 @@ func (u *UserRecord) GetPrompt(fullRedraw bool) string {
 
 	if ansiPrompt == `` {
 
-		hpFG := `alive`
-		hpBold := `false`
 		mpBold := `false`
-		if u.Character.Health < 1 {
-			hpFG = `dead`
-		} else if u.Character.Health == u.Character.HealthMax.Value {
-			hpBold = `true`
-		}
 		if u.Character.Mana == u.Character.ManaMax.Value {
 			mpBold = `true`
 		}
 
 		ansiPrompt = fmt.Sprintf(promptFormat,
-			hpFG, hpBold,
+			util.HealthClass(u.Character.Health, u.Character.HealthMax.Value),
 			u.Character.Health, u.Character.HealthMax.Value,
 			mpBold,
 			u.Character.Mana, u.Character.ManaMax.Value,
