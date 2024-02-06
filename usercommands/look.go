@@ -334,7 +334,10 @@ func lookRoom(userId int, roomId int, response *util.MessageQueue, secretLook bo
 
 	details := room.GetRoomDetails(user)
 
-	textOut, _ := templates.Process("descriptions/room", details)
+	textOut, _ := templates.Process("descriptions/room-title", details)
+	response.SendUserMessage(userId, textOut, false)
+
+	textOut, _ = templates.Process("descriptions/room", details)
 	response.SendUserMessage(userId, textOut, false)
 
 	signCt := 0

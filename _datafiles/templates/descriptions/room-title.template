@@ -1,0 +1,5 @@
+{{ $mapSymbol := "" -}}
+{{ if ne .RoomSymbol "" -}}
+   {{ $mapSymbol = printf `<ansi fg="black-bold">[</ansi><ansi fg="map-%s">%s</ansi><ansi fg="black-bold">]</ansi> ` (lowercase .RoomLegend) .RoomSymbol }}
+{{- end }}
+<ansi fg="black-bold">.:</ansi> {{ $mapSymbol }}<ansi fg="room-title">{{ .Room.Title }}</ansi>{{ if ne .Room.Zone ""}} <ansi fg="room-zone">[{{ .Room.Zone }}]</ansi>{{ end }}

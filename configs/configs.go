@@ -55,10 +55,12 @@ type config struct {
 	turnsPerSave    int     // calculated and cached when data is validated.
 	turnsPerSecond  int     // calculated and cached when data is validated.
 	roundsPerMinute float64 // calculated and cached when data is validated.
+
+	overrides map[string]any
 }
 
 var (
-	configData           config = config{}
+	configData           config = config{overrides: map[string]any{}}
 	configDataLock       sync.RWMutex
 	ErrInvalidConfigName = errors.New("invalid config name")
 	ErrLockedConfig      = errors.New("config name is locked")
@@ -91,6 +93,8 @@ func SetVal(propName string, propVal string, force ...bool) error {
 		}
 	}
 
+	overrides := configData.GetOverrides()
+
 	structValue := reflect.ValueOf(&configData)
 	structValue = structValue.Elem()
 	fieldValue := structValue.FieldByName(propName)
@@ -106,6 +110,7 @@ func SetVal(propName string, propVal string, force ...bool) error {
 	switch fieldValue.Kind() {
 	case reflect.String:
 		fieldValue.SetString(propVal)
+		overrides[propName] = propVal
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		intValue, err := strconv.ParseInt(propVal, 10, 64)
@@ -113,38 +118,46 @@ func SetVal(propName string, propVal string, force ...bool) error {
 			return fmt.Errorf("field is an integer, but provided value is not: %s", propVal)
 		}
 		fieldValue.SetInt(intValue)
+		overrides[propName] = intValue
+
 	case reflect.Bool:
 		boolValue, err := strconv.ParseBool(propVal)
 		if err != nil {
 			return fmt.Errorf("field is a boolean, but provided value is not: %s", propVal)
 		}
 		fieldValue.SetBool(boolValue)
+		overrides[propName] = boolValue
+
 	case reflect.Float32, reflect.Float64:
 		floatValue, err := strconv.ParseFloat(propVal, 64)
 		if err != nil {
 			return fmt.Errorf("field is a float, but provided value is not: %s", propVal)
 		}
 		fieldValue.SetFloat(floatValue)
+		overrides[propName] = floatValue
 
 	case reflect.Slice:
 		sliceVal := strings.Split(propVal, `;`)
 		fieldValue.Set(reflect.ValueOf(sliceVal))
-
+		overrides[propName] = sliceVal
 	// Add cases for other types as needed
 
 	default:
 		return fmt.Errorf("unsupported field type: %s", fieldValue.Kind())
 	}
 
+	configData.SetOverrides(overrides)
+
 	configData.validate()
 
 	// save the new config.
-	writeBytes, err := yaml.Marshal(configData)
+	writeBytes, err := yaml.Marshal(configData.GetOverrides())
 	if err != nil {
 		return err
 	}
 
-	return util.Save(configPath(), writeBytes, configData.CarefulSaveFiles)
+	overridePath := overridePath()
+	return util.Save(overridePath, writeBytes, configData.CarefulSaveFiles)
 
 }
 
@@ -203,6 +216,39 @@ func (c config) AllConfigData() map[string]any {
 	}
 
 	return output
+}
+
+func (c *config) GetOverrides() map[string]any {
+	return c.overrides
+}
+
+func (c *config) SetOverrides(overrides map[string]any) error {
+	c.overrides = map[string]any{}
+	for k, v := range overrides {
+		c.overrides[k] = v
+	}
+
+	structValue := reflect.ValueOf(c).Elem()
+	for name, value := range c.overrides {
+		structFieldValue := structValue.FieldByName(name)
+
+		if !structFieldValue.IsValid() {
+			return fmt.Errorf("No such field: %s in obj", name)
+		}
+
+		if !structFieldValue.CanSet() {
+			return fmt.Errorf("Cannot set %s field value", name)
+		}
+
+		val := reflect.ValueOf(value)
+		if structFieldValue.Type() != val.Type() {
+			return errors.New("Provided value type didn't match obj field type")
+		}
+
+		structFieldValue.Set(val)
+	}
+
+	return nil
 }
 
 // Ensures certain ranges and defaults are observed
@@ -420,17 +466,17 @@ func GetConfig() config {
 	return configData
 }
 
-func configPath() string {
-	configPath := os.Getenv(`CONFIG_PATH`)
-	if configPath == `` {
-		configPath = defaultConfigPath
+func overridePath() string {
+	overridePath := os.Getenv(`CONFIG_PATH`)
+	if overridePath == `` {
+		overridePath = `_datafiles/config-overrides.yaml`
 	}
-	return configPath
+	return overridePath
 }
 
 func ReloadConfig() error {
 
-	configPath := util.FilePath(configPath())
+	configPath := util.FilePath(defaultConfigPath)
 
 	bytes, err := os.ReadFile(configPath)
 	if err != nil {
@@ -441,6 +487,25 @@ func ReloadConfig() error {
 	err = yaml.Unmarshal(bytes, &tmpConfigData)
 	if err != nil {
 		return err
+	}
+
+	overridePath := overridePath()
+
+	if _, err := os.Stat(util.FilePath(overridePath)); err == nil {
+		if overridePath != `` {
+			overrideBytes, err := os.ReadFile(util.FilePath(overridePath))
+			if err != nil {
+				return err
+			}
+
+			overrides := make(map[string]interface{})
+			err = yaml.Unmarshal(overrideBytes, &overrides)
+			if err != nil {
+				return err
+			}
+
+			tmpConfigData.SetOverrides(overrides)
+		}
 	}
 
 	tmpConfigData.validate()

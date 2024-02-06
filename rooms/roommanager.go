@@ -58,6 +58,7 @@ type RoomTemplateDetails struct {
 	Permission     string
 	RoomSymbol     string
 	RoomLegend     string
+	Nouns          []string
 }
 
 var (
