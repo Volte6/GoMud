@@ -45,7 +45,7 @@ func List(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			listedSomething = true
 
-			headers := []string{"Qty", "Name", "Type", "price"}
+			headers := []string{"Qty", "Name", "Type", "Price"}
 
 			rows := [][]string{}
 
@@ -82,7 +82,7 @@ func List(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			listedSomething = true
 
-			headers := []string{"Quantity", "Name", "Level", "Race", "price"}
+			headers := []string{"Quantity", "Name", "Level", "Race", "Price"}
 
 			rows := [][]string{}
 

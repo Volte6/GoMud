@@ -261,6 +261,22 @@ func ParseExit(exitStr string) (roomId int, zone string) {
 	return roomId, zone
 }
 
+func (r *Room) GetNouns() []string {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	nouns := []string{}
+	if len(r.Props) < 1 {
+		return nouns
+	}
+
+	for _, prop := range r.Props {
+		nouns = append(nouns, prop.Nouns...)
+	}
+
+	return nouns
+}
+
 func (r *Room) FindTemporaryExitByUserId(userId int) (TemporaryRoomExit, bool) {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
@@ -1506,6 +1522,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		Permission:     user.Permission, // The permission level of the user viewing the room
 		RoomSymbol:     roomSymbol,
 		RoomLegend:     roomLegend,
+		Nouns:          r.GetNouns(),
 	}
 
 	nameFlags := []characters.NameRenderFlag{}

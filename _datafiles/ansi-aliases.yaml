@@ -64,7 +64,7 @@ color8:
   damage: 91 # Bright red
   shop-qty: 97 # Bright white
   shop-name: green
-  shop-price: yellow
+  shop-price: 93
   uses-left: 90 # Bright black
   holy: 96 # Bright cyan
   good: 36 # cyan
@@ -164,17 +164,17 @@ color256:
   damage: 9 # Bright red
   shop-qty: 15 # Bright white
   shop-name: green
-  shop-price: yellow
+  shop-price: 220
   uses-left: 8 # Bright black
-  holy: 21 # Bright cyan
-  good: 33 # cyan
-  virtuous: 45 # bright blue
-  lawful: 123 # green
-  neutral: 8 # bright black
-  misguided: 219 # yellow
-  corrupt: 198 # magenta
-  evil: 88 # bright red
-  unholy: 160 # red
+  holy: 21
+  good: 27
+  virtuous: 39
+  lawful: 51
+  neutral: 7 # bright black
+  misguided: 226
+  corrupt: 214
+  evil: 202
+  unholy: 196
   item-nothing: 237 # darkish black
   item-flags: 7 # light gray
   item-enchanted: 147
