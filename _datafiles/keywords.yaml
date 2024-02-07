@@ -139,6 +139,8 @@ help-aliases:
   keyring:          [key, keys]
   equip:            [wear, wield]
   status:           [score]
+  set-prompt:       [prompt]
+  colors:           [color, ansi]
 # Default aliases for commands
 # For example: inv -> inventory
 # They can be command + argument aliases

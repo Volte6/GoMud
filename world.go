@@ -411,6 +411,20 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 				}
 			}
 
+		} else if cmd == `set` {
+
+			options := []string{
+				`description`,
+				`prompt`,
+				`prompt default`,
+			}
+
+			for _, opt := range options {
+				if strings.HasPrefix(opt, targetName) {
+					suggestions = append(suggestions, opt[len(targetName):])
+				}
+			}
+
 		}
 
 		itmCt := len(itemList)

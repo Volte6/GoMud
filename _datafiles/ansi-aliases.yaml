@@ -101,6 +101,18 @@ color8:
   health-10: 91
   health-0: 91
   health-dead: 8
+  mana-100: 95
+  mana-90: 35
+  mana-80: 35
+  mana-70: 35
+  mana-60: 35
+  mana-50: 35
+  mana-40: 35
+  mana-30: 35
+  mana-20: 35
+  mana-10: 95
+  mana-0: 8
+  suggested-text: 90
 color256:
   table-title: green
   userid: black
@@ -196,3 +208,15 @@ color256:
   health-10: 202
   health-0: 196
   health-dead: 8
+  mana-100: 195
+  mana-90: 159
+  mana-80: 123
+  mana-70: 87
+  mana-60: 51
+  mana-50: 44
+  mana-40: 37
+  mana-30: 30
+  mana-20: 23
+  mana-10: 245
+  mana-0: 8
+  suggested-text: 8

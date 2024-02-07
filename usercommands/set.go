@@ -27,9 +27,12 @@ func Set(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		return response, nil
 	}
 
-	if args[0] == "description" {
+	setTarget := args[0]
+	args = args[1:]
 
-		rest = strings.TrimSpace(rest[len(args[0]):])
+	if setTarget == `description` {
+
+		rest = strings.TrimSpace(rest[len(setTarget):])
 		if len(rest) > 1024 {
 			rest = rest[:1024]
 		}
@@ -40,8 +43,34 @@ func Set(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		return response, nil
 	}
 
+	if setTarget == `prompt` {
+
+		if len(args) < 1 {
+			currentPrompt := user.GetConfigOption(`prompt`)
+			if currentPrompt == nil {
+				currentPrompt = users.PromptDefault
+			}
+			response.SendUserMessage(userId, "Your current prompt:\n", true)
+			response.SendUserMessage(userId, currentPrompt.(string), true)
+			response.SendUserMessage(userId, "\n"+`Type <ansi fg="command">help set-prompt</ansi> for more info on customizing prompts.`+"\n", true)
+			response.Handled = true
+			return response, nil
+		}
+
+		promptStr := rest[len(setTarget)+1:]
+
+		if promptStr == `default` {
+			user.SetConfigOption(`prompt`, nil)
+			user.SetConfigOption(`prompt-compiled`, nil)
+		} else {
+			user.SetConfigOption(`prompt`, promptStr)
+			user.SetConfigOption(`prompt-compiled`, users.CompilePrompt(promptStr))
+		}
+
+	}
+
 	// Are they setting a macro?
-	if len(args[0]) == 2 && args[0][0] == '=' {
+	if len(setTarget) == 2 && setTarget[0] == '=' {
 		macroNum, _ := strconv.Atoi(string(args[0][1]))
 		if macroNum == 0 {
 			response.SendUserMessage(userId, "Invalid macro number supplied.", true)
