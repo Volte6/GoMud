@@ -62,10 +62,52 @@ func Set(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		if promptStr == `default` {
 			user.SetConfigOption(`prompt`, nil)
 			user.SetConfigOption(`prompt-compiled`, nil)
+			user.SetConfigOption(`prompt`, users.PromptDefault)
+			user.SetConfigOption(`prompt-compiled`, users.CompilePrompt(users.PromptDefault))
+		} else if promptStr == `none` {
+			user.SetConfigOption(`prompt`, ``)
+			user.SetConfigOption(`prompt-compiled`, ``)
 		} else {
 			user.SetConfigOption(`prompt`, promptStr)
 			user.SetConfigOption(`prompt-compiled`, users.CompilePrompt(promptStr))
 		}
+
+		response.SendUserMessage(userId, "Prompt set.", true)
+		response.Handled = true
+		return response, nil
+
+	}
+
+	if setTarget == `fprompt` {
+
+		if len(args) < 1 {
+			currentPrompt := user.GetConfigOption(`fprompt`)
+			if currentPrompt == nil {
+				currentPrompt = users.PromptDefault
+			}
+			response.SendUserMessage(userId, "Your current fprompt:\n", true)
+			response.SendUserMessage(userId, currentPrompt.(string), true)
+			response.SendUserMessage(userId, "\n"+`Type <ansi fg="command">help set-prompt</ansi> for more info on customizing prompts.`+"\n", true)
+			response.Handled = true
+			return response, nil
+		}
+
+		promptStr := rest[len(setTarget)+1:]
+
+		if promptStr == `default` {
+			user.SetConfigOption(`fprompt`, nil)
+			user.SetConfigOption(`fprompt-compiled`, nil)
+		} else if promptStr == `none` {
+			user.SetConfigOption(`fprompt`, ``)
+			user.SetConfigOption(`fprompt-compiled`, ``)
+		} else {
+			user.SetConfigOption(`fprompt`, promptStr)
+			user.SetConfigOption(`fprompt-compiled`, users.CompilePrompt(promptStr))
+		}
+
+		response.SendUserMessage(userId, "fprompt set.", true)
+		response.Handled = true
+		return response, nil
 
 	}
 
