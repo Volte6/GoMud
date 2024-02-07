@@ -3,7 +3,10 @@ package users
 import (
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -20,11 +23,11 @@ var (
 	PermissionMod   string = "mod"   // Logged in has limited special powers
 	PermissionAdmin string = "admin" // Logged in and has special powers
 
-	promptFormat = `<ansi fg="black-bold">[</ansi>` +
-		`<ansi fg="white">HP:</ansi><ansi fg="%s">%d<ansi fg="black-bold">/</ansi>%d</ansi>` +
-		` ` +
-		`<ansi fg="white">MP:</ansi><ansi fg="magenta" bold="%s">%d<ansi fg="black-bold">/</ansi>%d</ansi>` +
-		`<ansi fg="black-bold">]:</ansi>`
+	//promptDefault         = `{8:0}[{255:0}HP:{hp:color}{8:0}/{mhp:color} {255:0}MP:{13:0}{mp:color}{8:0}/{13:0}{mmp:color}{8:0}]:`
+	PromptDefault         = `{8}[{255}HP:{hp:color}{8}/{mhp:color} {255}MP:{13}{mp:color}{8}/{13}{mmp:color}{8}]:`
+	promptDefaultCompiled = CompilePrompt(PromptDefault)
+	promptColorRegex      = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
+	promptFindTagsRegex   = regexp.MustCompile(`\{[a-zA-Z%:]+\}`)
 )
 
 type UserRecord struct {
@@ -40,7 +43,7 @@ type UserRecord struct {
 	suggestText    string
 	AdminCommands  []string `yaml:"admincommands,omitempty"`
 	RoomMemoryBlob string   `yaml:"roommemoryblob,omitempty"`
-	configOptions  map[string]any
+	ConfigOptions  map[string]any
 	connectionTime time.Time
 	lock           sync.RWMutex
 }
@@ -55,7 +58,7 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 		Password:       "",
 		Macros:         make(map[string]string),
 		Character:      characters.New(),
-		configOptions:  map[string]any{},
+		ConfigOptions:  map[string]any{},
 		connectionTime: time.Now(),
 		lock:           sync.RWMutex{},
 	}
@@ -75,11 +78,21 @@ func (u *UserRecord) HasAdminCommand(cmd string) bool {
 }
 
 func (u *UserRecord) SetConfigOption(key string, value any) {
-	u.configOptions[key] = value
+	if u.ConfigOptions == nil {
+		u.ConfigOptions = make(map[string]any)
+	}
+	if value == nil {
+		delete(u.ConfigOptions, key)
+		return
+	}
+	u.ConfigOptions[key] = value
 }
 
 func (u *UserRecord) GetConfigOption(key string) any {
-	if value, ok := u.configOptions[key]; ok {
+	if u.ConfigOptions == nil {
+		u.ConfigOptions = make(map[string]any)
+	}
+	if value, ok := u.ConfigOptions[key]; ok {
 		return value
 	}
 	return nil
@@ -104,28 +117,140 @@ func (u *UserRecord) GetPrompt(fullRedraw bool) string {
 
 	if ansiPrompt == `` {
 
-		mpBold := `false`
-		if u.Character.Mana == u.Character.ManaMax.Value {
-			mpBold = `true`
+		/*
+
+			mpBold := `false`
+			if u.Character.Mana == u.Character.ManaMax.Value {
+				mpBold = `true`
+			}
+				ansiPrompt = fmt.Sprintf(promptFormat,
+					util.HealthClass(u.Character.Health, u.Character.HealthMax.Value),
+					u.Character.Health, u.Character.HealthMax.Value,
+					mpBold,
+					u.Character.Mana, u.Character.ManaMax.Value,
+				)
+		*/
+		customPrompt := u.GetConfigOption(`prompt-compiled`)
+		var ok bool
+
+		if ansiPrompt, ok = customPrompt.(string); !ok || ansiPrompt == `` {
+			ansiPrompt = promptDefaultCompiled
 		}
 
-		ansiPrompt = fmt.Sprintf(promptFormat,
-			util.HealthClass(u.Character.Health, u.Character.HealthMax.Value),
-			u.Character.Health, u.Character.HealthMax.Value,
-			mpBold,
-			u.Character.Mana, u.Character.ManaMax.Value,
-		)
+		//
+		// TODO: Need to optimize this section to only calculate/replace when the value is actually used.
+		//
+		var currentXP, tnlXP int = -1, -1
+		var hpPct, mpPct int = -1, -1
+		var hpClass, mpClass string
+
+		matches := promptFindTagsRegex.FindAllString(ansiPrompt, -1)
+		for _, match := range matches {
+
+			switch match {
+
+			case "{hp}":
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{hp}", strconv.Itoa(u.Character.Health))
+
+			case "{hp:color}":
+				if len(hpClass) == 0 {
+					hpClass = fmt.Sprintf(`health-%d`, util.QuantizeTens(u.Character.Health, u.Character.HealthMax.Value))
+				}
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{hp:color}", fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, hpClass, u.Character.Health))
+
+			case "{mhp}":
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{mhp}", strconv.Itoa(u.Character.HealthMax.Value))
+
+			case "{mhp:color}":
+				if len(hpClass) == 0 {
+					hpClass = fmt.Sprintf(`health-%d`, util.QuantizeTens(u.Character.Health, u.Character.HealthMax.Value))
+				}
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{mhp:color}", fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, hpClass, u.Character.HealthMax.Value))
+
+			case "{hp%}":
+				if hpPct == -1 {
+					hpPct = int(math.Floor(float64(u.Character.Health) / float64(u.Character.HealthMax.Value) * 100))
+				}
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{hp%}", strconv.Itoa(hpPct)+`%`)
+
+			case "{hp%:color}":
+				if hpPct == -1 {
+					hpPct = int(math.Floor(float64(u.Character.Health) / float64(u.Character.HealthMax.Value) * 100))
+				}
+				if len(hpClass) == 0 {
+					hpClass = fmt.Sprintf(`health-%d`, util.QuantizeTens(u.Character.Health, u.Character.HealthMax.Value))
+				}
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{hp%:color}", fmt.Sprintf(`<ansi fg="%s">%d%%</ansi>`, hpClass, hpPct))
+
+			case "{mp}":
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{mp}", strconv.Itoa(u.Character.Mana))
+
+			case "{mp:color}":
+				if len(mpClass) == 0 {
+					mpClass = fmt.Sprintf(`mana-%d`, util.QuantizeTens(u.Character.Mana, u.Character.ManaMax.Value))
+				}
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{mp:color}", fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, mpClass, u.Character.Mana))
+
+			case "{mmp}":
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{mmp}", strconv.Itoa(u.Character.ManaMax.Value))
+
+			case "{mmp:color}":
+				if len(mpClass) == 0 {
+					mpClass = fmt.Sprintf(`mana-%d`, util.QuantizeTens(u.Character.Mana, u.Character.ManaMax.Value))
+				}
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{mmp:color}", fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, mpClass, u.Character.ManaMax.Value))
+
+			case "{mp%}":
+				if mpPct == -1 {
+					mpPct = int(math.Floor(float64(u.Character.Mana) / float64(u.Character.ManaMax.Value) * 100))
+				}
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{mp%}", strconv.Itoa(mpPct)+`%`)
+
+			case "{mp%:color}":
+				if mpPct == -1 {
+					mpPct = int(math.Floor(float64(u.Character.Mana) / float64(u.Character.ManaMax.Value) * 100))
+				}
+				if len(mpClass) == 0 {
+					mpClass = fmt.Sprintf(`mana-%d`, util.QuantizeTens(u.Character.Mana, u.Character.ManaMax.Value))
+				}
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{mp%:color}", fmt.Sprintf(`<ansi fg="%s">%d%%</ansi>`, mpClass, mpPct))
+
+			case "{xptnl}":
+				if currentXP == -1 && tnlXP == -1 {
+					currentXP, tnlXP = u.Character.XPTNLActual()
+				}
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{xptnl}", strconv.Itoa(tnlXP))
+
+			case "{xptnl%}":
+				if currentXP == -1 && tnlXP == -1 {
+					currentXP, tnlXP = u.Character.XPTNLActual()
+				}
+				tnlPercent := int(math.Floor(float64(currentXP) / float64(tnlXP) * 100))
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{xptnl%}", strconv.Itoa(tnlPercent)+`%`)
+
+			}
+		}
+
 	}
 
 	if fullRedraw {
 		unsent, suggested := u.GetUnsentText()
 		if len(suggested) > 0 {
-			suggested = `<ansi fg="black-bold">` + suggested + `</ansi>`
+			suggested = `<ansi fg="suggested-text">` + suggested + `</ansi>`
 		}
 		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + ansiPrompt + unsent + suggested
 	}
 
 	return ansiPrompt
+}
+
+func CompilePrompt(input string) string {
+
+	if promptColorRegex.MatchString(input) {
+		input = `<ansi bg="" fg="">` + promptColorRegex.ReplaceAllString(input, `</ansi><ansi fg="$1" bg="$2">`) + `</ansi>`
+	}
+
+	return input
 }
 
 func (u *UserRecord) RoundTick() {

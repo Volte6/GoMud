@@ -16,3 +16,7 @@ There are a handful of settings you can adjust with this command, including:
   This sets the description players see when they look at your character. You
   can also look at yourself to see your current description.
 
+  <ansi fg="command">set prompt [prompt text]</ansi>
+  This sets a custom prompt (See <ansi fg="command">help prompt</ansi>)
+  If you ommit the [prompt text], your current prompt will be displayed.
+
