@@ -416,7 +416,7 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 			options := []string{
 				`description`,
 				`prompt`,
-				`prompt default`,
+				`fprompt`,
 			}
 
 			for _, opt := range options {

@@ -311,6 +311,10 @@ func (c *Character) GetHealthAppearance() string {
 	return fmt.Sprintf(`<ansi fg="username">%s</ansi> is in <ansi fg="%s">perfect health.</ansi>`, c.Name, className)
 }
 
+func (c *Character) GetBackpackCapacity() int {
+	return int(math.Ceil(float64(c.Stats.Strength.Value)/3)) + 3
+}
+
 func (c *Character) GetFollowers() []int {
 	return append([]int{}, c.followers...)
 }
