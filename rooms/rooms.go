@@ -158,11 +158,6 @@ func (c *Container) FindItem(itemName string) (items.Item, bool) {
 	return items.Item{}, false
 }
 
-// Keep as non pointer receiver for template usage
-func (l GameLock) IsLockable() bool {
-	return l.Difficulty > 0
-}
-
 func (l GameLock) IsLocked() bool {
 	return l.Difficulty > 0 && l.UnlockedUntil < util.GetRoundCount()
 }
@@ -205,6 +200,8 @@ type Room struct {
 	mobs            []int                        `yaml:"-"`                       // list of mob instance IDs currently in the room. Does not get saved.
 	visitors        map[int]uint64               `yaml:"visitors,omitempty"`      // list of user IDs that have visited this room, and the last round they did
 	lastVisitor     uint64                       `yaml:"-"`                       // last round a visitor was in the room
+	Script          string                       `yaml:"-"`                       // The script associated with the room
+	tempDataStore   map[string]any               `yaml:"-"`                       // Temporary data store for the room
 }
 
 type TrainingRange struct {
@@ -234,14 +231,15 @@ func (re RoomExit) HasLock() bool {
 
 func NewRoom(zone string) *Room {
 	r := &Room{
-		RoomId:      GetNextRoomId(),
-		Zone:        zone,
-		Title:       "An empty room.",
-		Description: "This is an empty room that was never given a description.",
-		MapSymbol:   ``,
-		Exits:       make(map[string]RoomExit),
-		players:     []int{},
-		visitors:    make(map[int]uint64),
+		RoomId:        GetNextRoomId(),
+		Zone:          zone,
+		Title:         "An empty room.",
+		Description:   "This is an empty room that was never given a description.",
+		MapSymbol:     ``,
+		Exits:         make(map[string]RoomExit),
+		players:       []int{},
+		visitors:      make(map[int]uint64),
+		tempDataStore: make(map[string]any),
 	}
 
 	SetNextRoomId(r.RoomId + 1)
@@ -259,6 +257,44 @@ func ParseExit(exitStr string) (roomId int, zone string) {
 		roomId, _ = strconv.Atoi(exitStr)
 	}
 	return roomId, zone
+}
+
+func (r *Room) SetTempData(key string, value any) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	if r.tempDataStore == nil {
+		r.tempDataStore = make(map[string]any)
+	}
+
+	if value == nil {
+		delete(r.tempDataStore, key)
+		return
+	}
+	r.tempDataStore[key] = value
+}
+
+func (r *Room) GetTempData(key string) any {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	if r.tempDataStore == nil {
+		r.tempDataStore = make(map[string]any)
+	}
+
+	if value, ok := r.tempDataStore[key]; ok {
+		return value
+	}
+	return nil
+}
+
+func (r *Room) GetScript() string {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+	if len(r.Script) < 1 {
+		return ""
+	}
+	return r.Script
 }
 
 func (r *Room) GetNouns() []string {
@@ -790,7 +826,7 @@ func (r *Room) TryTrigger(cmd string, restOfInput string, userId int) (matchingT
 				// Quest token (have or not have)
 				if req.Type == RequiresQuestToken {
 
-					rejected = !user.Character.HasQuestToken(req.IdString)
+					rejected = !user.Character.HasQuest(req.IdString)
 					if rejected {
 						rejectionMessage = req.RejectionMessage
 						break
@@ -800,7 +836,7 @@ func (r *Room) TryTrigger(cmd string, restOfInput string, userId int) (matchingT
 				}
 
 				if req.Type == RequiresNotQuestToken {
-					rejected = user.Character.HasQuestToken(req.IdString)
+					rejected = user.Character.HasQuest(req.IdString)
 					if rejected {
 						rejectionMessage = req.RejectionMessage
 						break
@@ -1668,47 +1704,6 @@ func (r *Room) Validate() error {
 
 	if len(r.Props) > 0 {
 		for p, prop := range r.Props {
-			/*
-				prop.Requirements = []PropRequirement{}
-
-				if len(prop.RequiresQuestToken) > 0 {
-					newReq := PropRequirement{
-						Type:             RequiresQuestToken,
-						IdString:         prop.RequiresQuestToken,
-						RejectionMessage: prop.MsgTmp,
-					}
-					prop.Requirements = append(prop.Requirements, newReq)
-				}
-
-				if prop.RequiresItemId != 0 {
-					newReq := PropRequirement{
-						Type:             RequiresItemId,
-						IdNumber:         prop.RequiresItemId,
-						RejectionMessage: prop.MsgTmp,
-					}
-					prop.Requirements = append(prop.Requirements, newReq)
-				}
-
-				if prop.RequiresBuffId != 0 {
-					newReq := PropRequirement{
-						Type:             RequiresBuffId,
-						IdNumber:         prop.RequiresBuffId,
-						RejectionMessage: prop.MsgTmp,
-					}
-
-					prop.Requirements = append(prop.Requirements, newReq)
-				}
-
-				if prop.RequiresNoMobs {
-					newReq := PropRequirement{
-						Type:             RequiresNoMobs,
-						RejectionMessage: prop.MsgTmp,
-					}
-					prop.Requirements = append(prop.Requirements, newReq)
-				}
-
-				r.Props[p] = prop
-			*/
 			// make all verbs and all nouns lowercase.
 			for i, verb := range prop.Verbs {
 				r.Props[p].Verbs[i] = strings.ToLower(verb)
@@ -1718,73 +1713,6 @@ func (r *Room) Validate() error {
 			}
 		}
 	}
-
-	/*
-		if r.Zone == `Dark Forest` {
-			if r.MapSymbol == "♣" {
-
-				r.SpawnInfo = []SpawnInfo{}
-
-				if r.RoomId == 550 || r.RoomId == 529 || r.RoomId == 516 || r.RoomId == 420 || r.RoomId == 403 {
-
-					spawnInfo := SpawnInfo{
-						MobId:    34,
-						Cooldown: uint16(util.RoundsPer15Minutes),
-						Message:  "A massive tree suddenly begins to move.",
-					}
-					r.SpawnInfo = append(r.SpawnInfo, spawnInfo)
-
-				}
-
-				spawnQty := 0
-				chanceIn100 := 20
-				if util.Rand(100) < chanceIn100 {
-					spawnQty = util.Rand(2) + 1
-				}
-
-				spawnTimeMin := util.Rand(util.RoundsPer15Minutes >> 2)
-				spawnTimeMax := util.Rand(util.RoundsPer15Minutes)
-				spawnTimeDelta := spawnTimeMax - spawnTimeMin
-
-				for i := 0; i < spawnQty; i++ {
-					spawnInfo := SpawnInfo{
-						MobId:    32,
-						Cooldown: uint16(util.Rand(spawnTimeMin) + spawnTimeDelta),
-						Message:  "A fungal growth emerges from the ground.",
-					}
-					r.SpawnInfo = append(r.SpawnInfo, spawnInfo)
-				}
-
-				spawnQty = 0
-				chanceIn100 = 20
-
-				if len(r.SpawnInfo) == 0 {
-					chanceIn100 += 10
-				}
-
-				if util.Rand(100) < chanceIn100 {
-					spawnQty = util.Rand(1)
-					if util.Rand(5) == 0 {
-						spawnQty += 1
-					}
-				}
-
-				spawnTimeMax = util.Rand(util.RoundsPer15Minutes)
-				spawnTimeDelta = spawnTimeMax - spawnTimeMin
-
-				for i := 0; i < spawnQty; i++ {
-					spawnInfo := SpawnInfo{
-						MobId:    33,
-						Cooldown: uint16(util.Rand(spawnTimeMin) + spawnTimeDelta),
-						Message:  "A branch is pushed aside as an Imp enters the area.",
-					}
-					r.SpawnInfo = append(r.SpawnInfo, spawnInfo)
-				}
-
-				fmt.Println(r.SpawnInfo)
-			}
-		}
-	*/
 
 	if len(r.SpawnInfo) > 0 {
 

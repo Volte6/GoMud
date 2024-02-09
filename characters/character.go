@@ -800,28 +800,6 @@ func (c *Character) GetSkillLevelCost(currentLevel int) int {
 	return currentLevel
 }
 
-func (c *Character) HasQuestToken(questToken string) bool {
-
-	questId, stepName := quests.TokenToParts(questToken)
-
-	step, ok := c.QuestProgress[questId]
-	if !ok {
-		return false
-	}
-
-	if step == stepName {
-		return true
-	}
-
-	currentToken := quests.PartsToToken(questId, step)
-
-	if quests.IsTokenAfter(questToken, currentToken) {
-		return true
-	}
-
-	return false
-}
-
 func (c *Character) GetMemoryCapacity() int {
 	return c.GetSkillLevel(skills.Map)*c.Stats.Smarts.Value + 5
 }

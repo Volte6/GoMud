@@ -81,6 +81,13 @@ func IsTokenAfter(currentToken string, nextToken string) bool {
 	if currentStep == `` {
 		if nextStep == `start` {
 			return true
+		} else if nextStep == `end` {
+			// If it's a single step quest, then they can end it.
+			if questInfo := GetQuest(nextToken); questInfo != nil {
+				if len(questInfo.Steps) == 1 {
+					return true
+				}
+			}
 		}
 		return false
 	}

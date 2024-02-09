@@ -24,6 +24,7 @@ import (
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
@@ -71,6 +72,172 @@ func (s *Suggestions) Next() string {
 	}
 	s.pos++
 	return s.suggestions[s.pos-1]
+}
+
+func main() {
+
+	configs.ReloadConfig()
+	c := configs.GetConfig()
+
+	// Setup the default logger
+	slog.SetDefault(logger)
+
+	slog.Info(`========================`)
+	//
+	slog.Info(`  ___  ____   _______   `)
+	slog.Info(`  |  \/  | | | |  _  \  `)
+	slog.Info(`  | .  . | | | | | | |  `)
+	slog.Info(`  | |\/| | | | | | | |  `)
+	slog.Info(`  | |  | | |_| | |/ /   `)
+	slog.Info(`  \_|  |_/\___/|___/    `)
+	//
+	slog.Info(`========================`)
+	//
+	cfgData := c.AllConfigData()
+	cfgKeys := make([]string, 0, len(cfgData))
+	for k := range cfgData {
+		cfgKeys = append(cfgKeys, k)
+	}
+
+	// sort the keys
+	slices.Sort(cfgKeys)
+
+	for _, k := range cfgKeys {
+		slog.Info("Config", k, cfgData[k])
+	}
+	//
+	slog.Info(`========================`)
+	//
+	// System Configurations
+	runtime.GOMAXPROCS(c.MaxCPUCores)
+
+	// Load all the data files up front.
+	rooms.LoadDataFiles()
+	buffs.LoadDataFiles() // Load buffs before items for cost calculation reasons
+	items.LoadDataFiles()
+	races.LoadDataFiles()
+	mobs.LoadDataFiles()
+	quests.LoadDataFiles()
+	templates.LoadAliases()
+	keywords.LoadAliases()
+
+	scripting.Setup(c.ScriptLoadTimeoutMs, c.ScriptRoomTimeoutMs)
+
+	//
+	slog.Info(`========================`)
+	//
+	// Capture OS signals to gracefully shutdown the server
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Start a pool of worker goroutines
+	var wg sync.WaitGroup
+
+	// Start the TCP server
+	server, err := net.Listen("tcp", fmt.Sprintf(":%d", c.TelnetPort))
+	if err != nil {
+		slog.Error("Error creating server", "error", err)
+		return
+	}
+	defer server.Close()
+
+	// TODO: This is pretty lazy, but works for my testing.
+	//       Get rid of later.
+	go func() {
+		ipPort := fmt.Sprintf(`%s %d`, util.GetMyIP(), c.TelnetPort)
+
+		util.SetServerAddress(`<ansi fg="red">` + ipPort + `</ansi>`)
+
+		slog.Info("TCP listening.", "port", c.TelnetPort)
+		slog.Info(``)
+		slog.Warn(`Public IP Address`, `Address`, ipPort)
+		slog.Info(``)
+	}()
+
+	// keep track of whether we are accepting connections or not
+	serverAlive = true
+
+	go worldManager.InputWorker(workerShutdownChan, &wg)
+	go worldManager.MaintenanceWorker(workerShutdownChan, &wg)
+	go worldManager.GameTickWorker(workerShutdownChan, &wg)
+
+	// Start a goroutine to accept incoming connections, so that we can use a signal to stop the server
+	go func() {
+
+		// Loop to accept connections
+		for {
+			conn, err := server.Accept()
+
+			if !serverAlive {
+				slog.Error("Connections disabled.")
+				return
+			}
+
+			if err != nil {
+				slog.Error("Connection error", "error", err)
+				continue
+			}
+
+			connCt := worldManager.GetConnectionPool().ActiveConnectionCount()
+			if connCt >= configs.GetConfig().MaxTelnetConnections {
+				conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", connCt)))
+				conn.Close()
+				continue
+			}
+
+			wg.Add(1)
+			// hand off the connection to a handler goroutine so that we can continue handling new connections
+			go handleTelnetConnection(
+				worldManager.GetConnectionPool().Add(conn),
+				&wg,
+			)
+
+		}
+	}()
+
+	// block until a signal comes in
+	<-sigChan
+
+	tplTxt, err := templates.Process("goodbye", nil)
+	if err != nil {
+		slog.Error("Template Error", "error", err)
+	}
+	worldManager.GetConnectionPool().Broadcast([]byte(tplTxt))
+
+	serverAlive = false // immediately stop processing incoming connections
+
+	// some last minute stats reporting
+	totalConnections, totalDisconnections := worldManager.GetConnectionPool().Stats()
+	slog.Error(
+		"shutting down server",
+		"LifetimeConnections", totalConnections,
+		"LifetimeDisconnects", totalDisconnections,
+		"ActiveConnections", totalConnections-totalDisconnections,
+	)
+
+	// cleanup all connections
+	worldManager.GetConnectionPool().Cleanup()
+
+	// close the server
+	server.Close()
+
+	// Just an ephemeral goroutine that spins its wheels until the program shuts down")
+	go func() {
+		for {
+			slog.Error("Waiting on workers")
+			// sleep for 3 seconds
+			time.Sleep(time.Duration(3) * time.Second)
+		}
+	}()
+
+	// Send the worker shutdown signal for each worker thread to read
+	workerShutdownChan <- true
+	workerShutdownChan <- true
+	workerShutdownChan <- true
+
+	// Wait for all workers to finish their tasks.
+	// Otherwise we end up getting flushed file saves incomplete.
+	wg.Wait()
+
 }
 
 func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.WaitGroup) {
@@ -285,7 +452,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 		// If they have pressed enter (submitted their input), and nothing else has handled/aborted
 		if clientInput.EnterPressed {
 
-			if time.Since(lastInput) < time.Duration(c.TurnMilliseconds)*time.Millisecond {
+			if time.Since(lastInput) < time.Duration(c.TurnMs)*time.Millisecond {
 				/*
 					worldManager.GetConnectionPool().SendTo(
 						[]byte("Slow down! You're typing too fast! "+time.Since(lastInput).String()+"\n"),
@@ -332,172 +499,9 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 			}
 
 			time.Sleep(time.Duration(10) * time.Millisecond)
-			//	time.Sleep(time.Duration(util.TurnMilliseconds) * time.Millisecond)
+			//	time.Sleep(time.Duration(util.TurnMs) * time.Millisecond)
 		}
 
 	}
-
-}
-
-func main() {
-
-	c := configs.GetConfig()
-
-	// Setup the default logger
-	slog.SetDefault(logger)
-
-	slog.Info(`========================`)
-	//
-	slog.Info(`  ___  ____   _______   `)
-	slog.Info(`  |  \/  | | | |  _  \  `)
-	slog.Info(`  | .  . | | | | | | |  `)
-	slog.Info(`  | |\/| | | | | | | |  `)
-	slog.Info(`  | |  | | |_| | |/ /   `)
-	slog.Info(`  \_|  |_/\___/|___/    `)
-	//
-	slog.Info(`========================`)
-	//
-	cfgData := c.AllConfigData()
-	cfgKeys := make([]string, 0, len(cfgData))
-	for k := range cfgData {
-		cfgKeys = append(cfgKeys, k)
-	}
-
-	// sort the keys
-	slices.Sort(cfgKeys)
-
-	for _, k := range cfgKeys {
-		slog.Info("Config", k, cfgData[k])
-	}
-	//
-	slog.Info(`========================`)
-	//
-	// System Configurations
-	runtime.GOMAXPROCS(c.MaxCPUCores)
-
-	// Load all the data files up front.
-	rooms.LoadDataFiles()
-	buffs.LoadDataFiles() // Load buffs before items for cost calculation reasons
-	items.LoadDataFiles()
-	races.LoadDataFiles()
-	mobs.LoadDataFiles()
-	quests.LoadDataFiles()
-	templates.LoadAliases()
-	keywords.LoadAliases()
-
-	//
-	slog.Info(`========================`)
-	//
-	// Capture OS signals to gracefully shutdown the server
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
-	// Start a pool of worker goroutines
-	var wg sync.WaitGroup
-
-	// Start the TCP server
-	server, err := net.Listen("tcp", fmt.Sprintf(":%d", c.TelnetPort))
-	if err != nil {
-		slog.Error("Error creating server", "error", err)
-		return
-	}
-	defer server.Close()
-
-	// TODO: This is pretty lazy, but works for my testing.
-	//       Get rid of later.
-	go func() {
-		ipPort := fmt.Sprintf(`%s %d`, util.GetMyIP(), c.TelnetPort)
-
-		util.SetServerAddress(`<ansi fg="red">` + ipPort + `</ansi>`)
-
-		slog.Info("TCP listening.", "port", c.TelnetPort)
-		slog.Info(``)
-		slog.Warn(`Public IP Address`, `Address`, ipPort)
-		slog.Info(``)
-	}()
-
-	// keep track of whether we are accepting connections or not
-	serverAlive = true
-
-	go worldManager.InputWorker(workerShutdownChan, &wg)
-	go worldManager.MaintenanceWorker(workerShutdownChan, &wg)
-	go worldManager.GameTickWorker(workerShutdownChan, &wg)
-
-	// Start a goroutine to accept incoming connections, so that we can use a signal to stop the server
-	go func() {
-
-		// Loop to accept connections
-		for {
-			conn, err := server.Accept()
-
-			if !serverAlive {
-				slog.Error("Connections disabled.")
-				return
-			}
-
-			if err != nil {
-				slog.Error("Connection error", "error", err)
-				continue
-			}
-
-			connCt := worldManager.GetConnectionPool().ActiveConnectionCount()
-			if connCt >= configs.GetConfig().MaxTelnetConnections {
-				conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", connCt)))
-				conn.Close()
-				continue
-			}
-
-			wg.Add(1)
-			// hand off the connection to a handler goroutine so that we can continue handling new connections
-			go handleTelnetConnection(
-				worldManager.GetConnectionPool().Add(conn),
-				&wg,
-			)
-
-		}
-	}()
-
-	// block until a signal comes in
-	<-sigChan
-
-	tplTxt, err := templates.Process("goodbye", nil)
-	if err != nil {
-		slog.Error("Template Error", "error", err)
-	}
-	worldManager.GetConnectionPool().Broadcast([]byte(tplTxt))
-
-	serverAlive = false // immediately stop processing incoming connections
-
-	// some last minute stats reporting
-	totalConnections, totalDisconnections := worldManager.GetConnectionPool().Stats()
-	slog.Error(
-		"shutting down server",
-		"LifetimeConnections", totalConnections,
-		"LifetimeDisconnects", totalDisconnections,
-		"ActiveConnections", totalConnections-totalDisconnections,
-	)
-
-	// cleanup all connections
-	worldManager.GetConnectionPool().Cleanup()
-
-	// close the server
-	server.Close()
-
-	// Just an ephemeral goroutine that spins its wheels until the program shuts down")
-	go func() {
-		for {
-			slog.Error("Waiting on workers")
-			// sleep for 3 seconds
-			time.Sleep(time.Duration(3) * time.Second)
-		}
-	}()
-
-	// Send the worker shutdown signal for each worker thread to read
-	workerShutdownChan <- true
-	workerShutdownChan <- true
-	workerShutdownChan <- true
-
-	// Wait for all workers to finish their tasks.
-	// Otherwise we end up getting flushed file saves incomplete.
-	wg.Wait()
 
 }

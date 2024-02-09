@@ -12,22 +12,24 @@ description: Within the labyrinthine silence of the catacombs, The Crypt of the 
   centuries and the weight of a legacy that was once feared and revered. In this crypt,
   the past feels alive, and the perception of the ancient sovereign looms as large
   and as ominous as the day the tomb was sealed.
-props:
-- nouns: [sarcophagus]
-  verbs: [touch, push, hit, kick, open]
-  description: The sarcophagus lies solemn and imposing, its ancient stone surface
-    etched with enigmatic runes and the stern visage of the entombed sovereign, exuding
-    an air of timeless dominion and whispered dread.
-  trigger:
-    roomid: 138
-    affected: room
-    descriptionplayer: The room begins to tremble, and a trap door opens beneath your
-      feet! You fall into the room below!
-    descriptionroom: '%s has triggered some sort of trap! the room begins to tremble
-      and a trap door opens beneath your feet. You fall into the darkness below!'
 exits:
   north:
     roomid: 132
+items:
+- itemid: 10014
+- itemid: 20011
+- itemid: 20001
+- itemid: 20015
+  uncursed: true
+- itemid: 30002
+  uses: 1
+- itemid: 10004
+- itemid: 20004
+- itemid: 30007
+  uses: 1
+- itemid: 8
+  uses: 1
+- itemid: 10006
 spawninfo:
 - mobid: 17
   cooldown: 90

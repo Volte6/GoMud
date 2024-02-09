@@ -60,7 +60,7 @@ PVPEnabled: true
 #   Scales XP Charts for character leveling. Lower means less required, higher
 #   means more required. 1 is the default (no change).
 XPScale: 1
-# - TurnMilliseconds -
+# - TurnMs -
 #   How many milliseconds per turn. While lower is generally better, this can
 #   greatly increase overhead on the server - a command per mob or user is
 #   processed per turn. This is not the same as rounds, which is how often the
@@ -71,7 +71,7 @@ XPScale: 1
 #   player.
 #   100 is a good balance between handling input from players and not bogging
 #   down the server.
-TurnMilliseconds: 100
+TurnMs: 100
 # - RoundSeconds - 
 #   How many seconds per round. Anything gated by rounds will be affected by
 #   this. This is the main setting for controlling the pace of the game.
@@ -113,6 +113,16 @@ RoundsPerAutoSave: 900
 #   bogged down with too many mobs in memory. If you want mobs to stick around 
 #   indefinitely, set this to 0.
 MaxMobBoredom: 150 
+# - ScriptLoadTimeoutMs -
+#   When a script is first loaded, compiled, and run, it is given this long to
+#   complete. If it takes longer, it is killed. This includes the onLoad() function
+#   in scripts. Allowing a script to take longer to load might be okay to prepare some
+#   heavier data.
+ScriptLoadTimeoutMs: 1000
+# - ScriptRoomTimeoutMs - 
+#   How long a room script can run before it is killed. This is a safety feature to
+#   prevent long running scripts from bogging down the server.
+ScriptRoomTimeoutMs: 10
 ################################################################################
 #
 #   NETWORK SETTINGS

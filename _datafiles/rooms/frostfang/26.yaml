@@ -13,22 +13,6 @@ description: 'Adjacent to the Sanctuary of the Benevolent Heart, a narrow, shado
   the soft rustling of movement can be heard from within the shelters, hinting at
   the lives precariously balanced in this hidden enclave, a stone''s throw away from
   a place of worship and refuge.'
-props:
-- nouns: [trash]
-  description: Trash lines the alley.
-- nouns: [raven, eyes, bird]
-  verbs: [touch, push, press, take, rub, polish]
-  cooldown: 20
-  description: Looking more closely, the eyes of the raven are made of onyx. They
-    are clean and clear, as if polished.
-  trigger:
-    roomid: 31
-    questtoken: 2-investigate
-    affected: player
-    descriptionplayer: You press the eyes of the raven, and follow a secret entrance
-      to the west!
-    descriptionroom: <ansi fg="username">%s</ansi> presses in the eyes of the raven,
-      and falls through into a room to the west!
 biome: city
 exits:
   north:

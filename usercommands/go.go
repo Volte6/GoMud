@@ -8,6 +8,7 @@ import (
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -117,6 +118,7 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 	if goRoomId > 0 || exitName != `` {
 		// It does so we won't need to continue down the logic after this chunk
 		response.Handled = true
+		originRoomId := user.Character.RoomId
 
 		// Load current room details
 		destRoom := rooms.LoadRoom(goRoomId)
@@ -141,9 +143,25 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 			enterFromExit = fmt.Sprintf(`the <ansi fg="exit">%s</ansi>`, enterFromExit)
 		}
 
+		if scriptResponse, err := scripting.TryScriptEvent(`onExit`, user.UserId, cmdQueue); err == nil {
+			response.AbsorbMessages(scriptResponse)
+			if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
+				return response, nil
+			}
+		}
+
 		if err := rooms.MoveToRoom(user.UserId, destRoom.RoomId); err != nil {
 			response.SendUserMessage(userId, "Oops, couldn't move there!", true)
 		} else {
+
+			if scriptResponse, err := scripting.TryScriptEvent(`onEnter`, user.UserId, cmdQueue); err == nil {
+				response.AbsorbMessages(scriptResponse)
+				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
+					rooms.MoveToRoom(user.UserId, originRoomId)
+					return response, nil
+				}
+			}
+
 			// Tell the player they are moving
 			if isSneaking {
 				response.SendUserMessage(userId, fmt.Sprintf(`You <ansi fg="black-bold">sneak</ansi> towards the %s exit.`, exitName), true)

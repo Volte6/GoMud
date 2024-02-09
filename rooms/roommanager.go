@@ -581,6 +581,17 @@ func LoadRoom(roomId int) *Room {
 	roomManager.Lock()
 	filename := findRoomFile(roomId)
 	retRoom, _ := loadRoomFromFile(util.FilePath(roomDataFilesPath, `/`, filename))
+
+	// Load any script for the room
+	scriptPath := strings.Replace(roomDataFilesPath+`/`+retRoom.Filepath(), `.yaml`, `.js`, 1)
+
+	// Load the script into a string
+	if _, err := os.Stat(scriptPath); err == nil {
+		if bytes, err := os.ReadFile(scriptPath); err == nil {
+			retRoom.Script = string(bytes)
+		}
+	}
+
 	roomManager.Unlock()
 
 	return retRoom
@@ -880,74 +891,83 @@ func GetMapForDataString(dataStr string) string {
 		mapHeight, _ := strconv.Atoi(mapProperties[`height`])
 		mapWidth, _ := strconv.Atoi(mapProperties[`width`])
 		mapName := mapProperties[`name`]
-		mapMode := MapModeAllButSecrets
-		if showAll, _ := strconv.ParseBool(mapProperties[`secrets`]); showAll {
-			mapMode = MapModeAll
-		}
-		mapMarkers := mapProperties[`markers`]
+		showAll, _ := strconv.ParseBool(mapProperties[`secrets`])
 
-		var mapData MapData
-		var err error
+		mapMarkers := []string{mapProperties[`markers`]}
 
-		if mapRoom := LoadRoom(mapRoomId); mapRoom != nil {
-			if mapSize == "wide" {
-				rGraph := GenerateZoneMap(mapRoom.Zone, mapRoomId, 0, mapWidth, mapHeight, mapMode)
+		return GetSpecificMap(mapRoomId, mapSize, mapHeight, mapWidth, mapName, showAll, mapMarkers)
 
-				if mapMarkers != "" {
-					// Looks like: 1=T-Treasure Room,2=B-Spider Boss
-					markerDetails := strings.Split(mapMarkers, `,`)
-					for _, markerDetail := range markerDetails {
-						markerDetailParts := strings.Split(markerDetail, `:`)
-						if len(markerDetailParts) == 2 {
-							markerRoomId, _ := strconv.Atoi(markerDetailParts[0])
-							symbolAndLegend := strings.Split(markerDetailParts[1], `-`)
-
-							if markerRoomId > 0 && len(symbolAndLegend) == 2 {
-								rGraph.AddRoomSymbolOverrides([]rune(symbolAndLegend[0])[0], symbolAndLegend[1], markerRoomId)
-							}
-						}
-					}
-				}
-
-				//rGraph.AddRoomSymbolOverrides('×', "Here", mapRoomId)
-				mapData, err = DrawZoneMap(rGraph, mapName, mapWidth, mapHeight)
-			} else {
-				rGraph := GenerateZoneMap(mapRoom.Zone, mapRoomId, 0, int(math.Ceil(float64(mapWidth)/2)), int(math.Ceil(float64(mapHeight)/2)), mapMode)
-
-				if mapMarkers != "" {
-					// Looks like: 1:T-Treasure Room,2:B-Spider Boss
-					markerDetails := strings.Split(mapMarkers, `,`)
-					for _, markerDetail := range markerDetails {
-						markerDetailParts := strings.Split(markerDetail, `:`)
-						if len(markerDetailParts) == 2 {
-							markerRoomId, _ := strconv.Atoi(markerDetailParts[0])
-							symbolAndLegend := strings.Split(markerDetailParts[1], `-`)
-
-							if markerRoomId > 0 && len(symbolAndLegend) == 2 {
-								rGraph.AddRoomSymbolOverrides([]rune(symbolAndLegend[0])[0], symbolAndLegend[1], markerRoomId)
-							}
-						}
-					}
-				}
-
-				//rGraph.AddRoomSymbolOverrides('×', "Here", mapRoomId)
-				mapData, err = DrawZoneMap(rGraph, mapName, mapWidth, mapHeight)
-			}
-
-			if mapData.LegendWidth < 72 { // 80 - " Legend "
-				mapData.LegendWidth = 72
-			}
-
-			if err != nil {
-				slog.Error("Map Prop", "error", err.Error())
-				return ""
-			}
-
-			mapTxt, _ := templates.Process("maps/map", mapData)
-			return mapTxt
-		}
 	}
 	return ""
+}
+
+func GetSpecificMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool, mapMarkers []string) string {
+
+	mapMode := MapModeAllButSecrets
+	if showSecrets {
+		mapMode = MapModeAll
+	}
+
+	var mapData MapData
+	var err error
+
+	if mapRoom := LoadRoom(mapRoomId); mapRoom != nil {
+
+		if mapSize == "wide" {
+
+			rGraph := GenerateZoneMap(mapRoom.Zone, mapRoomId, 0, mapWidth, mapHeight, mapMode)
+
+			if len(mapMarkers) > 0 {
+				for _, overrideString := range mapMarkers {
+					parts := strings.Split(overrideString, `,`)
+					if len(parts) == 3 {
+						roomId, _ := strconv.Atoi(parts[0])
+						symbol := parts[1]
+						legend := parts[2]
+
+						if roomId > 0 && len(symbol) > 0 && len(legend) > 0 {
+							rGraph.AddRoomSymbolOverrides([]rune(symbol)[0], legend, roomId)
+						}
+					}
+				}
+			}
+
+			mapData, err = DrawZoneMap(rGraph, mapName, mapWidth, mapHeight)
+		} else {
+
+			rGraph := GenerateZoneMap(mapRoom.Zone, mapRoomId, 0, int(math.Ceil(float64(mapWidth)/2)), int(math.Ceil(float64(mapHeight)/2)), mapMode)
+
+			if len(mapMarkers) > 0 {
+				for _, overrideString := range mapMarkers {
+					parts := strings.Split(overrideString, `,`)
+					if len(parts) == 3 {
+						roomId, _ := strconv.Atoi(parts[0])
+						symbol := parts[1]
+						legend := parts[2]
+
+						if roomId > 0 && len(symbol) > 0 && len(legend) > 0 {
+							rGraph.AddRoomSymbolOverrides([]rune(symbol)[0], legend, roomId)
+						}
+					}
+				}
+			}
+
+			mapData, err = DrawZoneMap(rGraph, mapName, mapWidth, mapHeight)
+		}
+
+		if mapData.LegendWidth < 72 { // 80 - " Legend "
+			mapData.LegendWidth = 72
+		}
+
+		if err != nil {
+			slog.Error("Map Prop", "error", err.Error())
+			return ``
+		}
+
+		mapTxt, _ := templates.Process("maps/map", mapData)
+		return mapTxt
+	}
+	return ``
 }
 
 func LoadDataFiles() {

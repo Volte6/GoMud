@@ -6,6 +6,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/keywords"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -180,6 +181,15 @@ type UserCommand func(rest string, userId int, cmdQueue util.CommandQueue) (util
 
 func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
+	finalResponse := NewUserCommandResponse(userId)
+
+	response, err := scripting.TryCommand(keywords.TryCommandAlias(cmd), rest, userId, cmdQueue)
+	finalResponse.AbsorbMessages(response)
+	if response.Handled {
+		finalResponse.Handled = true
+		return finalResponse, err
+	}
+
 	cmd = strings.ToLower(cmd)
 
 	if alias := keywords.TryCommandAlias(cmd); alias != cmd {
@@ -208,19 +218,25 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 	// Try any room props, only return if the response indicates it was handled
 	if !userDisabled {
 		if response, err := RoomProps(cmd, rest, userId, cmdQueue); err != nil {
-			return response, err
+			finalResponse.AbsorbMessages(response)
+			if response.NextCommand != `` {
+				finalResponse.NextCommand = response.NextCommand
+			}
+			return finalResponse, err
 		} else if response.Handled {
-			return response, err
+			finalResponse.AbsorbMessages(response)
+			finalResponse.Handled = true
+			return finalResponse, err
 		}
+
 	}
 
 	if cmdInfo, ok := userCommands[cmd]; ok {
 
 		if userDisabled && !cmdInfo.AllowedWhenDowned && !cmdInfo.AdminOnly {
-			response := NewUserCommandResponse(userId)
-			response.SendUserMessage(userId, "You are unable to do that while downed.", true)
-			response.Handled = true
-			return response, nil
+			finalResponse.SendUserMessage(userId, "You are unable to do that while downed.", true)
+			finalResponse.Handled = true
+			return finalResponse, nil
 		}
 
 		if isAdmin || !cmdInfo.AdminOnly {
@@ -231,7 +247,14 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 			}()
 
 			response, err := cmdInfo.Func(rest, userId, cmdQueue)
-			return response, err
+			finalResponse.AbsorbMessages(response)
+			if response.NextCommand != `` {
+				finalResponse.NextCommand = response.NextCommand
+			}
+			if response.Handled {
+				finalResponse.Handled = true
+			}
+			return finalResponse, err
 
 		}
 	}
@@ -245,17 +268,30 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 		}()
 
 		if response, err := Go(cmd, userId, cmdQueue); err != nil {
-			return response, err
+			if response.NextCommand != `` {
+				finalResponse.NextCommand = response.NextCommand
+			}
+			finalResponse.AbsorbMessages(response)
+			return finalResponse, err
 		} else if response.Handled {
-			return response, err
+			if response.NextCommand != `` {
+				finalResponse.NextCommand = response.NextCommand
+			}
+			finalResponse.AbsorbMessages(response)
+			finalResponse.Handled = true
+			return finalResponse, err
 		}
 
 	}
 
 	if emoteText, ok := emoteAliases[cmd]; ok {
 		response, err := Emote(emoteText, userId, cmdQueue)
-		return response, err
+		if response.NextCommand != `` {
+			finalResponse.NextCommand = response.NextCommand
+		}
+		finalResponse.AbsorbMessages(response)
+		return finalResponse, err
 	}
 
-	return NewUserCommandResponse(userId), nil
+	return finalResponse, nil
 }

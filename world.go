@@ -341,7 +341,7 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 
 			if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
 				for exitName, exitInfo := range room.Exits {
-					if exitInfo.Secret || !exitInfo.Lock.IsLockable() {
+					if exitInfo.Secret || !exitInfo.HasLock() {
 						continue
 					}
 					if strings.HasPrefix(strings.ToLower(exitName), targetName) {
@@ -350,7 +350,7 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 				}
 
 				for containerName, containerInfo := range room.Containers {
-					if containerInfo.Lock.IsLockable() {
+					if containerInfo.HasLock() {
 						if strings.HasPrefix(strings.ToLower(containerName), targetName) {
 							suggestions = append(suggestions, containerName[targetNameLen:])
 						}
@@ -519,7 +519,7 @@ func (w *World) GameTickWorker(shutdown chan bool, wg *sync.WaitGroup) {
 
 	c := configs.GetConfig()
 
-	turnTimer := time.NewTimer(time.Duration(c.TurnMilliseconds) * time.Millisecond)
+	turnTimer := time.NewTimer(time.Duration(c.TurnMs) * time.Millisecond)
 
 loop:
 	for {
@@ -529,7 +529,7 @@ loop:
 			break loop
 
 		case <-turnTimer.C:
-			turnTimer.Reset(time.Duration(c.TurnMilliseconds) * time.Millisecond)
+			turnTimer.Reset(time.Duration(c.TurnMs) * time.Millisecond)
 			w.TurnTick()
 		}
 		c = configs.GetConfig()
@@ -674,7 +674,7 @@ func (w *World) processInput(wi WorldInput) {
 					command = wi.InputText
 				}
 
-				slog.Info("World received input", "InputText", (wi.InputText))
+				//slog.Info("World received input", "InputText", (wi.InputText))
 				commandResponse, err = usercommands.TryCommand(command, remains, wi.FromId, w)
 				if err != nil {
 					slog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
@@ -842,7 +842,6 @@ func (w *World) QueueQuest(userId int, questToken string) {
 	}
 
 	w.userQuestQueue.Push(newInput)
-
 }
 
 func (w *World) QueueCommand(userId int, mobId int, cmd string, waitTurns ...int) {
@@ -1271,6 +1270,7 @@ func (w *World) TurnTick() {
 
 	// handle queued quest toke handouts
 	for w.userQuestQueue.Len(0) > 0 {
+
 		if questRequest, ok := w.userQuestQueue.Pop(); ok {
 
 			// Give them a token
@@ -1288,12 +1288,10 @@ func (w *World) TurnTick() {
 						questUser.Character.ClearQuestToken(questRequest.QuestToken)
 						continue
 					}
-
 					// This only succees if the user doesn't have the quest yet or the quest is a later step of one they've started
 					if questUser.Character.GiveQuestToken(questRequest.QuestToken) {
 
 						_, stepName := quests.TokenToParts(questRequest.QuestToken)
-
 						if stepName == `start` {
 							if !questInfo.Secret {
 								questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have been given a new quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))

@@ -10,14 +10,6 @@ description: The Frostfire Inn stands as a beacon of warmth and respite amidst F
   rooms with thick fur blankets await, offering solace from the chill. With its jovial
   atmosphere and the innkeeper's renowned hospitality, the Frostfire has become a
   beloved haven for both locals and wanderers alike.
-props:
-- nouns: [""]
-  verbs: [sleep]
-  trigger:
-    roomid: 432
-    buffid: 15
-    affected: player
-    descriptionplayer: You are directed to a room upstairs with a large bed. How inviting....
 mapsymbol: I
 maplegend: Inn
 biome: city

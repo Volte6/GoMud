@@ -51,7 +51,7 @@ func IfQuest(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 	for _, uid := range room.GetPlayers() {
 		if user := users.GetByUserId(uid); user != nil {
 
-			if user.Character.HasQuestToken(questToken) {
+			if user.Character.HasQuest(questToken) {
 				cmdQueue.QueueCommand(0, mob.InstanceId, cmd)
 				break
 			}
@@ -104,7 +104,7 @@ func IfNotQuest(rest string, mobId int, cmdQueue util.CommandQueue) (util.Messag
 	for _, uid := range room.GetPlayers() {
 		if user := users.GetByUserId(uid); user != nil {
 
-			if !user.Character.HasQuestToken(questToken) {
+			if !user.Character.HasQuest(questToken) {
 				cmdQueue.QueueCommand(0, mob.InstanceId, cmd)
 				break
 			}
