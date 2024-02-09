@@ -27,10 +27,12 @@ type config struct {
 	CarefulSaveFiles             bool     `yaml:"CarefulSaveFiles"`
 	PVPEnabled                   bool     `yaml:"PVPEnabled"`
 	XPScale                      float64  `yaml:"XPScale"`
-	TurnMilliseconds             int      `yaml:"TurnMilliseconds"`
+	TurnMs                       int      `yaml:"TurnMs"`
 	RoundSeconds                 int      `yaml:"RoundSeconds"`
 	RoundsPerAutoSave            int      `yaml:"RoundsPerAutoSave"`
 	MaxMobBoredom                int      `yaml:"MaxMobBoredom"`
+	ScriptLoadTimeoutMs          int      `yaml:"ScriptLoadTimeoutMs"`          // How long to spend the first time a script is loaded into memory
+	ScriptRoomTimeoutMs          int      `yaml:"ScriptRoomTimeoutMs"`          // How many milliseconds to allow a script to run before it is interrupted
 	MaxTelnetConnections         int      `yaml:"MaxTelnetConnections"`         // Maximum number of telnet connections to accept
 	TelnetPort                   int      `yaml:"TelnetPort"`                   // Port used to accept telnet connections
 	WebPort                      int      `yaml:"WebPort"`                      // Port used for web requests
@@ -289,8 +291,8 @@ func (c *config) validate() {
 		c.XPScale = 1.0 // default
 	}
 
-	if c.TurnMilliseconds < 10 {
-		c.TurnMilliseconds = 100 // default
+	if c.TurnMs < 10 {
+		c.TurnMs = 100 // default
 	}
 
 	if c.RoundSeconds < 1 {
@@ -324,6 +326,14 @@ func (c *config) validate() {
 
 	if c.MaxMobBoredom < 1 {
 		c.MaxMobBoredom = 150 // default
+	}
+
+	if c.ScriptLoadTimeoutMs < 1 {
+		c.ScriptLoadTimeoutMs = 1000 // default
+	}
+
+	if c.ScriptRoomTimeoutMs < 1 {
+		c.ScriptRoomTimeoutMs = 10
 	}
 
 	if c.MaxTelnetConnections < 1 {
@@ -365,9 +375,9 @@ func (c *config) validate() {
 	// Nothing to do with Locked
 
 	// Pre-calculate and cache useful values
-	c.turnsPerRound = (c.RoundSeconds * 1000) / c.TurnMilliseconds
+	c.turnsPerRound = (c.RoundSeconds * 1000) / c.TurnMs
 	c.turnsPerSave = c.RoundsPerAutoSave * c.turnsPerRound
-	c.turnsPerSecond = 1000 / c.TurnMilliseconds
+	c.turnsPerSecond = 1000 / c.TurnMs
 	c.roundsPerMinute = 60 / float64(c.RoundSeconds)
 }
 
@@ -413,11 +423,11 @@ func (c config) SecondsToRounds(seconds int) int {
 }
 
 func (c config) MinutesToTurns(minutes int) int {
-	return int(math.Ceil(float64(minutes*60*1000) / float64(c.TurnMilliseconds)))
+	return int(math.Ceil(float64(minutes*60*1000) / float64(c.TurnMs)))
 }
 
 func (c config) SecondsToTurns(seconds int) int {
-	return int(math.Ceil(float64(seconds*1000) / float64(c.TurnMilliseconds)))
+	return int(math.Ceil(float64(seconds*1000) / float64(c.TurnMs)))
 }
 
 func (c config) IsBannedName(name string) bool {
@@ -516,10 +526,4 @@ func ReloadConfig() error {
 	configData = tmpConfigData
 
 	return nil
-}
-
-func init() {
-	if err := ReloadConfig(); err != nil {
-		panic(err)
-	}
 }

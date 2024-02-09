@@ -6,25 +6,6 @@ description: The skeletal frames of shattered wagons, their wheels sunken into t
   frost-covered canvas awnings that once provided shelter for weary travelers and
   valuable cargo. The contents of crates and barrels are strewn about, their wares
   now plundered by time and the elements.
-props:
-- nouns: [caravan]
-  description: The caravan, long since destroyed, once belonged to the frostfire guild
-    of magicians. There must have been some impressive artifacts carreid by them once.
-- nouns: [crate, crates, box]
-  verbs: [open, pry]
-  requirements:
-  - type: itemid
-    idnumber: 10012
-    rejectionmessage: You'll need some kind of tool to open that.
-  cooldown: 300
-  description: The scattered crates are mostly broken and empty, save one that is
-    still intact.
-  trigger:
-    itemid: 4
-    affected: player
-    descriptionplayer: You pry the box open and remove a glowing crystal from inside.
-    descriptionroom: <ansi fg="username">%s</ansi> pries the box open and removes
-      something that emits a faint glow.
 mapsymbol: C
 maplegend: Caravan
 exits:

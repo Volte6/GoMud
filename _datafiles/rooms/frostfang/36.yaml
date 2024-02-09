@@ -10,13 +10,6 @@ description: Inside Frostfang Castle, the grand entrance hall is a testament to 
   of past rulers, stern and unyielding, stand sentinel on either side, their imposing
   perception demanding respect. In a distant corner, the somber tones of a live ensemble
   resonate, their haunting melody echoing through the hall.
-props:
-- verbs: [north]
-  requirements:
-  - type: questtoken
-    idstring: 2-start
-    rejectionmessage: The guards block your path. "You must be invited to enter the
-      throne room," they say. "We cannot let you pass."
 biome: city
 exits:
   east:

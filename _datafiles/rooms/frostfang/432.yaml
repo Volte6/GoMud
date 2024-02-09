@@ -9,18 +9,6 @@ description: The dim glow of a crackling hearth in one corner bathes the wooden 
   wintry breeze, and the room is adorned with tasteful decorations that add a touch
   of charm to the ambiance. It's a perfect haven for weary adventurers seeking respite
   from the cold and a peaceful night's rest in the heart of Frostfang.
-props:
-- nouns: [crowbar, rod, metal, bar]
-  verbs: [get, take]
-  cooldown: 120
-  description: A crowbar leans besides the fireplace. Probably used for poking the
-    fire and moving the logs around.
-  trigger:
-    itemid: 10012
-    affected: player
-    descriptionplayer: You take the crowbar. They probably won't miss it.
-    descriptionroom: <ansi fg="username">%s</ansi> takes the crowbar from beside the
-      fireplace.
 mapsymbol: I
 maplegend: Inn
 biome: city

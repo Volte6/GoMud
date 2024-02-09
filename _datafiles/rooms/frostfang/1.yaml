@@ -9,17 +9,6 @@ description: In the shimmering heart of Frostfang, a city wrapped in a perpetual
   of the Square, where icicle-laden stalls display wares from around the frozen realm,
   and citizens clad in thick furs exchange stories of their encounters with mystical
   creatures.
-props:
-- nouns: [sign, map]
-  verbs: [look, read]
-  trigger:
-    skillinfo: map:1
-    affected: player
-    descriptionplayer: You look at the map nailed to the sign.
-    descriptionroom: <ansi fg="username">%s</ansi> looks at the map nailed to the
-      sign.
-    mapinfo: roomid=1/size=normal/height=22/width=38/secrets=false/name=Map of Frostfang/markers=1:×-Here
-      Center
 mapsymbol: T
 maplegend: Townsquare
 biome: city
@@ -32,6 +21,13 @@ exits:
     roomid: 12
   west:
     roomid: 7
+items:
+- itemid: 8
+  uses: 3
+- itemid: 30007
+  uses: 1
+- itemid: 30004
+  uses: 3
 spawninfo:
 - mobid: 2
   cooldown: 85

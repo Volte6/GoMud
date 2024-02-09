@@ -1,137 +1,237 @@
 package scripting
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
-	"reflect"
+	"time"
 
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-const (
-	TEST_SCRIPT = `
-	function onCommand(cmd, rest, user, response) {
-
-		console.log("1onCommand-"+cmd+"/rest-"+rest+"/userId-"+String(user.UserId))
-		
-
-		if (cmd === "ping") {
-			response.SendUserMessage(userId, "Oops!", true)
-			response.Handled = true;
-		}
-		// throw("Test");
-		return response;
-	}`
-
-	TEST_SCRIPT2 = `
-	function onCommand(cmd, rest, user, response) {
-
-		console.log("2onCommand-"+cmd+"/rest-"+rest+"/userId-"+String(user.UserId))
-		user.Character.Namio = "Chuckles"
-		
-		if (cmd === "ping") {
-			response.SendUserMessage(userId, "Oops!", true)
-			response.Handled = true;
-		}
-		// throw("Test");
-		return response;
-	}`
+var (
+	errNoScript = errors.New("no script")
+	errTimeout  = errors.New("script timeout")
 )
 
-func Test(u *users.UserRecord) {
-
-	vm := goja.New()
-	vm.Set("console", newConsole(vm))
-
-	_, err := vm.RunString(TEST_SCRIPT)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = vm.RunString(TEST_SCRIPT2)
-	if err != nil {
-		panic(err)
-	}
-
-	onCommandFunc, ok := goja.AssertFunction(vm.Get("onCommand"))
-	if !ok {
-		panic("Not a function")
-	}
-
-	cmd := "ping"
-	rest := "north"
-
-	res, err := onCommandFunc(goja.Undefined(),
-		vm.ToValue(cmd),
-		vm.ToValue(rest),
-		vm.ToValue(u),
-		vm.ToValue(util.NewMessageQueue(u.UserId, 0)),
-		vm.ToValue("test"))
-
-	if err != nil {
-
-		if jserr, ok := err.(*goja.Exception); ok {
-			slog.Error("JSVM", "exception", jserr.Value().Export())
-		} else {
-			panic(err)
-		}
-
-	} else {
-
-		mQ := res.Export().(util.MessageQueue)
-		fmt.Println("Handled", mQ.Handled)
-
-	}
-
-	slog.Info("NAme", u.Character.Name)
+func Setup(scriptLoadTimeoutMs int, scriptRoomTimeoutMs int) {
+	scriptLoadTimeout = time.Duration(scriptLoadTimeoutMs) * time.Millisecond
+	scriptRoomTimeout = time.Duration(scriptRoomTimeoutMs) * time.Millisecond
 }
 
-func sizeOf(v reflect.Value) uintptr {
-	switch v.Kind() {
-	case reflect.Ptr:
-		if v.IsNil() {
-			return 0
-		}
-		return sizeOf(v.Elem())
+func setAllScriptingFunctions(vm *goja.Runtime) {
+	setMessagingFunctions(vm)
+	setRoomFunctions(vm)
+	setUserFunctions(vm)
+	setUtilFunctions(vm)
+	setMobFunctions(vm)
+}
 
-	case reflect.Slice:
-		if v.IsNil() {
-			return 0
-		}
-		length := v.Len()
-		elemSize := sizeOf(reflect.New(v.Type().Elem()).Elem())
-		return uintptr(length) * elemSize
+func TryScriptLoad(roomId int) error {
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("scripting/TryScriptLoad()", "time", time.Since(timestart))
+	}()
 
-	case reflect.Struct:
-		var size uintptr
-		for i := 0; i < v.NumField(); i++ {
-			size += sizeOf(v.Field(i))
-		}
-		return size
-
-	case reflect.Array:
-		length := v.Len()
-		elemSize := sizeOf(reflect.New(v.Type().Elem()).Elem())
-		return uintptr(length) * elemSize
-
-	case reflect.String:
-		return uintptr(len(v.String()))
-
-	case reflect.Map:
-		// Maps are tricky because they have an unknown overhead for buckets and other internals.
-		// A rough estimate is the size of the keys and values, but this omits the actual map overhead.
-		// You might add a constant factor or use a per-map overhead based on runtime/map.go info.
-		var size uintptr
-		keys := v.MapKeys()
-		for _, key := range keys {
-			size += sizeOf(key) + sizeOf(v.MapIndex(key))
-		}
-		return size
-
-	default:
-		// This accounts for the types like integers, bools, etc.
-		return v.Type().Size()
+	vmw, err := getRoomVM(roomId)
+	if err != nil {
+		return err
 	}
+
+	if onCommandFunc, ok := vmw.GetFunction(`onLoad`); ok {
+
+		disableMessageQueue = true
+
+		vmw.MarkUsed() // Mark the VM as used to prevent it from being pruned
+
+		tmr := time.AfterFunc(scriptLoadTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+		_, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(roomId),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		disableMessageQueue = false
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("onLoad(): %w", err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return finalErr
+		}
+
+	}
+
+	return nil
+}
+
+func TryScriptEvent(eventName string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("scripting/TryScriptEvent()", "time", time.Since(timestart))
+	}()
+
+	messageQueue = util.NewMessageQueue(userId, 0)
+	commandQueue = cmdQueue
+
+	user := users.GetByUserId(userId)
+	if user == nil {
+		return messageQueue, errors.New("user not found")
+	}
+
+	vmw, err := getRoomVM(user.Character.RoomId)
+	if err != nil {
+		return messageQueue, err
+	}
+
+	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
+
+		vmw.MarkUsed() // Mark the VM as used to prevent it from being pruned
+
+		tmr := time.AfterFunc(scriptRoomTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(userId),
+			vmw.VM.ToValue(user.Character.RoomId),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("%s(): %w", eventName, err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+	}
+
+	return messageQueue, nil
+}
+
+func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("scripting/TryCommand()", "time", time.Since(timestart))
+	}()
+
+	messageQueue = util.NewMessageQueue(userId, 0)
+	commandQueue = cmdQueue
+
+	user := users.GetByUserId(userId)
+	if user == nil {
+		return messageQueue, errors.New("user not found")
+	}
+
+	vmw, err := getRoomVM(user.Character.RoomId)
+	if err != nil {
+		return messageQueue, err
+	}
+
+	if onCommandFunc, ok := vmw.GetFunction(`onCommand_` + cmd); ok {
+
+		slog.Info("onCommandFunc", "FOUND", `onCommand_`+cmd)
+
+		vmw.MarkUsed() // Mark the VM as used to prevent it from being pruned
+
+		tmr := time.AfterFunc(scriptRoomTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(rest),
+			vmw.VM.ToValue(userId),
+			vmw.VM.ToValue(user.Character.RoomId),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("onCommand_%s(): %w", cmd, err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+
+	} else if onCommandFunc, ok := vmw.GetFunction(`onCommand`); ok {
+
+		vmw.MarkUsed() // Mark the VM as used to prevent it from being pruned
+
+		tmr := time.AfterFunc(scriptRoomTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(cmd),
+			vmw.VM.ToValue(rest),
+			vmw.VM.ToValue(userId),
+			vmw.VM.ToValue(user.Character.RoomId),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("onCommand(): %w", err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+	}
+
+	return messageQueue, nil
 }

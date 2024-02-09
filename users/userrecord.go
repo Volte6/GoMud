@@ -46,6 +46,7 @@ type UserRecord struct {
 	ConfigOptions  map[string]any
 	connectionTime time.Time
 	lock           sync.RWMutex
+	tempDataStore  map[string]any
 }
 
 func NewUserRecord(userId int, connectionId uint64) *UserRecord {
@@ -61,7 +62,37 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 		ConfigOptions:  map[string]any{},
 		connectionTime: time.Now(),
 		lock:           sync.RWMutex{},
+		tempDataStore:  make(map[string]any),
 	}
+}
+
+func (u *UserRecord) SetTempData(key string, value any) {
+	u.lock.Lock()
+	defer u.lock.Unlock()
+
+	if u.tempDataStore == nil {
+		u.tempDataStore = make(map[string]any)
+	}
+
+	if value == nil {
+		delete(u.tempDataStore, key)
+		return
+	}
+	u.tempDataStore[key] = value
+}
+
+func (u *UserRecord) GetTempData(key string) any {
+	u.lock.RLock()
+	defer u.lock.RUnlock()
+
+	if u.tempDataStore == nil {
+		u.tempDataStore = make(map[string]any)
+	}
+
+	if value, ok := u.tempDataStore[key]; ok {
+		return value
+	}
+	return nil
 }
 
 func (u *UserRecord) HasAdminCommand(cmd string) bool {
