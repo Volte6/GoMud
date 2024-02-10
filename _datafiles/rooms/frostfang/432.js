@@ -4,17 +4,10 @@ crowbarAvailableRound = 0;
 const crowbar = ["crowbar", "rod", "metal", "bar"];
 const verbs = ["get", "take", "grab", "steal", "snatch"];
 
-function onCommand_look(rest, userId, roomId) {
+function onCommand_look(rest, user, room) {
 
-    parts = rest.toLowerCase().split(' ');
-    for (var i = 0; i < parts.length; i++) {
-        matches = UtilFindMatchIn(parts[i], crowbar);
-        if ( matches.exact.length > 0  ) {
-            break;
-        }
-    }
-
-    if ( matches.exact.length < 1 ) {
+    matches = UtilFindMatchIn(rest, crowbar);
+    if ( !matches.found ) {
         return false;
     }
 
@@ -24,28 +17,21 @@ function onCommand_look(rest, userId, roomId) {
         return false;
     }
 
-    SendUserMessage(userId, "A <ansi fg=\"item\">crowbar</ansi> leans besides the fireplace. Probably used for poking the fire and moving the logs around.");
-    SendRoomMessage(roomId, "<ansi fg=\"username\">"+UserGetCharacterName(userId)+"</ansi> looks at the <ansi fg=\"item\">crowbar</ansi> by the fireplace.");   
+    SendUserMessage(user.UserId(), "A <ansi fg=\"item\">crowbar</ansi> leans besides the fireplace. Probably used for poking the fire and moving the logs around.");
+    SendRoomMessage(room.RoomId(), "<ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> looks at the <ansi fg=\"item\">crowbar</ansi> by the fireplace.");   
 
     return true;
 }
 
 // Generic Command Handler
-function onCommand(cmd, rest, userId, roomId) {
+function onCommand(cmd, rest, user, room) {
 
     if ( !verbs.includes(cmd) ) {
         return false;
     }
     
-    parts = rest.toLowerCase().split(' ');
-    for (var i = 0; i < parts.length; i++) {
-        matches = UtilFindMatchIn(parts[i], crowbar);
-        if ( matches.exact.length > 0  ) {
-            break;
-        }
-    }
-
-    if ( matches.exact.length < 1 ) {
+    matches = UtilFindMatchIn(rest, crowbar);
+    if ( !matches.found ) {
         return false;
     }
 
@@ -57,9 +43,10 @@ function onCommand(cmd, rest, userId, roomId) {
 
     crowbarAvailableRound = roundNow + UtilGetMinutesToRounds(15)
 
-    SendUserMessage(userId, "You take the <ansi fg=\"item\">crowbar</ansi>. They probably won't miss it.");
-    SendRoomMessage(roomId, "<ansi fg=\"username\">"+UserGetCharacterName(userId)+"</ansi> takes the <ansi fg=\"item\">crowbar</ansi> from beside the fireplace.");   
-    UserGiveItem(userId, 10012);
+    SendUserMessage(user.UserId(), "You take the <ansi fg=\"item\">crowbar</ansi>. They probably won't miss it.");
+    SendRoomMessage(room.RoomId(), "<ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> takes the <ansi fg=\"item\">crowbar</ansi> from beside the fireplace.");   
+    
+    user.GiveItem(10012);
 
     return true;
 }

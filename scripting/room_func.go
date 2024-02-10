@@ -11,90 +11,53 @@ import (
 )
 
 func setRoomFunctions(vm *goja.Runtime) {
-	vm.Set(`RoomSetTempData`, RoomSetTempData)
-	vm.Set(`RoomGetTempData`, RoomGetTempData)
-	vm.Set(`RoomGetItems`, RoomGetItems)
-	vm.Set(`RoomGetMobs`, RoomGetMobs)
-	vm.Set(`RoomGetPlayers`, RoomGetPlayers)
-	vm.Set(`RoomGetContainers`, RoomGetContainers)
-	vm.Set(`RoomGetExits`, RoomGetExits)
-	vm.Set(`RoomGetMap`, RoomGetMap)
+	vm.Set(`GetRoom`, GetRoom)
+	vm.Set(`GetMap`, GetMap)
 }
 
-// ////////////////////////////////////////////////////////
-//
-// # These functions get exported to the scripting engine
-//
-// ////////////////////////////////////////////////////////
-func RoomSetTempData(roomId int, key string, value any) {
-	if room := rooms.LoadRoom(roomId); room != nil {
-		room.SetTempData(key, value)
-	}
+type ScriptRoom struct {
+	roomId     int
+	roomRecord *rooms.Room
 }
 
-func RoomGetTempData(roomId int, key string) any {
-	if room := rooms.LoadRoom(roomId); room != nil {
-		return room.GetTempData(key)
-	}
-	return nil
+func (r ScriptRoom) RoomId() int {
+	return r.roomId
 }
 
-func RoomGetItems(roomId int) []items.Item {
-
-	room := rooms.LoadRoom(roomId)
-	if room == nil {
-		return []items.Item{}
-	}
-
-	return room.GetAllFloorItems(false)
+func (r ScriptRoom) SetTempData(key string, value any) {
+	r.roomRecord.SetTempData(key, value)
 }
 
-func RoomGetMobs(roomId int) []int {
-
-	room := rooms.LoadRoom(roomId)
-	if room == nil {
-		return []int{}
-	}
-
-	return room.GetMobs()
+func (r ScriptRoom) etTempData(key string) any {
+	return r.roomRecord.GetTempData(key)
 }
 
-func RoomGetPlayers(roomId int) []int {
-
-	room := rooms.LoadRoom(roomId)
-	if room == nil {
-		return []int{}
-	}
-
-	return room.GetPlayers()
+func (r ScriptRoom) GetItems() []items.Item {
+	return r.roomRecord.GetAllFloorItems(false)
 }
 
-func RoomGetContainers(roomId int) []string {
+func (r ScriptRoom) GetMobs() []int {
+	return r.roomRecord.GetMobs()
+}
 
-	room := rooms.LoadRoom(roomId)
-	if room == nil {
-		return []string{}
-	}
+func (r ScriptRoom) GetPlayers() []int {
+	return r.roomRecord.GetPlayers()
+}
 
+func (r ScriptRoom) GetContainers() []string {
 	keys := []string{}
-	for key, _ := range room.Containers {
+	for key, _ := range r.roomRecord.Containers {
 		keys = append(keys, key)
 	}
-
 	return keys
 }
 
-func RoomGetExits(roomId int) []map[string]any {
+func (r ScriptRoom) GetExits() []map[string]any {
 
 	exits := []map[string]any{}
 
-	room := rooms.LoadRoom(roomId)
-	if room == nil {
-		return exits
-	}
-
 	seed := configs.GetConfig().Seed
-	for exitName, exitInfo := range room.Exits {
+	for exitName, exitInfo := range r.roomRecord.Exits {
 
 		exitMap := map[string]any{
 			"Name":   exitName,
@@ -104,7 +67,7 @@ func RoomGetExits(roomId int) []map[string]any {
 		}
 
 		if exitInfo.HasLock() {
-			lockId := fmt.Sprintf(`%d-%s`, roomId, exitName)
+			lockId := fmt.Sprintf(`%d-%s`, r.roomId, exitName)
 			exitMap["Lock"] = map[string]any{
 				"LockId":     lockId,
 				"Difficulty": exitInfo.Lock.Difficulty,
@@ -120,6 +83,18 @@ func RoomGetExits(roomId int) []map[string]any {
 	return exits
 }
 
+// ////////////////////////////////////////////////////////
+//
+// # These functions get exported to the scripting engine
+//
+// ////////////////////////////////////////////////////////
+func GetRoom(roomId int) *ScriptRoom {
+	if room := rooms.LoadRoom(roomId); room != nil {
+		return &ScriptRoom{roomId, room}
+	}
+	return nil
+}
+
 // mapRoomId    - Room the map is centered on
 // mapSize      - wide or normal
 // mapHeight	- Height of the map
@@ -130,7 +105,7 @@ func RoomGetExits(roomId int) []map[string]any {
 //
 //	[roomId],[symbol],[legend text]
 //	1,×,Here
-func RoomGetMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool, mapMarkers ...string) string {
+func GetMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool, mapMarkers ...string) string {
 	// mapRoomId    - Room the map is centered on
 	// mapSize      - wide or normal
 	// mapHeight	- Height of the map

@@ -35,7 +35,9 @@ These are optional, everything can still be referred to by `name` or augmented n
 
 [Room Functions](FUNCTIONS_ROOMS.md) - Functions that query or alter room data.
 
-[User Functions](FUNCTIONS_USER.md) - Functions that query or alter user data.
+[User Functions](FUNCTIONS_USERS.md) - Functions that query or alter user data.
 
 [Utility Functions](FUNCTIONS_UTIL.md) - Helper and info functions.
+
+[Messaging Functions](FUNCTIONS_MESSAGING.md) - Helper and info functions.
 

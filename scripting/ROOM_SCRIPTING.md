@@ -18,7 +18,7 @@ The following functions are special keywords that will be invoked under specific
 ---
 
 ```
-function onLoad(roomId) {
+function onLoad(room ROOMOBJ) {
 
 }
 ```
@@ -28,12 +28,12 @@ It is usually called the first time a player enters a room.
 
 |  Argument | Explanation |
 | --- | --- |
-| roomId | The id of the room. |
+| room | [ROOMOBJ](FUNCTION_ROOM.md) |
 
 ---
 
 ```
-function onEnter(userId, roomId) {
+function onEnter(user USEROBJ, room ROOMOBJ) {
 }
 ```
 
@@ -43,13 +43,13 @@ Returning `true` will reject the move, leaving them in their original room.
 
 |  Argument | Explanation |
 | --- | --- |
-| userId | The userId who entered the room. |
-| roomId | The id of the room. |
+| user | [USEROBJ](FUNCTION_USER.md) |
+| room | [ROOMOBJ](FUNCTION_ROOM.md) |
 
 ---
 
 ```
-function onExit(userId, roomId) {
+function onExit(user USEROBJ, room ROOMOBJ) {
 }
 ```
 
@@ -59,13 +59,13 @@ Returning `true` will reject the move, leaving them in their original room.
 
 |  Argument | Explanation |
 | --- | --- |
-| userId | The userId who entered the room. |
-| roomId | The id of the room. |
+| user | [USEROBJ](FUNCTION_USER.md) |
+| room | [ROOMOBJ](FUNCTION_ROOM.md) |
 
 ---
 
 ```
-function onCommand(cmd, rest, userId, roomId) {
+function onCommand(cmd string, rest string, user USEROBJ, room ROOMOBJ) {
 }
 ```
 
@@ -77,13 +77,13 @@ Returning `true` will halt any further processing of the response (i.e. "I've ha
 | --- | --- |
 | cmd | the command entered, such as `look`, `drop` or `west`. |
 | rest | Everything entered after the command (if anything). |
-| userId | The userId who entered the room. |
-| roomId | The id of the room. |
+| user | [USEROBJ](FUNCTION_USER.md) |
+| room | [ROOMOBJ](FUNCTION_ROOM.md) |
 
 ---
 
 ```
-function onCommand_{command}(rest, userId, roomId) {
+function onCommand_{command}(rest string, user USEROBJ, room ROOMOBJ) {
 }
 ```
 
@@ -98,7 +98,7 @@ In all other ways, this follows the same rules as the normal `onCommand()` funct
 |  Argument | Explanation |
 | --- | --- |
 | rest | Everything entered after the command (if anything). |
-| userId | The userId who entered the room. |
-| roomId | The id of the room. |
+| user | [USEROBJ](FUNCTION_USER.md) |
+| room | [ROOMOBJ](FUNCTION_ROOM.md) |
 
 ---

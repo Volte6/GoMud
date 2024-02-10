@@ -1,23 +1,25 @@
 
-function onCommand_vault(rest, userId, roomId) {
+function onCommand_vault(rest, user, room) {
 
     guard_present = false;
 
-    mobs = RoomGetMobs(roomId);
+    mobs = room.GetMobs();
     for (i = 0; i < mobs.length; i++) {
-    
-        mobName = MobGetCharacterName(mobs[i]);
+        if ( (mob = GetMob(mobs[i])) == null ) {
+            continue;
+        }
+        mobName = mob.GetCharacterName();
         if ( mobName.indexOf("guard") !== -1 ) {
             guard_present = true;
             break;
         }
     }
 
-    hidden = UserHasBuffFlag(userId, "hidden");
+    hidden = user.HasBuffFlag("hidden");
 
     if (guard_present && !hidden) {
-        SendUserMessage(userId, "A guard blocks you from entering the vault.");
-        SendRoomMessage(roomId, "A guard blocks <ansi fg=\"username\">"+UserGetCharacterName(userId)+"</ansi> from entering the vault.");
+        SendUserMessage(user.UserId(), "A guard blocks you from entering the vault.");
+        SendRoomMessage(room.RoomId(), "A guard blocks <ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> from entering the vault.");
         return true;
     }
 

@@ -33,10 +33,6 @@ func PruneRoomVMs(roomIds ...int) {
 }
 
 func TryRoomScriptEvent(eventName string, userId int, roomId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-	timestart := time.Now()
-	defer func() {
-		slog.Debug("TryRoomScriptEvent()", "time", time.Since(timestart))
-	}()
 
 	messageQueue = util.NewMessageQueue(userId, 0)
 	commandQueue = cmdQueue
@@ -46,14 +42,22 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int, cmdQueue util.
 		return messageQueue, err
 	}
 
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("TryRoomScriptEvent()", "eventName", eventName, "roomId", roomId, "time", time.Since(timestart))
+	}()
+
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
+
+		sUser := GetUser(userId)
+		sRoom := GetRoom(roomId)
 
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)
 		})
 		res, err := onCommandFunc(goja.Undefined(),
-			vmw.VM.ToValue(userId),
-			vmw.VM.ToValue(roomId),
+			vmw.VM.ToValue(sUser),
+			vmw.VM.ToValue(sRoom),
 		)
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()
@@ -85,11 +89,6 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int, cmdQueue util.
 
 func TryRoomCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
-	timestart := time.Now()
-	defer func() {
-		slog.Debug("TryRoomCommand()", "time", time.Since(timestart))
-	}()
-
 	messageQueue = util.NewMessageQueue(userId, 0)
 	commandQueue = cmdQueue
 
@@ -118,15 +117,23 @@ func TryRoomCommand(cmd string, rest string, userId int, cmdQueue util.CommandQu
 		return messageQueue, err
 	}
 
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("TryRoomCommand()", "cmd", cmd, "roomId", user.Character.RoomId, "time", time.Since(timestart))
+	}()
+
 	if onCommandFunc, ok := vmw.GetFunction(`onCommand_` + cmd); ok {
+
+		sUser := GetUser(userId)
+		sRoom := GetRoom(user.Character.RoomId)
 
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)
 		})
 		res, err := onCommandFunc(goja.Undefined(),
 			vmw.VM.ToValue(rest),
-			vmw.VM.ToValue(userId),
-			vmw.VM.ToValue(user.Character.RoomId),
+			vmw.VM.ToValue(sUser),
+			vmw.VM.ToValue(sRoom),
 		)
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()
@@ -154,14 +161,17 @@ func TryRoomCommand(cmd string, rest string, userId int, cmdQueue util.CommandQu
 
 	} else if onCommandFunc, ok := vmw.GetFunction(`onCommand`); ok {
 
+		sUser := GetUser(userId)
+		sRoom := GetRoom(user.Character.RoomId)
+
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)
 		})
 		res, err := onCommandFunc(goja.Undefined(),
 			vmw.VM.ToValue(cmd),
 			vmw.VM.ToValue(rest),
-			vmw.VM.ToValue(userId),
-			vmw.VM.ToValue(user.Character.RoomId),
+			vmw.VM.ToValue(sUser),
+			vmw.VM.ToValue(sRoom),
 		)
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()
@@ -253,7 +263,10 @@ func getRoomVM(roomId int) (*VMWrapper, error) {
 		vm.Interrupt(errTimeout)
 	})
 	if fn, ok := goja.AssertFunction(vm.Get(`onLoad`)); ok {
-		if _, err := fn(goja.Undefined(), vm.ToValue(roomId)); err != nil {
+
+		sRoom := GetRoom(roomId)
+
+		if _, err := fn(goja.Undefined(), vm.ToValue(sRoom)); err != nil {
 			// Wrap the error
 			finalErr := fmt.Errorf("onLoad: %w", err)
 

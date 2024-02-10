@@ -281,6 +281,9 @@ func FindMatchIn(searchName string, items ...string) (match string, closeMatch s
 	return match, closeMatch
 }
 
+// Searches for a partial or full match of a string
+// If allowContains is true, the match can appear anywhere in the string.
+// Otherwise it must start with the searchFor string
 func stringMatch(searchFor string, searchIn string, allowContains bool) (partialMatch bool, fullMatch bool) {
 
 	searchFor = strings.ToLower(searchFor)
