@@ -25,7 +25,7 @@ func (vmw *VMWrapper) GetFunction(name string) (goja.Callable, bool) {
 
 	fn, ok = goja.AssertFunction(vmw.VM.Get(name))
 
-	if vmw.cacheSize < vmw.maxCacheSize {
+	if vmw.maxCacheSize == 0 || vmw.cacheSize < vmw.maxCacheSize {
 		vmw.cacheSize++
 		vmw.callableCache[name] = fn
 	}

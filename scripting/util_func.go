@@ -24,6 +24,18 @@ func UtilGetRoundNumber() uint64 {
 	return util.GetRoundCount()
 }
 
+func UtilFindMatchIn(search string, items []string) map[string]string {
+
+	matches := map[string]string{}
+
+	match, closeMatch := util.FindMatchIn(search, items...)
+
+	matches["exact"] = match
+	matches["close"] = closeMatch
+
+	return matches
+}
+
 func UtilGetSecondsToRounds(seconds int) int {
 	return configs.GetConfig().SecondsToRounds(seconds)
 }
@@ -38,15 +50,4 @@ func UtilGetSecondsToTurns(seconds int) int {
 
 func UtilGetMinutesToTurns(minutes int) int {
 	return configs.GetConfig().MinutesToTurns(minutes)
-}
-
-func UtilFindMatchIn(search string, items []string) map[string]string {
-
-	matches := map[string]string{}
-
-	match, closeMatch := util.FindMatchIn(search, items...)
-	matches["exact"] = match
-	matches["close"] = closeMatch
-
-	return matches
 }

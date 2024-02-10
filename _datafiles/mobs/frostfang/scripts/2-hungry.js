@@ -1,31 +1,4 @@
 
-// This mob is in 271.yaml
-/*
-  idlecommands:
-  - ifnotquest 4-end say I'm so hungry.
-  - ifnotquest 4-end emote pats his belly as it grumbles.
-  - wander
-  itemtrades:
-  - accepteditemids: [30004]
-    prizequestids: [4-end]
-    prizecommands: [say Thanks! I can get on with my day now.]
-  asksubjects:
-  - ifquest: ""
-    ifnotquest: 4-start
-    asknouns:
-    - quest
-    - hunger
-    - hungry
-    - belly
-    - food
-    replycommands:
-    - say I forgot my lunch today, and I'm so hungry.
-    - say Do you think you could find a cheese sandwich for me?
-    - givequest 4-start
-  scripttag: hungry
-
-*/
-
 const nouns = ["quest", "hunger", "hungry", "belly", "food"]
 
 // eventDetails.sourceId   - mobInstanceId or userId

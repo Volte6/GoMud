@@ -277,7 +277,7 @@ func getMobVM(mobInstanceId int) (*VMWrapper, error) {
 	vm.ClearInterrupt()
 	tmr.Stop()
 
-	vmw := newVMWrapper(vm, 100)
+	vmw := newVMWrapper(vm, 0)
 
 	mobVMCache[mobInstanceId] = vmw
 

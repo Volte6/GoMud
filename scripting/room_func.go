@@ -11,13 +11,13 @@ import (
 )
 
 func setRoomFunctions(vm *goja.Runtime) {
+	vm.Set(`RoomSetTempData`, RoomSetTempData)
+	vm.Set(`RoomGetTempData`, RoomGetTempData)
 	vm.Set(`RoomGetItems`, RoomGetItems)
 	vm.Set(`RoomGetMobs`, RoomGetMobs)
 	vm.Set(`RoomGetPlayers`, RoomGetPlayers)
 	vm.Set(`RoomGetContainers`, RoomGetContainers)
 	vm.Set(`RoomGetExits`, RoomGetExits)
-	vm.Set(`RoomSetTempData`, RoomSetTempData)
-	vm.Set(`RoomGetTempData`, RoomGetTempData)
 	vm.Set(`RoomGetMap`, RoomGetMap)
 }
 
@@ -84,9 +84,9 @@ func RoomGetContainers(roomId int) []string {
 	return keys
 }
 
-func RoomGetExits(roomId int) map[string]map[string]any {
+func RoomGetExits(roomId int) []map[string]any {
 
-	exits := map[string]map[string]any{}
+	exits := []map[string]any{}
 
 	room := rooms.LoadRoom(roomId)
 	if room == nil {
@@ -97,8 +97,10 @@ func RoomGetExits(roomId int) map[string]map[string]any {
 	for exitName, exitInfo := range room.Exits {
 
 		exitMap := map[string]any{
+			"Name":   exitName,
 			"RoomId": exitInfo.RoomId,
 			"Secret": exitInfo.Secret,
+			"Lock":   false,
 		}
 
 		if exitInfo.HasLock() {
@@ -112,7 +114,7 @@ func RoomGetExits(roomId int) map[string]map[string]any {
 			exitMap["Lock"] = nil
 		}
 
-		exits[exitName] = exitMap
+		exits = append(exits, exitMap)
 	}
 
 	return exits

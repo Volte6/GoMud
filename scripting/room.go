@@ -272,7 +272,7 @@ func getRoomVM(roomId int) (*VMWrapper, error) {
 	vm.ClearInterrupt()
 	tmr.Stop()
 
-	vmw := newVMWrapper(vm, 100)
+	vmw := newVMWrapper(vm, 0)
 
 	roomVMCache[roomId] = vmw
 

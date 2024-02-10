@@ -103,8 +103,9 @@ func RoomMaintenance(out *connection.ConnectionTracker) bool {
 
 	roomManager.Lock()
 
+	roundCount := util.GetRoundCount()
 	// Get the current round count
-	unloadRoundThreshold := util.GetRoundCount() - roomUnloadTimeoutRounds
+	unloadRoundThreshold := roundCount - roomUnloadTimeoutRounds
 	unloadRooms := make([]*Room, 0)
 
 	roomsUpdated := false
@@ -152,7 +153,7 @@ func RoomMaintenance(out *connection.ConnectionTracker) bool {
 		}
 
 		// Consider unloading rooms from memory?
-		if util.GetRoundCount() > roomUnloadTimeoutRounds {
+		if roundCount%roomUnloadTimeoutRounds == 0 {
 			if room.lastVisitor < unloadRoundThreshold {
 				unloadRooms = append(unloadRooms, room)
 			}

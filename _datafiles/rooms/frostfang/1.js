@@ -1,11 +1,5 @@
 
-
-
-// cmd specific handler
-//function onCommand_look(rest, userId, roomId) {
-//    return false;
-//}
-
+mapSignData = ""
 
 // Generic Command Handler
 function onCommand(cmd, rest, userId, roomId) {
@@ -19,14 +13,12 @@ function onCommand(cmd, rest, userId, roomId) {
         SendRoomMessage(roomId, "<ansi fg=\"username\">"+UserGetCharacterName(userId)+"</ansi> looks at the map nailed to the sign.");
 
         // Load the cached map, or re-generate and cache it if it's not there
-        mapData = RoomGetTempData(roomId, "sign-map")
-        if ( mapData === null) {
-            mapData = RoomGetMap(roomId, "normal", 22, 38, "Map of Frostfang", false, String(roomId)+",×,Here")
-            RoomSetTempData(roomId, "sign-map", mapData)
+        if ( mapSignData == "" ) {
+            mapSignData = RoomGetMap(roomId, "normal", 22, 38, "Map of Frostfang", false, String(roomId)+",×,Here")
         }
 
         // Send the map to the user.
-        SendUserMessage(userId, mapData);
+        SendUserMessage(userId, mapSignData);
 
         return true;
     }
@@ -37,7 +29,7 @@ function onCommand(cmd, rest, userId, roomId) {
 // Executes when the room first loads.
 function onLoad(roomId) {
     // Just running this to pre-cache the map so that if someone looks at the map it won't time out
-    RoomSetTempData(roomId, "sign-map", RoomGetMap(roomId, "normal", 22, 38, "Map of Frostfang", false, String(roomId)+",×,Here"))
+    mapSignData = RoomGetMap(roomId, "normal", 22, 38, "Map of Frostfang", false, String(roomId)+",×,Here")
 }
 
 // return true - allow to enter

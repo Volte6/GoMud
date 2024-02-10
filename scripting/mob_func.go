@@ -8,7 +8,7 @@ import (
 func setMobFunctions(vm *goja.Runtime) {
 	vm.Set(`MobGetCharacterName`, MobGetCharacterName)
 	vm.Set(`MobCommand`, MobCommand)
-	vm.Set(`MobCharmed`, MobCharmed)
+	vm.Set(`MobIsCharmed`, MobIsCharmed)
 	vm.Set(`MobCharmSet`, MobCharmSet)
 	vm.Set(`MobCharmRemove`, MobCharmRemove)
 	vm.Set(`MobCharmExpire`, MobCharmExpire)
@@ -36,7 +36,7 @@ func MobCommand(mobInstanceId int, cmd string, waitTurns ...int) {
 
 // Returns true if a mob is charmed by/friendly to a player.
 // If userId is ommitted, it will return true if the mob is charmed by any player.
-func MobCharmed(mobInstanceId int, userId ...int) bool {
+func MobIsCharmed(mobInstanceId int, userId ...int) bool {
 
 	if mob := mobs.GetInstance(mobInstanceId); mob != nil {
 		if len(userId) < 1 {
