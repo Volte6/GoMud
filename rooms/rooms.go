@@ -3,6 +3,7 @@ package rooms
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -45,6 +46,7 @@ type SpawnInfo struct {
 	IdleCommands []string         `yaml:"idlecommands,omitempty"` // (optional) list of commands to override the default of the mob. Useful when you need a mob to be more unique.
 	ItemTrades   []mobs.ItemTrade `yaml:"itemtrades,omitempty"`   // (optional) one or more sets of objects they will trade for other objects.
 	AskSubjects  []mobs.AskMob    `yaml:"asksubjects,omitempty"`  // (optional) one or more subjects they will ask about.
+	ScriptTag    string           `yaml:"scripttag,omitempty"`    // (optional) if set, will override the mob's script tag
 }
 
 type FindFlag uint8
@@ -200,7 +202,6 @@ type Room struct {
 	mobs            []int                        `yaml:"-"`                       // list of mob instance IDs currently in the room. Does not get saved.
 	visitors        map[int]uint64               `yaml:"visitors,omitempty"`      // list of user IDs that have visited this room, and the last round they did
 	lastVisitor     uint64                       `yaml:"-"`                       // last round a visitor was in the room
-	Script          string                       `yaml:"-"`                       // The script associated with the room
 	tempDataStore   map[string]any               `yaml:"-"`                       // Temporary data store for the room
 }
 
@@ -289,12 +290,28 @@ func (r *Room) GetTempData(key string) any {
 }
 
 func (r *Room) GetScript() string {
+
+	scriptPath := r.GetScriptPath()
+
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
-	if len(r.Script) < 1 {
-		return ""
+
+	// Load the script into a string
+	if _, err := os.Stat(scriptPath); err == nil {
+		if bytes, err := os.ReadFile(scriptPath); err == nil {
+			return string(bytes)
+		}
 	}
-	return r.Script
+
+	return ``
+}
+
+func (r *Room) GetScriptPath() string {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	// Load any script for the room
+	return strings.Replace(roomDataFilesPath+`/`+r.Filepath(), `.yaml`, `.js`, 1)
 }
 
 func (r *Room) GetNouns() []string {
@@ -478,6 +495,10 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 							trade.GivenItems = make(map[int][]int) // make sure these are unique maps
 							mob.ItemTrades = append(mob.ItemTrades, trade)
 						}
+					}
+
+					if len(spawnInfo.ScriptTag) > 0 {
+						mob.ScriptTag = spawnInfo.ScriptTag
 					}
 
 					// If there are special trades at this location, overwrite.
@@ -1559,6 +1580,23 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		RoomSymbol:     roomSymbol,
 		RoomLegend:     roomLegend,
 		Nouns:          r.GetNouns(),
+	}
+
+	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {
+		tinymap := GetTinyMap(r.RoomId)
+		desclineWidth := 80 - 7 // 7 is the width of the tinymap
+		padding := 1
+		description := util.SplitString(r.GetDescription(), desclineWidth-padding)
+
+		for i := 0; i < len(tinymap); i++ {
+			if i > len(description)-1 {
+				description = append(description, strings.Repeat(` `, desclineWidth))
+			}
+
+			description[i] += strings.Repeat(` `, desclineWidth-len(description[i])) + tinymap[i]
+		}
+
+		details.TinyMapDescription = strings.Join(description, "\n")
 	}
 
 	nameFlags := []characters.NameRenderFlag{}

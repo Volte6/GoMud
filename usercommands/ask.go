@@ -8,6 +8,7 @@ import (
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/util"
 
 	"github.com/volte6/mud/users"
@@ -45,6 +46,8 @@ func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		`look`,
 		`emote`,
 		`throw`,
+		`eat`,
+		`drink`,
 	}
 
 	// args should look like one of the following:
@@ -109,17 +112,16 @@ func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			args = args[1:]
 		}
 
-		cmd := args[0]
-		args = args[1:]
-
-		rest = strings.Join(args, ` `)
-
 		if mob.Character.IsCharmed(userId) {
-			// If an alias was entered, conovert it
-			cmd := keywords.TryCommandAlias(cmd)
 
-			if cmd == `attack` {
-				if pid, _ := room.FindByName(rest); pid > 0 {
+			mobCmd := args[0]
+			askRest := strings.Join(args[1:], ` `)
+
+			// If an alias was entered, conovert it
+			mobCmd = keywords.TryCommandAlias(mobCmd)
+
+			if mobCmd == `attack` {
+				if pid, _ := room.FindByName(askRest); pid > 0 {
 					if !configs.GetConfig().PVPEnabled {
 						cmdQueue.QueueCommand(0, mobId, `emote shakes their head.`)
 						cmdQueue.QueueCommand(0, mobId, `say PVP is currently disabled.`)
@@ -131,8 +133,8 @@ func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			// Check if actual command is allowed
 			for _, allowedCmd := range allowedCommands {
-				if cmd == allowedCmd {
-					cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`%s %s`, cmd, rest))
+				if mobCmd == allowedCmd {
+					cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`%s %s`, mobCmd, askRest))
 
 					response.Handled = true
 					return response, nil
@@ -140,33 +142,14 @@ func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			}
 		}
 
-		searchText := strings.TrimSpace(fmt.Sprintf(`%s %s`, cmd, rest))
-		for _, subject := range mob.AskSubjects {
-
-			// They must have this quest, or continue
-			if len(subject.IfQuest) > 0 && !user.Character.HasQuest(subject.IfQuest) {
-				continue
-			}
-
-			// They must not have this quest, or continue
-			if len(subject.IfNotQuest) > 0 && user.Character.HasQuest(subject.IfNotQuest) {
-				continue
-			}
-
-			for _, noun := range subject.AskNouns {
-
-				if noun == searchText || strings.Contains(searchText, noun) {
-					for _, reply := range subject.ReplyCommands {
-						reply = strings.ReplaceAll(reply, `{userid}`, fmt.Sprintf(`@%d`, user.UserId)) // @ prefix denotes a userId
-						cmdQueue.QueueCommand(0, mobId, reply)
-					}
-					response.Handled = true
-					return response, nil
-				}
+		rest = strings.Join(args, ` `)
+		if res, err := scripting.TryMobScriptEvent(`onAsk`, mobId, room.RoomId, userId, `user`, map[string]any{"askText": rest}, cmdQueue); err == nil {
+			response.AbsorbMessages(res)
+			if !res.Handled {
+				cmdQueue.QueueCommand(0, mobId, `emote shakes their head.`)
 			}
 		}
 
-		cmdQueue.QueueCommand(0, mobId, `emote shakes their head.`)
 	}
 
 	response.Handled = true

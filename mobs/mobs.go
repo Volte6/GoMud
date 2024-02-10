@@ -61,6 +61,7 @@ type MobId int // Creating a custom type to help prevent confusion over MobId an
 
 type Mob struct {
 	MobId           MobId
+	Zone            string      `yaml:"zone,omitempty"`
 	ItemDropChance  int         // chance in 100
 	ActivityLevel   int         `yaml:"activitylevel,omitempty"` // 1 - 10%, 10 = 100%
 	InstanceId      int         `yaml:"-"`
@@ -84,6 +85,7 @@ type Mob struct {
 	PreventIdle     bool           `yaml:"-"`                    // Whether they can't possibly be idle
 	ItemTrades      []ItemTrade    `yaml:"itemtrades,omitempty"` // one or more sets of objects they will trade for other objects.
 	AskSubjects     []AskMob       `yaml:"asksubjects,omitempty"`
+	ScriptTag       string         `yaml:"scripttag"` // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
 	datastub        map[string]any // Generic storage stub for maintaining state between behaviors
 }
 
@@ -104,6 +106,10 @@ func (m *Mob) HasQuestWaiting(c *characters.Character) bool {
 	}
 
 	return false
+}
+
+func GetAllMobNames() []string {
+	return append([]string{}, allMobNames...)
 }
 
 func MobIdByName(mobName string) MobId {
@@ -437,12 +443,13 @@ func (r *Mob) Validate() error {
 	return nil
 }
 
-func (r *Mob) Filename() string {
-	return fmt.Sprintf("%d.yaml", r.Id())
+func (m *Mob) Filename() string {
+	return fmt.Sprintf("%d.yaml", m.Id())
 }
 
-func (r *Mob) Filepath() string {
-	return r.Filename()
+func (m *Mob) Filepath() string {
+	zone := ZoneNameSanitize(m.Zone)
+	return util.FilePath(zone, `/`, fmt.Sprintf("%d.yaml", m.Id()))
 }
 
 func (r *Mob) Save() error {
@@ -462,6 +469,39 @@ func (r *Mob) Save() error {
 	}
 
 	return nil
+}
+
+func (m *Mob) GetScript() string {
+
+	scriptPath := m.GetScriptPath()
+	// Load the script into a string
+	if _, err := os.Stat(scriptPath); err == nil {
+		if bytes, err := os.ReadFile(scriptPath); err == nil {
+			return string(bytes)
+		}
+	}
+
+	return ``
+}
+
+func (m *Mob) GetScriptPath() string {
+	// Load any script for the room
+
+	mobFilePath := m.Filename()
+
+	newExt := `.js`
+	if m.ScriptTag != `` {
+		newExt = fmt.Sprintf(`-%s.js`, m.ScriptTag)
+	}
+
+	scriptFilePath := `scripts/` + strings.Replace(mobFilePath, `.yaml`, newExt, 1)
+
+	fullScriptPath := strings.Replace(mobDataFilesFolderPath+`/`+m.Filepath(),
+		mobFilePath,
+		scriptFilePath,
+		1)
+
+	return util.FilePath(fullScriptPath)
 }
 
 func ReduceHostility() {
@@ -513,6 +553,16 @@ func MakeHostile(groupName string, userId int, rounds int) {
 	if mobsHatePlayers[groupName][userId] < rounds {
 		mobsHatePlayers[groupName][userId] = rounds
 	}
+}
+
+func ZoneNameSanitize(zone string) string {
+	if zone == "" {
+		return ""
+	}
+	// Convert spaces to underscores
+	zone = strings.ReplaceAll(zone, " ", "_")
+	// Lowercase it all, and add a slash at the end
+	return strings.ToLower(zone)
 }
 
 // file self loads due to init()

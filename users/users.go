@@ -12,6 +12,7 @@ import (
 
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/util"
 
 	//
@@ -203,6 +204,12 @@ func CreateUser(u *UserRecord) error {
 
 	if configs.GetConfig().IsBannedName(u.Username) {
 		return errors.New("that username is not allowed")
+	}
+
+	for _, name := range mobs.GetAllMobNames() {
+		if strings.EqualFold(name, u.Username) {
+			return errors.New("that username is not allowed")
+		}
 	}
 
 	if Exists(u.Username) {

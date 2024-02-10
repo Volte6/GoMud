@@ -7,9 +7,8 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
@@ -18,6 +17,179 @@ var (
 	scriptLoadTimeout = 1000 * time.Millisecond
 	scriptRoomTimeout = 10 * time.Millisecond
 )
+
+func PruneRoomVMs(roomIds ...int) {
+	if len(roomIds) > 0 {
+		for _, roomId := range roomIds {
+			delete(roomVMCache, roomId)
+		}
+		return
+	}
+	for roomId, _ := range roomVMCache {
+		if !rooms.IsRoomLoaded(roomId) {
+			delete(roomVMCache, roomId)
+		}
+	}
+}
+
+func TryRoomScriptEvent(eventName string, userId int, roomId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("TryRoomScriptEvent()", "time", time.Since(timestart))
+	}()
+
+	messageQueue = util.NewMessageQueue(userId, 0)
+	commandQueue = cmdQueue
+
+	vmw, err := getRoomVM(roomId)
+	if err != nil {
+		return messageQueue, err
+	}
+
+	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
+
+		tmr := time.AfterFunc(scriptRoomTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(userId),
+			vmw.VM.ToValue(roomId),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("%s(): %w", eventName, err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+	}
+
+	return messageQueue, nil
+}
+
+func TryRoomCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("TryRoomCommand()", "time", time.Since(timestart))
+	}()
+
+	messageQueue = util.NewMessageQueue(userId, 0)
+	commandQueue = cmdQueue
+
+	user := users.GetByUserId(userId)
+	if user == nil {
+		return messageQueue, errors.New("user not found")
+	}
+
+	room := rooms.LoadRoom(user.Character.RoomId)
+	if room != nil {
+		for _, mobInstanceId := range room.GetMobs() {
+			if mq, err := TryMobCommand(cmd, rest, mobInstanceId, userId, `user`, cmdQueue); err == nil {
+				messageQueue.AbsorbMessages(mq)
+
+				messageQueue.Handled = messageQueue.Handled || mq.Handled
+				if messageQueue.Handled {
+					return messageQueue, nil
+				}
+			}
+
+		}
+	}
+
+	vmw, err := getRoomVM(user.Character.RoomId)
+	if err != nil {
+		return messageQueue, err
+	}
+
+	if onCommandFunc, ok := vmw.GetFunction(`onCommand_` + cmd); ok {
+
+		tmr := time.AfterFunc(scriptRoomTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(rest),
+			vmw.VM.ToValue(userId),
+			vmw.VM.ToValue(user.Character.RoomId),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("onCommand_%s(): %w", cmd, err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+
+	} else if onCommandFunc, ok := vmw.GetFunction(`onCommand`); ok {
+
+		tmr := time.AfterFunc(scriptRoomTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(cmd),
+			vmw.VM.ToValue(rest),
+			vmw.VM.ToValue(userId),
+			vmw.VM.ToValue(user.Character.RoomId),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("onCommand(): %w", err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+	}
+
+	return messageQueue, nil
+}
 
 func getRoomVM(roomId int) (*VMWrapper, error) {
 
@@ -100,144 +272,9 @@ func getRoomVM(roomId int) (*VMWrapper, error) {
 	vm.ClearInterrupt()
 	tmr.Stop()
 
-	vmw := newVMWrapper(vm, 100)
+	vmw := newVMWrapper(vm, 0)
 
 	roomVMCache[roomId] = vmw
 
 	return vmw, nil
-}
-
-func clearRoomVM(roomId int) {
-	delete(roomVMCache, roomId)
-}
-
-func setRoomFunctions(vm *goja.Runtime) {
-	vm.Set(`RoomGetItems`, RoomGetItems)
-	vm.Set(`RoomGetMobs`, RoomGetMobs)
-	vm.Set(`RoomGetPlayers`, RoomGetPlayers)
-	vm.Set(`RoomGetContainers`, RoomGetContainers)
-	vm.Set(`RoomGetExits`, RoomGetExits)
-	vm.Set(`RoomSetTempData`, RoomSetTempData)
-	vm.Set(`RoomGetTempData`, RoomGetTempData)
-	vm.Set(`RoomGetMap`, RoomGetMap)
-}
-
-// ////////////////////////////////////////////////////////
-//
-// # These functions get exported to the scripting engine
-//
-// ////////////////////////////////////////////////////////
-func RoomSetTempData(roomId int, key string, value any) {
-	if room := rooms.LoadRoom(roomId); room != nil {
-		room.SetTempData(key, value)
-	}
-}
-
-func RoomGetTempData(roomId int, key string) any {
-	if room := rooms.LoadRoom(roomId); room != nil {
-		return room.GetTempData(key)
-	}
-	return nil
-}
-
-func RoomGetItems(roomId int) []items.Item {
-
-	room := rooms.LoadRoom(roomId)
-	if room == nil {
-		return []items.Item{}
-	}
-
-	return room.GetAllFloorItems(false)
-}
-
-func RoomGetMobs(roomId int) []int {
-
-	room := rooms.LoadRoom(roomId)
-	if room == nil {
-		return []int{}
-	}
-
-	return room.GetMobs()
-}
-
-func RoomGetPlayers(roomId int) []int {
-
-	room := rooms.LoadRoom(roomId)
-	if room == nil {
-		return []int{}
-	}
-
-	return room.GetPlayers()
-}
-
-func RoomGetContainers(roomId int) []string {
-
-	room := rooms.LoadRoom(roomId)
-	if room == nil {
-		return []string{}
-	}
-
-	keys := []string{}
-	for key, _ := range room.Containers {
-		keys = append(keys, key)
-	}
-
-	return keys
-}
-
-func RoomGetExits(roomId int) map[string]map[string]any {
-
-	exits := map[string]map[string]any{}
-
-	room := rooms.LoadRoom(roomId)
-	if room == nil {
-		return exits
-	}
-
-	seed := configs.GetConfig().Seed
-	for exitName, exitInfo := range room.Exits {
-
-		exitMap := map[string]any{
-			"RoomId": exitInfo.RoomId,
-			"Secret": exitInfo.Secret,
-		}
-
-		if exitInfo.HasLock() {
-			lockId := fmt.Sprintf(`%d-%s`, roomId, exitName)
-			exitMap["Lock"] = map[string]any{
-				"LockId":     lockId,
-				"Difficulty": exitInfo.Lock.Difficulty,
-				"Sequence":   util.GetLockSequence(lockId, int(exitInfo.Lock.Difficulty), seed),
-			}
-		} else {
-			exitMap["Lock"] = nil
-		}
-
-		exits[exitName] = exitMap
-	}
-
-	return exits
-}
-
-// mapRoomId    - Room the map is centered on
-// mapSize      - wide or normal
-// mapHeight	- Height of the map
-// mapWidth     - Width of the map
-// mapName 		- The title of the map
-// showSecrets  - Include secret exits/rooms?
-// mapMarkers   - A list of strings representing custom map markers:
-//
-//	[roomId],[symbol],[legend text]
-//	1,×,Here
-func RoomGetMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool, mapMarkers ...string) string {
-	// mapRoomId    - Room the map is centered on
-	// mapSize      - wide or normal
-	// mapHeight	- Height of the map
-	// mapWidth     - Width of the map
-	// mapName 		- The title of the map
-	// showSecrets  - Include secret exits/rooms?
-	// mapMarkers   - A list of strings representing custom map markers:
-	//                [roomId],[symbol],[legend text]
-	//                1,×,Here
-	return rooms.GetSpecificMap(mapRoomId, mapSize, mapHeight, mapWidth, mapName, showSecrets, mapMarkers)
 }

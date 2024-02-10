@@ -23,5 +23,5 @@ function onCommand_look(rest, userId, roomId) {
         }
     }
 
-    return true;
+    return false;
 }

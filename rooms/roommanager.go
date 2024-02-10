@@ -48,17 +48,18 @@ type ZoneInfo struct {
 }
 
 type RoomTemplateDetails struct {
-	Room           *Room
-	VisiblePlayers []characters.FormattedName
-	VisibleMobs    []characters.FormattedName
-	VisibleExits   map[string]RoomExit
-	TemporaryExits map[string]TemporaryRoomExit
-	UserId         int
-	Character      *characters.Character
-	Permission     string
-	RoomSymbol     string
-	RoomLegend     string
-	Nouns          []string
+	Room               *Room
+	VisiblePlayers     []characters.FormattedName
+	VisibleMobs        []characters.FormattedName
+	VisibleExits       map[string]RoomExit
+	TemporaryExits     map[string]TemporaryRoomExit
+	UserId             int
+	Character          *characters.Character
+	Permission         string
+	RoomSymbol         string
+	RoomLegend         string
+	Nouns              []string
+	TinyMapDescription string
 }
 
 var (
@@ -102,8 +103,9 @@ func RoomMaintenance(out *connection.ConnectionTracker) bool {
 
 	roomManager.Lock()
 
+	roundCount := util.GetRoundCount()
 	// Get the current round count
-	unloadRoundThreshold := util.GetRoundCount() - roomUnloadTimeoutRounds
+	unloadRoundThreshold := roundCount - roomUnloadTimeoutRounds
 	unloadRooms := make([]*Room, 0)
 
 	roomsUpdated := false
@@ -151,7 +153,7 @@ func RoomMaintenance(out *connection.ConnectionTracker) bool {
 		}
 
 		// Consider unloading rooms from memory?
-		if util.GetRoundCount() > roomUnloadTimeoutRounds {
+		if roundCount%roomUnloadTimeoutRounds == 0 {
 			if room.lastVisitor < unloadRoundThreshold {
 				unloadRooms = append(unloadRooms, room)
 			}
@@ -566,6 +568,14 @@ func GetZoneRoot(zone string) (int, error) {
 	return 0, fmt.Errorf("zone %s does not exist.", zone)
 }
 
+func IsRoomLoaded(roomId int) bool {
+	roomManager.RLock()
+	defer roomManager.RUnlock()
+
+	_, ok := roomManager.rooms[roomId]
+	return ok
+}
+
 // Load room grabs the room from memory and returns a pointer to it.
 // If the room hasn't been loaded yet, it loads it into memory
 func LoadRoom(roomId int) *Room {
@@ -581,17 +591,6 @@ func LoadRoom(roomId int) *Room {
 	roomManager.Lock()
 	filename := findRoomFile(roomId)
 	retRoom, _ := loadRoomFromFile(util.FilePath(roomDataFilesPath, `/`, filename))
-
-	// Load any script for the room
-	scriptPath := strings.Replace(roomDataFilesPath+`/`+retRoom.Filepath(), `.yaml`, `.js`, 1)
-
-	// Load the script into a string
-	if _, err := os.Stat(scriptPath); err == nil {
-		if bytes, err := os.ReadFile(scriptPath); err == nil {
-			retRoom.Script = string(bytes)
-		}
-	}
-
 	roomManager.Unlock()
 
 	return retRoom
@@ -899,6 +898,108 @@ func GetMapForDataString(dataStr string) string {
 
 	}
 	return ""
+}
+
+func GetTinyMap(mapRoomId int) []string {
+
+	result := [][]string{
+		{` `, ` `, ` `, ` `, ` `},
+		{` `, ` `, ` `, ` `, ` `},
+		{` `, ` `, ` `, ` `, ` `},
+		{` `, ` `, ` `, ` `, ` `},
+		{` `, ` `, ` `, ` `, ` `},
+	}
+
+	originX := 2
+	originY := 2
+
+	result[originY][originX] = "@"
+
+	if room := LoadRoom(mapRoomId); room != nil {
+
+		var deltas directionDelta
+		var ok bool
+
+		for direction, exit := range room.Exits {
+			if exit.Secret {
+				continue
+			}
+
+			targetSymbol := `•`
+			if targetRoom := LoadRoom(exit.RoomId); targetRoom != nil {
+				if len(targetRoom.MapSymbol) > 0 {
+					targetSymbol = targetRoom.MapSymbol
+				}
+			}
+
+			if len(exit.MapDirection) > 0 {
+				if deltas, ok = DirectionDeltas[exit.MapDirection]; !ok {
+					continue
+				}
+			} else if deltas, ok = DirectionDeltas[direction]; !ok {
+				continue
+			}
+
+			targetX := originX + (deltas.Dx * 2)
+			stepX := 0
+			if deltas.Dx < 0 {
+				stepX = -1
+			} else if deltas.Dx > 0 {
+				stepX = 1
+			}
+			totalXSteps := stepX * (deltas.Dx * 2)
+
+			targetY := originY + (deltas.Dy * 2)
+			stepY := 0
+			if deltas.Dy < 0 {
+				stepY = -1
+			} else if deltas.Dy > 0 {
+				stepY = 1
+			}
+			totalYSteps := stepY * (deltas.Dy * 2)
+
+			if stepX == 0 && stepY == 0 {
+				continue
+			}
+
+			posX := originX
+			posY := originY
+			for totalXSteps > 0 || totalYSteps > 0 {
+				if totalXSteps > 0 {
+					totalXSteps--
+				}
+				if totalYSteps > 0 {
+					totalYSteps--
+				}
+				posX += stepX
+				posY += stepY
+
+				if posY == originY && posX == originX {
+					continue
+				}
+				// out of bounds
+				if posY < 0 || posX < 0 || posY > len(result)-1 || posX > len(result[posY])-1 {
+					continue
+				}
+
+				if posX == targetX && posY == targetY {
+					result[posY][posX] = targetSymbol
+				} else {
+					result[posY][posX] = string(deltas.Arrow)
+				}
+			}
+
+		}
+	}
+
+	returnResult := []string{}
+	returnResult = append(returnResult, `╔═════╗`)
+	for y := 0; y < len(result); y++ {
+		returnResult = append(returnResult, `║`+strings.Join(result[y], ``)+`║`)
+	}
+	returnResult = append(returnResult, `╚═════╝`)
+
+	return returnResult
 }
 
 func GetSpecificMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool, mapMarkers []string) string {

@@ -183,7 +183,7 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 
 	finalResponse := NewUserCommandResponse(userId)
 
-	response, err := scripting.TryCommand(keywords.TryCommandAlias(cmd), rest, userId, cmdQueue)
+	response, err := scripting.TryRoomCommand(keywords.TryCommandAlias(cmd), rest, userId, cmdQueue)
 	finalResponse.AbsorbMessages(response)
 	if response.Handled {
 		finalResponse.Handled = true
@@ -290,6 +290,7 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 			finalResponse.NextCommand = response.NextCommand
 		}
 		finalResponse.AbsorbMessages(response)
+		finalResponse.Handled = finalResponse.Handled || response.Handled
 		return finalResponse, err
 	}
 

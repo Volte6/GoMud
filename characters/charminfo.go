@@ -1,7 +1,7 @@
 package characters
 
 const (
-	CharmPermanent      = -2 // Never expires due to time
+	CharmPermanent      = -1 // Never expires due to time
 	CharmExpiredDespawn = `emote bows and bids you farewell, disappearing into the scenery;despawn charmed mob expired`
 	CharmExpiredRevert  = `emote reverts to its old ways`
 )

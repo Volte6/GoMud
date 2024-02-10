@@ -21,13 +21,6 @@ exits:
     roomid: 12
   west:
     roomid: 7
-items:
-- itemid: 8
-  uses: 3
-- itemid: 30007
-  uses: 1
-- itemid: 30004
-  uses: 3
 spawninfo:
 - mobid: 2
   cooldown: 85

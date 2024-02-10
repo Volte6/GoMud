@@ -45,10 +45,8 @@ func Eat(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
 
-		usesBefore := matchItem.Uses
 		user.Character.UseItem(matchItem)
-		usesAfter := matchItem.Uses
-		fmt.Println("Uses", usesBefore, usesAfter)
+
 		response.SendUserMessage(userId, fmt.Sprintf(`You eat some of the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()), true)
 		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> eats some <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.Name()), true)
 

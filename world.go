@@ -249,7 +249,7 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 				}
 			}
 
-		} else if cmd == `drop` || cmd == `trash` || cmd == `sell` || cmd == `store` || cmd == `inspect` || cmd == `enchant` || cmd == `appraise` {
+		} else if cmd == `drop` || cmd == `trash` || cmd == `sell` || cmd == `store` || cmd == `inspect` || cmd == `enchant` || cmd == `appraise` || cmd == `give` {
 
 			itemList = user.Character.GetAllBackpackItems()
 
@@ -417,11 +417,62 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 				`description`,
 				`prompt`,
 				`fprompt`,
+				`tinymap`,
 			}
 
 			for _, opt := range options {
 				if strings.HasPrefix(opt, targetName) {
 					suggestions = append(suggestions, opt[len(targetName):])
+				}
+			}
+
+		} else if cmd == `spawn` {
+
+			if len(inputText) >= len(`spawn item `) && inputText[0:len(`spawn item `)] == `spawn item ` {
+				targetName := inputText[len(`spawn item `):]
+				for _, itemName := range items.GetAllItemNames() {
+					for _, testName := range util.BreakIntoParts(itemName) {
+						if strings.HasPrefix(testName, targetName) {
+							suggestions = append(suggestions, testName[len(targetName):])
+						}
+					}
+				}
+			} else if len(inputText) >= len(`spawn mob `) && inputText[0:len(`spawn mob `)] == `spawn mob ` {
+				targetName := inputText[len(`spawn mob `):]
+				for _, mobName := range mobs.GetAllMobNames() {
+					for _, testName := range util.BreakIntoParts(mobName) {
+						if strings.HasPrefix(testName, targetName) {
+							suggestions = append(suggestions, testName[len(targetName):])
+						}
+					}
+				}
+			} else if len(inputText) >= len(`spawn gold `) && inputText[0:len(`spawn gold `)] == `spawn gold ` {
+				suggestions = append(suggestions, "50", "100", "500", "1000", "5000")
+			} else {
+				options := []string{
+					`mob`,
+					`gold`,
+					`item`,
+				}
+
+				for _, opt := range options {
+					if strings.HasPrefix(opt, targetName) {
+						suggestions = append(suggestions, opt[len(targetName):])
+					}
+				}
+			}
+
+		} else if cmd == `locate` {
+
+			ids := users.GetOnlineUserIds()
+			for _, id := range ids {
+				if id == user.UserId {
+					continue
+				}
+				if user := users.GetByUserId(id); user != nil {
+					if strings.HasPrefix(strings.ToLower(user.Character.Name), targetName) {
+						suggestions = append(suggestions, user.Character.Name[targetNameLen:])
+					}
 				}
 			}
 

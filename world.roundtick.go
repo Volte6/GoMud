@@ -13,6 +13,7 @@ import (
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
@@ -1146,53 +1147,60 @@ func (w *World) HandleIdleMobs() util.MessageQueue {
 		}
 
 		cmdQueued := false
+
 		// If they have idle commands, maybe do one of them?
-		cmdCt := len(mob.IdleCommands)
-		if cmdCt > 0 {
+		if res, err := scripting.TryMobScriptEvent("onIdle", mob.InstanceId, mob.Character.RoomId, 0, ``, nil, w); err != nil {
+			messageQueue.AbsorbMessages(res)
 
-			// Each mob has a 10% chance of doing an idle action.
-			if util.Rand(10) < mob.ActivityLevel {
+		} else {
 
-				idleAction := mob.IdleCommands[int(mob.LastIdleCommand)%cmdCt]
-				mob.LastIdleCommand++
-				/*
-					idleCommandIndex := uint8(util.Rand(cmdCt))
-					for idleCommandIndex == mob.LastIdleCommand && cmdCt > 1 {
-						idleCommandIndex = uint8(util.Rand(cmdCt))
+			cmdCt := len(mob.IdleCommands)
+			if cmdCt > 0 {
+
+				// Each mob has a 10% chance of doing an idle action.
+				if util.Rand(10) < mob.ActivityLevel {
+
+					idleAction := mob.IdleCommands[int(mob.LastIdleCommand)%cmdCt]
+					mob.LastIdleCommand++
+					/*
+						idleCommandIndex := uint8(util.Rand(cmdCt))
+						for idleCommandIndex == mob.LastIdleCommand && cmdCt > 1 {
+							idleCommandIndex = uint8(util.Rand(cmdCt))
+						}
+
+						idleAction := mob.IdleCommands[idleCommandIndex]
+						mob.LastIdleCommand = idleCommandIndex
+					*/
+					if idleAction == `` { // blank is a no-op
+						continue
 					}
 
-					idleAction := mob.IdleCommands[idleCommandIndex]
-					mob.LastIdleCommand = idleCommandIndex
-				*/
-				if idleAction == `` { // blank is a no-op
+					allCmds := strings.Split(idleAction, `;`)
+					if len(allCmds) >= c.TurnsPerRound() {
+						w.QueueCommand(0, mob.InstanceId, `say I have an idleAction that is too long. Please notify an admin.`)
+					} else {
+						for turnDelay, action := range allCmds {
+							w.QueueCommand(0, mob.InstanceId, action, turnDelay)
+							cmdQueued = true
+						}
+					}
+
 					continue
 				}
-
-				allCmds := strings.Split(idleAction, `;`)
-				if len(allCmds) >= c.TurnsPerRound() {
-					w.QueueCommand(0, mob.InstanceId, `say I have an idleAction that is too long. Please notify an admin.`)
-				} else {
-					for turnDelay, action := range allCmds {
-						w.QueueCommand(0, mob.InstanceId, action, turnDelay)
-						cmdQueued = true
-					}
-				}
-
-				continue
 			}
-		}
 
-		//
-		// Look for trouble
-		//
-		if !cmdQueued {
-			if mob.Character.IsCharmed() {
-				// Only some mobs can apply first aid
-				if mob.Character.KnowsFirstAid() {
-					w.QueueCommand(0, mob.InstanceId, `lookforaid`)
+			//
+			// Look for trouble
+			//
+			if !cmdQueued {
+				if mob.Character.IsCharmed() {
+					// Only some mobs can apply first aid
+					if mob.Character.KnowsFirstAid() {
+						w.QueueCommand(0, mob.InstanceId, `lookforaid`)
+					}
+				} else {
+					w.QueueCommand(0, mob.InstanceId, `lookfortrouble`)
 				}
-			} else {
-				w.QueueCommand(0, mob.InstanceId, `lookfortrouble`)
 			}
 		}
 

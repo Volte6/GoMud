@@ -42,14 +42,24 @@ func Spawn(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	spawnType := args[0]
 	args = args[1:]
 
-	if len(args) >= 1 {
+	spawnTarget := ``
+	if len(args) == 1 {
+		spawnTarget = args[0]
+		args = args[1:]
+	} else {
+		spawnTarget = strings.Join(args, ` `)
+		args = []string{}
 
-		if spawnType == "item" {
+	}
 
-			itemId := items.FindItemByName(strings.Join(args, ` `))
+	if len(spawnTarget) > 0 {
+
+		if spawnType == `item` {
+
+			itemId := items.FindItemByName(spawnTarget)
 
 			if itemId < 1 {
-				itemId, _ = strconv.Atoi(args[0])
+				itemId, _ = strconv.Atoi(spawnTarget)
 			}
 
 			if itemId != 0 {
@@ -72,9 +82,15 @@ func Spawn(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			}
 		}
 
-		if spawnType == "gold" {
+		if spawnType == `gold` || spawnTarget == `gold` {
 
-			goldAmt, _ := strconv.Atoi(args[0])
+			goldAmt := 0
+			if spawnType == `gold` {
+				goldAmt, _ = strconv.Atoi(spawnTarget)
+			} else {
+				goldAmt, _ = strconv.Atoi(spawnType)
+			}
+
 			if goldAmt < 1 {
 				goldAmt = 1
 			}
@@ -92,16 +108,13 @@ func Spawn(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			return response, nil
 		}
 
-		if spawnType == "mob" {
+		if spawnType == `mob` {
 
-			var mobId mobs.MobId
+			mobId := mobs.MobIdByName(spawnTarget)
 
-			id, err := strconv.Atoi(args[0])
-
-			if err != nil {
-				mobId = mobs.MobIdByName(strings.Join(args, ` `))
-			} else {
-				mobId = mobs.MobId(id)
+			if mobId < 1 {
+				mobIdInt, _ := strconv.Atoi(spawnTarget)
+				mobId = mobs.MobId(mobs.MobId(mobIdInt))
 			}
 
 			if mobId > 0 {
