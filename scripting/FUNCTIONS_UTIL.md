@@ -6,7 +6,7 @@
 
 ---
 
-[UtilFindMatchIn(search string, items []string) object](util_func.go) - _Searches for a match in a list and returns a close and/or exact match_
+[UtilFindMatchIn(search string, items []any) object](util_func.go) - _Searches for a match in a list and returns a close and/or exact match_
 
 |  Argument | Explanation |
 | --- | --- |
@@ -16,6 +16,7 @@
 The `object` has the following properties:
 |  Property | Explanation |
 | --- | --- |
+| object.found | `true` if either an exact or close match were found. |
 | object.exact | empty string or Exact matching string. |
 | object.close | empty string or Close matching string. |
 

@@ -13,21 +13,138 @@ import (
 )
 
 func setUserFunctions(vm *goja.Runtime) {
-	vm.Set(`UserSetTempData`, UserSetTempData)
-	vm.Set(`UserGetTempData`, UserGetTempData)
-	vm.Set(`UserGetCharacterName`, UserGetCharacterName)
-	vm.Set(`UserGetRoomId`, UserGetRoomId)
-	vm.Set(`UserGetRoomId`, UserGetRoomId)
-	vm.Set(`UserHasQuest`, UserHasQuest)
-	vm.Set(`UserGiveQuest`, UserGiveQuest)
-	vm.Set(`UserGiveBuff`, UserGiveBuff)
-	vm.Set(`UserCommand`, UserCommand)
-	vm.Set(`UserTrainSkill`, UserTrainSkill)
-	vm.Set(`UserMoveRoom`, UserMoveRoom)
-	vm.Set(`UserGiveItem`, UserGiveItem)
-	vm.Set(`UserHasBuffFlag`, UserHasBuffFlag)
-	vm.Set(`UserHasItemId`, UserHasItemId)
-	vm.Set(`UserGetBackpackItems`, UserGetBackpackItems)
+	vm.Set(`GetUser`, GetUser)
+}
+
+type ScriptUser struct {
+	userId     int
+	userRecord *users.UserRecord
+}
+
+func (u ScriptUser) UserId() int {
+	return u.userId
+}
+
+func (u ScriptUser) SetTempData(key string, value any) {
+	if userValue, ok := value.(ScriptUser); ok { // Don't store pointer to user data.
+		userValue.userRecord = nil
+		value = userValue
+	}
+	u.userRecord.SetTempData(key, value)
+}
+
+func (u ScriptUser) GetTempData(key string) any {
+	if value := u.userRecord.GetTempData(key); value != nil {
+		if userValue, ok := value.(ScriptUser); ok { // If it was userdata we need to reload the whole thing in case the user isn't around anymore.
+			value = GetUser(userValue.userId)
+		}
+		return value
+	}
+	return nil
+}
+
+func (u ScriptUser) GetCharacterName() string {
+	return u.userRecord.Character.Name
+}
+
+func (u ScriptUser) GetRoomId() int {
+	return u.userRecord.Character.RoomId
+}
+
+func (u ScriptUser) HasQuest(questId string) bool {
+	return u.userRecord.Character.HasQuest(questId)
+}
+
+func (u ScriptUser) GiveQuest(questId string) {
+	commandQueue.QueueQuest(u.userId, questId)
+}
+
+func (u ScriptUser) GiveBuff(buffId int) {
+	commandQueue.QueueBuff(u.userId, 0, buffId)
+}
+
+func (u ScriptUser) Command(userId int, cmd string, waitTurns ...int) {
+	if len(waitTurns) < 1 {
+		waitTurns = append(waitTurns, 0)
+	}
+	commandQueue.QueueCommand(u.userId, 0, cmd, waitTurns[0])
+}
+
+func (u ScriptUser) TrainSkill(skillName string, skillLevel int) {
+
+	skillName = strings.ToLower(skillName)
+	currentLevel := u.userRecord.Character.GetSkillLevel(skills.SkillTag(skillName))
+
+	if currentLevel < skillLevel {
+		newLevel := u.userRecord.Character.TrainSkill(skillName, skillLevel)
+
+		skillData := struct {
+			SkillName  string
+			SkillLevel int
+		}{
+			SkillName:  skillName,
+			SkillLevel: newLevel,
+		}
+		skillUpTxt, _ := templates.Process("character/skillup", skillData)
+		messageQueue.SendUserMessage(u.userId, skillUpTxt, true)
+	}
+
+}
+
+func (u ScriptUser) MoveRoom(destRoomId int) {
+	rooms.MoveToRoom(u.userId, destRoomId)
+}
+
+func (u ScriptUser) GiveItem(itemId any) {
+
+	if id, ok := itemId.(int); ok {
+		itm := items.New(id)
+		if itm.ItemId > 0 {
+			u.userRecord.Character.StoreItem(itm)
+		}
+		return
+	}
+
+	if itmObj, ok := itemId.(items.Item); ok {
+		u.userRecord.Character.StoreItem(itmObj)
+		return
+	}
+
+}
+
+func (u ScriptUser) HasBuffFlag(buffFlag string) bool {
+	return u.userRecord.Character.HasBuffFlag(buffs.Flag(buffFlag))
+}
+
+func (u ScriptUser) HasItemId(itemId int) bool {
+	for _, itm := range u.userRecord.Character.GetAllBackpackItems() {
+		if itm.ItemId == itemId {
+			return true
+		}
+	}
+	return false
+}
+
+func (u ScriptUser) GetBackpackItems() []items.Item {
+	return u.userRecord.Character.GetAllBackpackItems()
+}
+
+func (u ScriptUser) GetAlignment() int {
+	return int(u.userRecord.Character.Alignment)
+}
+
+func (u ScriptUser) GetAlignmentName() string {
+	return u.userRecord.Character.AlignmentName()
+}
+
+func (u ScriptUser) SetAlignment(newAlignment int) {
+	if newAlignment < -100 {
+		newAlignment = -100
+	} else if newAlignment > 100 {
+		newAlignment = 100
+	}
+
+	u.userRecord.Character.Alignment = int8(newAlignment)
 }
 
 // ////////////////////////////////////////////////////////
@@ -35,115 +152,9 @@ func setUserFunctions(vm *goja.Runtime) {
 // # These functions get exported to the scripting engine
 //
 // ////////////////////////////////////////////////////////
-func UserSetTempData(userId int, key string, value any) {
+func GetUser(userId int) *ScriptUser {
 	if user := users.GetByUserId(userId); user != nil {
-		user.SetTempData(key, value)
-	}
-}
-
-func UserGetTempData(userId int, key string) any {
-	if user := users.GetByUserId(userId); user != nil {
-		return user.GetTempData(key)
+		return &ScriptUser{userId, user}
 	}
 	return nil
-}
-
-func UserGetCharacterName(userId int) string {
-	if user := users.GetByUserId(userId); user != nil {
-		return user.Character.Name
-	}
-	return `Unknown`
-}
-
-func UserGetRoomId(userId int) int {
-	if user := users.GetByUserId(userId); user != nil {
-		return user.Character.RoomId
-	}
-	return 0
-}
-
-func UserHasQuest(userId int, questId string) bool {
-	if user := users.GetByUserId(userId); user != nil {
-		return user.Character.HasQuest(questId)
-	}
-	return false
-}
-
-func UserGiveQuest(userId int, questId string) {
-	commandQueue.QueueQuest(userId, questId)
-}
-
-func UserGiveBuff(userId int, buffId int) {
-	commandQueue.QueueBuff(userId, 0, buffId)
-}
-
-func UserCommand(userId int, cmd string, waitTurns ...int) {
-	if len(waitTurns) < 1 {
-		waitTurns = append(waitTurns, 0)
-	}
-	commandQueue.QueueCommand(userId, 0, cmd, waitTurns[0])
-}
-
-func UserTrainSkill(userId int, skillName string, skillLevel int) {
-	if user := users.GetByUserId(userId); user != nil {
-
-		skillName = strings.ToLower(skillName)
-		currentLevel := user.Character.GetSkillLevel(skills.SkillTag(skillName))
-
-		if currentLevel < skillLevel {
-			newLevel := user.Character.TrainSkill(skillName, skillLevel)
-
-			skillData := struct {
-				SkillName  string
-				SkillLevel int
-			}{
-				SkillName:  skillName,
-				SkillLevel: newLevel,
-			}
-			skillUpTxt, _ := templates.Process("character/skillup", skillData)
-			messageQueue.SendUserMessage(userId, skillUpTxt, true)
-		}
-	}
-
-}
-
-func UserMoveRoom(userId int, destRoomId int) {
-	rooms.MoveToRoom(userId, destRoomId)
-}
-
-func UserGiveItem(userId int, itemId int) {
-	if user := users.GetByUserId(userId); user != nil {
-		itm := items.New(itemId)
-		if itm.ItemId > 0 {
-			user.Character.StoreItem(itm)
-			return
-		}
-	}
-}
-
-func UserHasBuffFlag(userId int, buffFlag string) bool {
-	if user := users.GetByUserId(userId); user != nil {
-		return user.Character.HasBuffFlag(buffs.Flag(buffFlag))
-	}
-	return false
-}
-
-func UserHasItemId(userId int, itemId int) bool {
-
-	if user := users.GetByUserId(userId); user != nil {
-		for _, itm := range user.Character.GetAllBackpackItems() {
-			if itm.ItemId == itemId {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-func UserGetBackpackItems(userId int) []items.Item {
-	if user := users.GetByUserId(userId); user != nil {
-		return user.Character.GetAllBackpackItems()
-	}
-	return []items.Item{}
 }

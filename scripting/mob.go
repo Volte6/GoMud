@@ -31,10 +31,6 @@ func PruneMobVMs(instanceIds ...int) {
 }
 
 func TryMobScriptEvent(eventName string, mobInstanceId int, roomId int, sourceId int, sourceType string, details map[string]any, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-	timestart := time.Now()
-	defer func() {
-		slog.Debug("TryMobScriptEvent()", "time", time.Since(timestart))
-	}()
 
 	messageQueue = util.NewMessageQueue(0, mobInstanceId)
 	commandQueue = cmdQueue
@@ -43,7 +39,13 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, roomId int, sourceId
 	if err != nil {
 		return messageQueue, err
 	}
-	slog.Info("TryMobScriptEvent()", "eventName", eventName, "mobInstanceId", mobInstanceId, "roomId", roomId, "details", details)
+
+	sMob := GetMob(mobInstanceId)
+
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("TryMobScriptEvent()", "eventName", eventName, "MobId", sMob.MobTypeId(), "time", time.Since(timestart))
+	}()
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
@@ -54,12 +56,14 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, roomId int, sourceId
 			details = make(map[string]any)
 		}
 
+		sRoom := GetRoom(roomId)
+
 		details["sourceId"] = sourceId
 		details["sourceType"] = sourceType
 
 		res, err := onCommandFunc(goja.Undefined(),
-			vmw.VM.ToValue(mobInstanceId),
-			vmw.VM.ToValue(roomId),
+			vmw.VM.ToValue(sMob),
+			vmw.VM.ToValue(sRoom),
 			vmw.VM.ToValue(details),
 		)
 		vmw.VM.ClearInterrupt()
@@ -92,11 +96,6 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, roomId int, sourceId
 
 func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sourceType string, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
-	timestart := time.Now()
-	defer func() {
-		slog.Debug("TryMobCommand()", "time", time.Since(timestart))
-	}()
-
 	messageQueue = util.NewMessageQueue(0, mobInstanceId)
 	commandQueue = cmdQueue
 
@@ -111,6 +110,11 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 		return messageQueue, err
 	}
 
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("TryMobCommand()", "cmd", cmd, "MobId", mob.MobId, "time", time.Since(timestart))
+	}()
+
 	if onCommandFunc, ok := vmw.GetFunction(`onCommand_` + cmd); ok {
 
 		details := map[string]interface{}{
@@ -118,13 +122,16 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 			`sourceType`: sourceType,
 		}
 
+		sMob := GetMob(mobInstanceId)
+		sRoom := GetRoom(mob.Character.RoomId)
+
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)
 		})
 		res, err := onCommandFunc(goja.Undefined(),
 			vmw.VM.ToValue(rest),
-			vmw.VM.ToValue(mobInstanceId),
-			vmw.VM.ToValue(mob.Character.RoomId),
+			vmw.VM.ToValue(sMob),
+			vmw.VM.ToValue(sRoom),
 			vmw.VM.ToValue(details),
 		)
 		vmw.VM.ClearInterrupt()
@@ -158,14 +165,17 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 			`sourceType`: sourceType,
 		}
 
+		sMob := GetMob(mobInstanceId)
+		sRoom := GetRoom(mob.Character.RoomId)
+
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)
 		})
 		res, err := onCommandFunc(goja.Undefined(),
 			vmw.VM.ToValue(cmd),
 			vmw.VM.ToValue(rest),
-			vmw.VM.ToValue(mobInstanceId),
-			vmw.VM.ToValue(mob.Character.RoomId),
+			vmw.VM.ToValue(sMob),
+			vmw.VM.ToValue(sRoom),
 			vmw.VM.ToValue(details),
 		)
 		vmw.VM.ClearInterrupt()
@@ -258,7 +268,10 @@ func getMobVM(mobInstanceId int) (*VMWrapper, error) {
 		vm.Interrupt(errTimeout)
 	})
 	if fn, ok := goja.AssertFunction(vm.Get(`onLoad`)); ok {
-		if _, err := fn(goja.Undefined(), vm.ToValue(mobInstanceId)); err != nil {
+
+		sMob := GetMob(mobInstanceId)
+
+		if _, err := fn(goja.Undefined(), vm.ToValue(sMob)); err != nil {
 			// Wrap the error
 			finalErr := fmt.Errorf("onLoad: %w", err)
 

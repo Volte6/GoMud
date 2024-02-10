@@ -3,16 +3,15 @@ const nouns = ["quest", "hunger", "hungry", "belly", "food"]
 
 // eventDetails.sourceId   - mobInstanceId or userId
 // eventDetails.sourceType - mob or user
-function onCommand_wave(rest, mobInstanceId, roomId, eventDetails) {
-    MobCommand(mobInstanceId, "wave")
+function onCommand_wave(rest, mob, room, eventDetails) {
+    mob.Command("wave")
 }
 
 // eventDetails.sourceId   - mobInstanceId or userId
 // eventDetails.sourceType - mob or user
-function onCommand(cmd, rest, mobInstanceId, roomId, eventDetails) {
-
+function onCommand(cmd, rest, mob, room, eventDetails) {
     if (cmd == "wave") {
-        MobCommand(mobInstanceId, "wave")
+        mob.Command("wave")
     }
     return false;
 }
@@ -22,18 +21,22 @@ function onCommand(cmd, rest, mobInstanceId, roomId, eventDetails) {
 // eventDetails.askText    - Text asked by the user
 // eventDetails.sourceId   - mobInstanceId or userId
 // eventDetails.sourceType - mob or user
-function onAsk(mobInstanceId, roomId, eventDetails) {
+function onAsk(mob, room, eventDetails) {
+
+    if ( (user = GetUser(eventDetails.sourceId)) == null ) {
+        return false;
+    }
 
     parts = eventDetails.askText.toLowerCase().split(' ');
     for (var i = 0; i < parts.length; i++) {
         match = UtilFindMatchIn(parts[i], nouns);
         if ( match.exact.length > 0 ) {
 
-            MobCommand(mobInstanceId, "emote rubs his belly.")
-            MobCommand(mobInstanceId, "say I forgot my lunch today, and I'm so hungry.")
-            MobCommand(mobInstanceId, "say Do you think you could find a cheese sandwich for me?")
+            mob.Command("emote rubs his belly.")
+            mob.Command("say I forgot my lunch today, and I'm so hungry.")
+            mob.Command("say Do you think you could find a cheese sandwich for me?")
 
-            UserGiveQuest(eventDetails.sourceId,  "4-start")
+            user.GiveQuest("4-start")
 
             return true;
         }
@@ -47,23 +50,27 @@ function onAsk(mobInstanceId, roomId, eventDetails) {
 // eventDetails.sourceType - mob or user
 // eventDetails.gold       - 0+
 // eventDetails.item       - items.Item
-function onGive(mobInstanceId, roomId, eventDetails) {
+function onGive(mob, room, eventDetails) {
 
     if (eventDetails.sourceType == "mob") {
         return false;
     }
 
     if (eventDetails.item.ItemId != 30004) {
-        MobCommand(mobInstanceId, "look !"+String(eventDetails.item.ItemId))
-        MobCommand(mobInstanceId, "drop !"+String(eventDetails.item.ItemId), UtilGetSecondsToTurns(5))
+        mob.Command("look !"+String(eventDetails.item.ItemId))
+        mob.Command("drop !"+String(eventDetails.item.ItemId), UtilGetSecondsToTurns(5))
         return true;
     }
 
-    if ( UserHasQuest(eventDetails.sourceId, "4-start") ) {
+    if ( (user = GetUser(eventDetails.sourceId)) == null ) {
+        return false;
+    }
 
-        UserGiveQuest(eventDetails.sourceId,  "4-end")
-        MobCommand(mobInstanceId, "say Thanks! I can get on with my day now.")
-        MobCommand(mobInstanceId, "eat !"+String(eventDetails.item.ItemId), )
+    if ( user.HasQuest("4-start") ) {
+
+        user.GiveQuest("4-end")
+        mob.Command("say Thanks! I can get on with my day now.")
+        mob.Command("eat !"+String(eventDetails.item.ItemId), )
 
         return true;
     }
@@ -74,12 +81,12 @@ function onGive(mobInstanceId, roomId, eventDetails) {
 playersTold = {}
 
 // Invoked once every round if mob is idle
-function onIdle(mobInstanceId, roomId) {
+function onIdle(mob, room) {
 
     round = UtilGetRoundNumber();
 
     grumbled = false
-    userIds = RoomGetPlayers(roomId);
+    userIds = room.GetPlayers();
 
     if ( userIds.length > 0 ) {
         for (var i = 0; i < userIds.length; i++) {
@@ -90,12 +97,16 @@ function onIdle(mobInstanceId, roomId) {
                 }
             }
 
-            if ( !UserHasQuest(userIds[i], "4-start") ) {
+            if ( (user = GetUser(userIds[i])) == null ) {
+                continue;
+            }
+
+            if ( !user.HasQuest("4-start") ) {
                 if ( !grumbled ) {
-                    MobCommand(mobInstanceId, "emote pats his belly as it grumbles.");
+                    mob.Command("emote pats his belly as it grumbles.");
                     grumbled = true;
                 }
-                MobCommand(mobInstanceId, "sayto @" + String(userIds[i]) + " I'm so hungry.");
+                mob.Command("sayto @" + String(userIds[i]) + " I'm so hungry.");
             }
 
             playersTold[userIds[i]] = round + 5;
@@ -112,16 +123,9 @@ function onIdle(mobInstanceId, roomId) {
     action = round % 3;
 
     if ( action == 0 ) {
-        MobCommand(mobInstanceId, "wander")
+        mob.Command("wander")
         return true;
     }
 
     return false;
-}
-
-// Invoked when script is first loaded.
-// onLoad() is potentially more forgiving of running long
-// ScriptLoadTimeoutMs config - so can be used to set up intial state
-function onLoad(mobInstanceId) {
-
 }

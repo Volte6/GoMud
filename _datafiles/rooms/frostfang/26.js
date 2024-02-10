@@ -4,51 +4,36 @@ const nouns = ["raven", "eyes", "bird"];
 
 
 // cmd specific handler
-function onCommand_look(rest, userId, roomId) {
+function onCommand_look(rest, user, room) {
 
-    parts = rest.toLowerCase().split(' ');
-    for (var i = 0; i < parts.length; i++) {
-        matches = UtilFindMatchIn(parts[i], nouns);
-        if ( matches.exact.length > 0 ) {
-            break;
-        }
-    }
-
-    if ( matches.exact.length < 1 ) {
+    matches = UtilFindMatchIn(rest, nouns);
+    if ( !matches.found ) {
         return false;
     }
 
-    SendUserMessage(userId, "Looking more closely, the eyes of the raven are made of onyx. They are clean and clear, as if polished.")
-    SendRoomMessage(roomId, "<ansi fg=\"username\">"+UserGetCharacterName(userId)+"</ansi> examines the raven in the mural.");
+    SendUserMessage(user.UserId(), "Looking more closely, the eyes of the raven are made of onyx. They are clean and clear, as if polished.")
+    SendRoomMessage(room.RoomId(), "<ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> examines the raven in the mural.");
 
     return true;
 }
 
 // Generic Command Handler
-function onCommand(cmd, rest, userId, roomId) {
-
+function onCommand(cmd, rest, user, room) {
 
     if ( !verbs.includes(cmd) ) {
         return false;
     }
     
-    parts = rest.toLowerCase().split(' ');
-    for (var i = 0; i < parts.length; i++) {
-        matches = UtilFindMatchIn(parts[i], nouns);
-        if ( matches.exact.length > 0  ) {
-            break;
-        }
-    }
-
-    if ( matches.exact.length < 1 ) {
+    matches = UtilFindMatchIn(rest, nouns);
+    if ( !matches.found ) {
         return false;
     }
-    
-    SendUserMessage(userId, "You press the eyes of the raven, and follow a secret entrance to the west!");
-    SendRoomMessage(roomId, "<ansi fg=\"username\">"+UserGetCharacterName(userId)+"</ansi> presses in the eyes of the raven, and falls through into a room to the west!");
 
-    UserGiveQuest(userId, "2-investigate")
-    UserMoveRoom(userId, 31)
+    SendUserMessage(user.UserId(), "You press the eyes of the raven, and follow a secret entrance to the west!");
+    SendRoomMessage(room.RoomId(), "<ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> presses in the eyes of the raven, and falls through into a room to the west!");
+
+    user.GiveQuest("2-investigate")
+    user.MoveRoom(31)
         
     return true;
 }

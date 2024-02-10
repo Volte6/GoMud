@@ -1,9 +1,9 @@
 
-function onCommand_out(rest, userId, roomId) {
+function onCommand_out(rest, user, room) {
     
-    mobs = RoomGetMobs(roomId);
+    mobs = room.GetMobs();
     if ( mobs.length > 0 ) {
-        SendUserMessage(userId, "The way out is block by denizens of the cave.");
+        SendUserMessage(user.UserId(), "The way out is block by denizens of the cave.");
         return true;
     }
 
