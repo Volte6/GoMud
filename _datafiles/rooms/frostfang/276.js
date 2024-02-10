@@ -1,28 +1,3 @@
-/*
-props:
-- nouns: [leaves, glimmer, light, locket]
-  requirements:
-  - type: notquesttoken
-    idstring: 1-return
-    rejectionmessage: You don't see that here anymore.
-  description: Nestled inside a pile of leaves is some sort of golden object.
-- nouns: [gold, golden, golden locket, locket, sophie's locket, object]
-  verbs: [get, take, grab]
-  requirements:
-  - type: questtoken
-    idstring: 1-start
-    rejectionmessage: You don't see anything worth taking.
-  - type: notquesttoken
-    idstring: 1-return
-    rejectionmessage: You don't see anything worth taking.
-  description: It appears to be a <ansi fg="itemname">golden locket</ansi>.
-  trigger:
-    itemid: 20025
-    questtoken: 1-return
-    affected: player
-    descriptionplayer: You brush aside the leaves and take the <ansi fg="itemname">golden locket</ansi>.
-    descriptionroom: <ansi fg="username">%s</ansi> takes a <ansi fg="itemname">golden locket</ansi> from the pile of leaves.
-*/
 
 locketAvailableRound = 0;
 

@@ -20,3 +20,6 @@ There are a handful of settings you can adjust with this command, including:
   This sets a custom prompt (See <ansi fg="command">help prompt</ansi>)
   If you ommit the [prompt text], your current prompt will be displayed.
 
+  <ansi fg="command">set tinymap</ansi>
+  This toggles the automatic tinymap on or off. It shows when looking at rooms.
+

@@ -21,7 +21,7 @@ func setUserFunctions(vm *goja.Runtime) {
 	vm.Set(`UserHasQuest`, UserHasQuest)
 	vm.Set(`UserGiveQuest`, UserGiveQuest)
 	vm.Set(`UserGiveBuff`, UserGiveBuff)
-	vm.Set(`UserGiveCommand`, UserGiveCommand)
+	vm.Set(`UserCommand`, UserCommand)
 	vm.Set(`UserTrainSkill`, UserTrainSkill)
 	vm.Set(`UserMoveRoom`, UserMoveRoom)
 	vm.Set(`UserGiveItem`, UserGiveItem)
@@ -77,7 +77,7 @@ func UserGiveBuff(userId int, buffId int) {
 	commandQueue.QueueBuff(userId, 0, buffId)
 }
 
-func UserGiveCommand(userId int, cmd string, waitTurns ...int) {
+func UserCommand(userId int, cmd string, waitTurns ...int) {
 	if len(waitTurns) < 1 {
 		waitTurns = append(waitTurns, 0)
 	}

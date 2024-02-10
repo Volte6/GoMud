@@ -264,11 +264,22 @@ func (c *Character) GetCharmedUserId() int {
 }
 
 func (c *Character) IsCharmed(userId ...int) bool {
+
+	if c.Charmed == nil {
+		return false
+	}
+
 	if len(userId) == 0 {
 		return c.Charmed != nil
 	}
 
-	return c.Charmed != nil && c.Charmed.UserId == userId[0]
+	for _, uId := range userId {
+		if c.Charmed.UserId == uId {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (c *Character) RemoveCharm() {

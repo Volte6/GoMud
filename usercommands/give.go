@@ -9,6 +9,7 @@ import (
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -186,91 +187,16 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 				}
 
-				if len(m.ItemTrades) > 0 {
-
-					for idx, trade := range m.ItemTrades {
-						for _, itemId := range trade.AcceptedItemIds {
-
-							if itemId == giveItem.ItemId {
-
-								if _, ok := trade.GivenItems[userId]; !ok {
-									trade.GivenItems[userId] = []int{}
-								}
-
-								alreadyGiven := false
-								for _, givenItemId := range trade.GivenItems[userId] {
-									if givenItemId == giveItem.ItemId {
-										alreadyGiven = true
-										break
-									}
-								}
-
-								if !alreadyGiven {
-									trade.GivenItems[userId] = append(trade.GivenItems[userId], giveItem.ItemId)
-								}
-
-								m.Character.RemoveItem(giveItem)
-							}
-						}
-
-						if giveGoldAmount > 0 {
-							if _, ok := trade.GivenGold[userId]; !ok {
-								trade.GivenGold[userId] = 0
-							}
-							trade.GivenGold[userId] += giveGoldAmount
-						}
-
-						// Check whether all accepted items have been given
-						goldGiven := trade.GivenGold[userId]
-
-						if goldGiven >= trade.AcceptedGold && len(trade.GivenItems[userId]) == len(trade.AcceptedItemIds) {
-							// If equal in length, then all items satisfied.
-							for _, prizeItemId := range trade.PrizeItemIds {
-								prizeItem := items.New(prizeItemId)
-								if prizeItem.ItemId > 0 {
-									m.Character.StoreItem(prizeItem)
-									cmdQueue.QueueCommand(0, m.InstanceId, fmt.Sprintf(`give !%d to @%d`, prizeItem.ItemId, user.UserId))
-								}
-							}
-
-							for _, prizeBuffId := range trade.PrizeBuffIds {
-								cmdQueue.QueueBuff(user.UserId, 0, prizeBuffId)
-							}
-
-							if trade.PrizeRoomId > 0 {
-
-								response.SendUserMessage(userId,
-									`You are whisked away to a new location.`,
-									true)
-								response.SendRoomMessage(room.RoomId,
-									fmt.Sprintf(`<ansi fg="username">%s</ansi> is whisked away to a new location.`, user.Character.Name),
-									true)
-
-								rooms.MoveToRoom(user.UserId, trade.PrizeRoomId)
-							}
-
-							for _, prizeQuestId := range trade.PrizeQuestIds {
-								cmdQueue.QueueQuest(user.UserId, prizeQuestId)
-							}
-
-							for _, prizeCmd := range trade.PrizeCommands {
-								cmdQueue.QueueCommand(0, m.InstanceId, prizeCmd)
-							}
-
-							if trade.PrizeGold > 0 {
-								m.Character.Gold += trade.PrizeGold
-								cmdQueue.QueueCommand(0, m.InstanceId, fmt.Sprintf(`give %d gold to @%d`, trade.PrizeGold, user.UserId))
-							}
-
-							delete(trade.GivenItems, userId)
-							delete(trade.GivenGold, userId)
-						}
-						m.ItemTrades[idx] = trade
+				if res, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, m.Character.RoomId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}, cmdQueue); err == nil {
+					response.AbsorbMessages(res)
+					if res.Handled {
+						response.Handled = true
+						return response, nil
 					}
-				} else {
-					cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`emote considers the <ansi fg="itemname">%s</ansi> for a moment.`, giveItem.Name()))
-					cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`gearup !%d`, giveItem.ItemId))
 				}
+
+				cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`emote considers the <ansi fg="itemname">%s</ansi> for a moment.`, giveItem.Name()))
+				cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`gearup !%d`, giveItem.ItemId))
 
 			} else {
 				response.SendUserMessage(userId, "Something went wrong.", true)

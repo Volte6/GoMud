@@ -43,6 +43,23 @@ func Set(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		return response, nil
 	}
 
+	if setTarget == `tinymap` {
+		on := user.GetConfigOption(`tinymap`)
+		if on == nil || !on.(bool) {
+			on = true
+			response.SendUserMessage(userId, `Tinymap turned <ansi fg="red">ON</ansi>.`, true)
+		} else {
+			on = false
+			response.SendUserMessage(userId, `Tinymap turned <ansi fg="red">OFF</ansi>.`, true)
+		}
+
+		user.SetConfigOption(`tinymap`, on)
+
+		response.Handled = true
+		return response, nil
+
+	}
+
 	if setTarget == `prompt` {
 
 		if len(args) < 1 {

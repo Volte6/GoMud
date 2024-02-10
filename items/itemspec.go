@@ -207,6 +207,15 @@ func FindItemByName(name string) int {
 	return 0
 }
 
+func GetAllItemNames() []string {
+
+	itemNames := []string{}
+	for _, item := range items {
+		itemNames = append(itemNames, item.Name)
+	}
+	return itemNames
+}
+
 // Presumably to ensure the datafile hasn't messed something up.
 func (i *ItemSpec) Id() int {
 	return i.ItemId

@@ -143,7 +143,7 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 			enterFromExit = fmt.Sprintf(`the <ansi fg="exit">%s</ansi>`, enterFromExit)
 		}
 
-		if scriptResponse, err := scripting.TryScriptEvent(`onExit`, user.UserId, cmdQueue); err == nil {
+		if scriptResponse, err := scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId, cmdQueue); err == nil {
 			response.AbsorbMessages(scriptResponse)
 			if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
 				return response, nil
@@ -154,7 +154,7 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 			response.SendUserMessage(userId, "Oops, couldn't move there!", true)
 		} else {
 
-			if scriptResponse, err := scripting.TryScriptEvent(`onEnter`, user.UserId, cmdQueue); err == nil {
+			if scriptResponse, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId, cmdQueue); err == nil {
 				response.AbsorbMessages(scriptResponse)
 				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
 					rooms.MoveToRoom(user.UserId, originRoomId)

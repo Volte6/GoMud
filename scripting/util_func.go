@@ -11,6 +11,8 @@ func setUtilFunctions(vm *goja.Runtime) {
 	vm.Set(`UtilFindMatchIn`, UtilFindMatchIn)
 	vm.Set(`UtilGetSecondsToRounds`, UtilGetSecondsToRounds)
 	vm.Set(`UtilGetMinutesToRounds`, UtilGetMinutesToRounds)
+	vm.Set(`UtilGetSecondsToTurns`, UtilGetSecondsToTurns)
+	vm.Set(`UtilGetMinutesToTurns`, UtilGetMinutesToTurns)
 }
 
 // ////////////////////////////////////////////////////////
@@ -28,6 +30,14 @@ func UtilGetSecondsToRounds(seconds int) int {
 
 func UtilGetMinutesToRounds(minutes int) int {
 	return configs.GetConfig().MinutesToRounds(minutes)
+}
+
+func UtilGetSecondsToTurns(seconds int) int {
+	return configs.GetConfig().SecondsToTurns(seconds)
+}
+
+func UtilGetMinutesToTurns(minutes int) int {
+	return configs.GetConfig().MinutesToTurns(minutes)
 }
 
 func UtilFindMatchIn(search string, items []string) map[string]string {

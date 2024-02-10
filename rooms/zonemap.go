@@ -27,6 +27,7 @@ type MapBorder struct {
 	Mid    []string
 	Bottom string
 }
+
 type MapData struct {
 	Title        string
 	Zone         string
