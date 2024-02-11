@@ -4,10 +4,6 @@
 
 This is an early version of GoMud, having only been in development a couple of months.
 
-It has been refactored on the fly, which is why some aspects might seem less than ideal.
-
-The network layer still needs to be cleaned up, since it start with very different assumptions than where things ended up, but it works fine as it is for now.
-
 Screenshots for some of the features can be found [here](https://imgur.com/a/90y6OGS).
 
 Colorization is handled through extensive use of my [github.com/Volte6/ansitags](https://github.com/Volte6/ansitags) library.
@@ -16,9 +12,13 @@ Can be run locally as a standard go program or via docker container. The default
 
 There is some stubbed out folders/files/code bits for a web service and web client, but nothing substantial or even moderately functional yet. Later this should use websockets to connect, and be able to server game-aware pages up.
 
-Certain admin in-game commands can be destructive. For example, the `build` command is notoriously finicky if you don't understand what you are doing. Although there is some documentation, it doesn't mean stuff won't get missed, plus it's possible to accidentally mess up typing something and then can be tricky to fix if you don't first understand the underlying mechanisms. Now that there is a user prompt system working this can probably be improved considerably in the near future, and building or modifying a room can be a series of prompts.
+NOTE: Certain admin in-game commands can be destructive. For example, the `build` command is notoriously finicky if you don't understand what you are doing. Although there is some documentation, it doesn't mean stuff won't get missed, plus it's possible to accidentally mess up typing something and then can be tricky to fix if you don't first understand the underlying mechanisms. Now that there is a user prompt system working this can probably be improved considerably in the near future, and building or modifying a room can be a series of prompts.
 
 The network layer will eventually be overhauled and possibly include support for the `alternative screen buffer` mode at some point.
+
+## Scripting
+
+Information on scripting in GoMud can be found in the [scripting README](scripting/README.md).
 
 ## Small Feature Demos
 
