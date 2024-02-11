@@ -27,7 +27,12 @@ Information on scripting in GoMud can be found in the [scripting README](scripti
 - [Quests / Quest Progress](https://youtu.be/3zIClk3ewTU)
 - [Lockpicking](https://youtu.be/-zgw99oI0XY)
 - [Hired Mercs](https://youtu.be/semi97yokZE)
-
+- [TinyMap](https://www.youtube.com/watch?v=VLNF5oM4pWw) (okay not much of a "feature")
+- [256 Color/xterm](https://www.youtube.com/watch?v=gGSrLwdVZZQ)
+- [Customizable Prompts](https://www.youtube.com/watch?v=MFkmjSTL0Ds)
+- [Mob/NPC Scripting](https://www.youtube.com/watch?v=li2k1N4p74o)
+- [Room Scripting](https://www.youtube.com/watch?v=n1qNUjhyOqg)
+- 
 # Quick Start
 
 A youtube playlist to getting started has been set up here:
