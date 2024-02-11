@@ -35,7 +35,7 @@ It is usually called within one round of a mob instance being created, or possib
 
 |  Argument | Explanation |
 | --- | --- |
-| mob | [MOBOBJ](FUNCTION_MOBS.md) |
+| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
 
 ---
 
@@ -48,8 +48,8 @@ function onIdle(mob MOBOBJ, room ROOMOBJ) {
 
 |  Argument | Explanation |
 | --- | --- |
-| mob | [MOBOBJ](FUNCTION_MOBS.md) |
-| room | [ROOMOBJ](FUNCTION_ROOM.md) |
+| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOM.md) |
 
 ---
 
@@ -62,8 +62,8 @@ function onGive(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 
 |  Argument | Explanation |
 | --- | --- |
-| mob | [MOBOBJ](FUNCTION_MOBS.md) |
-| room | [ROOMOBJ](FUNCTION_ROOM.md) |
+| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOM.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that gave the item/gold |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the gift |
 | eventDetails.gold | How much gold was given (if any) |
@@ -80,8 +80,8 @@ function onAsk(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 
 |  Argument | Explanation |
 | --- | --- |
-| mob | [MOBOBJ](FUNCTION_MOBS.md) |
-| room | [ROOMOBJ](FUNCTION_ROOM.md) |
+| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOM.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that asked the question |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the question |
 | eventDetails.askText | The question the mob was asked |
@@ -104,8 +104,8 @@ NOTE: Other mobs may be in the room with `onCommand()` functions defined, and th
 | --- | --- |
 | cmd | the command entered, such as `look`, `drop` or `west`. |
 | rest | Everything entered after the command (if anything). |
-| mob | [MOBOBJ](FUNCTION_MOBS.md) |
-| room | [ROOMOBJ](FUNCTION_ROOM.md) |
+| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOM.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that sent the command |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the command |
 
@@ -127,8 +127,8 @@ In all other ways, this follows the same rules as the normal `onCommand()` funct
 |  Argument | Explanation |
 | --- | --- |
 | rest | Everything entered after the command (if anything). |
-| mob | [MOBOBJ](FUNCTION_MOBS.md) |
-| room | [ROOMOBJ](FUNCTION_ROOM.md) |
+| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOM.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that sent the command |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the command |
 

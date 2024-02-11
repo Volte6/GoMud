@@ -28,7 +28,7 @@ It is usually called the first time a player enters a room.
 
 |  Argument | Explanation |
 | --- | --- |
-| room | [ROOMOBJ](FUNCTION_ROOM.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOM.md) |
 
 ---
 
@@ -43,8 +43,8 @@ Returning `true` will reject the move, leaving them in their original room.
 
 |  Argument | Explanation |
 | --- | --- |
-| user | [USEROBJ](FUNCTION_USER.md) |
-| room | [ROOMOBJ](FUNCTION_ROOM.md) |
+| user | [USEROBJ](FUNCTIONS_USER.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOM.md) |
 
 ---
 
@@ -59,8 +59,8 @@ Returning `true` will reject the move, leaving them in their original room.
 
 |  Argument | Explanation |
 | --- | --- |
-| user | [USEROBJ](FUNCTION_USER.md) |
-| room | [ROOMOBJ](FUNCTION_ROOM.md) |
+| user | [USEROBJ](FUNCTIONS_USER.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOM.md) |
 
 ---
 
@@ -77,8 +77,8 @@ Returning `true` will halt any further processing of the response (i.e. "I've ha
 | --- | --- |
 | cmd | the command entered, such as `look`, `drop` or `west`. |
 | rest | Everything entered after the command (if anything). |
-| user | [USEROBJ](FUNCTION_USER.md) |
-| room | [ROOMOBJ](FUNCTION_ROOM.md) |
+| user | [USEROBJ](FUNCTIONS_USER.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOM.md) |
 
 ---
 
@@ -98,7 +98,7 @@ In all other ways, this follows the same rules as the normal `onCommand()` funct
 |  Argument | Explanation |
 | --- | --- |
 | rest | Everything entered after the command (if anything). |
-| user | [USEROBJ](FUNCTION_USER.md) |
-| room | [ROOMOBJ](FUNCTION_ROOM.md) |
+| user | [USEROBJ](FUNCTIONS_USER.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOM.md) |
 
 ---
