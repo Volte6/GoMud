@@ -6,6 +6,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
@@ -56,7 +57,24 @@ func (u ScriptUser) HasQuest(questId string) bool {
 }
 
 func (u ScriptUser) GiveQuest(questId string) {
+
+	// If in a party, give to all party members.
+	if party := parties.Get(u.userId); party != nil {
+		for _, userId := range party.GetMembers() {
+			commandQueue.QueueQuest(userId, questId)
+		}
+		return
+	}
+
 	commandQueue.QueueQuest(u.userId, questId)
+
+}
+
+func (u ScriptUser) GainGold(amt int) {
+	u.userRecord.Character.Gold += amt
+	if u.userRecord.Character.Gold < 0 {
+		u.userRecord.Character.Gold = 0
+	}
 }
 
 func (u ScriptUser) GiveBuff(buffId int) {

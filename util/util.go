@@ -30,6 +30,22 @@ var (
 	timeTrackers        = map[string]*Accumulator{}
 	serverAddr   string = `Unknown`
 	serverSeed   string = ``
+
+	strippablePrepositions = []string{
+		`onto`,
+		`into`,
+		`over`,
+		`to`,
+		`toward`,
+		`towards`,
+		`from`,
+		`in`,
+		`under`,
+		`upon`,
+		`with`,
+		`the`, // also strip this because it's unnecessary
+		`my`,  // also strip this because it's unnecessary
+	}
 )
 
 const ()
@@ -183,6 +199,7 @@ func SplitStringNL(input string, lineWidth int) string {
 }
 
 func SplitButRespectQuotes(s string) []string {
+
 	// This regex matches either a quoted string (with either single or double quotes) or a non-space sequence.
 	// For example, for the input: `hello "my name" is 'Sammy'`
 	// It matches: [`hello", ""my name"", "is", "'Sammy'`]
@@ -656,4 +673,23 @@ func ManaClass(mana int, maxMana int) string {
 
 func QuantizeTens(value int, max int) int {
 	return int(math.Floor(float64(value)/float64(max)*10)) * 10
+}
+
+// Strips out common prepositions from a string
+func StripPrepositions(input string) string {
+
+	if input == `` {
+		return input
+	}
+
+	for _, prep := range strippablePrepositions {
+		prepLen := len(prep)
+
+		if len(input) > prepLen && input[0:len(prep)+1] == prep+` ` {
+			input = input[len(prep)+1:]
+		}
+		input = strings.ReplaceAll(input, ` `+prep+` `, ` `)
+	}
+
+	return input
 }

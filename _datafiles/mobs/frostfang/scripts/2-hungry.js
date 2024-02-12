@@ -1,14 +1,7 @@
 
 const nouns = ["quest", "hunger", "hungry", "belly", "food"]
 
-// eventDetails.sourceId   - mobInstanceId or userId
-// eventDetails.sourceType - mob or user
-function onCommand_wave(rest, mob, room, eventDetails) {
-    mob.Command("wave")
-}
 
-// eventDetails.sourceId   - mobInstanceId or userId
-// eventDetails.sourceType - mob or user
 function onCommand(cmd, rest, mob, room, eventDetails) {
     if (cmd == "wave") {
         mob.Command("wave")
@@ -16,50 +9,52 @@ function onCommand(cmd, rest, mob, room, eventDetails) {
     return false;
 }
 
-// Invoked when asked a question
-// Intended for quests, but can be used for other things
-// eventDetails.askText    - Text asked by the user
-// eventDetails.sourceId   - mobInstanceId or userId
-// eventDetails.sourceType - mob or user
 function onAsk(mob, room, eventDetails) {
 
     if ( (user = GetUser(eventDetails.sourceId)) == null ) {
         return false;
     }
 
-    parts = eventDetails.askText.toLowerCase().split(' ');
-    for (var i = 0; i < parts.length; i++) {
-        match = UtilFindMatchIn(parts[i], nouns);
-        if ( match.exact.length > 0 ) {
+    match = UtilFindMatchIn(eventDetails.askText, nouns);
+    if ( match.exact.length > 0 ) {
 
-            mob.Command("emote rubs his belly.")
-            mob.Command("say I forgot my lunch today, and I'm so hungry.")
-            mob.Command("say Do you think you could find a cheese sandwich for me?")
+        mob.Command("emote rubs his belly.")
+        mob.Command("say I forgot my lunch today, and I'm so hungry.")
+        mob.Command("say Do you think you could find a cheese sandwich for me?")
 
-            user.GiveQuest("4-start")
+        user.GiveQuest("4-start")
 
-            return true;
-        }
+        return true;
     }
 
     return false;
 }
 
-// Invoked when given an item
-// eventDetails.sourceId   - mobInstanceId or userId
-// eventDetails.sourceType - mob or user
-// eventDetails.gold       - 0+
-// eventDetails.item       - items.Item
 function onGive(mob, room, eventDetails) {
 
     if (eventDetails.sourceType == "mob") {
         return false;
     }
 
-    if (eventDetails.item.ItemId != 30004) {
-        mob.Command("look !"+String(eventDetails.item.ItemId))
-        mob.Command("drop !"+String(eventDetails.item.ItemId), UtilGetSecondsToTurns(5))
+    if ( eventDetails.gold > 0 ) {
+        mob.Command("say I don't need your money... but I'll take it!")
+        
+        // Check a random number
+        if ( Math.random() > 0.5 ) {
+            mob.Command("emote flips a coin into the air and catches it!")
+        } else {
+            mob.Command("emote flips a coin into the air and misses the catch!")
+            mob.Command("drop 1 gold");
+        }
         return true;
+    }
+
+    if (eventDetails.item) {
+        if (eventDetails.item.ItemId != 30004) {
+            mob.Command("look !"+String(eventDetails.item.ItemId))
+            mob.Command("drop !"+String(eventDetails.item.ItemId), UtilGetSecondsToTurns(5))
+            return true;
+        }
     }
 
     if ( (user = GetUser(eventDetails.sourceId)) == null ) {

@@ -8,6 +8,7 @@ import (
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -57,9 +58,15 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 			}
 		}
 
+		attackerCt := len(mob.DamageTaken)
+
 		xpMsg := `You gained <ansi fg="experience">%d experience points</ansi>%s!`
 		for uId, _ := range mob.DamageTaken {
 			if user := users.GetByUserId(uId); user != nil {
+
+				if res, err := scripting.TryMobScriptEvent(`onDie`, mob.InstanceId, uId, `user`, map[string]any{`attackerCount`: attackerCt}, cmdQueue); err == nil {
+					response.AbsorbMessages(res)
+				}
 
 				p := parties.Get(user.UserId)
 

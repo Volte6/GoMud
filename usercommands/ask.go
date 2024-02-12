@@ -143,7 +143,7 @@ func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		}
 
 		rest = strings.Join(args, ` `)
-		if res, err := scripting.TryMobScriptEvent(`onAsk`, mobId, room.RoomId, userId, `user`, map[string]any{"askText": rest}, cmdQueue); err == nil {
+		if res, err := scripting.TryMobScriptEvent(`onAsk`, mobId, userId, `user`, map[string]any{"askText": rest}, cmdQueue); err == nil {
 			response.AbsorbMessages(res)
 			if !res.Handled {
 				cmdQueue.QueueCommand(0, mobId, `emote shakes their head.`)

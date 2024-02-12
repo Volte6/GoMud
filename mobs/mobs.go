@@ -44,14 +44,6 @@ type ItemTrade struct {
 	GivenItems      map[int][]int `yaml:"-"`                              // key = userId, value = Items given. Should only contain items from AcceptedItemIds
 	GivenGold       map[int]int   `yaml:"-"`                              // key = userId, value = how much gold is given
 }
-
-type AskMob struct {
-	IfQuest       string
-	IfNotQuest    string
-	AskNouns      []string
-	ReplyCommands []string
-}
-
 type MobForHire struct {
 	MobId    MobId
 	Price    int
@@ -84,28 +76,8 @@ type Mob struct {
 	RoomStack       []int          `yaml:"-"`                    // Stack of rooms to get back home
 	PreventIdle     bool           `yaml:"-"`                    // Whether they can't possibly be idle
 	ItemTrades      []ItemTrade    `yaml:"itemtrades,omitempty"` // one or more sets of objects they will trade for other objects.
-	AskSubjects     []AskMob       `yaml:"asksubjects,omitempty"`
-	ScriptTag       string         `yaml:"scripttag"` // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
+	ScriptTag       string         `yaml:"scripttag"`            // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
 	datastub        map[string]any // Generic storage stub for maintaining state between behaviors
-}
-
-// If a character is provided, will only return true if character has the quest
-func (m *Mob) HasQuestWaiting(c *characters.Character) bool {
-
-	for _, subject := range m.AskSubjects {
-
-		if len(subject.IfQuest) > 0 {
-			if c == nil || c.HasQuest(subject.IfQuest) {
-				return true
-			}
-		} else if len(subject.IfNotQuest) > 0 {
-			if c == nil || c.HasQuest(subject.IfNotQuest) {
-				return !c.IsQuestDone(subject.IfNotQuest)
-			}
-		}
-	}
-
-	return false
 }
 
 func GetAllMobNames() []string {
@@ -236,7 +208,7 @@ func DestroyInstance(instanceId int) {
 }
 
 func (m *Mob) Despawns() bool {
-	if m.IsMerchant || len(m.ItemTrades) > 0 || len(m.AskSubjects) > 0 {
+	if m.IsMerchant || len(m.ItemTrades) > 0 {
 		return false
 	}
 	return true

@@ -30,6 +30,10 @@ func (w *World) roundTick() {
 
 	roundNumber := util.GetRoundCount()
 
+	if roundNumber%100 == 0 {
+		scripting.PruneVMs()
+	}
+
 	if c.LogIntervalRoundCount > 0 && roundNumber%uint64(c.LogIntervalRoundCount) == 0 {
 		slog.Info("World::RoundTick()", "roundNumber", roundNumber)
 	}
@@ -696,6 +700,13 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				messageQueue.SendRoomMessages(defMob.Character.RoomId, roundResult.MessagesToTargetRoom, true, user.UserId)
 			}
 
+			// Handle any scripted behavior now.
+			if roundResult.Hit {
+				if res, err := scripting.TryMobScriptEvent(`onHurt`, defMob.InstanceId, user.UserId, `user`, map[string]any{`damage`: roundResult.DamageToTarget, `crit`: roundResult.Crit}, w); err == nil {
+					messageQueue.AbsorbMessages(res)
+				}
+			}
+
 			//
 			// Special mob-only reaction/behavior
 			//
@@ -1014,6 +1025,13 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 				messageQueue.SendRoomMessages(defMob.Character.RoomId, roundResult.MessagesToTargetRoom, true)
 			}
 
+			// Handle any scripted behavior now.
+			if roundResult.Hit {
+				if res, err := scripting.TryMobScriptEvent(`onHurt`, defMob.InstanceId, mob.InstanceId, `mob`, map[string]any{`damage`: roundResult.DamageToTarget, `crit`: roundResult.Crit}, w); err == nil {
+					messageQueue.AbsorbMessages(res)
+				}
+			}
+
 			// Mobs get aggro when attacked
 			if defMob.Character.Aggro == nil {
 				defMob.PreventIdle = true
@@ -1091,7 +1109,7 @@ func (w *World) HandleAffected(affectedPlayerIds []int, affectedMobInstanceIds [
 // Idle Mobs
 func (w *World) HandleIdleMobs() util.MessageQueue {
 
-	c := configs.GetConfig()
+	// c := configs.GetConfig()
 
 	maxBoredom := uint8(configs.GetConfig().MaxMobBoredom)
 
@@ -1146,61 +1164,21 @@ func (w *World) HandleIdleMobs() util.MessageQueue {
 
 		}
 
-		cmdQueued := false
-
 		// If they have idle commands, maybe do one of them?
-		if res, err := scripting.TryMobScriptEvent("onIdle", mob.InstanceId, mob.Character.RoomId, 0, ``, nil, w); err != nil {
-			messageQueue.AbsorbMessages(res)
+		result, _ := scripting.TryMobScriptEvent("onIdle", mob.InstanceId, 0, ``, nil, w)
+		messageQueue.AbsorbMessages(result)
 
-		} else {
-
-			cmdCt := len(mob.IdleCommands)
-			if cmdCt > 0 {
-
-				// Each mob has a 10% chance of doing an idle action.
-				if util.Rand(10) < mob.ActivityLevel {
-
-					idleAction := mob.IdleCommands[int(mob.LastIdleCommand)%cmdCt]
-					mob.LastIdleCommand++
-					/*
-						idleCommandIndex := uint8(util.Rand(cmdCt))
-						for idleCommandIndex == mob.LastIdleCommand && cmdCt > 1 {
-							idleCommandIndex = uint8(util.Rand(cmdCt))
-						}
-
-						idleAction := mob.IdleCommands[idleCommandIndex]
-						mob.LastIdleCommand = idleCommandIndex
-					*/
-					if idleAction == `` { // blank is a no-op
-						continue
-					}
-
-					allCmds := strings.Split(idleAction, `;`)
-					if len(allCmds) >= c.TurnsPerRound() {
-						w.QueueCommand(0, mob.InstanceId, `say I have an idleAction that is too long. Please notify an admin.`)
-					} else {
-						for turnDelay, action := range allCmds {
-							w.QueueCommand(0, mob.InstanceId, action, turnDelay)
-							cmdQueued = true
-						}
-					}
-
-					continue
+		//
+		// Look for trouble
+		//
+		if !result.Handled {
+			if mob.Character.IsCharmed() {
+				// Only some mobs can apply first aid
+				if mob.Character.KnowsFirstAid() {
+					w.QueueCommand(0, mob.InstanceId, `lookforaid`)
 				}
-			}
-
-			//
-			// Look for trouble
-			//
-			if !cmdQueued {
-				if mob.Character.IsCharmed() {
-					// Only some mobs can apply first aid
-					if mob.Character.KnowsFirstAid() {
-						w.QueueCommand(0, mob.InstanceId, `lookforaid`)
-					}
-				} else {
-					w.QueueCommand(0, mob.InstanceId, `lookfortrouble`)
-				}
+			} else {
+				w.QueueCommand(0, mob.InstanceId, `lookfortrouble`)
 			}
 		}
 

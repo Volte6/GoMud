@@ -61,6 +61,73 @@ func (i *Item) Validate() {
 
 }
 
+func (i *Item) GetLongDescription() string {
+
+	iSpec := i.GetSpec()
+
+	longDesc := strings.Builder{}
+
+	longDesc.WriteString(iSpec.Description)
+
+	if iSpec.Type == Readable {
+
+		longDesc.WriteString("\n")
+		longDesc.WriteString(` - You should probably <ansi fg="command">read</ansi> this.`)
+
+	} else if iSpec.Subtype == Drinkable {
+
+		longDesc.WriteString("\n")
+		longDesc.WriteString(` - You could probably <ansi fg="command">drink</ansi> this.`)
+
+	} else if iSpec.Subtype == Edible {
+
+		longDesc.WriteString("\n")
+		longDesc.WriteString(` - You could probably <ansi fg="command">eat</ansi> this.`)
+
+	} else if iSpec.Type == Lockpicks {
+
+		longDesc.WriteString("\n")
+		longDesc.WriteString(` - These are used with the <ansi fg="command">picklock</ansi> command.`)
+
+	} else if iSpec.Type == Key {
+
+		longDesc.WriteString("\n")
+		longDesc.WriteString(` - When you find the right door, keys are added to your <ansi fg="command">keyring</ansi> automatically.`)
+
+	} else if iSpec.Subtype == Wearable {
+
+		longDesc.WriteString("\n")
+		longDesc.WriteString(fmt.Sprintf(`- It looks like wearable %s equipment.`, iSpec.Type))
+
+	} else if iSpec.Type == Weapon {
+
+		longDesc.WriteString("\n")
+		longDesc.WriteString(fmt.Sprintf(`- It looks like a %d-Handed weapon.`, iSpec.Hands))
+
+		if iSpec.Subtype == Claws {
+
+			longDesc.WriteString("\n")
+			longDesc.WriteString(`- It looks like a claws weapon. These can be dual wielded without training.`)
+
+		} else if iSpec.Subtype == Shooting {
+
+			longDesc.WriteString("\n")
+			longDesc.WriteString(`- This can fired into adjacent areas. (<ansi fg="command">help shoot</ansi>)`)
+
+		}
+
+		if iSpec.WaitRounds > 0 {
+
+			longDesc.WriteString("\n")
+			longDesc.WriteString(fmt.Sprintf(`- It requires an extra %d round(s) between attacks.`, iSpec.WaitRounds))
+
+		}
+
+	}
+
+	return longDesc.String()
+}
+
 func (i *Item) IsBetterThan(otherItm Item) bool {
 
 	if otherItm.ItemId < 1 {

@@ -30,17 +30,21 @@ func PruneMobVMs(instanceIds ...int) {
 	}
 }
 
-func TryMobScriptEvent(eventName string, mobInstanceId int, roomId int, sourceId int, sourceType string, details map[string]any, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, sourceType string, details map[string]any, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+
+	vmw, err := getMobVM(mobInstanceId)
+	if err != nil {
+		return util.NewMessageQueue(0, mobInstanceId), err
+	}
 
 	messageQueue = util.NewMessageQueue(0, mobInstanceId)
 	commandQueue = cmdQueue
 
-	vmw, err := getMobVM(mobInstanceId)
-	if err != nil {
-		return messageQueue, err
-	}
-
 	sMob := GetMob(mobInstanceId)
+	if sMob == nil {
+		PruneMobVMs(mobInstanceId)
+		return messageQueue, errors.New("mob not found")
+	}
 
 	timestart := time.Now()
 	defer func() {
@@ -56,7 +60,7 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, roomId int, sourceId
 			details = make(map[string]any)
 		}
 
-		sRoom := GetRoom(roomId)
+		sRoom := GetRoom(sMob.GetRoomId())
 
 		details["sourceId"] = sourceId
 		details["sourceType"] = sourceType
@@ -96,23 +100,23 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, roomId int, sourceId
 
 func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sourceType string, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
+	vmw, err := getMobVM(mobInstanceId)
+	if err != nil {
+		return util.NewMessageQueue(0, mobInstanceId), err
+	}
+
 	messageQueue = util.NewMessageQueue(0, mobInstanceId)
 	commandQueue = cmdQueue
 
-	mob := mobs.GetInstance(mobInstanceId)
-	if mob == nil {
+	sMob := GetMob(mobInstanceId)
+	if sMob == nil {
 		PruneMobVMs(mobInstanceId)
 		return messageQueue, errors.New("mob not found")
 	}
 
-	vmw, err := getMobVM(mobInstanceId)
-	if err != nil {
-		return messageQueue, err
-	}
-
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TryMobCommand()", "cmd", cmd, "MobId", mob.MobId, "time", time.Since(timestart))
+		slog.Debug("TryMobCommand()", "cmd", cmd, "MobId", sMob.MobTypeId(), "time", time.Since(timestart))
 	}()
 
 	if onCommandFunc, ok := vmw.GetFunction(`onCommand_` + cmd); ok {
@@ -122,8 +126,7 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 			`sourceType`: sourceType,
 		}
 
-		sMob := GetMob(mobInstanceId)
-		sRoom := GetRoom(mob.Character.RoomId)
+		sRoom := GetRoom(sMob.mobRecord.Character.RoomId)
 
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)
@@ -165,8 +168,7 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 			`sourceType`: sourceType,
 		}
 
-		sMob := GetMob(mobInstanceId)
-		sRoom := GetRoom(mob.Character.RoomId)
+		sRoom := GetRoom(sMob.GetRoomId())
 
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)

@@ -44,7 +44,7 @@ function onIdle(mob MOBOBJ, room ROOMOBJ) {
 }
 ```
 
-`onIdle()` is called each round that a mob isn't in combat or doing something that supercedes being idle, such as trying to walk home after wandering too far.
+`onIdle()` is called each round that a mob isn't in combat or doing something that supercedes being idle, such as trying to walk home after wandering too far. Returning `false` will allow the mob to perform their other idle checks such as looking for trouble, performing first aid, etc.
 
 |  Argument | Explanation |
 | --- | --- |
@@ -58,7 +58,7 @@ function onGive(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 }
 ```
 
-`onGive()` is called when an object or gold is given to a mob. Returning `true` from this function will stop the mob from attempting to wear the object (if applicable).
+`onGive()` is called when an object or gold is given to a mob with the `give` command. Returning `true` from this function will stop the mob from attempting to wear the object (if applicable).
 
 |  Argument | Explanation |
 | --- | --- |
@@ -68,6 +68,23 @@ function onGive(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the gift |
 | eventDetails.gold | How much gold was given (if any) |
 | eventDetails.item | An Item object that was given (if any) |
+
+---
+
+```
+function onShow(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
+}
+```
+
+`onShow()` is called when an object or gold is showed to a mob with the `show` command.
+
+|  Argument | Explanation |
+| --- | --- |
+| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| eventDetails.sourceId | The `userId` or `mobInstanceId` that showed the item |
+| eventDetails.sourceType | `"user"` or `"mob"`, the source type of the object being shown |
+| eventDetails.item | An Item object that was shown |
 
 ---
 
@@ -131,5 +148,42 @@ In all other ways, this follows the same rules as the normal `onCommand()` funct
 | room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that sent the command |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the command |
+
+---
+
+```
+function onHurt(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
+}
+```
+
+`onHurt()` is called when the mob takes damage from an attack.
+
+|  Argument | Explanation |
+| --- | --- |
+| rest | Everything entered after the command (if anything). |
+| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| eventDetails.sourceId | The `userId` or `mobInstanceId` that hit the mob |
+| eventDetails.sourceType | `"user"` or `"mob"`, the source type of the attack |
+| eventDetails.damage | how many hitpoints of damage were caused |
+| eventDetails.crit | true/false of whether was a crit. |
+
+---
+
+```
+function onDie(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
+}
+```
+
+`onDie()` is called when a mob dies, once for every player that caused damage to it. Currently only called for users that harmed it.
+
+|  Argument | Explanation |
+| --- | --- |
+| rest | Everything entered after the command (if anything). |
+| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
+| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| eventDetails.sourceId | The `userId` or `mobInstanceId` that killed the mob |
+| eventDetails.sourceType | `"user"` or `"mob"`, the source type of the death |
+| eventDetails.attackerCount | How many users hurt this mob before it died. |
 
 ---

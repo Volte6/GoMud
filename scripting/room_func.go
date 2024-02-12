@@ -6,7 +6,10 @@ import (
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
@@ -81,6 +84,106 @@ func (r ScriptRoom) GetExits() []map[string]any {
 	}
 
 	return exits
+}
+
+// Returns a list of userIds found to have the questId
+// if userIdParty is specified, will only check users in the party of the user.
+func (r ScriptRoom) HasQuest(questId string, partyUserId ...int) []int {
+
+	hasQuestUsers := []int{}
+
+	// Only check the user and their party?
+	if len(partyUserId) > 0 && partyUserId[0] > 0 {
+
+		if party := parties.Get(partyUserId[0]); party != nil {
+			for _, userId := range party.GetMembers() {
+				if user := users.GetByUserId(userId); user != nil {
+					if user.Character.HasQuest(questId) {
+						hasQuestUsers = append(hasQuestUsers, userId)
+					}
+				}
+			}
+
+			return hasQuestUsers
+		}
+
+		// No party, so just check the user
+		if user := users.GetByUserId(partyUserId[0]); user != nil {
+			if user.Character.HasQuest(questId) {
+				hasQuestUsers = append(hasQuestUsers, user.UserId)
+			}
+		}
+
+		return hasQuestUsers
+	}
+
+	// Just check all players
+	for _, userId := range r.roomRecord.GetPlayers() {
+		if user := users.GetByUserId(userId); user != nil {
+			if user.Character.HasQuest(questId) {
+				hasQuestUsers = append(hasQuestUsers, userId)
+			}
+		}
+	}
+
+	return hasQuestUsers
+}
+
+// Returns a list of userIds found to NOT have the questId
+// if userIdParty is specified, will only check users in the party of the user.
+func (r ScriptRoom) MissingQuest(questId string, partyUserId ...int) []int {
+
+	missingQuestUsers := []int{}
+
+	// Only check the user and their party?
+	if len(partyUserId) > 0 && partyUserId[0] > 0 {
+
+		if party := parties.Get(partyUserId[0]); party != nil {
+			// Check all party members
+			for _, userId := range party.GetMembers() {
+				if user := users.GetByUserId(userId); user != nil {
+					if !user.Character.HasQuest(questId) {
+						missingQuestUsers = append(missingQuestUsers, userId)
+					}
+				}
+			}
+
+			return missingQuestUsers
+		}
+
+		// No party, so just check the user
+		if user := users.GetByUserId(partyUserId[0]); user != nil {
+			if !user.Character.HasQuest(questId) {
+				missingQuestUsers = append(missingQuestUsers, user.UserId)
+			}
+		}
+		return missingQuestUsers
+
+	}
+
+	// Just check all players
+	for _, userId := range r.roomRecord.GetPlayers() {
+		if user := users.GetByUserId(userId); user != nil {
+			if !user.Character.HasQuest(questId) {
+				missingQuestUsers = append(missingQuestUsers, userId)
+			}
+		}
+	}
+
+	return missingQuestUsers
+}
+
+func (r ScriptRoom) SpawnMob(mobId int) int {
+
+	if mob := mobs.NewMobById(mobs.MobId(mobId), r.roomId); mob != nil {
+
+		r.roomRecord.AddMob(mob.InstanceId)
+
+		return mob.InstanceId
+	}
+
+	return 0
+
 }
 
 // ////////////////////////////////////////////////////////

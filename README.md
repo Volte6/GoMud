@@ -32,7 +32,7 @@ Information on scripting in GoMud can be found in the [scripting README](scripti
 - [Customizable Prompts](https://www.youtube.com/watch?v=MFkmjSTL0Ds)
 - [Mob/NPC Scripting](https://www.youtube.com/watch?v=li2k1N4p74o)
 - [Room Scripting](https://www.youtube.com/watch?v=n1qNUjhyOqg)
-- 
+
 # Quick Start
 
 A youtube playlist to getting started has been set up here:

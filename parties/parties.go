@@ -140,7 +140,7 @@ func (p *Party) Leave(userId int) bool {
 	}
 
 	for i := len(p.MobInstanceIds) - 1; i >= 0; i-- {
-		instId := p.InviteUserIds[i]
+		instId := p.MobInstanceIds[i]
 		m := mobs.GetInstance(instId)
 		if m == nil || m.Character.IsCharmed(userId) {
 			p.MobInstanceIds = append(p.MobInstanceIds[:i], p.MobInstanceIds[i+1:]...)

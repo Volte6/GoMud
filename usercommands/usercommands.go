@@ -103,6 +103,7 @@ var (
 		`share`:      {Share, false, false},
 		`shoot`:      {Shoot, false, false},
 		`shout`:      {Shout, true, false},
+		`show`:       {Show, true, false},
 		`skills`:     {Skills, true, false},
 		`skillset`:   {Skillset, false, true}, // Admin only
 		`sneak`:      {Sneak, false, false},

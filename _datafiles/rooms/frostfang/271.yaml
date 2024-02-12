@@ -11,8 +11,6 @@ biome: city
 exits:
   southwest:
     roomid: 270
-items:
-- itemid: 3
 spawninfo:
 - mobid: 2
   cooldown: 100

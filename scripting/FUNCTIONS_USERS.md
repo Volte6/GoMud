@@ -51,11 +51,19 @@ Note: This is useful for saving/retrieving data that a user can carry along to m
 
 ---
 
-[USEROBJ.GiveQuest(questId string)](user_func.go) - _Grants a quest or progress on a quest to a user_
+[USEROBJ.GiveQuest(questId string)](user_func.go) - _Grants a quest or progress on a quest to a user. If they are in a party, grants to the party members as well._
 
 |  Argument | Explanation |
 | --- | --- |
 | questId | The quest identifier string to give, such as `3-start`. |
+
+---
+
+[USEROBJ.GiveGold(amt int)](user_func.go) - _Update how much gold a user has_
+
+|  Argument | Explanation |
+| --- | --- |
+| amt | A positive or negative amount of gold to alter the users gold by. |
 
 ---
 

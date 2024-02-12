@@ -30,6 +30,8 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
+	rest = util.StripPrepositions(rest)
+
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 {
@@ -38,12 +40,16 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		return response, nil
 	}
 
+	var giveWho string = args[len(args)-1]
+	args = args[:len(args)-1]
+	var giveWhat string = strings.Join(args, " ")
+
 	var giveItem items.Item = items.Item{}
 	var giveGoldAmount int = 0
 
-	if strings.ToLower(args[1]) == "gold" {
+	if len(giveWhat) > 4 && giveWhat[len(giveWhat)-4:] == "gold" {
 
-		g, _ := strconv.ParseInt(args[0], 10, 32)
+		g, _ := strconv.ParseInt(giveWhat[0:len(giveWhat)-5], 10, 32)
 		giveGoldAmount = int(g)
 
 		if giveGoldAmount < 0 {
@@ -52,16 +58,8 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			return response, nil
 		}
 
-		args = args[2:]
-
 		if giveGoldAmount > user.Character.Gold {
 			response.SendUserMessage(userId, "You don't have that much gold to give.", true)
-			response.Handled = true
-			return response, nil
-		}
-
-		if len(args) < 1 {
-			response.SendUserMessage(userId, "Give it to whom?", true)
 			response.Handled = true
 			return response, nil
 		}
@@ -71,18 +69,17 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		var found bool = false
 
 		// Check whether the user has an item in their inventory that matches
-		giveItem, found = user.Character.FindInBackpack(args[0])
+		giveItem, found = user.Character.FindInBackpack(giveWhat)
 
 		if !found {
-			response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to give.", args[0]), true)
+			response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to give.", giveWhat), true)
 			response.Handled = true
 			return response, nil
 		}
 
-		args = args[1:]
 	}
 
-	playerId, mobId := room.FindByName(args[len(args)-1])
+	playerId, mobId := room.FindByName(giveWho)
 
 	if playerId > 0 {
 
@@ -187,7 +184,7 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 				}
 
-				if res, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, m.Character.RoomId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}, cmdQueue); err == nil {
+				if res, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}, cmdQueue); err == nil {
 					response.AbsorbMessages(res)
 					if res.Handled {
 						response.Handled = true

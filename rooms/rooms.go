@@ -32,21 +32,19 @@ var (
 )
 
 type SpawnInfo struct {
-	MobId        int              `yaml:"mobid,omitempty"`        // Mob template Id to spawn
-	InstanceId   int              `yaml:"-"`                      // Mob instance Id that was spawned (tracks whether exists currently)
-	Container    string           `yaml:"container,omitempty"`    // If set, any item spawned will go into the container.
-	ItemId       int              `yaml:"itemid,omitempty"`       // Item template Id to spawn on the floor
-	Gold         int              `yaml:"gold,omitempty"`         // How much gold to spawn on the floor
-	CooldownLeft uint16           `yaml:"-"`                      // How many rounds remain before it can spawn again. Only decrements if mob no longer exists.
-	Cooldown     uint16           `yaml:"cooldown,omitempty"`     // How many rounds to wait before spawning again after it is killed.
-	Message      string           `yaml:"message,omitempty"`      // (optional) message to display to the room when this creature spawns, instead of a default
-	Name         string           `yaml:"name,omitempty"`         // (optional) if set, will override the mob's name
-	ForceHostile bool             `yaml:"forcehostile,omitempty"` // (optional) if true, forces the mob to be hostile.
-	MaxWander    int              `yaml:"maxwander,omitempty"`    // (optional) if set, will override the mob's max wander distance
-	IdleCommands []string         `yaml:"idlecommands,omitempty"` // (optional) list of commands to override the default of the mob. Useful when you need a mob to be more unique.
-	ItemTrades   []mobs.ItemTrade `yaml:"itemtrades,omitempty"`   // (optional) one or more sets of objects they will trade for other objects.
-	AskSubjects  []mobs.AskMob    `yaml:"asksubjects,omitempty"`  // (optional) one or more subjects they will ask about.
-	ScriptTag    string           `yaml:"scripttag,omitempty"`    // (optional) if set, will override the mob's script tag
+	MobId        int      `yaml:"mobid,omitempty"`        // Mob template Id to spawn
+	InstanceId   int      `yaml:"-"`                      // Mob instance Id that was spawned (tracks whether exists currently)
+	Container    string   `yaml:"container,omitempty"`    // If set, any item spawned will go into the container.
+	ItemId       int      `yaml:"itemid,omitempty"`       // Item template Id to spawn on the floor
+	Gold         int      `yaml:"gold,omitempty"`         // How much gold to spawn on the floor
+	CooldownLeft uint16   `yaml:"-"`                      // How many rounds remain before it can spawn again. Only decrements if mob no longer exists.
+	Cooldown     uint16   `yaml:"cooldown,omitempty"`     // How many rounds to wait before spawning again after it is killed.
+	Message      string   `yaml:"message,omitempty"`      // (optional) message to display to the room when this creature spawns, instead of a default
+	Name         string   `yaml:"name,omitempty"`         // (optional) if set, will override the mob's name
+	ForceHostile bool     `yaml:"forcehostile,omitempty"` // (optional) if true, forces the mob to be hostile.
+	MaxWander    int      `yaml:"maxwander,omitempty"`    // (optional) if set, will override the mob's max wander distance
+	IdleCommands []string `yaml:"idlecommands,omitempty"` // (optional) list of commands to override the default of the mob. Useful when you need a mob to be more unique.
+	ScriptTag    string   `yaml:"scripttag,omitempty"`    // (optional) if set, will override the mob's script tag
 }
 
 type FindFlag uint8
@@ -488,22 +486,8 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 						mob.IdleCommands = append([]string{}, spawnInfo.IdleCommands...)
 					}
 
-					// If there are special trades at this location, overwrite.
-					if len(spawnInfo.ItemTrades) > 0 {
-						for _, trade := range spawnInfo.ItemTrades {
-							trade.GivenGold = make(map[int]int)    // make sure these are unique maps
-							trade.GivenItems = make(map[int][]int) // make sure these are unique maps
-							mob.ItemTrades = append(mob.ItemTrades, trade)
-						}
-					}
-
 					if len(spawnInfo.ScriptTag) > 0 {
 						mob.ScriptTag = spawnInfo.ScriptTag
-					}
-
-					// If there are special trades at this location, overwrite.
-					if len(spawnInfo.AskSubjects) > 0 {
-						mob.AskSubjects = append([]mobs.AskMob{}, spawnInfo.AskSubjects...)
 					}
 
 					// Does this mob have a special name?
@@ -1629,10 +1613,6 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 			}
 
 			tmpNameFlags := nameFlags
-
-			if mob.HasQuestWaiting(user.Character) {
-				tmpNameFlags = append(tmpNameFlags, characters.RenderQuest)
-			}
 
 			mobName := mob.Character.GetMobName(user.UserId, tmpNameFlags...)
 

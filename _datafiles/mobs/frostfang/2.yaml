@@ -5,12 +5,6 @@ hostile: false
 maxwander: 20
 groups: 
   - frostfang-npc
-idlecommands:
-  - 'emote flexes his muscles'
-  - ''
-  - 'wander'
-  - 'wander'
-  - 'wander'
 activitylevel: 2
 character:
   name: guard

@@ -13,7 +13,16 @@
 [MOBOBJ.MobTypeId() int](mob_func.go) - _Returns the base mobId used to spawn new instances._
 
 ---
+
 [MOBOBJ.GetCharacterName() string](mob_func.go) - _Returns the name of a given mob._
+
+---
+
+[MOBOBJ.GiveGold(amt int)](mob_func.go) - _Update how much gold a mob has_
+
+|  Argument | Explanation |
+| --- | --- |
+| amt | A positive or negative amount of gold to alter the mobs gold by. |
 
 ---
 
@@ -49,5 +58,17 @@
 ---
 
 [MOBOBJ.CharmExpire()](mob_func.go) - _Expires an existing charm. This would still execute any `onRevertCommand`` that was specified with the initial charm._
+
+---
+
+[MOBOBJ.GiveItem(itemId [int/Item])](mob_func.go) - _Creates an item (if itemId) or accepts an Item object and puts it in the users backpack_
+
+|  Argument | Explanation |
+| --- | --- |
+| itemId | The id or item object to give them. |
+
+---
+
+[MOBOBJ.GetRoomId() int](mob_func.go) - _Returns the RoomId the mob is in_
 
 ---
