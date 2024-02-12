@@ -4,7 +4,6 @@ itemdropchance: 2
 hostile: false
 groups: 
   - frostfang-npc
-activitylevel: 1
 character:
   name: king
   description: 'Seated upon his regal throne, the King of Frostfang carries the weight of his kingdom with a quiet dignity. His attire is a rich tapestry of royal blues and silvers, adorned with intricate embroidery that tells the story of his lineage and the battles fought to protect his realm. A heavy, ermine-trimmed cloak drapes over his shoulders, signifying his status and the responsibilities that come with it. His crown, a delicate circlet of silver and sapphires, rests atop his brow, glinting softly in the dim light of the throne room.'

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
@@ -144,59 +143,9 @@ func Look(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					true)
 			}
 
-			iSpec := lookItem.GetSpec()
-
 			response.SendUserMessage(userId,
-				iSpec.Description,
+				lookItem.GetLongDescription(),
 				true)
-
-			if iSpec.Type == items.Readable {
-				response.SendUserMessage(userId,
-					` - You should probably <ansi fg="command">read</ansi> this.`,
-					true)
-			} else if iSpec.Subtype == items.Drinkable {
-				response.SendUserMessage(userId,
-					` - You could probably <ansi fg="command">drink</ansi> this.`,
-					true)
-			} else if iSpec.Subtype == items.Edible {
-				response.SendUserMessage(userId,
-					` - You could probably <ansi fg="command">eat</ansi> this.`,
-					true)
-			} else if iSpec.Type == items.Lockpicks {
-				response.SendUserMessage(userId,
-					` - These are used with the <ansi fg="command">picklock</ansi> command.`,
-					true)
-			} else if iSpec.Type == items.Key {
-				response.SendUserMessage(userId,
-					` - When you find the right door, keys are added to your <ansi fg="command">keyring</ansi> automatically.`,
-					true)
-			} else if iSpec.Subtype == items.Wearable {
-				response.SendUserMessage(userId,
-					fmt.Sprintf(`- It looks like wearable %s equipment.`, iSpec.Type),
-					true)
-			} else if iSpec.Type == items.Weapon {
-
-				response.SendUserMessage(userId,
-					fmt.Sprintf(`- It looks like a %d-Handed weapon.`, iSpec.Hands),
-					true)
-
-				if iSpec.Subtype == items.Claws {
-					response.SendUserMessage(userId,
-						`- It looks like a claws weapon. These can be dual wielded without training.`,
-						true)
-				} else if iSpec.Subtype == items.Shooting {
-					response.SendUserMessage(userId,
-						`- This can fired into adjacent areas. (<ansi fg="command">help shoot</ansi>)`,
-						true)
-				}
-
-				if iSpec.WaitRounds > 0 {
-					response.SendUserMessage(userId,
-						fmt.Sprintf(`- It requires an extra %d round(s) between attacks.`, iSpec.WaitRounds),
-						true)
-				}
-
-			}
 
 			response.SendUserMessage(userId, ``, true)
 

@@ -67,7 +67,7 @@ Each `object` in the returned array has the following properties:
 
 ---
 
-[GetMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool, [,mapMarker string, mapMarker string]) string](room_func.go) - _Gets a rendered map of an area._
+[GetMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool [,mapMarker string, mapMarker string]) string](room_func.go) - _Gets a rendered map of an area._
 
 |  Argument | Explanation |
 | --- | --- |
@@ -79,4 +79,36 @@ Each `object` in the returned array has the following properties:
 | showSecrets | If `true`, show secret rooms. |
 | mapMarker (optional) | Zero or more special strings specifying a symbol and legend to override on the map. |
 |   | For example: `1,×,Here` Would put `×` on `RoomId 1` and mark is as `Here` on the legend. |
+
 ---
+
+[HasQuest(questId string [,partyUserId int]) []int](room_func.go) - _Returns an array of userId's in the room who have the questId. If partyyUserId is supplied, only checks the user and their party specified._
+
+Note: This could be useful for situations where you want to allow a whole party access to an area even if only one of them has the quest.
+
+|  Argument | Explanation |
+| --- | --- |
+| questId | The identifier of the quest such as `3-start`. |
+| partyUserId (optional) | Only check the specified user and their party |
+
+---
+
+[MissingQuest(questId string [,partyUserId int]) []int](room_func.go) - _Returns an array of userId's in the romo who DON'T have the questId. If partyyUserId is supplied, only checks the user and their party specified._
+
+Note: This could be useful for situations where you want to disallow a whole party access to an area even if only one of them is missing the quest.
+
+|  Argument | Explanation |
+| --- | --- |
+| questId | The identifier of the quest such as `3-start`. |
+| partyUserId (optional) | Only check the specified user and their party |
+
+---
+
+[SpawnMob(mobId int) int](room_func.go) - _Creates a new instance of MobId,and returns the `mobInstanceId` of the mob._
+
+|  Argument | Explanation |
+| --- | --- |
+| mobId | The ID if the mob type to spawn. NOT THE INSTANCE ID. |
+
+---
+

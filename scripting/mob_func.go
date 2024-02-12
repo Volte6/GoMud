@@ -2,6 +2,7 @@ package scripting
 
 import (
 	"github.com/dop251/goja"
+	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 )
 
@@ -22,6 +23,16 @@ func (m ScriptMob) InstanceId() int {
 	return m.mobInstanceId
 }
 
+func (m ScriptMob) GetRoomId() int {
+	return m.mobRecord.Character.RoomId
+}
+func (m ScriptMob) GainGold(amt int) {
+	m.mobRecord.Character.Gold += amt
+	if m.mobRecord.Character.Gold < 0 {
+		m.mobRecord.Character.Gold = 0
+	}
+}
+
 func (m ScriptMob) GetCharacterName() string {
 	return m.mobRecord.Character.Name
 }
@@ -31,6 +42,23 @@ func (m ScriptMob) Command(cmd string, waitTurns ...int) {
 		waitTurns = append(waitTurns, 0)
 	}
 	commandQueue.QueueCommand(0, m.mobInstanceId, cmd, waitTurns[0])
+}
+
+func (m ScriptMob) GiveItem(itemId any) {
+
+	if id, ok := itemId.(int); ok {
+		itm := items.New(id)
+		if itm.ItemId > 0 {
+			m.mobRecord.Character.StoreItem(itm)
+		}
+		return
+	}
+
+	if itmObj, ok := itemId.(items.Item); ok {
+		m.mobRecord.Character.StoreItem(itmObj)
+		return
+	}
+
 }
 
 // Returns true if a mob is charmed by/friendly to a player.

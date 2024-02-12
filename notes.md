@@ -120,64 +120,6 @@ Example:
 
 What would this mean for weapons that have extra attacks already? Those would be freebies?
 
-# Notes on creating quests
-
-Players can be given quests through a couple methods:
-
-## Given by mobs:
-
-*Given by a mob idlecommands:*
-```
-```
-
-*Given by a mob ask response:*
-```
- asksubjects:
-  - ifquest: ""
-    ifnotquest: 1-start
-    asknouns:
-    - frog
-    replycommands:
-    - emote sighs.
-    - say Please find my frog.
-    - givequest 1-start {userid}
-```
-*Given as a mob trade*
-```
-  itemtrades:
-  - accepteditemids: [20025]
-    prizeitemids: [20015]
-    prizequestids: [1-end]
-```
-
-## Given by room triggers
-
-```
-- nouns: [frog]
-  verbs: [get]
-  trigger:
-    questtoken: 2-frogfound
-    affected: player
-    descriptionplayer: You reach out and snatch up the frog.
-    descriptionroom: <ansi fg="username">%s</ansi> snatches up the frog.
-```
-
-## Given by picking up /stealing/buying/being given an item
-
-```
-itemid: 123123123
-name: golden key
-namesimple: key
-description: A golden key.
-questtoken: 56-key
-type: key
-subtype: generic
-```
-
-When putting requirements such as "must have" quest tokens or "must not have" quest tokens, all quests count as "have" if they occured before the current step the player is on.
-For example, if a quest has 3 steps: start, search, end
-If they are on step "search", and you require they have quest "start" they will, but they will not yet have quest "end"
-
 # Combat ideas
 
 * When anyone in the party is hated/aggrod, entire party becomes a viable target

@@ -37,10 +37,6 @@ var (
 		"givequest":      {GiveQuest, false},
 		"gearup":         {Gearup, false},
 		"go":             {Go, false},
-		"ifitem":         {IfItem, false},     // Special prefix to mob commands
-		"ifnotitem":      {IfNotItem, false},  // Special prefix to mob commands
-		"ifquest":        {IfQuest, false},    // Special prefix to mob commands
-		"ifnotquest":     {IfNotQuest, false}, // Special prefix to mob commands
 		"look":           {Look, false},
 		"lookforaid":     {LookForAid, false},
 		"lookfortrouble": {LookForTrouble, false},
@@ -52,6 +48,7 @@ var (
 		"sayto":          {SayTo, true},
 		"shout":          {Shout, true},
 		"shoot":          {Shoot, false},
+		"show":           {Show, false},
 		"sneak":          {Sneak, false},
 		"suicide":        {Suicide, true},
 		//		"stash":  {Stash, false},

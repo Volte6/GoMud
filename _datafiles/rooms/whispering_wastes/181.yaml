@@ -21,8 +21,5 @@ exits:
 spawninfo:
 - mobid: 27
   cooldown: 225
-  itemtrades:
-  - accepteditemids: [4]
-    prizequestids: [5-end]
 idlemessages:
 - The wind howls from every direction

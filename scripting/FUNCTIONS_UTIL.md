@@ -6,7 +6,7 @@
 
 ---
 
-[UtilFindMatchIn(search string, items []any) object](util_func.go) - _Searches for a match in a list and returns a close and/or exact match_
+[UtilFindMatchIn(search string, items []any) object](util_func.go) - _Searches for a match in a list and returns a close and/or exact match. Close matches must be at least the first 3 letters of the subject_
 
 |  Argument | Explanation |
 | --- | --- |
@@ -51,5 +51,13 @@ The `object` has the following properties:
 |  Argument | Explanation |
 | --- | --- |
 | minutes | How many minutes you want converted into a turn count. |
+
+---
+
+[UtilStripPrepositions(input string) string](util_func.go) - _Strips out common prepositions and some other grammatical annoyances (such as into,to,from,the,my, etc.)_
+
+|  Argument | Explanation |
+| --- | --- |
+| input | The string to strip and return. |
 
 ---

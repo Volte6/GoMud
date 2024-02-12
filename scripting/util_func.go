@@ -15,6 +15,7 @@ func setUtilFunctions(vm *goja.Runtime) {
 	vm.Set(`UtilGetMinutesToRounds`, UtilGetMinutesToRounds)
 	vm.Set(`UtilGetSecondsToTurns`, UtilGetSecondsToTurns)
 	vm.Set(`UtilGetMinutesToTurns`, UtilGetMinutesToTurns)
+	vm.Set(`UtilStripPrepositions`, UtilStripPrepositions)
 }
 
 // ////////////////////////////////////////////////////////
@@ -45,7 +46,7 @@ func UtilFindMatchIn(search string, items []string) map[string]any {
 			closeMatch = ``
 		}
 
-		if len(search) < len(closeMatch) && len(search) < 2 {
+		if len(search) < len(closeMatch) && len(search) < 3 {
 			closeMatch = ``
 		}
 	}
@@ -71,4 +72,8 @@ func UtilGetSecondsToTurns(seconds int) int {
 
 func UtilGetMinutesToTurns(minutes int) int {
 	return configs.GetConfig().MinutesToTurns(minutes)
+}
+
+func UtilStripPrepositions(input string) string {
+	return util.StripPrepositions(input)
 }
