@@ -50,48 +50,20 @@ var (
 )
 
 type BuffSpec struct {
-	BuffId        int    // Unique identifier for this buff spec
-	Name          string // The name of the buff
-	Description   string // A description of the buff
-	Secret        bool   // Whether or not the buff is secret (not displayed to the user)
-	TriggerNow    bool   `yaml:"triggernow,omitempty"`    // if true, buff triggers once right when it is applied
-	RoundInterval int    `yaml:"roundinterval,omitempty"` // triggers every x rounds
-	TriggerCount  int    `yaml:"triggercount,omitempty"`  // How many times it triggers before it is removed
-	// These modify hp/mp recovery by a specific amount
-	HealthRecovery int `yaml:"healrecovery,omitempty"`
-	ManaRecovery   int `yaml:"manarecovery,omitempty"`
-	// These modify hp/mp directly
-	HealthRoll string `yaml:"healthroll,omitempty"` // How much hp is added (or removed) per trigger
-	ManaRoll   string `yaml:"manaroll,omitempty"`   // How much mp is added (or removed) per trigger
-	// These modify stats like strength etc. directly (strength, healthmax, etc).
-	// See Character.Validate() for what is actually used.
-	DecaysInto []int          `yaml:"decaysinto,omitempty"` // A list of buffs that this buff adds when it expires
-	StatMods   map[string]int `yaml:"statmods,omitempty"`   // stat mods for the duration of the buff
-	Messages   BuffMessages   `yaml:"messages,omitempty"`   // All messages for the buff
-	Flags      []Flag         `yaml:"flags,omitempty"`      // A list of actions and such that this buff prevents or enables
+	BuffId        int            // Unique identifier for this buff spec
+	Name          string         // The name of the buff
+	Description   string         // A description of the buff
+	Secret        bool           // Whether or not the buff is secret (not displayed to the user)
+	TriggerNow    bool           `yaml:"triggernow,omitempty"`    // if true, buff triggers once right when it is applied
+	RoundInterval int            `yaml:"roundinterval,omitempty"` // triggers every x rounds
+	TriggerCount  int            `yaml:"triggercount,omitempty"`  // How many times it triggers before it is removed
+	StatMods      map[string]int `yaml:"statmods,omitempty"`      // stat mods for the duration of the buff
+	Flags         []Flag         `yaml:"flags,omitempty"`         // A list of actions and such that this buff prevents or enables
 }
 
 // Calculates the value of this buff
 func (b *BuffSpec) GetValue() int {
 	val := 0
-
-	if b.HealthRoll != `` {
-		cnt, count, sides, bonus, buffs := util.ParseDiceRoll(b.HealthRoll)
-		addlVal := cnt * (sides*count + bonus)
-		if addlVal < 0 {
-			addlVal *= -1
-		}
-		val += addlVal + len(buffs)*5
-	}
-
-	if b.ManaRoll != `` {
-		cnt, count, sides, bonus, buffs := util.ParseDiceRoll(b.ManaRoll)
-		addlVal := cnt * (sides*count + bonus)
-		if addlVal < 0 {
-			addlVal *= -1
-		}
-		val += addlVal + len(buffs)*5
-	}
 
 	for _, v := range b.StatMods {
 		val += int(math.Abs(float64(v)))

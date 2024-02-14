@@ -26,9 +26,22 @@ func (w *World) roundTick() {
 
 	c := configs.GetConfig()
 
-	util.IncrementRoundCount()
+	_, _, _, _, isNightBefore := c.GetDate(util.GetRoundCount(), 0)
 
+	util.IncrementRoundCount()
 	roundNumber := util.GetRoundCount()
+
+	_, _, _, _, isNight := c.GetDate(roundNumber, 0)
+
+	if isNightBefore != isNight {
+		if isNight {
+			sunsetTxt, _ := templates.Process("generic/sunset", nil)
+			w.Broadcast(sunsetTxt)
+		} else {
+			sunriseTxt, _ := templates.Process("generic/sunrise", nil)
+			w.Broadcast(sunriseTxt)
+		}
+	}
 
 	if roundNumber%100 == 0 {
 		scripting.PruneVMs()

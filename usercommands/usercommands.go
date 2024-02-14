@@ -112,6 +112,7 @@ var (
 		`status`:     {Status, true, false},
 		`storage`:    {Storage, false, false},
 		`suicide`:    {Suicide, true, false},
+		`time`:       {Time, true, false},
 		`throw`:      {Throw, false, false},
 		`track`:      {Track, false, false},
 		`trash`:      {Trash, false, false},

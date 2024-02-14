@@ -19,7 +19,7 @@
 {{- range $statName, $qty := .ItemSpec.StatMods }}{{if eq (mod $ct 4) 0 }}{{ printf "\n" }}{{ end }}{{ $ct = add $ct 1 }}   <ansi fg="yellow">{{ printf "%-12s" (uc (printf "%s:" $statName)) }}</ansi> {{ $qty }}{{ if ne $total $ct }}{{ end }}{{ end }}
 {{- if gt (len .ItemSpec.BuffIds) 0 }}   
    <ansi fg="yellow">Applies:</ansi>     {{ range $idx, $buffId := .ItemSpec.BuffIds }}<ansi fg="spellname">{{ buffname $buffId }}</ansi>
-                - {{ buffduration $buffId }}{{ $dmg := buffdamage $buffId }}{{ $heal := buffhealing $buffId }}{{ if ne $heal "" }} for {{ $heal }}{{- end }}{{ if ne $dmg "" }} for {{ $dmg }}{{- end }}
+                - {{ buffduration $buffId }}
                 {{- end }}{{ end }}
 {{- else }}
    Unknown...
@@ -33,7 +33,7 @@
    <ansi fg="yellow">Element:</ansi>     {{ padRight 53 (uc .ItemSpec.Element.String) }}{{ end }}
 {{- if gt (len .ItemSpec.Damage.CritBuffIds) 0 }}   
    <ansi fg="yellow">Crits Apply:</ansi> {{ range $idx, $buffId := .ItemSpec.Damage.CritBuffIds }}<ansi fg="spellname">{{ buffname $buffId }}</ansi>
-                - {{ buffduration $buffId }}{{ $dmg := buffdamage $buffId }}{{ $heal := buffhealing $buffId }}{{ if ne $heal "" }} for {{ $heal }}{{- end }}{{ if ne $dmg "" }} for {{ $dmg }}{{- end }}
+                - {{ buffduration $buffId }}
                 {{ end }}{{ end }}
 {{- else }}
    Unknown...

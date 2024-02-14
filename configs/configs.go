@@ -30,6 +30,8 @@ type config struct {
 	TurnMs                       int      `yaml:"TurnMs"`
 	RoundSeconds                 int      `yaml:"RoundSeconds"`
 	RoundsPerAutoSave            int      `yaml:"RoundsPerAutoSave"`
+	RoundsPerDay                 int      `yaml:"RoundsPerDay"` // How many rounds are in a day
+	NightHours                   int      `yaml:"NightHours"`   // How many hours of night
 	MaxMobBoredom                int      `yaml:"MaxMobBoredom"`
 	ScriptLoadTimeoutMs          int      `yaml:"ScriptLoadTimeoutMs"`          // How long to spend the first time a script is loaded into memory
 	ScriptRoomTimeoutMs          int      `yaml:"ScriptRoomTimeoutMs"`          // How many milliseconds to allow a script to run before it is interrupted
@@ -324,6 +326,16 @@ func (c *config) validate() {
 		c.RoundsPerAutoSave = 900 // default of 15 minutes worth of rounds
 	}
 
+	if c.RoundsPerDay < 10 {
+		c.RoundsPerDay = 20 // default of 24 hours worth of rounds
+	}
+
+	if c.NightHours < 0 {
+		c.NightHours = 0
+	} else if c.NightHours > 24 {
+		c.NightHours = 24
+	}
+
 	if c.MaxMobBoredom < 1 {
 		c.MaxMobBoredom = 150 // default
 	}
@@ -467,6 +479,40 @@ func (c config) IsBannedName(name string) bool {
 	}
 
 	return false
+}
+
+func (c config) GetDate(currentRound uint64, dayResetRound uint64) (day int, hour int, minute int, ampm string, night bool) {
+
+	currentRoundAdjusted := (util.GetRoundCount() - dayResetRound)
+	roundOfDay := int(currentRoundAdjusted % uint64(c.RoundsPerDay))
+
+	hourFloat, minutesFloat := math.Modf(float64(roundOfDay) / float64(c.RoundsPerDay) * 24)
+
+	hour = int(hourFloat)
+
+	night = false
+	halfNight := int(math.Floor(float64(c.NightHours) / 2))
+	nightStart := 23 - (halfNight - 1)
+	nightEnd := c.NightHours - halfNight
+	if hour >= nightStart || hour < nightEnd {
+		night = true
+	}
+
+	ampm = `AM`
+	if hour >= 12 {
+		ampm = `PM`
+		hour -= 12
+	}
+
+	if hour == 0 {
+		hour = 12
+	}
+
+	minute = int(math.Floor(minutesFloat * 60))
+
+	day = 1 + int(math.Floor(float64(currentRoundAdjusted)/float64(c.RoundsPerDay)))
+
+	return day, hour, minute, ampm, night
 }
 
 func GetConfig() config {
