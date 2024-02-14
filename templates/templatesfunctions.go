@@ -149,38 +149,6 @@ var (
 			a, d, s, b, _ := util.ParseDiceRoll(roll)
 			return util.FormatDiceRoll(a, d, s, b, []int{})
 		},
-		"buffdamage": func(buffId int) string {
-			buffSpec := buffs.GetBuffSpec(buffId)
-			if buffSpec == nil {
-				return "Unknown"
-			}
-
-			if buffSpec.HealthRoll == `` {
-				return ``
-			}
-			a, d, s, b, _ := util.ParseDiceRoll(buffSpec.HealthRoll)
-			if d >= 0 {
-				return ``
-			}
-
-			return fmt.Sprintf(`%s damage`, util.FormatDiceRoll(a, d*-1, s, b, []int{}))
-		},
-		"buffhealing": func(buffId int) string {
-			buffSpec := buffs.GetBuffSpec(buffId)
-			if buffSpec == nil {
-				return "Unknown"
-			}
-
-			if buffSpec.HealthRoll == `` {
-				return ``
-			}
-			_, d, _, _, _ := util.ParseDiceRoll(buffSpec.HealthRoll)
-			if d <= 0 {
-				return ``
-			}
-
-			return fmt.Sprintf(`%s health`, buffSpec.HealthRoll)
-		},
 		"profession": func(char characters.Character) string {
 
 			allRanks := char.GetAllSkillRanks()

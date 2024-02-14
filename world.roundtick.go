@@ -26,9 +26,20 @@ func (w *World) roundTick() {
 
 	c := configs.GetConfig()
 
-	util.IncrementRoundCount()
+	_, _, _, _, isNightBefore := c.GetDate(util.GetRoundCount(), 0)
 
+	util.IncrementRoundCount()
 	roundNumber := util.GetRoundCount()
+
+	_, _, _, _, isNight := c.GetDate(roundNumber, 0)
+
+	if isNightBefore != isNight {
+		if isNight {
+			w.Broadcast(templates.AnsiParse("<ansi fg=\"night\">The sun sets.</ansi>\n"))
+		} else {
+			w.Broadcast(templates.AnsiParse("<ansi fg=\"day\">The sun rises.</ansi>\n"))
+		}
+	}
 
 	if roundNumber%100 == 0 {
 		scripting.PruneVMs()

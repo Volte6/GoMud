@@ -113,6 +113,14 @@ RoundsPerAutoSave: 900
 #   bogged down with too many mobs in memory. If you want mobs to stick around 
 #   indefinitely, set this to 0.
 MaxMobBoredom: 150 
+# - RoundsPerDay -
+#   How many rounds are in a day? This is used to calculate the time of day.
+#   The lower this number, the faster the day/night cycle will be.
+#   A 4 second round and a 900 round day means the day/night cycle is 1 hour.
+RoundsPerDay: 900
+# - NightHours -
+#   How many hours of each 24 hour day will be nighttime?
+NightHours: 8
 # - ScriptLoadTimeoutMs -
 #   When a script is first loaded, compiled, and run, it is given this long to
 #   complete. If it takes longer, it is killed. This includes the onLoad() function

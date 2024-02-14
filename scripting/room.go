@@ -99,6 +99,23 @@ func TryRoomCommand(cmd string, rest string, userId int, cmdQueue util.CommandQu
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room != nil {
+
+		/*
+			// NOT SURE if I want to do this yet...
+			// This would allow buffs to capture commands
+
+			for _, buffInfo := range user.Character.GetBuffs() {
+				if mq, err := TryBuffCommand(cmd, rest, userId, 0, buffInfo.BuffId, cmdQueue); err == nil {
+					messageQueue.AbsorbMessages(mq)
+
+					messageQueue.Handled = messageQueue.Handled || mq.Handled
+					if messageQueue.Handled {
+						return messageQueue, nil
+					}
+				}
+			}
+		*/
+
 		for _, mobInstanceId := range room.GetMobs() {
 			if mq, err := TryMobCommand(cmd, rest, mobInstanceId, userId, `user`, cmdQueue); err == nil {
 				messageQueue.AbsorbMessages(mq)

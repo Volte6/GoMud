@@ -114,6 +114,8 @@ color8:
   mana-10: 95
   mana-0: 8
   suggested-text: 90
+  night: blue
+  day: 96
 color256:
   table-title: green
   userid: black
@@ -222,3 +224,5 @@ color256:
   mana-10: 245
   mana-0: 8
   suggested-text: 8
+  night: 17
+  day: 228

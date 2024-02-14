@@ -73,6 +73,100 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 	return messageQueue, nil
 }
 
+func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buffId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+
+	vmw, err := getBuffVM(buffId)
+	if err != nil {
+		return util.NewMessageQueue(0, 0), err
+	}
+
+	messageQueue = util.NewMessageQueue(0, 0)
+	commandQueue = cmdQueue
+
+	sActor := GetActor(userId, mobInstanceId)
+	sRoom := GetRoom(sActor.GetRoomId())
+
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("TryBuffCommand()", "cmd", cmd, "buffId", buffId, "time", time.Since(timestart))
+	}()
+
+	if onCommandFunc, ok := vmw.GetFunction(`onCommand_` + cmd); ok {
+
+		tmr := time.AfterFunc(scriptRoomTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(rest),
+			vmw.VM.ToValue(sActor),
+			vmw.VM.ToValue(sRoom),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("onCommand_%s(): %w", cmd, err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+
+	} else if onCommandFunc, ok := vmw.GetFunction(`onCommand`); ok {
+
+		sActor := GetActor(userId, mobInstanceId)
+		sRoom := GetRoom(sActor.GetRoomId())
+
+		tmr := time.AfterFunc(scriptRoomTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(cmd),
+			vmw.VM.ToValue(rest),
+			vmw.VM.ToValue(sActor),
+			vmw.VM.ToValue(sRoom),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("onCommand(): %w", err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+	}
+
+	return messageQueue, nil
+}
+
 func getBuffVM(buffId int) (*VMWrapper, error) {
 
 	if vm, ok := buffVMCache[buffId]; ok {
