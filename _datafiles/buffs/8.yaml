@@ -4,16 +4,6 @@ description: You're too tired to do anything.
 secret: false
 roundinterval: 1
 triggercount: 1
-messages:
-  start:
-    user: You're exhausted!
-    room: '{username} is exhausted'
-  effect:
-    user: You're exhausted!
-    room: '{username} is exhausted!'
-  end:
-    user: You catch your breath.
-    room: '{username} is no longer exhausted.'
 flags:
   - no-combat
   - no-flee

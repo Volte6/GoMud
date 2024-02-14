@@ -13,7 +13,7 @@ function onCommand_look(rest, user, room) {
     matches = UtilFindMatchIn(rest, caravan);
     if ( matches.found ) {
         SendUserMessage(user.UserId(), "The caravan, long since destroyed, once belonged to the frostfire guild of magicians. There must have been some impressive artifacts carreid by them once.");
-        SendRoomMessage(room.RoomId(), "<ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> examines the caravan.");   
+        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" examines the caravan.");   
         return true;
     }
 
@@ -25,7 +25,7 @@ function onCommand_look(rest, user, room) {
             SendUserMessage(user.UserId(), "The scattered crates are mostly broken and empty, save one that is still intact.");
         }
         
-        SendRoomMessage(room.RoomId(), "<ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> examines the broken crates.");   
+        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" examines the broken crates.");   
         return true;
     }
 
@@ -53,12 +53,12 @@ function onCommand(cmd, rest, user, room) {
 
     if ( !user.HasItemId(10012) ) {
         SendUserMessage(user.UserId(), "You'll need some kind of tool to open that.");
-        SendRoomMessage(room.RoomId(), "<ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> is messing around with an in-tact crate.");   
+        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" is messing around with an in-tact crate.");   
         return true;
     }
 
     SendUserMessage(user.UserId(), "You pry the box open and remove a glowing crystal from inside.");
-    SendRoomMessage(room.RoomId(), "<ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> pries the box open and removes something that emits a faint glow.");   
+    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" pries the box open and removes something that emits a faint glow.");   
     
     user.GiveItem(4);
 

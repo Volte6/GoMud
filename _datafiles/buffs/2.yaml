@@ -4,13 +4,3 @@ description: You are in a peaceful haze.
 secret: false
 roundinterval: 2
 triggercount: 3
-messages:
-  start:
-    user: You catch a whiff of a strange odor carried by the smoke.
-    room: '{username}''s eyes glaze over.'
-  effect:
-    user: You find yourself in a blissful haze, wanting nothing more than to sit and watch the world go by.
-    room: '{username} looks blissfully content.'
-  end:
-    user: You snape out of your haze.
-    room: '{username}''s eyes clear up.'

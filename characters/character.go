@@ -5,7 +5,6 @@ import (
 	"math"
 	"strconv"
 	"strings"
-	"time"
 
 	"log/slog"
 
@@ -14,7 +13,6 @@ import (
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/races"
-	"github.com/volte6/mud/roundinfo"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/stats"
@@ -1017,8 +1015,8 @@ func (c *Character) AddBuff(buffId int) error {
 	return nil
 }
 
-func (c *Character) GetBuffs() []buffs.Buff {
-	return c.Buffs.GetAllBuffs()
+func (c *Character) GetBuffs(buffId ...int) []*buffs.Buff {
+	return c.Buffs.GetAllBuffs(buffId...)
 }
 
 func (c *Character) RemoveBuff(buffId int) {
@@ -1027,176 +1025,21 @@ func (c *Character) RemoveBuff(buffId int) {
 	c.Validate()
 }
 
-func (c *Character) RoundTick() *roundinfo.RoundInfo {
-	tStart := time.Now()
-	rInfo := roundinfo.New()
-
-	// Roundtick any cooldowns
-	c.Cooldowns.RoundTick()
-
-	// Update all buffs
-	rInfo.AbsorbMessages(c.TriggerBuffs())
-
-	if c.Charmed != nil && c.Charmed.RoundsRemaining > 0 {
-		c.Charmed.RoundsRemaining--
-	}
-
-	// Recalculate all stats at the end of the round tick
-	c.Validate()
-
-	rInfo.ProcessingTime = time.Since(tStart)
-	return rInfo
-}
-
-// One or more buffId's can be specified if you wish to force trigger specific buffs at any time
-func (c *Character) TriggerBuffs(buffId ...int) *roundinfo.RoundInfo {
-
-	rInfo := roundinfo.New()
-
-	// Update all buffs
-	triggeredBuffs := c.Buffs.Trigger(buffId...)
-
-	if len(triggeredBuffs) > 0 {
-		for _, buff := range triggeredBuffs {
-
-			// We don't want to process a trigger on an expired buff
-			if buff.Expired() {
-				continue
-			}
-
-			buffInfo := buffs.GetBuffSpec(buff.BuffId)
-
-			//
-			// Health/mana related buffs don't apply if player is downed.
-			//
-			if c.Health > 0 {
-
-				if buffInfo.HealthRoll != `` {
-					totalHealthChange := 0
-
-					cnt, count, sides, bonus, _ := util.ParseDiceRoll(buffInfo.HealthRoll)
-
-					for i := 0; i < cnt; i++ {
-
-						healthChange := util.RollDice(count, sides) + bonus
-						totalHealthChange += healthChange
-
-						userMsg := buffInfo.Messages.Effect.User
-						if len(userMsg) > 0 {
-							userMsg = strings.ReplaceAll(userMsg, "{hitpoints}", fmt.Sprintf(`%d`, int(math.Abs(float64(healthChange)))))
-							rInfo.SendUserMessage(userMsg, true)
-						}
-
-						roomMsg := buffInfo.Messages.Effect.Room
-						if len(roomMsg) > 0 {
-							roomMsg = strings.ReplaceAll(roomMsg, "{hitpoints}", fmt.Sprintf(`%d`, int(math.Abs(float64(healthChange)))))
-							rInfo.SendRoomMessage(roomMsg, true)
-						}
-					}
-
-					c.ApplyHealthChange(
-						totalHealthChange,
-					)
-				}
-
-				if buffInfo.ManaRoll != `` {
-					totalManaChange := 0
-
-					cnt, count, sides, bonus, _ := util.ParseDiceRoll(buffInfo.ManaRoll)
-
-					for i := 0; i < cnt; i++ {
-
-						manaChange := util.RollDice(count, sides) + bonus
-						totalManaChange += manaChange
-
-						userMsg := buffInfo.Messages.Effect.User
-						if len(userMsg) > 0 {
-							userMsg = strings.ReplaceAll(userMsg, "{manapoints}", fmt.Sprintf(`%d`, int(math.Abs(float64(manaChange)))))
-							rInfo.SendUserMessage(userMsg, true)
-						}
-
-						roomMsg := buffInfo.Messages.Effect.Room
-						if len(roomMsg) > 0 {
-							roomMsg = strings.ReplaceAll(roomMsg, "{manapoints}", fmt.Sprintf(`%d`, int(math.Abs(float64(manaChange)))))
-							rInfo.SendRoomMessage(roomMsg, true)
-						}
-					}
-
-					c.ApplyManaChange(
-						totalManaChange,
-					)
-				}
-
-			}
-
+func (c *Character) ApplyHealthChange(healthChange int) int {
+	oldHealth := c.Health
+	newHealth := c.Health + healthChange
+	if newHealth < 0 {
+		c.CancelBuffsWithFlag(buffs.CancelIfCombat)
+		if newHealth < -10 {
+			newHealth = -10
 		}
 	}
-
-	return rInfo
-}
-
-func (c *Character) ApplyHealthChange(healthChange int) {
-	c.Health += healthChange
-	if healthChange < 0 {
-		c.CancelBuffsWithFlag(buffs.CancelIfCombat)
-	}
+	c.Health = newHealth
+	return newHealth - oldHealth
 }
 
 func (c *Character) ApplyManaChange(manaChange int) {
 	c.Mana += manaChange
-}
-
-// returns roundInfo and slice of new buffId's to add.
-func (c *Character) PruneBuffs() (rInfo *roundinfo.RoundInfo, newBuffIds []int) {
-
-	rInfo = roundinfo.New()
-
-	buffsToPrune := c.Buffs.Prune()
-
-	prunedBuffIds := map[int]struct{}{}
-
-	for _, buff := range buffsToPrune {
-		buffInfo := buffs.GetBuffSpec(buff.BuffId)
-
-		prunedBuffIds[buff.BuffId] = struct{}{}
-
-		// Track any buff id's this will add as a result of its decay
-		if len(buffInfo.DecaysInto) > 0 {
-			newBuffIds = append(newBuffIds, buffInfo.DecaysInto...)
-		}
-
-		userMsg := buffInfo.Messages.End.User
-		if len(userMsg) > 0 {
-
-			userMsg = strings.ReplaceAll(userMsg, "{username}", c.Name)
-			rInfo.SendUserMessage(userMsg, true)
-		}
-
-		roomMsg := buffInfo.Messages.End.Room
-		if len(roomMsg) > 0 {
-
-			roomMsg = strings.ReplaceAll(roomMsg, "{username}", c.Name)
-			rInfo.SendRoomMessage(roomMsg, true)
-		}
-
-		slog.Info("Pruned Buff", "name", buffInfo.Name, "buffId", buff.BuffId, "buffs", c.Buffs)
-	}
-
-	if len(buffsToPrune) > 0 {
-		c.Validate()
-	}
-
-	// This section is the prevent the re-addition of a buff that was just pruned.
-	if len(newBuffIds) > 0 {
-		for i := len(newBuffIds) - 1; i >= 0; i-- {
-			if _, ok := prunedBuffIds[newBuffIds[i]]; ok {
-				newBuffIds = append(newBuffIds[:i], newBuffIds[i+1:]...)
-			}
-		}
-	}
-
-	return rInfo, newBuffIds
-
 }
 
 func (c *Character) BarterPrice(startPrice int) int {

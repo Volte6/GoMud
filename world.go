@@ -22,6 +22,7 @@ import (
 	"github.com/volte6/mud/prompt"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
@@ -1232,24 +1233,19 @@ func (w *World) TurnTick() {
 
 					buffMob.Character.AddBuff(buffRequest.BuffId)
 
-					if len(buffInfo.Messages.Start.Room) > 0 {
-						roomMsg := buffInfo.Messages.Start.Room
-						roomMsg = strings.ReplaceAll(roomMsg, `{username}'s`, fmt.Sprintf(`<ansi fg="mobname">%s's</ansi>`, buffMob.Character.Name))
-						roomMsg = strings.ReplaceAll(roomMsg, `{username}`, fmt.Sprintf(`<ansi fg="mobname">%s</ansi>`, buffMob.Character.Name))
-						messageQueue.SendRoomMessage(buffMob.Character.RoomId, roomMsg, true)
+					//
+					// Fire onStart for buff script
+					//
+					if response, err := scripting.TryBuffScriptEvent(`onStart`, 0, buffMob.InstanceId, buffRequest.BuffId, w); err == nil {
+						messageQueue.AbsorbMessages(response)
 					}
 
+					//
+					// If the buff calls for an immediate triggering
+					//
 					if buffInfo.TriggerNow {
-						msgs := buffMob.Character.TriggerBuffs(buffInfo.BuffId)
-
-						for _, msgInfo := range msgs.Messages {
-
-							msgInfo.Msg = strings.ReplaceAll(msgInfo.Msg, `{username}'s`, fmt.Sprintf(`<ansi fg="mobname">%s's</ansi>`, buffMob.Character.Name))
-							msgInfo.Msg = strings.ReplaceAll(msgInfo.Msg, `{username}`, fmt.Sprintf(`<ansi fg="mobname">%s</ansi>`, buffMob.Character.Name))
-
-							if msgInfo.ToRoom {
-								messageQueue.SendRoomMessage(buffMob.Character.RoomId, msgInfo.Msg, false)
-							}
+						if response, err := scripting.TryBuffScriptEvent(`onTrigger`, 0, buffMob.InstanceId, buffRequest.BuffId, w); err == nil {
+							messageQueue.AbsorbMessages(response)
 						}
 
 						if buffMob.Character.Health <= 0 {
@@ -1286,30 +1282,19 @@ func (w *World) TurnTick() {
 						//
 						buffUser.Character.AddBuff(buffRequest.BuffId)
 
-						if len(buffInfo.Messages.Start.User) > 0 {
-							messageQueue.SendUserMessage(buffUser.UserId, buffInfo.Messages.Start.User, true)
+						//
+						// Fire onStart for buff script
+						//
+						if response, err := scripting.TryBuffScriptEvent(`onStart`, buffUser.UserId, 0, buffRequest.BuffId, w); err == nil {
+							messageQueue.AbsorbMessages(response)
 						}
 
-						if len(buffInfo.Messages.Start.Room) > 0 {
-							roomMsg := buffInfo.Messages.Start.Room
-							roomMsg = strings.ReplaceAll(roomMsg, "{username}'s", fmt.Sprintf(`<ansi fg="username">%s's</ansi>`, buffUser.Character.Name))
-							roomMsg = strings.ReplaceAll(roomMsg, "{username}", fmt.Sprintf(`<ansi fg="username">%s</ansi>`, buffUser.Character.Name))
-							messageQueue.SendRoomMessage(buffUser.Character.RoomId, roomMsg, true, buffUser.UserId)
-						}
-
+						//
+						// If the buff calls for an immediate triggering
+						//
 						if buffInfo.TriggerNow {
-							msgs := buffUser.Character.TriggerBuffs(buffInfo.BuffId)
-
-							for _, msgInfo := range msgs.Messages {
-
-								msgInfo.Msg = strings.ReplaceAll(msgInfo.Msg, `{username}'s`, fmt.Sprintf(`<ansi fg="username">%s's</ansi>`, buffUser.Character.Name))
-								msgInfo.Msg = strings.ReplaceAll(msgInfo.Msg, `{username}`, fmt.Sprintf(`<ansi fg="username">%s</ansi>`, buffUser.Character.Name))
-
-								if msgInfo.ToRoom {
-									messageQueue.SendRoomMessage(buffUser.Character.RoomId, msgInfo.Msg, false, buffUser.UserId)
-								} else {
-									messageQueue.SendUserMessage(buffUser.UserId, msgInfo.Msg, false)
-								}
+							if response, err := scripting.TryBuffScriptEvent(`onTrigger`, buffUser.UserId, 0, buffRequest.BuffId, w); err == nil {
+								messageQueue.AbsorbMessages(response)
 							}
 						}
 					}

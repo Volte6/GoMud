@@ -3,18 +3,6 @@ name: Sleeping
 description: You are getting much needed rest.
 roundinterval: 1
 triggercount: 50
-healthroll: 3d8
-decaysinto:
-  - 16 # Well Rested
-messages:
-  start:
-    user: You lay your head down and immediately doze off.
-    room: '{username} is getting some rest.'
-  effect:
-    user: ZZzzz...
-  end:
-    user: You wake up!
-    room: '{username} wakes up.'
 flags:
 - cancel-on-action
 - cancel-on-combat

@@ -33,14 +33,14 @@ func (b *Buff) Expired() bool {
 
 // A list of applied buffs
 type Buffs struct {
-	List      []Buff
+	List      []*Buff
 	buffFlags map[Flag][]int // a map of buff flags to the index of the buff
 	buffIds   map[int]int    // a map of a buffId to it position in buffList
 }
 
 func New() Buffs {
 	return Buffs{
-		List:      []Buff{},
+		List:      []*Buff{},
 		buffFlags: make(map[Flag][]int),
 		buffIds:   make(map[int]int),
 	}
@@ -167,7 +167,7 @@ func (bs *Buffs) AddBuff(buffId int) bool {
 			return true
 		}
 
-		bs.List = append(bs.List, newBuff)
+		bs.List = append(bs.List, &newBuff)
 		listIndex := len(bs.List) - 1
 		bs.buffIds[buffId] = listIndex
 		for _, flag := range buffInfo.Flags {
@@ -185,7 +185,7 @@ func (bs *Buffs) AddBuff(buffId int) bool {
 }
 
 // Returns what buffs were triggered
-func (bs *Buffs) Trigger(buffId ...int) (triggeredBuffs []Buff) {
+func (bs *Buffs) Trigger(buffId ...int) (triggeredBuffs []*Buff) {
 
 	for idx, b := range bs.List {
 
@@ -220,17 +220,32 @@ func (bs *Buffs) Trigger(buffId ...int) (triggeredBuffs []Buff) {
 	return triggeredBuffs
 }
 
-func (bs *Buffs) GetAllBuffs() []Buff {
-	retBuffs := []Buff{}
+func (bs *Buffs) GetAllBuffs(buffId ...int) []*Buff {
+	retBuffs := []*Buff{}
 	for _, b := range bs.List {
 		if !b.Expired() {
-			retBuffs = append(retBuffs, b)
+
+			if len(buffId) > 0 {
+				for _, id := range buffId {
+					if b.BuffId != id {
+						continue
+					}
+					retBuffs = append(retBuffs, b)
+				}
+			} else {
+				retBuffs = append(retBuffs, b)
+			}
+
 		}
 	}
 	return retBuffs
 }
 
-func (bs *Buffs) Prune() (prunedBuffs []Buff) {
+func (bs *Buffs) Prune() (prunedBuffs []*Buff) {
+
+	if len(bs.List) == 0 {
+		return prunedBuffs
+	}
 
 	var prune bool = false
 	for i := len(bs.List) - 1; i >= 0; i-- {

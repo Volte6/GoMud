@@ -12,7 +12,7 @@ function onCommand_look(rest, user, room) {
     }
 
     SendUserMessage(user.UserId(), "Looking more closely, the eyes of the raven are made of onyx. They are clean and clear, as if polished.")
-    SendRoomMessage(room.RoomId(), "<ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> examines the raven in the mural.");
+    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" examines the raven in the mural.");
 
     return true;
 }
@@ -30,7 +30,7 @@ function onCommand(cmd, rest, user, room) {
     }
 
     SendUserMessage(user.UserId(), "You press the eyes of the raven, and follow a secret entrance to the west!");
-    SendRoomMessage(room.RoomId(), "<ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> presses in the eyes of the raven, and falls through into a room to the west!");
+    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" presses in the eyes of the raven, and falls through into a room to the west!");
 
     user.GiveQuest("2-investigate")
     user.MoveRoom(31)

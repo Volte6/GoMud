@@ -22,7 +22,7 @@ func Glarble(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 }
 ```
 
-Then the command must be entered into the `userCommands` map in [usercommands.go](usercommands.go)
+Then the command must be entered into the `userCommands` map in [usercommands.go](/scripting/usercommands.go)
 
 
 TODO: More info.

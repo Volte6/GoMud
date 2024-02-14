@@ -3,16 +3,5 @@ name: Poison
 description: You have been poisoned!
 roundinterval: 3
 triggercount: 3
-healthroll: -1d8
-messages:
-  start:
-    user: You begin to feel sick.
-    room: '{username} is looking sickly.'
-  effect:
-    user: The poison hurts you for {hitpoints} damage!
-    room: '{username} convulses under the effects of a poison.'
-  end:
-    user: The poison wears off.
-    room: '{username}''s poison abates.'
 flags:
   - poison

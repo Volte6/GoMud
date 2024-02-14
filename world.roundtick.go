@@ -121,18 +121,27 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 			for _, uId := range room.GetPlayers() {
 
 				user := users.GetByUserId(uId)
-				roundInfo := user.Character.RoundTick()
 
-				for _, message := range roundInfo.Messages {
+				// Roundtick any cooldowns
+				user.Character.Cooldowns.RoundTick()
 
-					message.Msg = strings.ReplaceAll(message.Msg, `{username}'s`, fmt.Sprintf(`<ansi fg="username">%s's</ansi>`, user.Character.Name))
-					message.Msg = strings.ReplaceAll(message.Msg, `{username}`, fmt.Sprintf(`<ansi fg="username">%s</ansi>`, user.Character.Name))
+				if user.Character.Charmed != nil && user.Character.Charmed.RoundsRemaining > 0 {
+					user.Character.Charmed.RoundsRemaining--
+				}
 
-					if message.ToRoom {
-						messageQueue.SendRoomMessage(room.RoomId, message.Msg, false, user.UserId)
-					} else {
-						messageQueue.SendUserMessage(user.UserId, message.Msg, false)
+				if triggeredBuffs := user.Character.Buffs.Trigger(); len(triggeredBuffs) > 0 {
+
+					//
+					// Fire onStart for buff script
+					//
+					for _, buff := range triggeredBuffs {
+						if !buff.Expired() {
+							if response, err := scripting.TryBuffScriptEvent(`onTrigger`, uId, 0, buff.BuffId, w); err == nil {
+								messageQueue.AbsorbMessages(response)
+							}
+						}
 					}
+
 				}
 
 				chanceIn100 := 5
@@ -158,6 +167,8 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 
 				}
 
+				// Recalculate all stats at the end of the round tick
+				user.Character.Validate()
 			}
 
 		}
@@ -171,15 +182,33 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 
 	messageQueue := util.NewMessageQueue(0, 0)
 
-	for _, mobId := range mobs.GetAllMobInstanceIds() {
+	for _, mobInstanceId := range mobs.GetAllMobInstanceIds() {
 
-		mob := mobs.GetInstance(mobId)
+		mob := mobs.GetInstance(mobInstanceId)
 
 		if mob == nil {
 			continue
 		}
 
-		roundInfo := mob.Character.RoundTick()
+		// Roundtick any cooldowns
+		mob.Character.Cooldowns.RoundTick()
+
+		if mob.Character.Charmed != nil && mob.Character.Charmed.RoundsRemaining > 0 {
+			mob.Character.Charmed.RoundsRemaining--
+		}
+
+		if triggeredBuffs := mob.Character.Buffs.Trigger(); len(triggeredBuffs) > 0 {
+
+			//
+			// Fire onStart for buff script
+			//
+			for _, buff := range triggeredBuffs {
+				if response, err := scripting.TryBuffScriptEvent(`onTrigger`, 0, mobInstanceId, buff.BuffId, w); err == nil {
+					messageQueue.AbsorbMessages(response)
+				}
+			}
+
+		}
 
 		// Do charm cleanup
 		if mob.Character.IsCharmed() && mob.Character.Charmed.RoundsRemaining == 0 {
@@ -196,13 +225,8 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 			}
 		}
 
-		for _, message := range roundInfo.Messages {
-			if message.ToRoom {
-				message.Msg = strings.ReplaceAll(message.Msg, `{username}'s`, fmt.Sprintf(`<ansi fg="mobname">%s's</ansi>`, mob.Character.Name))
-				message.Msg = strings.ReplaceAll(message.Msg, `{username}`, fmt.Sprintf(`<ansi fg="mobname">%s</ansi>`, mob.Character.Name))
-				messageQueue.SendRoomMessage(mob.Character.RoomId, message.Msg, false)
-			}
-		}
+		// Recalculate all stats at the end of the round tick
+		mob.Character.Validate()
 
 		if mob.Character.Health <= 0 {
 			// Mob died
@@ -227,23 +251,15 @@ func (w *World) PruneBuffs() util.MessageQueue {
 			for _, uId := range room.GetPlayers(rooms.FindBuffed) {
 
 				user := users.GetByUserId(uId)
-				roundInfo, newBuffIds := user.Character.PruneBuffs()
 
-				for _, message := range roundInfo.Messages {
-
-					message.Msg = strings.ReplaceAll(message.Msg, `{username}'s`, fmt.Sprintf(`<ansi fg="username">%s's</ansi>`, user.Character.Name))
-					message.Msg = strings.ReplaceAll(message.Msg, `{username}`, fmt.Sprintf(`<ansi fg="username">%s</ansi>`, user.Character.Name))
-
-					if message.ToRoom {
-						messageQueue.SendRoomMessage(room.RoomId, message.Msg, false, user.UserId)
-					} else {
-						messageQueue.SendUserMessage(user.UserId, message.Msg, false)
+				if buffsToPrune := user.Character.Buffs.Prune(); len(buffsToPrune) > 0 {
+					for _, buffInfo := range buffsToPrune {
+						if response, err := scripting.TryBuffScriptEvent(`onEnd`, uId, 0, buffInfo.BuffId, w); err == nil {
+							messageQueue.AbsorbMessages(response)
+						}
 					}
-				}
 
-				// Queue up the new buffs
-				for _, buffId := range newBuffIds {
-					w.QueueBuff(user.UserId, 0, buffId)
+					user.Character.Validate()
 				}
 
 			}
@@ -251,28 +267,18 @@ func (w *World) PruneBuffs() util.MessageQueue {
 	}
 
 	// Handle outstanding mob buffs
-	for _, mId := range mobs.GetAllMobInstanceIds() {
+	for _, mobInstanceId := range mobs.GetAllMobInstanceIds() {
 
-		mob := mobs.GetInstance(mId)
-		if len(mob.Character.Buffs.List) < 1 {
-			continue
-		}
+		mob := mobs.GetInstance(mobInstanceId)
 
-		roundInfo, newBuffIds := mob.Character.PruneBuffs()
-
-		for _, message := range roundInfo.Messages {
-
-			message.Msg = strings.ReplaceAll(message.Msg, `{username}'s`, fmt.Sprintf(`<ansi fg="mobname">%s's</ansi>`, mob.Character.Name))
-			message.Msg = strings.ReplaceAll(message.Msg, `{username}`, fmt.Sprintf(`<ansi fg="mobname">%s</ansi>`, mob.Character.Name))
-
-			if message.ToRoom {
-				messageQueue.SendRoomMessage(mob.Character.RoomId, message.Msg, false)
+		if buffsToPrune := mob.Character.Buffs.Prune(); len(buffsToPrune) > 0 {
+			for _, buffInfo := range buffsToPrune {
+				if response, err := scripting.TryBuffScriptEvent(`onEnd`, 0, mobInstanceId, buffInfo.BuffId, w); err == nil {
+					messageQueue.AbsorbMessages(response)
+				}
 			}
-		}
 
-		// Queue up the new buffs
-		for _, buffId := range newBuffIds {
-			w.QueueBuff(0, mob.InstanceId, buffId)
+			mob.Character.Validate()
 		}
 
 	}

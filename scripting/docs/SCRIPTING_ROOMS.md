@@ -18,7 +18,7 @@ The following functions are special keywords that will be invoked under specific
 ---
 
 ```
-function onLoad(room ROOMOBJ) {
+function onLoad(room RoomObject) {
 
 }
 ```
@@ -28,12 +28,12 @@ It is usually called the first time a player enters a room.
 
 |  Argument | Explanation |
 | --- | --- |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 
 ---
 
 ```
-function onEnter(user USEROBJ, room ROOMOBJ) {
+function onEnter(user ActorObject, room RoomObject) {
 }
 ```
 
@@ -43,13 +43,13 @@ Returning `true` will reject the move, leaving them in their original room.
 
 |  Argument | Explanation |
 | --- | --- |
-| user | [USEROBJ](FUNCTIONS_USERS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| user | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 
 ---
 
 ```
-function onExit(user USEROBJ, room ROOMOBJ) {
+function onExit(user ActorObject, room RoomObject) {
 }
 ```
 
@@ -59,13 +59,13 @@ Returning `true` will reject the move, leaving them in their original room.
 
 |  Argument | Explanation |
 | --- | --- |
-| user | [USEROBJ](FUNCTIONS_USERS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| user | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 
 ---
 
 ```
-function onCommand(cmd string, rest string, user USEROBJ, room ROOMOBJ) {
+function onCommand(cmd string, rest string, user ActorObject, room RoomObject) {
 }
 ```
 
@@ -77,13 +77,13 @@ Returning `true` will halt any further processing of the response (i.e. "I've ha
 | --- | --- |
 | cmd | the command entered, such as `look`, `drop` or `west`. |
 | rest | Everything entered after the command (if anything). |
-| user | [USEROBJ](FUNCTIONS_USERS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| user | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 
 ---
 
 ```
-function onCommand_{command}(rest string, user USEROBJ, room ROOMOBJ) {
+function onCommand_{command}(rest string, user ActorObject, room RoomObject) {
 }
 ```
 
@@ -98,7 +98,7 @@ In all other ways, this follows the same rules as the normal `onCommand()` funct
 |  Argument | Explanation |
 | --- | --- |
 | rest | Everything entered after the command (if anything). |
-| user | [USEROBJ](FUNCTIONS_USERS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| user | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 
 ---

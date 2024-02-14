@@ -78,6 +78,7 @@ type Mob struct {
 	ItemTrades      []ItemTrade    `yaml:"itemtrades,omitempty"` // one or more sets of objects they will trade for other objects.
 	ScriptTag       string         `yaml:"scripttag"`            // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
 	datastub        map[string]any // Generic storage stub for maintaining state between behaviors
+	tempDataStore   map[string]any
 }
 
 func GetAllMobNames() []string {
@@ -205,6 +206,31 @@ func DestroyInstance(instanceId int) {
 	defer mobMutex.Unlock()
 
 	delete(mobInstances, instanceId)
+}
+
+func (m *Mob) SetTempData(key string, value any) {
+
+	if m.tempDataStore == nil {
+		m.tempDataStore = make(map[string]any)
+	}
+
+	if value == nil {
+		delete(m.tempDataStore, key)
+		return
+	}
+	m.tempDataStore[key] = value
+}
+
+func (m *Mob) GetTempData(key string) any {
+
+	if m.tempDataStore == nil {
+		m.tempDataStore = make(map[string]any)
+	}
+
+	if value, ok := m.tempDataStore[key]; ok {
+		return value
+	}
+	return nil
 }
 
 func (m *Mob) Despawns() bool {

@@ -11,7 +11,7 @@ function onCommand(cmd, rest, user, room) {
     if ( rest.substr(rest.length - 3) == "map" || rest.substr(rest.length - 4) == "sign" ) {
       
         SendUserMessage(user.UserId(), "You look at the map nailed to the sign.");
-        SendRoomMessage(room.RoomId(), "<ansi fg=\"username\">"+user.GetCharacterName()+"</ansi> looks at the map nailed to the sign.");
+        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" looks at the map nailed to the sign.");
 
         // Load the cached map, or re-generate and cache it if it's not there
         if ( mapSignData == "" ) {
