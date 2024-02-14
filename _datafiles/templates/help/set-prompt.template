@@ -42,7 +42,7 @@ The <ansi fg="command">set prompt</ansi> command allows you to customize your in
     <ansi fg="magenta">{tp}</ansi>    Unspent Training Points   <ansi fg="magenta">{sp}</ansi>    Unspent Stat Points
     <ansi fg="magenta">{i}</ansi>     Items Carried             <ansi fg="magenta">{I}</ansi>     Maximum backpack capacity
     <ansi fg="magenta">{g}</ansi>     Gold on hand              <ansi fg="magenta">{h}</ansi>     Hidden/Invisible flag
-    <ansi fg="magenta">{t}</ansi>     Time of day symbol (<ansi fg="night">•</ansi>/<ansi fg="day">⚙</ansi>)  <ansi fg="magenta">{T}</ansi>     Full time of day
+    <ansi fg="magenta">{t}</ansi>     Day/Night symbol (<ansi fg="night">•</ansi>/<ansi fg="day">⚙</ansi>)    <ansi fg="magenta">{T}</ansi>     Full time of day
     <ansi fg="magenta">{w}</ansi>     Wait rounds for combat (fprompt only)
 
 The default prompt is:

@@ -5,6 +5,7 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/util"
 )
 
@@ -17,7 +18,11 @@ func setUtilFunctions(vm *goja.Runtime) {
 	vm.Set(`UtilGetMinutesToTurns`, UtilGetMinutesToTurns)
 	vm.Set(`UtilStripPrepositions`, UtilStripPrepositions)
 	vm.Set(`UtilDiceRoll`, UtilDiceRoll)
-
+	vm.Set(`UtilGetTime`, UtilGetTime)
+	vm.Set(`UtilGetTimeString`, UtilGetTimeString)
+	vm.Set(`UtilSetTime`, UtilSetTime)
+	vm.Set(`UtilSetTimeDay`, UtilSetTimeDay)
+	vm.Set(`UtilSetTimeNight`, UtilSetTimeNight)
 }
 
 // ////////////////////////////////////////////////////////
@@ -82,4 +87,25 @@ func UtilStripPrepositions(input string) string {
 
 func UtilDiceRoll(diceQty int, diceSides int) int {
 	return util.RollDice(diceQty, diceSides)
+}
+
+func UtilGetTime() gametime.GameDate {
+	return gametime.GetDate()
+}
+
+func UtilGetTimeString() string {
+	gd := gametime.GetDate()
+	return gd.String()
+}
+
+func UtilSetTimeDay() {
+	gametime.SetToDay(-1)
+}
+
+func UtilSetTimeNight() {
+	gametime.SetToNight(-1)
+}
+
+func UtilSetTime(hour int, minutes int) {
+	gametime.SetTime(hour, minutes)
 }

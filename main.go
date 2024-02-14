@@ -17,6 +17,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/inputhandlers"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/keywords"
@@ -120,6 +121,7 @@ func main() {
 	quests.LoadDataFiles()
 	templates.LoadAliases()
 	keywords.LoadAliases()
+	gametime.SetToDay(-5)
 
 	scripting.Setup(c.ScriptLoadTimeoutMs, c.ScriptRoomTimeoutMs)
 
@@ -445,6 +447,8 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 			// Add a signal handler (shortcut ctrl combos) after the AnsiHandler
 			// This captures signals and replaces user input so should happen after AnsiHandler to ensure it happens before other processes.
 			connDetails.AddInputHandler("SignalHandler", inputhandlers.SignalHandler, "AnsiHandler")
+
+			connDetails.SetState(connection.LoggedIn)
 
 			worldManager.EnterWorld(userObject.Character.RoomId, userObject.Character.Zone, userObject.UserId)
 		}

@@ -91,11 +91,14 @@ func (c *ConnectionTracker) Broadcast(b []byte, excludeIds ...ConnectionId) {
 			return true
 		}
 
-		// Write the message to the connection
-		if _, err := cd.(*ConnectionDetails).Write(b); err != nil {
-			slog.Error("could not write to connection", "connectionId", key.(uint64), "remoteAddr", cd.(*ConnectionDetails).RemoteAddr().String(), "error", err)
-			// Remove from the connections
-			c.Remove(key.(ConnectionId))
+		details := cd.(*ConnectionDetails)
+		if details.state != Login {
+			// Write the message to the connection
+			if _, err := details.Write(b); err != nil {
+				slog.Error("could not write to connection", "connectionId", key.(uint64), "remoteAddr", cd.(*ConnectionDetails).RemoteAddr().String(), "error", err)
+				// Remove from the connections
+				c.Remove(key.(ConnectionId))
+			}
 		}
 
 		return true // return true unless you want it to halt early
