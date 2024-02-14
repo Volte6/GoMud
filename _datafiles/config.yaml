@@ -112,7 +112,7 @@ RoundsPerAutoSave: 900
 #   This is mainly a resource management feature to keep the game from getting 
 #   bogged down with too many mobs in memory. If you want mobs to stick around 
 #   indefinitely, set this to 0.
-MaxMobBoredom: 150 
+MaxMobBoredom: 150
 # - RoundsPerDay -
 #   How many rounds are in a day? This is used to calculate the time of day.
 #   The lower this number, the faster the day/night cycle will be.

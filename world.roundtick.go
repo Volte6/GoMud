@@ -35,9 +35,11 @@ func (w *World) roundTick() {
 
 	if isNightBefore != isNight {
 		if isNight {
-			w.Broadcast(templates.AnsiParse("<ansi fg=\"night\">The sun sets.</ansi>\n"))
+			sunsetTxt, _ := templates.Process("generic/sunset", nil)
+			w.Broadcast(sunsetTxt)
 		} else {
-			w.Broadcast(templates.AnsiParse("<ansi fg=\"day\">The sun rises.</ansi>\n"))
+			sunriseTxt, _ := templates.Process("generic/sunrise", nil)
+			w.Broadcast(sunriseTxt)
 		}
 	}
 

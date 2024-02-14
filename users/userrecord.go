@@ -12,6 +12,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/prompt"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/util"
@@ -24,7 +25,7 @@ var (
 	PermissionMod   string = "mod"   // Logged in has limited special powers
 	PermissionAdmin string = "admin" // Logged in and has special powers
 
-	PromptDefault         = `{8}[{255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:`
+	PromptDefault         = `{8}[{t} {255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:`
 	promptDefaultCompiled = CompilePrompt(PromptDefault)
 	promptColorRegex      = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
 	promptFindTagsRegex   = regexp.MustCompile(`\{[a-zA-Z%:\-]+\}`)
@@ -315,7 +316,26 @@ func (u *UserRecord) GetPrompt(fullRedraw bool) string {
 				if inCombat {
 					ansiPrompt = strings.ReplaceAll(ansiPrompt, "{w}", strconv.Itoa(u.Character.Aggro.RoundsWaiting))
 				}
+
+			case "{t}":
+				_, _, _, _, night := configs.GetConfig().GetDate(util.GetRoundCount(), 0)
+
+				if night {
+					ansiPrompt = strings.ReplaceAll(ansiPrompt, "{t}", `<ansi fg="night">•</ansi>`)
+				} else {
+					ansiPrompt = strings.ReplaceAll(ansiPrompt, "{t}", `<ansi fg="day">⚙</ansi>`)
+				}
+
+			case "{T}":
+				_, hour, minute, ampm, night := configs.GetConfig().GetDate(util.GetRoundCount(), 0)
+
+				if night {
+					ansiPrompt = strings.ReplaceAll(ansiPrompt, "{T}", fmt.Sprintf(`<ansi fg="night">%d:%02d%s</ansi>`, hour, minute, ampm))
+				} else {
+					ansiPrompt = strings.ReplaceAll(ansiPrompt, "{T}", fmt.Sprintf(`<ansi fg="day">%d:%02d%s</ansi>`, hour, minute, ampm))
+				}
 			}
+
 		}
 
 	}
