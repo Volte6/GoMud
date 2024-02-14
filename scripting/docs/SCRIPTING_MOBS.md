@@ -25,7 +25,7 @@ The following functions are special keywords that will be invoked under specific
 ---
 
 ```
-function onLoad(mob MOBOBJ) {
+function onLoad(mob ActorObject) {
 
 }
 ```
@@ -35,12 +35,12 @@ It is usually called within one round of a mob instance being created, or possib
 
 |  Argument | Explanation |
 | --- | --- |
-| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
 
 ---
 
 ```
-function onIdle(mob MOBOBJ, room ROOMOBJ) {
+function onIdle(mob ActorObject, room RoomObject) {
 }
 ```
 
@@ -48,13 +48,13 @@ function onIdle(mob MOBOBJ, room ROOMOBJ) {
 
 |  Argument | Explanation |
 | --- | --- |
-| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 
 ---
 
 ```
-function onGive(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
+function onGive(mob ActorObject, room RoomObject, eventDetails object) {
 }
 ```
 
@@ -62,8 +62,8 @@ function onGive(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 
 |  Argument | Explanation |
 | --- | --- |
-| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that gave the item/gold |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the gift |
 | eventDetails.gold | How much gold was given (if any) |
@@ -72,7 +72,7 @@ function onGive(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 ---
 
 ```
-function onShow(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
+function onShow(mob ActorObject, room RoomObject, eventDetails object) {
 }
 ```
 
@@ -80,8 +80,8 @@ function onShow(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 
 |  Argument | Explanation |
 | --- | --- |
-| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that showed the item |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the object being shown |
 | eventDetails.item | An Item object that was shown |
@@ -89,7 +89,7 @@ function onShow(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 ---
 
 ```
-function onAsk(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
+function onAsk(mob ActorObject, room RoomObject, eventDetails object) {
 }
 ```
 
@@ -97,8 +97,8 @@ function onAsk(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 
 |  Argument | Explanation |
 | --- | --- |
-| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that asked the question |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the question |
 | eventDetails.askText | The question the mob was asked |
@@ -106,7 +106,7 @@ function onAsk(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 ---
 
 ```
-function onCommand(cmd string, rest string, mob MOBOBJ, room ROOMOBJ, eventDetails object) {
+function onCommand(cmd string, rest string, mob ActorObject, room RoomObject, eventDetails object) {
 }
 ```
 
@@ -121,15 +121,15 @@ NOTE: Other mobs may be in the room with `onCommand()` functions defined, and th
 | --- | --- |
 | cmd | the command entered, such as `look`, `drop` or `west`. |
 | rest | Everything entered after the command (if anything). |
-| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that sent the command |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the command |
 
 ---
 
 ```
-function onCommand_{command}(rest, mob MOBOBJ, room ROOMOBJ, eventDetails object) {
+function onCommand_{command}(rest, mob ActorObject, room RoomObject, eventDetails object) {
 }
 ```
 
@@ -144,15 +144,15 @@ In all other ways, this follows the same rules as the normal `onCommand()` funct
 |  Argument | Explanation |
 | --- | --- |
 | rest | Everything entered after the command (if anything). |
-| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that sent the command |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the command |
 
 ---
 
 ```
-function onHurt(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
+function onHurt(mob ActorObject, room RoomObject, eventDetails object) {
 }
 ```
 
@@ -161,8 +161,8 @@ function onHurt(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 |  Argument | Explanation |
 | --- | --- |
 | rest | Everything entered after the command (if anything). |
-| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that hit the mob |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the attack |
 | eventDetails.damage | how many hitpoints of damage were caused |
@@ -171,7 +171,7 @@ function onHurt(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 ---
 
 ```
-function onDie(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
+function onDie(mob ActorObject, room RoomObject, eventDetails object) {
 }
 ```
 
@@ -180,8 +180,8 @@ function onDie(mob MOBOBJ, room ROOMOBJ, eventDetails object) {
 |  Argument | Explanation |
 | --- | --- |
 | rest | Everything entered after the command (if anything). |
-| mob | [MOBOBJ](FUNCTIONS_MOBS.md) |
-| room | [ROOMOBJ](FUNCTIONS_ROOMS.md) |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that killed the mob |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the death |
 | eventDetails.attackerCount | How many users hurt this mob before it died. |

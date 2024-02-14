@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
+	"os"
 	"strings"
 	"time"
 
@@ -181,6 +182,33 @@ func (b *BuffSpec) Filename() string {
 
 func (b *BuffSpec) Filepath() string {
 	return b.Filename()
+}
+
+func (b *BuffSpec) GetScript() string {
+
+	scriptPath := b.GetScriptPath()
+	// Load the script into a string
+	if _, err := os.Stat(scriptPath); err == nil {
+		if bytes, err := os.ReadFile(scriptPath); err == nil {
+			return string(bytes)
+		}
+	}
+
+	return ``
+}
+
+func (b *BuffSpec) GetScriptPath() string {
+	// Load any script for the buff
+
+	buffFilePath := b.Filename()
+	scriptFilePath := strings.Replace(buffFilePath, `.yaml`, `.js`, 1)
+
+	fullScriptPath := strings.Replace(buffDataFilesFolderPath+`/`+b.Filepath(),
+		buffFilePath,
+		scriptFilePath,
+		1)
+
+	return util.FilePath(fullScriptPath)
 }
 
 // file self loads due to init()

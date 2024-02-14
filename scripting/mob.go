@@ -40,7 +40,7 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, source
 	messageQueue = util.NewMessageQueue(0, mobInstanceId)
 	commandQueue = cmdQueue
 
-	sMob := GetMob(mobInstanceId)
+	sMob := GetActor(0, mobInstanceId)
 	if sMob == nil {
 		PruneMobVMs(mobInstanceId)
 		return messageQueue, errors.New("mob not found")
@@ -108,7 +108,7 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 	messageQueue = util.NewMessageQueue(0, mobInstanceId)
 	commandQueue = cmdQueue
 
-	sMob := GetMob(mobInstanceId)
+	sMob := GetActor(0, mobInstanceId)
 	if sMob == nil {
 		PruneMobVMs(mobInstanceId)
 		return messageQueue, errors.New("mob not found")
@@ -211,7 +211,6 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 func getMobVM(mobInstanceId int) (*VMWrapper, error) {
 
 	if vm, ok := mobVMCache[mobInstanceId]; ok {
-		mobVMCache[mobInstanceId] = vm
 		if vm == nil {
 			return nil, errNoScript
 		}
@@ -241,7 +240,7 @@ func getMobVM(mobInstanceId int) (*VMWrapper, error) {
 	//
 	// Run the program
 	//
-	tmr := time.AfterFunc(scriptMobTimeout, func() {
+	tmr := time.AfterFunc(scriptLoadTimeout, func() {
 		vm.Interrupt(errTimeout)
 	})
 	if _, err = vm.RunProgram(prg); err != nil {
@@ -271,7 +270,7 @@ func getMobVM(mobInstanceId int) (*VMWrapper, error) {
 	})
 	if fn, ok := goja.AssertFunction(vm.Get(`onLoad`)); ok {
 
-		sMob := GetMob(mobInstanceId)
+		sMob := GetActor(0, mobInstanceId)
 
 		if _, err := fn(goja.Undefined(), vm.ToValue(sMob)); err != nil {
 			// Wrap the error

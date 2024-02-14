@@ -20,9 +20,8 @@ func Setup(scriptLoadTimeoutMs int, scriptRoomTimeoutMs int) {
 func setAllScriptingFunctions(vm *goja.Runtime) {
 	setMessagingFunctions(vm)
 	setRoomFunctions(vm)
-	setUserFunctions(vm)
+	setActorFunctions(vm)
 	setUtilFunctions(vm)
-	setMobFunctions(vm)
 }
 
 func PruneVMs() {

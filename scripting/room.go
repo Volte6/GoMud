@@ -49,7 +49,7 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int, cmdQueue util.
 
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 
-		sUser := GetUser(userId)
+		sUser := GetActor(userId, 0)
 		sRoom := GetRoom(roomId)
 
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
@@ -204,7 +204,6 @@ func TryRoomCommand(cmd string, rest string, userId int, cmdQueue util.CommandQu
 func getRoomVM(roomId int) (*VMWrapper, error) {
 
 	if vm, ok := roomVMCache[roomId]; ok {
-		roomVMCache[roomId] = vm
 		if vm == nil {
 			return nil, errNoScript
 		}
@@ -234,7 +233,7 @@ func getRoomVM(roomId int) (*VMWrapper, error) {
 	//
 	// Run the program
 	//
-	tmr := time.AfterFunc(scriptRoomTimeout, func() {
+	tmr := time.AfterFunc(scriptLoadTimeout, func() {
 		vm.Interrupt(errTimeout)
 	})
 	if _, err = vm.RunProgram(prg); err != nil {

@@ -1,24 +1,22 @@
 # Scripting Language
 
-All scripting is in ECMAScript 5.1 (AKA javascript).
+All scripting is in [ECMAScript 5.1](https://en.wikipedia.org/wiki/ECMAScript) (AKA javascript).
 
 # Room Scripting
-See [Room Scripting](ROOM_SCRIPTING.md)
+See [Room Scripting](/scripting/docs/SCRIPTING_ROOMS.md)
 
 # Mob Scripting
-See [Mob Scripting](MOB_SCRIPTING.md)
+See [Mob Scripting](/scripting/docs/SCRIPTING_MOBS.md)
 
 # Script Functions
 
-[Mob Functions](FUNCTIONS_MOBS.md) - Functions that query or alter mob data.
+[ActorObject Functions](/scripting/docs/FUNCTIONS_ACTORS.md) - Functions that query or alter user/mob data.
 
-[Room Functions](FUNCTIONS_ROOMS.md) - Functions that query or alter room data.
+[RoomObject Functions](/scripting/docs/FUNCTIONS_ROOMS.md) - Functions that query or alter room data.
 
-[User Functions](FUNCTIONS_USERS.md) - Functions that query or alter user data.
+[Utility Functions](/scripting/docs/FUNCTIONS_UTIL.md) - Helper and info functions.
 
-[Utility Functions](FUNCTIONS_UTIL.md) - Helper and info functions.
-
-[Messaging Functions](FUNCTIONS_MESSAGING.md) - Helper and info functions.
+[Messaging Functions](/scripting/docs/FUNCTIONS_MESSAGING.md) - Helper and info functions.
 
 # Special symbols in user or mob commands:
 

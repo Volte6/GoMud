@@ -44,7 +44,7 @@ function onGive(mob, room, eventDetails) {
             mob.Command("say Thank you for taking care of that problem. The kingdom is indebted to you.")
             mob.Command("say I will add this artifact to the treasury. Here is some gold to compensate you.")
 
-            mob.GainGold(1250);
+            mob.AddGold(1250);
             mob.Command("give 1250 gold @" + String(eventDetails.sourceId));
 
             user.GiveQuest("2-end")

@@ -4,13 +4,6 @@ description: You're very sneaky.
 secret: false
 roundinterval: 1
 triggercount: 15
-messages:
-  start:
-    user: You feel sneaky.
-    room: '{username} disappears into the shadows'
-  end:
-    user: You no longer feel sneaky.
-    room: '{username} emerges from the shadows.'
 flags:
   - hidden
   - cancel-on-combat
