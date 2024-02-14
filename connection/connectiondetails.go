@@ -13,6 +13,7 @@ type ConnectState uint32
 
 const (
 	Login ConnectState = iota
+	LoggedIn
 	Zombie
 	MaxHistory = 10
 )

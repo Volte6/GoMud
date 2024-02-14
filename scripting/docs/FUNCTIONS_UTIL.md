@@ -11,6 +11,9 @@ General purpose global functions
   - [UtilGetMinutesToTurns(minutes int) int](#utilgetminutestoturnsminutes-int-int)
   - [UtilStripPrepositions(input string) string](#utilstripprepositionsinput-string-string)
   - [UtilDiceRoll(diceQty int, diceSides int) int](#utildicerolldiceqty-int-dicesides-int-int)
+  - [UtilGetTime() object](#utilgettime-object)
+  - [UtilSetTimeDay()](#utilsettimeday)
+  - [UtilSetTime(hour int, minutes int)](#utilsettimehour-int-minutes-int)
 
 ## [UtilGetRoundNumber() int](/scripting/util_func.go) 
 _Gets the current Round number, which always counts up_
@@ -72,3 +75,31 @@ Simulates a dice roll and returns a result.
 | --- | --- |
 | diceQty | How many dice to roll. |
 | diceSides | How many sides on each dice. |
+
+## [UtilGetTime() object](/scripting/util_func.go)
+Returns an object with details about the current day/time
+
+The returned `object` has the following properties:
+|  Property | Explanation |
+| --- | --- |
+| object.Day | `int` representing how many days have passed. |
+| object.Hour | `int` current hour. |
+| object.Hour24 | `int` current hour in 24 hour format. |
+| object.Minute | `int` current minute. |
+| object.AmPm | `AM` or `PM` |
+| object.Night | `true` if is it currently nighttime. |
+| object.DayStart | Hour that day starts (24 hour format). |
+| object.NightStart | Hour that night starts (24 hour format). |
+
+## [UtilSetTimeDay()](/scripting/util_func.go)
+Sets the time to 1 round before day breaks.
+
+## [UtilSetTime(hour int, minutes int)](/scripting/util_func.go)
+Sets the game time to a specific `hour:minutes`, in 24 hour time.
+
+_Example: `5:30pm` would be `UtilSetTime(17, 30)`_
+
+|  Argument | Explanation |
+| --- | --- |
+| hour | The hour to set to (0-23) |
+| minutes | The minutes to set to (0-59) |

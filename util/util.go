@@ -25,11 +25,12 @@ import (
 )
 
 var (
-	turnCount    uint64 = 0
-	roundCount   uint64 = 0
-	timeTrackers        = map[string]*Accumulator{}
-	serverAddr   string = `Unknown`
-	serverSeed   string = ``
+	turnCount     uint64 = 0
+	roundCount    uint64 = 0
+	timeTrackers         = map[string]*Accumulator{}
+	serverAddr    string = `Unknown`
+	serverSeed    string = ``
+	dayResetRound uint64 = 0
 
 	strippablePrepositions = []string{
 		`onto`,

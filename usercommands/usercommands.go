@@ -185,11 +185,16 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 
 	finalResponse := NewUserCommandResponse(userId)
 
-	response, err := scripting.TryRoomCommand(keywords.TryCommandAlias(cmd), rest, userId, cmdQueue)
-	finalResponse.AbsorbMessages(response)
-	if response.Handled {
-		finalResponse.Handled = true
-		return finalResponse, err
+	// Do not allow scripts to intercept server commands
+	if cmd != `server` {
+
+		response, err := scripting.TryRoomCommand(keywords.TryCommandAlias(cmd), rest, userId, cmdQueue)
+		finalResponse.AbsorbMessages(response)
+		if response.Handled {
+			finalResponse.Handled = true
+			return finalResponse, err
+		}
+
 	}
 
 	cmd = strings.ToLower(cmd)

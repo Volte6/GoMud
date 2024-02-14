@@ -12,7 +12,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/prompt"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/util"
@@ -318,22 +318,12 @@ func (u *UserRecord) GetPrompt(fullRedraw bool) string {
 				}
 
 			case "{t}":
-				_, _, _, _, night := configs.GetConfig().GetDate(util.GetRoundCount(), 0)
-
-				if night {
-					ansiPrompt = strings.ReplaceAll(ansiPrompt, "{t}", `<ansi fg="night">•</ansi>`)
-				} else {
-					ansiPrompt = strings.ReplaceAll(ansiPrompt, "{t}", `<ansi fg="day">⚙</ansi>`)
-				}
+				gd := gametime.GetDate()
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{t}", gd.String(true))
 
 			case "{T}":
-				_, hour, minute, ampm, night := configs.GetConfig().GetDate(util.GetRoundCount(), 0)
-
-				if night {
-					ansiPrompt = strings.ReplaceAll(ansiPrompt, "{T}", fmt.Sprintf(`<ansi fg="night">%d:%02d%s</ansi>`, hour, minute, ampm))
-				} else {
-					ansiPrompt = strings.ReplaceAll(ansiPrompt, "{T}", fmt.Sprintf(`<ansi fg="day">%d:%02d%s</ansi>`, hour, minute, ampm))
-				}
+				gd := gametime.GetDate()
+				ansiPrompt = strings.ReplaceAll(ansiPrompt, "{T}", gd.String())
 			}
 
 		}

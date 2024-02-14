@@ -1,9 +1,7 @@
 package usercommands
 
 import (
-	"fmt"
-
-	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/util"
 )
 
@@ -11,13 +9,14 @@ func Time(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 	response := NewUserCommandResponse(userId)
 
-	_, hour, minute, ampm, isNight := configs.GetConfig().GetDate(util.GetRoundCount(), 0)
+	gd := gametime.GetDate()
+
 	dayNight := `day`
-	if isNight {
+	if gd.Night {
 		dayNight = `night`
 	}
 
-	response.SendUserMessage(userId, fmt.Sprintf("<ansi fg=\"%s\">It is now %d:%02d%s (%s).</ansi>", dayNight, hour, minute, ampm, dayNight), true)
+	response.SendUserMessage(userId, `It is now `+gd.String()+`. It is `+dayNight+`.`, true)
 
 	response.Handled = true
 	return response, nil

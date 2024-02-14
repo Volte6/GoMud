@@ -10,6 +10,7 @@ import (
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/combat"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
@@ -26,15 +27,15 @@ func (w *World) roundTick() {
 
 	c := configs.GetConfig()
 
-	_, _, _, _, isNightBefore := c.GetDate(util.GetRoundCount(), 0)
+	gdBefore := gametime.GetDate()
 
 	util.IncrementRoundCount()
 	roundNumber := util.GetRoundCount()
 
-	_, _, _, _, isNight := c.GetDate(roundNumber, 0)
+	gdNow := gametime.GetDate()
 
-	if isNightBefore != isNight {
-		if isNight {
+	if gdBefore.Night != gdNow.Night {
+		if gdNow.Night {
 			sunsetTxt, _ := templates.Process("generic/sunset", nil)
 			w.Broadcast(sunsetTxt)
 		} else {

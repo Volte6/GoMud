@@ -61,6 +61,8 @@ type config struct {
 	roundsPerMinute float64 // calculated and cached when data is validated.
 
 	overrides map[string]any
+
+	validated bool
 }
 
 var (
@@ -152,7 +154,7 @@ func SetVal(propName string, propVal string, force ...bool) error {
 
 	configData.SetOverrides(overrides)
 
-	configData.validate()
+	configData.Validate()
 
 	// save the new config.
 	writeBytes, err := yaml.Marshal(configData.GetOverrides())
@@ -256,7 +258,7 @@ func (c *config) SetOverrides(overrides map[string]any) error {
 }
 
 // Ensures certain ranges and defaults are observed
-func (c *config) validate() {
+func (c *config) Validate() {
 
 	if c.MaxCPUCores < 0 {
 		c.MaxCPUCores = 0 // default
@@ -391,6 +393,8 @@ func (c *config) validate() {
 	c.turnsPerSave = c.RoundsPerAutoSave * c.turnsPerRound
 	c.turnsPerSecond = 1000 / c.TurnMs
 	c.roundsPerMinute = 60 / float64(c.RoundSeconds)
+
+	c.validated = true
 }
 
 func (c config) GetDeathXPPenalty() (setting string, pct float64) {
@@ -481,44 +485,13 @@ func (c config) IsBannedName(name string) bool {
 	return false
 }
 
-func (c config) GetDate(currentRound uint64, dayResetRound uint64) (day int, hour int, minute int, ampm string, night bool) {
-
-	currentRoundAdjusted := (util.GetRoundCount() - dayResetRound)
-	roundOfDay := int(currentRoundAdjusted % uint64(c.RoundsPerDay))
-
-	hourFloat, minutesFloat := math.Modf(float64(roundOfDay) / float64(c.RoundsPerDay) * 24)
-
-	hour = int(hourFloat)
-
-	night = false
-	halfNight := int(math.Floor(float64(c.NightHours) / 2))
-	nightStart := 23 - (halfNight - 1)
-	nightEnd := c.NightHours - halfNight
-	if hour >= nightStart || hour < nightEnd {
-		night = true
-	}
-
-	ampm = `AM`
-	if hour >= 12 {
-		ampm = `PM`
-		hour -= 12
-	}
-
-	if hour == 0 {
-		hour = 12
-	}
-
-	minute = int(math.Floor(minutesFloat * 60))
-
-	day = 1 + int(math.Floor(float64(currentRoundAdjusted)/float64(c.RoundsPerDay)))
-
-	return day, hour, minute, ampm, night
-}
-
 func GetConfig() config {
 	configDataLock.RLock()
 	defer configDataLock.RUnlock()
 
+	if !configData.validated {
+		configData.Validate()
+	}
 	return configData
 }
 
@@ -564,7 +537,7 @@ func ReloadConfig() error {
 		}
 	}
 
-	tmpConfigData.validate()
+	tmpConfigData.Validate()
 
 	configDataLock.Lock()
 	defer configDataLock.Unlock()

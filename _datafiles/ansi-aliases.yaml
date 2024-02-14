@@ -116,6 +116,7 @@ color8:
   suggested-text: 90
   night: blue
   day: 96
+  day-dusk: yellow
 color256:
   table-title: green
   userid: black
@@ -226,3 +227,4 @@ color256:
   suggested-text: 8
   night: 17
   day: 228
+  day-dusk: 214
