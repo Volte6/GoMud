@@ -48,6 +48,7 @@ type UserRecord struct {
 	connectionTime time.Time
 	lock           sync.RWMutex
 	tempDataStore  map[string]any
+	activePrompt   *prompt.Prompt
 }
 
 func NewUserRecord(userId int, connectionId uint64) *UserRecord {
@@ -134,15 +135,15 @@ func (u *UserRecord) GetConnectTime() time.Time {
 	return u.connectionTime
 }
 
-func (u *UserRecord) GetPrompt(fullRedraw bool) string {
+func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 
 	u.lock.RLock()
 	defer u.lock.RUnlock()
 
 	strOut := strings.Builder{}
 
-	if cmdPrompt := prompt.Get(u.UserId); cmdPrompt != nil {
-		if activeQuestion := cmdPrompt.GetNextQuestion(); activeQuestion != nil {
+	if u.activePrompt != nil {
+		if activeQuestion := u.activePrompt.GetNextQuestion(); activeQuestion != nil {
 			strOut.WriteString(activeQuestion.String())
 		}
 	}
@@ -440,4 +441,37 @@ func (u *UserRecord) SetPassword(pw string) error {
 
 func (u *UserRecord) ConnectionId() uint64 {
 	return u.connectionId
+}
+
+// Prompt related functionality
+func (u *UserRecord) StartPrompt(command string, rest string) (*prompt.Prompt, bool) {
+
+	u.lock.RLock()
+	defer u.lock.RUnlock()
+
+	if u.activePrompt != nil {
+		// If it's the same prompt, return the existing one
+		if u.activePrompt.Command == command && u.activePrompt.Rest == rest {
+			return u.activePrompt, false
+		}
+	}
+
+	// If no prompt found or it seems like a new prompt, create a new one and replace the old
+	u.activePrompt = prompt.New(command, rest)
+
+	return u.activePrompt, false
+}
+
+func (u *UserRecord) GetPrompt() *prompt.Prompt {
+	u.lock.RLock()
+	defer u.lock.RUnlock()
+
+	return u.activePrompt
+}
+
+func (u *UserRecord) ClearPrompt() {
+	u.lock.Lock()
+	defer u.lock.Unlock()
+
+	u.activePrompt = nil
 }

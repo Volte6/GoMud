@@ -153,8 +153,6 @@ func (w *World) LeaveWorld(userId int) {
 		connectionIds := users.GetConnectionIds(room.GetPlayers())
 		tplTxt, _ := templates.Process("player-despawn", user.Character.Name)
 		w.connectionPool.SendTo([]byte(tplTxt), connectionIds...)
-
-		prompt.Clear(userId)
 	}
 
 }
@@ -169,7 +167,7 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 	}
 
 	// If engaged in a prompt just try and match an option
-	if promptInfo := prompt.Get(userId); promptInfo != nil {
+	if promptInfo := user.GetPrompt(); promptInfo != nil {
 		if qInfo := promptInfo.GetNextQuestion(); qInfo != nil {
 
 			if len(qInfo.Options) > 0 {
@@ -666,7 +664,7 @@ func (w *World) processInput(wi WorldInput) {
 
 	var activeQuestion *prompt.Question = nil
 
-	if cmdPrompt := prompt.Get(wi.FromId); cmdPrompt != nil {
+	if cmdPrompt := user.GetPrompt(); cmdPrompt != nil {
 
 		if activeQuestion = cmdPrompt.GetNextQuestion(); activeQuestion != nil {
 
@@ -679,7 +677,7 @@ func (w *World) processInput(wi WorldInput) {
 			}
 		} else {
 			// If a prompt was found, but no pending questions, clear it.
-			prompt.Clear(wi.FromId)
+			user.ClearPrompt()
 		}
 
 	}
@@ -778,7 +776,7 @@ func (w *World) processInput(wi WorldInput) {
 		break
 	}
 
-	worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(user.GetPrompt(true))), connId)
+	worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
 
 }
 
@@ -954,7 +952,7 @@ func (w *World) DispatchMessages(u util.MessageQueue) {
 				message.Msg = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Msg
 				w.connectionPool.SendTo([]byte(message.Msg), user.ConnectionId())
 				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-					redrawPrompts[user.ConnectionId()] = user.GetPrompt(true)
+					redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
 				}
 			}
 
@@ -991,7 +989,7 @@ func (w *World) DispatchMessages(u util.MessageQueue) {
 						message.Msg = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Msg
 						w.connectionPool.SendTo([]byte(message.Msg), user.ConnectionId())
 						if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-							redrawPrompts[user.ConnectionId()] = user.GetPrompt(true)
+							redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
 						}
 					}
 				}

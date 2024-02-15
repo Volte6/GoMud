@@ -6,7 +6,6 @@ import (
 
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/prompt"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
@@ -117,7 +116,7 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 		response.SendUserMessage(userId, "", true)
 		response.SendUserMessage(userId, "Your keyring already has this lock on it.", true)
 
-		prompt.Clear(userId)
+		user.ClearPrompt()
 
 		response.SendUserMessage(userId, ``, true)
 		response.SendUserMessage(userId, `<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You Successfully picked the lock!</ansi> <ansi fg="yellow-bold">***</ansi>`, true)
@@ -144,7 +143,7 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 	}
 
 	// Get if already exists, otherwise create new
-	cmdPrompt, isNew := prompt.Init(userId, `picklock`, rest)
+	cmdPrompt, isNew := user.StartPrompt(`picklock`, rest)
 
 	if isNew {
 		response.SendUserMessage(userId, GetLockRender(sequence, keyring_sequence), true)
@@ -162,7 +161,7 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 	}
 
 	if question.Response == `quit` {
-		prompt.Clear(userId)
+		user.ClearPrompt()
 		response.SendUserMessage(userId, `Type '<ansi fg="command">help picklock</ansi>' for more information on picking locks.`, true)
 		response.Handled = true
 		return response, nil
@@ -200,7 +199,7 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 		response.SendUserMessage(userId, ``, true)
 		response.SendUserMessage(userId, `<ansi fg="green-bold">A satisfying *click* tells you that you're making progress...</ansi>`, true)
 	} else {
-		prompt.Clear(userId)
+		user.ClearPrompt()
 		response.Handled = true
 		return response, nil
 	}
@@ -230,7 +229,8 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 			room.Exits[exitName] = exitInfo
 		}
 
-		prompt.Clear(userId)
+		user.ClearPrompt()
+
 		response.Handled = true
 		return response, nil
 

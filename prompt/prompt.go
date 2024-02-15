@@ -42,63 +42,17 @@ type Question struct {
 
 type Prompt struct {
 	lock      sync.RWMutex
-	UserId    int         // Who see's this prompt?
 	Command   string      // Where does it call when complete?
 	Rest      string      // What is the 'rest' of the command
 	Questions []*Question // All questions so far
 }
 
-var (
-	activePromptLock = sync.RWMutex{}
-	activePrompts    = make(map[int]*Prompt, 0)
-)
-
-// Get *any* current command prompt for the user
-func Get(userId int) *Prompt {
-
-	activePromptLock.RLock()
-	defer activePromptLock.RUnlock()
-
-	if promptPtr, ok := activePrompts[userId]; ok {
-		return promptPtr
-	}
-	return nil
-}
-
-// Initialize a new prompt from a command
-func Init(userId int, command string, rest string) (*Prompt, bool) {
-
-	activePromptLock.Lock()
-	defer activePromptLock.Unlock()
-
-	if promptPtr, ok := activePrompts[userId]; ok {
-		if promptPtr.Command == command {
-			if promptPtr.Rest == rest {
-				return promptPtr, false
-			}
-		}
-	}
-
-	delete(activePrompts, userId)
-
-	promptPtr := &Prompt{
-		UserId:    userId,
+func New(command string, rest string) *Prompt {
+	return &Prompt{
 		Command:   command,
 		Rest:      rest,
 		Questions: make([]*Question, 0),
 	}
-
-	activePrompts[userId] = promptPtr
-
-	return promptPtr, true
-}
-
-func Clear(userId int) {
-
-	activePromptLock.Lock()
-	defer activePromptLock.Unlock()
-
-	delete(activePrompts, userId)
 }
 
 // Returns the next pending question.
