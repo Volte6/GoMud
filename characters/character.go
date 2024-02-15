@@ -40,6 +40,7 @@ const (
 	RenderHealth NameRenderFlag = iota
 	RenderAggro
 	RenderQuest
+	RenderLightSource
 )
 
 type Character struct {
@@ -413,11 +414,13 @@ func (c *Character) GetPlayerName(viewingUserId int, renderFlags ...NameRenderFl
 	}
 
 	includeHealth := false
-	for _, f := range renderFlags {
-		if f == RenderHealth {
+	for _, flag := range renderFlags {
+		if flag == RenderHealth {
 			includeHealth = true
 		}
-
+		if flag == RenderLightSource {
+			f.LightSource = true
+		}
 	}
 
 	if includeHealth {

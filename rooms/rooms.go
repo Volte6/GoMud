@@ -47,7 +47,7 @@ type SpawnInfo struct {
 	ScriptTag    string   `yaml:"scripttag,omitempty"`    // (optional) if set, will override the mob's script tag
 }
 
-type FindFlag uint8
+type FindFlag uint16
 
 const (
 	AffectsNone   = ""
@@ -55,18 +55,19 @@ const (
 	AffectsRoom   = "room"   // Does it affect everyone in the room?
 
 	// Useful for finding mobs/players
-	FindCharmed        FindFlag = 0b00000001 // charmed
-	FindNeutral        FindFlag = 0b00000010 // Not aggro, not charmed, not Hostile
-	FindFightingPlayer FindFlag = 0b00000100 // aggro vs. a player
-	FindFightingMob    FindFlag = 0b00001000 // aggro vs. a mob
-	FindHostile        FindFlag = 0b00010000 // will auto-attack players
-	FindMerchant       FindFlag = 0b00100000 // is a merchant
-	FindDowned         FindFlag = 0b01000000 // hp < 1
-	FindBuffed         FindFlag = 0b10000000 // has a buff
+	FindCharmed        FindFlag = 0b000000001 // charmed
+	FindNeutral        FindFlag = 0b000000010 // Not aggro, not charmed, not Hostile
+	FindFightingPlayer FindFlag = 0b000000100 // aggro vs. a player
+	FindFightingMob    FindFlag = 0b000001000 // aggro vs. a mob
+	FindHostile        FindFlag = 0b000010000 // will auto-attack players
+	FindMerchant       FindFlag = 0b000100000 // is a merchant
+	FindDowned         FindFlag = 0b001000000 // hp < 1
+	FindBuffed         FindFlag = 0b010000000 // has a buff
+	FindHasLight       FindFlag = 0b100000000 // has a light source
 	// Combinatorial flags
 	FindFighting          = FindFightingPlayer | FindFightingMob // Currently in combat (aggro)
 	FindIdle              = FindCharmed | FindNeutral            // Not aggro or hostile
-	FindAll      FindFlag = 0b11111111
+	FindAll      FindFlag = 0b111111111
 )
 
 type Sign struct {
@@ -1004,6 +1005,11 @@ func (r *Room) GetPlayers(findTypes ...FindFlag) []int {
 			}
 		}
 
+		if typeFlag&FindHasLight == FindHasLight && user.Character.HasBuffFlag(buffs.EmitsLight) {
+			playerMatches = append(playerMatches, userId)
+			continue
+		}
+
 		isCharmed = user.Character.IsCharmed()
 
 		if isCharmed && typeFlag&FindCharmed == FindCharmed {
@@ -1083,6 +1089,11 @@ func (r *Room) GetMobs(findTypes ...FindFlag) []int {
 				mobMatches = append(mobMatches, mobId)
 				continue
 			}
+		}
+
+		if typeFlag&FindHasLight == FindHasLight && mob.Character.HasBuffFlag(buffs.EmitsLight) {
+			mobMatches = append(mobMatches, mobId)
+			continue
 		}
 
 		// Useful to find any mobs that will always attack players
@@ -1545,11 +1556,14 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 
 	var roomSymbol string = r.MapSymbol
 	var roomLegend string = r.MapLegend
-	if roomSymbol == `` && r.Biome != `` {
-		if b, found := GetBiome(r.Biome); found {
-			roomSymbol = string(b.Symbol())
-			roomLegend = b.Name()
-		}
+
+	b := r.GetBiome()
+
+	if b.symbol != 0 {
+		roomSymbol = string(b.symbol)
+	}
+	if b.name != `` {
+		roomLegend = b.name
 	}
 
 	details := &RoomTemplateDetails{
@@ -1564,6 +1578,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		RoomSymbol:     roomSymbol,
 		RoomLegend:     roomLegend,
 		Nouns:          r.GetNouns(),
+		IsDark:         b.IsDark(),
 	}
 
 	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {
@@ -1590,6 +1605,9 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 
 	for _, playerId := range r.players {
 		if playerId != user.UserId {
+
+			renderFlags := append([]characters.NameRenderFlag{}, nameFlags...)
+
 			player := users.GetByUserId(playerId)
 			if player != nil {
 
@@ -1597,7 +1615,11 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 					continue
 				}
 
-				pName := player.Character.GetPlayerName(user.UserId, nameFlags...)
+				if player.Character.HasBuffFlag(buffs.EmitsLight) {
+					renderFlags = append(renderFlags, characters.RenderLightSource)
+				}
+
+				pName := player.Character.GetPlayerName(user.UserId, renderFlags...)
 				details.VisiblePlayers = append(details.VisiblePlayers, pName)
 			}
 		}
@@ -1771,4 +1793,17 @@ func (r *Room) Filename() string {
 func (r *Room) Filepath() string {
 	zone := ZoneNameSanitize(r.Zone)
 	return util.FilePath(zone, `/`, fmt.Sprintf("%d.yaml", r.RoomId))
+}
+
+func (r *Room) GetBiome() BiomeInfo {
+
+	if r.Biome == `` {
+		if r.Zone != `` {
+			r.Biome = GetZoneBiome(r.Zone)
+		}
+	}
+
+	bInfo, _ := GetBiome(r.Biome)
+
+	return bInfo
 }

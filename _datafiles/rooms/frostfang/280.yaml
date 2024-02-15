@@ -5,6 +5,7 @@ description: The old dirt road stretches ahead of you, its path well-trodden by 
   travelers over the years. Here, the city's influence is still felt, with buildings
   gradually giving way to open fields on either side of the road. The air is filled
   with the distant sounds of the city's activities fading into the serene countryside.
+biome: city
 exits:
   east:
     roomid: 281

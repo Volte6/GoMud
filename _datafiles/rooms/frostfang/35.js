@@ -54,7 +54,9 @@ function onCommand_say(rest, user, room) {
         return false;
     }
 
-    SendUserMessage(user.UserId(), "The eyes of the stone statues glow as you say the words aloud. You feel a sense of warmth wash over you, and the biting cold air no longer bothers you.");
+    SendUserMessage(user.UserId(), "The eyes of the stone statues glow as you say the words aloud.");
+    SendUserMessage(user.UserId(), "You feel a sense of warmth wash over you, and the biting cold air no longer bothers you.");
+    
     SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" chants something unintelligible, and the eyes of the stone statues glow briefly before fading back to ordinary stone.");
 
     if ( user.HasQuest("3-end") ) {

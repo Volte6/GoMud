@@ -9,6 +9,7 @@ description: Further into The Mirror Caves, you discover a chamber that maintain
   statues, while overhead, stalactites drip slowly, their rhythmic patter a gentle
   reminder of the cave's quiet dynamism. The air here is tinged with a cool dampness,
   carrying the essence of the deep earth.
+biome: cave
 exits:
   north:
     roomid: 246

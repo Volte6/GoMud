@@ -6,6 +6,7 @@ description: As you stand at the fork in the road, your choices become apparent.
   a broken-down caravan in the distance, its skeletal frame a testament to past travelers'
   misfortune. To the east, the foreboding presence of the Dark Forest looms, its dense,
   snowy trees casting long shadows over a worn and overgrown road.
+biome: city
 exits:
   east:
     roomid: 305

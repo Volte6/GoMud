@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
@@ -139,14 +140,18 @@ func Go(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, 
 		room.RemoveMob(mobId)
 		destRoom.AddMob(mobId)
 
+		c := configs.GetConfig()
+
 		// Tell the old room they are leaving
 		response.SendRoomMessage(room.RoomId,
-			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> leaves towards the <ansi fg="exit">%s</ansi> exit.`, mob.Character.Name, exitName),
-			true)
+			fmt.Sprintf(c.ExitRoomMessageWrapper,
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> leaves towards the <ansi fg="exit">%s</ansi> exit.`, mob.Character.Name, exitName),
+			), true)
 		// Tell the new room they have arrived
 		response.SendRoomMessage(destRoom.RoomId,
-			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> enters from %s.`, mob.Character.Name, enterFromExit),
-			true)
+			fmt.Sprintf(c.EnterRoomMessageWrapper,
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> enters from %s.`, mob.Character.Name, enterFromExit),
+			), true)
 
 		response.Handled = true
 	}

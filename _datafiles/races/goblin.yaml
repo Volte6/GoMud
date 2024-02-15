@@ -1,6 +1,7 @@
 raceid: 5
 name: Goblin
 description: A small magical being with pointy ears.
+nightvision: true
 size: small
 unarmedname: claws
 tnlscale: 2.0

@@ -7,6 +7,7 @@ description: As you explore the cleared offshoot, you can't help but marvel at t
   the heart of the forest. The sunlight filters through the gaps in the trees, creating
   patterns of light and shadow on the ground. Fresh animal tracks crisscross the path,
   a testament to the return of life to this rejuvenated area.
+biome: city
 exits:
   northeast:
     roomid: 303

@@ -9,6 +9,7 @@ description: In this secluded part of The Mirror Caves, you come across a chambe
   along with the occasional drip of water from the ceiling, maintains the cave's enigmatic
   ambiance. The air is fresh, carrying a hint of moisture and earth, a silent testament
   to the ever-present, unseen forces shaping the cavern's depths.
+biome: cave
 exits:
   east:
     roomid: 218

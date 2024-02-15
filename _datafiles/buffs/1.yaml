@@ -1,8 +1,8 @@
 buffid: 1
-name: Admin Hidden
-description: You are super well hidden!
+name: Will o' the Wisp
+description: A glowing orb is following you.
 secret: false
 roundinterval: 10
-triggercount: 100
+triggercount: 1
 flags:
-  - hidden
+  - lightsource

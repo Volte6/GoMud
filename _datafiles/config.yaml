@@ -5,10 +5,11 @@
 #   You can change these options to customize the game to your liking.
 #
 #   Note: If you decide to use a custom config.yaml, it is recommended that you
-#   copy the contents of this file into your own config.yaml and then make
-#   changes to that file. When running the server, use the environment variable:
-#   CONFIG_PATH like so: CONFIG_PATH=../mudfiles/config.yaml to specify where 
-#   your custom file can be found. 
+#   copy only the properties you want to change of this file into your own 
+#   config.yaml.
+#   When running the server, use the environment variable: CONFIG_PATH like so: 
+#   CONFIG_PATH=../mudfiles/config.yaml to specify where your custom config file
+#   can be found. 
 #
 #   This way when you update the server, your custom config file will not be
 #   overwritten.
@@ -80,7 +81,7 @@ RoundSeconds: 4
 #   The chance that a player will drop a piece of worn/backpack equipment when 
 #   they die. This is a percentage, so 0.5 is 50% chance.
 OnDeathEquipmentDropChance: 1
-# - OnDeathAlwaysDropBackpack - 
+# - OnDeathAlwaysDropBackpack -
 #   If true, players will always drop their backpack contents when they die. 
 #   If false, it will failover to OnDeathEquipmentDropChance.
 OnDeathAlwaysDropBackpack: true
@@ -91,6 +92,12 @@ OnDeathAlwaysDropBackpack: true
 #   10% - lose 10% of XP
 #   50% - lose 50% of XP
 OnDeathXPPenalty: none
+# - EnterRoomMessageWrapper -
+#   Decorate entrance text with this. Put a %s where the message should be.
+EnterRoomMessageWrapper: "   <ansi fg=\"enters-message\"> >>> </ansi>%s"
+# - ExitRoomMessageWrapper -
+#   Decorate exit text with this. Put a %s where the message should be.
+ExitRoomMessageWrapper: "   <ansi fg=\"leaves-message\"> >>> </ansi>%s"
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS
@@ -101,7 +108,7 @@ OnDeathXPPenalty: none
 #   Maximum CPU cores to use. 0 for all available cores.
 #   Most of the game is single threaded, but there are a few things that can
 #   benefit from multiple cores, such as the web server and telnet server.
-MaxCPUCores: 0 
+MaxCPUCores: 0
 # - RoundsPerAutoSave -
 #   How often the server will automatically save the game state. This is a
 #   backup feature in case the server crashes. The game state is also saved

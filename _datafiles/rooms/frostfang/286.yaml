@@ -5,6 +5,7 @@ description: The Southern Road is flanked by ancient, snow-covered trees, their 
   branches reaching out like skeletal fingers against the white canvas of the land.
   The path itself is a narrow trail, partially obscured by layers of snow, with the
   occasional set of footprints, both human and animal, marking the way.
+biome: city
 exits:
   northwest:
     roomid: 285

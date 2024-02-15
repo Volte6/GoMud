@@ -33,6 +33,7 @@ type Race struct {
 	RaceId        int
 	Name          string
 	Description   string
+	NightVision   bool
 	Size          Size
 	TNLScale      float32
 	UnarmedName   string

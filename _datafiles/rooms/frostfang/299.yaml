@@ -5,6 +5,7 @@ description: Brambles and thorns encroach upon the path, making progress slow an
   arduous. The air grows heavy with a sense of impending dread, and the first eerie
   cries of unseen creatures pierce the silence. You stand at the very threshold of
   the unknown, ready to step into the foreboding depths of the Dark Forest.
+biome: city
 exits:
   east:
     roomid: 300

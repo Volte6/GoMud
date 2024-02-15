@@ -9,6 +9,7 @@ description: In a quieter section of The Mirror Caves, you encounter a chamber t
   still, almost sacred, only disturbed by the occasional sound of water droplets,
   each echoing like a whisper from the past, reverberating through the timeless expanse
   of the cave.
+biome: cave
 exits:
   south:
     roomid: 253

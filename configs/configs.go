@@ -53,6 +53,8 @@ type config struct {
 	OnDeathEquipmentDropChance float64 `yaml:"OnDeathEquipmentDropChance"` // Chance a player will drop a given piece of equipment on death
 	OnDeathAlwaysDropBackpack  bool    `yaml:"OnDeathAlwaysDropBackpack"`  // If true, players will always drop their backpack items on death
 	OnDeathXPPenalty           string  `yaml:"OnDeathXPPenalty"`           // Possible values are: none, level, 10%, 25%, 50%, 75%, 90%, 100%
+	EnterRoomMessageWrapper    string  `yaml:"EnterRoomMessageWrapper"`
+	ExitRoomMessageWrapper     string  `yaml:"ExitRoomMessageWrapper"`
 
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.
@@ -322,6 +324,22 @@ func (c *config) Validate() {
 				c.OnDeathXPPenalty = `none` // default
 			}
 		}
+	}
+
+	// Must have a message wrapper...
+	if c.EnterRoomMessageWrapper == `` {
+		c.EnterRoomMessageWrapper = `%s` // default
+	}
+	if strings.LastIndex(c.EnterRoomMessageWrapper, `%s`) < 0 {
+		c.EnterRoomMessageWrapper += `%s` // default
+	}
+
+	// Must have a message wrapper...
+	if c.ExitRoomMessageWrapper == `` {
+		c.ExitRoomMessageWrapper = `%s` // default
+	}
+	if strings.LastIndex(c.ExitRoomMessageWrapper, `%s`) < 0 {
+		c.ExitRoomMessageWrapper += `%s` // default
 	}
 
 	if c.RoundsPerAutoSave < 1 {

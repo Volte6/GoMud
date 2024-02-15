@@ -40,9 +40,10 @@ const (
 	Drunk  Flag = `drunk`
 
 	// Useful flags
-	Hidden   Flag = `hidden`
-	Accuracy Flag = `accuracy`
-	Blink    Flag = `blink`
+	Hidden     Flag = `hidden`
+	Accuracy   Flag = `accuracy`
+	Blink      Flag = `blink`
+	EmitsLight Flag = `lightsource`
 )
 
 var (
