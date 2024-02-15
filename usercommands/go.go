@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
@@ -162,20 +163,30 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 				}
 			}
 
+			c := configs.GetConfig()
+
 			// Tell the player they are moving
 			if isSneaking {
-				response.SendUserMessage(userId, fmt.Sprintf(`You <ansi fg="black-bold">sneak</ansi> towards the %s exit.`, exitName), true)
+				response.SendUserMessage(userId,
+					fmt.Sprintf(c.ExitRoomMessageWrapper,
+						fmt.Sprintf(`You <ansi fg="black-bold">sneak</ansi> towards the %s exit.`, exitName),
+					), true)
 			} else {
-				response.SendUserMessage(userId, fmt.Sprintf(`You head towards the <ansi fg="exit">%s</ansi> exit.`, exitName), true)
+				response.SendUserMessage(userId,
+					fmt.Sprintf(c.ExitRoomMessageWrapper,
+						fmt.Sprintf(`You head towards the <ansi fg="exit">%s</ansi> exit.`, exitName),
+					), true)
 
 				// Tell the old room they are leaving
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> leaves towards the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
-					true)
+					fmt.Sprintf(c.ExitRoomMessageWrapper,
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> leaves towards the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
+					), true)
 				// Tell the new room they have arrived
 				response.SendRoomMessage(destRoom.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> enters from %s.`, user.Character.Name, enterFromExit),
-					true)
+					fmt.Sprintf(c.EnterRoomMessageWrapper,
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> enters from %s.`, user.Character.Name, enterFromExit),
+					), true)
 			}
 
 			if currentParty := parties.Get(userId); currentParty != nil {
@@ -188,7 +199,7 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 						}
 						if partyUser := users.GetByUserId(partyMemberId); partyUser != nil {
 							if partyUser.Character.RoomId == room.RoomId {
-								response.SendUserMessage(partyMemberId, `You follow the party leader.`, true)
+								response.SendUserMessage(partyMemberId, `    You follow the party leader.`, true)
 								cmdQueue.QueueCommand(partyMemberId, 0, rest)
 							}
 						}
@@ -286,9 +297,13 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 		if rest == "north" || rest == "south" || rest == "east" || rest == "west" || rest == "up" || rest == "down" || rest == "northwest" || rest == "northeast" || rest == "southwest" || rest == "southeast" {
 			response.SendUserMessage(userId, "You're bumping into walls.", true)
 			if !user.Character.HasBuffFlag(buffs.Hidden) {
+
+				c := configs.GetConfig()
+
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> is bumping into walls.`, user.Character.Name),
-					true)
+					fmt.Sprintf(c.ExitRoomMessageWrapper,
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> is bumping into walls.`, user.Character.Name),
+					), true)
 			}
 			response.Handled = true
 		}

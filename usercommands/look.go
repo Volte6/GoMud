@@ -5,8 +5,10 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
@@ -33,6 +35,31 @@ func Look(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
 		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+	}
+
+	isDark := gametime.IsNight()
+	biome := room.GetBiome()
+	if biome.IsDark() {
+		isDark = true
+	}
+	lightSource := false
+
+	// If someone has light, cancel the darkness
+	if isDark {
+		if mobInstanceIds := room.GetMobs(rooms.FindHasLight); len(mobInstanceIds) > 0 {
+			lightSource = true
+		} else if userIds := room.GetPlayers(rooms.FindHasLight); len(userIds) > 0 {
+			lightSource = true
+		}
+	}
+
+	if isDark && !lightSource {
+		raceInfo := races.GetRace(user.Character.RaceId)
+		if !raceInfo.NightVision {
+			response.SendUserMessage(userId, `You can't see anything!`, true)
+			response.Handled = true
+			return response, nil
+		}
 	}
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
@@ -94,6 +121,22 @@ func Look(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		}
 
 		if lookRoomId > 0 {
+
+			if isDark && !lightSource {
+
+				raceInfo := races.GetRace(user.Character.RaceId)
+				if !raceInfo.NightVision {
+
+					biome := room.GetBiome()
+					if !biome.IsLit() {
+						response.SendUserMessage(userId, `It's too dark to see anything in that direction.`, true)
+						response.Handled = true
+						return response, nil
+					}
+
+				}
+
+			}
 
 			exitInfo := room.Exits[exitName]
 			if exitInfo.Lock.IsLocked() {

@@ -9,6 +9,7 @@ description: Within the labyrinth of The Mirror Caves, you find yourself in yet 
   meeting in the middle to form natural pillars that add to the maze-like quality
   of the cave. The air is cool and echoes with the distant, indistinct sounds of water
   droplets hitting stone, a constant reminder of the cave's deep, hidden life.
+biome: cave
 exits:
   east:
     roomid: 233

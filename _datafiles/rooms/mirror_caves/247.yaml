@@ -9,6 +9,7 @@ description: Deeper within The Mirror Caves, you find yourself in a chamber that
   of a distant underground stream adds a soothing backdrop to this natural sanctuary.
   The air, cool and crisp, fills the chamber with a sense of purity and untouched
   antiquity, a quiet ode to the enduring beauty of these subterranean depths.
+biome: cave
 exits:
   north:
     roomid: 245

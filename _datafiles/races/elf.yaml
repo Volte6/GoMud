@@ -1,6 +1,7 @@
 raceid: 2
 name: Elf
 description: A magical being with pointy ears.
+nightvision: true
 size: medium
 unarmedname: fists
 angrycommands: 

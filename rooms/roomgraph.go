@@ -426,9 +426,12 @@ func (r *RoomGraph) addNode(sourceRoomNode *roomNode, direction string, roomId i
 
 	mapSymbol := newRoomData.MapSymbol
 	mapLegend := newRoomData.MapLegend
-	if mapSymbol == `` && newRoomData.Biome != `` {
-		if b, found := GetBiome(newRoomData.Biome); found {
+	if mapSymbol == `` {
+		b := newRoomData.GetBiome()
+		if b.symbol != 0 {
 			mapSymbol = string(b.symbol)
+		}
+		if b.name != `` {
 			mapLegend = b.name
 		}
 	}
@@ -548,9 +551,12 @@ func (r *RoomGraph) Build(rootRoomId int, overrideRoomIdSymbols map[int]rune) er
 
 	mapSymbol := roomNow.MapSymbol
 	mapLegend := roomNow.MapLegend
-	if mapSymbol == `` && roomNow.Biome != `` {
-		if b, found := GetBiome(roomNow.Biome); found {
+	if mapSymbol == `` {
+		b := roomNow.GetBiome()
+		if b.symbol != 0 {
 			mapSymbol = string(b.symbol)
+		}
+		if b.name != `` {
 			mapLegend = b.name
 		}
 	}

@@ -115,9 +115,8 @@ func (a ScriptActor) GiveQuest(questId string) {
 			}
 			return
 		}
-	} else if a.mobRecord != nil {
-		a.characterRecord.GiveQuestToken(questId)
 	}
+	a.characterRecord.GiveQuestToken(questId)
 
 }
 

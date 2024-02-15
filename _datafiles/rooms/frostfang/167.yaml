@@ -11,6 +11,7 @@ description: Outside of the frost-covered gates to the west of Frostfang, the bi
   from the blizzard, like ghostly sentinels watching over this desolate expanse. Here,
   at the threshold of the Whispering Wastes, you feel a profound sense of isolation,
   standing in a world where few dare to tread.
+biome: city
 exits:
   east:
     roomid: 35

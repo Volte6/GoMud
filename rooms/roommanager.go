@@ -43,8 +43,9 @@ const (
 )
 
 type ZoneInfo struct {
-	RootRoomId int
-	RoomIds    map[int]struct{}
+	RootRoomId   int
+	DefaultBiome string // city, swamp etc. see biomes.go
+	RoomIds      map[int]struct{}
 }
 
 type RoomTemplateDetails struct {
@@ -60,6 +61,7 @@ type RoomTemplateDetails struct {
 	RoomLegend         string
 	Nouns              []string
 	TinyMapDescription string
+	IsDark             bool
 }
 
 var (
@@ -421,6 +423,7 @@ func loadAllRoomZones() error {
 
 		if loadedRoom.ZoneRoot {
 			zoneInfo.RootRoomId = loadedRoom.RoomId
+			zoneInfo.DefaultBiome = loadedRoom.Biome
 		}
 
 		roomManager.zones[loadedRoom.Zone] = zoneInfo
@@ -677,6 +680,17 @@ func FindZoneName(zone string) string {
 	}
 
 	return ""
+}
+
+func GetZoneBiome(zone string) string {
+	roomManager.Lock()
+	defer roomManager.Unlock()
+
+	if z, ok := roomManager.zones[zone]; ok {
+		return z.DefaultBiome
+	}
+
+	return ``
 }
 
 func MoveToZone(roomId int, newZoneName string) error {

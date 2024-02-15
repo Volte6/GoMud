@@ -117,6 +117,8 @@ color8:
   night: blue
   day: 96
   day-dusk: yellow
+  enters-message: 8
+  leaves-message: 8
 color256:
   table-title: green
   userid: black
@@ -228,3 +230,5 @@ color256:
   night: 17
   day: 228
   day-dusk: 214
+  enters-message: 8
+  leaves-message: 8

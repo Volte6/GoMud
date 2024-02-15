@@ -6,6 +6,8 @@ type BiomeInfo struct {
 	name           string
 	symbol         rune
 	description    string
+	darkArea       bool // Whether is always dark
+	litArea        bool // Whether is always lit
 	requiredItemId int  // item id required to move into any room with this biome
 	usesItem       bool // Whether it "uses" the item (i.e. consumes it or decreases its uses left) when moving into a room with this biome
 }
@@ -34,16 +36,26 @@ func (bi BiomeInfo) UsesItem() bool {
 	return bi.usesItem
 }
 
+func (bi BiomeInfo) IsLit() bool {
+	return bi.litArea && !bi.darkArea
+}
+
+func (bi BiomeInfo) IsDark() bool {
+	return !bi.litArea && bi.darkArea
+}
+
 var (
 	AllBiomes = map[string]BiomeInfo{
 		`city`: {
 			name:        `City`,
 			symbol:      '•',
+			litArea:     true,
 			description: `Cities are generally well protected, with well built roads. Usually they will have shops, inns, and law enforcement. Fighting and Killing in cities can lead to a lasting bad reputation.`,
 		},
 		`house`: {
 			name:        `House`,
 			symbol:      '⌂',
+			litArea:     true,
 			description: `A standard dwelling, houses can appear almost anywhere. They are usually safe, but may be abandoned or occupied by hostile creatures.`,
 		},
 		`shore`: {
@@ -60,6 +72,7 @@ var (
 		`forest`: {
 			name:        `Forest`,
 			symbol:      '♣',
+			darkArea:    true,
 			description: `Forests are wild areas full of trees. Animals and monsters often live here.`,
 		},
 		`mountains`: {
@@ -75,6 +88,7 @@ var (
 		`swamp`: {
 			name:        `Swamp`,
 			symbol:      '♨',
+			darkArea:    true,
 			description: `Swamps are wet, muddy areas that are difficult to traverse.`,
 		},
 		`snow`: {
@@ -85,11 +99,13 @@ var (
 		`spiderweb`: {
 			name:        `Spiderweb`,
 			symbol:      '🕸',
+			darkArea:    true,
 			description: `Spiderwebs are usually found where larger spiders live. They are very dangerous areas.`,
 		},
 		`cave`: {
 			name:        `Cave`,
 			symbol:      '⌬',
+			darkArea:    true,
 			description: `The land is covered in caves of all sorts. You never know what you'll find in them.`,
 		},
 	}

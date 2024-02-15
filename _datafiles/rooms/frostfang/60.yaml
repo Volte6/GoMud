@@ -8,6 +8,7 @@ description: The East Frostfang Gate stands as a formidable sentinel, marking th
   itself, reinforced with iron and bearing the scars of past skirmishes, serves as
   both a welcoming point for allies and a stark deterrent for foes, embodying the
   resilience and legacy of Frostfang.
+biome: city
 exits:
   east:
     roomid: 278

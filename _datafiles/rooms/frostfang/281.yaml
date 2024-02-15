@@ -7,6 +7,7 @@ description: You leave behind the city's borders and enter the tranquil Frostfan
   echoes of laughter and the clinking of tankards from the city's taverns are replaced
   by the hushed whispers of the winter wind and the soft crunch of your boots in the
   snow.
+biome: city
 exits:
   east:
     roomid: 282

@@ -2,6 +2,7 @@ roomid: 287
 zone: Frostfang
 title: The Southern Road
 description: The southern road
+biome: city
 exits:
   northwest:
     roomid: 286
