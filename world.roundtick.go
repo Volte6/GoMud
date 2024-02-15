@@ -1255,8 +1255,7 @@ func (w *World) HandleAutoHealing(roundNumber uint64) util.MessageQueue {
 			}
 		}
 
-		str := templates.AnsiParse(user.GetPrompt(true))
-		w.connectionPool.SendTo([]byte(str), user.ConnectionId())
+		w.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetPrompt(true))), user.ConnectionId())
 	}
 
 	return messageQueue
