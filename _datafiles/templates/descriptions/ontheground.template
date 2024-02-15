@@ -1,11 +1,11 @@
-{{- $displayed := 0 -}}
-{{- $itemCt := len . -}}
-<ansi fg="white">On the Ground: </ansi>
+{{- $displayed := 0 -}}{{- $groundItems := .GroundStuff -}}
+{{- $itemCt := len $groundItems -}}
+<ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">On the Ground: </ansi>
 {{- if ne $itemCt 0 -}}
-    {{- range $index, $itemName := . -}}
+    {{- range $index, $itemName := $groundItems -}}
         {{- $displayed = add $displayed 1 -}}
         <ansi fg="item">{{ $itemName }}</ansi>{{- if ne $displayed $itemCt }}{{- if ne $displayed (sub $itemCt 1) }}, {{ else }} and {{ end }}{{ end -}}
     {{- end }}
 {{ else -}}
-Nothing
+<ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">Nothing</ansi>
 {{ end }}

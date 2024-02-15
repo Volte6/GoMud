@@ -12,6 +12,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/skills"
@@ -1579,6 +1580,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		RoomLegend:     roomLegend,
 		Nouns:          r.GetNouns(),
 		IsDark:         b.IsDark(),
+		IsNight:        gametime.IsNight(),
 	}
 
 	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {

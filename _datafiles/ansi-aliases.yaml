@@ -39,7 +39,8 @@ color8:
   map-mob: 91 # Bright red
   map-npc: 36 # Bright cyan
   map-here: 95 # Bright magenta
-  description: white
+  room-description: white-bold
+  room-description-dark: white
   map-default: 90
   map-room: 97 # Bright white
   map-target: 91 # Bright red
@@ -157,7 +158,8 @@ color256:
   map-mob: 9 # Bright red
   map-npc: 6 # Bright cyan
   map-here: 13 # Bright magenta
-  description: white
+  room-description: 15
+  room-description-dark: 8
   map-default: 8
   map-room: 15 # Bright white
   map-target: 9 # Bright red

@@ -37,15 +37,18 @@ func Look(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
-	isDark := gametime.IsNight()
-	biome := room.GetBiome()
-	if biome.IsDark() {
-		isDark = true
-	}
 	lightSource := false
 
+	isDark := gametime.IsNight()
+	biome := room.GetBiome()
+	if biome.IsLit() {
+		lightSource = true
+	} else if biome.IsDark() {
+		isDark = true
+	}
+
 	// If someone has light, cancel the darkness
-	if isDark {
+	if isDark && !lightSource {
 		if mobInstanceIds := room.GetMobs(rooms.FindHasLight); len(mobInstanceIds) > 0 {
 			lightSource = true
 		} else if userIds := room.GetPlayers(rooms.FindHasLight); len(userIds) > 0 {
@@ -357,7 +360,6 @@ func lookRoom(userId int, roomId int, response *util.MessageQueue, secretLook bo
 	response.SendUserMessage(userId, textOut, false)
 
 	groundStuff := []string{}
-
 	for containerName, container := range room.Containers {
 
 		chestName := fmt.Sprintf(`<ansi fg="container">%s</ansi>`, containerName)
@@ -386,7 +388,12 @@ func lookRoom(userId int, roomId int, response *util.MessageQueue, secretLook bo
 		groundStuff = append(groundStuff, item.Name())
 	}
 
-	textOut, _ = templates.Process("descriptions/ontheground", groundStuff)
+	groundDetails := map[string]any{
+		`GroundStuff`: groundStuff,
+		`IsDark`:      room.GetBiome().IsDark(),
+		`IsNight`:     gametime.IsNight(),
+	}
+	textOut, _ = templates.Process("descriptions/ontheground", groundDetails)
 	response.SendUserMessage(userId, textOut, false)
 
 	textOut, _ = templates.Process("descriptions/exits", details)

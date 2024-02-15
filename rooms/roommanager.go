@@ -62,6 +62,7 @@ type RoomTemplateDetails struct {
 	Nouns              []string
 	TinyMapDescription string
 	IsDark             bool
+	IsNight            bool
 }
 
 var (
