@@ -1,7 +1,7 @@
 {{- $displayed := 0 -}}
 {{- $whoCt := add (len .VisiblePlayers) (len .VisibleMobs) -}}
 {{- if ne $whoCt 0 -}}
-<ansi fg="room-description{{ if .IsNight }}-dark{{ end }}">Also here: </ansi>
+<ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">Also here: </ansi>
     {{- range $index, $playerName := .VisiblePlayers -}}
         {{- $displayed = add $displayed 1 -}}
         <ansi fg="username">{{ $playerName }}</ansi>{{- if ne $displayed $whoCt }}{{- if ne $displayed (sub $whoCt 1) }}, {{ else }} and {{ end }}{{ end -}}
@@ -11,6 +11,6 @@
         <ansi fg="mobname">{{ $mobName }}</ansi>{{- if ne $displayed $whoCt }}{{- if ne $displayed (sub $whoCt 1) }}, {{ else }} and {{ end }}{{ end -}}
     {{- end -}}
 {{- else -}}
-<ansi fg="room-description{{ if .IsNight }}-dark{{ end }}">Nobody else is here.</ansi>
+<ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">Nobody else is here.</ansi>
 {{- end }}
 

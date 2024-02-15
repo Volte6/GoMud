@@ -1,4 +1,4 @@
-<ansi fg="room-description{{ if .IsNight }}-dark{{ end }}">{{ if ne .TinyMapDescription "" }}{{ .TinyMapDescription }}{{ else }}{{ splitstring .Room.GetDescription 80 }}{{ end }}</ansi>
+<ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">{{ if ne .TinyMapDescription "" }}{{ .TinyMapDescription }}{{ else }}{{ splitstring .Room.GetDescription 80 }}{{ end }}</ansi>
 {{ if ne (len .Room.SkillTraining) 0 }}
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>
       <ansi fg="yellow-bold">You can train here!</ansi> Type <ansi fg="command">train</ansi> to see what training is available. 
