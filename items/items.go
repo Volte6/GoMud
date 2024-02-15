@@ -21,16 +21,17 @@ var (
 
 // Instance properties that may change
 type Item struct {
-	ItemId       int       `yaml:"itemid,omitempty"`
-	Blob         string    `yaml:"blob,omitempty"` // Does this item have a blob? Should be base64 encoded.
-	Uses         int       `yaml:"uses,omitempty"` // How many times it has been "used"
-	Spec         *ItemSpec `yaml:"overrides,omitempty"`
-	Uncursed     bool      `yaml:"uncursed,omitempty"`     // Is this item uncursed?
-	Enchantments uint8     `yaml:"enchantments,omitempty"` // Is this item enchanted?
+	ItemId        int            `yaml:"itemid,omitempty"`
+	Blob          string         `yaml:"blob,omitempty"` // Does this item have a blob? Should be base64 encoded.
+	Uses          int            `yaml:"uses,omitempty"` // How many times it has been "used"
+	Spec          *ItemSpec      `yaml:"overrides,omitempty"`
+	Uncursed      bool           `yaml:"uncursed,omitempty"`     // Is this item uncursed?
+	Enchantments  uint8          `yaml:"enchantments,omitempty"` // Is this item enchanted?
+	tempDataStore map[string]any // Used to store temporary data for the item. It's lost if the server restarts etc.
 }
 
 func New(itemId int) Item {
-	itemSpec := getItemSpec(itemId)
+	itemSpec := GetItemSpec(itemId)
 
 	newItm := Item{}
 	if itemSpec != nil {
@@ -41,6 +42,31 @@ func New(itemId int) Item {
 	}
 
 	return newItm
+}
+
+func (i *Item) SetTempData(key string, value any) {
+
+	if i.tempDataStore == nil {
+		i.tempDataStore = make(map[string]any)
+	}
+
+	if value == nil {
+		delete(i.tempDataStore, key)
+		return
+	}
+	i.tempDataStore[key] = value
+}
+
+func (i *Item) GetTempData(key string) any {
+
+	if i.tempDataStore == nil {
+		i.tempDataStore = make(map[string]any)
+	}
+
+	if value, ok := i.tempDataStore[key]; ok {
+		return value
+	}
+	return nil
 }
 
 func (i Item) IsDisabled() bool {
@@ -141,7 +167,7 @@ func (i *Item) GetSpec() ItemSpec {
 	if i.Spec != nil {
 		return *i.Spec
 	}
-	iSpec := getItemSpec(i.ItemId)
+	iSpec := GetItemSpec(i.ItemId)
 	if iSpec == nil {
 		iSpec = &ItemSpec{}
 	}
@@ -150,7 +176,7 @@ func (i *Item) GetSpec() ItemSpec {
 
 func (i *Item) Rename(newName string) {
 	if i.Spec == nil {
-		specCopy := *getItemSpec(i.ItemId)
+		specCopy := *GetItemSpec(i.ItemId)
 		specCopy.Name = newName
 		i.Spec = &specCopy
 	}
@@ -173,7 +199,7 @@ func (i *Item) Enchant(damageBonus int, defenseBonus int, statBonus map[string]i
 	var newSpec ItemSpec
 
 	if i.Spec == nil {
-		specCopy := *getItemSpec(i.ItemId)
+		specCopy := *GetItemSpec(i.ItemId)
 		newSpec = specCopy
 	} else {
 		newSpec = *i.Spec
@@ -269,7 +295,7 @@ func (i *Item) Equals(b Item) bool {
 
 func (i *Item) IsValid() bool {
 
-	if itemInfo := getItemSpec(i.ItemId); itemInfo != nil {
+	if itemInfo := GetItemSpec(i.ItemId); itemInfo != nil {
 		return true
 	}
 	return false

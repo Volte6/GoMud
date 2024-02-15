@@ -6,6 +6,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -34,6 +35,14 @@ func Use(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	} else {
 
 		itemSpec := matchItem.GetSpec()
+
+		if result, err := scripting.TryItemScriptEvent("onUse", userId, 0, matchItem, cmdQueue); err == nil {
+			response.AbsorbMessages(result)
+			if result.Handled {
+				response.Handled = true
+				return response, nil
+			}
+		}
 
 		if itemSpec.Subtype != items.Usable {
 			response.SendUserMessage(userId,
