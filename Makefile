@@ -67,6 +67,10 @@ shell:
 .PHONY: validate
 validate: fmtcheck vet
 
+.PHONY: build_rpi
+build_rpi: ### Build a binary for a raspberry pi
+	env GOOS=linux GOARCH=arm GOARM=5 go build -o $(BIN)-rpi
+
 .PHONY: build_only
 build: validate build_only  ### Validate the code and build the binary.
 
