@@ -352,6 +352,10 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 			break
 		}
 
+		if connDetails.InputDisabled() {
+			continue
+		}
+
 		clientInput.DataIn = inputBuffer[:n]
 
 		// Input handler processes any special commands, transforms input, sets flags from input, etc

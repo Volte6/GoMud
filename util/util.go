@@ -58,6 +58,7 @@ type CommandQueue interface {
 	QueueRoomAction(roomId int, sourceUserId int, sourceMobId int, action string)
 	Broadcast(msg string, skipLineRefresh ...bool)
 	GetSettings(userId int) (connection.ClientSettings, error)
+	SetProgressMeter(userId int, name string, turnLength int, disableInput bool)
 }
 
 func SetServerAddress(addr string) {

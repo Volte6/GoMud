@@ -31,6 +31,37 @@ var (
 	promptFindTagsRegex   = regexp.MustCompile(`\{[a-zA-Z%:\-]+\}`)
 )
 
+type progressMeter struct {
+	name      string
+	turnStart uint64
+	turnTotal int
+}
+
+func (p *progressMeter) String() string {
+	output := strings.Builder{}
+
+	turnsPassed := int(util.GetTurnCount() - uint64(p.turnStart))
+
+	pctDone := float64(turnsPassed) / float64(p.turnTotal)
+	if pctDone > 1 {
+		pctDone = 1
+	}
+
+	fullQty := int(math.Floor(30 * pctDone))
+	emptyQty := 30 - fullQty
+
+	output.WriteString(strings.Repeat(`█`, fullQty))
+	output.WriteString(strings.Repeat(`░`, emptyQty))
+
+	output.WriteString(fmt.Sprintf(` %d%% - %s`, int(pctDone*100), p.name))
+
+	return output.String()
+}
+
+func (p *progressMeter) Done() bool {
+	return p.turnStart+uint64(p.turnTotal) <= util.GetTurnCount()
+}
+
 type UserRecord struct {
 	connectionId   uint64
 	UserId         int
@@ -49,6 +80,7 @@ type UserRecord struct {
 	lock           sync.RWMutex
 	tempDataStore  map[string]any
 	activePrompt   *prompt.Prompt
+	meterProgress  *progressMeter
 }
 
 func NewUserRecord(userId int, connectionId uint64) *UserRecord {
@@ -66,6 +98,23 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 		lock:           sync.RWMutex{},
 		tempDataStore:  make(map[string]any),
 	}
+}
+
+func (u *UserRecord) SetProgressMeter(name string, turnCt int) {
+	tNow := util.GetTurnCount()
+	u.meterProgress = &progressMeter{
+		name:      name,
+		turnStart: tNow,
+		turnTotal: turnCt,
+	}
+}
+
+func (u *UserRecord) GetProgressMeter() *progressMeter {
+	return u.meterProgress
+}
+
+func (u *UserRecord) RemoveProgressMeter() {
+	u.meterProgress = nil
 }
 
 func (u *UserRecord) SetTempData(key string, value any) {
@@ -142,7 +191,9 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 
 	strOut := strings.Builder{}
 
-	if u.activePrompt != nil {
+	if u.meterProgress != nil {
+		strOut.WriteString(u.meterProgress.String())
+	} else if u.activePrompt != nil {
 		if activeQuestion := u.activePrompt.GetNextQuestion(); activeQuestion != nil {
 			strOut.WriteString(activeQuestion.String())
 		}

@@ -1450,6 +1450,47 @@ func (w *World) TurnTick() {
 		w.roundTick()
 	}
 
+	// only visually update twice a second.
+	renderInterval := uint64(float64(c.TurnsPerSecond()) / 2)
+
+	if turnCt%renderInterval == 0 {
+		for _, uId := range users.GetOnlineUserIds() {
+
+			if user := users.GetByUserId(uId); user != nil {
+
+				meter := user.GetProgressMeter()
+				if meter == nil {
+					continue
+				}
+
+				w.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), user.ConnectionId())
+
+				if meter.Done() {
+					if cd, err := w.connectionPool.Get(user.ConnectionId()); err == nil {
+						user.RemoveProgressMeter()
+						cd.InputDisabled(false)
+					}
+				}
+
+			}
+		}
+	}
+
+}
+
+func (w *World) SetProgressMeter(userId int, name string, turnLength int, disableInput bool) {
+
+	if user := users.GetByUserId(userId); user != nil {
+
+		user.SetProgressMeter(name, turnLength)
+
+		if disableInput {
+			if cd, err := w.connectionPool.Get(user.ConnectionId()); err == nil {
+				cd.InputDisabled(true)
+			}
+		}
+	}
+
 }
 
 func NewWorld(osSignalChan chan os.Signal) *World {
