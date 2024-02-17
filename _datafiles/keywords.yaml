@@ -19,6 +19,7 @@ help:
       - keyring
       - skills
       - status
+      - killstats
     shops:
       - appraise
       - bank
@@ -168,6 +169,7 @@ command-aliases:
   macros:           ['=?']
   sneak:            ['sn']
   backstab:         ['bs']
+  killstats:        ['kills', 'kd', 'killstat']
   quests:           ['q', 'quest']
   shout:            ['yell', 'scream', 'holler']
   picklock:         ['pick', 'lockpick']

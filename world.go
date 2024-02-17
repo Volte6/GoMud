@@ -19,6 +19,7 @@ import (
 	"github.com/volte6/mud/mobcommands"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
+	"github.com/volte6/mud/progressbar"
 	"github.com/volte6/mud/prompt"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/rooms"
@@ -1450,26 +1451,26 @@ func (w *World) TurnTick() {
 		w.roundTick()
 	}
 
-	// only visually update twice a second.
-	renderInterval := uint64(float64(c.TurnsPerSecond()) / 2)
-
+	// only visually update 4x a second.
+	renderInterval := uint64(float64(c.TurnsPerSecond()) / 4)
 	if turnCt%renderInterval == 0 {
 		for _, uId := range users.GetOnlineUserIds() {
 
 			if user := users.GetByUserId(uId); user != nil {
 
-				meter := user.GetProgressMeter()
-				if meter == nil {
-					continue
-				}
+				if meter := user.GetProgressBar(); meter != nil {
 
-				w.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), user.ConnectionId())
+					meter.Update(turnCt)
 
-				if meter.Done() {
-					if cd, err := w.connectionPool.Get(user.ConnectionId()); err == nil {
-						user.RemoveProgressMeter()
-						cd.InputDisabled(false)
+					if meter.Done() {
+						user.RemoveProgressBar()
+						if cd, err := w.connectionPool.Get(user.ConnectionId()); err == nil {
+							cd.InputDisabled(false)
+						}
 					}
+
+					w.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), user.ConnectionId())
+
 				}
 
 			}
@@ -1478,17 +1479,21 @@ func (w *World) TurnTick() {
 
 }
 
-func (w *World) SetProgressMeter(userId int, name string, turnLength int, disableInput bool) {
+func (w *World) StartProgressBar(userId int, name string, turnLength int, displayFlags ...progressbar.BarDisplay) {
 
 	if user := users.GetByUserId(userId); user != nil {
 
-		user.SetProgressMeter(name, turnLength)
+		user.StartProgressBar(name, turnLength, displayFlags...)
 
-		if disableInput {
-			if cd, err := w.connectionPool.Get(user.ConnectionId()); err == nil {
-				cd.InputDisabled(true)
+		for _, flag := range displayFlags {
+			if flag == progressbar.PromptDisableInput {
+				if cd, err := w.connectionPool.Get(user.ConnectionId()); err == nil {
+					cd.InputDisabled(true)
+				}
+				break
 			}
 		}
+
 	}
 
 }
