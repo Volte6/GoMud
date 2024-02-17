@@ -2,6 +2,7 @@ package usercommands
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/races"
@@ -23,7 +24,100 @@ func Inventory(rest string, userId int, cmdQueue util.CommandQueue) (util.Messag
 	itemNames := []string{}
 	itemNamesFormatted := []string{}
 
-	for _, item := range user.Character.Items {
+	itemList := []items.Item{}
+
+	typeSearchTerms := map[string]items.ItemType{
+		`weapons`:   items.Weapon,
+		`offhand`:   items.Offhand,
+		`shields`:   items.Offhand,
+		`head`:      items.Head,
+		`neck`:      items.Neck,
+		`body`:      items.Body,
+		`armor`:     items.Body,
+		`belts`:     items.Belt,
+		`gloves`:    items.Gloves,
+		`rings`:     items.Ring,
+		`legs`:      items.Legs,
+		`pants`:     items.Legs,
+		`leggings`:  items.Legs,
+		`feet`:      items.Feet,
+		`potions`:   items.Potion,
+		`food`:      items.Food,
+		`drinks`:    items.Drink,
+		`scrolls`:   items.Scroll,
+		`grenades`:  items.Grenade,
+		`keys`:      items.Key,
+		`gemstones`: items.Gemstone,
+	}
+
+	subtypeSearchTerms := map[string]items.ItemSubType{
+		`armor`:        items.Wearable,
+		`clothing`:     items.Wearable,
+		`clothes`:      items.Wearable,
+		`wearable`:     items.Wearable,
+		`drinks`:       items.Drinkable,
+		`food`:         items.Edible,
+		`usable`:       items.Usable,
+		`throwable`:    items.Throwable,
+		`bloudgeoning`: items.Bludgeoning,
+		`cleaving`:     items.Cleaving,
+		`stabbing`:     items.Stabbing,
+		`slashing`:     items.Slashing,
+		`shooting`:     items.Shooting,
+		`claws`:        items.Claws,
+	}
+
+	for _, item := range user.Character.GetAllBackpackItems() {
+
+		foundMatch := false
+		if len(rest) > 0 {
+
+			for term, itemType := range typeSearchTerms {
+				if strings.HasPrefix(term, rest) {
+					if item.GetSpec().Type == itemType {
+						itemList = append(itemList, item)
+						foundMatch = true
+						break
+					}
+				}
+			}
+
+			if foundMatch {
+				continue
+			}
+
+			for term, itemSubtype := range subtypeSearchTerms {
+				if strings.HasPrefix(term, rest) {
+					if item.GetSpec().Subtype == itemSubtype {
+						itemList = append(itemList, item)
+						foundMatch = true
+						break
+					}
+				}
+			}
+
+			if foundMatch {
+				continue
+			}
+
+			//
+			// Did not find match, search item name for a possible match.
+			//
+			for _, part := range util.BreakIntoParts(item.Name()) {
+				if strings.HasPrefix(part, rest) {
+					itemList = append(itemList, item)
+					break
+				}
+
+			}
+
+		} else {
+			itemList = append(itemList, item)
+		}
+
+	}
+
+	for _, item := range itemList {
 
 		iName := item.Name()
 		iNameFormatted := fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, iName)

@@ -123,6 +123,7 @@ type ConnectionDetails struct {
 	handlerMutex      sync.Mutex
 	inputHandlerNames []string
 	inputHandlers     []InputHandler
+	inputDisabled     bool
 }
 
 // bool is true if they have changed since last time they were gotten
@@ -216,8 +217,16 @@ func (cd *ConnectionDetails) ConnectionId() ConnectionId {
 func (cd *ConnectionDetails) State() ConnectState {
 	return ConnectState(atomic.LoadUint32((*uint32)(&cd.state)))
 }
+
 func (cd *ConnectionDetails) SetState(state ConnectState) {
 	atomic.StoreUint32((*uint32)(&cd.state), uint32(state))
+}
+
+func (cd *ConnectionDetails) InputDisabled(setTo ...bool) bool {
+	if len(setTo) > 0 {
+		cd.inputDisabled = setTo[0]
+	}
+	return cd.inputDisabled
 }
 
 func (cd *ConnectionDetails) SetScreenSize(w uint32, h uint32) {
@@ -245,6 +254,7 @@ func NewConnectionDetails(connId ConnectionId, c net.Conn) *ConnectionDetails {
 			ScreenHeight: 24,
 			Monochrome:   false,
 		},
-		conn: c,
+		inputDisabled: false,
+		conn:          c,
 	}
 }

@@ -64,6 +64,7 @@ var (
 		`help`:       {Help, true, false},
 		`hire`:       {Hire, false, false},
 		`keyring`:    {KeyRing, true, false},
+		`killstats`:  {Killstats, true, false},
 		`inspect`:    {Inspect, false, false},
 		`inventory`:  {Inventory, true, false},
 		`jobs`:       {Jobs, true, false},

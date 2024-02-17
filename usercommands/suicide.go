@@ -91,6 +91,8 @@ func Suicide(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 
 	user.Character.Health = -10
 
+	user.Character.KD.AddDeath()
+
 	rooms.MoveToRoom(userId, 75)
 
 	response.Handled = true

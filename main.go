@@ -352,6 +352,10 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 			break
 		}
 
+		if connDetails.InputDisabled() {
+			continue
+		}
+
 		clientInput.DataIn = inputBuffer[:n]
 
 		// Input handler processes any special commands, transforms input, sets flags from input, etc
@@ -418,7 +422,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 				}
 
 				if redrawPrompt {
-					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetPrompt(true))), clientInput.ConnectionId)
+					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
 				}
 
 			}
@@ -481,7 +485,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 					clientInput.Buffer = append(clientInput.Buffer, []byte(suggested)...)
 					suggestions.Clear()
 					userObject.SetUnsentText(string(clientInput.Buffer), ``)
-					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetPrompt(true))), clientInput.ConnectionId)
+					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
 
 				}
 

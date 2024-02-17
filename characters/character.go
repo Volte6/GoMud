@@ -73,6 +73,7 @@ type Character struct {
 	Settings       map[string]string `yaml:"settings,omitempty"`      // custom setting tracking, used for anything.
 	QuestProgress  map[int]string    `yaml:"questprogress,omitempty"` // quest progress tracking
 	KeyRing        map[string]string `yaml:"keyring,omitempty"`       // key is the lock id, value is the sequence
+	KD             KDStats           `yaml:"kd,omitempty"`            // Kill/Death stats
 	roomHistory    []int             // A stack FILO of the last X rooms the character has been in
 	followers      []int             `yaml:"-"` // everyone following this user
 }
