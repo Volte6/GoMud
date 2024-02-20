@@ -1,5 +1,4 @@
 
-showLocketCounter = {};
 
 const sadnessSubjects = ["quest", "locket", "sad", "sadness", "crying", "sniffles", "necklace"]
 const gardenSubjects = ["garden", "where", "gardening", "quest", "locket", "sad", "sadness", "necklace"]
@@ -61,11 +60,21 @@ function onAsk(mob, room, eventDetails) {
 
 function onGive(mob, room, eventDetails) {
 
+    showLocketCounter = mob.GetTempData('showLocketCounter');
+    if ( showLocketCounter === null ) {
+        showLocketCounter = {};
+    }
+
+
     if (eventDetails.item) {
 
         if (eventDetails.item.ItemId == 20025) {
             
             mob.Command("say Thank you so much! I thought I'd never see this again!")
+
+            if ( !showLocketCounter[eventDetails.sourceId] ) {
+                showLocketCounter[eventDetails.sourceId] = 0;
+            }
 
             // Give it back to them
             if ( showLocketCounter[eventDetails.sourceId] > 2 ) {
@@ -100,12 +109,19 @@ function onGive(mob, room, eventDetails) {
 
 function onShow(mob, room, eventDetails) {
 
+    showLocketCounter = mob.GetTempData('showLocketCounter');
+    if ( showLocketCounter === null ) {
+        showLocketCounter = {};
+    }
+
     if (eventDetails.item.ItemId == 20025) {
         
         if ( !showLocketCounter[eventDetails.sourceId] ) {
             showLocketCounter[eventDetails.sourceId] = 0;
         }
         showLocketCounter[eventDetails.sourceId]++;
+
+        mob.SetTempData('showLocketCounter', showLocketCounter);
 
         if ( showLocketCounter[eventDetails.sourceId] == 1 ) {
             mob.Command("say Wow, that's it! Can I have it back?")

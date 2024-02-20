@@ -69,7 +69,7 @@ _Note: This is useful for saving/retrieving data that an ActorObject can carry a
 |  Argument | Explanation |
 | --- | --- |
 | key | A unique identifier for the data. |
-| value | What you will be saving. |
+| value | What you will be saving. If null, frees from memory. |
 
 ## [ActorObject.GetTempData(key string) any](/scripting/actor_func.go)
 Gets temporary data for the ActorObject.

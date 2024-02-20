@@ -59,7 +59,7 @@ type CommandQueue interface {
 	QueueRoomAction(roomId int, sourceUserId int, sourceMobId int, action string)
 	Broadcast(msg string, skipLineRefresh ...bool)
 	GetSettings(userId int) (connection.ClientSettings, error)
-	StartProgressBar(userId int, name string, turnLength int, displayFlags ...progressbar.BarDisplay)
+	StartProgressBar(userId int, name string, turnLength int, onCompleteFunc func(), displayFlags ...progressbar.BarDisplay)
 }
 
 func SetServerAddress(addr string) {

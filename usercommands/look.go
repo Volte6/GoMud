@@ -37,26 +37,36 @@ func Look(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
-	lightSource := false
+	// 0 = none. 1 = can see this room. 2 = can see this room and all exits
+	visibility := 2
+	if gametime.IsNight() {
+		visibility -= 1
+	}
 
-	isDark := gametime.IsNight()
 	biome := room.GetBiome()
+	if biome.IsDark() {
+		visibility -= 2
+	}
 	if biome.IsLit() {
-		lightSource = true
-	} else if biome.IsDark() {
-		isDark = true
+		visibility += 1
+	}
+
+	if visibility < 0 {
+		visibility = 0
+	} else if visibility > 2 {
+		visibility = 2
 	}
 
 	// If someone has light, cancel the darkness
-	if isDark && !lightSource {
+	if visibility < 2 {
 		if mobInstanceIds := room.GetMobs(rooms.FindHasLight); len(mobInstanceIds) > 0 {
-			lightSource = true
+			visibility += 1
 		} else if userIds := room.GetPlayers(rooms.FindHasLight); len(userIds) > 0 {
-			lightSource = true
+			visibility += 1
 		}
 	}
 
-	if isDark && !lightSource {
+	if visibility < 1 {
 		raceInfo := races.GetRace(user.Character.RaceId)
 		if !raceInfo.NightVision {
 			response.SendUserMessage(userId, `You can't see anything!`, true)
@@ -125,7 +135,7 @@ func Look(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		if lookRoomId > 0 {
 
-			if isDark && !lightSource {
+			if visibility < 2 {
 
 				raceInfo := races.GetRace(user.Character.RaceId)
 				if !raceInfo.NightVision {

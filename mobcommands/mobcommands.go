@@ -25,6 +25,7 @@ var (
 		"backstab":       {Backstab, false},
 		"befriend":       {Befriend, false},
 		"break":          {Break, false},
+		"converse":       {Converse, false},
 		"callforhelp":    {CallForHelp, false},
 		"despawn":        {Despawn, false},
 		"drink":          {Drink, false},

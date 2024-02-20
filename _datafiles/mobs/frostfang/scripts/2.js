@@ -18,3 +18,8 @@ function onIdle(mob, room) {
 
     return false;
 }
+
+// Called whenever a mob uses the converse command.
+function onConverse(message, mob, sourceMob, room) {
+
+}

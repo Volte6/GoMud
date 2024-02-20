@@ -292,6 +292,20 @@ func (a ScriptActor) CharmExpire() {
 	a.characterRecord.Charmed.Expire()
 }
 
+func (a ScriptActor) getScript() string {
+	if a.mobRecord != nil {
+		return a.mobRecord.GetScript()
+	}
+	return ""
+}
+
+func (a ScriptActor) getScriptTag() string {
+	if a.mobRecord != nil {
+		return a.mobRecord.ScriptTag
+	}
+	return ""
+}
+
 // ////////////////////////////////////////////////////////
 //
 // # These functions get exported to the scripting engine

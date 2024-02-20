@@ -9,20 +9,23 @@ import (
 type BarDisplay uint8
 
 const (
-	PromptReplace      BarDisplay = iota // Show instead of the normal prompt
-	PromptPrefix                         // Show before the prompt
-	PromptSuffix                         // Show after the prompt
-	PromptNoBar                          // Don't show the bar at all
-	PromptDisableInput                   // Disable input while the bar is showing
+	PromptReplace          BarDisplay = iota // Show instead of the normal prompt
+	PromptPrefix                             // Show before the prompt
+	PromptSuffix                             // Show after the prompt
+	PromptNoBar                              // Don't show the bar at all
+	PromptDisableInput                       // Disable input while the bar is showing
+	PromptTypingInterrupts                   // Typing interrupts/cancels the bar
 )
 
 type ProgressBar struct {
-	name        string
-	turnStart   uint64
-	turnTotal   int
-	turnNow     uint64
-	size        int
-	renderStyle BarDisplay
+	name           string
+	turnStart      uint64
+	turnTotal      int
+	turnNow        uint64
+	size           int
+	renderStyle    BarDisplay
+	cancelled      bool
+	onCompleteFunc func()
 }
 
 func (p *ProgressBar) Update(turnNow uint64) {
@@ -74,14 +77,25 @@ func (p *ProgressBar) String() string {
 }
 
 func (p *ProgressBar) Done() bool {
-	return p.turnNow >= p.turnStart+uint64(p.turnTotal)
+	return p.cancelled || p.turnNow >= p.turnStart+uint64(p.turnTotal)
 }
 
 func (p *ProgressBar) RenderStyle() BarDisplay {
 	return p.renderStyle
 }
 
-func New(name string, turns int, renderFlags ...BarDisplay) *ProgressBar {
+func (p *ProgressBar) Cancel() {
+	p.cancelled = true
+	p.onCompleteFunc = nil
+}
+
+func (p *ProgressBar) OnComplete() {
+	if p.onCompleteFunc != nil {
+		p.onCompleteFunc()
+	}
+}
+
+func New(name string, turns int, onComplete func(), renderFlags ...BarDisplay) *ProgressBar {
 
 	renderFlag := PromptReplace
 	size := 30
@@ -100,11 +114,12 @@ func New(name string, turns int, renderFlags ...BarDisplay) *ProgressBar {
 	}
 
 	return &ProgressBar{
-		name:        name,
-		turnStart:   0,
-		turnTotal:   turns,
-		size:        size,
-		renderStyle: renderFlag,
+		name:           name,
+		turnStart:      0,
+		turnTotal:      turns,
+		size:           size,
+		renderStyle:    renderFlag,
+		onCompleteFunc: onComplete,
 	}
 
 }

@@ -102,7 +102,7 @@ func SetTime(setToHour int, setToMinutes ...int) {
 	roundsPerHour := float64(c.RoundsPerDay) / 24
 	dayResetOffset = int(math.Floor(float64(setToHour) * roundsPerHour))
 	if len(setToMinutes) > 0 {
-		dayResetOffset += int((float64(setToMinutes[0]) / 60) * roundsPerHour)
+		dayResetOffset += int(math.Ceil((float64(setToMinutes[0]) / 60) * roundsPerHour))
 	}
 
 	roundOfDay := int(util.GetRoundCount() % uint64(c.RoundsPerDay))

@@ -5,7 +5,7 @@ description: Before you lies the Frost Lake in all its glory. The ice is so clea
   and pristine that it's almost like walking on a sheet of glass. Sunlight dances
   upon the frozen surface, creating an ever-shifting kaleidoscope of colors that ripple
   and play across the ice, like a living canvas painted by the gods.
-biome: city
+biome: road
 exits:
   northwest:
     roomid: 295

@@ -215,6 +215,12 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 	userDisabled := false
 	isAdmin := false
 	if user := users.GetByUserId(userId); user != nil {
+
+		// If the user has a progressbar that is interrupted by input, cancel it
+		if user.GetProgressBar() != nil {
+			user.GetProgressBar().Cancel()
+		}
+
 		// Cancel any buffs they have that get cancelled based on them doing anything at all
 		user.Character.CancelBuffsWithFlag(buffs.CancelOnAction)
 

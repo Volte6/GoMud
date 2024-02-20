@@ -7,7 +7,7 @@ description: As you venture beyond the city's limits and onto the tranquil Frost
   out from behind frosted trees. The distant echoes of laughter and the clinking of
   tankards from the city's taverns give way to the hushed whispers of the winter wind
   and the soft crunch of your boots in the snow.
-biome: city
+biome: road
 exits:
   east:
     roomid: 301

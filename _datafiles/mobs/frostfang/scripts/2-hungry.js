@@ -70,10 +70,8 @@ function onGive(mob, room, eventDetails) {
         return true;
     }
 
-
 }
 
-playersTold = {}
 
 // Invoked once every round if mob is idle
 function onIdle(mob, room) {
@@ -83,7 +81,13 @@ function onIdle(mob, room) {
     grumbled = false
     userIds = room.GetPlayers();
 
+    toldPlayers = mob.GetTempData('playersTold');
+    if ( toldPlayers === null ) {
+        toldPlayers = {};
+    }
+
     if ( userIds.length > 0 ) {
+        
         for (var i = 0; i < userIds.length; i++) {
 
             if ( userIds[i] in playersTold ) {
@@ -106,13 +110,30 @@ function onIdle(mob, room) {
 
             playersTold[userIds[i]] = round + 5;
         }
+
+        if ( Object.keys(playersTold).length > 0 ) {
+            mob.SetTempData('playersTold', playersTold);
+        } else {
+            mob.SetTempData('playersTold', null);
+        }
+        
         return true;
     }
 
+    sizeBefore = Object.keys(playersTold).length;
     for (var key in playersTold) {
         if ( playersTold[key] < round-100 ) {
             delete playersTold[key];
         }
+    }
+    sizeAfter = Object.keys(playersTold).length;
+
+    if ( sizeAfter != sizeBefore ) {
+        if ( sizeAfter == 0 ) {
+            mob.SetTempData('playersTold', playersTold);
+        }
+    } else {
+        mob.SetTempData('playersTold', null);
     }
 
     action = round % 3;

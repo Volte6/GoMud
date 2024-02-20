@@ -1479,11 +1479,13 @@ func (w *World) TurnTick() {
 
 }
 
-func (w *World) StartProgressBar(userId int, name string, turnLength int, displayFlags ...progressbar.BarDisplay) {
+func (w *World) StartProgressBar(userId int, name string, turnLength int, onComplete func(), displayFlags ...progressbar.BarDisplay) {
 
 	if user := users.GetByUserId(userId); user != nil {
 
-		user.StartProgressBar(name, turnLength, displayFlags...)
+		pb := progressbar.New(name, turnLength, onComplete, displayFlags...)
+
+		user.SetProgressBar(pb)
 
 		for _, flag := range displayFlags {
 			if flag == progressbar.PromptDisableInput {

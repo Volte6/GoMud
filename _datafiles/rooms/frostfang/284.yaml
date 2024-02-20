@@ -6,7 +6,7 @@ description: The trees on either side of the road grow taller and denser, castin
   the leaves takes on a muted, eerie quality, bathing the path in a dim, twilight
   glow. The once-frequent travelers' footprints are now scarce, and the air carries
   a hint of foreboding.
-biome: city
+biome: road
 exits:
   east:
     roomid: 297

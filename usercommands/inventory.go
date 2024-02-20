@@ -56,6 +56,7 @@ func Inventory(rest string, userId int, cmdQueue util.CommandQueue) (util.Messag
 		`clothes`:      items.Wearable,
 		`wearable`:     items.Wearable,
 		`drinks`:       items.Drinkable,
+		`drinkable`:    items.Drinkable,
 		`food`:         items.Edible,
 		`usable`:       items.Usable,
 		`throwable`:    items.Throwable,
@@ -147,6 +148,7 @@ func Inventory(rest string, userId int, cmdQueue util.CommandQueue) (util.Messag
 		`ItemNamesFormatted`: itemNamesFormatted,
 		`AttackDamage`:       diceRoll,
 		`RaceInfo`:           raceInfo,
+		`Searching`:          len(rest) > 0,
 	}
 
 	tplTxt, _ := templates.Process("character/inventory", invData)

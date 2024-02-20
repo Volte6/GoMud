@@ -70,8 +70,8 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 	}
 }
 
-func (u *UserRecord) StartProgressBar(name string, turnCt int, renderFlags ...progressbar.BarDisplay) {
-	u.progress = progressbar.New(name, turnCt, renderFlags...)
+func (u *UserRecord) SetProgressBar(pb *progressbar.ProgressBar) {
+	u.progress = pb
 }
 
 func (u *UserRecord) GetProgressBar() *progressbar.ProgressBar {
@@ -79,6 +79,7 @@ func (u *UserRecord) GetProgressBar() *progressbar.ProgressBar {
 }
 
 func (u *UserRecord) RemoveProgressBar() {
+	u.progress.OnComplete()
 	u.progress = nil
 }
 

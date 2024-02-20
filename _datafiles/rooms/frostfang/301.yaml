@@ -5,7 +5,7 @@ description: This narrow trail, previously blocked by a tangle of fallen trees a
   debris, now stands cleared and inviting. Sunlight filters through the canopy above,
   casting a warm, golden glow upon the freshly cleared path. The air is filled with
   the earthy scent of freshly cut wood, and the promise of uncharted territory beckons.
-biome: city
+biome: road
 exits:
   east:
     roomid: 302

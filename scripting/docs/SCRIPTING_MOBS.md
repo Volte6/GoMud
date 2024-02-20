@@ -18,7 +18,7 @@ In this way you can have generic scripts for a mob id, or specific scripts for s
 
 # Script Functions and Rules
 
-Mob scripts can maintain their own internal state. If you define or alter a global varaible it will persist until the mob despawns.
+Any variables defined in the global scope of a mob script will be set for all mobs that use that script. If you want to set/recall mob-specific data, use [SetTempData/GetTempData](FUNCTIONS_ACTORS.md#actorobjectsettempdatakey-string-value-any)
 
 The following functions are special keywords that will be invoked under specific circumstances if they are defined within your script:
 
@@ -181,6 +181,27 @@ function onDie(mob ActorObject, room RoomObject, eventDetails object) {
 | --- | --- |
 | rest | Everything entered after the command (if anything). |
 | mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
+| eventDetails.sourceId | The `userId` or `mobInstanceId` that killed the mob |
+| eventDetails.sourceType | `"user"` or `"mob"`, the source type of the death |
+| eventDetails.attackerCount | How many users hurt this mob before it died. |
+
+---
+
+```
+function onConverse(message string, mob ActorObject, sourceMob ActorObject, room RoomObject) {
+}
+```
+
+`onConverse()` is a special event function that is only called when mobs use the `converse` command.
+
+_Note: The intention of the converse command and onConverse is to faciliate mob-to-mob discussions._
+
+|  Argument | Explanation |
+| --- | --- |
+| message | The message that was sent via converse. |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| sourceMob | [ActorObject](FUNCTIONS_ACTORS.md) |
 | room | [RoomObject](FUNCTIONS_ROOMS.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that killed the mob |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the death |

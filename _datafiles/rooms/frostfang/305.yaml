@@ -8,6 +8,7 @@ description: The skeletal frames of shattered wagons, their wheels sunken into t
   now plundered by time and the elements.
 mapsymbol: C
 maplegend: Caravan
+biome: road
 exits:
   west:
     roomid: 303

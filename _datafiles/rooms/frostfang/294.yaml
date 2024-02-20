@@ -6,7 +6,7 @@ description: As you press onward along the path, the Frost Lake begins to domina
   lined your way now stand aside, revealing an unobstructed panorama of the lake's
   icy expanse. Its surface shimmers like a myriad of diamonds under the soft, wintry
   sunlight, casting an otherworldly glow.
-biome: city
+biome: road
 exits:
   north:
     roomid: 293
