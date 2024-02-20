@@ -32,6 +32,9 @@ Information on scripting in GoMud can be found in the [scripting README](scripti
 - [Customizable Prompts](https://www.youtube.com/watch?v=MFkmjSTL0Ds)
 - [Mob/NPC Scripting](https://www.youtube.com/watch?v=li2k1N4p74o)
 - [Room Scripting](https://www.youtube.com/watch?v=n1qNUjhyOqg)
+- [Kill Stats](https://www.youtube.com/watch?v=4aXs8JNj5Cc)
+- [Searchable Inventory](https://www.youtube.com/watch?v=iDUbdeR2BUg)
+- [Day/Night Cycles](https://www.youtube.com/watch?v=CiEbOp244cw)
 
 # Quick Start
 
