@@ -56,7 +56,7 @@ func Portal(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 		config := configs.GetConfig()
 
 		// Only interest in rooms where players haven't visited in a while and have at least 1
-		mostItemRoomId, qty := rooms.GetRoomWithMostItems(config.LootGoblinIncludeRecentRooms, config.LootGoblinMinimumItems, config.LootGoblinMinimumGold)
+		mostItemRoomId, qty := rooms.GetRoomWithMostItems(bool(config.LootGoblinIncludeRecentRooms), int(config.LootGoblinMinimumItems), int(config.LootGoblinMinimumGold))
 		if portalTargetRoomId == 0 && qty == 0 { // could't find any
 			// No more rooms with items? Our job is done i guess.
 			cmdQueue.QueueCommand(0, mobId, `portal home;drop all`)

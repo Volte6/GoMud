@@ -173,7 +173,7 @@ var (
 func LoadAliases() {
 
 	var err error
-	loadedKeywords, err = fileloader.LoadFlatFile[*Aliases](configs.GetConfig().FileKeywords)
+	loadedKeywords, err = fileloader.LoadFlatFile[*Aliases](string(configs.GetConfig().FileKeywords))
 	if err != nil {
 		panic(err)
 	}

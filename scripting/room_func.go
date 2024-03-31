@@ -59,7 +59,7 @@ func (r ScriptRoom) GetExits() []map[string]any {
 
 	exits := []map[string]any{}
 
-	seed := configs.GetConfig().Seed
+	seed := string(configs.GetConfig().Seed)
 	for exitName, exitInfo := range r.roomRecord.Exits {
 
 		exitMap := map[string]any{

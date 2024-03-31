@@ -65,7 +65,7 @@ func KeyRing(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 	pickFormatting := [][]string{}
 	pickRowsIncomplete := [][]string{}
 
-	cfgSeed := configs.GetConfig().Seed
+	cfgSeed := string(configs.GetConfig().Seed)
 
 	for lockId, seq := range user.Character.KeyRing {
 

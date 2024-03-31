@@ -320,12 +320,12 @@ func LoadDataFiles() {
 	start := time.Now()
 
 	var err error
-	items, err = fileloader.LoadAllFlatFiles[int, *ItemSpec](configs.GetConfig().FolderItemData)
+	items, err = fileloader.LoadAllFlatFiles[int, *ItemSpec](string(configs.GetConfig().FolderItemData))
 	if err != nil {
 		panic(err)
 	}
 
-	attackMessages, err = fileloader.LoadAllFlatFiles[ItemSubType, *WeaponAttackMessageGroup](configs.GetConfig().FolderAttackMessageData)
+	attackMessages, err = fileloader.LoadAllFlatFiles[ItemSubType, *WeaponAttackMessageGroup](string(configs.GetConfig().FolderAttackMessageData))
 	if err != nil {
 		panic(err)
 	}

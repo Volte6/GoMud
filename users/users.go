@@ -241,7 +241,7 @@ func LoadUser(username string) (*UserRecord, error) {
 
 	slog.Info("Loading user", "username", username)
 
-	userFilePath := util.FilePath(configs.GetConfig().FolderUserData, `/`, strings.ToLower(username)+`.yaml`)
+	userFilePath := util.FilePath(string(configs.GetConfig().FolderUserData), `/`, strings.ToLower(username)+`.yaml`)
 
 	userFileTxt, err := os.ReadFile(userFilePath)
 	if err != nil {
@@ -293,7 +293,7 @@ func SaveUser(u UserRecord) error {
 
 	carefulSave := configs.GetConfig().CarefulSaveFiles
 
-	path := util.FilePath(configs.GetConfig().FolderUserData, `/`, strings.ToLower(u.Username)+`.yaml`)
+	path := util.FilePath(string(configs.GetConfig().FolderUserData), `/`, strings.ToLower(u.Username)+`.yaml`)
 
 	saveFilePath := path
 	if carefulSave { // careful save first saves a {filename}.new file
@@ -324,13 +324,13 @@ func GetUniqueUserId() int {
 }
 
 func Exists(name string) bool {
-	_, err := os.Stat(util.FilePath(configs.GetConfig().FolderUserData, `/`, strings.ToLower(name)+`.yaml`))
+	_, err := os.Stat(util.FilePath(string(configs.GetConfig().FolderUserData), `/`, strings.ToLower(name)+`.yaml`))
 	return !os.IsNotExist(err)
 }
 
 func UserCount() int {
 
-	entries, err := os.ReadDir(util.FilePath(configs.GetConfig().FolderUserData))
+	entries, err := os.ReadDir(util.FilePath(string(configs.GetConfig().FolderUserData)))
 	if err != nil {
 		panic(err)
 	}

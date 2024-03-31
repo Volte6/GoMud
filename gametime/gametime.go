@@ -146,7 +146,7 @@ func getDate(currentRound uint64) GameDate {
 	night := false
 	halfNight := int(math.Floor(float64(c.NightHours) / 2))
 	nightStart := 24 - halfNight
-	nightEnd := c.NightHours - halfNight
+	nightEnd := int(c.NightHours) - halfNight
 	if hour >= nightStart || hour < nightEnd {
 		night = true
 	}

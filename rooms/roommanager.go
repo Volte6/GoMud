@@ -77,7 +77,7 @@ var (
 )
 
 func GetNextRoomId() int {
-	return configs.GetConfig().NextRoomId
+	return int(configs.GetConfig().NextRoomId)
 }
 
 func SetNextRoomId(nextRoomId int) {
@@ -88,9 +88,9 @@ func GetAllRoomIds() []int {
 	roomManager.RLock()
 	defer roomManager.RUnlock()
 
-	var roomIds []int = make([]int, len(roomManager.rooms))
+	var roomIds []int = make([]int, len(roomManager.roomIdToFileCache))
 	i := 0
-	for roomId, _ := range roomManager.rooms {
+	for roomId, _ := range roomManager.roomIdToFileCache {
 		roomIds[i] = roomId
 		i++
 	}
@@ -174,6 +174,20 @@ func RoomMaintenance(out *connection.ConnectionTracker) bool {
 	}
 
 	return roomsUpdated
+}
+
+func GetAllZoneNames() []string {
+	roomManager.RLock()
+	defer roomManager.RUnlock()
+
+	var zoneNames []string = make([]string, len(roomManager.zones))
+	i := 0
+	for zoneName, _ := range roomManager.zones {
+		zoneNames[i] = zoneName
+		i++
+	}
+
+	return zoneNames
 }
 
 func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
