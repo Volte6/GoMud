@@ -110,7 +110,7 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 	//
 	keyring_sequence := user.Character.GetKey(lockId)
 
-	sequence := util.GetLockSequence(lockId, lockStrength, configs.GetConfig().Seed)
+	sequence := util.GetLockSequence(lockId, lockStrength, string(configs.GetConfig().Seed))
 
 	if keyring_sequence == sequence {
 		response.SendUserMessage(userId, "", true)

@@ -41,81 +41,84 @@ func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		args = args[1:]
 
-		if len(args) > 0 {
+		if len(args) < 1 {
 
-			if args[0] == "day" {
-				gametime.SetToDay(-1)
-				gd := gametime.GetDate()
-				response.SendUserMessage(userId, `Time set to `+gd.String(), true)
-			} else if args[0] == "night" {
-				gametime.SetToNight(-1)
-				gd := gametime.GetDate()
-				response.SendUserMessage(userId, `Time set to `+gd.String(), true)
-			} else if args[0] == "time" && len(args) > 1 {
+			headers := []string{"Name", "Value"}
+			rows := [][]string{}
+			formatting := []string{`<ansi fg="yellow-bold">%s</ansi>`, `<ansi fg="red-bold">%s</ansi>`}
 
-				timeStr := strings.Join(args[1:], ` `)
+			response.SendUserMessage(userId, ``, true)
 
-				if len(timeStr) >= 2 && strings.ToLower(timeStr[len(timeStr)-2:]) == `pm` {
-					timeStr = timeStr[:len(timeStr)-2]
-				}
-
-				timeParts := strings.Split(timeStr, `:`)
-
-				hourStr := timeParts[0]
-				minuteStr := `0`
-				if len(timeParts) > 1 {
-					minuteStr = timeParts[1]
-				}
-
-				hour, _ := strconv.Atoi(hourStr)
-				minutes, _ := strconv.Atoi(minuteStr)
-
-				gametime.SetTime(hour, minutes)
-				gd := gametime.GetDate()
-				response.SendUserMessage(userId, `Time set to `+gd.String(), true)
-			}
-		} else {
-
-			if len(args) < 1 {
-
-				headers := []string{"Name", "Value"}
-				rows := [][]string{}
-				formatting := []string{`<ansi fg="yellow-bold">%s</ansi>`, `<ansi fg="red-bold">%s</ansi>`}
-
-				response.SendUserMessage(userId, ``, true)
-
-				cfgData := configs.GetConfig().AllConfigData()
-				cfgKeys := make([]string, 0, len(cfgData))
-				for k := range cfgData {
-					cfgKeys = append(cfgKeys, k)
-				}
-
-				// sort the keys
-				slices.Sort(cfgKeys)
-
-				for _, k := range cfgKeys {
-					rows = append(rows, []string{k, fmt.Sprintf(`%v`, cfgData[k])})
-				}
-
-				settingsTable := templates.GetTable("Server Settings", headers, rows, formatting)
-				tplTxt, _ := templates.Process("tables/generic", settingsTable)
-				response.SendUserMessage(userId, tplTxt, true)
-
-				response.Handled = true
-				return response, nil
+			cfgData := configs.GetConfig().AllConfigData()
+			cfgKeys := make([]string, 0, len(cfgData))
+			for k := range cfgData {
+				cfgKeys = append(cfgKeys, k)
 			}
 
-			configName := strings.ToLower(args[0])
-			configValue := strings.Join(args[1:], ` `)
+			// sort the keys
+			slices.Sort(cfgKeys)
 
-			if err := configs.SetVal(configName, configValue); err != nil {
-				response.SendUserMessage(userId, fmt.Sprintf(`config change error: %s=%s (%s)`, configName, configValue, err), true)
-				response.Handled = true
-				return response, nil
+			for _, k := range cfgKeys {
+				rows = append(rows, []string{k, fmt.Sprintf(`%v`, cfgData[k])})
 			}
 
-			response.SendUserMessage(userId, fmt.Sprintf(`config changed: %s=%s`, configName, configValue), true)
+			settingsTable := templates.GetTable("Server Settings", headers, rows, formatting)
+			tplTxt, _ := templates.Process("tables/generic", settingsTable)
+			response.SendUserMessage(userId, tplTxt, true)
+
+			response.Handled = true
+			return response, nil
 		}
+
+		if args[0] == "day" {
+			gametime.SetToDay(-1)
+			gd := gametime.GetDate()
+			response.SendUserMessage(userId, `Time set to `+gd.String(), true)
+			response.Handled = true
+			return response, nil
+		} else if args[0] == "night" {
+			gametime.SetToNight(-1)
+			gd := gametime.GetDate()
+			response.SendUserMessage(userId, `Time set to `+gd.String(), true)
+			response.Handled = true
+			return response, nil
+		} else if args[0] == "time" && len(args) > 1 {
+
+			timeStr := strings.Join(args[1:], ` `)
+
+			if len(timeStr) >= 2 && strings.ToLower(timeStr[len(timeStr)-2:]) == `pm` {
+				timeStr = timeStr[:len(timeStr)-2]
+			}
+
+			timeParts := strings.Split(timeStr, `:`)
+
+			hourStr := timeParts[0]
+			minuteStr := `0`
+			if len(timeParts) > 1 {
+				minuteStr = timeParts[1]
+			}
+
+			hour, _ := strconv.Atoi(hourStr)
+			minutes, _ := strconv.Atoi(minuteStr)
+
+			gametime.SetTime(hour, minutes)
+			gd := gametime.GetDate()
+			response.SendUserMessage(userId, `Time set to `+gd.String(), true)
+			response.Handled = true
+			return response, nil
+		}
+
+		configName := strings.ToLower(args[0])
+		configValue := strings.Join(args[1:], ` `)
+
+		if err := configs.SetVal(configName, configValue); err != nil {
+			response.SendUserMessage(userId, fmt.Sprintf(`config change error: %s=%s (%s)`, configName, configValue, err), true)
+			response.Handled = true
+			return response, nil
+		}
+
+		response.SendUserMessage(userId, fmt.Sprintf(`config changed: %s=%s`, configName, configValue), true)
+
 		response.Handled = true
 		return response, nil
 	}

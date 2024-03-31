@@ -9,7 +9,7 @@ func Motd(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 	response := NewUserCommandResponse(userId)
 
-	response.SendUserMessage(userId, configs.GetConfig().Motd, true)
+	response.SendUserMessage(userId, string(configs.GetConfig().Motd), true)
 
 	response.Handled = true
 	return response, nil
