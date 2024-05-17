@@ -305,11 +305,22 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 		n, err := connDetails.Read(inputBuffer)
 		if err != nil {
 
+			// If failed to read from the connection, switch to zombie state
 			if userObject != nil {
-				worldManager.LeaveWorld(userObject.UserId)
 
-				if err := users.LogOutUserByConnectionId(connDetails.ConnectionId()); err != nil {
-					slog.Error("Log Out Error", "connectionId", connDetails.ConnectionId(), "error", err)
+				if c.ZombieSeconds > 0 {
+
+					connDetails.SetState(connection.Zombie)
+					users.SetZombieUser(userObject.UserId)
+
+				} else {
+
+					worldManager.LeaveWorld(userObject.UserId)
+
+					if err := users.LogOutUserByConnectionId(connDetails.ConnectionId()); err != nil {
+						slog.Error("Log Out Error", "connectionId", connDetails.ConnectionId(), "error", err)
+					}
+
 				}
 			}
 

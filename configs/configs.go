@@ -56,6 +56,9 @@ type config struct {
 	EnterRoomMessageWrapper    ConfigString `yaml:"EnterRoomMessageWrapper"`
 	ExitRoomMessageWrapper     ConfigString `yaml:"ExitRoomMessageWrapper"`
 
+	ZombieSeconds ConfigInt `yaml:"ZombieSeconds"` // How many seconds a player will be a zombie allowing them to reconnect.
+	LogoutRounds  ConfigInt `yaml:"LogoutRounds"`  // How many rounds of uninterrupted meditation must be completed to log out.
+
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.
 	turnsPerSave    int     // calculated and cached when data is validated.
@@ -338,6 +341,14 @@ func (c *config) Validate() {
 	}
 	if strings.LastIndex(string(c.ExitRoomMessageWrapper), `%s`) < 0 {
 		c.ExitRoomMessageWrapper += `%s` // default
+	}
+
+	// Zombie configs
+	if c.ZombieSeconds < 0 {
+		c.ZombieSeconds = 0 // default
+	}
+	if c.LogoutRounds < 0 {
+		c.LogoutRounds = 3 // default
 	}
 
 	if c.RoundsPerAutoSave < 1 {

@@ -98,6 +98,14 @@ EnterRoomMessageWrapper: "   <ansi fg=\"enters-message\"> >>> </ansi>%s"
 # - ExitRoomMessageWrapper -
 #   Decorate exit text with this. Put a %s where the message should be.
 ExitRoomMessageWrapper: "   <ansi fg=\"leaves-message\"> >>> </ansi>%s"
+# - ZombieSeconds -
+#   How many seconds a character stays active/in game after a network connection
+#   is lost. Set to 0 to instantly log out characters (exploitable).
+ZombieSeconds: 30
+# - LogoutRounds - 
+#   How many rounds of meditation a player must complete before they are
+#   logged out. If interrupted, they must start over.
+LogoutRounds: 3
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS

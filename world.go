@@ -1027,6 +1027,31 @@ func (w *World) TurnTick() {
 
 	turnCt := util.IncrementTurnCount()
 
+	//
+	// Cleanup any zombies
+	//
+
+	expTurns := (uint64(c.ZombieSeconds) * uint64(c.TurnsPerSecond()))
+
+	if expTurns < turnCt {
+		expZombies := users.GetExpiredZombies(turnCt - expTurns)
+		if len(expZombies) > 0 {
+
+			connIds := users.GetConnectionIds(expZombies)
+
+			for _, userId := range expZombies {
+				worldManager.LeaveWorld(userId)
+				users.RemoveZombieUser(userId)
+			}
+			for _, connId := range connIds {
+				if err := users.LogOutUserByConnectionId(connId); err != nil {
+					slog.Error("Log Out Error", "connectionId", connId, "error", err)
+				}
+			}
+
+		}
+	}
+
 	if turnCt%uint64(c.TurnsPerAutoSave()) == 0 {
 		tStart := time.Now()
 

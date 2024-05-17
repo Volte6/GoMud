@@ -57,6 +57,22 @@ func (c *ConnectionTracker) Cleanup() {
 	})
 }
 
+func (c *ConnectionTracker) Kick(id ConnectionId) (err error) {
+
+	// Try to retrieve the value
+	if cd, ok := c.netConnections.Load(id); ok {
+		// close the connection, no longer useful.
+		cd.(*ConnectionDetails).Close()
+		// keep track of the number of disconnects
+		atomic.AddUint64(&c.disconnectCounter, 1)
+		// remove the connection from the map
+		slog.Info("connection kicked", "connectionId", id, "remoteAddr", cd.(*ConnectionDetails).RemoteAddr().String())
+		return nil
+	}
+
+	return errors.New("connection not found")
+}
+
 func (c *ConnectionTracker) Remove(id ConnectionId) (err error) {
 
 	//if err := users.LogOutUserByConnectionId(id); err != nil {
