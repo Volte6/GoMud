@@ -51,6 +51,7 @@ type UserRecord struct {
 	tempDataStore  map[string]any
 	activePrompt   *prompt.Prompt
 	progress       *progressbar.ProgressBar
+	isZombie       bool // are they a zombie currently?
 }
 
 func NewUserRecord(userId int, connectionId uint64) *UserRecord {

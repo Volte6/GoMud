@@ -114,7 +114,7 @@ func trySystemCommand(cmd string, connectionPool *connection.ConnectionTracker, 
 		tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
 		connectionPool.SendTo([]byte(tplTxt), connectionId)
 
-		connectionPool.Remove(connectionId)
+		connectionPool.Kick(connectionId)
 		return true
 	}
 
