@@ -6,7 +6,7 @@ description: As you continue your journey along the path, the glimpses of the Fr
   uninterrupted views of its vast, icy expanse. The surface of the lake appears like
   a flawless mirror, reflecting the azure sky and the surrounding winter landscape
   with breathtaking clarity.
-biome: city
+biome: road
 exits:
   northwest:
     roomid: 292

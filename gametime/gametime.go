@@ -102,7 +102,7 @@ func SetTime(setToHour int, setToMinutes ...int) {
 	roundsPerHour := float64(c.RoundsPerDay) / 24
 	dayResetOffset = int(math.Floor(float64(setToHour) * roundsPerHour))
 	if len(setToMinutes) > 0 {
-		dayResetOffset += int((float64(setToMinutes[0]) / 60) * roundsPerHour)
+		dayResetOffset += int(math.Ceil((float64(setToMinutes[0]) / 60) * roundsPerHour))
 	}
 
 	roundOfDay := int(util.GetRoundCount() % uint64(c.RoundsPerDay))
@@ -146,7 +146,7 @@ func getDate(currentRound uint64) GameDate {
 	night := false
 	halfNight := int(math.Floor(float64(c.NightHours) / 2))
 	nightStart := 24 - halfNight
-	nightEnd := c.NightHours - halfNight
+	nightEnd := int(c.NightHours) - halfNight
 	if hour >= nightStart || hour < nightEnd {
 		night = true
 	}

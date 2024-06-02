@@ -73,6 +73,7 @@ type Character struct {
 	Settings       map[string]string `yaml:"settings,omitempty"`      // custom setting tracking, used for anything.
 	QuestProgress  map[int]string    `yaml:"questprogress,omitempty"` // quest progress tracking
 	KeyRing        map[string]string `yaml:"keyring,omitempty"`       // key is the lock id, value is the sequence
+	KD             KDStats           `yaml:"kd,omitempty"`            // Kill/Death stats
 	roomHistory    []int             // A stack FILO of the last X rooms the character has been in
 	followers      []int             `yaml:"-"` // everyone following this user
 }
@@ -140,7 +141,7 @@ func (c *Character) FindKeyInBackpack(lockId string) (items.Item, bool) {
 
 func (c *Character) HasKey(lockId string, difficulty int) (hasKey bool, hasSequence bool) {
 
-	sequence := util.GetLockSequence(lockId, difficulty, configs.GetConfig().Seed)
+	sequence := util.GetLockSequence(lockId, difficulty, string(configs.GetConfig().Seed))
 
 	// Check whether they ahve a key for this lock
 	return c.GetKey(`key-`+lockId) != ``, c.GetKey(lockId) == sequence
@@ -546,6 +547,24 @@ func (c *Character) HandsRequired(i items.Item) int {
 	return iSpec.Hands
 }
 
+// Copies over an existing item with a new item
+// Returns true if successfully replaces an item
+func (c *Character) UpdateItem(originalItm items.Item, replacement items.Item) bool {
+	for j := len(c.Items) - 1; j >= 0; j-- {
+		if c.Items[j].Equals(originalItm) {
+			// If the number of uses remaining has decremented from the original item
+			// The item gets destroyed from existence
+			if originalItm.Uses >= 1 && replacement.Uses < 1 {
+				c.Items = append(c.Items[:j], c.Items[j+1:]...)
+			} else {
+				c.Items[j] = replacement
+			}
+			return true
+		}
+	}
+	return false
+}
+
 func (c *Character) UseItem(i items.Item) int {
 	for j := len(c.Items) - 1; j >= 0; j-- {
 		if c.Items[j].Equals(i) {
@@ -557,6 +576,7 @@ func (c *Character) UseItem(i items.Item) int {
 				c.Items = append(c.Items[:j], c.Items[j+1:]...)
 			} else {
 				c.Items[j].Uses = usesLeft
+				c.Items[j].LastUsedRound = util.GetRoundCount()
 			}
 
 			return usesLeft

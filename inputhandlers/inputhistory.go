@@ -6,12 +6,10 @@ import "github.com/volte6/mud/connection"
 func HistoryInputHandler(clientInput *connection.ClientInput, connectionPool *connection.ConnectionTracker, sharedState map[string]any) (nextHandler bool) {
 	// Save whatever was in the buffer when enter was hit as the last submitted
 	if clientInput.EnterPressed {
-		// copy the bytes over
-
-		clientInput.History.Add(clientInput.Buffer)
-
-		//clientInput.LastSubmitted = make([]byte, len(clientInput.Buffer))
-		//copy(clientInput.LastSubmitted, clientInput.Buffer)
+		// copy the bytes over (If not just an enter press)
+		if len(clientInput.Buffer) > 0 {
+			clientInput.History.Add(clientInput.Buffer)
+		}
 	}
 
 	return true

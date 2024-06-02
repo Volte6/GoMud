@@ -30,11 +30,13 @@ var (
 
 type ActiveUsers struct {
 	sync.RWMutex
-	Users           map[int]*UserRecord             // userId to UserRecord
-	Usernames       map[string]int                  // username to userId
-	Connections     map[connection.ConnectionId]int // connectionId to userId
-	UserConnections map[int]connection.ConnectionId // userId to connectionId
+	Users             map[int]*UserRecord                // userId to UserRecord
+	Usernames         map[string]int                     // username to userId
+	Connections       map[connection.ConnectionId]int    // connectionId to userId
+	UserConnections   map[int]connection.ConnectionId    // userId to connectionId
+	ZombieConnections map[connection.ConnectionId]uint64 // connectionId to turn they became a zombie
 }
+
 type Online struct {
 	UserId         string
 	Username       string
@@ -47,11 +49,43 @@ type Online struct {
 
 func NewUserManager() *ActiveUsers {
 	return &ActiveUsers{
-		Users:           make(map[int]*UserRecord),
-		Usernames:       make(map[string]int),
-		Connections:     make(map[connection.ConnectionId]int),
-		UserConnections: make(map[int]connection.ConnectionId),
+		Users:             make(map[int]*UserRecord),
+		Usernames:         make(map[string]int),
+		Connections:       make(map[connection.ConnectionId]int),
+		UserConnections:   make(map[int]connection.ConnectionId),
+		ZombieConnections: make(map[connection.ConnectionId]uint64),
 	}
+}
+
+func RemoveZombieUser(userId int) {
+	userManager.Lock()
+	defer userManager.Unlock()
+
+	connId := userManager.UserConnections[userId]
+	delete(userManager.ZombieConnections, connId)
+}
+
+func RemoveZombieConnection(connectionId connection.ConnectionId) {
+	userManager.Lock()
+	defer userManager.Unlock()
+
+	delete(userManager.ZombieConnections, connectionId)
+}
+
+func GetExpiredZombies(expirationTurn uint64) []int {
+	userManager.Lock()
+	defer userManager.Unlock()
+
+	expiredUsers := make([]int, 0)
+
+	for connectionId, zombieTurn := range userManager.ZombieConnections {
+		if zombieTurn < expirationTurn {
+			slog.Info("TEST", "expiration", expirationTurn, "zombieTurn", zombieTurn)
+			expiredUsers = append(expiredUsers, userManager.Connections[connectionId])
+		}
+	}
+
+	return expiredUsers
 }
 
 func GetConnectionIds(userIds []int) []connection.ConnectionId {
@@ -137,29 +171,77 @@ func GetByConnectionId(connectionId connection.ConnectionId) *UserRecord {
 }
 
 // First time creating a user.
-func LoginUser(u *UserRecord, connectionId connection.ConnectionId) error {
+func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, error) {
 
-	u.connectionId = connectionId
-
-	slog.Info("Logging in user", "username", u.Username, "connectionId", u.connectionId)
+	slog.Info("Logging in user", "username", u.Username, "connectionId", connectionId)
 
 	userManager.Lock()
 	defer userManager.Unlock()
 
-	if _, ok := userManager.Usernames[u.Username]; ok {
-		return errors.New("user is already logged in")
+	if userId, ok := userManager.Usernames[u.Username]; ok {
+
+		if otherConnId, ok := userManager.UserConnections[userId]; ok {
+
+			if _, ok := userManager.ZombieConnections[otherConnId]; ok {
+
+				// The user is a zombie.
+				delete(userManager.ZombieConnections, otherConnId)
+
+				u.connectionId = connectionId
+
+				userManager.Users[u.UserId] = u
+				userManager.Usernames[u.Username] = u.UserId
+				userManager.Connections[u.connectionId] = u.UserId
+				userManager.UserConnections[u.UserId] = u.connectionId
+
+				return "Reconnecting...", nil
+			}
+
+		}
+
+		return "That user is already logged in.", errors.New("user is already logged in")
 	}
 
 	if len(u.AdminCommands) > 0 {
 		u.Permission = PermissionMod
 	}
 
+	u.connectionId = connectionId
+
 	userManager.Users[u.UserId] = u
 	userManager.Usernames[u.Username] = u.UserId
 	userManager.Connections[u.connectionId] = u.UserId
 	userManager.UserConnections[u.UserId] = u.connectionId
 
-	return nil
+	return "", nil
+}
+
+func SetZombieConnection(connId connection.ConnectionId) {
+
+	userManager.Lock()
+	defer userManager.Unlock()
+
+	if _, ok := userManager.ZombieConnections[connId]; ok {
+		return
+	}
+
+	userManager.ZombieConnections[connId] = util.GetTurnCount()
+}
+
+func SetZombieUser(userId int) {
+
+	userManager.Lock()
+	defer userManager.Unlock()
+
+	if u, ok := userManager.Users[userId]; ok {
+
+		if _, ok := userManager.ZombieConnections[u.connectionId]; ok {
+			return
+		}
+
+		userManager.ZombieConnections[u.connectionId] = util.GetTurnCount()
+	}
+
 }
 
 func SaveAllUsers() {
@@ -241,7 +323,7 @@ func LoadUser(username string) (*UserRecord, error) {
 
 	slog.Info("Loading user", "username", username)
 
-	userFilePath := util.FilePath(configs.GetConfig().FolderUserData, `/`, strings.ToLower(username)+`.yaml`)
+	userFilePath := util.FilePath(string(configs.GetConfig().FolderUserData), `/`, strings.ToLower(username)+`.yaml`)
 
 	userFileTxt, err := os.ReadFile(userFilePath)
 	if err != nil {
@@ -293,7 +375,7 @@ func SaveUser(u UserRecord) error {
 
 	carefulSave := configs.GetConfig().CarefulSaveFiles
 
-	path := util.FilePath(configs.GetConfig().FolderUserData, `/`, strings.ToLower(u.Username)+`.yaml`)
+	path := util.FilePath(string(configs.GetConfig().FolderUserData), `/`, strings.ToLower(u.Username)+`.yaml`)
 
 	saveFilePath := path
 	if carefulSave { // careful save first saves a {filename}.new file
@@ -324,13 +406,13 @@ func GetUniqueUserId() int {
 }
 
 func Exists(name string) bool {
-	_, err := os.Stat(util.FilePath(configs.GetConfig().FolderUserData, `/`, strings.ToLower(name)+`.yaml`))
+	_, err := os.Stat(util.FilePath(string(configs.GetConfig().FolderUserData), `/`, strings.ToLower(name)+`.yaml`))
 	return !os.IsNotExist(err)
 }
 
 func UserCount() int {
 
-	entries, err := os.ReadDir(util.FilePath(configs.GetConfig().FolderUserData))
+	entries, err := os.ReadDir(util.FilePath(string(configs.GetConfig().FolderUserData)))
 	if err != nil {
 		panic(err)
 	}

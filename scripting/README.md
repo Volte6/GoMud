@@ -8,11 +8,16 @@ See [Room Scripting](/scripting/docs/SCRIPTING_ROOMS.md)
 # Mob Scripting
 See [Mob Scripting](/scripting/docs/SCRIPTING_MOBS.md)
 
+# Item Scripting
+See [Item Scripting](/scripting/docs/SCRIPTING_ITEMS.md)
+
 # Script Functions
 
 [ActorObject Functions](/scripting/docs/FUNCTIONS_ACTORS.md) - Functions that query or alter user/mob data.
 
 [RoomObject Functions](/scripting/docs/FUNCTIONS_ROOMS.md) - Functions that query or alter room data.
+
+[ItemObject Functions](/scripting/docs/FUNCTIONS_ITEMS.md) - Functions that query or alter item data.
 
 [Utility Functions](/scripting/docs/FUNCTIONS_UTIL.md) - Helper and info functions.
 

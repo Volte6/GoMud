@@ -21,6 +21,7 @@ import (
 	"crypto/md5"
 
 	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/progressbar"
 	"github.com/volte6/mud/term"
 )
 
@@ -58,6 +59,7 @@ type CommandQueue interface {
 	QueueRoomAction(roomId int, sourceUserId int, sourceMobId int, action string)
 	Broadcast(msg string, skipLineRefresh ...bool)
 	GetSettings(userId int) (connection.ClientSettings, error)
+	StartProgressBar(userId int, name string, turnLength int, onCompleteFunc func(), displayFlags ...progressbar.BarDisplay)
 }
 
 func SetServerAddress(addr string) {

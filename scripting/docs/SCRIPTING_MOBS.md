@@ -1,24 +1,24 @@
 # Mob Scripting
 
 Example Script: 
-* [Mob Script Tag Instance Script (hungry)](../_datafiles/mobs/frostfang/scripts/2-hungry.js)
-* [Mob Script Tag defined in Spawninfo (hungry)](../_datafiles/rooms/frostfang/271.yaml)
+* [Mob Script Tag Instance Script (hungry)](../../_datafiles/mobs/frostfang/scripts/2-hungry.js)
+* [Mob Script Tag defined in Spawninfo (hungry)](../../_datafiles/rooms/frostfang/271.yaml)
 
 ## Script paths
 
 All mob scripts reside in a subfolder of their zone/definition file.
 
-For example, the mob located at `_datafiles/mobs/frostfang/2.yaml` would place its script at `_datafiles/mobs/frostfang/scripts/2.js`
+For example, the mob located at `../../_datafiles/mobs/frostfang/2.yaml` would place its script at `../../_datafiles/mobs/frostfang/scripts/2.js`
 
 If a mob defined in a rooms spawninfo has a `scripttag` defined, it will be appended to the mobs script path with a hyphen. 
 
-For example, `scripttag: hungry` for mob `2` (as above) would load the script `_datafiles/mobs/frostfang/scripts/2-hungry.js`
+For example, `scripttag: hungry` for mob `2` (as above) would load the script `../../_datafiles/mobs/frostfang/scripts/2-hungry.js`
 
 In this way you can have generic scripts for a mob id, or specific scripts for special rooms or circumstances.
 
 # Script Functions and Rules
 
-Mob scripts can maintain their own internal state. If you define or alter a global varaible it will persist until the mob despawns.
+Any variables defined in the global scope of a mob script will be set for all mobs that use that script. If you want to set/recall mob-specific data, use [SetTempData/GetTempData](FUNCTIONS_ACTORS.md#actorobjectsettempdatakey-string-value-any)
 
 The following functions are special keywords that will be invoked under specific circumstances if they are defined within your script:
 
@@ -181,6 +181,27 @@ function onDie(mob ActorObject, room RoomObject, eventDetails object) {
 | --- | --- |
 | rest | Everything entered after the command (if anything). |
 | mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
+| eventDetails.sourceId | The `userId` or `mobInstanceId` that killed the mob |
+| eventDetails.sourceType | `"user"` or `"mob"`, the source type of the death |
+| eventDetails.attackerCount | How many users hurt this mob before it died. |
+
+---
+
+```
+function onConverse(message string, mob ActorObject, sourceMob ActorObject, room RoomObject) {
+}
+```
+
+`onConverse()` is a special event function that is only called when mobs use the `converse` command.
+
+_Note: The intention of the converse command and onConverse is to faciliate mob-to-mob discussions._
+
+|  Argument | Explanation |
+| --- | --- |
+| message | The message that was sent via converse. |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| sourceMob | [ActorObject](FUNCTIONS_ACTORS.md) |
 | room | [RoomObject](FUNCTIONS_ROOMS.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that killed the mob |
 | eventDetails.sourceType | `"user"` or `"mob"`, the source type of the death |

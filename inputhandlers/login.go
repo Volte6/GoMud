@@ -112,13 +112,17 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 			} else {
 				// Password matched, assign the loaded data
 				state.UserObject = tmpUser
-				if err := users.LoginUser(tmpUser, clientInput.ConnectionId); err != nil {
 
-					connectionPool.SendTo([]byte("That user is already logged in. Bye!"), clientInput.ConnectionId)
+				msg, err := users.LoginUser(tmpUser, clientInput.ConnectionId)
+
+				if len(msg) > 0 {
+					connectionPool.SendTo([]byte(msg), clientInput.ConnectionId)
 					connectionPool.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
+				}
+
+				if err != nil {
 					connectionPool.Remove(clientInput.ConnectionId)
 					return false
-
 				}
 
 				return true

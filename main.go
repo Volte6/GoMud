@@ -45,36 +45,6 @@ var (
 	worldManager = NewWorld(sigChan)
 )
 
-type Suggestions struct {
-	suggestions []string
-	pos         int
-}
-
-func (s *Suggestions) Count() int {
-	return len(s.suggestions)
-}
-
-func (s *Suggestions) Clear() {
-	s.suggestions = []string{}
-	s.pos = 0
-}
-
-func (s *Suggestions) Set(suggestions []string) {
-	s.suggestions = suggestions
-	s.pos = 0
-}
-
-func (s *Suggestions) Next() string {
-	if len(s.suggestions) < 1 {
-		return ``
-	}
-	if s.pos >= len(s.suggestions) {
-		s.pos = 0
-	}
-	s.pos++
-	return s.suggestions[s.pos-1]
-}
-
 func main() {
 
 	configs.ReloadConfig()
@@ -110,7 +80,7 @@ func main() {
 	slog.Info(`========================`)
 	//
 	// System Configurations
-	runtime.GOMAXPROCS(c.MaxCPUCores)
+	runtime.GOMAXPROCS(int(c.MaxCPUCores))
 
 	// Load all the data files up front.
 	rooms.LoadDataFiles()
@@ -123,7 +93,7 @@ func main() {
 	keywords.LoadAliases()
 	gametime.SetToDay(-5)
 
-	scripting.Setup(c.ScriptLoadTimeoutMs, c.ScriptRoomTimeoutMs)
+	scripting.Setup(int(c.ScriptLoadTimeoutMs), int(c.ScriptRoomTimeoutMs))
 
 	//
 	slog.Info(`========================`)
@@ -180,7 +150,7 @@ func main() {
 			}
 
 			connCt := worldManager.GetConnectionPool().ActiveConnectionCount()
-			if connCt >= configs.GetConfig().MaxTelnetConnections {
+			if connCt >= int(configs.GetConfig().MaxTelnetConnections) {
 				conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", connCt)))
 				conn.Close()
 				continue
@@ -335,11 +305,22 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 		n, err := connDetails.Read(inputBuffer)
 		if err != nil {
 
+			// If failed to read from the connection, switch to zombie state
 			if userObject != nil {
-				worldManager.LeaveWorld(userObject.UserId)
 
-				if err := users.LogOutUserByConnectionId(connDetails.ConnectionId()); err != nil {
-					slog.Error("Log Out Error", "connectionId", connDetails.ConnectionId(), "error", err)
+				if c.ZombieSeconds > 0 {
+
+					connDetails.SetState(connection.Zombie)
+					users.SetZombieUser(userObject.UserId)
+
+				} else {
+
+					worldManager.LeaveWorld(userObject.UserId)
+
+					if err := users.LogOutUserByConnectionId(connDetails.ConnectionId()); err != nil {
+						slog.Error("Log Out Error", "connectionId", connDetails.ConnectionId(), "error", err)
+					}
+
 				}
 			}
 
@@ -350,6 +331,10 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 			}
 
 			break
+		}
+
+		if connDetails.InputDisabled() {
+			continue
 		}
 
 		clientInput.DataIn = inputBuffer[:n]
@@ -418,7 +403,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 				}
 
 				if redrawPrompt {
-					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetPrompt(true))), clientInput.ConnectionId)
+					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
 				}
 
 			}
@@ -481,7 +466,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 					clientInput.Buffer = append(clientInput.Buffer, []byte(suggested)...)
 					suggestions.Clear()
 					userObject.SetUnsentText(string(clientInput.Buffer), ``)
-					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetPrompt(true))), clientInput.ConnectionId)
+					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
 
 				}
 

@@ -19,7 +19,8 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.Command(cmd string, waitTurns ...int)](#actorobjectcommandcmd-string-waitturns-int)
   - [ActorObject.TrainSkill(skillName string, skillLevel int)](#actorobjecttrainskillskillname-string-skilllevel-int)
   - [ActorObject.MoveRoom(destRoomId int)](#actorobjectmoveroomdestroomid-int)
-  - [ActorObject.GiveItem(itemId \[int/Item\])](#actorobjectgiveitemitemid-intitem)
+  - [ActorObject.UpdateItem(itemId ItemObject)](#actorobjectupdateitemitemid-itemobject)
+  - [ActorObject.GiveItem(itemId ItemObject)](#actorobjectgiveitemitemid-itemobject)
   - [ActorObject.HasBuff(buffId int) bool](#actorobjecthasbuffbuffid-int-bool)
   - [ActorObject.GiveBuff(buffId int)](#actorobjectgivebuffbuffid-int)
   - [ActorObject.HasBuffFlag(buffFlag string) bool](#actorobjecthasbuffflagbuffflag-string-bool)
@@ -27,7 +28,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.ExpireBuff(buffId int)](#actorobjectexpirebuffbuffid-int)
   - [ActorObject.RemoveBuff(buffId int)](#actorobjectremovebuffbuffid-int)
   - [ActorObject.HasItemId(itemId int) bool](#actorobjecthasitemiditemid-int-bool)
-  - [ActorObject.GetBackpackItems() \[\]Item](#actorobjectgetbackpackitems-item)
+  - [ActorObject.GetBackpackItems() \[\]ItemObject](#actorobjectgetbackpackitems-itemobject)
   - [ActorObject.GetAlignment() int](#actorobjectgetalignment-int)
   - [ActorObject.GetAlignmentName() string](#actorobjectgetalignmentname-string)
   - [ActorObject.ChangeAlignment(alignmentChange int)](#actorobjectchangealignmentalignmentchange-int)
@@ -69,7 +70,7 @@ _Note: This is useful for saving/retrieving data that an ActorObject can carry a
 |  Argument | Explanation |
 | --- | --- |
 | key | A unique identifier for the data. |
-| value | What you will be saving. |
+| value | What you will be saving. If null, frees from memory. |
 
 ## [ActorObject.GetTempData(key string) any](/scripting/actor_func.go)
 Gets temporary data for the ActorObject.
@@ -123,6 +124,8 @@ Update how much health an ActorObject has, and returns the actual amount their h
 ## [ActorObject.Command(cmd string, waitTurns ...int)](/scripting/actor_func.go)
 Forces an ActorObject to execute a command as if they entered it
 
+_Note: Don't underestimate the power of this function! Complex and interesting behaviors or interactions can emerge from using it._
+
 |  Argument | Explanation |
 | --- | --- |
 | cmd | The command to execute such as `look west` or `say goodbye`. |
@@ -142,12 +145,21 @@ Quietly moves an ActorObject to a new room
 | --- | --- |
 | destRoomId | The room id to move them to. |
 
-## [ActorObject.GiveItem(itemId [int/Item])](/scripting/actor_func.go)
-Creates an item (if itemId) or accepts an Item object and puts it in the actors backpack
+## [ActorObject.UpdateItem(itemId ItemObject)](/scripting/actor_func.go)
+Accepts an ItemObject to update in the players backpack. If the item does not already exist in the players backpack, it is ignored.
+
+_Note: This is the only way to save changes made to an item in the players backpack._
 
 |  Argument | Explanation |
 | --- | --- |
-| itemId | The id or item object to give them. |
+| ItemObject | The item object to give them. |
+
+## [ActorObject.GiveItem(itemId ItemObject)](/scripting/actor_func.go)
+Accepts an ItemObject to put into the players backpack. This can be called multiple times to duplicate an item.
+
+|  Argument | Explanation |
+| --- | --- |
+| ItemObject | The item object to give them. |
 
 ## [ActorObject.HasBuff(buffId int) bool](/scripting/actor_func.go)
 Returns true if the Actor has the buffId supplied
@@ -191,8 +203,6 @@ Remove a buff without triggering onEnd
 | --- | --- |
 | buffId | The ID of the buff to remove |
 
-
-
 ## [ActorObject.HasItemId(itemId int) bool](/scripting/actor_func.go)
 Check whether an ActorObject has an item id in their backpack
 
@@ -200,10 +210,10 @@ Check whether an ActorObject has an item id in their backpack
 | --- | --- |
 | itemId | The ItemId to check for. |
 
-## [ActorObject.GetBackpackItems() []Item](/scripting/actor_func.go)
+## [ActorObject.GetBackpackItems() []ItemObject](/scripting/actor_func.go)
 Get a list of Item objects in the ActorObjects backpack
 
-_Note: See [/scripting/docs/ITEMS.md](/scripting/docs/ITEMS.md) for details on Item objects._
+_Note: See [/scripting/docs/FUNCTIONS_ITEMS.md](/scripting/docs/FUNCTIONS_ITEMS.md) for details on ItemObject objects._
 
 ## [ActorObject.GetAlignment() int](/scripting/actor_func.go)
 Get the numeric representation of a ActorObjects alignment, from -100 to 100

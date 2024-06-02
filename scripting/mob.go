@@ -7,43 +7,97 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
-	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/util"
 )
 
 var (
-	mobVMCache       = make(map[int]*VMWrapper)
+	mobVMCache       = make(map[string]*VMWrapper)
 	scriptMobTimeout = 10 * time.Millisecond
 )
 
 func PruneMobVMs(instanceIds ...int) {
-	if len(instanceIds) > 0 {
-		for _, mobInstanceId := range instanceIds {
-			delete(mobVMCache, mobInstanceId)
-		}
-		return
-	}
-	for mobInstanceId, _ := range mobVMCache {
-		if mob := mobs.GetInstance(mobInstanceId); mob == nil {
-			delete(mobVMCache, mobInstanceId)
-		}
-	}
+
 }
 
-func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, sourceType string, details map[string]any, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	vmw, err := getMobVM(mobInstanceId)
-	if err != nil {
-		return util.NewMessageQueue(0, mobInstanceId), err
-	}
+func TryMobConverse(rest string, mobInstanceId int, sourceMobInstanceId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	messageQueue = util.NewMessageQueue(0, mobInstanceId)
 	commandQueue = cmdQueue
 
 	sMob := GetActor(0, mobInstanceId)
 	if sMob == nil {
-		PruneMobVMs(mobInstanceId)
 		return messageQueue, errors.New("mob not found")
+	}
+
+	vmw, err := getMobVM(sMob)
+	if err != nil {
+		return util.NewMessageQueue(0, mobInstanceId), err
+	}
+
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("TryMobConverse()", "mobInstanceId", mobInstanceId, "sourceMobInstanceId", sourceMobInstanceId, "time", time.Since(timestart))
+	}()
+	if onCommandFunc, ok := vmw.GetFunction("onConverse"); ok {
+
+		tmr := time.AfterFunc(scriptRoomTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+
+		sourceMob := GetActor(0, sourceMobInstanceId)
+		if sourceMob == nil {
+			return messageQueue, errors.New("mob not found")
+		}
+
+		sRoom := GetRoom(sMob.GetRoomId())
+
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(rest),
+			vmw.VM.ToValue(sMob),
+			vmw.VM.ToValue(sourceMob),
+			vmw.VM.ToValue(sRoom),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("TryMobConverse(): %w", err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+	}
+
+	return messageQueue, nil
+}
+
+func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, sourceType string, details map[string]any, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+
+	messageQueue = util.NewMessageQueue(0, mobInstanceId)
+	commandQueue = cmdQueue
+
+	sMob := GetActor(0, mobInstanceId)
+	if sMob == nil {
+		return messageQueue, errors.New("mob not found")
+	}
+
+	vmw, err := getMobVM(sMob)
+	if err != nil {
+		return util.NewMessageQueue(0, mobInstanceId), err
 	}
 
 	timestart := time.Now()
@@ -100,11 +154,6 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, source
 
 func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sourceType string, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
-	vmw, err := getMobVM(mobInstanceId)
-	if err != nil {
-		return util.NewMessageQueue(0, mobInstanceId), err
-	}
-
 	messageQueue = util.NewMessageQueue(0, mobInstanceId)
 	commandQueue = cmdQueue
 
@@ -112,6 +161,11 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 	if sMob == nil {
 		PruneMobVMs(mobInstanceId)
 		return messageQueue, errors.New("mob not found")
+	}
+
+	vmw, err := getMobVM(sMob)
+	if err != nil {
+		return util.NewMessageQueue(0, mobInstanceId), err
 	}
 
 	timestart := time.Now()
@@ -208,30 +262,27 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 	return messageQueue, nil
 }
 
-func getMobVM(mobInstanceId int) (*VMWrapper, error) {
+func getMobVM(mobActor *ScriptActor) (*VMWrapper, error) {
 
-	if vm, ok := mobVMCache[mobInstanceId]; ok {
+	scriptId := fmt.Sprintf(`%d-%s`, mobActor.MobTypeId(), mobActor.getScriptTag())
+
+	if vm, ok := mobVMCache[scriptId]; ok {
 		if vm == nil {
 			return nil, errNoScript
 		}
 		return vm, nil
 	}
 
-	mob := mobs.GetInstance(mobInstanceId)
-	if mob == nil {
-		return nil, fmt.Errorf("mob instance not found: %d", mobInstanceId)
-	}
-
-	script := mob.GetScript()
+	script := mobActor.getScript()
 	if len(script) == 0 {
-		mobVMCache[mobInstanceId] = nil
+		mobVMCache[scriptId] = nil
 		return nil, errNoScript
 	}
 
 	vm := goja.New()
 	setAllScriptingFunctions(vm)
 
-	prg, err := goja.Compile(fmt.Sprintf(`mob-%d`, mobInstanceId), script, false)
+	prg, err := goja.Compile(fmt.Sprintf(`mob-%s`, scriptId), script, false)
 	if err != nil {
 		finalErr := fmt.Errorf("Compile: %w", err)
 		return nil, finalErr
@@ -270,9 +321,7 @@ func getMobVM(mobInstanceId int) (*VMWrapper, error) {
 	})
 	if fn, ok := goja.AssertFunction(vm.Get(`onLoad`)); ok {
 
-		sMob := GetActor(0, mobInstanceId)
-
-		if _, err := fn(goja.Undefined(), vm.ToValue(sMob)); err != nil {
+		if _, err := fn(goja.Undefined(), vm.ToValue(mobActor)); err != nil {
 			// Wrap the error
 			finalErr := fmt.Errorf("onLoad: %w", err)
 
@@ -293,7 +342,7 @@ func getMobVM(mobInstanceId int) (*VMWrapper, error) {
 
 	vmw := newVMWrapper(vm, 0)
 
-	mobVMCache[mobInstanceId] = vmw
+	mobVMCache[scriptId] = vmw
 
 	return vmw, nil
 }

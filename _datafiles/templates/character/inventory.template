@@ -1,3 +1,4 @@
+{{ if not .Searching }}
  ┌─ <ansi fg="black-bold">.:</ansi><ansi fg="blue">Equipment</ansi> ──────────────────────────────────────────────────────────────┐
 {{ if not .Equipment.Weapon.IsDisabled }}   <ansi fg="yellow">Weapon:  </ansi><ansi fg="itemname">{{ .Equipment.Weapon.NameComplex  }}</ansi>
 {{ end -}}
@@ -21,3 +22,8 @@
 {{ end }} └────────────────────────────────────────────────────────────────────────────┘
  {{ $itemCt := len .ItemNames -}}{{ $formattedNames := .ItemNamesFormatted -}}{{- $strlen := 0 -}}
  Carrying: {{ range $index, $name := .ItemNames -}}{{ $proposedLength := (add 2 (add $strlen (len $name))) }}{{- if gt $proposedLength 68 -}}{{- $strlen = 0 -}}{{- printf "\n           " -}}{{- end -}}{{ index $formattedNames $index }}{{- if ne $index (sub $itemCt 1) }}, {{ $strlen = (add 2 (add $strlen (len $name))) }}{{ end }}{{ end }}
+{{ else }}
+{{ $itemCt := len .ItemNames -}}{{ $formattedNames := .ItemNamesFormatted -}}
+ Found in your bag: {{ range $index, $name := .ItemNames -}}{{  index $formattedNames $index }}
+                   {{ end -}}
+{{ end }}

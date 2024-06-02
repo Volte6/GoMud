@@ -64,6 +64,7 @@ var (
 		`help`:       {Help, true, false},
 		`hire`:       {Hire, false, false},
 		`keyring`:    {KeyRing, true, false},
+		`killstats`:  {Killstats, true, false},
 		`inspect`:    {Inspect, false, false},
 		`inventory`:  {Inventory, true, false},
 		`jobs`:       {Jobs, true, false},
@@ -213,13 +214,37 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 
 	userDisabled := false
 	isAdmin := false
-	if user := users.GetByUserId(userId); user != nil {
+	user := users.GetByUserId(userId)
+	if user != nil {
+
+		// If the user has a progressbar that is interrupted by input, cancel it
+		if user.GetProgressBar() != nil {
+			user.GetProgressBar().Cancel()
+		}
+
 		// Cancel any buffs they have that get cancelled based on them doing anything at all
 		user.Character.CancelBuffsWithFlag(buffs.CancelOnAction)
 
 		userDisabled = user.Character.IsDisabled()
 		isAdmin = user.Permission == users.PermissionAdmin
 		isAdmin = isAdmin || user.HasAdminCommand(cmd)
+
+		// Check if the "rest" is an item the character has
+		matchingItem, found := user.Character.FindInBackpack(rest)
+		if !found {
+			matchingItem, found = user.Character.FindOnBody(rest)
+		}
+
+		if found {
+			// If the item has a script, run it
+			if scriptResponse, err := scripting.TryItemCommand(cmd, matchingItem, user.UserId, cmdQueue); err == nil {
+				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
+					finalResponse.AbsorbMessages(scriptResponse)
+					finalResponse.Handled = true
+					return finalResponse, err
+				}
+			}
+		}
 	}
 
 	// Try any room props, only return if the response indicates it was handled

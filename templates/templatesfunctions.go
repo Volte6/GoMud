@@ -155,7 +155,7 @@ var (
 			return skills.GetProfession(allRanks)
 		},
 		"roundstotime": func(rounds int) string {
-			return formatDuration(rounds * configs.GetConfig().RoundSeconds)
+			return formatDuration(rounds * int(configs.GetConfig().RoundSeconds))
 		},
 	}
 )

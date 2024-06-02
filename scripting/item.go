@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"strconv"
 	"time"
 
 	"github.com/dop251/goja"
@@ -12,39 +13,43 @@ import (
 )
 
 var (
-	itemVMCache       = make(map[int]*VMWrapper)
+	itemVMCache       = make(map[string]*VMWrapper)
 	scriptItemTimeout = 10 * time.Millisecond
 )
 
 func PruneItemVMs(instanceIds ...int) {
-	// Do not prune, they dont' get a VM per buff instance.
+
 }
 
-func TryItemScriptEvent(eventName string, userId int, mobInstanceId int, item items.Item, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryItemCommand(cmd string, item items.Item, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
-	vmw, err := getItemVM(item.ItemId)
-	if err != nil {
-		return util.NewMessageQueue(0, 0), err
-	}
-
-	messageQueue = util.NewMessageQueue(0, 0)
+	messageQueue = util.NewMessageQueue(userId, 0)
 	commandQueue = cmdQueue
 
-	actorInfo := GetActor(userId, mobInstanceId)
+	sItem := GetItem(item)
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TryItemScriptEvent()", "eventName", eventName, "itemId", item.ItemId, "time", time.Since(timestart))
+		slog.Debug("TryItemCommand()", "cmd", cmd, "itemId", item.ItemId, "userId", userId, "time", time.Since(timestart))
 	}()
-	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 
-		tmr := time.AfterFunc(scriptRoomTimeout, func() {
+	vmw, err := getItemVM(sItem)
+	if err != nil {
+		return util.NewMessageQueue(userId, 0), err
+	}
+
+	if onCommandFunc, ok := vmw.GetFunction(`onCommand_` + cmd); ok {
+
+		sUser := GetActor(userId, 0)
+		sRoom := GetRoom(sUser.GetRoomId())
+
+		tmr := time.AfterFunc(scriptItemTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)
 		})
-
 		res, err := onCommandFunc(goja.Undefined(),
-			vmw.VM.ToValue(item),
-			vmw.VM.ToValue(actorInfo),
+			vmw.VM.ToValue(sUser),
+			vmw.VM.ToValue(sItem),
+			vmw.VM.ToValue(sRoom),
 		)
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()
@@ -52,7 +57,7 @@ func TryItemScriptEvent(eventName string, userId int, mobInstanceId int, item it
 		if err != nil {
 
 			// Wrap the error
-			finalErr := fmt.Errorf("%s(): %w", eventName, err)
+			finalErr := fmt.Errorf("onCommand_%s(): %w", cmd, err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
@@ -69,32 +74,76 @@ func TryItemScriptEvent(eventName string, userId int, mobInstanceId int, item it
 		if boolVal, ok := res.Export().(bool); ok {
 			messageQueue.Handled = messageQueue.Handled || boolVal
 		}
+
+		// Save any changed that might have happened to the item
+		sUser.characterRecord.UpdateItem(item, *sItem.itemRecord)
+
+	} else if onCommandFunc, ok := vmw.GetFunction(`onCommand`); ok {
+
+		sUser := GetActor(userId, 0)
+		sRoom := GetRoom(sUser.GetRoomId())
+
+		tmr := time.AfterFunc(scriptItemTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(cmd),
+			vmw.VM.ToValue(sUser),
+			vmw.VM.ToValue(sItem),
+			vmw.VM.ToValue(sRoom),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("onCommand(): %w", err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+
+		// Save any changed that might have happened to the item
+		sUser.characterRecord.UpdateItem(item, *sItem.itemRecord)
 	}
 
 	return messageQueue, nil
 }
 
-func getItemVM(itemId int) (*VMWrapper, error) {
+func getItemVM(sItem *ScriptItem) (*VMWrapper, error) {
 
-	if vm, ok := itemVMCache[itemId]; ok {
+	scriptId := strconv.Itoa(sItem.ItemId())
+
+	if vm, ok := itemVMCache[scriptId]; ok {
 		if vm == nil {
 			return nil, errNoScript
 		}
 		return vm, nil
 	}
 
-	spec := items.GetItemSpec(itemId)
-
-	script := spec.GetScript()
+	script := sItem.getScript()
 	if len(script) == 0 {
-		itemVMCache[itemId] = nil
+		itemVMCache[scriptId] = nil
 		return nil, errNoScript
 	}
 
 	vm := goja.New()
 	setAllScriptingFunctions(vm)
 
-	prg, err := goja.Compile(fmt.Sprintf(`item-%d`, itemId), script, false)
+	prg, err := goja.Compile(fmt.Sprintf(`item-%s`, scriptId), script, false)
 	if err != nil {
 		finalErr := fmt.Errorf("Compile: %w", err)
 		return nil, finalErr
@@ -127,7 +176,7 @@ func getItemVM(itemId int) (*VMWrapper, error) {
 
 	vmw := newVMWrapper(vm, 0)
 
-	itemVMCache[itemId] = vmw
+	itemVMCache[scriptId] = vmw
 
 	return vmw, nil
 }

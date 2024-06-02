@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/mud/prompt"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/term"
@@ -28,7 +27,7 @@ func Start(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	}
 
 	// Get if already exists, otherwise create new
-	cmdPrompt, isNew := prompt.Init(userId, `start`, rest)
+	cmdPrompt, isNew := user.StartPrompt(`start`, rest)
 
 	if isNew {
 		response.SendUserMessage(userId, fmt.Sprintf(`You'll need to answer some questions.%s`, term.CRLFStr), true)
@@ -93,6 +92,8 @@ func Start(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			response.Handled = true
 			return response, nil
 		}
+
+		user.ClearPrompt()
 
 		response.SendUserMessage(userId, fmt.Sprintf(`You will be known as <ansi fg="yellow-bold">%s</ansi>!%s`, user.Character.Name, term.CRLFStr), true)
 	}

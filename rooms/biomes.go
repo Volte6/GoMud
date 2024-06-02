@@ -52,6 +52,11 @@ var (
 			litArea:     true,
 			description: `Cities are generally well protected, with well built roads. Usually they will have shops, inns, and law enforcement. Fighting and Killing in cities can lead to a lasting bad reputation.`,
 		},
+		`road`: {
+			name:        `Road`,
+			symbol:      '•',
+			description: `Roads are well traveled paths, often extending out into the countryside.`,
+		},
 		`house`: {
 			name:        `House`,
 			symbol:      '⌂',
@@ -72,7 +77,6 @@ var (
 		`forest`: {
 			name:        `Forest`,
 			symbol:      '♣',
-			darkArea:    true,
 			description: `Forests are wild areas full of trees. Animals and monsters often live here.`,
 		},
 		`mountains`: {

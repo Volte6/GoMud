@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/progressbar"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
@@ -47,7 +49,11 @@ func Sneak(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		return response, nil
 	}
 
-	cmdQueue.QueueBuff(userId, 0, 9) // Buff 9 is sneak
+	// Testing for now
+	timeToWait := configs.GetConfig().TurnsPerRound() * 2
+	cmdQueue.StartProgressBar(userId, "<ansi fg=\"black\" bold=\"true\">(Sneaking)</ansi>", timeToWait, func() {
+		cmdQueue.QueueBuff(userId, 0, 9) // Buff 9 is sneak
+	}, progressbar.PromptNoBar, progressbar.PromptPrefix, progressbar.PromptTypingInterrupts)
 
 	response.Handled = true
 	return response, nil

@@ -19,6 +19,7 @@ import (
 	"github.com/volte6/mud/mobcommands"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
+	"github.com/volte6/mud/progressbar"
 	"github.com/volte6/mud/prompt"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/rooms"
@@ -153,8 +154,6 @@ func (w *World) LeaveWorld(userId int) {
 		connectionIds := users.GetConnectionIds(room.GetPlayers())
 		tplTxt, _ := templates.Process("player-despawn", user.Character.Name)
 		w.connectionPool.SendTo([]byte(tplTxt), connectionIds...)
-
-		prompt.Clear(userId)
 	}
 
 }
@@ -169,7 +168,7 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 	}
 
 	// If engaged in a prompt just try and match an option
-	if promptInfo := prompt.Get(userId); promptInfo != nil {
+	if promptInfo := user.GetPrompt(); promptInfo != nil {
 		if qInfo := promptInfo.GetNextQuestion(); qInfo != nil {
 
 			if len(qInfo.Options) > 0 {
@@ -666,7 +665,7 @@ func (w *World) processInput(wi WorldInput) {
 
 	var activeQuestion *prompt.Question = nil
 
-	if cmdPrompt := prompt.Get(wi.FromId); cmdPrompt != nil {
+	if cmdPrompt := user.GetPrompt(); cmdPrompt != nil {
 
 		if activeQuestion = cmdPrompt.GetNextQuestion(); activeQuestion != nil {
 
@@ -679,7 +678,7 @@ func (w *World) processInput(wi WorldInput) {
 			}
 		} else {
 			// If a prompt was found, but no pending questions, clear it.
-			prompt.Clear(wi.FromId)
+			user.ClearPrompt()
 		}
 
 	}
@@ -778,7 +777,7 @@ func (w *World) processInput(wi WorldInput) {
 		break
 	}
 
-	worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(user.GetPrompt(true))), connId)
+	worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
 
 }
 
@@ -954,7 +953,7 @@ func (w *World) DispatchMessages(u util.MessageQueue) {
 				message.Msg = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Msg
 				w.connectionPool.SendTo([]byte(message.Msg), user.ConnectionId())
 				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-					redrawPrompts[user.ConnectionId()] = user.GetPrompt(true)
+					redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
 				}
 			}
 
@@ -991,7 +990,7 @@ func (w *World) DispatchMessages(u util.MessageQueue) {
 						message.Msg = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Msg
 						w.connectionPool.SendTo([]byte(message.Msg), user.ConnectionId())
 						if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-							redrawPrompts[user.ConnectionId()] = user.GetPrompt(true)
+							redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
 						}
 					}
 				}
@@ -1027,6 +1026,31 @@ func (w *World) TurnTick() {
 	c := configs.GetConfig()
 
 	turnCt := util.IncrementTurnCount()
+
+	//
+	// Cleanup any zombies
+	//
+
+	expTurns := (uint64(c.ZombieSeconds) * uint64(c.TurnsPerSecond()))
+
+	if expTurns < turnCt {
+		expZombies := users.GetExpiredZombies(turnCt - expTurns)
+		if len(expZombies) > 0 {
+
+			connIds := users.GetConnectionIds(expZombies)
+
+			for _, userId := range expZombies {
+				worldManager.LeaveWorld(userId)
+				users.RemoveZombieUser(userId)
+			}
+			for _, connId := range connIds {
+				if err := users.LogOutUserByConnectionId(connId); err != nil {
+					slog.Error("Log Out Error", "connectionId", connId, "error", err)
+				}
+			}
+
+		}
+	}
 
 	if turnCt%uint64(c.TurnsPerAutoSave()) == 0 {
 		tStart := time.Now()
@@ -1450,6 +1474,53 @@ func (w *World) TurnTick() {
 	// After a full round of turns, we can do a round tick.
 	if turnCt%uint64(c.TurnsPerRound()) == 0 {
 		w.roundTick()
+	}
+
+	// only visually update 4x a second.
+	renderInterval := uint64(float64(c.TurnsPerSecond()) / 4)
+	if turnCt%renderInterval == 0 {
+		for _, uId := range users.GetOnlineUserIds() {
+
+			if user := users.GetByUserId(uId); user != nil {
+
+				if meter := user.GetProgressBar(); meter != nil {
+
+					meter.Update(turnCt)
+
+					if meter.Done() {
+						user.RemoveProgressBar()
+						if cd, err := w.connectionPool.Get(user.ConnectionId()); err == nil {
+							cd.InputDisabled(false)
+						}
+					}
+
+					w.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), user.ConnectionId())
+
+				}
+
+			}
+		}
+	}
+
+}
+
+func (w *World) StartProgressBar(userId int, name string, turnLength int, onComplete func(), displayFlags ...progressbar.BarDisplay) {
+
+	if user := users.GetByUserId(userId); user != nil {
+
+		pb := progressbar.New(name, turnLength, onComplete, displayFlags...)
+
+		user.SetProgressBar(pb)
+
+		for _, flag := range displayFlags {
+			if flag == progressbar.PromptDisableInput {
+				if cd, err := w.connectionPool.Get(user.ConnectionId()); err == nil {
+					cd.InputDisabled(true)
+				}
+				break
+			}
+		}
+
 	}
 
 }

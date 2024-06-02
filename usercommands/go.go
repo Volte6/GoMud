@@ -168,23 +168,23 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 			// Tell the player they are moving
 			if isSneaking {
 				response.SendUserMessage(userId,
-					fmt.Sprintf(c.ExitRoomMessageWrapper,
+					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 						fmt.Sprintf(`You <ansi fg="black-bold">sneak</ansi> towards the %s exit.`, exitName),
 					), true)
 			} else {
 				response.SendUserMessage(userId,
-					fmt.Sprintf(c.ExitRoomMessageWrapper,
+					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 						fmt.Sprintf(`You head towards the <ansi fg="exit">%s</ansi> exit.`, exitName),
 					), true)
 
 				// Tell the old room they are leaving
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(c.ExitRoomMessageWrapper,
+					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> leaves towards the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
 					), true)
 				// Tell the new room they have arrived
 				response.SendRoomMessage(destRoom.RoomId,
-					fmt.Sprintf(c.EnterRoomMessageWrapper,
+					fmt.Sprintf(string(c.EnterRoomMessageWrapper),
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> enters from %s.`, user.Character.Name, enterFromExit),
 					), true)
 			}
@@ -301,7 +301,7 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 				c := configs.GetConfig()
 
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(c.ExitRoomMessageWrapper,
+					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> is bumping into walls.`, user.Character.Name),
 					), true)
 			}

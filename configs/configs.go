@@ -17,44 +17,47 @@ import (
 const defaultConfigPath = "_datafiles/config.yaml"
 
 type config struct {
-	MaxCPUCores                  int      `yaml:"MaxCPUCores"`
-	FolderItemData               string   `yaml:"FolderItemData"`
-	FolderAttackMessageData      string   `yaml:"FolderAttackMessageData"`
-	FolderUserData               string   `yaml:"FolderUserData"`
-	FolderTemplates              string   `yaml:"FolderTemplates"`
-	FileAnsiAliases              string   `yaml:"FileAnsiAliases"`
-	FileKeywords                 string   `yaml:"FileKeywords"`
-	CarefulSaveFiles             bool     `yaml:"CarefulSaveFiles"`
-	PVPEnabled                   bool     `yaml:"PVPEnabled"`
-	XPScale                      float64  `yaml:"XPScale"`
-	TurnMs                       int      `yaml:"TurnMs"`
-	RoundSeconds                 int      `yaml:"RoundSeconds"`
-	RoundsPerAutoSave            int      `yaml:"RoundsPerAutoSave"`
-	RoundsPerDay                 int      `yaml:"RoundsPerDay"` // How many rounds are in a day
-	NightHours                   int      `yaml:"NightHours"`   // How many hours of night
-	MaxMobBoredom                int      `yaml:"MaxMobBoredom"`
-	ScriptLoadTimeoutMs          int      `yaml:"ScriptLoadTimeoutMs"`          // How long to spend the first time a script is loaded into memory
-	ScriptRoomTimeoutMs          int      `yaml:"ScriptRoomTimeoutMs"`          // How many milliseconds to allow a script to run before it is interrupted
-	MaxTelnetConnections         int      `yaml:"MaxTelnetConnections"`         // Maximum number of telnet connections to accept
-	TelnetPort                   int      `yaml:"TelnetPort"`                   // Port used to accept telnet connections
-	WebPort                      int      `yaml:"WebPort"`                      // Port used for web requests
-	NextRoomId                   int      `yaml:"NextRoomId"`                   // The next room id to use when creating a new room
-	LootGoblinRoundCount         int      `yaml:"LootGoblinRoundCount"`         // How often to spawn a loot goblin
-	LootGoblinMinimumItems       int      `yaml:"LootGoblinMinimumItems"`       // How many items on the ground to attract the loot goblin
-	LootGoblinMinimumGold        int      `yaml:"LootGoblinMinimumGold"`        // How much gold on the ground to attract the loot goblin
-	LootGoblinIncludeRecentRooms bool     `yaml:"LootGoblinIncludeRecentRooms"` // should the goblin include rooms that have been visited recently?
-	LogIntervalRoundCount        int      `yaml:"LogIntervalRoundCount"`        // How often to report the current round number.
-	Locked                       []string `yaml:"Locked"`                       // List of locked config properties that cannot be changed without editing the file directly.
-	Seed                         string   `yaml:"Seed"`                         // Seed that may be used for generating content
-	OnLoginCommands              []string `yaml:"OnLoginCommands"`              // Commands to run when a user logs in
-	Motd                         string   `yaml:"Motd"`                         // Message of the day to display when a user logs in
-	BannedNames                  []string `yaml:"BannedNames"`                  // List of names that are not allowed to be used
+	MaxCPUCores                  ConfigInt         `yaml:"MaxCPUCores"`
+	FolderItemData               ConfigString      `yaml:"FolderItemData"`
+	FolderAttackMessageData      ConfigString      `yaml:"FolderAttackMessageData"`
+	FolderUserData               ConfigString      `yaml:"FolderUserData"`
+	FolderTemplates              ConfigString      `yaml:"FolderTemplates"`
+	FileAnsiAliases              ConfigString      `yaml:"FileAnsiAliases"`
+	FileKeywords                 ConfigString      `yaml:"FileKeywords"`
+	CarefulSaveFiles             ConfigBool        `yaml:"CarefulSaveFiles"`
+	PVPEnabled                   ConfigBool        `yaml:"PVPEnabled"`
+	XPScale                      ConfigFloat       `yaml:"XPScale"`
+	TurnMs                       ConfigInt         `yaml:"TurnMs"`
+	RoundSeconds                 ConfigInt         `yaml:"RoundSeconds"`
+	RoundsPerAutoSave            ConfigInt         `yaml:"RoundsPerAutoSave"`
+	RoundsPerDay                 ConfigInt         `yaml:"RoundsPerDay"` // How many rounds are in a day
+	NightHours                   ConfigInt         `yaml:"NightHours"`   // How many hours of night
+	MaxMobBoredom                ConfigInt         `yaml:"MaxMobBoredom"`
+	ScriptLoadTimeoutMs          ConfigInt         `yaml:"ScriptLoadTimeoutMs"`          // How long to spend the first time a script is loaded into memory
+	ScriptRoomTimeoutMs          ConfigInt         `yaml:"ScriptRoomTimeoutMs"`          // How many milliseconds to allow a script to run before it is interrupted
+	MaxTelnetConnections         ConfigInt         `yaml:"MaxTelnetConnections"`         // Maximum number of telnet connections to accept
+	TelnetPort                   ConfigInt         `yaml:"TelnetPort"`                   // Port used to accept telnet connections
+	WebPort                      ConfigInt         `yaml:"WebPort"`                      // Port used for web requests
+	NextRoomId                   ConfigInt         `yaml:"NextRoomId"`                   // The next room id to use when creating a new room
+	LootGoblinRoundCount         ConfigInt         `yaml:"LootGoblinRoundCount"`         // How often to spawn a loot goblin
+	LootGoblinMinimumItems       ConfigInt         `yaml:"LootGoblinMinimumItems"`       // How many items on the ground to attract the loot goblin
+	LootGoblinMinimumGold        ConfigInt         `yaml:"LootGoblinMinimumGold"`        // How much gold on the ground to attract the loot goblin
+	LootGoblinIncludeRecentRooms ConfigBool        `yaml:"LootGoblinIncludeRecentRooms"` // should the goblin include rooms that have been visited recently?
+	LogIntervalRoundCount        ConfigInt         `yaml:"LogIntervalRoundCount"`        // How often to report the current round number.
+	Locked                       ConfigSliceString `yaml:"Locked"`                       // List of locked config properties that cannot be changed without editing the file directly.
+	Seed                         ConfigString      `yaml:"Seed"`                         // Seed that may be used for generating content
+	OnLoginCommands              ConfigSliceString `yaml:"OnLoginCommands"`              // Commands to run when a user logs in
+	Motd                         ConfigString      `yaml:"Motd"`                         // Message of the day to display when a user logs in
+	BannedNames                  ConfigSliceString `yaml:"BannedNames"`                  // List of names that are not allowed to be used
 
-	OnDeathEquipmentDropChance float64 `yaml:"OnDeathEquipmentDropChance"` // Chance a player will drop a given piece of equipment on death
-	OnDeathAlwaysDropBackpack  bool    `yaml:"OnDeathAlwaysDropBackpack"`  // If true, players will always drop their backpack items on death
-	OnDeathXPPenalty           string  `yaml:"OnDeathXPPenalty"`           // Possible values are: none, level, 10%, 25%, 50%, 75%, 90%, 100%
-	EnterRoomMessageWrapper    string  `yaml:"EnterRoomMessageWrapper"`
-	ExitRoomMessageWrapper     string  `yaml:"ExitRoomMessageWrapper"`
+	OnDeathEquipmentDropChance ConfigFloat  `yaml:"OnDeathEquipmentDropChance"` // Chance a player will drop a given piece of equipment on death
+	OnDeathAlwaysDropBackpack  ConfigBool   `yaml:"OnDeathAlwaysDropBackpack"`  // If true, players will always drop their backpack items on death
+	OnDeathXPPenalty           ConfigString `yaml:"OnDeathXPPenalty"`           // Possible values are: none, level, 10%, 25%, 50%, 75%, 90%, 100%
+	EnterRoomMessageWrapper    ConfigString `yaml:"EnterRoomMessageWrapper"`
+	ExitRoomMessageWrapper     ConfigString `yaml:"ExitRoomMessageWrapper"`
+
+	ZombieSeconds ConfigInt `yaml:"ZombieSeconds"` // How many seconds a player will be a zombie allowing them to reconnect.
+	LogoutRounds  ConfigInt `yaml:"LogoutRounds"`  // How many rounds of uninterrupted meditation must be completed to log out.
 
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.
@@ -89,6 +92,8 @@ func SetVal(propName string, propVal string, force ...bool) error {
 		}
 	}
 
+	overrides := configData.GetOverrides()
+
 	typeSearchStructVal := reflect.ValueOf(configData)
 	// Get the value and type of the struct
 	//val := reflect.ValueOf(configData)
@@ -101,58 +106,43 @@ func SetVal(propName string, propVal string, force ...bool) error {
 		}
 	}
 
-	overrides := configData.GetOverrides()
+	// Get the reflect.Value of instance
+	val := reflect.ValueOf(&configData).Elem() // Use Elem() because we start with a pointer
 
-	structValue := reflect.ValueOf(&configData)
-	structValue = structValue.Elem()
-	fieldValue := structValue.FieldByName(propName)
+	// Find the field by name
+	fieldVal := val.FieldByName(propName)
 
-	if !fieldValue.IsValid() {
+	if !fieldVal.IsValid() {
 		return fmt.Errorf("no such field: %s in obj", propName)
 	}
 
-	if !fieldValue.CanSet() {
-		return fmt.Errorf("cannot set field %s", propName)
+	// If fieldVal is struct and Set has a pointer receiver, you need to get the address of fieldVal
+	if !fieldVal.CanAddr() {
+		return fmt.Errorf("field is not addressable")
 	}
 
-	switch fieldValue.Kind() {
-	case reflect.String:
-		fieldValue.SetString(propVal)
-		overrides[propName] = propVal
+	fieldValPtr := fieldVal.Addr() // Get a pointer to the field
+	method := fieldValPtr.MethodByName("Set")
 
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		intValue, err := strconv.ParseInt(propVal, 10, 64)
-		if err != nil {
-			return fmt.Errorf("field is an integer, but provided value is not: %s", propVal)
-		}
-		fieldValue.SetInt(intValue)
-		overrides[propName] = intValue
-
-	case reflect.Bool:
-		boolValue, err := strconv.ParseBool(propVal)
-		if err != nil {
-			return fmt.Errorf("field is a boolean, but provided value is not: %s", propVal)
-		}
-		fieldValue.SetBool(boolValue)
-		overrides[propName] = boolValue
-
-	case reflect.Float32, reflect.Float64:
-		floatValue, err := strconv.ParseFloat(propVal, 64)
-		if err != nil {
-			return fmt.Errorf("field is a float, but provided value is not: %s", propVal)
-		}
-		fieldValue.SetFloat(floatValue)
-		overrides[propName] = floatValue
-
-	case reflect.Slice:
-		sliceVal := strings.Split(propVal, `;`)
-		fieldValue.Set(reflect.ValueOf(sliceVal))
-		overrides[propName] = sliceVal
-	// Add cases for other types as needed
-
-	default:
-		return fmt.Errorf("unsupported field type: %s", fieldValue.Kind())
+	if !method.IsValid() {
+		return fmt.Errorf("Set method missing")
 	}
+	// Prepare arguments and call the method as before
+	args := []reflect.Value{reflect.ValueOf(propVal)}
+	returnValues := method.Call(args)
+
+	// Assuming the method returns an error as its last return value
+	if len(returnValues) > 0 { // Check there is at least one return value
+		errVal := returnValues[len(returnValues)-1] // Get the last return value
+		if errVal.Interface() != nil {              // Check if the returned value is not nil
+			if err, ok := errVal.Interface().(error); ok {
+				return err
+			}
+		}
+	}
+
+	// set the map value
+	reflect.ValueOf(overrides).SetMapIndex(reflect.ValueOf(propName), fieldVal)
 
 	configData.SetOverrides(overrides)
 
@@ -165,7 +155,7 @@ func SetVal(propName string, propVal string, force ...bool) error {
 	}
 
 	overridePath := overridePath()
-	return util.Save(overridePath, writeBytes, configData.CarefulSaveFiles)
+	return util.Save(overridePath, writeBytes, bool(configData.CarefulSaveFiles))
 
 }
 
@@ -217,6 +207,13 @@ func (c config) AllConfigData() map[string]any {
 				output[fmt.Sprintf(`%s.%d`, name, j)] = cmd
 			}
 
+		} else if itm.Type().Kind() == reflect.Map {
+			// iterate the map
+			keys := itm.MapKeys()
+			for _, key := range keys {
+				output[fmt.Sprintf(`%s.%d`, name, key.Int())] = itm.MapIndex(key).Float()
+			}
+
 		} else {
 			output[mapName] = itm.Interface()
 		}
@@ -231,6 +228,7 @@ func (c *config) GetOverrides() map[string]any {
 }
 
 func (c *config) SetOverrides(overrides map[string]any) error {
+
 	c.overrides = map[string]any{}
 	for k, v := range overrides {
 		c.overrides[k] = v
@@ -238,6 +236,7 @@ func (c *config) SetOverrides(overrides map[string]any) error {
 
 	structValue := reflect.ValueOf(c).Elem()
 	for name, value := range c.overrides {
+
 		structFieldValue := structValue.FieldByName(name)
 
 		if !structFieldValue.IsValid() {
@@ -249,11 +248,13 @@ func (c *config) SetOverrides(overrides map[string]any) error {
 		}
 
 		val := reflect.ValueOf(value)
+
 		if structFieldValue.Type() != val.Type() {
 			return errors.New("Provided value type didn't match obj field type")
 		}
 
 		structFieldValue.Set(val)
+
 	}
 
 	return nil
@@ -311,15 +312,15 @@ func (c *config) Validate() {
 
 	// Nothing to do with OnDeathAlwaysDropBackpack
 
-	c.OnDeathXPPenalty = strings.ToLower(c.OnDeathXPPenalty)
+	c.OnDeathXPPenalty.Set(strings.ToLower(string(c.OnDeathXPPenalty)))
 
 	if c.OnDeathXPPenalty != `none` && c.OnDeathXPPenalty != `level` {
 		// If not a valid percent, set to default
-		if !strings.HasSuffix(c.OnDeathXPPenalty, `%`) {
+		if !strings.HasSuffix(string(c.OnDeathXPPenalty), `%`) {
 			c.OnDeathXPPenalty = `none` // default
 		} else {
 			// If not a valid percent, set to default
-			percent, err := strconv.ParseInt(c.OnDeathXPPenalty[0:len(c.OnDeathXPPenalty)-1], 10, 64)
+			percent, err := strconv.ParseInt(string(c.OnDeathXPPenalty)[0:len(c.OnDeathXPPenalty)-1], 10, 64)
 			if err != nil || percent < 0 || percent > 100 {
 				c.OnDeathXPPenalty = `none` // default
 			}
@@ -330,7 +331,7 @@ func (c *config) Validate() {
 	if c.EnterRoomMessageWrapper == `` {
 		c.EnterRoomMessageWrapper = `%s` // default
 	}
-	if strings.LastIndex(c.EnterRoomMessageWrapper, `%s`) < 0 {
+	if strings.LastIndex(string(c.EnterRoomMessageWrapper), `%s`) < 0 {
 		c.EnterRoomMessageWrapper += `%s` // default
 	}
 
@@ -338,8 +339,16 @@ func (c *config) Validate() {
 	if c.ExitRoomMessageWrapper == `` {
 		c.ExitRoomMessageWrapper = `%s` // default
 	}
-	if strings.LastIndex(c.ExitRoomMessageWrapper, `%s`) < 0 {
+	if strings.LastIndex(string(c.ExitRoomMessageWrapper), `%s`) < 0 {
 		c.ExitRoomMessageWrapper += `%s` // default
+	}
+
+	// Zombie configs
+	if c.ZombieSeconds < 0 {
+		c.ZombieSeconds = 0 // default
+	}
+	if c.LogoutRounds < 0 {
+		c.LogoutRounds = 3 // default
 	}
 
 	if c.RoundsPerAutoSave < 1 {
@@ -407,9 +416,9 @@ func (c *config) Validate() {
 	// Nothing to do with Locked
 
 	// Pre-calculate and cache useful values
-	c.turnsPerRound = (c.RoundSeconds * 1000) / c.TurnMs
-	c.turnsPerSave = c.RoundsPerAutoSave * c.turnsPerRound
-	c.turnsPerSecond = 1000 / c.TurnMs
+	c.turnsPerRound = int((c.RoundSeconds * 1000) / c.TurnMs)
+	c.turnsPerSave = int(c.RoundsPerAutoSave) * c.turnsPerRound
+	c.turnsPerSecond = int(1000 / c.TurnMs)
 	c.roundsPerMinute = 60 / float64(c.RoundSeconds)
 
 	c.validated = true
@@ -417,14 +426,14 @@ func (c *config) Validate() {
 
 func (c config) GetDeathXPPenalty() (setting string, pct float64) {
 
-	setting = c.OnDeathXPPenalty
+	setting = string(c.OnDeathXPPenalty)
 	pct = 0.0
 
 	if c.OnDeathXPPenalty == `none` || c.OnDeathXPPenalty == `level` {
 		return setting, pct
 	}
 
-	percent, err := strconv.ParseInt(c.OnDeathXPPenalty[0:len(c.OnDeathXPPenalty)-1], 10, 64)
+	percent, err := strconv.ParseInt(string(c.OnDeathXPPenalty)[0:len(c.OnDeathXPPenalty)-1], 10, 64)
 	if err != nil || percent < 0 || percent > 100 {
 		setting = `none`
 		pct = 0.0
@@ -545,7 +554,7 @@ func ReloadConfig() error {
 				return err
 			}
 
-			overrides := make(map[string]interface{})
+			overrides := map[string]any{}
 			err = yaml.Unmarshal(overrideBytes, &overrides)
 			if err != nil {
 				return err
@@ -553,6 +562,8 @@ func ReloadConfig() error {
 
 			tmpConfigData.SetOverrides(overrides)
 		}
+	} else {
+		tmpConfigData.SetOverrides(map[string]any{})
 	}
 
 	tmpConfigData.Validate()

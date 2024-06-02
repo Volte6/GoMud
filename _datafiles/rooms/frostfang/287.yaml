@@ -1,8 +1,11 @@
 roomid: 287
 zone: Frostfang
 title: The Southern Road
-description: The southern road
-biome: city
+description: The Southern Road is flanked by ancient, snow-covered trees, their gnarled
+  branches reaching out like skeletal fingers against the white canvas of the land.
+  The path itself is a narrow trail, partially obscured by layers of snow, with the
+  occasional set of footprints, both human and animal, marking the way.
+biome: road
 exits:
   northwest:
     roomid: 286
