@@ -124,6 +124,8 @@ Update how much health an ActorObject has, and returns the actual amount their h
 ## [ActorObject.Command(cmd string, waitTurns ...int)](/scripting/actor_func.go)
 Forces an ActorObject to execute a command as if they entered it
 
+_Note: Don't underestimate the power of this function! Complex and interesting behaviors or interactions can emerge from using it._
+
 |  Argument | Explanation |
 | --- | --- |
 | cmd | The command to execute such as `look west` or `say goodbye`. |
