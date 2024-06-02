@@ -6,7 +6,6 @@ import (
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
@@ -186,21 +185,12 @@ func (a ScriptActor) MoveRoom(destRoomId int) {
 	}
 }
 
-func (a ScriptActor) GiveItem(itemId any) {
+func (a ScriptActor) UpdateItem(itm ScriptItem) {
+	a.userRecord.Character.UpdateItem(itm.originalItem, *itm.itemRecord)
+}
 
-	if id, ok := itemId.(int); ok {
-		itm := items.New(id)
-		if itm.ItemId > 0 {
-			a.characterRecord.StoreItem(itm)
-		}
-		return
-	}
-
-	if itmObj, ok := itemId.(items.Item); ok {
-		a.characterRecord.StoreItem(itmObj)
-		return
-	}
-
+func (a ScriptActor) GiveItem(itm ScriptItem) {
+	a.userRecord.Character.StoreItem(*itm.itemRecord)
 }
 
 func (a ScriptActor) HasBuff(buffId int) bool {
@@ -239,7 +229,7 @@ func (a ScriptActor) HasItemId(itemId int) bool {
 func (a ScriptActor) GetBackpackItems() []ScriptItem {
 	itms := make([]ScriptItem, 0, 5)
 	for _, item := range a.characterRecord.GetAllBackpackItems() {
-		itms = append(itms, ScriptItem{&item})
+		itms = append(itms, newScriptItem(item))
 	}
 	return itms
 }

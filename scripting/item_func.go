@@ -10,8 +10,13 @@ func setItemFunctions(vm *goja.Runtime) {
 	vm.Set(`CreateItem`, CreateItem)
 }
 
+func newScriptItem(i items.Item) ScriptItem {
+	return ScriptItem{i, &i}
+}
+
 type ScriptItem struct {
-	itemRecord *items.Item
+	originalItem items.Item
+	itemRecord   *items.Item
 }
 
 func (i ScriptItem) ItemId() int {
@@ -85,7 +90,8 @@ func (i ScriptItem) GetTempData(key string) any {
 
 // Converts an item into a ScriptItem for use in the scripting engine
 func GetItem(i items.Item) *ScriptItem {
-	return &ScriptItem{&i}
+	sItm := newScriptItem(i)
+	return &sItm
 }
 
 // ////////////////////////////////////////////////////////
@@ -100,5 +106,7 @@ func CreateItem(itemId int) *ScriptItem {
 	if i.ItemId == 0 {
 		return nil
 	}
-	return &ScriptItem{&i}
+
+	sItm := newScriptItem(i)
+	return &sItm
 }

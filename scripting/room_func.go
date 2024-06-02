@@ -37,7 +37,7 @@ func (r ScriptRoom) etTempData(key string) any {
 func (r ScriptRoom) GetItems() []ScriptItem {
 	itms := make([]ScriptItem, 0, 5)
 	for _, item := range r.roomRecord.GetAllFloorItems(false) {
-		itms = append(itms, ScriptItem{&item})
+		itms = append(itms, newScriptItem(item))
 	}
 	return itms
 }

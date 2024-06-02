@@ -19,7 +19,8 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.Command(cmd string, waitTurns ...int)](#actorobjectcommandcmd-string-waitturns-int)
   - [ActorObject.TrainSkill(skillName string, skillLevel int)](#actorobjecttrainskillskillname-string-skilllevel-int)
   - [ActorObject.MoveRoom(destRoomId int)](#actorobjectmoveroomdestroomid-int)
-  - [ActorObject.GiveItem(itemId \[int/Item\])](#actorobjectgiveitemitemid-intitem)
+  - [ActorObject.UpdateItem(itemId ItemObject)](#actorobjectupdateitemitemid-itemobject)
+  - [ActorObject.GiveItem(itemId ItemObject)](#actorobjectgiveitemitemid-itemobject)
   - [ActorObject.HasBuff(buffId int) bool](#actorobjecthasbuffbuffid-int-bool)
   - [ActorObject.GiveBuff(buffId int)](#actorobjectgivebuffbuffid-int)
   - [ActorObject.HasBuffFlag(buffFlag string) bool](#actorobjecthasbuffflagbuffflag-string-bool)
@@ -142,12 +143,21 @@ Quietly moves an ActorObject to a new room
 | --- | --- |
 | destRoomId | The room id to move them to. |
 
-## [ActorObject.GiveItem(itemId [int/Item])](/scripting/actor_func.go)
-Creates an item (if itemId) or accepts an Item object and puts it in the actors backpack
+## [ActorObject.UpdateItem(itemId ItemObject)](/scripting/actor_func.go)
+Accepts an ItemObject to update in the players backpack. If the item does not already exist in the players backpack, it is ignored.
+
+_Note: This is the only way to save changes made to an item in the players backpack._
 
 |  Argument | Explanation |
 | --- | --- |
-| itemId | The id or item object to give them. |
+| ItemObject | The item object to give them. |
+
+## [ActorObject.GiveItem(itemId ItemObject)](/scripting/actor_func.go)
+Accepts an ItemObject to put into the players backpack. This can be called multiple times to duplicate an item.
+
+|  Argument | Explanation |
+| --- | --- |
+| ItemObject | The item object to give them. |
 
 ## [ActorObject.HasBuff(buffId int) bool](/scripting/actor_func.go)
 Returns true if the Actor has the buffId supplied
