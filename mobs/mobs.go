@@ -69,15 +69,14 @@ type Mob struct {
 	CombatCommands  []string    `yaml:"combatcommands,omitempty"` // Commands they may do while in combat
 	DamageTaken     map[int]int `yaml:"-"`                        // key = who, value = how much
 	Character       characters.Character
-	ShopStock       map[int]int    `yaml:"shopstock,omitempty"`
-	ShopServants    []MobForHire   `yaml:"shopservants,omitempty"`
-	MaxWander       int            `yaml:"maxwander,omitempty"`  // Max rooms to wander from home
-	GoingHome       bool           `yaml:"-"`                    // WHether they are trying to get home
-	RoomStack       []int          `yaml:"-"`                    // Stack of rooms to get back home
-	PreventIdle     bool           `yaml:"-"`                    // Whether they can't possibly be idle
-	ItemTrades      []ItemTrade    `yaml:"itemtrades,omitempty"` // one or more sets of objects they will trade for other objects.
-	ScriptTag       string         `yaml:"scripttag"`            // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
-	datastub        map[string]any // Generic storage stub for maintaining state between behaviors
+	ShopStock       map[int]int  `yaml:"shopstock,omitempty"`
+	ShopServants    []MobForHire `yaml:"shopservants,omitempty"`
+	MaxWander       int          `yaml:"maxwander,omitempty"`  // Max rooms to wander from home
+	GoingHome       bool         `yaml:"-"`                    // WHether they are trying to get home
+	RoomStack       []int        `yaml:"-"`                    // Stack of rooms to get back home
+	PreventIdle     bool         `yaml:"-"`                    // Whether they can't possibly be idle
+	ItemTrades      []ItemTrade  `yaml:"itemtrades,omitempty"` // one or more sets of objects they will trade for other objects.
+	ScriptTag       string       `yaml:"scripttag"`            // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
 	tempDataStore   map[string]any
 }
 
@@ -238,23 +237,6 @@ func (m *Mob) Despawns() bool {
 		return false
 	}
 	return true
-}
-
-func (m *Mob) GetData(dataname string) (any, bool) {
-	if m.datastub == nil {
-		m.datastub = make(map[string]any)
-	}
-	if val, ok := m.datastub[dataname]; ok {
-		return val, true
-	}
-	return nil, false
-}
-
-func (m *Mob) SetData(dataname string, data any) {
-	if m.datastub == nil {
-		m.datastub = make(map[string]any)
-	}
-	m.datastub[dataname] = data
 }
 
 func (r *Mob) GetSellPrice(item items.Item) int {

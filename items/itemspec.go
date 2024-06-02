@@ -108,6 +108,8 @@ const (
 
 	POVUser  = 0
 	POVOther = 1
+
+	itemDataFilesFolderPath = "_datafiles/items"
 )
 
 type Damage struct {
@@ -136,7 +138,7 @@ type ItemSpec struct {
 	WaitRounds      int         `yaml:"waitrounds,omitempty"`      // How many extra rounds each combat requires
 	Hands           WeaponHands `yaml:"hands"`                     // How many hands it takes to wield
 	Name            string
-	NameSimple      string // A simpler name for the item, for example "Golden Battleaxe" should be "Battleaxe" for simple
+	NameSimple      string // A simpler name for the item, for example "Golden Battleaxe" should be "Battleaxe" or "Axe" for simple
 	Description     string
 	QuestToken      string `yaml:"questtoken,omitempty"` // Grants this quest if given/picked up
 	Type            ItemType
@@ -312,6 +314,23 @@ func getItemSpec(itemId int) *ItemSpec {
 		}
 	}
 	return nil
+}
+
+func getScriptPath(itemId int) string {
+
+	if itemId >= 50000 {
+		return fmt.Sprintf(`%s/grenades-50000/%d.js`, itemDataFilesFolderPath, itemId)
+	} else if itemId >= 30000 {
+		return fmt.Sprintf(`%s/consumables-30000/%d.js`, itemDataFilesFolderPath, itemId)
+	} else if itemId >= 20000 {
+		return fmt.Sprintf(`%s/armor-20000/%d.js`, itemDataFilesFolderPath, itemId)
+	} else if itemId >= 10000 {
+		return fmt.Sprintf(`%s/weapons-10000/%d.js`, itemDataFilesFolderPath, itemId)
+	} else if itemId >= 1 {
+		return fmt.Sprintf(`%s/other-0/%d.js`, itemDataFilesFolderPath, itemId)
+	}
+
+	return ``
 }
 
 // file self loads due to init()

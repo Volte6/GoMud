@@ -27,7 +27,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.ExpireBuff(buffId int)](#actorobjectexpirebuffbuffid-int)
   - [ActorObject.RemoveBuff(buffId int)](#actorobjectremovebuffbuffid-int)
   - [ActorObject.HasItemId(itemId int) bool](#actorobjecthasitemiditemid-int-bool)
-  - [ActorObject.GetBackpackItems() \[\]Item](#actorobjectgetbackpackitems-item)
+  - [ActorObject.GetBackpackItems() \[\]ItemObject](#actorobjectgetbackpackitems-itemobject)
   - [ActorObject.GetAlignment() int](#actorobjectgetalignment-int)
   - [ActorObject.GetAlignmentName() string](#actorobjectgetalignmentname-string)
   - [ActorObject.ChangeAlignment(alignmentChange int)](#actorobjectchangealignmentalignmentchange-int)
@@ -191,8 +191,6 @@ Remove a buff without triggering onEnd
 | --- | --- |
 | buffId | The ID of the buff to remove |
 
-
-
 ## [ActorObject.HasItemId(itemId int) bool](/scripting/actor_func.go)
 Check whether an ActorObject has an item id in their backpack
 
@@ -200,10 +198,10 @@ Check whether an ActorObject has an item id in their backpack
 | --- | --- |
 | itemId | The ItemId to check for. |
 
-## [ActorObject.GetBackpackItems() []Item](/scripting/actor_func.go)
+## [ActorObject.GetBackpackItems() []ItemObject](/scripting/actor_func.go)
 Get a list of Item objects in the ActorObjects backpack
 
-_Note: See [/scripting/docs/ITEMS.md](/scripting/docs/ITEMS.md) for details on Item objects._
+_Note: See [/scripting/docs/FUNCTIONS_ITEMS.md](/scripting/docs/FUNCTIONS_ITEMS.md) for details on ItemObject objects._
 
 ## [ActorObject.GetAlignment() int](/scripting/actor_func.go)
 Get the numeric representation of a ActorObjects alignment, from -100 to 100

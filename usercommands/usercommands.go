@@ -214,7 +214,8 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 
 	userDisabled := false
 	isAdmin := false
-	if user := users.GetByUserId(userId); user != nil {
+	user := users.GetByUserId(userId)
+	if user != nil {
 
 		// If the user has a progressbar that is interrupted by input, cancel it
 		if user.GetProgressBar() != nil {
@@ -227,6 +228,23 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 		userDisabled = user.Character.IsDisabled()
 		isAdmin = user.Permission == users.PermissionAdmin
 		isAdmin = isAdmin || user.HasAdminCommand(cmd)
+
+		// Check if the "rest" is an item the character has
+		matchingItem, found := user.Character.FindInBackpack(rest)
+		if !found {
+			matchingItem, found = user.Character.FindOnBody(rest)
+		}
+
+		if found {
+			// If the item has a script, run it
+			if scriptResponse, err := scripting.TryItemCommand(cmd, matchingItem, user.UserId, cmdQueue); err == nil {
+				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
+					finalResponse.AbsorbMessages(scriptResponse)
+					finalResponse.Handled = true
+					return finalResponse, err
+				}
+			}
+		}
 	}
 
 	// Try any room props, only return if the response indicates it was handled

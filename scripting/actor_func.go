@@ -216,7 +216,7 @@ func (a ScriptActor) HasBuffFlag(buffFlag string) bool {
 }
 
 func (a ScriptActor) CancelBuffWithFlag(buffFlag string) bool {
-	return a.characterRecord.CancelBuffsWithFlag(buffs.Flag(buffFlag))
+	return a.characterRecord.CancelBuffsWithFlag(buffs.Flag(strings.ToLower(buffFlag)))
 }
 
 func (a ScriptActor) ExpireBuff(buffId int) {
@@ -236,8 +236,12 @@ func (a ScriptActor) HasItemId(itemId int) bool {
 	return false
 }
 
-func (a ScriptActor) GetBackpackItems() []items.Item {
-	return a.characterRecord.GetAllBackpackItems()
+func (a ScriptActor) GetBackpackItems() []ScriptItem {
+	itms := make([]ScriptItem, 0, 5)
+	for _, item := range a.characterRecord.GetAllBackpackItems() {
+		itms = append(itms, ScriptItem{&item})
+	}
+	return itms
 }
 
 func (a ScriptActor) GetAlignment() int {

@@ -25,6 +25,9 @@ const buffDataFilesFolderPath = "_datafiles/buffs"
 type Flag string
 
 const (
+	//
+	// All Flags must be lowercase
+	//
 	All Flag = ``
 
 	// Behavioral flags

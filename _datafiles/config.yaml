@@ -232,7 +232,22 @@ BannedNames:
 - "player*"
 - "user*"
 - "me"
-- "self"
+- "us"
+- "you"
+- "them"
+- "party"
+- "everyone"
+- "someone"
+- "anyone"
+- "nobody"
+- "somebody"
+- "anybody"
+- "none"
+- "nothing"
+- "something"
+- "anything"
+- "everything"
+- "all"
 # - NextRoomID -
 # This number is auto-updated to the highest number of rooms in the game. 
 #   If creating your own rooms but don't want to risk an update conflicting, 

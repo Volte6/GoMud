@@ -2,6 +2,7 @@ package items
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -21,12 +22,14 @@ var (
 
 // Instance properties that may change
 type Item struct {
-	ItemId       int       `yaml:"itemid,omitempty"`
-	Blob         string    `yaml:"blob,omitempty"` // Does this item have a blob? Should be base64 encoded.
-	Uses         int       `yaml:"uses,omitempty"` // How many times it has been "used"
-	Spec         *ItemSpec `yaml:"overrides,omitempty"`
-	Uncursed     bool      `yaml:"uncursed,omitempty"`     // Is this item uncursed?
-	Enchantments uint8     `yaml:"enchantments,omitempty"` // Is this item enchanted?
+	ItemId        int            `yaml:"itemid,omitempty"`
+	Blob          string         `yaml:"blob,omitempty"`          // Does this item have a blob? Should be base64 encoded.
+	Uses          int            `yaml:"uses,omitempty"`          // How many uses it has left
+	LastUsedRound uint64         `yaml:"lastusedround,omitempty"` // Last round this item was used
+	Spec          *ItemSpec      `yaml:"overrides,omitempty"`
+	Uncursed      bool           `yaml:"uncursed,omitempty"`     // Is this item uncursed?
+	Enchantments  uint8          `yaml:"enchantments,omitempty"` // Is this item enchanted?
+	tempDataStore map[string]any // Temporary data store for this item. Not saved to disk.
 }
 
 func New(itemId int) Item {
@@ -41,6 +44,45 @@ func New(itemId int) Item {
 	}
 
 	return newItm
+}
+
+func (i *Item) GetScript() string {
+
+	if scriptPath := getScriptPath(i.ItemId); scriptPath != `` {
+		// Load the script into a string
+		if _, err := os.Stat(scriptPath); err == nil {
+			if bytes, err := os.ReadFile(scriptPath); err == nil {
+				return string(bytes)
+			}
+		}
+	}
+
+	return ``
+}
+
+func (i *Item) SetTempData(key string, value any) {
+
+	if i.tempDataStore == nil {
+		i.tempDataStore = make(map[string]any)
+	}
+
+	if value == nil {
+		delete(i.tempDataStore, key)
+		return
+	}
+	i.tempDataStore[key] = value
+}
+
+func (i *Item) GetTempData(key string) any {
+
+	if i.tempDataStore == nil {
+		i.tempDataStore = make(map[string]any)
+	}
+
+	if value, ok := i.tempDataStore[key]; ok {
+		return value
+	}
+	return nil
 }
 
 func (i Item) IsDisabled() bool {
@@ -261,6 +303,11 @@ func (i *Item) Equals(b Item) bool {
 	}
 
 	if i.Spec != b.Spec {
+		return false
+	}
+
+	// If there is a spec defined on this item, then the other item should also have a spec defined pointing to the same address.
+	if i.Spec != nil && i.Spec != b.Spec {
 		return false
 	}
 
