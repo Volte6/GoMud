@@ -7,7 +7,7 @@ Example Script:
 
 All item scripts reside the same folder as the item definition file.
 
-For example, the item located at `_datafiles/items/other-0/6.yaml` would place its script at `_datafiles/items/other-0/6.js`
+For example, the item located at `../_datafiles/items/other-0/6.yaml` would place its script at `../_datafiles/items/other-0/6.js`
 
 # Script Functions and Rules
 
