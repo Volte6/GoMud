@@ -1,18 +1,18 @@
 # Buff Scripting
 
 Example Script: 
-* [Mob Script Tag Instance Script (hungry)](../_datafiles/mobs/frostfang/scripts/2-hungry.js)
-* [Mob Script Tag defined in Spawninfo (hungry)](../_datafiles/rooms/frostfang/271.yaml)
+* [Mob Script Tag Instance Script (hungry)](../../_datafiles/mobs/frostfang/scripts/2-hungry.js)
+* [Mob Script Tag defined in Spawninfo (hungry)](../../_datafiles/rooms/frostfang/271.yaml)
 
 ## Script paths
 
 All mob scripts reside in a subfolder of their zone/definition file.
 
-For example, the mob located at `_datafiles/mobs/frostfang/2.yaml` would place its script at `_datafiles/mobs/frostfang/scripts/2.js`
+For example, the mob located at `../../_datafiles/mobs/frostfang/2.yaml` would place its script at `../../_datafiles/mobs/frostfang/scripts/2.js`
 
 If a mob defined in a rooms spawninfo has a `scripttag` defined, it will be appended to the mobs script path with a hyphen. 
 
-For example, `scripttag: hungry` for mob `2` (as above) would load the script `_datafiles/mobs/frostfang/scripts/2-hungry.js`
+For example, `scripttag: hungry` for mob `2` (as above) would load the script `../../_datafiles/mobs/frostfang/scripts/2-hungry.js`
 
 In this way you can have generic scripts for a mob id, or specific scripts for special rooms or circumstances.
 

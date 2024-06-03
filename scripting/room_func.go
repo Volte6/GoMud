@@ -5,7 +5,6 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
@@ -35,8 +34,12 @@ func (r ScriptRoom) etTempData(key string) any {
 	return r.roomRecord.GetTempData(key)
 }
 
-func (r ScriptRoom) GetItems() []items.Item {
-	return r.roomRecord.GetAllFloorItems(false)
+func (r ScriptRoom) GetItems() []ScriptItem {
+	itms := make([]ScriptItem, 0, 5)
+	for _, item := range r.roomRecord.GetAllFloorItems(false) {
+		itms = append(itms, newScriptItem(item))
+	}
+	return itms
 }
 
 func (r ScriptRoom) GetMobs() []int {

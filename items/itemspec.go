@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
+	"os"
 	"strings"
 	"time"
 
@@ -108,6 +109,8 @@ const (
 
 	POVUser  = 0
 	POVOther = 1
+
+	itemDataFilesFolderPath = "_datafiles/items"
 )
 
 type Damage struct {
@@ -136,7 +139,7 @@ type ItemSpec struct {
 	WaitRounds      int         `yaml:"waitrounds,omitempty"`      // How many extra rounds each combat requires
 	Hands           WeaponHands `yaml:"hands"`                     // How many hands it takes to wield
 	Name            string
-	NameSimple      string // A simpler name for the item, for example "Golden Battleaxe" should be "Battleaxe" for simple
+	NameSimple      string // A simpler name for the item, for example "Golden Battleaxe" should be "Battleaxe" or "Axe" for simple
 	Description     string
 	QuestToken      string `yaml:"questtoken,omitempty"` // Grants this quest if given/picked up
 	Type            ItemType
@@ -301,10 +304,38 @@ func (i *ItemSpec) Filename() string {
 }
 
 func (i *ItemSpec) Filepath() string {
-	return i.Filename()
+	if i.ItemId >= 30000 {
+		return fmt.Sprintf("consumables-30000/%s", i.Filename())
+	}
+	if i.ItemId >= 20000 {
+		return fmt.Sprintf("armor-20000/%s/%s", i.Type, i.Filename())
+	}
+	if i.ItemId >= 10000 {
+		return fmt.Sprintf("weapons-10000/%s", i.Filename())
+	}
+	return fmt.Sprintf("other-0/%s", i.Filename())
 }
 
-func getItemSpec(itemId int) *ItemSpec {
+func (i ItemSpec) GetScript() string {
+
+	scriptPath := i.GetScriptPath()
+
+	// Load the script into a string
+	if _, err := os.Stat(scriptPath); err == nil {
+		if bytes, err := os.ReadFile(scriptPath); err == nil {
+			return string(bytes)
+		}
+	}
+
+	return ``
+}
+
+func (i *ItemSpec) GetScriptPath() string {
+	// Load any script for the room
+	return strings.Replace(string(configs.GetConfig().FolderItemData)+`/`+i.Filepath(), `.yaml`, `.js`, 1)
+}
+
+func GetItemSpec(itemId int) *ItemSpec {
 	if itemId > 0 {
 		spec, ok := items[itemId]
 		if ok {

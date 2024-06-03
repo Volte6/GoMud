@@ -5,7 +5,7 @@
   - [RoomObject.RoomId() int](#roomobjectroomid-int)
   - [RoomObject.SetTempData(key string, value any)](#roomobjectsettempdatakey-string-value-any)
   - [RoomObject.GetTempData(key string) any](#roomobjectgettempdatakey-string-any)
-  - [RoomObject.GetItems() \[\]Item](#roomobjectgetitems-item)
+  - [RoomObject.GetItems() \[\]ItemObject](#roomobjectgetitems-itemobject)
   - [RoomObject.GetMobs() \[\]int](#roomobjectgetmobs-int)
   - [RoomObject.GetPlayers() \[\]int](#roomobjectgetplayers-int)
   - [RoomObject.GetContainers() \[\]string](#roomobjectgetcontainers-string)
@@ -40,10 +40,10 @@ _Note: This is useful for saving/retrieving data between room scripts._
 | --- | --- |
 | key | A unique identifier for the data. |
 
-## [RoomObject.GetItems() []Item](/scripting/room_func.go)
+## [RoomObject.GetItems() []ItemObject](/scripting/room_func.go)
 Returns an array of items on the floor of the room.
 
-_Note: See [/scripting/docs/ITEMS.md](/scripting/docs/ITEMS.md) for details on Item objects._
+_Note: See [/scripting/docs/FUNCTIONS_ITEMS.md](/scripting/docs/FUNCTIONS_ITEMS.md) for details on ItemObject objects._
 
 ## [RoomObject.GetMobs() []int](/scripting/room_func.go)
 Returns an array of `mobInstanceIds` in the room.

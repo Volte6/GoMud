@@ -13,7 +13,7 @@ idlecommands:
   - restock 30001/3
   - restock 20005/1
   - restock 6/3
-  - restock 50000/4
+  - restock 9/4
   - restock 8/1
 activitylevel: 1
 character:
