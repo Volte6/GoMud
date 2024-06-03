@@ -2,7 +2,6 @@ package items
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -47,17 +46,7 @@ func New(itemId int) Item {
 }
 
 func (i *Item) GetScript() string {
-
-	if scriptPath := getScriptPath(i.ItemId); scriptPath != `` {
-		// Load the script into a string
-		if _, err := os.Stat(scriptPath); err == nil {
-			if bytes, err := os.ReadFile(scriptPath); err == nil {
-				return string(bytes)
-			}
-		}
-	}
-
-	return ``
+	return i.GetSpec().GetScript()
 }
 
 func (i *Item) SetTempData(key string, value any) {

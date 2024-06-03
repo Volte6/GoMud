@@ -332,7 +332,7 @@ func (i ItemSpec) GetScript() string {
 
 func (i *ItemSpec) GetScriptPath() string {
 	// Load any script for the room
-	return strings.Replace(configs.GetConfig().FolderItemData+`/`+i.Filepath(), `.yaml`, `.js`, 1)
+	return strings.Replace(string(configs.GetConfig().FolderItemData)+`/`+i.Filepath(), `.yaml`, `.js`, 1)
 }
 
 func GetItemSpec(itemId int) *ItemSpec {
@@ -343,23 +343,6 @@ func GetItemSpec(itemId int) *ItemSpec {
 		}
 	}
 	return nil
-}
-
-func getScriptPath(itemId int) string {
-
-	if itemId >= 50000 {
-		return fmt.Sprintf(`%s/grenades-50000/%d.js`, itemDataFilesFolderPath, itemId)
-	} else if itemId >= 30000 {
-		return fmt.Sprintf(`%s/consumables-30000/%d.js`, itemDataFilesFolderPath, itemId)
-	} else if itemId >= 20000 {
-		return fmt.Sprintf(`%s/armor-20000/%d.js`, itemDataFilesFolderPath, itemId)
-	} else if itemId >= 10000 {
-		return fmt.Sprintf(`%s/weapons-10000/%d.js`, itemDataFilesFolderPath, itemId)
-	} else if itemId >= 1 {
-		return fmt.Sprintf(`%s/other-0/%d.js`, itemDataFilesFolderPath, itemId)
-	}
-
-	return ``
 }
 
 // file self loads due to init()
