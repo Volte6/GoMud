@@ -2,7 +2,6 @@ package items
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -33,7 +32,7 @@ type Item struct {
 }
 
 func New(itemId int) Item {
-	itemSpec := getItemSpec(itemId)
+	itemSpec := GetItemSpec(itemId)
 
 	newItm := Item{}
 	if itemSpec != nil {
@@ -47,17 +46,7 @@ func New(itemId int) Item {
 }
 
 func (i *Item) GetScript() string {
-
-	if scriptPath := getScriptPath(i.ItemId); scriptPath != `` {
-		// Load the script into a string
-		if _, err := os.Stat(scriptPath); err == nil {
-			if bytes, err := os.ReadFile(scriptPath); err == nil {
-				return string(bytes)
-			}
-		}
-	}
-
-	return ``
+	return i.GetSpec().GetScript()
 }
 
 func (i *Item) SetTempData(key string, value any) {
@@ -183,7 +172,7 @@ func (i *Item) GetSpec() ItemSpec {
 	if i.Spec != nil {
 		return *i.Spec
 	}
-	iSpec := getItemSpec(i.ItemId)
+	iSpec := GetItemSpec(i.ItemId)
 	if iSpec == nil {
 		iSpec = &ItemSpec{}
 	}
@@ -192,7 +181,7 @@ func (i *Item) GetSpec() ItemSpec {
 
 func (i *Item) Rename(newName string) {
 	if i.Spec == nil {
-		specCopy := *getItemSpec(i.ItemId)
+		specCopy := *GetItemSpec(i.ItemId)
 		specCopy.Name = newName
 		i.Spec = &specCopy
 	}
@@ -215,7 +204,7 @@ func (i *Item) Enchant(damageBonus int, defenseBonus int, statBonus map[string]i
 	var newSpec ItemSpec
 
 	if i.Spec == nil {
-		specCopy := *getItemSpec(i.ItemId)
+		specCopy := *GetItemSpec(i.ItemId)
 		newSpec = specCopy
 	} else {
 		newSpec = *i.Spec
@@ -316,7 +305,7 @@ func (i *Item) Equals(b Item) bool {
 
 func (i *Item) IsValid() bool {
 
-	if itemInfo := getItemSpec(i.ItemId); itemInfo != nil {
+	if itemInfo := GetItemSpec(i.ItemId); itemInfo != nil {
 		return true
 	}
 	return false
