@@ -508,6 +508,7 @@ func (c *Character) StoreItem(i items.Item) bool {
 		return false
 	}
 	c.Items = append(c.Items, i)
+
 	return true
 }
 

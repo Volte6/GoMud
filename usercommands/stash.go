@@ -5,6 +5,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -45,6 +46,11 @@ func Stash(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			response.SendRoomMessage(user.Character.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is attempting to look unsuspicious.`, user.Character.Name),
 				true)
+		}
+
+		// Trigger lost event
+		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId, cmdQueue); err == nil {
+			response.AbsorbMessages(scriptResponse)
 		}
 	}
 

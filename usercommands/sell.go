@@ -6,6 +6,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -81,6 +82,11 @@ func Sell(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		response.SendRoomMessage(room.RoomId,
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> sells a <ansi fg="itemname">%s</ansi>.`, user.Character.Name, item.Name()),
 			true)
+
+		// Trigger lost event
+		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, item, userId, cmdQueue); err == nil {
+			response.AbsorbMessages(scriptResponse)
+		}
 
 		break
 	}

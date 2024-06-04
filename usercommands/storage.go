@@ -7,6 +7,7 @@ import (
 
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
@@ -106,6 +107,11 @@ func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 
 		response.SendUserMessage(userId, fmt.Sprintf(`You placed the <ansi fg="itemname">%s</ansi> into storage.`, itm.Name()), true)
 
+		// Trigger lost event
+		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itm, userId, cmdQueue); err == nil {
+			response.AbsorbMessages(scriptResponse)
+		}
+
 	} else if action == `remove` {
 
 		if itemName == `all` {
@@ -143,10 +149,19 @@ func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 			return response, nil
 		}
 
-		user.ItemStorage.RemoveItem(itm)
-		user.Character.StoreItem(itm)
+		if user.Character.StoreItem(itm) {
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You removed the <ansi fg="itemname">%s</ansi> from storage.`, itm.Name()), true)
+			user.ItemStorage.RemoveItem(itm)
+
+			response.SendUserMessage(userId, fmt.Sprintf(`You removed the <ansi fg="itemname">%s</ansi> from storage.`, itm.Name()), true)
+
+			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, itm, userId, cmdQueue); err == nil {
+				response.AbsorbMessages(scriptResponse)
+			}
+
+		} else {
+			response.SendUserMessage(userId, `You can't carry that!`, true)
+		}
 
 	}
 

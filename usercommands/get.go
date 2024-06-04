@@ -7,6 +7,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -126,23 +127,35 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
 
-			// Swap the item location
-			container.RemoveItem(matchItem)
-			room.Containers[containerName] = container
+			// Trigger onFound event
+			if user.Character.StoreItem(matchItem) {
 
-			user.Character.StoreItem(matchItem)
+				// Swap the item location
+				container.RemoveItem(matchItem)
+				room.Containers[containerName] = container
 
-			iSpec := matchItem.GetSpec()
-			if iSpec.QuestToken != `` {
-				cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+				iSpec := matchItem.GetSpec()
+				if iSpec.QuestToken != `` {
+					cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+				}
+
+				response.SendUserMessage(userId,
+					fmt.Sprintf(`You take the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>.`, matchItem.Name(), containerName),
+					true)
+				response.SendRoomMessage(user.Character.RoomId,
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>...`, user.Character.Name, matchItem.Name(), containerName),
+					true)
+
+				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId, cmdQueue); err == nil {
+					response.AbsorbMessages(scriptResponse)
+				}
+
+			} else {
+				response.SendUserMessage(userId,
+					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()),
+					true)
 			}
 
-			response.SendUserMessage(userId,
-				fmt.Sprintf(`You take the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>.`, matchItem.Name(), containerName),
-				true)
-			response.SendRoomMessage(user.Character.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>...`, user.Character.Name, matchItem.Name(), containerName),
-				true)
 		}
 
 	} else {
@@ -181,21 +194,32 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
 
-			// Swap the item location
-			room.RemoveItem(matchItem, getFromStash)
-			user.Character.StoreItem(matchItem)
+			if user.Character.StoreItem(matchItem) {
 
-			iSpec := matchItem.GetSpec()
-			if iSpec.QuestToken != `` {
-				cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+				// Swap the item location
+				room.RemoveItem(matchItem, getFromStash)
+
+				iSpec := matchItem.GetSpec()
+				if iSpec.QuestToken != `` {
+					cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+				}
+
+				response.SendUserMessage(userId,
+					fmt.Sprintf(`You pick up the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()),
+					true)
+				response.SendRoomMessage(user.Character.RoomId,
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, user.Character.Name, matchItem.Name()),
+					true)
+
+				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId, cmdQueue); err == nil {
+					response.AbsorbMessages(scriptResponse)
+				}
+
+			} else {
+				response.SendUserMessage(userId,
+					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()),
+					true)
 			}
-
-			response.SendUserMessage(userId,
-				fmt.Sprintf(`You pick up the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()),
-				true)
-			response.SendRoomMessage(user.Character.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, user.Character.Name, matchItem.Name()),
-				true)
 		}
 
 	}
