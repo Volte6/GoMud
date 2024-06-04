@@ -21,6 +21,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.MoveRoom(destRoomId int)](#actorobjectmoveroomdestroomid-int)
   - [ActorObject.UpdateItem(itemId ItemObject)](#actorobjectupdateitemitemid-itemobject)
   - [ActorObject.GiveItem(itemId ItemObject)](#actorobjectgiveitemitemid-itemobject)
+  - [ActorObject.TakeItem(itemId ItemObject)](#actorobjecttakeitemitemid-itemobject)
   - [ActorObject.HasBuff(buffId int) bool](#actorobjecthasbuffbuffid-int-bool)
   - [ActorObject.GiveBuff(buffId int)](#actorobjectgivebuffbuffid-int)
   - [ActorObject.HasBuffFlag(buffFlag string) bool](#actorobjecthasbuffflagbuffflag-string-bool)
@@ -160,6 +161,14 @@ Accepts an ItemObject to put into the players backpack. This can be called multi
 |  Argument | Explanation |
 | --- | --- |
 | ItemObject | The item object to give them. |
+
+## [ActorObject.TakeItem(itemId ItemObject)](/scripting/actor_func.go)
+Takes an object from the users backpack.
+
+|  Argument | Explanation |
+| --- | --- |
+| ItemObject | The item object to take. |
+
 
 ## [ActorObject.HasBuff(buffId int) bool](/scripting/actor_func.go)
 Returns true if the Actor has the buffId supplied

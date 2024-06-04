@@ -16,6 +16,39 @@ The following functions are special keywords that will be invoked under specific
 ---
 
 ```
+function onLost(user ActorObject, item ItemObject, room RoomObject) {
+}
+```
+
+`onLost()` is called when a player loses something from their backpack, such as dropping it.
+
+|  Argument | Explanation |
+| --- | --- |
+| user | [ActorObject](FUNCTIONS_ACTORS.md) |
+| item | [ItemObject](FUNCTIONS_ITEMS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
+
+
+_Note: changes to the item will not be saved from this event._
+
+---
+
+```
+function onFound(user ActorObject, item ItemObject, room RoomObject) {
+}
+```
+
+`onFound()` is called when a player gains an item in their backpack.
+
+|  Argument | Explanation |
+| --- | --- |
+| user | [ActorObject](FUNCTIONS_ACTORS.md) |
+| item | [ItemObject](FUNCTIONS_ITEMS.md) |
+| room | [RoomObject](FUNCTIONS_ROOMS.md) |
+
+---
+
+```
 function onCommand(cmd string, user ActorObject, item ItemObject, room RoomObject) {
 }
 ```

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -51,6 +52,11 @@ func Trash(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		response.SendUserMessage(user.UserId,
 			fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi>%s!`, grantXP, xpMsgExtra),
 			true)
+
+		// Trigger lost event
+		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId, cmdQueue); err == nil {
+			response.AbsorbMessages(scriptResponse)
+		}
 
 	}
 

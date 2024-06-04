@@ -190,7 +190,15 @@ func (a ScriptActor) UpdateItem(itm ScriptItem) {
 }
 
 func (a ScriptActor) GiveItem(itm ScriptItem) {
-	a.userRecord.Character.StoreItem(*itm.itemRecord)
+	if a.userRecord.Character.StoreItem(*itm.itemRecord) {
+		TryItemScriptEvent(`onGive`, *itm.itemRecord, a.userId, commandQueue)
+	}
+}
+
+func (a ScriptActor) TakeItem(itm ScriptItem) {
+	if a.userRecord.Character.RemoveItem(*itm.itemRecord) {
+		TryItemScriptEvent(`onLost`, *itm.itemRecord, a.userId, commandQueue)
+	}
 }
 
 func (a ScriptActor) HasBuff(buffId int) bool {

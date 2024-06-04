@@ -109,6 +109,15 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				user.UserId,
 				targetUser.UserId)
 
+			// Trigger onLost event
+			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, giveItem, userId, cmdQueue); err == nil {
+				response.AbsorbMessages(scriptResponse)
+			}
+
+			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, giveItem, targetUser.UserId, cmdQueue); err == nil {
+				response.AbsorbMessages(scriptResponse)
+			}
+
 		} else if giveGoldAmount > 0 {
 
 			if targetUser.UserId == user.UserId {
@@ -181,6 +190,11 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					response.SendRoomMessage(room.RoomId,
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> gave their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, giveItem.Name(), m.Character.Name),
 						true)
+
+					// Trigger onLost event
+					if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, giveItem, userId, cmdQueue); err == nil {
+						response.AbsorbMessages(scriptResponse)
+					}
 
 				}
 

@@ -21,6 +21,69 @@ func PruneItemVMs(instanceIds ...int) {
 
 }
 
+func TryItemScriptEvent(eventName string, item items.Item, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+
+	messageQueue = util.NewMessageQueue(userId, 0)
+	commandQueue = cmdQueue
+
+	sItem := GetItem(item)
+
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("TryItemScriptEvent()", "eventName", eventName, "item", item, "time", time.Since(timestart))
+	}()
+
+	vmw, err := getItemVM(sItem)
+	if err != nil {
+		return util.NewMessageQueue(userId, 0), err
+	}
+
+	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
+
+		sUser := GetActor(userId, 0)
+		sRoom := GetRoom(sUser.GetRoomId())
+
+		tmr := time.AfterFunc(scriptItemTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(sUser),
+			vmw.VM.ToValue(sItem),
+			vmw.VM.ToValue(sRoom),
+		)
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("%s(): %w", eventName, err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+
+		if eventName != `onLost` {
+			// Save any changed that might have happened to the item
+			sUser.characterRecord.UpdateItem(item, *sItem.itemRecord)
+		}
+	}
+
+	return messageQueue, nil
+}
+
 func TryItemCommand(cmd string, item items.Item, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	messageQueue = util.NewMessageQueue(userId, 0)

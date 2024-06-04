@@ -6,6 +6,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -45,14 +46,20 @@ func Eat(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
 
-		user.Character.UseItem(matchItem)
-
 		response.SendUserMessage(userId, fmt.Sprintf(`You eat some of the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()), true)
 		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> eats some <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.Name()), true)
+
+		// If no more uses, will be lost, so trigger event
+		if usesLeft := user.Character.UseItem(matchItem); usesLeft < 1 {
+			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId, cmdQueue); err == nil {
+				response.AbsorbMessages(scriptResponse)
+			}
+		}
 
 		for _, buffId := range itemSpec.BuffIds {
 			cmdQueue.QueueBuff(user.UserId, 0, buffId)
 		}
+
 	}
 
 	response.Handled = true
