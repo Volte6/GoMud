@@ -81,9 +81,9 @@ function onIdle(mob, room) {
     grumbled = false
     userIds = room.GetPlayers();
 
-    toldPlayers = mob.GetTempData('playersTold');
-    if ( toldPlayers === null ) {
-        toldPlayers = {};
+    playersTold = mob.GetTempData('playersTold');
+    if ( playersTold === null ) {
+        playersTold = {};
     }
 
     if ( userIds.length > 0 ) {

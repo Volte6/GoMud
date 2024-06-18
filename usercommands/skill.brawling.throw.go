@@ -9,6 +9,7 @@ import (
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -66,26 +67,33 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	if targetMobId > 0 {
 		targetMob := mobs.GetInstance(targetMobId)
 
-		user.Character.RemoveItem(itemMatch)
+		if user.Character.RemoveItem(itemMatch) {
 
-		room.AddItem(itemMatch, false)
+			// Trigger onLost event
+			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itemMatch, userId, cmdQueue); err == nil {
+				response.AbsorbMessages(scriptResponse)
+			}
 
-		// Tell the player they are throwing the item
-		response.SendUserMessage(userId,
-			fmt.Sprintf(`You hurl the <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, itemMatch.Name(), targetMob.Character.Name),
-			true)
+			room.AddItem(itemMatch, false)
 
-		// Tell the old room they are leaving
-		response.SendRoomMessage(room.RoomId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, user.Character.Name, itemMatch.Name(), targetMob.Character.Name),
-			true)
+			// Tell the player they are throwing the item
+			response.SendUserMessage(userId,
+				fmt.Sprintf(`You hurl the <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, itemMatch.Name(), targetMob.Character.Name),
+				true)
 
-		// If grenades are dropped, they explode and affect everyone in the room!
-		iSpec := itemMatch.GetSpec()
-		if iSpec.Type == items.Grenade {
-			cmdQueue.QueueRoomAction(user.Character.RoomId, user.UserId, 0, fmt.Sprintf("detonate #%d !%d", targetMob.InstanceId, itemMatch.ItemId))
+			// Tell the old room they are leaving
+			response.SendRoomMessage(room.RoomId,
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, user.Character.Name, itemMatch.Name(), targetMob.Character.Name),
+				true)
+
+			// If grenades are dropped, they explode and affect everyone in the room!
+			iSpec := itemMatch.GetSpec()
+			if iSpec.Type == items.Grenade {
+				cmdQueue.QueueRoomAction(user.Character.RoomId, user.UserId, 0, fmt.Sprintf("detonate #%d !%d", targetMob.InstanceId, itemMatch.ItemId))
+			}
+		} else {
+			response.SendUserMessage(userId, `You can't do that right now.`, true)
 		}
-
 		response.Handled = true
 
 	} else if targetPlayerId > 0 {

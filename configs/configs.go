@@ -17,6 +17,7 @@ import (
 const defaultConfigPath = "_datafiles/config.yaml"
 
 type config struct {
+	Version                      ConfigString      `yaml:"Version"` // Cuurrent version of all datafiles
 	MaxCPUCores                  ConfigInt         `yaml:"MaxCPUCores"`
 	FolderItemData               ConfigString      `yaml:"FolderItemData"`
 	FolderAttackMessageData      ConfigString      `yaml:"FolderAttackMessageData"`

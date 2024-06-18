@@ -6,3 +6,6 @@ Give youself a quest token
 <ansi fg="command">questtoken list</ansi>
 List all quest tokens that you have
 
+<ansi fg="command">questtoken all</ansi>
+List all quest tokens
+
