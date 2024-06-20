@@ -17,10 +17,12 @@ import (
 const defaultConfigPath = "_datafiles/config.yaml"
 
 type config struct {
+	Version                      ConfigString      `yaml:"Version"` // Cuurrent version of all datafiles
 	MaxCPUCores                  ConfigInt         `yaml:"MaxCPUCores"`
 	FolderItemData               ConfigString      `yaml:"FolderItemData"`
 	FolderAttackMessageData      ConfigString      `yaml:"FolderAttackMessageData"`
 	FolderUserData               ConfigString      `yaml:"FolderUserData"`
+	FolderSpellData              ConfigString      `yaml:"FolderSpellData"`
 	FolderTemplates              ConfigString      `yaml:"FolderTemplates"`
 	FileAnsiAliases              ConfigString      `yaml:"FileAnsiAliases"`
 	FileKeywords                 ConfigString      `yaml:"FileKeywords"`
@@ -277,6 +279,10 @@ func (c *config) Validate() {
 
 	if c.FolderUserData == `` {
 		c.FolderUserData = `_datafiles/users` // default
+	}
+
+	if c.FolderSpellData == `` {
+		c.FolderSpellData = `_datafiles/spells` // default
 	}
 
 	if c.FolderTemplates == `` {

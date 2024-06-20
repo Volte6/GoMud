@@ -1,8 +1,8 @@
 buffid: 1
-name: Will o' the Wisp
+name: Illumination
 description: A glowing orb is following you.
 secret: false
-roundinterval: 10
+roundinterval: 75
 triggercount: 1
 flags:
   - lightsource

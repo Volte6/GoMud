@@ -18,6 +18,7 @@ help:
       - jobs
       - keyring
       - skills
+      - spells
       - status
       - killstats
     shops:
@@ -38,6 +39,7 @@ help:
     combat:
       - attack
       - break
+      - cast
       - consider
       - flee
       - shoot

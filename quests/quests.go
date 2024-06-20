@@ -165,6 +165,14 @@ func GetQuest(questToken string) *Quest {
 	return nil
 }
 
+func GetAllQuests() []Quest {
+	ret := []Quest{}
+	for _, q := range quests {
+		ret = append(ret, *q)
+	}
+	return ret
+}
+
 // file self loads due to init()
 func LoadDataFiles() {
 

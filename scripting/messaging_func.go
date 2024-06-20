@@ -17,6 +17,7 @@ func SendRoomMessage(roomId int, message string, excludeIds ...int) {
 	if disableMessageQueue {
 		return
 	}
+
 	messageQueue.SendRoomMessage(roomId, message, true, excludeIds...)
 }
 

@@ -1,0 +1,7 @@
+spellid: healall
+name: Minor Heal All
+description: Heals party for 2d3
+type: helpmulti
+cost: 6
+waitrounds: 2
+difficulty: 50

@@ -26,10 +26,17 @@ import (
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
+	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
+	"github.com/volte6/mud/version"
+)
+
+const (
+	// Version is the current version of the server
+	Version = `1.0.0`
 )
 
 var (
@@ -78,11 +85,29 @@ func main() {
 	}
 	//
 	slog.Info(`========================`)
+
+	// Do version related checks
+	slog.Info(`Version: ` + Version)
+	if err := version.VersionCheck(Version); err != nil {
+
+		if err == version.ErrIncompatibleVersion {
+			slog.Error("Incompatible version.", "details", "Backup all datafiles and run with -u or --upgrade flag to attempt an automatic upgrade.")
+			return
+		}
+
+		if err == version.ErrUpgradePossible {
+			slog.Warn("Version mismatch.", "details", "Your config files could use some updating. Backup all datafiles and run with -u or --upgrade flag to attempt an automatic upgrade.")
+		}
+
+	}
+	slog.Info(`========================`)
+
 	//
 	// System Configurations
 	runtime.GOMAXPROCS(int(c.MaxCPUCores))
 
 	// Load all the data files up front.
+	spells.LoadSpellFiles()
 	rooms.LoadDataFiles()
 	buffs.LoadDataFiles() // Load buffs before items for cost calculation reasons
 	items.LoadDataFiles()

@@ -8,6 +8,7 @@ import (
 
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/races"
+	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -106,6 +107,19 @@ func Help(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		if helpName == `races` {
 			helpVars = getRaceOptions(helpRest)
+		}
+
+		if helpName == `spell` {
+			sData := spells.GetSpell(helpRest)
+			if sData == nil {
+				sData = spells.FindSpellByName(helpRest)
+			}
+
+			if sData == nil {
+				helpName = `spells`
+			} else {
+				helpVars = *sData
+			}
 		}
 
 		helpTxt, err = templates.Process("help/"+helpName, helpVars)

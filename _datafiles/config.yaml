@@ -23,6 +23,13 @@
 #   overwrite your changes.
 #
 ################################################################################
+# - Version - 
+#   Latest semantic version of the datafiles (MAJOR.MINOR.PATCH)
+#   Do not change this value, it will be handled by the server when updated
+#   MAJOR version - incompatible API changes. Will attempt to upgrade datafiles.
+#   MINOR version - added functionality (backward compatible)
+#   PATCH version - bug fix (backward compatible)
+Version: "1.0.0"
 # - FolderUserData - 
 #   Relative path to where the user datafiles are stored - set to a folder
 #   outside of the repo to preserve your user data files.
@@ -33,6 +40,9 @@ FolderTemplates: _datafiles/templates
 # - FolderItemData -
 #   Where the item datafiles are stored
 FolderItemData: _datafiles/items 
+# - FolderItemData -
+#   Where spell datafiles are stored
+FolderSpellData: _datafiles/spells
 # - FolderAttackMessageData -
 #   Defines the various combat related text messages
 FolderAttackMessageData: _datafiles/combat-messages 
