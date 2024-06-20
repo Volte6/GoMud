@@ -120,6 +120,9 @@ color8:
   day-dusk: yellow
   enters-message: 8
   leaves-message: 8
+  spell-neutral: white
+  spell-helpful: green
+  spell-harmful: red
 color256:
   table-title: green
   userid: black
@@ -234,3 +237,6 @@ color256:
   day-dusk: 214
   enters-message: 8
   leaves-message: 8
+  spell-neutral: white
+  spell-helpful: green
+  spell-harmful: red

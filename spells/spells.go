@@ -38,11 +38,64 @@ var (
 	allSpells = map[string]*SpellData{}
 )
 
-func GetSpell(spellName string) *SpellData {
-	if sp, ok := allSpells[spellName]; ok {
-		return sp
+func (s SpellType) HelpOrHarmString() string {
+	switch s {
+	case Neutral:
+		return `Neutral`
+	case HelpSingle:
+		return `Helpful`
+	case HelpMulti:
+		return `Helpful`
+	case HarmSingle:
+		return `Harmful`
+	case HarmMulti:
+		return `Harmful`
+	}
+	return `Unknown`
+}
+
+func (s SpellType) TargetTypeString() string {
+	switch s {
+	case Neutral:
+		return `Unknown`
+	case HelpSingle:
+		return `Single Target`
+	case HarmSingle:
+		return `Single Target`
+	case HelpMulti:
+		return `Group Target`
+	case HarmMulti:
+		return `Group Target`
+	}
+	return `Unknown`
+}
+
+func GetSpell(spellId string) *SpellData {
+	if sd, ok := allSpells[spellId]; ok {
+		return sd
 	}
 	return nil
+}
+
+func FindSpellByName(spellName string) *SpellData {
+
+	var closestMatch *SpellData = nil
+
+	spellName = strings.ToLower(spellName)
+	for _, spellData := range allSpells {
+
+		testName := strings.ToLower(spellData.Name)
+
+		if testName == spellName {
+			return spellData
+		}
+
+		if closestMatch == nil && strings.HasPrefix(strings.ToLower(spellData.Name), spellName) {
+			closestMatch = spellData
+		}
+
+	}
+	return closestMatch
 }
 
 func GetAllSpells() map[string]*SpellData {

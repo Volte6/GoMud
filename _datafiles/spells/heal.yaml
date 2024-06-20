@@ -1,6 +1,6 @@
 spellid: heal
 name: Minor Heal
-description: A spell that heals 2d3 hit points.
+description: Heals for 2d3
 type: helpsingle
 cost: 3
 waitrounds: 2

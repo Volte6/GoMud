@@ -1,6 +1,6 @@
 spellid: illum
 name: Illuminate
-description: Grants a light aura to the target.
+description: Grants a light aura
 type: helpsingle
 cost: 5
 waitrounds: 3

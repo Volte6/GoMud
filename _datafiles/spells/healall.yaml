@@ -1,6 +1,6 @@
 spellid: healall
 name: Minor Heal All
-description: A spell that heals 2d3 hit points of everyone in the party.
+description: Heals party for 2d3
 type: helpmulti
 cost: 6
 waitrounds: 2
