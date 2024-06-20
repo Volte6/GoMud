@@ -14,7 +14,6 @@ import (
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/stats"
 	"github.com/volte6/mud/util"
 	//
@@ -59,7 +58,8 @@ type Character struct {
 	Mana           int               // The mana of the character
 	Gold           int               // The gold the character is holding
 	Bank           int               // The gold the character has in the bank
-	Charmed        *CharmInfo        `yaml:"-"` // If they are charmed, this is the info
+	SpellBook      map[string]int    `yaml:"spellbook,omitempty"` // The spells the character has learned
+	Charmed        *CharmInfo        `yaml:"-"`                   // If they are charmed, this is the info
 	Items          []items.Item      // The items the character is holding
 	Buffs          buffs.Buffs       `yaml:"buffs,omitempty"` // The buffs the character has active
 	Equipment      Worn              // The equipment the character is wearing
@@ -104,6 +104,7 @@ func New() *Character {
 		Skills:         make(map[string]int),
 		Gold:           25,
 		Bank:           100,
+		SpellBook:      make(map[string]int),
 		Items:          []items.Item{},
 		Buffs:          buffs.New(),
 		Equipment:      Worn{},
@@ -208,11 +209,17 @@ func (c *Character) GetDefaultDiceRoll() (attacks int, dCount int, dSides int, b
 	return attacks, dCount, dSides, bonus, buffOnCrit
 }
 
-func (c *Character) HasSpell(spellName string) bool {
-	if _, ok := spells.SpellBook[spellName]; ok {
-		return true
+func (c *Character) GetSpells() []string {
+	ret := make([]string, 0, len(c.SpellBook))
+	for sName, _ := range c.SpellBook {
+		ret = append(ret, sName)
 	}
-	return false
+	return ret
+}
+
+func (c *Character) HasSpell(spellName string) bool {
+	_, ok := c.SpellBook[spellName]
+	return ok
 }
 
 func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
@@ -994,20 +1001,33 @@ func (c *Character) SetAid(userId int, roundsWaitTime ...int) {
 
 }
 
-func (c *Character) SetCast(userId int, mobInstanceId int, roundsWaitTime int, spellName string) {
+func (c *Character) SetCast(roundsWaitTime int, sInfo SpellAggroInfo) {
 
 	c.Aggro = &Aggro{
-		UserId:        userId,
-		MobInstanceId: mobInstanceId,
 		Type:          SpellCast,
 		RoundsWaiting: roundsWaitTime,
-		SpellName:     spellName,
+		SpellInfo:     sInfo,
 	}
 
 }
 
 func (c *Character) EndAggro() {
 	c.Aggro = nil
+}
+
+func (c *Character) IsAggro(targetUserId int, targetMobInstanceId int) bool {
+
+	if c.Aggro != nil {
+
+		if c.Aggro.MobInstanceId > 0 && c.Aggro.MobInstanceId == targetMobInstanceId {
+			return true
+		}
+		if c.Aggro.UserId > 0 && c.Aggro.UserId == targetUserId {
+			return true
+		}
+
+	}
+	return false
 }
 
 func (c *Character) IsDisabled() bool {
@@ -1057,7 +1077,10 @@ func (c *Character) ApplyHealthChange(healthChange int) int {
 		if newHealth < -10 {
 			newHealth = -10
 		}
+	} else if newHealth > c.HealthMax.Value {
+		newHealth = c.HealthMax.Value
 	}
+
 	c.Health = newHealth
 	return newHealth - oldHealth
 }

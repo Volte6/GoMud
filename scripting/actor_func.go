@@ -17,6 +17,7 @@ import (
 func setActorFunctions(vm *goja.Runtime) {
 	vm.Set(`GetUser`, GetUser)
 	vm.Set(`GetMob`, GetMob)
+	vm.Set(`ActorNames`, ActorNames)
 }
 
 type ScriptActor struct {
@@ -342,4 +343,23 @@ func GetUser(userId int) *ScriptActor {
 
 func GetMob(mobInstanceId int) *ScriptActor {
 	return GetActor(0, mobInstanceId)
+}
+
+func ActorNames(actorList []*ScriptActor) string {
+
+	sBuilder := strings.Builder{}
+	listSize := len(actorList)
+
+	for i := 0; i < listSize; i++ {
+
+		sBuilder.WriteString(actorList[i].GetCharacterName(true))
+
+		if i < listSize-2 {
+			sBuilder.WriteString(`, `)
+		} else if i == listSize-2 {
+			sBuilder.WriteString(`and `)
+		}
+	}
+
+	return sBuilder.String()
 }

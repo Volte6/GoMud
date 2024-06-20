@@ -40,6 +40,9 @@ FolderTemplates: _datafiles/templates
 # - FolderItemData -
 #   Where the item datafiles are stored
 FolderItemData: _datafiles/items 
+# - FolderItemData -
+#   Where spell datafiles are stored
+FolderSpellData: _datafiles/spells
 # - FolderAttackMessageData -
 #   Defines the various combat related text messages
 FolderAttackMessageData: _datafiles/combat-messages 

@@ -15,7 +15,6 @@ import (
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
-	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
@@ -457,6 +456,28 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			continue
 		}
 
+		if user.Character.Aggro != nil && user.Character.Aggro.Type == characters.SpellCast {
+
+			if user.Character.Aggro.RoundsWaiting > 0 {
+				user.Character.Aggro.RoundsWaiting--
+
+				if res, err := scripting.TrySpellScriptEvent(`onWait`, user.UserId, 0, user.Character.Aggro.SpellInfo, w); err == nil {
+					messageQueue.AbsorbMessages(res)
+				}
+
+				continue
+			}
+
+			if res, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo, w); err == nil {
+				messageQueue.AbsorbMessages(res)
+			}
+
+			user.Character.Aggro = nil
+
+			continue
+
+		}
+
 		// In combat with another player
 		if user.Character.Aggro != nil && user.Character.Aggro.UserId > 0 {
 
@@ -531,13 +552,12 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			var roundResult combat.AttackResult
 
 			if user.Character.Aggro.Type == characters.SpellCast {
-				spellInfo := spells.SpellBook[user.Character.Aggro.SpellName]
-				roundResult.MessagesToSource = append(roundResult.MessagesToSource, fmt.Sprintf(`You cast <ansi fg="spellname">%s</ansi>`, spellInfo.Name))
 
-				if spellInfo.Type == spells.HelpSingle || spellInfo.Type == spells.HelpMultiple {
-					messageQueue.SendUserMessage(user.UserId, `This was a helpful spell.`, true)
-					continue
+				if res, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo, w); err == nil {
+					messageQueue.AbsorbMessages(res)
 				}
+
+				user.Character.Aggro = nil
 
 			} else if user.Character.Aggro.Type == characters.Aid {
 
@@ -684,14 +704,14 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			var roundResult combat.AttackResult
 
 			if user.Character.Aggro.Type == characters.SpellCast {
-				spellInfo := spells.SpellBook[user.Character.Aggro.SpellName]
-				roundResult.MessagesToSource = append(roundResult.MessagesToSource, fmt.Sprintf(`You cast <ansi fg="spellname">%s</ansi>`, spellInfo.Name))
 
-				if spellInfo.Type == spells.HelpSingle || spellInfo.Type == spells.HelpMultiple {
-					messageQueue.SendUserMessage(user.UserId, `This was a helpful spell.`, true)
-
-					continue
+				if res, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo, w); err == nil {
+					messageQueue.AbsorbMessages(res)
 				}
+
+				user.Character.Aggro = nil
+
+				continue
 
 			} else if user.Character.Aggro.Type == characters.Aid {
 
@@ -902,14 +922,14 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 			var roundResult combat.AttackResult
 
 			if mob.Character.Aggro.Type == characters.SpellCast {
-				spellInfo := spells.SpellBook[mob.Character.Aggro.SpellName]
 
-				roundResult.MessagesToTarget = append(roundResult.MessagesToTarget, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> casts <ansi fg="spellname">%s</ansi>`, mob.Character.Name, spellInfo.Name))
-
-				if spellInfo.Type == spells.HelpSingle || spellInfo.Type == spells.HelpMultiple {
-					messageQueue.SendRoomMessage(mob.Character.RoomId, `This was a helpful spell.`, true)
-					continue
+				if res, err := scripting.TrySpellScriptEvent(`onMagic`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo, w); err == nil {
+					messageQueue.AbsorbMessages(res)
 				}
+
+				mob.Character.Aggro = nil
+
+				continue
 
 			} else if mob.Character.Aggro.Type == characters.Aid {
 
@@ -1015,13 +1035,14 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 			var roundResult combat.AttackResult
 
 			if mob.Character.Aggro.Type == characters.SpellCast {
-				spellInfo := spells.SpellBook[mob.Character.Aggro.SpellName]
-				roundResult.MessagesToSourceRoom = append(roundResult.MessagesToSourceRoom, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> casts <ansi fg="spellname">%s</ansi>`, defMob.Character.Name, spellInfo.Name))
 
-				if spellInfo.Type == spells.HelpSingle || spellInfo.Type == spells.HelpMultiple {
-					messageQueue.SendRoomMessage(mob.Character.RoomId, `This was a helpful spell.`, true)
-					continue
+				if res, err := scripting.TrySpellScriptEvent(`onMagic`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo, w); err == nil {
+					messageQueue.AbsorbMessages(res)
 				}
+
+				mob.Character.Aggro = nil
+
+				continue
 
 			} else if mob.Character.Aggro.Type == characters.Aid {
 				mob.Character.Aggro = nil

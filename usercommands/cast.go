@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -29,9 +30,6 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
-	attackPlayerId := 0
-	attackMobInstanceId := 0
-
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 1 {
@@ -41,114 +39,182 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	}
 
 	spellName := args[0]
+	spellArg := strings.Join(args[1:], ` `)
 
-	if len(args) < 2 {
-		// If no argument supplied, attack whoever is attacking the player currently.
-		for _, mobId := range room.GetMobs(rooms.FindFightingPlayer) {
-			m := mobs.GetInstance(mobId)
-			if m.Character.Aggro != nil && m.Character.Aggro.UserId == userId {
-				attackMobInstanceId = mobId
-				break
-			}
-		}
-	} else {
-		attackPlayerId, attackMobInstanceId = room.FindByName(strings.Join(args[1:], ` `))
-	}
+	spellInfo := spells.GetSpell(spellName)
 
-	if attackPlayerId == userId {
-		attackPlayerId = 0
-	}
-
-	if !user.Character.HasSpell(spellName) {
+	if spellInfo == nil || !user.Character.HasSpell(spellName) {
 		response.SendUserMessage(userId, fmt.Sprintf(`You don't know a spell called <ansi fg="spellname">%s</ansi>.`, spellName), true)
 		response.Handled = true
 		return response, nil
 	}
 
-	spellInfo := spells.SpellBook[spellName]
-
-	if attackMobInstanceId == 0 && attackPlayerId == 0 {
-		response.SendUserMessage(userId, "No target found!", true)
+	if user.Character.Mana < spellInfo.Cost {
+		response.SendUserMessage(userId, fmt.Sprintf(`You don't have enough mana to cast <ansi fg="spellname">%s</ansi>.`, spellName), true)
 		response.Handled = true
 		return response, nil
 	}
 
-	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
+	targetPlayerId := 0
+	targetMobInstanceId := 0
 
-	if attackMobInstanceId > 0 {
+	if spellArg != `` {
+		targetPlayerId, targetMobInstanceId = room.FindByName(spellArg)
+	}
 
-		m := mobs.GetInstance(attackMobInstanceId)
+	spellAggro := characters.SpellAggroInfo{
+		SpellId:              spellInfo.SpellId,
+		SpellRest:            ``,
+		TargetUserIds:        make([]int, 0),
+		TargetMobInstanceIds: make([]int, 0),
+	}
 
-		if m.Character.IsCharmed(userId) {
-			response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name), true)
-			response.Handled = true
-			return response, nil
-		}
+	if spellInfo.Type == spells.Neutral {
 
-		if m != nil {
+		spellAggro.SpellRest = spellArg
 
-			user.Character.SetCast(0, attackMobInstanceId, spellInfo.WaitRounds, spellName)
+	} else if spellInfo.Type == spells.HelpSingle {
 
-			response.SendUserMessage(userId,
-				fmt.Sprintf(`You prepare to enter into mortal combat with <ansi fg="mobname">%s</ansi>`, m.Character.Name),
-				true)
+		if spellArg == `` {
 
-			if !isSneaking {
-				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, user.Character.Name, m.Character.Name),
-					true)
+			// No target specified? Default to self
+			spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, userId)
+
+		} else {
+
+			if targetPlayerId > 0 {
+				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, userId)
+			} else if targetMobInstanceId > 0 {
+				spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, targetMobInstanceId)
 			}
 
-			for _, instId := range room.GetMobs(rooms.FindCharmed) {
-				if m := mobs.GetInstance(instId); m != nil {
-					if m.Character.IsCharmed(userId) { // Charmed mobs help the player
-						cmdQueue.QueueCommand(0, instId, fmt.Sprintf(`attack #%d`, attackMobInstanceId)) // # denotes a specific mob instanceId
+		}
+
+	} else if spellInfo.Type == spells.HarmSingle {
+
+		if spellArg == `` {
+
+			if user.Character.Aggro != nil {
+				// No target specified? Default to self
+				if user.Character.Aggro.UserId > 0 {
+					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, userId)
+				} else if user.Character.Aggro.MobInstanceId > 0 {
+					spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, user.Character.Aggro.MobInstanceId)
+				}
+			} else {
+
+				fightingMobs := room.GetMobs(rooms.FindFightingPlayer)
+				if len(fightingMobs) > 0 {
+
+					for _, mobInstId := range fightingMobs {
+
+						if mob := mobs.GetInstance(mobInstId); mob != nil && mob.Character.IsAggro(userId, 0) {
+							spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
+							break
+						}
+
+					}
+
+				}
+
+				// If no mobs found, try finding an aggro player
+				if len(spellAggro.TargetMobInstanceIds) < 1 {
+					fightingPlayers := room.GetPlayers(rooms.FindFightingPlayer)
+					if len(fightingPlayers) > 0 {
+
+						for _, fUserId := range fightingPlayers {
+
+							if u := users.GetByUserId(fUserId); u != nil && u.Character.IsAggro(userId, 0) {
+								spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, fUserId)
+								break
+							}
+
+						}
+
 					}
 				}
-			}
-		}
 
-	} else if attackPlayerId > 0 {
-
-		p := users.GetByUserId(attackPlayerId)
-
-		if p != nil {
-
-			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
-				if partyInfo.IsMember(attackPlayerId) {
-					response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name), true)
-					response.Handled = true
-					return response, nil
-				}
 			}
 
-			user.Character.SetCast(attackPlayerId, 0, spellInfo.WaitRounds, spellName)
+		} else {
 
-			response.SendUserMessage(userId,
-				fmt.Sprintf(`You prepare to enter into mortal combat with <ansi fg="username">%s</ansi>`, p.Character.Name),
-				true)
-
-			if !isSneaking {
-
-				response.SendUserMessage(attackPlayerId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight you!`, user.Character.Name),
-					true)
-
-				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, user.Character.Name, p.Character.Name),
-					true,
-					userId, attackPlayerId)
-			}
-
-			for _, instId := range room.GetMobs(rooms.FindCharmed) {
-				if m := mobs.GetInstance(instId); m != nil {
-					if m.Character.IsCharmed(userId) { // Charmed mobs help the player
-						cmdQueue.QueueCommand(0, instId, fmt.Sprintf(`attack @%d`, attackPlayerId)) // @ denotes a specific user id
-					}
-				}
+			if targetPlayerId > 0 {
+				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, userId)
+			} else if targetMobInstanceId > 0 {
+				spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, targetMobInstanceId)
 			}
 
 		}
+
+	} else if spellInfo.Type == spells.HelpMulti {
+
+		spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, userId)
+
+		// Targets self and all in party
+		if p := parties.Get(userId); p != nil {
+
+			for _, partyUserId := range p.GetMembers() {
+
+				if partyUserId == userId {
+					continue
+				}
+
+				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, partyUserId)
+
+			}
+
+			for _, partyMobId := range p.GetMobs() {
+
+				spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, partyMobId)
+
+			}
+
+		}
+
+	} else if spellInfo.Type == spells.HarmMulti {
+
+		// Targets all mobs aggro towards player
+		// Targets all players aggro towards player and their parties
+
+		// If not currently aggro, only targets all mobs in the room
+
+		fightingMobs := room.GetMobs(rooms.FindFightingPlayer)
+		for _, mobInstId := range fightingMobs {
+			if m := mobs.GetInstance(mobInstId); m != nil && m.Character.IsAggro(userId, 0) {
+				spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
+			}
+		}
+
+		fightingPlayers := room.GetPlayers(rooms.FindFightingPlayer)
+		for _, uId := range fightingPlayers {
+			if u := users.GetByUserId(uId); u != nil && u.Character.IsAggro(userId, 0) {
+				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+			}
+		}
+
+		if len(spellAggro.TargetUserIds) < 1 && len(spellAggro.TargetMobInstanceIds) < 1 {
+			// No targets found, default to all mobs in the room
+			spellAggro.TargetMobInstanceIds = fightingMobs
+		}
+
+	}
+
+	if len(spellAggro.TargetUserIds) > 0 || len(spellAggro.TargetMobInstanceIds) > 0 || len(spellAggro.SpellRest) > 0 {
+
+		continueCasting := true
+		if res, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro, cmdQueue); err == nil {
+			response.AbsorbMessages(res)
+			continueCasting = res.Handled
+		}
+
+		if continueCasting {
+			user.Character.Mana -= spellInfo.Cost
+			user.Character.SetCast(spellInfo.WaitRounds, spellAggro)
+		}
+
+	} else {
+
+		response.SendUserMessage(userId, `Couldn't find a target for the spell.`, true)
 
 	}
 

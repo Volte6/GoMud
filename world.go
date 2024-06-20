@@ -476,6 +476,12 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 				}
 			}
 
+		} else if cmd == `cast` {
+			for _, spellName := range user.Character.GetSpells() {
+				if strings.HasPrefix(spellName, targetName) {
+					suggestions = append(suggestions, spellName[len(targetName):])
+				}
+			}
 		}
 
 		itmCt := len(itemList)

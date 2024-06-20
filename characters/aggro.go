@@ -12,11 +12,18 @@ const (
 	Aid
 )
 
+type SpellAggroInfo struct {
+	SpellId              string
+	SpellRest            string
+	TargetUserIds        []int
+	TargetMobInstanceIds []int
+}
+
 type Aggro struct {
 	Type          AggroType
 	MobInstanceId int
 	UserId        int
-	SpellName     string // If Type is SpellCast, this is the spell name
-	ExitName      string // For example, firing a weapon in a direction
-	RoundsWaiting int    // How many rounds must pass before this triggers
+	SpellInfo     SpellAggroInfo // If Type is SpellCast, this is the spell info
+	ExitName      string         // For example, firing a weapon in a direction
+	RoundsWaiting int            // How many rounds must pass before this triggers
 }

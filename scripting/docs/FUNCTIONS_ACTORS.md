@@ -3,6 +3,7 @@
 ActorObjects are the basic object that represents Users and NPCs
 
 - [ActorObject](#actorobject)
+  - [ActorNames(actors \[\]ActorObject) string ](#actornamesactors-actorobject-string-)
   - [GetUser(userId int) ActorObject ](#getuseruserid-int-actorobject-)
   - [GetMob(mobInstanceId int) ActorObject ](#getmobmobinstanceid-int-actorobject-)
   - [ActorObject.UserId() int](#actorobjectuserid-int)
@@ -33,6 +34,18 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetAlignment() int](#actorobjectgetalignment-int)
   - [ActorObject.GetAlignmentName() string](#actorobjectgetalignmentname-string)
   - [ActorObject.ChangeAlignment(alignmentChange int)](#actorobjectchangealignmentalignmentchange-int)
+
+
+
+
+## [ActorNames(actors []ActorObject) string ](/scripting/actor_func.go)
+Returns a formatted list of actor names, separated by commas, then "and".
+
+_Example: "Tim, Jim and Henry"_
+
+|  Argument | Explanation |
+| --- | --- |
+| actors | An array of ActorObjects. |
 
 ## [GetUser(userId int) ActorObject ](/scripting/actor_func.go)
 Retrieves a ActorObject for a given userId.

@@ -1,0 +1,7 @@
+spellid: minheal
+name: Minor Heal
+description: A spell that heals 2d3 hit points.
+type: helpsingle
+cost: 3
+waitrounds: 2
+difficulty: 50

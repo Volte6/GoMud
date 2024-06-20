@@ -109,6 +109,7 @@ var (
 		`skillset`:   {Skillset, false, true}, // Admin only
 		`sneak`:      {Sneak, false, false},
 		`spawn`:      {Spawn, false, true}, // Admin only
+		`spells`:     {Spells, true, false},
 		`stash`:      {Stash, false, false},
 		`status`:     {Status, true, false},
 		`storage`:    {Storage, false, false},
@@ -318,6 +319,20 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 
 	if emoteText, ok := emoteAliases[cmd]; ok {
 		response, err := Emote(emoteText, userId, cmdQueue)
+		if response.NextCommand != `` {
+			finalResponse.NextCommand = response.NextCommand
+		}
+		finalResponse.AbsorbMessages(response)
+		finalResponse.Handled = finalResponse.Handled || response.Handled
+		return finalResponse, err
+	}
+
+	if user.Character.HasSpell(cmd) {
+		castCmd := cmd
+		if len(rest) > 0 {
+			castCmd += ` ` + rest
+		}
+		response, err := Cast(castCmd, userId, cmdQueue)
 		if response.NextCommand != `` {
 			finalResponse.NextCommand = response.NextCommand
 		}

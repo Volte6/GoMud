@@ -26,6 +26,7 @@ import (
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
+	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
@@ -106,6 +107,7 @@ func main() {
 	runtime.GOMAXPROCS(int(c.MaxCPUCores))
 
 	// Load all the data files up front.
+	spells.LoadSpellFiles()
 	rooms.LoadDataFiles()
 	buffs.LoadDataFiles() // Load buffs before items for cost calculation reasons
 	items.LoadDataFiles()
