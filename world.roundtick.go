@@ -15,6 +15,7 @@ import (
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
+	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
@@ -472,6 +473,24 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				messageQueue.AbsorbMessages(res)
 			}
 
+			user.Character.TrackSpellCast(user.Character.Aggro.SpellInfo.SpellId)
+
+			if spellData := spells.GetSpell(user.Character.Aggro.SpellInfo.SpellId); spellData != nil {
+
+				if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti {
+
+					for _, mobId := range user.Character.Aggro.SpellInfo.TargetMobInstanceIds {
+						if defMob := mobs.GetInstance(mobId); defMob != nil {
+							if defMob.Character.Aggro == nil {
+								defMob.PreventIdle = true
+								w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack @%d", user.UserId)) // @ means player
+							}
+						}
+					}
+
+				}
+			}
+
 			user.Character.Aggro = nil
 
 			continue
@@ -551,15 +570,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			var roundResult combat.AttackResult
 
-			if user.Character.Aggro.Type == characters.SpellCast {
-
-				if res, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo, w); err == nil {
-					messageQueue.AbsorbMessages(res)
-				}
-
-				user.Character.Aggro = nil
-
-			} else if user.Character.Aggro.Type == characters.Aid {
+			if user.Character.Aggro.Type == characters.Aid {
 
 				user.Character.Aggro = nil
 
@@ -703,17 +714,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			var roundResult combat.AttackResult
 
-			if user.Character.Aggro.Type == characters.SpellCast {
-
-				if res, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo, w); err == nil {
-					messageQueue.AbsorbMessages(res)
-				}
-
-				user.Character.Aggro = nil
-
-				continue
-
-			} else if user.Character.Aggro.Type == characters.Aid {
+			if user.Character.Aggro.Type == characters.Aid {
 
 				user.Character.Aggro = nil
 
@@ -921,17 +922,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 			var roundResult combat.AttackResult
 
-			if mob.Character.Aggro.Type == characters.SpellCast {
-
-				if res, err := scripting.TrySpellScriptEvent(`onMagic`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo, w); err == nil {
-					messageQueue.AbsorbMessages(res)
-				}
-
-				mob.Character.Aggro = nil
-
-				continue
-
-			} else if mob.Character.Aggro.Type == characters.Aid {
+			if mob.Character.Aggro.Type == characters.Aid {
 
 				mob.Character.Aggro = nil
 
@@ -1034,17 +1025,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 			var roundResult combat.AttackResult
 
-			if mob.Character.Aggro.Type == characters.SpellCast {
-
-				if res, err := scripting.TrySpellScriptEvent(`onMagic`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo, w); err == nil {
-					messageQueue.AbsorbMessages(res)
-				}
-
-				mob.Character.Aggro = nil
-
-				continue
-
-			} else if mob.Character.Aggro.Type == characters.Aid {
+			if mob.Character.Aggro.Type == characters.Aid {
 				mob.Character.Aggro = nil
 			} else {
 				roundResult = combat.AttackMobVsMob(mob, defMob)

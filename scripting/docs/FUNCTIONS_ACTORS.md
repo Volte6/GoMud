@@ -34,6 +34,9 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetAlignment() int](#actorobjectgetalignment-int)
   - [ActorObject.GetAlignmentName() string](#actorobjectgetalignmentname-string)
   - [ActorObject.ChangeAlignment(alignmentChange int)](#actorobjectchangealignmentalignmentchange-int)
+  - [ActorObject.HasSpell(spellId string)](#actorobjecthasspellspellid-string)
+  - [ActorObject.LearnSpell(spellId string)](#actorobjectlearnspellspellid-string)
+  - [ActorObject.IsAggro(targetActor ActorObject)](#actorobjectisaggrotargetactor-actorobject)
 
 
 
@@ -249,3 +252,24 @@ Update the alignment by a relative amount. Caps result at -100 to 100
 |  Argument | Explanation |
 | --- | --- |
 | alignmentChange | The alignment adjustment, from -200 to 200 |
+
+## [ActorObject.HasSpell(spellId string)](/scripting/actor_func.go)
+Returns true if the actor has the spell supplied
+
+|  Argument | Explanation |
+| --- | --- |
+| spellId | The ID of the spell |
+
+## [ActorObject.LearnSpell(spellId string)](/scripting/actor_func.go)
+Adds the spell to the Actors spellbook.
+
+|  Argument | Explanation |
+| --- | --- |
+| spellId | The ID of the spell |
+
+## [ActorObject.IsAggro(targetActor ActorObject)](/scripting/actor_func.go)
+Returns true if the actor is aggro vs targetActor
+
+|  Argument | Explanation |
+| --- | --- |
+| targetActor | [ActorObject](FUNCTIONS_ACTORS.md) |

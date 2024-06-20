@@ -19,37 +19,49 @@ func Spells(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		return response, fmt.Errorf(`user %d not found`, userId)
 	}
 
-	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `Cost`, `Rounds`}
+	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `Cost`, `Rounds`, `Casts`}
 	allFormatting := [][]string{}
 	rows := [][]string{}
 
-	for _, spellId := range user.Character.GetSpells() {
+	for spellId, casts := range user.Character.GetSpells() {
 
-		allFormatting = append(allFormatting, []string{
-			`<ansi fg="yellow-bold">%s</ansi>`,
-			`<ansi fg="yellow-bold">%s</ansi>`,
-			`<ansi fg="yellow-bold">%s</ansi>`,
-			`<ansi fg="white-bold">%s</ansi>`,
-			`<ansi fg="magenta-bold">%s</ansi>`,
-			`<ansi fg="mana-bold">%s</ansi>`,
-		})
+		if casts < 0 {
+			continue
+		}
+
+		casts -= 1
 
 		if sp := spells.GetSpell(spellId); sp != nil {
 
+			targetColor := `green-bold`
 			target := string(sp.Type)
 			switch sp.Type {
 			case spells.Neutral:
 				target = `?`
+				targetColor = `white-bold`
 			case spells.HelpSingle:
 				target = `Single`
 			case spells.HarmSingle:
 				target = `Single`
+				targetColor = `red-bold`
 			case spells.HelpMulti:
 				target = `Multi`
 			case spells.HarmMulti:
 				target = `Multi`
+				targetColor = `red-bold`
 			}
-			rows = append(rows, []string{sp.SpellId, sp.Name, sp.Description, target, fmt.Sprintf(`%d`, sp.Cost), fmt.Sprintf(`%d`, sp.WaitRounds)})
+
+			allFormatting = append(allFormatting, []string{
+				`<ansi fg="yellow-bold">%s</ansi>`,
+				`<ansi fg="yellow-bold">%s</ansi>`,
+				`<ansi fg="yellow-bold">%s</ansi>`,
+				`<ansi fg="` + targetColor + `">%s</ansi>`,
+				`<ansi fg="magenta-bold">%s</ansi>`,
+				`<ansi fg="mana-bold">%s</ansi>`,
+				`<ansi fg="red-bold">%s</ansi>`,
+			})
+
+			rows = append(rows, []string{sp.SpellId, sp.Name, sp.Description, target, fmt.Sprintf(`%d`, sp.Cost), fmt.Sprintf(`%d`, sp.WaitRounds), fmt.Sprintf(`%d`, casts)})
 
 		}
 

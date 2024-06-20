@@ -209,17 +209,51 @@ func (c *Character) GetDefaultDiceRoll() (attacks int, dCount int, dSides int, b
 	return attacks, dCount, dSides, bonus, buffOnCrit
 }
 
-func (c *Character) GetSpells() []string {
-	ret := make([]string, 0, len(c.SpellBook))
-	for sName, _ := range c.SpellBook {
-		ret = append(ret, sName)
+func (c *Character) GetSpells() map[string]int {
+	ret := make(map[string]int)
+	for sName, sCasts := range c.SpellBook {
+		ret[sName] = sCasts
 	}
 	return ret
 }
 
 func (c *Character) HasSpell(spellName string) bool {
-	_, ok := c.SpellBook[spellName]
-	return ok
+	if intVal, ok := c.SpellBook[spellName]; ok {
+		return intVal > 0
+	}
+	return false
+}
+
+func (c *Character) DisableSpell(spellName string) bool {
+	if intVal, ok := c.SpellBook[spellName]; ok {
+		if intVal > 0 {
+			c.SpellBook[spellName] = intVal * -1
+		}
+	}
+	return false
+}
+
+func (c *Character) EnableSpell(spellName string) bool {
+	if intVal, ok := c.SpellBook[spellName]; ok {
+		if intVal < 0 {
+			c.SpellBook[spellName] = intVal * -1
+		}
+	}
+	return false
+}
+
+func (c *Character) TrackSpellCast(spellName string) bool {
+	if intVal, ok := c.SpellBook[spellName]; ok {
+		if intVal > 0 {
+			intVal++
+			c.SpellBook[spellName] = intVal
+		}
+	}
+	return false
+}
+
+func (c *Character) LearnSpell(spellName string) {
+	c.SpellBook[spellName] = 0
 }
 
 func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
@@ -1285,6 +1319,10 @@ func (c *Character) Validate() error {
 
 	if len(c.Description) == 0 {
 		c.Description = c.Name + " seems thoroughly uninteresting."
+	}
+
+	if c.SpellBook == nil {
+		c.SpellBook = make(map[string]int)
 	}
 
 	if c.Zone == "" {

@@ -262,6 +262,18 @@ func (a ScriptActor) ChangeAlignment(alignmentChange int) {
 	a.characterRecord.Alignment = int8(newAlignment)
 }
 
+func (a ScriptActor) HasSpell(spellId string) bool {
+	return a.characterRecord.HasSpell(spellId)
+}
+
+func (a ScriptActor) LearnSpell(spellId string) {
+	a.characterRecord.LearnSpell(spellId)
+}
+
+func (a ScriptActor) IsAggro(actor ScriptActor) bool {
+	return a.characterRecord.IsAggro(actor.UserId(), actor.InstanceId())
+}
+
 // ////////////////////////////////////////////////////////
 //
 // Functions only really useful for mobs

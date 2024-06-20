@@ -56,9 +56,3 @@ function onMagic(sourceActor, targetActor) {
     targetActor.AddHealth(healAmt);
     
 }
-
-// Called when the spell fails its cast attempt
-// Return true if the fail message has been handled, otherwise will use a default message.
-function onFail(sourceActor, targetActor) {
-    return false
-}
