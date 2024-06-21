@@ -253,7 +253,9 @@ func (c *Character) TrackSpellCast(spellName string) bool {
 }
 
 func (c *Character) LearnSpell(spellName string) {
-	c.SpellBook[spellName] = 0
+	if _, ok := c.SpellBook[spellName]; !ok {
+		c.SpellBook[spellName] = 1
+	}
 }
 
 func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {

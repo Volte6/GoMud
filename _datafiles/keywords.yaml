@@ -170,6 +170,7 @@ command-aliases:
   command:          ['cmd']
   macros:           ['=?']
   sneak:            ['sn']
+  spells:           ['spellbook']
   backstab:         ['bs']
   killstats:        ['kills', 'kd', 'killstat']
   quests:           ['q', 'quest']

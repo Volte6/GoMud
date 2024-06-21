@@ -1,0 +1,15 @@
+questid: 6
+name: The History of Frostfang
+description: Elara needs help finding the history of Frostfang, a book.
+steps:
+  - id: start
+    description: The book was borrowed by a resident of Frostfang and never returned.
+    hint: The book is probably still in Frostfang, somewhere.
+  - id: return 
+    description: Deliver the book to Elara, in the Frostfang keep library.
+    hint: The keep is to the north of Town Square.
+  - id: end 
+    description: You returned an important part of Frostfangs history.
+rewards:
+  experience: 1000
+

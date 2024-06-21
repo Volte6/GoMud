@@ -108,9 +108,11 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 					for _, mobInstId := range fightingMobs {
 
-						if mob := mobs.GetInstance(mobInstId); mob != nil && mob.Character.IsAggro(userId, 0) {
-							spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
-							break
+						if mob := mobs.GetInstance(mobInstId); mob != nil {
+							if mob.Character.IsAggro(userId, 0) {
+								spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
+								break
+							}
 						}
 
 					}
@@ -124,9 +126,11 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 						for _, fUserId := range fightingPlayers {
 
-							if u := users.GetByUserId(fUserId); u != nil && u.Character.IsAggro(userId, 0) {
-								spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, fUserId)
-								break
+							if u := users.GetByUserId(fUserId); u != nil {
+								if u.Character.IsAggro(userId, 0) {
+									spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, fUserId)
+									break
+								}
 							}
 
 						}
@@ -180,15 +184,19 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		fightingMobs := room.GetMobs(rooms.FindFightingPlayer)
 		for _, mobInstId := range fightingMobs {
-			if m := mobs.GetInstance(mobInstId); m != nil && m.Character.IsAggro(userId, 0) {
-				spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
+			if m := mobs.GetInstance(mobInstId); m != nil {
+				if m.Character.IsAggro(userId, 0) || m.HatesRace(user.Character.Race()) {
+					spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
+				}
 			}
 		}
 
 		fightingPlayers := room.GetPlayers(rooms.FindFightingPlayer)
 		for _, uId := range fightingPlayers {
-			if u := users.GetByUserId(uId); u != nil && u.Character.IsAggro(userId, 0) {
-				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+			if u := users.GetByUserId(uId); u != nil {
+				if u.Character.IsAggro(userId, 0) {
+					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+				}
 			}
 		}
 

@@ -1,0 +1,7 @@
+itemid: 10
+name: history of frostfang
+namesimple: Book
+description: The book tells of a time Frostfang was known as "DragonsFang", and was not in a permanent winter.
+type: readable
+subtype: blobcontent
+questtoken: 6-return

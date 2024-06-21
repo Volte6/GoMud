@@ -5,6 +5,7 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
@@ -40,6 +41,13 @@ func (r ScriptRoom) GetItems() []ScriptItem {
 		itms = append(itms, newScriptItem(item))
 	}
 	return itms
+}
+
+func (r ScriptRoom) SpawnItem(itemId int, inStash bool) {
+	i := items.New(itemId)
+	if i.ItemId != 0 {
+		r.roomRecord.AddItem(i, inStash)
+	}
 }
 
 func (r ScriptRoom) GetMobs() []int {

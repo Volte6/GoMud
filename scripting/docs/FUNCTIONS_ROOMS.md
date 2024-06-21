@@ -6,6 +6,7 @@
   - [RoomObject.SetTempData(key string, value any)](#roomobjectsettempdatakey-string-value-any)
   - [RoomObject.GetTempData(key string) any](#roomobjectgettempdatakey-string-any)
   - [RoomObject.GetItems() \[\]ItemObject](#roomobjectgetitems-itemobject)
+  - [RoomObject.SpawnItem(itemId int, inStash bool) \[\]ItemObject](#roomobjectspawnitemitemid-int-instash-bool-itemobject)
   - [RoomObject.GetMobs() \[\]int](#roomobjectgetmobs-int)
   - [RoomObject.GetPlayers() \[\]int](#roomobjectgetplayers-int)
   - [RoomObject.GetContainers() \[\]string](#roomobjectgetcontainers-string)
@@ -44,6 +45,15 @@ _Note: This is useful for saving/retrieving data between room scripts._
 Returns an array of items on the floor of the room.
 
 _Note: See [/scripting/docs/FUNCTIONS_ITEMS.md](/scripting/docs/FUNCTIONS_ITEMS.md) for details on ItemObject objects._
+
+
+## [RoomObject.SpawnItem(itemId int, inStash bool) []ItemObject](/scripting/room_func.go)
+Spawns an item in the room.
+
+|  Argument | Explanation |
+| --- | --- |
+| itemId | ItemId to spawn. |
+| inStash | If true, spawns stashed instead of visible. |
 
 ## [RoomObject.GetMobs() []int](/scripting/room_func.go)
 Returns an array of `mobInstanceIds` in the room.
