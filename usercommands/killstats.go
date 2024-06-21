@@ -19,33 +19,62 @@ func Killstats(rest string, userId int, cmdQueue util.CommandQueue) (util.Messag
 		return response, fmt.Errorf("user %d not found", userId)
 	}
 
-	headers := []string{`Mob Name`, `Quantity`, `%`}
+	tableTitle := `Kill Stats`
+	headers := []string{}
 	rows := [][]string{}
-
 	formatting := []string{
 		`<ansi fg="mobname">%s</ansi>`,
 		`<ansi fg="red">%s</ansi>`,
 		`<ansi fg="230">%s</ansi>`,
 	}
+	totalKills := 0
 
-	totalKills := user.Character.KD.GetKills()
+	if rest == `race` {
 
-	for mobId, killCt := range user.Character.KD.Kills {
-		if mobSpec := mobs.GetMobSpec(mobs.MobId(mobId)); mobSpec != nil {
+		tableTitle += ` by Race`
 
+		headers = []string{`Race Name`, `Quantity`, `%`}
+
+		totalKills = user.Character.KD.GetRaceKills()
+
+		for raceName, killCt := range user.Character.KD.RaceKills {
 			rows = append(rows, []string{
-				mobSpec.Character.Name,
+				raceName,
 				fmt.Sprintf("%d", killCt),
 				fmt.Sprintf("%2.f%%", float64(killCt)/float64(totalKills)*100),
 			})
 		}
-	}
 
-	rows = append(rows, []string{
-		``,
-		``,
-		``,
-	})
+		rows = append(rows, []string{
+			``,
+			``,
+			``,
+		})
+	} else {
+
+		tableTitle += ` by Mob`
+
+		headers = []string{`Mob Name`, `Quantity`, `%`}
+
+		totalKills = user.Character.KD.GetMobKills()
+
+		for mobId, killCt := range user.Character.KD.Kills {
+			if mobSpec := mobs.GetMobSpec(mobs.MobId(mobId)); mobSpec != nil {
+
+				rows = append(rows, []string{
+					mobSpec.Character.Name,
+					fmt.Sprintf("%d", killCt),
+					fmt.Sprintf("%2.f%%", float64(killCt)/float64(totalKills)*100),
+				})
+			}
+		}
+
+		rows = append(rows, []string{
+			``,
+			``,
+			``,
+		})
+	}
 
 	rows = append(rows, []string{
 		`Total Kills`,
@@ -67,7 +96,7 @@ func Killstats(rest string, userId int, cmdQueue util.CommandQueue) (util.Messag
 		})
 	}
 
-	searchResultsTable := templates.GetTable(`Kill Stats`, headers, rows, formatting)
+	searchResultsTable := templates.GetTable(tableTitle, headers, rows, formatting)
 	tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
 	response.SendUserMessage(userId, tplTxt, false)
 

@@ -76,12 +76,17 @@ function onGive(mob, room, eventDetails) {
 // Invoked once every round if mob is idle
 function onIdle(mob, room) {
 
+    noQuest = room.MissingQuest("6-start");
+    if ( noQuest.length < 1 ) {
+        return false;
+    }
+
     round = UtilGetRoundNumber();
 
-    action = round % 4;
+    action = round % 6;
 
     if ( action == 0 ) {
-        mob.Command("emote looks worried.")
+        mob.Command("say now where did I leave that book?")
         return true;
     }
 

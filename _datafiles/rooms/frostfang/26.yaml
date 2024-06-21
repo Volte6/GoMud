@@ -19,6 +19,8 @@ exits:
     roomid: 27
   south:
     roomid: 25
+items:
+- itemid: 20011
 spawninfo:
 - mobid: 1
   cooldown: 10

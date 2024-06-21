@@ -274,6 +274,14 @@ func (a ScriptActor) IsAggro(actor ScriptActor) bool {
 	return a.characterRecord.IsAggro(actor.UserId(), actor.InstanceId())
 }
 
+func (a ScriptActor) GetMobKills(mobId int) int {
+	return a.characterRecord.KD.GetMobKills(mobId)
+}
+
+func (a ScriptActor) GetRaceKills(race string) int {
+	return a.characterRecord.KD.GetRaceKills(race)
+}
+
 // ////////////////////////////////////////////////////////
 //
 // Functions only really useful for mobs

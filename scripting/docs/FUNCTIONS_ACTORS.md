@@ -37,6 +37,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.HasSpell(spellId string)](#actorobjecthasspellspellid-string)
   - [ActorObject.LearnSpell(spellId string)](#actorobjectlearnspellspellid-string)
   - [ActorObject.IsAggro(targetActor ActorObject)](#actorobjectisaggrotargetactor-actorobject)
+  - [ActorObject.GetMobKills(mobId int) int](#actorobjectgetmobkillsmobid-int-int)
 
 
 
@@ -273,3 +274,11 @@ Returns true if the actor is aggro vs targetActor
 |  Argument | Explanation |
 | --- | --- |
 | targetActor | [ActorObject](FUNCTIONS_ACTORS.md) |
+
+## [ActorObject.GetMobKills(mobId int) int](/scripting/actor_func.go)
+Returns the number of times the actor has killed a certain mobId
+
+|  Argument | Explanation |
+| --- | --- |
+| mobId | ID of the mob to check |
+
