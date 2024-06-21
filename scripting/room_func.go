@@ -31,8 +31,16 @@ func (r ScriptRoom) SetTempData(key string, value any) {
 	r.roomRecord.SetTempData(key, value)
 }
 
-func (r ScriptRoom) etTempData(key string) any {
+func (r ScriptRoom) GetTempData(key string) any {
 	return r.roomRecord.GetTempData(key)
+}
+
+func (r ScriptRoom) SetPermData(key string, value any) {
+	r.roomRecord.SetLongTermData(key, value)
+}
+
+func (r ScriptRoom) GetPermData(key string) any {
+	return r.roomRecord.GetLongTermData(key)
 }
 
 func (r ScriptRoom) GetItems() []ScriptItem {

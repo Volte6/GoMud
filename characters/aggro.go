@@ -9,7 +9,6 @@ const (
 	BackStab
 	SpellCast
 	Flee
-	Aid
 )
 
 type SpellAggroInfo struct {

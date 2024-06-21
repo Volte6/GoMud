@@ -175,34 +175,35 @@ func (l *GameLock) SetLocked() {
 }
 
 type Room struct {
-	mutex           sync.RWMutex
-	RoomId          int    // a unique numeric index of the room. Also the filename.
-	Zone            string // zone is a way to partition rooms into groups. Also into folders.
-	ZoneRoot        bool   `yaml:"zoneroot,omitempty"`  // Is this the root room? If transported to a zone this is the room you end up in. Also copied for new room creation.
-	IsBank          bool   `yaml:"isbank,omitempty"`    // Is this a bank room? If so, players can deposit/withdraw gold here.
-	IsStorage       bool   `yaml:"isstorage,omitempty"` // Is this a storage room? If so, players can add/remove objects here.
-	Title           string
-	Description     string
-	Props           []RoomProp           `yaml:"props,omitempty"`      // A list of props in the room
-	MapSymbol       string               `yaml:"mapsymbol,omitempty"`  // The symbol to use when generating a map of the zone
-	MapLegend       string               `yaml:"maplegend,omitempty"`  // The text to display in the legend for this room. Should be one word.
-	Biome           string               `yaml:"biome,omitempty"`      // The biome of the room. Used for weather generation.
-	Containers      map[string]Container `yaml:"containers,omitempty"` // If this room has a chest, what is in it?
-	Exits           map[string]RoomExit
-	ExitsTemp       map[string]TemporaryRoomExit `yaml:"-"` // Temporary exits that will be removed after a certain time. Don't bother saving on sever shutting down.
-	Items           []items.Item                 `yaml:"items,omitempty"`
-	Gold            int                          `yaml:"gold,omitempty"`          // How much gold is on the ground?
-	SpawnInfo       []SpawnInfo                  `yaml:"spawninfo,omitempty"`     // key is creature ID, value is spawn chance
-	SkillTraining   map[string]TrainingRange     `yaml:"skilltraining,omitempty"` // list of skills that can be trained in this room
-	Signs           []Sign                       `yaml:"sign,omitempty"`          // list of scribbles in the room
-	Stash           []items.Item                 `yaml:"stash,omitempty"`         // list of items in the room that are not visible to players
-	IdleMessages    []string                     `yaml:"idlemessages,omitempty"`  // list of messages that can be displayed to players in the room
-	LastIdleMessage uint8                        `yaml:"-"`                       // index of the last idle message displayed
-	players         []int                        `yaml:"-"`                       // list of user IDs currently in the room
-	mobs            []int                        `yaml:"-"`                       // list of mob instance IDs currently in the room. Does not get saved.
-	visitors        map[int]uint64               `yaml:"visitors,omitempty"`      // list of user IDs that have visited this room, and the last round they did
-	lastVisitor     uint64                       `yaml:"-"`                       // last round a visitor was in the room
-	tempDataStore   map[string]any               `yaml:"-"`                       // Temporary data store for the room
+	mutex             sync.RWMutex
+	RoomId            int    // a unique numeric index of the room. Also the filename.
+	Zone              string // zone is a way to partition rooms into groups. Also into folders.
+	ZoneRoot          bool   `yaml:"zoneroot,omitempty"`  // Is this the root room? If transported to a zone this is the room you end up in. Also copied for new room creation.
+	IsBank            bool   `yaml:"isbank,omitempty"`    // Is this a bank room? If so, players can deposit/withdraw gold here.
+	IsStorage         bool   `yaml:"isstorage,omitempty"` // Is this a storage room? If so, players can add/remove objects here.
+	Title             string
+	Description       string
+	Props             []RoomProp           `yaml:"props,omitempty"`      // A list of props in the room
+	MapSymbol         string               `yaml:"mapsymbol,omitempty"`  // The symbol to use when generating a map of the zone
+	MapLegend         string               `yaml:"maplegend,omitempty"`  // The text to display in the legend for this room. Should be one word.
+	Biome             string               `yaml:"biome,omitempty"`      // The biome of the room. Used for weather generation.
+	Containers        map[string]Container `yaml:"containers,omitempty"` // If this room has a chest, what is in it?
+	Exits             map[string]RoomExit
+	ExitsTemp         map[string]TemporaryRoomExit `yaml:"-"` // Temporary exits that will be removed after a certain time. Don't bother saving on sever shutting down.
+	Items             []items.Item                 `yaml:"items,omitempty"`
+	Gold              int                          `yaml:"gold,omitempty"`              // How much gold is on the ground?
+	SpawnInfo         []SpawnInfo                  `yaml:"spawninfo,omitempty"`         // key is creature ID, value is spawn chance
+	SkillTraining     map[string]TrainingRange     `yaml:"skilltraining,omitempty"`     // list of skills that can be trained in this room
+	Signs             []Sign                       `yaml:"sign,omitempty"`              // list of scribbles in the room
+	Stash             []items.Item                 `yaml:"stash,omitempty"`             // list of items in the room that are not visible to players
+	IdleMessages      []string                     `yaml:"idlemessages,omitempty"`      // list of messages that can be displayed to players in the room
+	LastIdleMessage   uint8                        `yaml:"-"`                           // index of the last idle message displayed
+	LongTermDataStore map[string]any               `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
+	players           []int                        `yaml:"-"`                           // list of user IDs currently in the room
+	mobs              []int                        `yaml:"-"`                           // list of mob instance IDs currently in the room. Does not get saved.
+	visitors          map[int]uint64               `yaml:"visitors,omitempty"`          // list of user IDs that have visited this room, and the last round they did
+	lastVisitor       uint64                       `yaml:"-"`                           // last round a visitor was in the room
+	tempDataStore     map[string]any               `yaml:"-"`                           // Temporary data store for the room
 }
 
 type TrainingRange struct {
@@ -258,6 +259,35 @@ func ParseExit(exitStr string) (roomId int, zone string) {
 		roomId, _ = strconv.Atoi(exitStr)
 	}
 	return roomId, zone
+}
+
+func (r *Room) SetLongTermData(key string, value any) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	if r.LongTermDataStore == nil {
+		r.LongTermDataStore = make(map[string]any)
+	}
+
+	if value == nil {
+		delete(r.LongTermDataStore, key)
+		return
+	}
+	r.LongTermDataStore[key] = value
+}
+
+func (r *Room) GetLongTermData(key string) any {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	if r.LongTermDataStore == nil {
+		r.LongTermDataStore = make(map[string]any)
+	}
+
+	if value, ok := r.LongTermDataStore[key]; ok {
+		return value
+	}
+	return nil
 }
 
 func (r *Room) SetTempData(key string, value any) {

@@ -43,6 +43,41 @@ func (a ScriptActor) MobTypeId() int {
 	return 0
 }
 
+func (a ScriptActor) GetRace() string {
+	return a.characterRecord.Race()
+}
+
+func (a ScriptActor) GetStat(statName string) int {
+
+	statName = strings.ToLower(statName)
+
+	if strings.HasPrefix(statName, "st") {
+		return a.characterRecord.Stats.Strength.Value
+	}
+
+	if strings.HasPrefix(statName, "sp") {
+		return a.characterRecord.Stats.Speed.Value
+	}
+
+	if strings.HasPrefix(statName, "sm") {
+		return a.characterRecord.Stats.Smarts.Value
+	}
+
+	if strings.HasPrefix(statName, "vi") {
+		return a.characterRecord.Stats.Vitality.Value
+	}
+
+	if strings.HasPrefix(statName, "my") {
+		return a.characterRecord.Stats.Mysticism.Value
+	}
+
+	if strings.HasPrefix(statName, "pe") {
+		return a.characterRecord.Stats.Perception.Value
+	}
+
+	return 0
+}
+
 func (a ScriptActor) SetTempData(key string, value any) {
 
 	if a.userRecord != nil {
@@ -280,6 +315,22 @@ func (a ScriptActor) GetMobKills(mobId int) int {
 
 func (a ScriptActor) GetRaceKills(race string) int {
 	return a.characterRecord.KD.GetRaceKills(race)
+}
+
+func (a ScriptActor) GetHealth() int {
+	return a.characterRecord.Health
+}
+
+func (a ScriptActor) GetHealthMax() int {
+	return a.characterRecord.HealthMax.Value
+}
+
+func (a ScriptActor) GetMana() int {
+	return a.characterRecord.Mana
+}
+
+func (a ScriptActor) GetManaMax() int {
+	return a.characterRecord.ManaMax.Value
 }
 
 // ////////////////////////////////////////////////////////

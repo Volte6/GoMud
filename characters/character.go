@@ -1021,22 +1021,6 @@ func (c *Character) SetAggro(userId int, mobInstanceId int, aggroType AggroType,
 
 }
 
-func (c *Character) SetAid(userId int, roundsWaitTime ...int) {
-
-	aidWaitRounds := 2
-	if len(roundsWaitTime) > 0 {
-		aidWaitRounds = roundsWaitTime[0]
-	}
-
-	c.Aggro = &Aggro{
-		UserId:        userId,
-		MobInstanceId: 0,
-		Type:          Aid,
-		RoundsWaiting: aidWaitRounds,
-	}
-
-}
-
 func (c *Character) SetCast(roundsWaitTime int, sInfo SpellAggroInfo) {
 
 	c.Aggro = &Aggro{

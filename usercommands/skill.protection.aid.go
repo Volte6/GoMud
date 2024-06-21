@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -64,13 +66,25 @@ func Aid(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 				return response, nil
 			}
 
-			user.Character.CancelBuffsWithFlag(buffs.Hidden)
+			// Set spell Aid
+			spellAggro := characters.SpellAggroInfo{
+				SpellId:              `aid`,
+				SpellRest:            ``,
+				TargetUserIds:        []int{aidPlayerId},
+				TargetMobInstanceIds: []int{},
+			}
 
-			user.Character.SetAid(p.UserId, 2)
+			continueCasting := true
+			if res, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro, cmdQueue); err == nil {
+				response.AbsorbMessages(res)
+				continueCasting = res.Handled
+			}
 
-			response.SendUserMessage(user.UserId, fmt.Sprintf(`You prepare to provide aid to <ansi fg="username">%s</ansi>.`, p.Character.Name), true)
-			response.SendUserMessage(p.UserId, fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to apply first aid on you.`, user.Character.Name), true)
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to provide aid to <ansi fg="username">%s</ansi>.`, user.Character.Name, p.Character.Name), true, user.UserId, p.UserId)
+			if continueCasting {
+				user.Character.CancelBuffsWithFlag(buffs.Hidden)
+				user.Character.SetCast(2, spellAggro)
+			}
+
 		}
 
 		response.Handled = true

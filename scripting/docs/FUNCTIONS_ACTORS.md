@@ -9,6 +9,8 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.UserId() int](#actorobjectuserid-int)
   - [ActorObject.InstanceId() int](#actorobjectinstanceid-int)
   - [ActorObject.MobTypeId() int](#actorobjectmobtypeid-int)
+  - [ActorObject.GetRace() string](#actorobjectgetrace-string)
+  - [ActorObject.GetStat(statName string) int](#actorobjectgetstatstatname-string-int)
   - [ActorObject.SetTempData(key string, value any)](#actorobjectsettempdatakey-string-value-any)
   - [ActorObject.GetTempData(key string) any](#actorobjectgettempdatakey-string-any)
   - [ActorObject.GetCharacterName( \[wrapInTags bool\] ) string](#actorobjectgetcharactername-wrapintags-bool--string)
@@ -38,6 +40,11 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.LearnSpell(spellId string)](#actorobjectlearnspellspellid-string)
   - [ActorObject.IsAggro(targetActor ActorObject)](#actorobjectisaggrotargetactor-actorobject)
   - [ActorObject.GetMobKills(mobId int) int](#actorobjectgetmobkillsmobid-int-int)
+  - [ActorObject.GetRaceKills(raceName string) int](#actorobjectgetracekillsracename-string-int)
+  - [ActorObject.GetHealth() int](#actorobjectgethealth-int)
+  - [ActorObject.GetHealthMax() int](#actorobjectgethealthmax-int)
+  - [ActorObject.GetMana() int](#actorobjectgetmana-int)
+  - [ActorObject.GetManaMax() int](#actorobjectgetmanamax-int)
 
 
 
@@ -79,6 +86,16 @@ _Note: Only useful for Mob ActorObjects - Returns zero otherwise._
 Returns the base mobId used to spawn new instances.
 
 _Note: Only useful for Mob ActorObjects - Returns zero otherwise._
+
+## [ActorObject.GetRace() string](/scripting/actor_func.go)
+Gets the race name of the actor, such as Human, Elf, Rodent, etc.
+
+## [ActorObject.GetStat(statName string) int](/scripting/actor_func.go)
+Returns the named stat value.
+
+|  Argument | Explanation |
+| --- | --- |
+| statName | A stat name such as `strength`, `smarts`, `perception`, etc. |
 
 ## [ActorObject.SetTempData(key string, value any)](/scripting/actor_func.go)
 Sets temporary data for the ActorObject (Lasts until the ActorObject is removed from memory).
@@ -282,3 +299,21 @@ Returns the number of times the actor has killed a certain mobId
 | --- | --- |
 | mobId | ID of the mob to check |
 
+## [ActorObject.GetRaceKills(raceName string) int](/scripting/actor_func.go)
+Returns the number of times the actor has killed a certain race of mob
+
+|  Argument | Explanation |
+| --- | --- |
+| raceName | race name such as human, goblin, rodent |
+
+## [ActorObject.GetHealth() int](/scripting/actor_func.go)
+Returns current actor health
+
+## [ActorObject.GetHealthMax() int](/scripting/actor_func.go)
+Returns current actor max health
+
+## [ActorObject.GetMana() int](/scripting/actor_func.go)
+Returns current actor mana
+
+## [ActorObject.GetManaMax() int](/scripting/actor_func.go)
+Returns current actor max mana

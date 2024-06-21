@@ -59,8 +59,6 @@ func Aid(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 
 			mob.Character.CancelBuffsWithFlag(buffs.Hidden)
 
-			mob.Character.SetAid(p.UserId, 2)
-
 			response.SendUserMessage(p.UserId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> prepares to apply first aid on you.`, mob.Character.Name), true)
 			response.SendRoomMessage(mob.Character.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> prepares to provide aid to <ansi fg="username">%s</ansi>.`, mob.Character.Name, p.Character.Name), true)
 		}

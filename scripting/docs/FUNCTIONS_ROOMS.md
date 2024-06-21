@@ -5,6 +5,8 @@
   - [RoomObject.RoomId() int](#roomobjectroomid-int)
   - [RoomObject.SetTempData(key string, value any)](#roomobjectsettempdatakey-string-value-any)
   - [RoomObject.GetTempData(key string) any](#roomobjectgettempdatakey-string-any)
+  - [RoomObject.SetPermData(key string, value any)](#roomobjectsetpermdatakey-string-value-any)
+  - [RoomObject.GetPermData(key string) any](#roomobjectgetpermdatakey-string-any)
   - [RoomObject.GetItems() \[\]ItemObject](#roomobjectgetitems-itemobject)
   - [RoomObject.SpawnItem(itemId int, inStash bool) \[\]ItemObject](#roomobjectspawnitemitemid-int-instash-bool-itemobject)
   - [RoomObject.GetMobs() \[\]int](#roomobjectgetmobs-int)
@@ -25,7 +27,7 @@ Returns the roomId of the room.
 ## [RoomObject.SetTempData(key string, value any)](/scripting/room_func.go)
 Sets temporary data for the room (Lasts until the room is unloaded from memory).
 
-_Note: This is useful for saving/retrieving data between room scripts._
+_Note: This is useful for short term saving/retrieving data between room scripts, such as a switch being triggered._
 
 |  Argument | Explanation |
 | --- | --- |
@@ -33,9 +35,28 @@ _Note: This is useful for saving/retrieving data between room scripts._
 | value | What you will be saving. |
 
 ## [RoomObject.GetTempData(key string) any](/scripting/room_func.go)
-Gets temporary data for the room.
+Gets temporarily saved data for the room. Data is ephemeral.
 
-_Note: This is useful for saving/retrieving data between room scripts._
+_Note: This is useful for short term saving/retrieving data between room scripts, such as a switch being triggered._
+
+|  Argument | Explanation |
+| --- | --- |
+| key | A unique identifier for the data. |
+
+## [RoomObject.SetPermData(key string, value any)](/scripting/room_func.go)
+Sets permanent data for the room (Saved even when room is unloaded from memory).
+
+_Note: This is useful for long term saving/retrieving data between room scripts, such as a leaderboard or clan ownership._
+
+|  Argument | Explanation |
+| --- | --- |
+| key | A unique identifier for the data. |
+| value | What you will be saving. |
+
+## [RoomObject.GetPermData(key string) any](/scripting/room_func.go)
+Gets permanently saved data for the room.
+
+_Note: This is useful for long term saving/retrieving data between room scripts, such as a leaderboard or clan ownership._
 
 |  Argument | Explanation |
 | --- | --- |

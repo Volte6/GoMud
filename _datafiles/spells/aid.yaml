@@ -1,0 +1,7 @@
+spellid: aid
+name: Aid
+description: Revives a fallen ally
+type: helpsingle
+cost: 0
+waitrounds: 2
+difficulty: 0

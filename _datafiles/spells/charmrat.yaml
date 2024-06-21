@@ -1,0 +1,7 @@
+spellid: charmrat
+name: Charm Rat
+description: Charms a rat to follow and fight for you
+type: harmsingle
+cost: 8
+waitrounds: 3
+difficulty: 50

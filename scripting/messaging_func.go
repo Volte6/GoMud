@@ -7,7 +7,7 @@ package scripting
 // ////////////////////////////////////////////////////////
 
 func SendUserMessage(userId int, message string) {
-	if disableMessageQueue {
+	if disableMessageQueue || userId == 0 {
 		return
 	}
 	messageQueue.SendUserMessage(userId, message, true)
