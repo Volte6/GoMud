@@ -8,6 +8,7 @@ import (
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/skills"
+	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -81,8 +82,9 @@ func Aid(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			}
 
 			if continueCasting {
+				spellInfo := spells.GetSpell(`aid`)
 				user.Character.CancelBuffsWithFlag(buffs.Hidden)
-				user.Character.SetCast(2, spellAggro)
+				user.Character.SetCast(spellInfo.WaitRounds, spellAggro)
 			}
 
 		}

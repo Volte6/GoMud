@@ -83,7 +83,7 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		} else {
 
 			if targetPlayerId > 0 {
-				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, userId)
+				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, targetPlayerId)
 			} else if targetMobInstanceId > 0 {
 				spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, targetMobInstanceId)
 			}
@@ -95,9 +95,9 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		if spellArg == `` {
 
 			if user.Character.Aggro != nil {
-				// No target specified? Default to self
+				// No target specified? Default to aggro target
 				if user.Character.Aggro.UserId > 0 {
-					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, userId)
+					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, user.Character.Aggro.UserId)
 				} else if user.Character.Aggro.MobInstanceId > 0 {
 					spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, user.Character.Aggro.MobInstanceId)
 				}
@@ -143,7 +143,7 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		} else {
 
 			if targetPlayerId > 0 {
-				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, userId)
+				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, targetPlayerId)
 			} else if targetMobInstanceId > 0 {
 				spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, targetMobInstanceId)
 			}

@@ -798,6 +798,51 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 		// Disable any buffs that are cancelled by combat
 		mob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
+		if mob.Character.Aggro != nil && mob.Character.Aggro.Type == characters.SpellCast {
+
+			if mob.Character.Aggro.RoundsWaiting > 0 {
+				mob.Character.Aggro.RoundsWaiting--
+
+				if res, err := scripting.TrySpellScriptEvent(`onWait`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo, w); err == nil {
+					messageQueue.AbsorbMessages(res)
+				}
+
+				continue
+			}
+
+			allowRetaliation := true
+			if res, err := scripting.TrySpellScriptEvent(`onMagic`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo, w); err == nil {
+				messageQueue.AbsorbMessages(res)
+
+				if res.Handled {
+					allowRetaliation = false
+				}
+			}
+
+			if allowRetaliation {
+				if spellData := spells.GetSpell(mob.Character.Aggro.SpellInfo.SpellId); spellData != nil {
+
+					if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti {
+
+						for _, mobId := range mob.Character.Aggro.SpellInfo.TargetMobInstanceIds {
+							if defMob := mobs.GetInstance(mobId); defMob != nil {
+								if defMob.Character.Aggro == nil {
+									defMob.PreventIdle = true
+									w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack #%d", mob.InstanceId)) // # means mob
+								}
+							}
+						}
+
+					}
+				}
+			}
+
+			mob.Character.Aggro = nil
+
+			continue
+
+		}
+
 		// H2H is the base level combat, can do combat commands then
 		if mob.Character.Aggro.Type == characters.DefaultAttack {
 

@@ -25,6 +25,7 @@ var (
 		"backstab":       {Backstab, false},
 		"befriend":       {Befriend, false},
 		"break":          {Break, false},
+		"cast":           {Cast, false},
 		"converse":       {Converse, false},
 		"callforhelp":    {CallForHelp, false},
 		"despawn":        {Despawn, false},
