@@ -12,7 +12,7 @@ steps:
     description: Explore and investigate the catacombs.
     hint: Look for an ancient crypt deep within the catacombs.
   - id: inform 
-    description: Return to the King and show him what you found.
+    description: Return to the King and show him what you discovered.
     hint: The King is north of the Town Square in Frostfang.
   - id: end 
     description: You helped the king stop a malevolent force.

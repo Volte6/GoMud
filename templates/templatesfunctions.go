@@ -157,6 +157,9 @@ var (
 		"roundstotime": func(rounds int) string {
 			return formatDuration(rounds * int(configs.GetConfig().RoundSeconds))
 		},
+		"intlen": func(num int) int {
+			return len(strconv.Itoa(num))
+		},
 	}
 )
 

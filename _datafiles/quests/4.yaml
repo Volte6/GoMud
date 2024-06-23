@@ -1,5 +1,5 @@
 questid: 4
-name: Deliver Lunch
+name: A Soldier's Lunch
 description: A soldier in Frostfang forgot his lunch.
 steps:
   - id: start 
