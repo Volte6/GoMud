@@ -10,8 +10,8 @@
 # 5. From then on he can be asked wehre the thieves den is, and will reveal it.
 #
 questid: 7
-name: Rodric's Secret
-description: Rodric knows a secret about the Frostfang slums.
+name: Rodric's Rats
+description: Rodric could use a hand with the rat situation.
 steps:
   - id: start
     description: Rodric would like you to kill 25 rats for him.
@@ -23,7 +23,7 @@ steps:
     description: Give the rat trap you found to Rodric.
     hint: Find Rodric, he needs a rat trap.
   - id: end 
-    description: Rodric revealed the thieves den is in the south end of the slums.
+    description: You helped Rodric get back to work.
 rewards:
   experience: 1000
 

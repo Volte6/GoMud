@@ -1,5 +1,6 @@
 
 const startNouns = ["rat", "rats", "too many", "problem"];
+const thievesNouns = ["thief", "thieves", "guild", "hideout", "entrance", "dogs", "slums"];
 
 function onAsk(mob, room, eventDetails) {
 
@@ -36,8 +37,38 @@ function onAsk(mob, room, eventDetails) {
     }
 
     if ( user.HasQuest("7-end") ) {
-        mob.Command("say I'll let you in on a little secret... the thieves guild can be found in the far southern part of the slums.");
-        mob.Command("say There are some dogs guarding the entrance, but if you can search around that area, you'll find the entrance!");
+
+        tMatch = UtilFindMatchIn(eventDetails.askText, thievesNouns);
+        if ( tMatch.exact.length > 0 ) { 
+
+            askTimes = mob.GetTempData(`ask-`+String(user.UserId()));
+            if ( askTimes == null ) {
+                askTimes = 0;
+                
+            }
+            
+            askTimes++;
+            mob.SetTempData(`ask-`+String(user.UserId()), askTimes);
+
+            if ( askTimes == 1 ) {
+                mob.Command("say I really shouldn't talk about the thieves guild. They like it secret for a reason, and it could mean my neck!");
+                return true;
+            }
+
+            if ( askTimes > 1 ) {
+                mob.Command("say Okay look, their entrance is near the far south end of the slums.");
+                mob.Command("say There are some dogs guarding it, and it takes a little searching around to find the hidden entrance.");
+                return true;
+            }
+
+        } else {
+
+            mob.Command("say Thank you so much! I can finally get back to catching some rats, and maybe earn a little coin.");
+            mob.Command("say The thieves guild used to employ me to eliminate rats around their hideout, but for some reason they don't seem to need my help anymore, and didn't pay me for my last job I did for them.");
+
+            return true;
+        }
+
     }
 
     return false;
@@ -64,11 +95,8 @@ function onGive(mob, room, eventDetails) {
 
         user = GetUser(eventDetails.sourceId);
 
-        mob.Command("say Thank you so much! I can finally get back to catching some rats.");
-        mob.Command("say Here's a little secret... The thieves guild used to employ me to eliminate rats around their hideout.");
-        mob.Command("say For some reason they don't seem to need my help anymore, and didn't pay me for my last job I did for them.");
-        mob.Command("say So i'll let you in on a little secret... they can be found in the far southern part of the slums.");
-        mob.Command("say There are some dogs guarding the entrance, but if you can search around that area, you'll find the entrance!");
+        mob.Command("say Thank you so much! I can finally get back to catching some rats, and maybe earn a little coin.");
+        mob.Command("say The thieves guild used to employ me to eliminate rats around their hideout, but for some reason they don't seem to need my help anymore, and didn't pay me for my last job I did for them.");
         
         user.GiveQuest("7-end");
 
