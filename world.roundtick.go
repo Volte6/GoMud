@@ -146,7 +146,7 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 				if triggeredBuffs := user.Character.Buffs.Trigger(); len(triggeredBuffs) > 0 {
 
 					//
-					// Fire onStart for buff script
+					// Fire onTrigger for buff script
 					//
 					for _, buff := range triggeredBuffs {
 						if !buff.Expired() {
@@ -214,7 +214,7 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 		if triggeredBuffs := mob.Character.Buffs.Trigger(); len(triggeredBuffs) > 0 {
 
 			//
-			// Fire onStart for buff script
+			// Fire onTrigger for buff script
 			//
 			for _, buff := range triggeredBuffs {
 				if response, err := scripting.TryBuffScriptEvent(`onTrigger`, 0, mobInstanceId, buff.BuffId, w); err == nil {
@@ -252,6 +252,27 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 	return messageQueue
 }
 
+func (w *World) LogOff(userId int) {
+
+	user := users.GetByUserId(userId)
+	users.SaveUser(*user)
+
+	worldManager.LeaveWorld(userId)
+
+	connId := user.ConnectionId()
+
+	tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
+
+	worldManager.GetConnectionPool().SendTo([]byte(tplTxt), connId)
+
+	if err := users.LogOutUserByConnectionId(connId); err != nil {
+		slog.Error("Log Out Error", "connectionId", connId, "error", err)
+	}
+
+	worldManager.GetConnectionPool().Remove(connId)
+
+}
+
 func (w *World) PruneBuffs() util.MessageQueue {
 
 	messageQueue := util.NewMessageQueue(0, 0)
@@ -262,18 +283,27 @@ func (w *World) PruneBuffs() util.MessageQueue {
 		if room := rooms.LoadRoom(roomId); room != nil {
 
 			// Handle outstanding player buffs
+			logOff := false
 			for _, uId := range room.GetPlayers(rooms.FindBuffed) {
 
 				user := users.GetByUserId(uId)
 
+				logOff = false
 				if buffsToPrune := user.Character.Buffs.Prune(); len(buffsToPrune) > 0 {
 					for _, buffInfo := range buffsToPrune {
 						if response, err := scripting.TryBuffScriptEvent(`onEnd`, uId, 0, buffInfo.BuffId, w); err == nil {
 							messageQueue.AbsorbMessages(response)
 						}
+						if buffInfo.BuffId == 0 {
+							logOff = true
+						}
 					}
 
 					user.Character.Validate()
+
+					if logOff {
+						w.LogOff(uId)
+					}
 				}
 
 			}
@@ -487,6 +517,9 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 						for _, mobId := range user.Character.Aggro.SpellInfo.TargetMobInstanceIds {
 							if defMob := mobs.GetInstance(mobId); defMob != nil {
+
+								defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
+
 								if defMob.Character.Aggro == nil {
 									defMob.PreventIdle = true
 									w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack @%d", user.UserId)) // @ means player
@@ -539,6 +572,8 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				user.Character.Aggro = nil
 				continue
 			}
+
+			defUser.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
 			if defUser.Character.Health < 1 {
 				messageQueue.SendUserMessage(user.UserId, "Your rage subsides.", true)
@@ -660,6 +695,8 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				user.Character.Aggro = nil
 				continue
 			}
+
+			defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
 			if defMob.Character.Health < 1 {
 				messageQueue.SendUserMessage(user.UserId, "Your rage subsides.", true)
@@ -826,6 +863,9 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 						for _, mobId := range mob.Character.Aggro.SpellInfo.TargetMobInstanceIds {
 							if defMob := mobs.GetInstance(mobId); defMob != nil {
+
+								defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
+
 								if defMob.Character.Aggro == nil {
 									defMob.PreventIdle = true
 									w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack #%d", mob.InstanceId)) // # means mob
@@ -885,6 +925,8 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 				mob.Character.Aggro = nil
 				continue
 			}
+
+			defUser.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
 			if defUser.Character.Health < 1 {
 				mob.Character.Aggro = nil
@@ -997,6 +1039,8 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 				mob.Character.Aggro = nil
 				continue
 			}
+
+			defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
 			if defMob.Character.Health < 1 {
 				mob.Character.Aggro = nil

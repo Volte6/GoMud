@@ -23,3 +23,45 @@ Mob scripts can maintain their own internal state. If you define or alter a glob
 The following functions are special keywords that will be invoked under specific circumstances if they are defined within your script:
 
 ---
+
+```
+function onStart(actor, triggersLeft) {
+}
+```
+
+`onStart()` is called when a buff is first added to an actor.
+
+|  Argument | Explanation |
+| --- | --- |
+| actor | [ActorObject](FUNCTIONS_ACTORS.md) |
+| triggersLeft | `int` number of triggers until it expires |
+
+---
+
+```
+function onTrigger(actor, triggersLeft) {
+}
+```
+
+`onTrigger()` is called every time a buff triggers.
+
+|  Argument | Explanation |
+| --- | --- |
+| actor | [ActorObject](FUNCTIONS_ACTORS.md) |
+| triggersLeft | `int` number of triggers until it expires |
+
+---
+
+```
+function onTrigger(actor, triggersLeft) {
+}
+```
+
+`onEnd()` is called when a buff has run its course, right before it is removed.
+
+|  Argument | Explanation |
+| --- | --- |
+| actor | [ActorObject](FUNCTIONS_ACTORS.md) |
+| triggersLeft | `int` number of triggers until it expires |
+
+---

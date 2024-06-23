@@ -1,12 +1,12 @@
 
 // Invoked when the buff is first applied to the player.
-function onStart(actor) {
+function onStart(actor, triggersLeft) {
     SendUserMessage(actor.UserId(), "A magical healing aura washes over you.")
     SendRoomMessage(actor.GetRoomId(), actor.GetCharacterName(true)+' is surrounded by a healing glow.', actor.UserId())
 }
 
 // Invoked every time the buff is triggered (see roundinterval)
-function onTrigger(actor) {
+function onTrigger(actor, triggersLeft) {
     healAmt = actor.AddHealth(UtilDiceRoll(1, 10))
 
     SendUserMessage(actor.UserId(), 'You heal for <ansi fg="healing">'+String(healAmt)+' damage</ansi>!')
@@ -14,7 +14,7 @@ function onTrigger(actor) {
 }
 
 // Invoked when the buff has run its course.
-function onEnd(actor) {
+function onEnd(actor, triggersLeft) {
     SendUserMessage(actor.UserId(), "The healing aura fades.")
     SendRoomMessage(actor.GetRoomId(), `The healing aura around `+actor.GetCharacterName(true)+' fades.', actor.UserId())
 }

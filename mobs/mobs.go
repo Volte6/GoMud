@@ -45,6 +45,7 @@ type ItemTrade struct {
 	GivenItems      map[int][]int `yaml:"-"`                              // key = userId, value = Items given. Should only contain items from AcceptedItemIds
 	GivenGold       map[int]int   `yaml:"-"`                              // key = userId, value = how much gold is given
 }
+
 type MobForHire struct {
 	MobId    MobId
 	Price    int
@@ -72,12 +73,11 @@ type Mob struct {
 	Character       characters.Character
 	ShopStock       map[int]int  `yaml:"shopstock,omitempty"`
 	ShopServants    []MobForHire `yaml:"shopservants,omitempty"`
-	MaxWander       int          `yaml:"maxwander,omitempty"`  // Max rooms to wander from home
-	GoingHome       bool         `yaml:"-"`                    // WHether they are trying to get home
-	RoomStack       []int        `yaml:"-"`                    // Stack of rooms to get back home
-	PreventIdle     bool         `yaml:"-"`                    // Whether they can't possibly be idle
-	ItemTrades      []ItemTrade  `yaml:"itemtrades,omitempty"` // one or more sets of objects they will trade for other objects.
-	ScriptTag       string       `yaml:"scripttag"`            // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
+	MaxWander       int          `yaml:"maxwander,omitempty"` // Max rooms to wander from home
+	GoingHome       bool         `yaml:"-"`                   // WHether they are trying to get home
+	RoomStack       []int        `yaml:"-"`                   // Stack of rooms to get back home
+	PreventIdle     bool         `yaml:"-"`                   // Whether they can't possibly be idle
+	ScriptTag       string       `yaml:"scripttag"`           // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
 	tempDataStore   map[string]any
 }
 
@@ -234,7 +234,7 @@ func (m *Mob) GetTempData(key string) any {
 }
 
 func (m *Mob) Despawns() bool {
-	if m.IsMerchant || len(m.ItemTrades) > 0 {
+	if m.IsMerchant {
 		return false
 	}
 	return true
@@ -405,18 +405,6 @@ func (r *Mob) Validate() error {
 	if r.IsMerchant {
 		if r.ShopStock == nil {
 			r.ShopStock = make(map[int]int)
-		}
-	}
-
-	if len(r.ItemTrades) > 0 {
-		for idx, trade := range r.ItemTrades {
-			if trade.GivenItems == nil {
-				trade.GivenItems = make(map[int][]int)
-			}
-			if trade.GivenGold == nil {
-				trade.GivenGold = make(map[int]int)
-			}
-			r.ItemTrades[idx] = trade
 		}
 	}
 

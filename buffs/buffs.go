@@ -94,6 +94,13 @@ func (bs *Buffs) CancelBuffId(buffId int) bool {
 	return false
 }
 
+func (bs *Buffs) TriggersLeft(buffId int) int {
+	if idx, ok := bs.buffIds[buffId]; ok {
+		return bs.List[idx].TriggersLeft
+	}
+	return 0
+}
+
 func (bs *Buffs) GetBuffIdsWithFlag(action Flag) []int {
 	buffIds := []int{}
 	for idx := range bs.buffFlags[action] {
@@ -122,8 +129,13 @@ func (bs *Buffs) HasFlag(action Flag, expire bool) bool {
 
 				// If expire is set, need to check the rest of the buffs to possibly expire them too.
 				if expire {
-					b.TriggersLeft = TriggersLeftExpired
-					bs.List[index] = b
+					// Buff zero is special, and if force cancelled, it will be removed from the list
+					if b.BuffId == 0 {
+						bs.List = append(bs.List[:index], bs.List[index+1:]...)
+					} else {
+						b.TriggersLeft = TriggersLeftExpired
+						bs.List[index] = b
+					}
 					break
 				}
 

@@ -1,11 +1,11 @@
 
 // Invoked when the buff is first applied to the player.
-function onStart(actor) {
+function onStart(actor, triggersLeft) {
     SendUserMessage(actor.UserId(), 'The potion warms you as you drink it down.')
 }
 
 // Invoked every time the buff is triggered (see roundinterval)
-function onTrigger(actor) {
+function onTrigger(actor, triggersLeft) {
     healAmt = actor.AddHealth(UtilDiceRoll(1, 5))
 
     SendUserMessage(actor.UserId(), 'You heal for <ansi fg="healing">'+String(healAmt)+' damage</ansi>!')
@@ -13,7 +13,7 @@ function onTrigger(actor) {
 }
 
 // Invoked when the buff has run its course.
-function onEnd(actor) {
+function onEnd(actor, triggersLeft) {
     SendUserMessage(actor.UserId(), "The potions effect runs out.")
 }
 
