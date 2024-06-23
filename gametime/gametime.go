@@ -42,7 +42,7 @@ func (gd GameDate) String(symbolOnly ...bool) string {
 	if len(symbolOnly) > 0 && symbolOnly[0] {
 
 		if gd.Night {
-			return `<ansi fg="night">•</ansi>`
+			return `<ansi fg="night">☾</ansi>` // •
 		}
 		return fmt.Sprintf(`<ansi fg="%s">⚙</ansi>`, dayNight)
 	}

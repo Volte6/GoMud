@@ -359,6 +359,13 @@ func (a ScriptActor) CharmSet(userId int, charmRounds int, onRevertCommand ...st
 		onRevertCommand = append(onRevertCommand, ``)
 	}
 	a.characterRecord.Charm(userId, charmRounds, onRevertCommand[0])
+
+	// If the player is in a party, add the mob to their party
+	if a.mobInstanceId > 0 {
+		if plrParty := parties.Get(userId); plrParty != nil {
+			plrParty.AddMob(a.mobInstanceId)
+		}
+	}
 }
 
 func (a ScriptActor) CharmRemove() {
