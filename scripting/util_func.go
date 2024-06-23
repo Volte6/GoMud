@@ -6,6 +6,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/gametime"
+	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
@@ -23,6 +24,8 @@ func setUtilFunctions(vm *goja.Runtime) {
 	vm.Set(`UtilSetTime`, UtilSetTime)
 	vm.Set(`UtilSetTimeDay`, UtilSetTimeDay)
 	vm.Set(`UtilSetTimeNight`, UtilSetTimeNight)
+	vm.Set(`UtilIsDay`, UtilIsDay)
+	vm.Set(`UtilLocateUser`, UtilLocateUser)
 }
 
 // ////////////////////////////////////////////////////////
@@ -108,4 +111,24 @@ func UtilSetTimeNight() {
 
 func UtilSetTime(hour int, minutes int) {
 	gametime.SetTime(hour, minutes)
+}
+
+func UtilIsDay() bool {
+	return !gametime.IsNight()
+}
+
+func UtilLocateUser(idOrName any) int {
+
+	// check if is string
+	if userName, ok := idOrName.(string); ok { // handle string
+		if locateUser := users.GetByCharacterName(userName); locateUser != nil {
+			return locateUser.Character.RoomId
+		}
+	} else if userId, ok := idOrName.(int); ok { // handle int
+		if user := users.GetByUserId(userId); user != nil {
+			return user.Character.RoomId
+		}
+	}
+
+	return 0
 }

@@ -46,7 +46,7 @@ The <ansi fg="command">set prompt</ansi> command allows you to customize your in
     <ansi fg="magenta">{w}</ansi>     Wait rounds for combat (fprompt only)
 
 The default prompt is:
-<ansi fg="246">{8}[{t} {255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:</ansi>
+<ansi fg="246">{8}[{t} {T} {255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:</ansi>
 
 <ansi fg="red">Note:</ansi> You can reset your prompt to the default with <ansi fg="command">set prompt default</ansi>
 

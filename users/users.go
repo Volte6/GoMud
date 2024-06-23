@@ -138,14 +138,20 @@ func GetByCharacterName(name string) *UserRecord {
 	userManager.RLock()
 	defer userManager.RUnlock()
 
+	var closeMatch *UserRecord = nil
+
 	name = strings.ToLower(name)
 	for _, user := range userManager.Users {
-		if strings.HasPrefix(strings.ToLower(user.Character.Name), name) {
+		testName := strings.ToLower(user.Character.Name)
+		if testName == name {
 			return user
+		}
+		if strings.HasPrefix(testName, name) {
+			closeMatch = user
 		}
 	}
 
-	return nil
+	return closeMatch
 }
 
 func GetByUserId(userId int) *UserRecord {
