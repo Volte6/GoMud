@@ -1,0 +1,7 @@
+itemid: 11
+name: rat trap
+namesimple: box
+description: A simple wooden box with a hinged lid, containing a spring-loaded mechanism designed to snap shut on small creatures.
+type: object
+subtype: generic
+questtoken: 7-tradetrap

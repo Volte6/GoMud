@@ -1,0 +1,29 @@
+#
+# This quest reveals the location fo the thieves hideout
+# 1. They must ask rodric about the rat problem
+#    ask rodric about rats
+# 2. They must kill 25 rats for rodric (they may have already done this)
+#    ask rodric about rats
+# 3. Rodric is impressed, but needs them to retrieve an old rat trap from a customer
+#    give trap to rodric
+# 4. When they return the trap, Rodric mentions the thieves guild never returned his traps, costing him a lot of money
+# 5. From then on he can be asked wehre the thieves den is, and will reveal it.
+#
+questid: 7
+name: Rodric's Secret
+description: Rodric knows a secret about the Frostfang slums.
+steps:
+  - id: start
+    description: Rodric would like you to kill 25 rats for him.
+    hint: Rats are abundant south of town square, in the alleyway and near the slums.
+  - id: gettrap
+    description: Collect an old trap from a resident of Frostfang.
+    hint: The residents are just north of town square.
+  - id: tradetrap 
+    description: Give the rat trap you found to Rodric.
+    hint: Find Rodric, he needs a rat trap.
+  - id: end 
+    description: Rodric revealed the thieves den is in the south end of the slums.
+rewards:
+  experience: 1000
+

@@ -22,6 +22,7 @@ func setAllScriptingFunctions(vm *goja.Runtime) {
 	setRoomFunctions(vm)
 	setActorFunctions(vm)
 	setSpellFunctions(vm)
+	setItemFunctions(vm)
 	setUtilFunctions(vm)
 }
 

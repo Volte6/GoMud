@@ -16,3 +16,4 @@ exits:
 spawninfo:
 - mobid: 26
   cooldown: 60
+  scripttag: rattrap

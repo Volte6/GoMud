@@ -149,9 +149,11 @@ func (a ScriptActor) GiveQuest(questId string) {
 				commandQueue.QueueQuest(userId, questId)
 			}
 			return
+		} else {
+			commandQueue.QueueQuest(a.userId, questId)
 		}
 	}
-	a.characterRecord.GiveQuestToken(questId)
+	//a.characterRecord.GiveQuestToken(questId)
 
 }
 
@@ -226,14 +228,18 @@ func (a ScriptActor) UpdateItem(itm ScriptItem) {
 }
 
 func (a ScriptActor) GiveItem(itm ScriptItem) {
-	if a.userRecord.Character.StoreItem(*itm.itemRecord) {
-		TryItemScriptEvent(`onGive`, *itm.itemRecord, a.userId, commandQueue)
+	if a.characterRecord.StoreItem(*itm.itemRecord) {
+		if a.userId > 0 {
+			TryItemScriptEvent(`onGive`, *itm.itemRecord, a.userId, commandQueue)
+		}
 	}
 }
 
 func (a ScriptActor) TakeItem(itm ScriptItem) {
-	if a.userRecord.Character.RemoveItem(*itm.itemRecord) {
-		TryItemScriptEvent(`onLost`, *itm.itemRecord, a.userId, commandQueue)
+	if a.characterRecord.RemoveItem(*itm.itemRecord) {
+		if a.userId > 0 {
+			TryItemScriptEvent(`onLost`, *itm.itemRecord, a.userId, commandQueue)
+		}
 	}
 }
 

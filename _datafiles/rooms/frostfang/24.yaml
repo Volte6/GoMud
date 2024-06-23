@@ -18,3 +18,9 @@ exits:
     roomid: 25
   south:
     roomid: 23
+items:
+- itemid: 20001
+spawninfo:
+- mobid: 40
+  cooldown: 20
+  message: You notice a rat catcher setting up some traps.
