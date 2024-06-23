@@ -1,10 +1,12 @@
-<ansi fg="215">                                      </ansi>
-<ansi fg="130">               @@@@@@@@@               </ansi>
-<ansi fg="172">            @@@@@@@@@@@@@@@            </ansi>
-<ansi fg="214">          @@@@@@@@@@@@@@@@@@@          </ansi>
-<ansi fg="221">         @@@@@@@@@@@@@@@@@@@@@         </ansi>
-<ansi fg="153">~~~~~ ~~ ~~~ ~~~~~~ ~~~~~~ ~~~~ ~~ ~~~~</ansi>
-<ansi fg="019">~    ~    ~~   ~  ~        ~~~~     ~~ </ansi>
-<ansi fg="018">  ~      ~~      ~~ ~~  ~~  ~~ ~~ ~~~  </ansi>
-<ansi fg="017">  ~  ~~     ~         ~       ~~  ~~  ~</ansi>
-<ansi fg="night">              The sun sets.          </ansi>
+
+            <ansi fg="215">                                      </ansi>
+            <ansi fg="130">               @@@@@@@@@               </ansi>
+            <ansi fg="172">            @@@@@@@@@@@@@@@            </ansi>
+            <ansi fg="214">          @@@@@@@@@@@@@@@@@@@          </ansi>
+            <ansi fg="221">         @@@@@@@@@@@@@@@@@@@@@         </ansi>
+            <ansi fg="153">~~~~~ ~~ ~~~ ~~~~~~ ~~~~~~ ~~~~ ~~ ~~~~</ansi>
+            <ansi fg="019">~    ~    ~~   ~  ~        ~~~~     ~~ </ansi>
+            <ansi fg="018">  ~      ~~      ~~ ~~  ~~  ~~ ~~ ~~~  </ansi>
+            <ansi fg="017">  ~  ~~     ~         ~       ~~  ~~  ~</ansi>
+            <ansi fg="night">              The sun sets.          </ansi>
+
