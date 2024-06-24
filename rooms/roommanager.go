@@ -959,6 +959,9 @@ func GetTinyMap(mapRoomId int) []string {
 				if len(targetRoom.MapSymbol) > 0 {
 					targetSymbol = targetRoom.MapSymbol
 				}
+				if len(targetRoom.players) > 0 || len(targetRoom.mobs) > 0 {
+					targetSymbol = `⚠`
+				}
 			}
 
 			if len(exit.MapDirection) > 0 {

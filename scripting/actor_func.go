@@ -267,10 +267,17 @@ func (a ScriptActor) RemoveBuff(buffId int) {
 	a.characterRecord.Buffs.RemoveBuff(buffId * -1)
 }
 
-func (a ScriptActor) HasItemId(itemId int) bool {
+func (a ScriptActor) HasItemId(itemId int, excludeWorn ...bool) bool {
 	for _, itm := range a.characterRecord.GetAllBackpackItems() {
 		if itm.ItemId == itemId {
 			return true
+		}
+	}
+	if len(excludeWorn) == 0 || !excludeWorn[0] {
+		for _, itm := range a.characterRecord.GetAllWornItems() {
+			if itm.ItemId == itemId {
+				return true
+			}
 		}
 	}
 	return false

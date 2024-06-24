@@ -60,7 +60,7 @@ var (
 		`gearup`:     {Gearup, false, false},
 		`get`:        {Get, false, false},
 		`give`:       {Give, false, false},
-		`go`:         {Go, false, false},
+		//`go`:         {Go, false, false},
 		`help`:       {Help, true, false},
 		`hire`:       {Hire, false, false},
 		`keyring`:    {KeyRing, true, false},

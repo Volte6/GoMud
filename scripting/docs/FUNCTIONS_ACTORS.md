@@ -31,7 +31,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.CancelBuffWithFlag(buffFlag string) bool](#actorobjectcancelbuffwithflagbuffflag-string-bool)
   - [ActorObject.ExpireBuff(buffId int)](#actorobjectexpirebuffbuffid-int)
   - [ActorObject.RemoveBuff(buffId int)](#actorobjectremovebuffbuffid-int)
-  - [ActorObject.HasItemId(itemId int) bool](#actorobjecthasitemiditemid-int-bool)
+  - [ActorObject.HasItemId(itemId int, \[excludeWorn bool\]) bool](#actorobjecthasitemiditemid-int-excludeworn-bool-bool)
   - [ActorObject.GetBackpackItems() \[\]ItemObject](#actorobjectgetbackpackitems-itemobject)
   - [ActorObject.GetAlignment() int](#actorobjectgetalignment-int)
   - [ActorObject.GetAlignmentName() string](#actorobjectgetalignmentname-string)
@@ -246,12 +246,13 @@ Remove a buff without triggering onEnd
 | --- | --- |
 | buffId | The ID of the buff to remove |
 
-## [ActorObject.HasItemId(itemId int) bool](/scripting/actor_func.go)
+## [ActorObject.HasItemId(itemId int, [excludeWorn bool]) bool](/scripting/actor_func.go)
 Check whether an ActorObject has an item id in their backpack
 
 |  Argument | Explanation |
 | --- | --- |
 | itemId | The ItemId to check for. |
+| itemId (optional) | Ignore worn items? |
 
 ## [ActorObject.GetBackpackItems() []ItemObject](/scripting/actor_func.go)
 Get a list of Item objects in the ActorObjects backpack

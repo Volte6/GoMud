@@ -479,6 +479,10 @@ func (c config) SecondsToTurns(seconds int) int {
 	return int(math.Ceil(float64(seconds*1000) / float64(c.TurnMs)))
 }
 
+func (c config) RoundsToSeconds(rounds int) int {
+	return int(math.Ceil(float64(rounds) * float64(c.RoundSeconds)))
+}
+
 func (c config) IsBannedName(name string) bool {
 
 	var startsWith bool

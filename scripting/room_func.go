@@ -2,6 +2,7 @@ package scripting
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/configs"
@@ -203,6 +204,29 @@ func (r ScriptRoom) SpawnMob(mobId int) int {
 
 	return 0
 
+}
+
+func (r ScriptRoom) AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int) bool {
+	tmpExit := rooms.TemporaryRoomExit{
+		RoomId:  exitRoomId,
+		Title:   exitNameFancy,
+		UserId:  0,
+		Expires: time.Now().Add(time.Duration(configs.GetConfig().RoundsToSeconds(roundTTL)) * time.Second),
+	}
+
+	// Spawn a portal in the room that leads to the portal location
+	return r.roomRecord.AddTemporaryExit(exitNameSimple, tmpExit)
+}
+
+func (r ScriptRoom) RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int) bool {
+	tmpExit := rooms.TemporaryRoomExit{
+		RoomId: exitRoomId,
+		Title:  exitNameFancy,
+		UserId: 0,
+	}
+
+	// Spawn a portal in the room that leads to the portal location
+	return r.roomRecord.RemoveTemporaryExit(tmpExit)
 }
 
 // ////////////////////////////////////////////////////////

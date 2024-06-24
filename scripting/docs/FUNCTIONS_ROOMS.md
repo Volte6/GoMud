@@ -17,6 +17,8 @@
   - [RoomObject.HasQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjecthasquestquestid-string-partyuserid-int-int)
   - [RoomObject.MissingQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjectmissingquestquestid-string-partyuserid-int-int)
   - [RoomObject.SpawnMob(mobId int) int](#roomobjectspawnmobmobid-int-int)
+  - [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](#roomobjectaddtemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int-roundttl-int)
+  - [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](#roomobjectremovetemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int)
 
 ## [GetRoom(roomId int) RoomObject ](/scripting/room_func.go)
 Retrieves a RoomObject for a given roomId.
@@ -142,3 +144,24 @@ Creates a new instance of MobId,and returns the `mobInstanceId` of the mob.
 |  Argument | Explanation |
 | --- | --- |
 | mobId | The ID if the mob type to spawn. NOT THE INSTANCE ID. |
+
+## [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](/scripting/room_func.go)
+Adds a temporary exit to the room for the specified amount of time.
+
+|  Argument | Explanation |
+| --- | --- |
+| exitNameSimple | The simple plain text exit name. |
+| exitNameFancy | Should be the simple name, but can have color tags. |
+| exitRoomId | The roomId the exit should lead to. |
+| roundTTL | How many rounds the exit should persist for. |
+
+## [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](/scripting/room_func.go)
+Removes a temporary exit
+
+_Note: all 3 parameters much match an existing temporary exit for it to be removed._
+
+|  Argument | Explanation |
+| --- | --- |
+| exitNameSimple | The simple plain text exit name. |
+| exitNameFancy | Should be the simple name, but can have color tags. |
+| exitRoomId | The roomId the exit should lead to. |

@@ -384,7 +384,7 @@ func (r *Room) RemoveTemporaryExit(t TemporaryRoomExit) bool {
 	}
 
 	for k, v := range r.ExitsTemp {
-		if v.UserId == t.UserId && v.Title == t.Title && v.Expires.Equal(t.Expires) {
+		if v.UserId == t.UserId && v.Title == t.Title && t.RoomId == v.RoomId {
 			delete(r.ExitsTemp, k)
 			return true
 		}
