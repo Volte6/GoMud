@@ -1,3 +1,7 @@
+// 
+// buff zero (0) is a special buff that when naturally expires, 
+// will remove the player from the game without zombie status.
+//
 
 // Invoked when the buff is first applied to the player.
 function onStart(actor, triggersLeft) {

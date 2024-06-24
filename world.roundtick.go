@@ -513,7 +513,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			if allowRetaliation {
 				if spellData := spells.GetSpell(user.Character.Aggro.SpellInfo.SpellId); spellData != nil {
 
-					if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti {
+					if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti || spellData.Type == spells.HarmArea {
 
 						for _, mobId := range user.Character.Aggro.SpellInfo.TargetMobInstanceIds {
 							if defMob := mobs.GetInstance(mobId); defMob != nil {
@@ -859,7 +859,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 			if allowRetaliation {
 				if spellData := spells.GetSpell(mob.Character.Aggro.SpellInfo.SpellId); spellData != nil {
 
-					if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti {
+					if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti || spellData.Type == spells.HarmArea {
 
 						for _, mobId := range mob.Character.Aggro.SpellInfo.TargetMobInstanceIds {
 							if defMob := mobs.GetInstance(mobId); defMob != nil {

@@ -73,6 +73,7 @@ help:
       - shout
       - train
       - whisper
+      - quit
     parties:
       - follow
       - party

@@ -241,6 +241,8 @@ func SetZombieUser(userId int) {
 
 	if u, ok := userManager.Users[userId]; ok {
 
+		u.Character.RemoveBuff(0)
+
 		if _, ok := userManager.ZombieConnections[u.connectionId]; ok {
 			return
 		}

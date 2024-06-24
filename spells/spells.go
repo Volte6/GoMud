@@ -32,6 +32,8 @@ const (
 	HarmMulti  SpellType = "harmmulti"  // Harmful, defaults to all aggro mobs - chain lightning etc
 	HelpSingle SpellType = "helpsingle" // Helpful, defaults on self - heal etc
 	HelpMulti  SpellType = "helpmulti"  // Helpful, defaults on party - mass heal etc
+	HarmArea   SpellType = "harmarea"   // Hits everyone in the room, even if hidden or friendly
+	HelpArea   SpellType = "helparea"   // Hits everyone in the room, even if hidden
 )
 
 var (

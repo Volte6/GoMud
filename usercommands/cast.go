@@ -205,6 +205,11 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			spellAggro.TargetMobInstanceIds = fightingMobs
 		}
 
+	} else if spellInfo.Type == spells.HelpArea || spellInfo.Type == spells.HarmArea {
+
+		spellAggro.TargetUserIds = room.GetPlayers()
+		spellAggro.TargetMobInstanceIds = room.GetMobs()
+
 	}
 
 	if len(spellAggro.TargetUserIds) > 0 || len(spellAggro.TargetMobInstanceIds) > 0 || len(spellAggro.SpellRest) > 0 {
