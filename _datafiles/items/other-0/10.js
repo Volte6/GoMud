@@ -48,8 +48,6 @@ STORY = [
 
 function onCommand_read(user, item, room) {
 
-    console.log("LEN", String(STORY.length));
-
     SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" thumbs through their <ansi fg=\"item\">"+item.Name()+"</ansi> book.", user.UserId());   
 
     SendUserMessage(user.UserId(), "");
