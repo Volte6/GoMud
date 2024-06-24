@@ -1227,21 +1227,23 @@ func (w *World) HandleIdleMobs() util.MessageQueue {
 			continue
 		}
 
-		if !mob.Character.IsCharmed() { // Won't do this stuff if befriended
-
-			if mob.MaxWander > -1 && len(mob.RoomStack) > mob.MaxWander {
-				mob.GoingHome = true
-			}
-			if mob.GoingHome {
-				w.QueueCommand(0, mob.InstanceId, `go home`)
-				continue
-			}
-
-		}
-
 		// If they have idle commands, maybe do one of them?
 		result, _ := scripting.TryMobScriptEvent("onIdle", mob.InstanceId, 0, ``, nil, w)
 		messageQueue.AbsorbMessages(result)
+
+		if !result.Handled {
+			if !mob.Character.IsCharmed() { // Won't do this stuff if befriended
+
+				if mob.MaxWander > -1 && len(mob.RoomStack) > mob.MaxWander {
+					mob.GoingHome = true
+				}
+				if mob.GoingHome {
+					w.QueueCommand(0, mob.InstanceId, `go home`)
+					continue
+				}
+
+			}
+		}
 
 		//
 		// Look for trouble

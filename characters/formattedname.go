@@ -12,6 +12,7 @@ type FormattedName struct {
 	Suffix        string   // What ansi alias suffix to use (if any)
 	Flags         []string // Single charavter flags
 	HealthDisplay string   // What health to append to the end of the name (if any)
+	Adjectives    []string
 }
 
 func (c FormattedName) String() string {
@@ -39,5 +40,12 @@ func (c FormattedName) String() string {
 			output = fmt.Sprintf(`%s <ansi fg="black-bold">(%s)</ansi>`, output, c.HealthDisplay)
 		}
 	}
+
+	if len(c.Adjectives) > 0 {
+		for _, adj := range c.Adjectives {
+			output += fmt.Sprintf(` <ansi fg="black-bold">(%s)</ansi>`, adj)
+		}
+	}
+
 	return output
 }

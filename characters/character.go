@@ -45,6 +45,7 @@ const (
 type Character struct {
 	Name           string            // The name of the character
 	Description    string            // A description of the character.
+	Adjectives     []string          // Decorative text for the name of the character (e.g. "sleeping", "dead", "wounded")
 	RoomId         int               // The room id the character is in.
 	Zone           string            // The zone the character is in. The folder the room can be located in too.
 	RaceId         int               // Character race
@@ -81,9 +82,10 @@ type Character struct {
 func New() *Character {
 	return &Character{
 		//Name:   defaultName,
-		RoomId: startingRoomId,
-		Zone:   startingZone,
-		RaceId: startingRace,
+		Adjectives: []string{},
+		RoomId:     startingRoomId,
+		Zone:       startingZone,
+		RaceId:     startingRace,
 		Stats: stats.Statistics{
 			Strength:   stats.StatInfo{Base: 1},
 			Speed:      stats.StatInfo{Base: 1},
@@ -412,8 +414,9 @@ func (c *Character) GetDefense() int {
 func (c *Character) GetMobName(viewingUserId int, renderFlags ...NameRenderFlag) FormattedName {
 
 	f := FormattedName{
-		Name: c.Name,
-		Type: "mobname",
+		Name:       c.Name,
+		Type:       "mobname",
+		Adjectives: c.Adjectives,
 	}
 
 	if c.IsCharmed(viewingUserId) {
@@ -453,8 +456,9 @@ func (c *Character) GetMobName(viewingUserId int, renderFlags ...NameRenderFlag)
 func (c *Character) GetPlayerName(viewingUserId int, renderFlags ...NameRenderFlag) FormattedName {
 
 	f := FormattedName{
-		Name: c.Name,
-		Type: "username",
+		Name:       c.Name,
+		Type:       "username",
+		Adjectives: c.Adjectives,
 	}
 
 	includeHealth := false
@@ -483,6 +487,25 @@ func (c *Character) GetPlayerName(viewingUserId int, renderFlags ...NameRenderFl
 	}
 
 	return f
+}
+
+func (c *Character) SetAdjective(adj string, addToList bool) {
+	if c.Adjectives == nil {
+		c.Adjectives = []string{}
+	}
+	for i, a := range c.Adjectives {
+		if a == adj {
+			if addToList {
+				return
+			} else {
+				c.Adjectives = append(c.Adjectives[:i], c.Adjectives[i+1:]...)
+				return
+			}
+		}
+	}
+	if addToList {
+		c.Adjectives = append(c.Adjectives, adj)
+	}
 }
 
 func (c *Character) PruneCooldowns() {

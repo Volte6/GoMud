@@ -13,3 +13,5 @@ maplegend: Rocks
 exits:
   southeast:
     roomid: 319
+items:
+- itemid: 10016

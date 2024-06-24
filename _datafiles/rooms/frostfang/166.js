@@ -8,7 +8,7 @@ function onCommand_vault(rest, user, room) {
         if ( (mob = GetMob(mobs[i])) == null ) {
             continue;
         }
-        mobName = mob.GetCharacterName();
+        mobName = mob.GetCharacterName(false);
         if ( mobName.indexOf("guard") !== -1 ) {
             guard_present = true;
             break;
