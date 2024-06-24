@@ -83,7 +83,7 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		} else {
 
 			if targetPlayerId > 0 {
-				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, userId)
+				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, targetPlayerId)
 			} else if targetMobInstanceId > 0 {
 				spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, targetMobInstanceId)
 			}
@@ -95,9 +95,9 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		if spellArg == `` {
 
 			if user.Character.Aggro != nil {
-				// No target specified? Default to self
+				// No target specified? Default to aggro target
 				if user.Character.Aggro.UserId > 0 {
-					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, userId)
+					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, user.Character.Aggro.UserId)
 				} else if user.Character.Aggro.MobInstanceId > 0 {
 					spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, user.Character.Aggro.MobInstanceId)
 				}
@@ -108,9 +108,11 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 					for _, mobInstId := range fightingMobs {
 
-						if mob := mobs.GetInstance(mobInstId); mob != nil && mob.Character.IsAggro(userId, 0) {
-							spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
-							break
+						if mob := mobs.GetInstance(mobInstId); mob != nil {
+							if mob.Character.IsAggro(userId, 0) {
+								spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
+								break
+							}
 						}
 
 					}
@@ -124,9 +126,11 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 						for _, fUserId := range fightingPlayers {
 
-							if u := users.GetByUserId(fUserId); u != nil && u.Character.IsAggro(userId, 0) {
-								spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, fUserId)
-								break
+							if u := users.GetByUserId(fUserId); u != nil {
+								if u.Character.IsAggro(userId, 0) {
+									spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, fUserId)
+									break
+								}
 							}
 
 						}
@@ -139,7 +143,7 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		} else {
 
 			if targetPlayerId > 0 {
-				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, userId)
+				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, targetPlayerId)
 			} else if targetMobInstanceId > 0 {
 				spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, targetMobInstanceId)
 			}
@@ -180,15 +184,19 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		fightingMobs := room.GetMobs(rooms.FindFightingPlayer)
 		for _, mobInstId := range fightingMobs {
-			if m := mobs.GetInstance(mobInstId); m != nil && m.Character.IsAggro(userId, 0) {
-				spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
+			if m := mobs.GetInstance(mobInstId); m != nil {
+				if m.Character.IsAggro(userId, 0) || m.HatesRace(user.Character.Race()) {
+					spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
+				}
 			}
 		}
 
 		fightingPlayers := room.GetPlayers(rooms.FindFightingPlayer)
 		for _, uId := range fightingPlayers {
-			if u := users.GetByUserId(uId); u != nil && u.Character.IsAggro(userId, 0) {
-				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+			if u := users.GetByUserId(uId); u != nil {
+				if u.Character.IsAggro(userId, 0) {
+					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+				}
 			}
 		}
 
@@ -196,6 +204,11 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			// No targets found, default to all mobs in the room
 			spellAggro.TargetMobInstanceIds = fightingMobs
 		}
+
+	} else if spellInfo.Type == spells.HelpArea || spellInfo.Type == spells.HarmArea {
+
+		spellAggro.TargetUserIds = room.GetPlayers()
+		spellAggro.TargetMobInstanceIds = room.GetMobs()
 
 	}
 

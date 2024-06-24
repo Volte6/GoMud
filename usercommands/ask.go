@@ -152,6 +152,8 @@ func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 	}
 
+	response.SendUserMessage(userId, `ask who what?`, true)
+
 	response.Handled = true
 	return response, nil
 }

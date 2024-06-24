@@ -60,7 +60,7 @@ var (
 		`gearup`:     {Gearup, false, false},
 		`get`:        {Get, false, false},
 		`give`:       {Give, false, false},
-		`go`:         {Go, false, false},
+		//`go`:         {Go, false, false},
 		`help`:       {Help, true, false},
 		`hire`:       {Hire, false, false},
 		`keyring`:    {KeyRing, true, false},
@@ -86,6 +86,7 @@ var (
 		`pray`:       {Pray, false, false},
 		`print`:      {Print, true, false},
 		`quests`:     {Quests, true, false},
+		`quit`:       {Quit, true, false},
 		`questtoken`: {QuestToken, false, true}, // Admin only
 		`rank`:       {Rank, false, false},
 		`read`:       {Read, false, false},

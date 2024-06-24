@@ -26,7 +26,7 @@ var (
 	PermissionMod   string = "mod"   // Logged in has limited special powers
 	PermissionAdmin string = "admin" // Logged in and has special powers
 
-	PromptDefault         = `{8}[{t} {255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:`
+	PromptDefault         = `{8}[{t} {T} {255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:`
 	promptDefaultCompiled = CompilePrompt(PromptDefault)
 	promptColorRegex      = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
 	promptFindTagsRegex   = regexp.MustCompile(`\{[a-zA-Z%:\-]+\}`)

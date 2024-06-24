@@ -132,32 +132,15 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 		if room := rooms.LoadRoom(roomId); room != nil {
 			room.RoundTick()
 
-			for _, uId := range room.GetPlayers() {
-
-				user := users.GetByUserId(uId)
-
-				// Roundtick any cooldowns
-				user.Character.Cooldowns.RoundTick()
-
-				if user.Character.Charmed != nil && user.Character.Charmed.RoundsRemaining > 0 {
-					user.Character.Charmed.RoundsRemaining--
+			allowIdleMessages := true
+			if scriptResponse, err := scripting.TryRoomIdleEvent(roomId, w); err == nil {
+				messageQueue.AbsorbMessages(scriptResponse)
+				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
+					allowIdleMessages = false
 				}
+			}
 
-				if triggeredBuffs := user.Character.Buffs.Trigger(); len(triggeredBuffs) > 0 {
-
-					//
-					// Fire onStart for buff script
-					//
-					for _, buff := range triggeredBuffs {
-						if !buff.Expired() {
-							if response, err := scripting.TryBuffScriptEvent(`onTrigger`, uId, 0, buff.BuffId, w); err == nil {
-								messageQueue.AbsorbMessages(response)
-							}
-						}
-					}
-
-				}
-
+			if allowIdleMessages {
 				chanceIn100 := 5
 				if room.RoomId == -1 || len(room.Props) > 0 {
 					chanceIn100 = 20
@@ -177,6 +160,33 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 						messageQueue.SendRoomMessage(roomId,
 							msg,
 							true)
+					}
+
+				}
+			}
+
+			for _, uId := range room.GetPlayers() {
+
+				user := users.GetByUserId(uId)
+
+				// Roundtick any cooldowns
+				user.Character.Cooldowns.RoundTick()
+
+				if user.Character.Charmed != nil && user.Character.Charmed.RoundsRemaining > 0 {
+					user.Character.Charmed.RoundsRemaining--
+				}
+
+				if triggeredBuffs := user.Character.Buffs.Trigger(); len(triggeredBuffs) > 0 {
+
+					//
+					// Fire onTrigger for buff script
+					//
+					for _, buff := range triggeredBuffs {
+						if !buff.Expired() {
+							if response, err := scripting.TryBuffScriptEvent(`onTrigger`, uId, 0, buff.BuffId, w); err == nil {
+								messageQueue.AbsorbMessages(response)
+							}
+						}
 					}
 
 				}
@@ -214,7 +224,7 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 		if triggeredBuffs := mob.Character.Buffs.Trigger(); len(triggeredBuffs) > 0 {
 
 			//
-			// Fire onStart for buff script
+			// Fire onTrigger for buff script
 			//
 			for _, buff := range triggeredBuffs {
 				if response, err := scripting.TryBuffScriptEvent(`onTrigger`, 0, mobInstanceId, buff.BuffId, w); err == nil {
@@ -252,6 +262,27 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 	return messageQueue
 }
 
+func (w *World) LogOff(userId int) {
+
+	user := users.GetByUserId(userId)
+	users.SaveUser(*user)
+
+	worldManager.LeaveWorld(userId)
+
+	connId := user.ConnectionId()
+
+	tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
+
+	worldManager.GetConnectionPool().SendTo([]byte(tplTxt), connId)
+
+	if err := users.LogOutUserByConnectionId(connId); err != nil {
+		slog.Error("Log Out Error", "connectionId", connId, "error", err)
+	}
+
+	worldManager.GetConnectionPool().Remove(connId)
+
+}
+
 func (w *World) PruneBuffs() util.MessageQueue {
 
 	messageQueue := util.NewMessageQueue(0, 0)
@@ -262,18 +293,27 @@ func (w *World) PruneBuffs() util.MessageQueue {
 		if room := rooms.LoadRoom(roomId); room != nil {
 
 			// Handle outstanding player buffs
+			logOff := false
 			for _, uId := range room.GetPlayers(rooms.FindBuffed) {
 
 				user := users.GetByUserId(uId)
 
+				logOff = false
 				if buffsToPrune := user.Character.Buffs.Prune(); len(buffsToPrune) > 0 {
 					for _, buffInfo := range buffsToPrune {
 						if response, err := scripting.TryBuffScriptEvent(`onEnd`, uId, 0, buffInfo.BuffId, w); err == nil {
 							messageQueue.AbsorbMessages(response)
 						}
+						if buffInfo.BuffId == 0 {
+							logOff = true
+						}
 					}
 
 					user.Character.Validate()
+
+					if logOff {
+						w.LogOff(uId)
+					}
 				}
 
 			}
@@ -469,25 +509,35 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				continue
 			}
 
+			allowRetaliation := true
 			if res, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo, w); err == nil {
 				messageQueue.AbsorbMessages(res)
+
+				if res.Handled {
+					allowRetaliation = false
+				}
 			}
 
 			user.Character.TrackSpellCast(user.Character.Aggro.SpellInfo.SpellId)
 
-			if spellData := spells.GetSpell(user.Character.Aggro.SpellInfo.SpellId); spellData != nil {
+			if allowRetaliation {
+				if spellData := spells.GetSpell(user.Character.Aggro.SpellInfo.SpellId); spellData != nil {
 
-				if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti {
+					if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti || spellData.Type == spells.HarmArea {
 
-					for _, mobId := range user.Character.Aggro.SpellInfo.TargetMobInstanceIds {
-						if defMob := mobs.GetInstance(mobId); defMob != nil {
-							if defMob.Character.Aggro == nil {
-								defMob.PreventIdle = true
-								w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack @%d", user.UserId)) // @ means player
+						for _, mobId := range user.Character.Aggro.SpellInfo.TargetMobInstanceIds {
+							if defMob := mobs.GetInstance(mobId); defMob != nil {
+
+								defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
+
+								if defMob.Character.Aggro == nil {
+									defMob.PreventIdle = true
+									w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack @%d", user.UserId)) // @ means player
+								}
 							}
 						}
-					}
 
+					}
 				}
 			}
 
@@ -533,7 +583,9 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				continue
 			}
 
-			if defUser.Character.Health < 1 && user.Character.Aggro.Type != characters.Aid {
+			defUser.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
+
+			if defUser.Character.Health < 1 {
 				messageQueue.SendUserMessage(user.UserId, "Your rage subsides.", true)
 				user.Character.Aggro = nil
 				continue
@@ -570,44 +622,20 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			var roundResult combat.AttackResult
 
-			if user.Character.Aggro.Type == characters.Aid {
+			roundResult = combat.AttackPlayerVsPlayer(user, defUser)
 
-				user.Character.Aggro = nil
+			// If a mob attacks a player, check whether player has a charmed mob helping them, and if so, they will move to attack back
+			room := rooms.LoadRoom(roomId)
+			for _, instanceId := range room.GetMobs(rooms.FindCharmed) {
+				if charmedMob := mobs.GetInstance(instanceId); charmedMob != nil {
+					if charmedMob.Character.IsCharmed(defUser.UserId) && charmedMob.Character.Aggro == nil {
 
-				if defUser.Character.Health > 0 {
-					messageQueue.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is no longer in need of aid.`, defUser.Character.Name), true)
-				} else {
-					defUser.Character.Health = 1
-
-					messageQueue.SendUserMessage(user.UserId,
-						fmt.Sprintf(`<ansi fg="green-bold">+</ansi> You apply first aid to <ansi fg="username">%s</ansi>. <ansi fg="green-bold">+</ansi>`, defUser.Character.Name),
-						true)
-					messageQueue.SendUserMessage(defUser.UserId,
-						fmt.Sprintf(`<ansi fg="green-bold">+</ansi> <ansi fg="username">%s</ansi> applies first aid and stops the bleeding. <ansi fg="green-bold">+</ansi>`, user.Character.Name),
-						true)
-					messageQueue.SendRoomMessage(user.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="green-bold">+</ansi> <ansi fg="username">%s</ansi> applies first aid to <ansi fg="username">%s</ansi> and stops the bleeding. <ansi fg="green-bold">+</ansi>`, user.Character.Name, defUser.Character.Name),
-						true,
-						user.UserId,
-						defUser.UserId)
-				}
-
-			} else {
-				roundResult = combat.AttackPlayerVsPlayer(user, defUser)
-
-				// If a mob attacks a player, check whether player has a charmed mob helping them, and if so, they will move to attack back
-				room := rooms.LoadRoom(roomId)
-				for _, instanceId := range room.GetMobs(rooms.FindCharmed) {
-					if charmedMob := mobs.GetInstance(instanceId); charmedMob != nil {
-						if charmedMob.Character.IsCharmed(defUser.UserId) && charmedMob.Character.Aggro == nil {
-
-							// Set aggro to something to prevent multiple attack triggers on this conditional
-							charmedMob.Character.Aggro = &characters.Aggro{
-								Type: characters.DefaultAttack,
-							}
-
-							w.QueueCommand(0, instanceId, fmt.Sprintf("attack @%d", user.UserId)) // # denotes a specific user id
+						// Set aggro to something to prevent multiple attack triggers on this conditional
+						charmedMob.Character.Aggro = &characters.Aggro{
+							Type: characters.DefaultAttack,
 						}
+
+						w.QueueCommand(0, instanceId, fmt.Sprintf("attack @%d", user.UserId)) // # denotes a specific user id
 					}
 				}
 			}
@@ -678,7 +706,9 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				continue
 			}
 
-			if defMob.Character.Health < 1 && user.Character.Aggro.Type != characters.Aid {
+			defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
+
+			if defMob.Character.Health < 1 {
 				messageQueue.SendUserMessage(user.UserId, "Your rage subsides.", true)
 				user.Character.Aggro = nil
 				continue
@@ -714,13 +744,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			var roundResult combat.AttackResult
 
-			if user.Character.Aggro.Type == characters.Aid {
-
-				user.Character.Aggro = nil
-
-			} else {
-				roundResult = combat.AttackPlayerVsMob(user, defMob)
-			}
+			roundResult = combat.AttackPlayerVsMob(user, defMob)
 
 			for _, buffId := range roundResult.BuffSource {
 				w.QueueBuff(user.UserId, 0, buffId)
@@ -821,6 +845,54 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 		// Disable any buffs that are cancelled by combat
 		mob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
+		if mob.Character.Aggro != nil && mob.Character.Aggro.Type == characters.SpellCast {
+
+			if mob.Character.Aggro.RoundsWaiting > 0 {
+				mob.Character.Aggro.RoundsWaiting--
+
+				if res, err := scripting.TrySpellScriptEvent(`onWait`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo, w); err == nil {
+					messageQueue.AbsorbMessages(res)
+				}
+
+				continue
+			}
+
+			allowRetaliation := true
+			if res, err := scripting.TrySpellScriptEvent(`onMagic`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo, w); err == nil {
+				messageQueue.AbsorbMessages(res)
+
+				if res.Handled {
+					allowRetaliation = false
+				}
+			}
+
+			if allowRetaliation {
+				if spellData := spells.GetSpell(mob.Character.Aggro.SpellInfo.SpellId); spellData != nil {
+
+					if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti || spellData.Type == spells.HarmArea {
+
+						for _, mobId := range mob.Character.Aggro.SpellInfo.TargetMobInstanceIds {
+							if defMob := mobs.GetInstance(mobId); defMob != nil {
+
+								defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
+
+								if defMob.Character.Aggro == nil {
+									defMob.PreventIdle = true
+									w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack #%d", mob.InstanceId)) // # means mob
+								}
+							}
+						}
+
+					}
+				}
+			}
+
+			mob.Character.Aggro = nil
+
+			continue
+
+		}
+
 		// H2H is the base level combat, can do combat commands then
 		if mob.Character.Aggro.Type == characters.DefaultAttack {
 
@@ -864,7 +936,9 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 				continue
 			}
 
-			if defUser.Character.Health < 1 && mob.Character.Aggro.Type != characters.Aid {
+			defUser.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
+
+			if defUser.Character.Health < 1 {
 				mob.Character.Aggro = nil
 				continue
 			}
@@ -922,37 +996,18 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 			var roundResult combat.AttackResult
 
-			if mob.Character.Aggro.Type == characters.Aid {
+			roundResult = combat.AttackMobVsPlayer(mob, defUser)
 
-				mob.Character.Aggro = nil
-
-				if defUser.Character.Health <= 0 {
-
-					defUser.Character.Health = 1
-
-					messageQueue.SendUserMessage(defUser.UserId,
-						fmt.Sprintf(`<ansi fg="green-bold">+</ansi> <ansi fg="mobname">%s</ansi> applies first aid and stops the bleeding. <ansi fg="green-bold">+</ansi>`, mob.Character.Name),
-						true)
-					messageQueue.SendRoomMessage(mob.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="green-bold">+</ansi> <ansi fg="mobname">%s</ansi> applies first aid to <ansi fg="username">%s</ansi> and stops the bleeding. <ansi fg="green-bold">+</ansi>`, mob.Character.Name, defUser.Character.Name),
-						true,
-						defUser.UserId)
-				}
-
-			} else {
-				roundResult = combat.AttackMobVsPlayer(mob, defUser)
-
-				// If a mob attacks a player, check whether player has a charmed mob helping them, and if so, they will move to attack back
-				room := rooms.LoadRoom(roomId)
-				for _, instanceId := range room.GetMobs(rooms.FindCharmed) {
-					if charmedMob := mobs.GetInstance(instanceId); charmedMob != nil {
-						if charmedMob.Character.IsCharmed(defUser.UserId) && charmedMob.Character.Aggro == nil {
-							// This is set to prevent it from triggering more than once
-							charmedMob.Character.Aggro = &characters.Aggro{
-								Type: characters.DefaultAttack,
-							}
-							w.QueueCommand(0, instanceId, fmt.Sprintf("attack #%d", mob.InstanceId)) // # denotes a specific mob id
+			// If a mob attacks a player, check whether player has a charmed mob helping them, and if so, they will move to attack back
+			room := rooms.LoadRoom(roomId)
+			for _, instanceId := range room.GetMobs(rooms.FindCharmed) {
+				if charmedMob := mobs.GetInstance(instanceId); charmedMob != nil {
+					if charmedMob.Character.IsCharmed(defUser.UserId) && charmedMob.Character.Aggro == nil {
+						// This is set to prevent it from triggering more than once
+						charmedMob.Character.Aggro = &characters.Aggro{
+							Type: characters.DefaultAttack,
 						}
+						w.QueueCommand(0, instanceId, fmt.Sprintf("attack #%d", mob.InstanceId)) // # denotes a specific mob id
 					}
 				}
 			}
@@ -995,7 +1050,9 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 				continue
 			}
 
-			if defMob.Character.Health < 1 && mob.Character.Aggro.Type != characters.Aid {
+			defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
+
+			if defMob.Character.Health < 1 {
 				mob.Character.Aggro = nil
 				continue
 			}
@@ -1025,11 +1082,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 			var roundResult combat.AttackResult
 
-			if mob.Character.Aggro.Type == characters.Aid {
-				mob.Character.Aggro = nil
-			} else {
-				roundResult = combat.AttackMobVsMob(mob, defMob)
-			}
+			roundResult = combat.AttackMobVsMob(mob, defMob)
 
 			for _, buffId := range roundResult.BuffSource {
 				w.QueueBuff(0, mob.InstanceId, buffId)

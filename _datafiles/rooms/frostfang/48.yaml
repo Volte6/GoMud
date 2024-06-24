@@ -13,3 +13,13 @@ biome: city
 exits:
   east:
     roomid: 41
+spawninfo:
+- mobid: 39
+  cooldown: 120
+  message: The librarian Elara enters the room, her eyes scanning the shelves with
+    a thoughtful expression.
+  idlecommands:
+  - ""
+  - ""
+  - emote watches you carefully.
+  - emote conjures a glowing orb of light, using it to illuminate the pages of a book.

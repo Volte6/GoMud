@@ -14,6 +14,8 @@ General purpose global functions
   - [UtilGetTime() object](#utilgettime-object)
   - [UtilSetTimeDay()](#utilsettimeday)
   - [UtilSetTime(hour int, minutes int)](#utilsettimehour-int-minutes-int)
+  - [UtilIsDay() bool](#utilisday-bool)
+  - [UtilLocateUser(search int|string) int](#utillocateusersearch-intstring-int)
 
 ## [UtilGetRoundNumber() int](/scripting/util_func.go) 
 _Gets the current Round number, which always counts up_
@@ -103,3 +105,13 @@ _Example: `5:30pm` would be `UtilSetTime(17, 30)`_
 | --- | --- |
 | hour | The hour to set to (0-23) |
 | minutes | The minutes to set to (0-59) |
+
+## [UtilIsDay() bool](/scripting/util_func.go)
+Returns true if it is currently daytime.
+
+## [UtilLocateUser(search int|string) int](/scripting/util_func.go)
+Returns the roomId of the user, or 0 (zero) if not found.
+
+|  Argument | Explanation |
+| --- | --- |
+| search | username or userId to find |

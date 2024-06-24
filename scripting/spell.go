@@ -33,11 +33,12 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TrySpellScriptEvent()", "eventName", eventName, "spellId", spellAggro.SpellId, "time", time.Since(timestart))
+		slog.Debug("TrySpellScriptEvent()", "eventName", eventName, "spellId", spellAggro.SpellId, "spellRest", spellAggro.SpellRest, "TargetUsers", spellAggro.TargetUserIds, "TargetMobs", spellAggro.TargetMobInstanceIds, "time", time.Since(timestart))
 	}()
 
 	vmw, err := getSpellVM(spellAggro.SpellId)
 	if err != nil {
+		slog.Debug("TrySpellScriptEvent()", "error", err)
 		return messageQueue, err
 	}
 

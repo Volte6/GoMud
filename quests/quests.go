@@ -147,6 +147,10 @@ func GetQuest(questToken string) *Quest {
 		return nil
 	}
 
+	if questStep == `all+` {
+		return quest
+	}
+
 	stepIsValid := true
 	if len(questStep) > 0 {
 		stepIsValid = false

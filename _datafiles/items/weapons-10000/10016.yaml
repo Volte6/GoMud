@@ -1,0 +1,10 @@
+itemid: 10016
+name: boat oar
+namesimple: oar
+description: An oar used to paddle a small boat.
+type: weapon
+hands: 1
+subtype: bludgeoning
+uses: 0
+damage:
+  diceroll: 1d3

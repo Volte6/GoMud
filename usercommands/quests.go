@@ -36,34 +36,60 @@ func Quests(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		Records     []QuestRecord
 	}
 
-	showall := rest == "all"
+	showHidden := rest == `all+`
+	showComplete := (rest == `all`) || showHidden
 
 	qInfo := QuestInfo{}
 	allQuests := []QuestRecord{}
 	var completion float64
 
-	for questId, questStep := range user.Character.GetQuestProgress() {
+	qInfo.QuestsTotal = 0
+
+	allQuestProgress := user.Character.GetQuestProgress()
+
+	if rest == `all+` {
+		for _, quest := range quests.GetAllQuests() {
+			if _, ok := allQuestProgress[quest.QuestId]; ok {
+				continue
+			}
+			allQuestProgress[quest.QuestId] = `all+`
+		}
+	} else {
+
+	}
+
+	for questId, questStep := range allQuestProgress {
 		questToken := quests.PartsToToken(questId, questStep)
 		if questInfo := quests.GetQuest(questToken); questInfo != nil {
 
 			// Secret quests are not rendered
-			if !showall && questInfo.Secret {
+			if !showHidden && questInfo.Secret {
 				continue
 			}
+
+			qInfo.QuestsTotal++
 
 			totalSteps := len(questInfo.Steps)
 			completedSteps := 0
 			description := questInfo.Description
-			for _, step := range questInfo.Steps {
-				completedSteps++
-				if step.Id == questStep {
-					description = step.Description
-					break
+
+			if questStep != `all+` {
+				for _, step := range questInfo.Steps {
+					completedSteps++
+					if step.Id == questStep {
+						description = step.Description
+						break
+					}
 				}
 			}
 
 			completion = float64(completedSteps) / float64(totalSteps)
-			barFull, barEmpty := util.ProgressBar(completion, 10)
+
+			if !showComplete && completion >= 1 {
+				continue
+			}
+
+			barFull, barEmpty := util.ProgressBar(completion, 25)
 
 			qDisplay := QuestRecord{
 				Id:          questInfo.QuestId,
@@ -77,7 +103,7 @@ func Quests(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			allQuests = append(allQuests, qDisplay)
 		}
 	}
-	qInfo.QuestsTotal = quests.GetQuestCt(showall)
+
 	qInfo.QuestsFound = len(allQuests)
 	qInfo.Records = allQuests
 

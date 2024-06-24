@@ -55,7 +55,7 @@ function onMagic(sourceActor, ARG) {
 }
 ```
 
-`onMagic()` is called when the spell is ready and finally cast.
+`onMagic()` is called when the spell is ready and finally cast. For harmful type spells, return `true` to abort auto-retaliation from mobs.
 
 |  Argument | Explanation |
 | --- | --- |

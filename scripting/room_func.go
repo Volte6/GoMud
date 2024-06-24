@@ -2,9 +2,11 @@ package scripting
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
@@ -30,8 +32,16 @@ func (r ScriptRoom) SetTempData(key string, value any) {
 	r.roomRecord.SetTempData(key, value)
 }
 
-func (r ScriptRoom) etTempData(key string) any {
+func (r ScriptRoom) GetTempData(key string) any {
 	return r.roomRecord.GetTempData(key)
+}
+
+func (r ScriptRoom) SetPermData(key string, value any) {
+	r.roomRecord.SetLongTermData(key, value)
+}
+
+func (r ScriptRoom) GetPermData(key string) any {
+	return r.roomRecord.GetLongTermData(key)
 }
 
 func (r ScriptRoom) GetItems() []ScriptItem {
@@ -40,6 +50,13 @@ func (r ScriptRoom) GetItems() []ScriptItem {
 		itms = append(itms, newScriptItem(item))
 	}
 	return itms
+}
+
+func (r ScriptRoom) SpawnItem(itemId int, inStash bool) {
+	i := items.New(itemId)
+	if i.ItemId != 0 {
+		r.roomRecord.AddItem(i, inStash)
+	}
 }
 
 func (r ScriptRoom) GetMobs() []int {
@@ -187,6 +204,29 @@ func (r ScriptRoom) SpawnMob(mobId int) int {
 
 	return 0
 
+}
+
+func (r ScriptRoom) AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int) bool {
+	tmpExit := rooms.TemporaryRoomExit{
+		RoomId:  exitRoomId,
+		Title:   exitNameFancy,
+		UserId:  0,
+		Expires: time.Now().Add(time.Duration(configs.GetConfig().RoundsToSeconds(roundTTL)) * time.Second),
+	}
+
+	// Spawn a portal in the room that leads to the portal location
+	return r.roomRecord.AddTemporaryExit(exitNameSimple, tmpExit)
+}
+
+func (r ScriptRoom) RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int) bool {
+	tmpExit := rooms.TemporaryRoomExit{
+		RoomId: exitRoomId,
+		Title:  exitNameFancy,
+		UserId: 0,
+	}
+
+	// Spawn a portal in the room that leads to the portal location
+	return r.roomRecord.RemoveTemporaryExit(tmpExit)
 }
 
 // ////////////////////////////////////////////////////////

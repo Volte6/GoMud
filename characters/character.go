@@ -253,7 +253,9 @@ func (c *Character) TrackSpellCast(spellName string) bool {
 }
 
 func (c *Character) LearnSpell(spellName string) {
-	c.SpellBook[spellName] = 0
+	if _, ok := c.SpellBook[spellName]; !ok {
+		c.SpellBook[spellName] = 1
+	}
 }
 
 func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
@@ -1015,22 +1017,6 @@ func (c *Character) SetAggro(userId int, mobInstanceId int, aggroType AggroType,
 		MobInstanceId: mobInstanceId,
 		Type:          aggroType,
 		RoundsWaiting: combatAddlWaitRounds,
-	}
-
-}
-
-func (c *Character) SetAid(userId int, roundsWaitTime ...int) {
-
-	aidWaitRounds := 2
-	if len(roundsWaitTime) > 0 {
-		aidWaitRounds = roundsWaitTime[0]
-	}
-
-	c.Aggro = &Aggro{
-		UserId:        userId,
-		MobInstanceId: 0,
-		Type:          Aid,
-		RoundsWaiting: aidWaitRounds,
 	}
 
 }

@@ -43,6 +43,41 @@ func (a ScriptActor) MobTypeId() int {
 	return 0
 }
 
+func (a ScriptActor) GetRace() string {
+	return a.characterRecord.Race()
+}
+
+func (a ScriptActor) GetStat(statName string) int {
+
+	statName = strings.ToLower(statName)
+
+	if strings.HasPrefix(statName, "st") {
+		return a.characterRecord.Stats.Strength.Value
+	}
+
+	if strings.HasPrefix(statName, "sp") {
+		return a.characterRecord.Stats.Speed.Value
+	}
+
+	if strings.HasPrefix(statName, "sm") {
+		return a.characterRecord.Stats.Smarts.Value
+	}
+
+	if strings.HasPrefix(statName, "vi") {
+		return a.characterRecord.Stats.Vitality.Value
+	}
+
+	if strings.HasPrefix(statName, "my") {
+		return a.characterRecord.Stats.Mysticism.Value
+	}
+
+	if strings.HasPrefix(statName, "pe") {
+		return a.characterRecord.Stats.Perception.Value
+	}
+
+	return 0
+}
+
 func (a ScriptActor) SetTempData(key string, value any) {
 
 	if a.userRecord != nil {
@@ -114,9 +149,11 @@ func (a ScriptActor) GiveQuest(questId string) {
 				commandQueue.QueueQuest(userId, questId)
 			}
 			return
+		} else {
+			commandQueue.QueueQuest(a.userId, questId)
 		}
 	}
-	a.characterRecord.GiveQuestToken(questId)
+	//a.characterRecord.GiveQuestToken(questId)
 
 }
 
@@ -191,14 +228,18 @@ func (a ScriptActor) UpdateItem(itm ScriptItem) {
 }
 
 func (a ScriptActor) GiveItem(itm ScriptItem) {
-	if a.userRecord.Character.StoreItem(*itm.itemRecord) {
-		TryItemScriptEvent(`onGive`, *itm.itemRecord, a.userId, commandQueue)
+	if a.characterRecord.StoreItem(*itm.itemRecord) {
+		if a.userId > 0 {
+			TryItemScriptEvent(`onGive`, *itm.itemRecord, a.userId, commandQueue)
+		}
 	}
 }
 
 func (a ScriptActor) TakeItem(itm ScriptItem) {
-	if a.userRecord.Character.RemoveItem(*itm.itemRecord) {
-		TryItemScriptEvent(`onLost`, *itm.itemRecord, a.userId, commandQueue)
+	if a.characterRecord.RemoveItem(*itm.itemRecord) {
+		if a.userId > 0 {
+			TryItemScriptEvent(`onLost`, *itm.itemRecord, a.userId, commandQueue)
+		}
 	}
 }
 
@@ -226,10 +267,17 @@ func (a ScriptActor) RemoveBuff(buffId int) {
 	a.characterRecord.Buffs.RemoveBuff(buffId * -1)
 }
 
-func (a ScriptActor) HasItemId(itemId int) bool {
+func (a ScriptActor) HasItemId(itemId int, excludeWorn ...bool) bool {
 	for _, itm := range a.characterRecord.GetAllBackpackItems() {
 		if itm.ItemId == itemId {
 			return true
+		}
+	}
+	if len(excludeWorn) == 0 || !excludeWorn[0] {
+		for _, itm := range a.characterRecord.GetAllWornItems() {
+			if itm.ItemId == itemId {
+				return true
+			}
 		}
 	}
 	return false
@@ -274,6 +322,30 @@ func (a ScriptActor) IsAggro(actor ScriptActor) bool {
 	return a.characterRecord.IsAggro(actor.UserId(), actor.InstanceId())
 }
 
+func (a ScriptActor) GetMobKills(mobId int) int {
+	return a.characterRecord.KD.GetMobKills(mobId)
+}
+
+func (a ScriptActor) GetRaceKills(race string) int {
+	return a.characterRecord.KD.GetRaceKills(race)
+}
+
+func (a ScriptActor) GetHealth() int {
+	return a.characterRecord.Health
+}
+
+func (a ScriptActor) GetHealthMax() int {
+	return a.characterRecord.HealthMax.Value
+}
+
+func (a ScriptActor) GetMana() int {
+	return a.characterRecord.Mana
+}
+
+func (a ScriptActor) GetManaMax() int {
+	return a.characterRecord.ManaMax.Value
+}
+
 // ////////////////////////////////////////////////////////
 //
 // Functions only really useful for mobs
@@ -294,6 +366,13 @@ func (a ScriptActor) CharmSet(userId int, charmRounds int, onRevertCommand ...st
 		onRevertCommand = append(onRevertCommand, ``)
 	}
 	a.characterRecord.Charm(userId, charmRounds, onRevertCommand[0])
+
+	// If the player is in a party, add the mob to their party
+	if a.mobInstanceId > 0 {
+		if plrParty := parties.Get(userId); plrParty != nil {
+			plrParty.AddMob(a.mobInstanceId)
+		}
+	}
 }
 
 func (a ScriptActor) CharmRemove() {

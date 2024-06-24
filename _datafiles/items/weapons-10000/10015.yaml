@@ -1,0 +1,9 @@
+itemid: 10015
+name: crude cudgel
+namesimple: club
+description: A crudely fashioned cudgel, with large nails haphazardly hammered into it, penetrating and sticking out through at various spots.
+type: weapon
+hands: 1
+subtype: bludgeoning
+damage:
+  diceroll: 2d2

@@ -22,6 +22,7 @@ func PruneBuffVMs(instanceIds ...int) {
 
 func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
+	slog.Info("TryBuffScriptEvent()", "eventName", eventName, "buffId", buffId)
 	vmw, err := getBuffVM(buffId)
 	if err != nil {
 		return util.NewMessageQueue(0, 0), err
@@ -31,6 +32,7 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 	commandQueue = cmdQueue
 
 	actorInfo := GetActor(userId, mobInstanceId)
+	buffTriggersLeft := actorInfo.characterRecord.Buffs.TriggersLeft(buffId)
 
 	timestart := time.Now()
 	defer func() {
@@ -44,6 +46,7 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 
 		res, err := onCommandFunc(goja.Undefined(),
 			vmw.VM.ToValue(actorInfo),
+			vmw.VM.ToValue(buffTriggersLeft),
 		)
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()

@@ -5,7 +5,10 @@
   - [RoomObject.RoomId() int](#roomobjectroomid-int)
   - [RoomObject.SetTempData(key string, value any)](#roomobjectsettempdatakey-string-value-any)
   - [RoomObject.GetTempData(key string) any](#roomobjectgettempdatakey-string-any)
+  - [RoomObject.SetPermData(key string, value any)](#roomobjectsetpermdatakey-string-value-any)
+  - [RoomObject.GetPermData(key string) any](#roomobjectgetpermdatakey-string-any)
   - [RoomObject.GetItems() \[\]ItemObject](#roomobjectgetitems-itemobject)
+  - [RoomObject.SpawnItem(itemId int, inStash bool) \[\]ItemObject](#roomobjectspawnitemitemid-int-instash-bool-itemobject)
   - [RoomObject.GetMobs() \[\]int](#roomobjectgetmobs-int)
   - [RoomObject.GetPlayers() \[\]int](#roomobjectgetplayers-int)
   - [RoomObject.GetContainers() \[\]string](#roomobjectgetcontainers-string)
@@ -14,6 +17,8 @@
   - [RoomObject.HasQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjecthasquestquestid-string-partyuserid-int-int)
   - [RoomObject.MissingQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjectmissingquestquestid-string-partyuserid-int-int)
   - [RoomObject.SpawnMob(mobId int) int](#roomobjectspawnmobmobid-int-int)
+  - [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](#roomobjectaddtemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int-roundttl-int)
+  - [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](#roomobjectremovetemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int)
 
 ## [GetRoom(roomId int) RoomObject ](/scripting/room_func.go)
 Retrieves a RoomObject for a given roomId.
@@ -24,7 +29,7 @@ Returns the roomId of the room.
 ## [RoomObject.SetTempData(key string, value any)](/scripting/room_func.go)
 Sets temporary data for the room (Lasts until the room is unloaded from memory).
 
-_Note: This is useful for saving/retrieving data between room scripts._
+_Note: This is useful for short term saving/retrieving data between room scripts, such as a switch being triggered._
 
 |  Argument | Explanation |
 | --- | --- |
@@ -32,9 +37,28 @@ _Note: This is useful for saving/retrieving data between room scripts._
 | value | What you will be saving. |
 
 ## [RoomObject.GetTempData(key string) any](/scripting/room_func.go)
-Gets temporary data for the room.
+Gets temporarily saved data for the room. Data is ephemeral.
 
-_Note: This is useful for saving/retrieving data between room scripts._
+_Note: This is useful for short term saving/retrieving data between room scripts, such as a switch being triggered._
+
+|  Argument | Explanation |
+| --- | --- |
+| key | A unique identifier for the data. |
+
+## [RoomObject.SetPermData(key string, value any)](/scripting/room_func.go)
+Sets permanent data for the room (Saved even when room is unloaded from memory).
+
+_Note: This is useful for long term saving/retrieving data between room scripts, such as a leaderboard or clan ownership._
+
+|  Argument | Explanation |
+| --- | --- |
+| key | A unique identifier for the data. |
+| value | What you will be saving. |
+
+## [RoomObject.GetPermData(key string) any](/scripting/room_func.go)
+Gets permanently saved data for the room.
+
+_Note: This is useful for long term saving/retrieving data between room scripts, such as a leaderboard or clan ownership._
 
 |  Argument | Explanation |
 | --- | --- |
@@ -44,6 +68,15 @@ _Note: This is useful for saving/retrieving data between room scripts._
 Returns an array of items on the floor of the room.
 
 _Note: See [/scripting/docs/FUNCTIONS_ITEMS.md](/scripting/docs/FUNCTIONS_ITEMS.md) for details on ItemObject objects._
+
+
+## [RoomObject.SpawnItem(itemId int, inStash bool) []ItemObject](/scripting/room_func.go)
+Spawns an item in the room.
+
+|  Argument | Explanation |
+| --- | --- |
+| itemId | ItemId to spawn. |
+| inStash | If true, spawns stashed instead of visible. |
 
 ## [RoomObject.GetMobs() []int](/scripting/room_func.go)
 Returns an array of `mobInstanceIds` in the room.
@@ -111,3 +144,24 @@ Creates a new instance of MobId,and returns the `mobInstanceId` of the mob.
 |  Argument | Explanation |
 | --- | --- |
 | mobId | The ID if the mob type to spawn. NOT THE INSTANCE ID. |
+
+## [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](/scripting/room_func.go)
+Adds a temporary exit to the room for the specified amount of time.
+
+|  Argument | Explanation |
+| --- | --- |
+| exitNameSimple | The simple plain text exit name. |
+| exitNameFancy | Should be the simple name, but can have color tags. |
+| exitRoomId | The roomId the exit should lead to. |
+| roundTTL | How many rounds the exit should persist for. |
+
+## [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](/scripting/room_func.go)
+Removes a temporary exit
+
+_Note: all 3 parameters much match an existing temporary exit for it to be removed._
+
+|  Argument | Explanation |
+| --- | --- |
+| exitNameSimple | The simple plain text exit name. |
+| exitNameFancy | Should be the simple name, but can have color tags. |
+| exitRoomId | The roomId the exit should lead to. |

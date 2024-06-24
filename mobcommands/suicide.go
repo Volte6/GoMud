@@ -73,7 +73,8 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 				// Not in a party? Great give them the xp.
 				if p == nil {
 
-					user.Character.KD.AddKill(int(mob.MobId))
+					user.Character.KD.AddMobKill(int(mob.MobId))
+					user.Character.KD.AddRaceKill(mob.Character.Race())
 
 					xpScaler := float64(mob.Character.Level) / float64(totalPlayerLevels)
 					//if xpScaler > 1 {
@@ -119,7 +120,8 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 					if user := users.GetByUserId(memberId); user != nil {
 
-						user.Character.KD.AddKill(int(mob.MobId))
+						user.Character.KD.AddMobKill(int(mob.MobId))
+						user.Character.KD.AddRaceKill(mob.Character.Race())
 
 						grantXP, xpScale := user.Character.GrantXP(xpSplit)
 
