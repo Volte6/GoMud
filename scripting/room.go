@@ -55,10 +55,12 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int, cmdQueue util.
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)
 		})
+
 		res, err := onCommandFunc(goja.Undefined(),
 			vmw.VM.ToValue(sUser),
 			vmw.VM.ToValue(sRoom),
 		)
+
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()
 
@@ -66,6 +68,61 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int, cmdQueue util.
 
 			// Wrap the error
 			finalErr := fmt.Errorf("%s(): %w", eventName, err)
+
+			if _, ok := finalErr.(*goja.Exception); ok {
+				slog.Error("JSVM", "exception", finalErr)
+				return messageQueue, finalErr
+			} else if errors.Is(finalErr, errTimeout) {
+				slog.Error("JSVM", "interrupted", finalErr)
+				return messageQueue, finalErr
+			}
+
+			slog.Error("JSVM", "error", finalErr)
+			return messageQueue, finalErr
+		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			messageQueue.Handled = messageQueue.Handled || boolVal
+		}
+	}
+
+	return messageQueue, nil
+}
+
+func TryRoomIdleEvent(roomId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+
+	messageQueue = util.NewMessageQueue(0, 0)
+	commandQueue = cmdQueue
+
+	vmw, err := getRoomVM(roomId)
+	if err != nil {
+		return messageQueue, err
+	}
+
+	timestart := time.Now()
+	defer func() {
+		slog.Debug("TryRoomIdleEvent()", "roomId", roomId, "time", time.Since(timestart))
+	}()
+
+	if onCommandFunc, ok := vmw.GetFunction(`onIdle`); ok {
+
+		sRoom := GetRoom(roomId)
+
+		tmr := time.AfterFunc(scriptRoomTimeout, func() {
+			vmw.VM.Interrupt(errTimeout)
+		})
+
+		res, err := onCommandFunc(goja.Undefined(),
+			vmw.VM.ToValue(sRoom),
+		)
+
+		vmw.VM.ClearInterrupt()
+		tmr.Stop()
+
+		if err != nil {
+
+			// Wrap the error
+			finalErr := fmt.Errorf("TryRoomIdleEvent(): %w", err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)

@@ -132,6 +132,39 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 		if room := rooms.LoadRoom(roomId); room != nil {
 			room.RoundTick()
 
+			allowIdleMessages := true
+			if scriptResponse, err := scripting.TryRoomIdleEvent(roomId, w); err == nil {
+				messageQueue.AbsorbMessages(scriptResponse)
+				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
+					allowIdleMessages = false
+				}
+			}
+
+			if allowIdleMessages {
+				chanceIn100 := 5
+				if room.RoomId == -1 || len(room.Props) > 0 {
+					chanceIn100 = 20
+				}
+
+				idleMsgCt := len(room.IdleMessages)
+				if idleMsgCt > 0 && util.Rand(100) < chanceIn100 {
+					// pick a random message
+					idleMsgIndex := uint8(util.Rand(idleMsgCt))
+					for idleMsgIndex == room.LastIdleMessage && idleMsgCt > 1 {
+						idleMsgIndex = uint8(util.Rand(idleMsgCt))
+					}
+					room.LastIdleMessage = idleMsgIndex
+
+					msg := room.IdleMessages[idleMsgIndex]
+					if msg != `` {
+						messageQueue.SendRoomMessage(roomId,
+							msg,
+							true)
+					}
+
+				}
+			}
+
 			for _, uId := range room.GetPlayers() {
 
 				user := users.GetByUserId(uId)
@@ -154,29 +187,6 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 								messageQueue.AbsorbMessages(response)
 							}
 						}
-					}
-
-				}
-
-				chanceIn100 := 5
-				if room.RoomId == -1 || len(room.Props) > 0 {
-					chanceIn100 = 20
-				}
-
-				idleMsgCt := len(room.IdleMessages)
-				if idleMsgCt > 0 && util.Rand(100) < chanceIn100 {
-					// pick a random message
-					idleMsgIndex := uint8(util.Rand(idleMsgCt))
-					for idleMsgIndex == room.LastIdleMessage && idleMsgCt > 1 {
-						idleMsgIndex = uint8(util.Rand(idleMsgCt))
-					}
-					room.LastIdleMessage = idleMsgIndex
-
-					msg := room.IdleMessages[idleMsgIndex]
-					if msg != `` {
-						messageQueue.SendRoomMessage(roomId,
-							msg,
-							true)
 					}
 
 				}

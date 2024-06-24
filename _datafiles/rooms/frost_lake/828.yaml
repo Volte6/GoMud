@@ -1,0 +1,15 @@
+roomid: 828
+zone: Frost Lake
+title: Frost Lake Rocks
+description: You stand atop a large rock a ways from the shore of Frost Lake. The
+  frigid waters are violently churning below you, their surface a dark, foreboding
+  shade of blue. The rock is slick with ice, and the wind howls around you, carrying
+  with it the scent of pine and the promise of snow. The view from here is breathtaking,
+  but the danger is palpable. One wrong step could send you tumbling into the icy
+  depths below. The only way back is to the southeast, where occasionally you can
+  see the water become shallow enough to wade back to shore.
+mapsymbol: "~"
+maplegend: Rocks
+exits:
+  southeast:
+    roomid: 319
