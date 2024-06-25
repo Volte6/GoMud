@@ -30,6 +30,8 @@ type PastAuctionItem struct {
 	EndTime    time.Time
 }
 
+const maxHistoryItems = 100
+
 var (
 	ActiveAuction *AuctionItem = nil
 	PastAuctions  []PastAuctionItem
@@ -111,7 +113,7 @@ func EndAuction() {
 			EndTime:    ActiveAuction.EndTime,
 		})
 
-		if len(PastAuctions) > 30 {
+		for len(PastAuctions) > maxHistoryItems {
 			PastAuctions = PastAuctions[1:]
 		}
 
@@ -124,7 +126,7 @@ func EndAuction() {
 func GetAuctionHistory(totalItems int) []PastAuctionItem {
 
 	if totalItems < 1 {
-		return []PastAuctionItem{}
+		return PastAuctions
 	}
 
 	if totalItems > len(PastAuctions) {
