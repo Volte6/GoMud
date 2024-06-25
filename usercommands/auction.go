@@ -85,11 +85,19 @@ func Auction(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 			return response, nil
 		}
 
+		if amt > user.Character.Gold {
+			response.SendUserMessage(userId, `You don't have that much gold.`, true)
+			response.Handled = true
+			return response, nil
+		}
+
 		if err := auctions.Bid(userId, amt); err != nil {
 			response.SendUserMessage(userId, err.Error(), true)
 			response.Handled = true
 			return response, nil
 		}
+
+		user.Character.Gold -= amt
 
 		// Broadcast the bid
 		auctionTxt, _ := templates.Process("auctions/auction-bid", currentAuction)
