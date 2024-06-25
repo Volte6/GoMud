@@ -22,7 +22,47 @@ func Set(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) == 0 {
-		response.SendUserMessage(userId, "Set what?", true)
+
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">description:</ansi>`, true)
+		response.SendUserMessage(userId, `<ansi fg="yellow">`+util.SplitStringNL(user.Character.Description, 80)+`</ansi>`, true)
+		response.SendUserMessage(userId, ``, true)
+
+		on := user.GetConfigOption(`tinymap`)
+		onTxt := `<ansi fg="red">OFF</ansi>`
+		if on == nil || on.(bool) {
+			onTxt = `<ansi fg="green">ON</ansi>`
+		}
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">tinymap:</ansi> `, true)
+		response.SendUserMessage(userId, onTxt, true)
+		response.SendUserMessage(userId, ``, true)
+
+		on = user.GetConfigOption(`auction`)
+		onTxt = `<ansi fg="red">OFF</ansi>`
+		if on == nil || on.(bool) {
+			onTxt = `<ansi fg="green">ON</ansi>`
+		}
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">auction:</ansi> `, true)
+		response.SendUserMessage(userId, onTxt, true)
+		response.SendUserMessage(userId, ``, true)
+
+		currentPrompt := user.GetConfigOption(`prompt`)
+		if currentPrompt == nil {
+			currentPrompt = users.PromptDefault
+		}
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">prompt: </ansi> `, true)
+		response.SendUserMessage(userId, currentPrompt.(string), true)
+		response.SendUserMessage(userId, ``, true)
+
+		currentPrompt = user.GetConfigOption(`fprompt`)
+		if currentPrompt == nil {
+			currentPrompt = users.PromptDefault
+		}
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">fprompt:</ansi> `, true)
+		response.SendUserMessage(userId, currentPrompt.(string), true)
+		response.SendUserMessage(userId, ``, true)
+
+		response.SendUserMessage(userId, `See: <ansi fg="command">help set</ansi>`, true)
+
 		response.Handled = true
 		return response, nil
 	}
