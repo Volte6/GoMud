@@ -47,6 +47,42 @@ func Auction(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		return response, nil
 	}
 
+	if args[0] == `history` {
+
+		headers := []string{"Date", "Item", "Seller", "Buyer", "Winning Bid"}
+		formatting := []string{
+			`<ansi fg="magenta">%s</ansi>`,
+			`<ansi fg="item">%s</ansi>`,
+			`<ansi fg="username">%s</ansi>`,
+			`<ansi fg="username">%s</ansi>`,
+			`<ansi fg="gold">%s</ansi>`,
+		}
+
+		rows := [][]string{}
+
+		auctionHistory := auctions.GetAuctionHistory(0)
+
+		for i := len(auctionHistory) - 1; i >= 0; i-- {
+			aItem := auctionHistory[i]
+
+			rows = append(rows, []string{
+				aItem.EndTime.Format("2006-01-02 15:04:05"),
+				aItem.ItemName,
+				aItem.SellerName,
+				aItem.BuyerName,
+				strconv.Itoa(aItem.WinningBid) + " gold",
+			})
+		}
+
+		historyTableData := templates.GetTable(`Past Auctions`, headers, rows, formatting)
+
+		tplTxt, _ := templates.Process("tables/generic", historyTableData)
+		response.SendUserMessage(userId, tplTxt, true)
+
+		response.Handled = true
+		return response, nil
+	}
+
 	if args[0] == `bid` {
 
 		if currentAuction == nil {
@@ -109,6 +145,9 @@ func Auction(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 				}
 			}
 		}
+
+		response.Handled = true
+		return response, nil
 	}
 
 	// If there is already an auction happening, abort this attempt.
