@@ -15,3 +15,6 @@ exits:
     roomid: 319
 items:
 - itemid: 10016
+idlemessages:
+- A gust of wind sends a chill throgh the air.
+- A large wave crashes against the shore.

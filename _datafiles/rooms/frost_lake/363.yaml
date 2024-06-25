@@ -14,3 +14,5 @@ exits:
     mapdirection: west-gap2
   east:
     roomid: 362
+idlemessages:
+- 304

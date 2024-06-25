@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log/slog"
+	"strconv"
 	"strings"
 	"time"
 
@@ -146,20 +147,32 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 					chanceIn100 = 20
 				}
 
+				idleMsgs := room.IdleMessages
 				idleMsgCt := len(room.IdleMessages)
 				if idleMsgCt > 0 && util.Rand(100) < chanceIn100 {
-					// pick a random message
-					idleMsgIndex := uint8(util.Rand(idleMsgCt))
-					for idleMsgIndex == room.LastIdleMessage && idleMsgCt > 1 {
-						idleMsgIndex = uint8(util.Rand(idleMsgCt))
-					}
-					room.LastIdleMessage = idleMsgIndex
 
-					msg := room.IdleMessages[idleMsgIndex]
-					if msg != `` {
-						messageQueue.SendRoomMessage(roomId,
-							msg,
-							true)
+					if targetRoomId, err := strconv.Atoi(idleMsgs[0]); err == nil {
+						idleMsgCt = 0
+						if tgtRoom := rooms.LoadRoom(targetRoomId); tgtRoom != nil {
+							idleMsgs = tgtRoom.IdleMessages
+							idleMsgCt = len(idleMsgs)
+						}
+					}
+
+					if idleMsgCt > 0 {
+						// pick a random message
+						idleMsgIndex := uint8(util.Rand(idleMsgCt))
+						for idleMsgIndex == room.LastIdleMessage && idleMsgCt > 1 {
+							idleMsgIndex = uint8(util.Rand(idleMsgCt))
+						}
+						room.LastIdleMessage = idleMsgIndex
+
+						msg := idleMsgs[idleMsgIndex]
+						if msg != `` {
+							messageQueue.SendRoomMessage(roomId,
+								msg,
+								true)
+						}
 					}
 
 				}

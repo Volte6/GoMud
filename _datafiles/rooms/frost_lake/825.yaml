@@ -11,3 +11,7 @@ exits:
     roomid: 753
   south:
     roomid: 764
+idlemessages:
+- The turbulent lake's waves lap at the shore.
+- A gust of wind sends a chill throgh the air.
+- A large wave crashes against the shore.
