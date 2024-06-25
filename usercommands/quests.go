@@ -112,8 +112,8 @@ func Quests(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		return allQuests[i].Id < allQuests[j].Id
 	})
 
-	jobsTxt, _ := templates.Process("character/quests", qInfo)
-	response.SendUserMessage(userId, jobsTxt, false)
+	questTxt, _ := templates.Process("character/quests", qInfo)
+	response.SendUserMessage(userId, questTxt, false)
 
 	response.Handled = true
 	return response, nil

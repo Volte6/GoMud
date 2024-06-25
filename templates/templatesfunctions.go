@@ -162,6 +162,13 @@ var (
 			// return the number of seconds unti the given time
 			return int(time.Until(t).Seconds())
 		},
+		"intstrlen": func(i ...int) int {
+			totalLen := 0
+			for _, n := range i {
+				totalLen += len(strconv.Itoa(n))
+			}
+			return totalLen
+		},
 	}
 )
 
