@@ -23,7 +23,9 @@ help:
       - killstats
     shops:
       - appraise
+      - auction
       - bank
+      - bid
       - buy
       - deposit
       - hire
@@ -67,7 +69,6 @@ help:
       - use
     general:
       - emote
-      - go
       - read
       - say
       - shout
@@ -186,6 +187,7 @@ command-aliases:
   'storage remove': ['unstore']
   'rank back':      ['backrank']
   'rank front':     ['frontrank']
+  'auction bid':    ['bid']
   # Direction aliases
 direction-aliases:
   n:  north

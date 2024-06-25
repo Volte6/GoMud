@@ -64,6 +64,15 @@ CarefulSaveFiles: true
 #   These modify the way the game players, the pace/speed of the game, etc.
 #
 ################################################################################
+# - AuctionsEnabled -
+#   If true, players can globally auction off items.
+AuctionsEnabled: true
+# - AuctionSeconds -
+#   How may seconds until an auction closes.
+AuctionSeconds: 180
+# - AuctionUpdateSeconds -
+#   How may seconds (roughly) between updates on current auction.
+AuctionUpdateSeconds: 180
 # - PVPEnabled -
 #   If true, players can attack each other. If false, they cannot.
 PVPEnabled: true

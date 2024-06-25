@@ -27,6 +27,9 @@ type config struct {
 	FileAnsiAliases              ConfigString      `yaml:"FileAnsiAliases"`
 	FileKeywords                 ConfigString      `yaml:"FileKeywords"`
 	CarefulSaveFiles             ConfigBool        `yaml:"CarefulSaveFiles"`
+	AuctionsEnabled              ConfigBool        `yaml:"AuctionsEnabled"`
+	AuctionSeconds               ConfigInt         `yaml:"AuctionSeconds"`
+	AuctionUpdateSeconds         ConfigInt         `yaml:"AuctionUpdateSeconds"`
 	PVPEnabled                   ConfigBool        `yaml:"PVPEnabled"`
 	XPScale                      ConfigFloat       `yaml:"XPScale"`
 	TurnMs                       ConfigInt         `yaml:"TurnMs"`
@@ -298,6 +301,17 @@ func (c *config) Validate() {
 	}
 
 	// Nothing to do with CarefulSaveFiles
+
+	if c.AuctionSeconds < 30 {
+		c.AuctionSeconds = 30 // minimum
+	}
+
+	if c.AuctionUpdateSeconds < 15 {
+		c.AuctionUpdateSeconds = 15 // default
+	} else if c.AuctionUpdateSeconds > c.AuctionSeconds>>1 {
+		c.AuctionUpdateSeconds = c.AuctionSeconds >> 1 // default
+	}
+
 	// Nothing to do with PVPEnabled
 
 	if c.XPScale <= 0 {

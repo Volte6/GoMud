@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"log/slog"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/volte6/mud/auctions"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/combat"
@@ -43,6 +45,8 @@ func (w *World) roundTick() {
 			w.Broadcast(sunriseTxt)
 		}
 	}
+
+	w.ProcessAuction(tStart)
 
 	if roundNumber%100 == 0 {
 		scripting.PruneVMs()
@@ -146,20 +150,32 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 					chanceIn100 = 20
 				}
 
+				idleMsgs := room.IdleMessages
 				idleMsgCt := len(room.IdleMessages)
 				if idleMsgCt > 0 && util.Rand(100) < chanceIn100 {
-					// pick a random message
-					idleMsgIndex := uint8(util.Rand(idleMsgCt))
-					for idleMsgIndex == room.LastIdleMessage && idleMsgCt > 1 {
-						idleMsgIndex = uint8(util.Rand(idleMsgCt))
-					}
-					room.LastIdleMessage = idleMsgIndex
 
-					msg := room.IdleMessages[idleMsgIndex]
-					if msg != `` {
-						messageQueue.SendRoomMessage(roomId,
-							msg,
-							true)
+					if targetRoomId, err := strconv.Atoi(idleMsgs[0]); err == nil {
+						idleMsgCt = 0
+						if tgtRoom := rooms.LoadRoom(targetRoomId); tgtRoom != nil {
+							idleMsgs = tgtRoom.IdleMessages
+							idleMsgCt = len(idleMsgs)
+						}
+					}
+
+					if idleMsgCt > 0 {
+						// pick a random message
+						idleMsgIndex := uint8(util.Rand(idleMsgCt))
+						for idleMsgIndex == room.LastIdleMessage && idleMsgCt > 1 {
+							idleMsgIndex = uint8(util.Rand(idleMsgCt))
+						}
+						room.LastIdleMessage = idleMsgIndex
+
+						msg := idleMsgs[idleMsgIndex]
+						if msg != `` {
+							messageQueue.SendRoomMessage(roomId,
+								msg,
+								true)
+						}
 					}
 
 				}
@@ -1227,21 +1243,23 @@ func (w *World) HandleIdleMobs() util.MessageQueue {
 			continue
 		}
 
-		if !mob.Character.IsCharmed() { // Won't do this stuff if befriended
-
-			if mob.MaxWander > -1 && len(mob.RoomStack) > mob.MaxWander {
-				mob.GoingHome = true
-			}
-			if mob.GoingHome {
-				w.QueueCommand(0, mob.InstanceId, `go home`)
-				continue
-			}
-
-		}
-
 		// If they have idle commands, maybe do one of them?
 		result, _ := scripting.TryMobScriptEvent("onIdle", mob.InstanceId, 0, ``, nil, w)
 		messageQueue.AbsorbMessages(result)
+
+		if !result.Handled {
+			if !mob.Character.IsCharmed() { // Won't do this stuff if befriended
+
+				if mob.MaxWander > -1 && len(mob.RoomStack) > mob.MaxWander {
+					mob.GoingHome = true
+				}
+				if mob.GoingHome {
+					w.QueueCommand(0, mob.InstanceId, `go home`)
+					continue
+				}
+
+			}
+		}
 
 		//
 		// Look for trouble
@@ -1415,4 +1433,71 @@ func (w *World) CheckForLevelUps() util.MessageQueue {
 	}
 
 	return messageQueue
+}
+
+// Checks for current auction and handles updates/communication
+func (w *World) ProcessAuction(tNow time.Time) {
+
+	a := auctions.GetCurrentAuction()
+	if a == nil {
+		return
+	}
+
+	auctionOnConnectionIds := []uint64{}
+	for _, uid := range users.GetOnlineUserIds() {
+		if u := users.GetByUserId(uid); u != nil {
+			auctionOn := u.GetConfigOption(`auction`)
+			if auctionOn == nil || auctionOn.(bool) {
+				auctionOnConnectionIds = append(auctionOnConnectionIds, u.ConnectionId())
+			}
+		}
+	}
+
+	if len(auctionOnConnectionIds) == 0 {
+		return
+	}
+
+	c := configs.GetConfig()
+
+	if a.IsEnded() {
+
+		auctions.EndAuction()
+
+		a.LastUpdate = tNow
+		auctionTxt, _ := templates.Process("auctions/auction-end", a)
+		w.GetConnectionPool().SendTo([]byte(auctionTxt), auctionOnConnectionIds...)
+
+		// Give the item to the winner and let them know
+		if a.HighestBidUserId > 0 {
+
+			if user := users.GetByUserId(a.HighestBidUserId); user != nil {
+				if user.Character.StoreItem(a.ItemData) {
+					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">You have won the auction for the <ansi fg="item">%s</ansi>! It has been added to your backpack.</ansi>%s`, a.ItemData.Name(), term.CRLFStr))
+					w.GetConnectionPool().SendTo([]byte(msg), user.ConnectionId())
+				}
+			}
+
+		} else {
+			if user := users.GetByUserId(a.HighestBidUserId); user != nil {
+				if user.Character.StoreItem(a.ItemData) {
+					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.Name(), term.CRLFStr))
+					w.GetConnectionPool().SendTo([]byte(msg), user.ConnectionId())
+				}
+			}
+		}
+
+	} else if a.LastUpdate.IsZero() {
+
+		a.LastUpdate = tNow
+		auctionTxt, _ := templates.Process("auctions/auction-start", a)
+		w.GetConnectionPool().SendTo([]byte(auctionTxt), auctionOnConnectionIds...)
+
+	} else if time.Since(a.LastUpdate) > time.Second*time.Duration(c.AuctionUpdateSeconds) {
+
+		a.LastUpdate = tNow
+		auctionTxt, _ := templates.Process("auctions/auction-update", a)
+		w.GetConnectionPool().SendTo([]byte(auctionTxt), auctionOnConnectionIds...)
+
+	}
+
 }

@@ -15,3 +15,5 @@ exits:
     roomid: 331
   southwest:
     roomid: 329
+idlemessages:
+- 304

@@ -10,3 +10,11 @@ exits:
     roomid: 333
   west:
     roomid: 363
+spawninfo:
+- mobid: 26
+  cooldown: 50
+  message: An old lake worker shuffles along the dock, muttering to himself.
+  name: lake worker
+  scripttag: lakeworker
+idlemessages:
+- 304

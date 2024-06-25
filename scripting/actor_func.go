@@ -119,9 +119,9 @@ func (a ScriptActor) GetTempData(key string) any {
 	return nil
 }
 
-func (a ScriptActor) GetCharacterName(wrapInTags ...bool) string {
+func (a ScriptActor) GetCharacterName(wrapInTags bool) string {
 
-	if len(wrapInTags) > 0 && wrapInTags[0] {
+	if wrapInTags {
 		if a.userRecord != nil {
 			return `<ansi fg="username">` + a.characterRecord.Name + `</ansi>`
 		} else if a.mobRecord != nil {
@@ -344,6 +344,10 @@ func (a ScriptActor) GetMana() int {
 
 func (a ScriptActor) GetManaMax() int {
 	return a.characterRecord.ManaMax.Value
+}
+
+func (a ScriptActor) SetAdjective(adj string, addIt bool) {
+	a.characterRecord.SetAdjective(adj, addIt)
 }
 
 // ////////////////////////////////////////////////////////

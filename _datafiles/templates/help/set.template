@@ -23,3 +23,6 @@ There are a handful of settings you can adjust with this command, including:
   <ansi fg="command">set tinymap</ansi>
   This toggles the automatic tinymap on or off. It shows when looking at rooms.
 
+  <ansi fg="command">set auction</ansi>
+  This toggles the auction system on or off. If off, you will not receive notifications about system-wide auctions.
+

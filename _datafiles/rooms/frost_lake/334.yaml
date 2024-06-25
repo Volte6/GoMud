@@ -15,3 +15,5 @@ exits:
     roomid: 335
   south:
     roomid: 333
+idlemessages:
+- 304

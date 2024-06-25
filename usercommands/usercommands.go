@@ -31,6 +31,7 @@ var (
 		`appraise`:   {Appraise, false, false},
 		`ask`:        {Ask, false, false},
 		`attack`:     {Attack, false, false},
+		`auction`:    {Auction, true, false},
 		`backstab`:   {Backstab, false, false},
 		`biome`:      {Biome, true, false},
 		`broadcast`:  {Broadcast, true, false},

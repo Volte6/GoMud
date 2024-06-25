@@ -1,0 +1,17 @@
+<ansi fg="blue-bold">*******************************************************************************</ansi>
+<ansi fg="blue-bold">* * * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * * *</ansi>
+
+    <ansi fg="yellow">The auction will end in <ansi fg="white-bold">{{ secondsFrom .EndTime }} seconds</ansi>!</ansi>
+
+    Owner:       <ansi fg="username">{{- .SellerName }}</ansi>
+    Item:        <ansi fg="item">{{ .ItemData.NameComplex }}</ansi>
+    Description: <ansi fg="item">{{ splitstring .ItemData.GetSpec.Description 60 "                 " }}</ansi>
+
+    Highest Bid: {{ if lt .HighestBid 1 }}none{{ else }}<ansi fg="gold">{{ .HighestBid }} gold</ansi> by <ansi fg="username">{{ .HighestBidderName }}</ansi>{{ end }}
+    {{ if lt .HighestBid 1 }}Minimum Bid: <ansi fg="gold">{{ .MinimumBid }} gold</ansi>{{ end }}
+
+    <ansi fg="command">bid <ansi fg="gold">(gold amount)</ansi></ansi> to bid on this auction.
+
+<ansi fg="blue-bold">* * * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * * *</ansi>
+<ansi fg="blue-bold">*******************************************************************************</ansi>
+

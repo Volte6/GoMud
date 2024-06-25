@@ -13,7 +13,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetStat(statName string) int](#actorobjectgetstatstatname-string-int)
   - [ActorObject.SetTempData(key string, value any)](#actorobjectsettempdatakey-string-value-any)
   - [ActorObject.GetTempData(key string) any](#actorobjectgettempdatakey-string-any)
-  - [ActorObject.GetCharacterName( \[wrapInTags bool\] ) string](#actorobjectgetcharactername-wrapintags-bool--string)
+  - [ActorObject.GetCharacterName( wrapInTags bool ) string](#actorobjectgetcharactername-wrapintags-bool--string)
   - [ActorObject.GetRoomId() int](#actorobjectgetroomid-int)
   - [ActorObject.HasQuest(questId string) bool](#actorobjecthasquestquestid-string-bool)
   - [ActorObject.GiveQuest(questId string)](#actorobjectgivequestquestid-string)
@@ -45,6 +45,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetHealthMax() int](#actorobjectgethealthmax-int)
   - [ActorObject.GetMana() int](#actorobjectgetmana-int)
   - [ActorObject.GetManaMax() int](#actorobjectgetmanamax-int)
+  - [ActorObject.SetAdjective(adj string, addIt bool)](#actorobjectsetadjectiveadj-string-addit-bool)
 
 
 
@@ -116,7 +117,7 @@ _Note: This is useful for saving/retrieving data that a ActorObject can carry al
 | --- | --- |
 | key | A unique identifier for the data. |
 
-## [ActorObject.GetCharacterName( [wrapInTags bool] ) string](/scripting/actor_func.go)
+## [ActorObject.GetCharacterName( wrapInTags bool ) string](/scripting/actor_func.go)
 Retrieves the name of a ActorObject.
 
 |  Argument | Explanation |
@@ -318,3 +319,11 @@ Returns current actor mana
 
 ## [ActorObject.GetManaMax() int](/scripting/actor_func.go)
 Returns current actor max mana
+
+## [ActorObject.SetAdjective(adj string, addIt bool)](/scripting/actor_func.go)
+Adds or removes a specific text adjective to the characters name
+
+|  Argument | Explanation |
+| --- | --- |
+| adj | Adjective such as "sleeping", "crying" or "busy" |
+| addIt | `true` to add it. `false` to remove it. |

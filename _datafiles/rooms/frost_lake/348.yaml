@@ -15,3 +15,5 @@ exits:
     roomid: 347
   west:
     roomid: 349
+idlemessages:
+- 304
