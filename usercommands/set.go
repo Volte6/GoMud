@@ -60,6 +60,26 @@ func Set(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 	}
 
+	if setTarget == `auction` {
+		on := user.GetConfigOption(`auction`)
+		if on == nil {
+			on = true
+		}
+		if !on.(bool) {
+			on = true
+			response.SendUserMessage(userId, `Auctions turned <ansi fg="red">ON</ansi>.`, true)
+		} else {
+			on = false
+			response.SendUserMessage(userId, `Auctions turned <ansi fg="red">OFF</ansi>.`, true)
+		}
+
+		user.SetConfigOption(`auction`, on)
+
+		response.Handled = true
+		return response, nil
+
+	}
+
 	if setTarget == `prompt` {
 
 		if len(args) < 1 {

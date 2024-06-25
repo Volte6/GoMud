@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 	"unicode/utf8"
 
 	"github.com/volte6/mud/buffs"
@@ -157,8 +158,9 @@ var (
 		"roundstotime": func(rounds int) string {
 			return formatDuration(rounds * int(configs.GetConfig().RoundSeconds))
 		},
-		"intlen": func(num int) int {
-			return len(strconv.Itoa(num))
+		"secondsFrom": func(t time.Time) int {
+			// return the number of seconds unti the given time
+			return int(time.Until(t).Seconds())
 		},
 	}
 )
