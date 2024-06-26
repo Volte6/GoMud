@@ -371,7 +371,14 @@ func LoadUser(username string) (*UserRecord, error) {
 
 func SaveUser(u UserRecord) error {
 
-	slog.Info("Saving user", "username", u.Username)
+	fileWritten := false
+	tmpSaved := false
+	tmpCopied := false
+	completed := false
+
+	defer func() {
+		slog.Info("SaveUser()", "username", u.Username, "wrote file", fileWritten, ".tmp file", tmpSaved, ".tmp copied", tmpCopied, "completed", completed)
+	}()
 
 	memoryString := ``
 	for _, rId := range u.Character.GetRoomMemory() {
@@ -399,6 +406,10 @@ func SaveUser(u UserRecord) error {
 	if err != nil {
 		return err
 	}
+	fileWritten = true
+	if carefulSave {
+		tmpSaved = true
+	}
 
 	if carefulSave {
 		//
@@ -407,9 +418,10 @@ func SaveUser(u UserRecord) error {
 		if err := os.Rename(saveFilePath, path); err != nil {
 			return err
 		}
+		tmpCopied = true
 	}
 
-	slog.Info("Saved user", "username", u.Username)
+	completed = true
 
 	return nil
 }

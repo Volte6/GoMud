@@ -165,16 +165,20 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 					if idleMsgCt > 0 {
 						// pick a random message
 						idleMsgIndex := uint8(util.Rand(idleMsgCt))
-						for idleMsgIndex == room.LastIdleMessage && idleMsgCt > 1 {
-							idleMsgIndex = uint8(util.Rand(idleMsgCt))
-						}
-						room.LastIdleMessage = idleMsgIndex
 
-						msg := idleMsgs[idleMsgIndex]
-						if msg != `` {
-							messageQueue.SendRoomMessage(roomId,
-								msg,
-								true)
+						// If it's a repeating message, treat it as a non-message
+						// (Unless it's the only one)
+						if idleMsgIndex != room.LastIdleMessage || idleMsgCt == 1 {
+
+							room.LastIdleMessage = idleMsgIndex
+
+							msg := idleMsgs[idleMsgIndex]
+							if msg != `` {
+								messageQueue.SendRoomMessage(roomId,
+									msg,
+									true)
+							}
+
 						}
 					}
 

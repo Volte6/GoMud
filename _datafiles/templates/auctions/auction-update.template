@@ -6,7 +6,7 @@
 
     Owner:       <ansi fg="username">{{- .SellerName }}</ansi>
     Item:        <ansi fg="item">{{ .ItemData.NameComplex }}</ansi>
-    Description: <ansi fg="item">{{ splitstring .ItemData.GetSpec.Description 60 "                 " }}</ansi>
+    Description: <ansi fg="itemdesc">{{ splitstring .ItemData.GetSpec.Description 60 "                 " }}</ansi>
 
     Highest Bid: {{ if lt .HighestBid 1 }}none{{ else }}<ansi fg="gold">{{ .HighestBid }} gold</ansi> by <ansi fg="username">{{ .HighestBidderName }}</ansi>{{ end }}
     {{ if lt .HighestBid 1 }}Minimum Bid: <ansi fg="gold">{{ .MinimumBid }} gold</ansi>{{ end }}
