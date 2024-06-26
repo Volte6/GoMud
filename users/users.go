@@ -61,6 +61,9 @@ func RemoveZombieUser(userId int) {
 	userManager.Lock()
 	defer userManager.Unlock()
 
+	if u := userManager.Users[userId]; u != nil {
+		u.Character.SetAdjective(`zombie`, false)
+	}
 	connId := userManager.UserConnections[userId]
 	delete(userManager.ZombieConnections, connId)
 }
@@ -195,6 +198,7 @@ func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, err
 
 				u.connectionId = connectionId
 
+				u.Character.SetAdjective(`zombie`, false)
 				userManager.Users[u.UserId] = u
 				userManager.Usernames[u.Username] = u.UserId
 				userManager.Connections[u.connectionId] = u.UserId
@@ -242,6 +246,7 @@ func SetZombieUser(userId int) {
 	if u, ok := userManager.Users[userId]; ok {
 
 		u.Character.RemoveBuff(0)
+		u.Character.SetAdjective(`zombie`, true)
 
 		if _, ok := userManager.ZombieConnections[u.connectionId]; ok {
 			return

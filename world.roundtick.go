@@ -1478,7 +1478,7 @@ func (w *World) ProcessAuction(tNow time.Time) {
 			}
 
 		} else {
-			if user := users.GetByUserId(a.HighestBidUserId); user != nil {
+			if user := users.GetByUserId(a.SellerUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
 					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.Name(), term.CRLFStr))
 					w.GetConnectionPool().SendTo([]byte(msg), user.ConnectionId())
