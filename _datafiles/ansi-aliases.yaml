@@ -57,6 +57,7 @@ color8:
   trail-hot: 91
   item: green
   itemname: green
+  itemdesc: green
   questname: cyan
   xp: 93 # Bright yellow
   experience: 93 # Bright yellow
@@ -179,6 +180,7 @@ color256:
   trail-hot: 9
   item: green
   itemname: green
+  itemdesc: 79
   questname: cyan
   xp: 11 # Bright yellow
   experience: 11 # Bright yellow

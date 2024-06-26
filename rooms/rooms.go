@@ -1635,6 +1635,10 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		nameFlags = append(nameFlags, characters.RenderHealth)
 	}
 
+	if useShortAdjectives := user.GetConfigOption(`shortadjectives`); useShortAdjectives != nil && useShortAdjectives.(bool) {
+		nameFlags = append(nameFlags, characters.RenderShortAdjectives)
+	}
+
 	for _, playerId := range r.players {
 		if playerId != user.UserId {
 
@@ -1645,10 +1649,6 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 
 				if player.Character.HasBuffFlag(buffs.Hidden) { // Don't show them if they are sneaking
 					continue
-				}
-
-				if player.Character.HasBuffFlag(buffs.EmitsLight) {
-					renderFlags = append(renderFlags, characters.RenderLightSource)
 				}
 
 				pName := player.Character.GetPlayerName(user.UserId, renderFlags...)

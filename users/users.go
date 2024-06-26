@@ -61,6 +61,9 @@ func RemoveZombieUser(userId int) {
 	userManager.Lock()
 	defer userManager.Unlock()
 
+	if u := userManager.Users[userId]; u != nil {
+		u.Character.SetAdjective(`zombie`, false)
+	}
 	connId := userManager.UserConnections[userId]
 	delete(userManager.ZombieConnections, connId)
 }
@@ -184,6 +187,8 @@ func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, err
 	userManager.Lock()
 	defer userManager.Unlock()
 
+	u.Character.SetAdjective(`zombie`, false)
+
 	if userId, ok := userManager.Usernames[u.Username]; ok {
 
 		if otherConnId, ok := userManager.UserConnections[userId]; ok {
@@ -242,6 +247,7 @@ func SetZombieUser(userId int) {
 	if u, ok := userManager.Users[userId]; ok {
 
 		u.Character.RemoveBuff(0)
+		u.Character.SetAdjective(`zombie`, true)
 
 		if _, ok := userManager.ZombieConnections[u.connectionId]; ok {
 			return
@@ -366,7 +372,14 @@ func LoadUser(username string) (*UserRecord, error) {
 
 func SaveUser(u UserRecord) error {
 
-	slog.Info("Saving user", "username", u.Username)
+	fileWritten := false
+	tmpSaved := false
+	tmpCopied := false
+	completed := false
+
+	defer func() {
+		slog.Info("SaveUser()", "username", u.Username, "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
+	}()
 
 	memoryString := ``
 	for _, rId := range u.Character.GetRoomMemory() {
@@ -394,6 +407,10 @@ func SaveUser(u UserRecord) error {
 	if err != nil {
 		return err
 	}
+	fileWritten = true
+	if carefulSave {
+		tmpSaved = true
+	}
 
 	if carefulSave {
 		//
@@ -402,9 +419,10 @@ func SaveUser(u UserRecord) error {
 		if err := os.Rename(saveFilePath, path); err != nil {
 			return err
 		}
+		tmpCopied = true
 	}
 
-	slog.Info("Saved user", "username", u.Username)
+	completed = true
 
 	return nil
 }

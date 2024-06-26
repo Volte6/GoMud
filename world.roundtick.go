@@ -165,16 +165,20 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 					if idleMsgCt > 0 {
 						// pick a random message
 						idleMsgIndex := uint8(util.Rand(idleMsgCt))
-						for idleMsgIndex == room.LastIdleMessage && idleMsgCt > 1 {
-							idleMsgIndex = uint8(util.Rand(idleMsgCt))
-						}
-						room.LastIdleMessage = idleMsgIndex
 
-						msg := idleMsgs[idleMsgIndex]
-						if msg != `` {
-							messageQueue.SendRoomMessage(roomId,
-								msg,
-								true)
+						// If it's a repeating message, treat it as a non-message
+						// (Unless it's the only one)
+						if idleMsgIndex != room.LastIdleMessage || idleMsgCt == 1 {
+
+							room.LastIdleMessage = idleMsgIndex
+
+							msg := idleMsgs[idleMsgIndex]
+							if msg != `` {
+								messageQueue.SendRoomMessage(roomId,
+									msg,
+									true)
+							}
+
 						}
 					}
 
@@ -1296,9 +1300,10 @@ func (w *World) HandleAutoHealing(roundNumber uint64) util.MessageQueue {
 	for _, userId := range onlineIds {
 		user := users.GetByUserId(userId)
 
-		//if user.Character.Aggro != nil {
-		//continue
-		//}
+		// Only heal if not in combat
+		if user.Character.Aggro != nil {
+			continue
+		}
 
 		if user.Character.Health < 1 {
 			if user.Character.RoomId == 75 {
@@ -1478,7 +1483,7 @@ func (w *World) ProcessAuction(tNow time.Time) {
 			}
 
 		} else {
-			if user := users.GetByUserId(a.HighestBidUserId); user != nil {
+			if user := users.GetByUserId(a.SellerUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
 					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.Name(), term.CRLFStr))
 					w.GetConnectionPool().SendTo([]byte(msg), user.ConnectionId())

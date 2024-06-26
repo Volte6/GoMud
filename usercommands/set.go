@@ -27,21 +27,30 @@ func Set(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		response.SendUserMessage(userId, `<ansi fg="yellow">`+util.SplitStringNL(user.Character.Description, 80)+`</ansi>`, true)
 		response.SendUserMessage(userId, ``, true)
 
-		on := user.GetConfigOption(`tinymap`)
+		on := user.GetConfigOption(`auction`)
 		onTxt := `<ansi fg="red">OFF</ansi>`
 		if on == nil || on.(bool) {
 			onTxt = `<ansi fg="green">ON</ansi>`
 		}
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">tinymap:</ansi> `, true)
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">auction:</ansi> `, true)
 		response.SendUserMessage(userId, onTxt, true)
 		response.SendUserMessage(userId, ``, true)
 
-		on = user.GetConfigOption(`auction`)
+		on = user.GetConfigOption(`shortadjectives`)
 		onTxt = `<ansi fg="red">OFF</ansi>`
 		if on == nil || on.(bool) {
 			onTxt = `<ansi fg="green">ON</ansi>`
 		}
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">auction:</ansi> `, true)
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">shortadjectives:</ansi> `, true)
+		response.SendUserMessage(userId, onTxt, true)
+		response.SendUserMessage(userId, ``, true)
+
+		on = user.GetConfigOption(`tinymap`)
+		onTxt = `<ansi fg="red">OFF</ansi>`
+		if on == nil || on.(bool) {
+			onTxt = `<ansi fg="green">ON</ansi>`
+		}
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">tinymap:</ansi> `, true)
 		response.SendUserMessage(userId, onTxt, true)
 		response.SendUserMessage(userId, ``, true)
 
@@ -83,23 +92,6 @@ func Set(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		return response, nil
 	}
 
-	if setTarget == `tinymap` {
-		on := user.GetConfigOption(`tinymap`)
-		if on == nil || !on.(bool) {
-			on = true
-			response.SendUserMessage(userId, `Tinymap turned <ansi fg="red">ON</ansi>.`, true)
-		} else {
-			on = false
-			response.SendUserMessage(userId, `Tinymap turned <ansi fg="red">OFF</ansi>.`, true)
-		}
-
-		user.SetConfigOption(`tinymap`, on)
-
-		response.Handled = true
-		return response, nil
-
-	}
-
 	if setTarget == `auction` {
 		on := user.GetConfigOption(`auction`)
 		if on == nil {
@@ -114,6 +106,40 @@ func Set(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		}
 
 		user.SetConfigOption(`auction`, on)
+
+		response.Handled = true
+		return response, nil
+
+	}
+
+	if setTarget == `shortadjectives` {
+		on := user.GetConfigOption(`shortadjectives`)
+		if on == nil || !on.(bool) {
+			on = true
+			response.SendUserMessage(userId, `Short Adjectives turned <ansi fg="red">ON</ansi>.`, true)
+		} else {
+			on = false
+			response.SendUserMessage(userId, `Short Adjectives turned <ansi fg="red">OFF</ansi>.`, true)
+		}
+
+		user.SetConfigOption(`shortadjectives`, on)
+
+		response.Handled = true
+		return response, nil
+
+	}
+
+	if setTarget == `tinymap` {
+		on := user.GetConfigOption(`tinymap`)
+		if on == nil || !on.(bool) {
+			on = true
+			response.SendUserMessage(userId, `Tinymap turned <ansi fg="red">ON</ansi>.`, true)
+		} else {
+			on = false
+			response.SendUserMessage(userId, `Tinymap turned <ansi fg="red">OFF</ansi>.`, true)
+		}
+
+		user.SetConfigOption(`tinymap`, on)
 
 		response.Handled = true
 		return response, nil

@@ -618,6 +618,9 @@ loop:
 			if err := rooms.SaveAllRooms(); err != nil {
 				slog.Error("rooms.SaveAllRooms()", "error", err.Error())
 			}
+			// Save all user data too.
+			users.SaveAllUsers()
+
 			break loop
 
 		case <-roomUpdateTimer.C:

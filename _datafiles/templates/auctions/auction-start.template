@@ -1,3 +1,4 @@
+
 <ansi fg="blue-bold">*******************************************************************************</ansi>
 <ansi fg="blue-bold">* * * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * * *</ansi>
 
@@ -6,7 +7,7 @@
 
     Owner:       <ansi fg="username">{{- .SellerName }}</ansi>
     Item:        <ansi fg="item">{{ .ItemData.NameComplex }}</ansi>
-    Description: <ansi fg="item">{{ splitstring .ItemData.GetSpec.Description 60 "                 " }}</ansi>
+    Description: <ansi fg="itemdesc">{{ splitstring .ItemData.GetSpec.Description 60 "                 " }}</ansi>
 
     Minimum Bid: <ansi fg="gold">{{ .MinimumBid }} gold</ansi>
 
