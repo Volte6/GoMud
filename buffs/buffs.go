@@ -46,14 +46,14 @@ func New() Buffs {
 	}
 }
 
-func (bs *Buffs) Validate() {
+func (bs *Buffs) Validate(forceRebuild ...bool) {
 	if bs.buffFlags == nil {
 		bs.buffFlags = make(map[Flag][]int)
 	}
 	if bs.buffIds == nil {
 		bs.buffIds = make(map[int]int)
 	}
-	if len(bs.List) != len(bs.buffIds) {
+	if (len(bs.List) != len(bs.buffIds)) || (len(forceRebuild) > 0 && forceRebuild[0]) {
 		// Rebuild
 		bs.buffIds = make(map[int]int)
 		bs.buffFlags = make(map[Flag][]int)
@@ -260,6 +260,7 @@ func (bs *Buffs) Prune() (prunedBuffs []*Buff) {
 	}
 
 	var prune bool = false
+	var didPrune bool = false
 	for i := len(bs.List) - 1; i >= 0; i-- {
 
 		prune = false
@@ -282,23 +283,13 @@ func (bs *Buffs) Prune() (prunedBuffs []*Buff) {
 			prunedBuffs = append(prunedBuffs, b)
 			// remove the buff
 			bs.List = append(bs.List[:i], bs.List[i+1:]...)
+			didPrune = true
 		}
 	}
 
 	// Since pruning occured, rebuild the lookups
-	if prune {
-		bs.buffFlags = make(map[Flag][]int)
-		bs.buffIds = make(map[int]int)
-		for idx, b := range bs.List {
-
-			bs.buffIds[b.BuffId] = idx
-			for _, flag := range GetBuffSpec(b.BuffId).Flags {
-				if _, ok := bs.buffFlags[flag]; !ok {
-					bs.buffFlags[flag] = []int{}
-				}
-				bs.buffFlags[flag] = append(bs.buffFlags[flag], idx)
-			}
-		}
+	if didPrune {
+		bs.Validate(true)
 	}
 
 	return prunedBuffs

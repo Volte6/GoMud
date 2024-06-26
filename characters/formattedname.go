@@ -7,19 +7,31 @@ import (
 var (
 	// -short suffix should also be defined in case shorthand symbols are preferred
 	adjectiveSwaps = map[string]string{
-		// Have they disconnected and are zombie status?
-		`zombie`:       `<ansi fg="77">z</ansi><ansi fg="77">O</ansi><ansi fg="113">m</ansi><ansi fg="72">B</ansi><ansi fg="65">i</ansi><ansi fg="78">e</ansi>`,
-		`zombie-short`: `<ansi fg="77">z</ansi>`,
+
 		// Are they charmed/friendly?
 		//`charmed`: `<ansi fg="225">♥</ansi><ansi fg="219">c</ansi><ansi fg="213">h</ansi><ansi fg="207">a</ansi><ansi fg="201">r</ansi><ansi fg="164">m</ansi><ansi fg="127">e</ansi><ansi fg="90">d</ansi>`,
 		`charmed`:       `<ansi fg="225">♥</ansi><ansi fg="219">f</ansi><ansi fg="213">r</ansi><ansi fg="207">i</ansi><ansi fg="201">e</ansi><ansi fg="164">n</ansi><ansi fg="127">d</ansi>`,
 		`charmed-short`: `<ansi fg="127">♥</ansi>`,
+
 		// Are they downed?
-		`downed`:       `<ansi fg="7">☠</ansi><ansi fg="red">downed</ansi>`,
+		`downed`:       `<ansi fg="red">☠downed</ansi>`,
 		`downed-short`: `<ansi fg="red">☠</ansi>`,
+
+		// Are they hiding?
+		`hidden`:       `<ansi fg="black-bold">hidden</ansi>`,
+		`hidden-short`: `<ansi fg="black-bold">?</ansi>`,
+
 		// Does light come from this character?
 		`lit`:       `<ansi fg="187">⚙</ansi><ansi fg="229">L</ansi><ansi fg="228">i</ansi><ansi fg="227">t</ansi>`,
 		`lit-short`: `<ansi fg="187">⚙</ansi>`,
+
+		// Are they hiding?
+		`sleeping`:       `<ansi fg="black-bold">asleep</ansi>`,
+		`sleeping-short`: `<ansi fg="black-bold">zZz</ansi>`,
+
+		// Have they disconnected and are zombie status?
+		`zombie`:       `<ansi fg="77">z</ansi><ansi fg="77">O</ansi><ansi fg="113">m</ansi><ansi fg="72">B</ansi><ansi fg="65">i</ansi><ansi fg="78">e</ansi>`,
+		`zombie-short`: `<ansi fg="77">z</ansi>`,
 	}
 )
 
