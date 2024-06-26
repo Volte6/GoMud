@@ -424,7 +424,7 @@ func (c *Character) getFormattedName(viewingUserId int, uType string, renderFlag
 	f := FormattedName{
 		Name:       c.Name,
 		Type:       uType,
-		Adjectives: c.Adjectives,
+		Adjectives: make([]string, 0, len(c.Adjectives)),
 	}
 
 	includeHealth := false
@@ -445,8 +445,14 @@ func (c *Character) getFormattedName(viewingUserId int, uType string, renderFlag
 		}
 	}
 
+	f.Adjectives = append(f.Adjectives, c.Adjectives...)
+
 	if c.HasBuffFlag(buffs.EmitsLight) {
 		f.Adjectives = append(f.Adjectives, `lit`)
+	}
+
+	if c.HasBuffFlag(buffs.Hidden) {
+		f.Adjectives = append(f.Adjectives, `hidden`)
 	}
 
 	if c.Health < 1 {

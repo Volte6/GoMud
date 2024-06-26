@@ -16,13 +16,16 @@ There are a handful of settings you can adjust with this command, including:
   This sets the description players see when they look at your character. You
   can also look at yourself to see your current description.
 
+  <ansi fg="command">set auction</ansi>
+  This toggles the auction system on or off. If off, you will not receive notifications about system-wide auctions.
+
+  <ansi fg="command">set shortadjectives</ansi>
+  This toggles short adjective displayes on or off. See <ansi fg="command">help adjectives</ansi>
+
   <ansi fg="command">set prompt [prompt text]</ansi>
   This sets a custom prompt (See <ansi fg="command">help prompt</ansi>)
   If you ommit the [prompt text], your current prompt will be displayed.
 
   <ansi fg="command">set tinymap</ansi>
   This toggles the automatic tinymap on or off. It shows when looking at rooms.
-
-  <ansi fg="command">set auction</ansi>
-  This toggles the auction system on or off. If off, you will not receive notifications about system-wide auctions.
 
