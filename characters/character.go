@@ -38,8 +38,7 @@ const (
 
 	RenderHealth NameRenderFlag = iota
 	RenderAggro
-	RenderQuest
-	RenderLightSource
+	RenderShortAdjectives
 )
 
 type Character struct {
@@ -288,6 +287,7 @@ func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
 }
 
 func (c *Character) Charm(userId int, rounds int, expireCommand string) {
+	c.SetAdjective(`charmed`, true)
 	c.Charmed = NewCharm(userId, rounds, expireCommand)
 	if c.Aggro != nil && c.Aggro.UserId == userId {
 		c.Aggro = nil
@@ -328,6 +328,7 @@ func (c *Character) IsCharmed(userId ...int) bool {
 }
 
 func (c *Character) RemoveCharm() {
+	c.SetAdjective(`charmed`, false)
 	c.Charmed = nil
 }
 
@@ -412,52 +413,17 @@ func (c *Character) GetDefense() int {
 }
 
 func (c *Character) GetMobName(viewingUserId int, renderFlags ...NameRenderFlag) FormattedName {
-
-	f := FormattedName{
-		Name:       c.Name,
-		Type:       "mobname",
-		Adjectives: c.Adjectives,
-	}
-
-	if c.IsCharmed(viewingUserId) {
-		f.Flags = append(f.Flags, `friend`)
-	}
-
-	includeHealth := false
-	includeQuest := false
-
-	for _, f := range renderFlags {
-		if f == RenderHealth {
-			includeHealth = true
-		} else if f == RenderQuest {
-			includeQuest = true
-		}
-
-	}
-
-	if includeQuest {
-		f.Flags = append(f.Flags, `!`)
-	}
-
-	if includeHealth {
-		pctHealth := int(math.Ceil(float64(c.Health) / float64(c.HealthMax.Value) * 100))
-		f.HealthDisplay = strconv.Itoa(pctHealth) + `%`
-	}
-
-	if c.Health < 1 {
-		f.Suffix = `downed`
-	} else if c.Aggro != nil && c.Aggro.UserId > 0 {
-		f.Suffix = `aggro`
-	}
-
-	return f
+	return c.getFormattedName(viewingUserId, `mobname`, renderFlags...)
 }
 
 func (c *Character) GetPlayerName(viewingUserId int, renderFlags ...NameRenderFlag) FormattedName {
+	return c.getFormattedName(viewingUserId, `username`, renderFlags...)
+}
 
+func (c *Character) getFormattedName(viewingUserId int, uType string, renderFlags ...NameRenderFlag) FormattedName {
 	f := FormattedName{
 		Name:       c.Name,
-		Type:       "username",
+		Type:       uType,
 		Adjectives: c.Adjectives,
 	}
 
@@ -465,19 +431,22 @@ func (c *Character) GetPlayerName(viewingUserId int, renderFlags ...NameRenderFl
 	for _, flag := range renderFlags {
 		if flag == RenderHealth {
 			includeHealth = true
-		}
-		if flag == RenderLightSource {
-			f.LightSource = true
+		} else if flag == RenderShortAdjectives {
+			f.UseShortAdjectives = true
 		}
 	}
 
 	if includeHealth {
 		if c.Health < 1 {
-			f.HealthDisplay = "downed"
+			f.Adjectives = append(f.Adjectives, `downed`)
 		} else {
 			pctHealth := int(math.Ceil(float64(c.Health) / float64(c.HealthMax.Value) * 100))
-			f.HealthDisplay = strconv.Itoa(pctHealth) + `%`
+			f.Adjectives = append(f.Adjectives, strconv.Itoa(pctHealth)+`%`)
 		}
+	}
+
+	if c.HasBuffFlag(buffs.EmitsLight) {
+		f.Adjectives = append(f.Adjectives, `lit`)
 	}
 
 	if c.Health < 1 {

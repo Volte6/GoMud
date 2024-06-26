@@ -187,6 +187,8 @@ func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, err
 	userManager.Lock()
 	defer userManager.Unlock()
 
+	u.Character.SetAdjective(`zombie`, false)
+
 	if userId, ok := userManager.Usernames[u.Username]; ok {
 
 		if otherConnId, ok := userManager.UserConnections[userId]; ok {
@@ -198,7 +200,6 @@ func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, err
 
 				u.connectionId = connectionId
 
-				u.Character.SetAdjective(`zombie`, false)
 				userManager.Users[u.UserId] = u
 				userManager.Usernames[u.Username] = u.UserId
 				userManager.Connections[u.connectionId] = u.UserId
@@ -377,7 +378,7 @@ func SaveUser(u UserRecord) error {
 	completed := false
 
 	defer func() {
-		slog.Info("SaveUser()", "username", u.Username, "wrote file", fileWritten, ".tmp file", tmpSaved, ".tmp copied", tmpCopied, "completed", completed)
+		slog.Info("SaveUser()", "username", u.Username, "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
 	}()
 
 	memoryString := ``

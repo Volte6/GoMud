@@ -1300,9 +1300,10 @@ func (w *World) HandleAutoHealing(roundNumber uint64) util.MessageQueue {
 	for _, userId := range onlineIds {
 		user := users.GetByUserId(userId)
 
-		//if user.Character.Aggro != nil {
-		//continue
-		//}
+		// Only heal if not in combat
+		if user.Character.Aggro != nil {
+			continue
+		}
 
 		if user.Character.Health < 1 {
 			if user.Character.RoomId == 75 {
