@@ -1470,6 +1470,19 @@ func (w *World) TurnTick() {
 	//
 	messageQueue.AbsorbMessages(w.PruneBuffs())
 
+	//
+	// Update movement points for each player
+	// TODO: Optimize this to avoid re-loops through users
+	//
+	for _, uId := range users.GetOnlineUserIds() {
+		if user := users.GetByUserId(uId); user != nil {
+			user.Character.ActionPoints += 1
+			if user.Character.ActionPoints > user.Character.ActionPointsMax.Value {
+				user.Character.ActionPoints = user.Character.ActionPointsMax.Value
+			}
+		}
+	}
+
 	if turnCt%uint64(c.TurnsPerSecond()) == 0 {
 		messageQueue.AbsorbMessages(w.CheckForLevelUps())
 	}

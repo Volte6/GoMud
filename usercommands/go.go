@@ -23,6 +23,16 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 		return response, fmt.Errorf("user %d not found", userId)
 	}
 
+	if user.Character.ActionPoints < 10 {
+		response.SendUserMessage(userId, "Youre too tired to move!", true)
+		response.Handled = true
+		return response, nil
+	}
+	user.Character.ActionPoints -= 10
+	if user.Character.ActionPoints < 0 {
+		user.Character.ActionPoints = 0
+	}
+
 	if user.Character.Aggro != nil {
 		response.SendUserMessage(userId, "You can't do that! You are in combat!", true)
 		response.Handled = true

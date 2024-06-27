@@ -209,6 +209,7 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 		//
 		var currentXP, tnlXP int = -1, -1
 		var hpPct, mpPct int = -1, -1
+		var acPt int = u.Character.ActionPoints
 		var hpClass, mpClass string
 
 		promptLen := len(ansiPrompt)
@@ -287,6 +288,9 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 					}
 					promptOut.WriteString(strconv.Itoa(mpPct))
 					promptOut.WriteString(`%`)
+
+				case "{ap}":
+					promptOut.WriteString(strconv.Itoa(acPt))
 
 				case "{xp}":
 					if currentXP == -1 && tnlXP == -1 {

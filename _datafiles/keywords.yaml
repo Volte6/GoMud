@@ -148,6 +148,7 @@ help-aliases:
   status:           [score]
   set-prompt:       [prompt]
   colors:           [color, ansi]
+  auction:          [bid]
 # Default aliases for commands
 # For example: inv -> inventory
 # They can be command + argument aliases
