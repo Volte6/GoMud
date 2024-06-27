@@ -46,77 +46,85 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 
 	exitName, goRoomId := room.FindExitByName(rest)
 
-	exitInfo := room.Exits[exitName]
-	if exitInfo.Lock.IsLocked() {
+	if goRoomId > 0 || exitName != `` {
 
-		lockId := fmt.Sprintf(`%d-%s`, room.RoomId, exitName)
-
-		hasKey, hasSequence := user.Character.HasKey(lockId, int(room.Exits[exitName].Lock.Difficulty))
-
-		lockpickItm := items.Item{}
-		// Only look for a lockpick kit if they know the sequence
-		if hasSequence {
-			for _, itm := range user.Character.GetAllBackpackItems() {
-				if itm.GetSpec().Type == items.Lockpicks {
-					lockpickItm = itm
-					break
-				}
-			}
+		scriptResponse, err := scripting.TryRoomCommand(exitName, ``, userId, cmdQueue)
+		response.AbsorbMessages(scriptResponse)
+		if scriptResponse.Handled {
+			response.Handled = true
+			return response, err
 		}
 
-		if lockpickItm.ItemId > 0 && hasSequence {
+		exitInfo := room.Exits[exitName]
+		if exitInfo.Lock.IsLocked() {
 
-			response.SendUserMessage(userId, `You know this lock well, you quickly pick it.`, true)
-			response.SendRoomMessage(room.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> quickly picks the lock on the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
-				true,
-				userId)
+			lockId := fmt.Sprintf(`%d-%s`, room.RoomId, exitName)
 
-			exitInfo.Lock.SetUnlocked()
-			room.Exits[exitName] = exitInfo
+			hasKey, hasSequence := user.Character.HasKey(lockId, int(room.Exits[exitName].Lock.Difficulty))
 
-		} else if hasKey {
-			response.SendUserMessage(userId, fmt.Sprintf(`You use the key on your key ring to unlock the <ansi fg="exit">%s</ansi> exit.`, exitName), true)
-			response.SendRoomMessage(room.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to unlock the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
-				true,
-				userId)
+			lockpickItm := items.Item{}
+			// Only look for a lockpick kit if they know the sequence
+			if hasSequence {
+				for _, itm := range user.Character.GetAllBackpackItems() {
+					if itm.GetSpec().Type == items.Lockpicks {
+						lockpickItm = itm
+						break
+					}
+				}
+			}
 
-			exitInfo.Lock.SetUnlocked()
-			room.Exits[exitName] = exitInfo
-		} else {
+			if lockpickItm.ItemId > 0 && hasSequence {
 
-			// check for a key item on their person
-			if backpackKeyItm, hasBackpackKey := user.Character.FindKeyInBackpack(lockId); hasBackpackKey {
+				response.SendUserMessage(userId, `You know this lock well, you quickly pick it.`, true)
+				response.SendRoomMessage(room.RoomId,
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> quickly picks the lock on the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
+					true,
+					userId)
 
-				itmSpec := backpackKeyItm.GetSpec()
+				exitInfo.Lock.SetUnlocked()
+				room.Exits[exitName] = exitInfo
 
-				response.SendUserMessage(userId, fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to unlock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName), true)
+			} else if hasKey {
+				response.SendUserMessage(userId, fmt.Sprintf(`You use the key on your key ring to unlock the <ansi fg="exit">%s</ansi> exit.`, exitName), true)
 				response.SendRoomMessage(room.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to unlock the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
 					true,
 					userId)
 
-				// Key entries look like:
-				// "key-<roomid>-<exitname>": "<itemid>"
-				user.Character.SetKey(`key-`+lockId, fmt.Sprintf(`%d`, backpackKeyItm.ItemId))
-				user.Character.RemoveItem(backpackKeyItm)
-
 				exitInfo.Lock.SetUnlocked()
 				room.Exits[exitName] = exitInfo
+			} else {
 
+				// check for a key item on their person
+				if backpackKeyItm, hasBackpackKey := user.Character.FindKeyInBackpack(lockId); hasBackpackKey {
+
+					itmSpec := backpackKeyItm.GetSpec()
+
+					response.SendUserMessage(userId, fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to unlock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName), true)
+					response.SendRoomMessage(room.RoomId,
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to unlock the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
+						true,
+						userId)
+
+					// Key entries look like:
+					// "key-<roomid>-<exitname>": "<itemid>"
+					user.Character.SetKey(`key-`+lockId, fmt.Sprintf(`%d`, backpackKeyItm.ItemId))
+					user.Character.RemoveItem(backpackKeyItm)
+
+					exitInfo.Lock.SetUnlocked()
+					room.Exits[exitName] = exitInfo
+
+				}
+
+				if exitInfo.Lock.IsLocked() {
+					response.SendUserMessage(userId, `There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.`, true)
+					response.Handled = true
+					return response, nil
+				}
 			}
 
-			if exitInfo.Lock.IsLocked() {
-				response.SendUserMessage(userId, `There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.`, true)
-				response.Handled = true
-				return response, nil
-			}
 		}
 
-	}
-
-	if goRoomId > 0 || exitName != `` {
 		// It does so we won't need to continue down the logic after this chunk
 		response.Handled = true
 		originRoomId := user.Character.RoomId

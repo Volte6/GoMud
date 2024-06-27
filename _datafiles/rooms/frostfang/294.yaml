@@ -2,12 +2,14 @@ roomid: 294
 zone: Frostfang
 title: The Southern Road
 description: As you press onward along the path, the Frost Lake begins to dominate
-  your view, filling your senses with its enchanting presence. The ancient trees that
-  lined your way now stand aside, revealing an unobstructed panorama of the lake's
-  icy expanse. Its surface shimmers like a myriad of diamonds under the soft, wintry
-  sunlight, casting an otherworldly glow.
+  your view, filling your senses with its enchanting presence. Here, the vile filth
+  of the cities sewer canal runs out from under the walls of the city and along the
+  path, making its way to the sea.
 biome: road
 exits:
+  canal:
+    roomid: 462
+    secret: true
   north:
     roomid: 293
   south:

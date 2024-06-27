@@ -1,22 +1,26 @@
 roomid: 462
 zone: Frostfang
 title: Slums
-description: 'Tucked away in the heart of Frostfang''s sprawling slums, a dimly lit
+description: Tucked away in the heart of Frostfang's sprawling slums, a dimly lit
   alleyway meanders from the bustling Beggars Lane. This concealed corner, a world
-  apart from the temple''s tranquility, boasts ramshackle shanties crafted from discarded
+  apart from the temple's tranquility, boasts ramshackle shanties crafted from discarded
   wood, rusted metal sheets, and tattered fabric. Makeshift tents of mismatched fabrics
-  and fraying ropes dot the gaps between these structures. The uneven ground is littered
-  with remnants of daily life: discarded meal bones, worn-out shoes, and glimmers
-  from shattered glass. Muffled whispers and subtle movements hint at the precarious
-  lives within, hidden deep in the slums, yet a stone''s throw from a place of refuge.'
+  and fraying ropes dot the gaps between these structures. The sewers drain out of
+  the canal here, through a rusted grate. The unthinkable slime, filth, and stench
+  of the cities denizens repulses you.
 biome: city
 exits:
+  grate:
+    roomid: 294
+    secret: true
   north:
     roomid: 463
   south:
     roomid: 464
   west:
     roomid: 447
+items:
+- itemid: 20011
 spawninfo:
 - mobid: 12
   cooldown: 20

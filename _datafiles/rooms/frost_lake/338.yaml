@@ -16,4 +16,4 @@ exits:
   south:
     roomid: 337
 idlemessages:
-- 304
+- "304"

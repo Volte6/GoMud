@@ -38,8 +38,9 @@ var (
 		`tackle`:     {Tackle, false, false},
 		`bank`:       {Bank, false, false},
 		`break`:      {Break, false, false},
-		`build`:      {Build, false, true}, // Admin only
-		`buff`:       {Buff, false, true},  // Admin only
+		`build`:      {Build, false, true},  // Admin only
+		`ibuild`:     {IBuild, false, true}, // Admin only
+		`buff`:       {Buff, false, true},   // Admin only
 		`bump`:       {Bump, false, false},
 		`buy`:        {Buy, false, false},
 		`cast`:       {Cast, false, false},
@@ -295,6 +296,7 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 	}
 
 	// Try moving if they aren't disabled
+	// This also processes shortened versions of exit names, such as "ea" instead of "east"
 	if !userDisabled {
 
 		start := time.Now()
