@@ -48,13 +48,6 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 
 	if goRoomId > 0 || exitName != `` {
 
-		scriptResponse, err := scripting.TryRoomCommand(exitName, ``, userId, cmdQueue)
-		response.AbsorbMessages(scriptResponse)
-		if scriptResponse.Handled {
-			response.Handled = true
-			return response, err
-		}
-
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
 

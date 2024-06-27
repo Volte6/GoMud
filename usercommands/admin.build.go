@@ -11,6 +11,123 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+func IBuild(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+
+	response := NewUserCommandResponse(userId)
+
+	// Load user details
+	user := users.GetByUserId(userId)
+	if user == nil { // Something went wrong. User not found.
+		return response, fmt.Errorf("user %d not found", userId)
+	}
+
+	// args should look like one of the following:
+	// info <optional room id>
+	// <move to room id>
+	args := util.SplitButRespectQuotes(rest)
+
+	if len(args) < 1 {
+
+		// send some sort of help info?
+		infoOutput, _ := templates.Process("admincommands/help/command.build", nil)
+		response.SendUserMessage(userId, infoOutput, false)
+	}
+
+	cmdPrompt, _ := user.StartPrompt(`ibuild`, rest)
+
+	// #build zone "The Arctic"
+	if args[0] == "zone" {
+
+		zoneQ := cmdPrompt.Ask(`New zone name?`, []string{``})
+		if !zoneQ.Done {
+			response.Handled = true
+			return response, nil
+		}
+
+		if zoneQ.Response == `` {
+			response.SendUserMessage(userId, `Aborting zone build`, true)
+			user.ClearPrompt()
+			response.Handled = true
+			return response, nil
+		}
+
+		zoneName := zoneQ.Response
+
+		if roomId, err := rooms.CreateZone(zoneName); err != nil {
+			response.SendUserMessage(userId, err.Error(), true)
+		} else {
+			response.SendUserMessage(userId, fmt.Sprintf(`Zone %s created.`, zoneName), true)
+
+			if err := rooms.MoveToRoom(user.UserId, roomId); err != nil {
+				response.SendUserMessage(userId, err.Error(), true)
+			} else {
+				response.SendUserMessage(userId, fmt.Sprintf(`Moved to room %d.`, roomId), true)
+				response.NextCommand = `look`
+			}
+		}
+
+		user.ClearPrompt()
+		response.Handled = true
+		return response, nil
+
+	}
+
+	// #build room north <south>
+	if args[0] == "room" {
+
+		exitNameQ := cmdPrompt.Ask(`Room exit name?`, []string{})
+		if !exitNameQ.Done {
+			response.Handled = true
+			return response, nil
+		}
+
+		if exitNameQ.Response == `` {
+			response.SendUserMessage(userId, `Aborting room build`, true)
+			user.ClearPrompt()
+			response.Handled = true
+			return response, nil
+		}
+
+		exitName := exitNameQ.Response
+
+		dirNameQ := cmdPrompt.Ask(`Map direction?`, []string{})
+		if !dirNameQ.Done {
+			response.Handled = true
+			return response, nil
+		}
+
+		if _, ok := rooms.DirectionDeltas[dirNameQ.Response]; !ok {
+			dirNameQ.RejectResponse()
+			response.SendUserMessage(userId, `Invalid map direction.`, true)
+			response.Handled = true
+			return response, nil
+
+		}
+
+		mapDirection := dirNameQ.Response
+
+		retDirNameQ := cmdPrompt.Ask(`Return exit name (opt)?`, []string{}, ``)
+		if !retDirNameQ.Done {
+			response.Handled = true
+			return response, nil
+		}
+
+		returnName := retDirNameQ.Response
+
+		response.SendUserMessage(userId, fmt.Sprintf(`exitName: %s - mapDirection: %s - returnName: %s.`, exitName, mapDirection, returnName), true)
+
+		user.ClearPrompt()
+		response.Handled = true
+		return response, nil
+
+	}
+
+	// TODO: WIP
+
+	response.Handled = true
+	return response, nil
+}
+
 func Build(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)

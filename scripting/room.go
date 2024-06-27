@@ -155,6 +155,9 @@ func TryRoomCommand(cmd string, rest string, userId int, cmdQueue util.CommandQu
 	}
 
 	room := rooms.LoadRoom(user.Character.RoomId)
+
+	altCmd, _ := room.FindExitByName(cmd)
+
 	if room != nil {
 
 		/*
@@ -196,7 +199,12 @@ func TryRoomCommand(cmd string, rest string, userId int, cmdQueue util.CommandQu
 		slog.Debug("TryRoomCommand()", "cmd", cmd, "roomId", user.Character.RoomId, "time", time.Since(timestart))
 	}()
 
-	if onCommandFunc, ok := vmw.GetFunction(`onCommand_` + cmd); ok {
+	onCommandFunc, cmdFound := vmw.GetFunction(`onCommand_` + cmd)
+	if !cmdFound && altCmd != `` {
+		onCommandFunc, cmdFound = vmw.GetFunction(`onCommand_` + altCmd)
+	}
+
+	if cmdFound {
 
 		sUser := GetUser(userId)
 		sRoom := GetRoom(user.Character.RoomId)

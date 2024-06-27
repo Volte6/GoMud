@@ -10,6 +10,8 @@ exits:
   canal:
     roomid: 462
     secret: true
+    lock:
+      difficulty: 3
   north:
     roomid: 293
   south:

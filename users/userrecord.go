@@ -493,7 +493,7 @@ func (u *UserRecord) StartPrompt(command string, rest string) (*prompt.Prompt, b
 	// If no prompt found or it seems like a new prompt, create a new one and replace the old
 	u.activePrompt = prompt.New(command, rest)
 
-	return u.activePrompt, false
+	return u.activePrompt, true
 }
 
 func (u *UserRecord) GetPrompt() *prompt.Prompt {
