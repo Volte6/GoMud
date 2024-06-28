@@ -11,6 +11,12 @@ See [Mob Scripting](/scripting/docs/SCRIPTING_MOBS.md)
 # Item Scripting
 See [Item Scripting](/scripting/docs/SCRIPTING_ITEMS.md)
 
+# Buff Scripting
+See [Buff Scripting](/scripting/docs/SCRIPTING_BUFFS.md)
+
+# Spell Scripting
+See [Spell Scripting](/scripting/docs/SCRIPTING_SPELLS.md)
+
 # Script Functions
 
 [ActorObject Functions](/scripting/docs/FUNCTIONS_ACTORS.md) - Functions that query or alter user/mob data.
