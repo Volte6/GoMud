@@ -4,7 +4,7 @@
 
 This is an early version of GoMud, having only been in development a couple of months.
 
-Screenshots for some of the features can be found [here](https://imgur.com/a/90y6OGS).
+Screenshots for some of the features can be found [here](webclient/images/).
 
 Colorization is handled through extensive use of my [github.com/Volte6/ansitags](https://github.com/Volte6/ansitags) library.
 
