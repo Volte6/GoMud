@@ -14,6 +14,7 @@ type AuctionItem struct {
 	ItemData          items.Item
 	SellerUserId      int
 	SellerName        string
+	Anonymous         bool
 	EndTime           time.Time
 	MinimumBid        int
 	HighestBid        int
@@ -25,6 +26,7 @@ type AuctionItem struct {
 type PastAuctionItem struct {
 	ItemName   string
 	WinningBid int
+	Anonymous  bool
 	SellerName string
 	BuyerName  string
 	EndTime    time.Time
@@ -47,12 +49,15 @@ func StartAuction(item items.Item, userId int, minimumBid int) bool {
 		return false
 	}
 
+	c := configs.GetConfig()
+
 	if u := users.GetByUserId(userId); u != nil {
 		ActiveAuction = &AuctionItem{
 			ItemData:          item,
 			SellerUserId:      userId,
 			SellerName:        u.Character.Name,
-			EndTime:           time.Now().Add(time.Second * time.Duration(configs.GetConfig().AuctionSeconds)),
+			Anonymous:         bool(c.AuctionsAnonymous),
+			EndTime:           time.Now().Add(time.Second * time.Duration(c.AuctionSeconds)),
 			MinimumBid:        minimumBid,
 			HighestBid:        0,
 			HighestBidUserId:  0,
@@ -108,6 +113,7 @@ func EndAuction() {
 		PastAuctions = append(PastAuctions, PastAuctionItem{
 			ItemName:   ActiveAuction.ItemData.NameComplex(),
 			WinningBid: ActiveAuction.HighestBid,
+			Anonymous:  ActiveAuction.Anonymous,
 			SellerName: ActiveAuction.SellerName,
 			BuyerName:  ActiveAuction.HighestBidderName,
 			EndTime:    ActiveAuction.EndTime,

@@ -5,7 +5,8 @@
     <ansi fg="yellow-bold">An auction has started!</ansi>
     <ansi fg="yellow">The auction will end in <ansi fg="white-bold">{{ secondsFrom .EndTime }} seconds</ansi>!</ansi>
 
-    Owner:       <ansi fg="username">{{- .SellerName }}</ansi>
+    {{ if not .Anonymous -}}Owner:       <ansi fg="username">{{- .SellerName }}</ansi>
+{{ end -}}
     Item:        <ansi fg="item">{{ .ItemData.NameComplex }}</ansi>
     Description: <ansi fg="itemdesc">{{ splitstring .ItemData.GetSpec.Description 60 "                 " }}</ansi>
 

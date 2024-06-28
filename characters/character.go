@@ -127,6 +127,18 @@ func (c *Character) GetDescription() string {
 	return descriptionCache[hash]
 }
 
+func (c *Character) DeductActionPoints(amount int) bool {
+
+	if c.ActionPoints < amount {
+		return false
+	}
+	c.ActionPoints -= 10
+	if c.ActionPoints < 0 {
+		c.ActionPoints = 0
+	}
+	return true
+}
+
 func (c *Character) FindKeyInBackpack(lockId string) (items.Item, bool) {
 
 	for _, itm := range c.GetAllBackpackItems() {

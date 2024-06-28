@@ -9,6 +9,7 @@ help:
       - macros
       - set
     character:
+      - actionpoints
       - alignment
       - armor
       - conditions

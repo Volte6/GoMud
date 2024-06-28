@@ -28,6 +28,7 @@ type config struct {
 	FileKeywords                 ConfigString      `yaml:"FileKeywords"`
 	CarefulSaveFiles             ConfigBool        `yaml:"CarefulSaveFiles"`
 	AuctionsEnabled              ConfigBool        `yaml:"AuctionsEnabled"`
+	AuctionsAnonymous            ConfigBool        `yaml:"AuctionsAnonymous"`
 	AuctionSeconds               ConfigInt         `yaml:"AuctionSeconds"`
 	AuctionUpdateSeconds         ConfigInt         `yaml:"AuctionUpdateSeconds"`
 	PVPEnabled                   ConfigBool        `yaml:"PVPEnabled"`

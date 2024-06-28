@@ -65,11 +65,17 @@ func Auction(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		for i := len(auctionHistory) - 1; i >= 0; i-- {
 			aItem := auctionHistory[i]
 
+			buyerName := aItem.BuyerName
+			sellerName := aItem.SellerName
+			if aItem.Anonymous {
+				buyerName = `Anonymous`
+				sellerName = `Anonymous`
+			}
 			rows = append(rows, []string{
 				aItem.EndTime.Format("2006-01-02 15:04:05"),
 				aItem.ItemName,
-				aItem.SellerName,
-				aItem.BuyerName,
+				sellerName,
+				buyerName,
 				strconv.Itoa(aItem.WinningBid) + " gold",
 			})
 		}

@@ -4,7 +4,7 @@
 
     <ansi fg="yellow">The auction has <ansi fg="white-bold">ENDED!</ansi></ansi>
 
-    Winner:      {{ if lt .HighestBid 1 }}none (It will be returned to the owner){{ else }}<ansi fg="username">{{- .HighestBidderName }}</ansi>{{ end }}
+    Winner:      {{ if lt .HighestBid 1 }}none (It will be returned to the owner){{ else }}{{ if .Anonymous }}Anonymous{{ else }}<ansi fg="username">{{- .HighestBidderName }}</ansi>{{ end }}{{ end }}
     Bid:         {{ if lt .HighestBid 1 }}none{{ else }}<ansi fg="gold">{{ .HighestBid }} gold</ansi>{{ end }}
 
     Item:        <ansi fg="item">{{ .ItemData.NameComplex }}</ansi>
