@@ -6,7 +6,7 @@
     <ansi fg="yellow">The auction will end in <ansi fg="white-bold">{{ secondsFrom .EndTime }} seconds</ansi>!</ansi>
 
     {{ if not .Anonymous -}}Owner:       <ansi fg="username">{{- .SellerName }}</ansi>
-{{ end -}}
+    {{ end -}}
     Item:        <ansi fg="item">{{ .ItemData.NameComplex }}</ansi>
     Description: <ansi fg="itemdesc">{{ splitstring .ItemData.GetSpec.Description 60 "                 " }}</ansi>
 
