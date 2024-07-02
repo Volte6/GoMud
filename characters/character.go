@@ -1454,8 +1454,10 @@ func (c *Character) Validate() error {
 }
 
 func (c *Character) Race() string {
-	r := races.GetRace(c.RaceId)
-	return r.Name
+	if r := races.GetRace(c.RaceId); r != nil {
+		return r.Name
+	}
+	return `Ghostly Spirit`
 }
 
 func (c *Character) AlignmentName() string {

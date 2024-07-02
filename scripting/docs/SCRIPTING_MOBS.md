@@ -200,11 +200,8 @@ _Note: The intention of the converse command and onConverse is to faciliate mob-
 |  Argument | Explanation |
 | --- | --- |
 | message | The message that was sent via converse. |
-| mob | [ActorObject](FUNCTIONS_ACTORS.md) |
-| sourceMob | [ActorObject](FUNCTIONS_ACTORS.md) |
+| mob | [ActorObject](FUNCTIONS_ACTORS.md) - The mob hearing the conversation |
+| sourceMob | [ActorObject](FUNCTIONS_ACTORS.md) - The mob issuing the converse command |
 | room | [RoomObject](FUNCTIONS_ROOMS.md) |
-| eventDetails.sourceId | The `userId` or `mobInstanceId` that killed the mob |
-| eventDetails.sourceType | `"user"` or `"mob"`, the source type of the death |
-| eventDetails.attackerCount | How many users hurt this mob before it died. |
 
 ---

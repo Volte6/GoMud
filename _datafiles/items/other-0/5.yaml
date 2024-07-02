@@ -3,5 +3,5 @@ name: amethyst
 namesimple: gemstone
 description: The amethyst crystal is a beautiful hue of purple.
 type: object
-value: 200
+value: 80
 subtype: mundane

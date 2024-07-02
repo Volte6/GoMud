@@ -1762,6 +1762,112 @@ func (r *Room) RemovePlayer(userId int) (int, bool) {
 	return len(r.players), false
 }
 
+// Spawns an item in the room unless:
+// 1. Item is already in the room
+// 2. (optional) Item is currently held by someone in the room
+// 3. item repeat-spawned too recently
+// If containerName is provided, ony that container name will be considered
+func (r *Room) RepeatSpawnItem(itemId int, roundFrequency int, containerName ...string) bool {
+
+	roundNum := util.GetRoundCount()
+	spawnKey := strconv.Itoa(itemId)
+
+	cName := ``
+	if len(containerName) > 0 {
+		cName = containerName[0]
+		spawnKey = cName + `-` + spawnKey
+	}
+
+	r.mutex.Lock()
+
+	// Are we detailing with a container?
+	if cName != `` {
+
+		c, ok := r.Containers[cName]
+
+		// Container doesn't exist? Abort.
+		if !ok {
+			r.mutex.Unlock()
+			return false
+		}
+
+		// Item in the container? Abort.
+		for _, item := range c.Items {
+			if item.ItemId == itemId {
+				r.mutex.Unlock()
+				return false
+			}
+		}
+
+	}
+
+	// Check if item is already in the room
+	for _, item := range r.Items {
+		if item.ItemId == itemId {
+			r.mutex.Unlock()
+			return false
+		}
+	}
+
+	// Check hidden as well
+	for _, item := range r.Stash {
+		if item.ItemId == itemId {
+			r.mutex.Unlock()
+			return false
+		}
+	}
+
+	// unlock for further processing that will require locks
+	r.mutex.Unlock()
+
+	// Check whether enough time has passed since last spawn
+	if lastSpawn := r.GetTempData(spawnKey); lastSpawn != nil {
+		if lastSpawn.(uint64)+uint64(roundFrequency) > roundNum {
+			return false
+		}
+	}
+
+	// If someone is carrying it, abort
+	for _, userId := range r.GetPlayers() {
+
+		if user := users.GetByUserId(userId); user != nil {
+
+			for _, item := range user.Character.GetAllBackpackItems() {
+				if item.ItemId == itemId {
+					return false
+				}
+			}
+
+			for _, item := range user.Character.GetAllWornItems() {
+				if item.ItemId == itemId {
+					return false
+				}
+			}
+		}
+	}
+
+	r.SetTempData(spawnKey, roundNum)
+
+	// Create item
+	itm := items.New(itemId)
+
+	// Add to container?
+	if cName != `` {
+
+		c := r.Containers[cName]
+		c.AddItem(itm)
+		r.Containers[cName] = c
+
+	} else { // Add to room
+
+		r.AddItem(itm, false)
+
+	}
+
+	return true
+
+}
+
 func (r *Room) Id() int {
 	return r.RoomId
 }

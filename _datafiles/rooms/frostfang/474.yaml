@@ -15,6 +15,9 @@ exits:
     roomid: 473
   west:
     roomid: 475
+items:
+- itemid: 20010
+gold: 10
 spawninfo:
 - mobid: 28
   cooldown: 59
