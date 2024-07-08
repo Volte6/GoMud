@@ -61,6 +61,7 @@ type Character struct {
 	Bank            int               // The gold the character has in the bank
 	SpellBook       map[string]int    `yaml:"spellbook,omitempty"` // The spells the character has learned
 	Charmed         *CharmInfo        `yaml:"-"`                   // If they are charmed, this is the info
+	CharmedMobs     []int             `yaml:"-"`                   // If they have charmed anyone, this is the list of mob instance ids
 	Items           []items.Item      // The items the character is holding
 	Buffs           buffs.Buffs       `yaml:"buffs,omitempty"` // The buffs the character has active
 	Equipment       Worn              // The equipment the character is wearing
@@ -76,6 +77,7 @@ type Character struct {
 	QuestProgress   map[int]string    `yaml:"questprogress,omitempty"` // quest progress tracking
 	KeyRing         map[string]string `yaml:"keyring,omitempty"`       // key is the lock id, value is the sequence
 	KD              KDStats           `yaml:"kd,omitempty"`            // Kill/Death stats
+	MiscData        map[string]any    `yaml:"miscdata,omitempty"`      // Any random other data that needs to be stored
 	roomHistory     []int             // A stack FILO of the last X rooms the character has been in
 	followers       []int             `yaml:"-"` // everyone following this user
 }
@@ -108,9 +110,11 @@ func New() *Character {
 		Gold:           25,
 		Bank:           100,
 		SpellBook:      make(map[string]int),
+		CharmedMobs:    []int{},
 		Items:          []items.Item{},
 		Buffs:          buffs.New(),
 		Equipment:      Worn{},
+		MiscData:       make(map[string]any),
 		roomHistory:    make([]int, 0, 10),
 		KeyRing:        make(map[string]string),
 	}
@@ -137,6 +141,58 @@ func (c *Character) DeductActionPoints(amount int) bool {
 		c.ActionPoints = 0
 	}
 	return true
+}
+
+func (c *Character) SetMiscData(key string, value any) {
+
+	if c.MiscData == nil {
+		c.MiscData = make(map[string]any)
+	}
+
+	if value == nil {
+		delete(c.MiscData, key)
+		return
+	}
+	c.MiscData[key] = value
+}
+
+func (c *Character) GetMiscData(key string) any {
+
+	if c.MiscData == nil {
+		c.MiscData = make(map[string]any)
+	}
+
+	if value, ok := c.MiscData[key]; ok {
+		return value
+	}
+	return nil
+}
+
+func (c *Character) GetMiscDataKeys(prefixMatch ...string) []string {
+
+	if c.MiscData == nil {
+		c.MiscData = make(map[string]any)
+	}
+
+	allKeys := []string{}
+	for key, _ := range c.MiscData {
+		allKeys = append(allKeys, key)
+	}
+
+	if len(prefixMatch) == 0 {
+		return allKeys
+	}
+
+	retKeys := []string{}
+	for _, prefix := range prefixMatch {
+		for _, key := range allKeys {
+			if finalKey, ok := strings.CutPrefix(key, prefix); ok {
+				retKeys = append(retKeys, finalKey)
+			}
+		}
+	}
+
+	return retKeys
 }
 
 func (c *Character) FindKeyInBackpack(lockId string) (items.Item, bool) {
@@ -300,6 +356,22 @@ func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
 	return actualXP, xpScale
 }
 
+func (c *Character) TrackCharmed(mobId int, add bool) {
+	for _, mobInstanceId := range c.CharmedMobs {
+		if mobInstanceId == mobId {
+			if !add {
+				c.CharmedMobs = append(c.CharmedMobs[:mobInstanceId], c.CharmedMobs[mobInstanceId+1:]...)
+			}
+			return
+		}
+	}
+	c.CharmedMobs = append(c.CharmedMobs, mobId)
+}
+
+func (c *Character) GetCharmIds() []int {
+	return append([]int{}, c.CharmedMobs...)
+}
+
 func (c *Character) Charm(userId int, rounds int, expireCommand string) {
 	c.SetAdjective(`charmed`, true)
 	c.Charmed = NewCharm(userId, rounds, expireCommand)
@@ -341,9 +413,15 @@ func (c *Character) IsCharmed(userId ...int) bool {
 	return false
 }
 
-func (c *Character) RemoveCharm() {
+// Returns userId of whoever had charmed them
+func (c *Character) RemoveCharm() int {
+	charmUserId := 0
 	c.SetAdjective(`charmed`, false)
-	c.Charmed = nil
+	if c.Charmed != nil {
+		charmUserId = c.Charmed.UserId
+		c.Charmed = nil
+	}
+	return charmUserId
 }
 
 func (c *Character) GetRandomItem() (items.Item, bool) {
@@ -1054,8 +1132,27 @@ func (c *Character) IsAggro(targetUserId int, targetMobInstanceId int) bool {
 		if c.Aggro.MobInstanceId > 0 && c.Aggro.MobInstanceId == targetMobInstanceId {
 			return true
 		}
+
 		if c.Aggro.UserId > 0 && c.Aggro.UserId == targetUserId {
 			return true
+		}
+
+		if c.Aggro.Type == SpellCast {
+			if len(c.Aggro.SpellInfo.TargetUserIds) > 0 {
+				for _, uId := range c.Aggro.SpellInfo.TargetUserIds {
+					if uId == targetUserId {
+						return true
+					}
+				}
+			}
+
+			if len(c.Aggro.SpellInfo.TargetMobInstanceIds) > 0 {
+				for _, mId := range c.Aggro.SpellInfo.TargetMobInstanceIds {
+					if mId == targetMobInstanceId {
+						return true
+					}
+				}
+			}
 		}
 
 	}

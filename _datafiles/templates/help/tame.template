@@ -1,0 +1,31 @@
+<ansi fg="black-bold">.:</ansi> <ansi fg="magenta">Help for </ansi><ansi fg="skill">tame</ansi> (skill)
+
+The <ansi fg="skill">tame</ansi> skill lets you tame certain types of creatures. 
+
+Each skill level you train adds to the types of creatures you can tame.
+
+<ansi fg="yellow">Usage: </ansi>
+
+(Lvl ?) <ansi fg="skill">tame</ansi> List specific creatures you have learned to tame.
+
+(Lvl 1) <ansi fg="skill">tame [mobname]</ansi> Tamed for 5 minutes.
+(Lvl 2) <ansi fg="skill">tame [mobname]</ansi> Tamed for 15 minutes.
+(Lvl 3) <ansi fg="skill">tame [mobname]</ansi> Tamed for 60 minutes.
+(Lvl 4) <ansi fg="skill">tame [mobname]</ansi> Tamed until you despawn.
+
+Your skill level affects how long a creature stays tamed for.
+
+Only some creatures can be successfully tamed, and some may require special
+equipment. It is up to you to discover what creatures or equipment.
+
+Your chances of tame success are calculated as follows:
+    <ansi fg="red">50 - (creatureHealthPercentage*50) - LevelDifference + creatureTameAbility</ansi>
+The maximum chance of success is no more than 95%
+On success up to 25% of their gold will drop to the floor. You can increase
+your odds of a successful tame by decreasing the creatures health.
+
+Each specific creature type has a difference chance to tame it. Every time you
+successfully tame a creature, you increase your chances in the future. Every
+time you fail a tame attempt, you decrease your odds in the future.
+
+

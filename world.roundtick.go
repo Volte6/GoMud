@@ -257,7 +257,11 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 		// Do charm cleanup
 		if mob.Character.IsCharmed() && mob.Character.Charmed.RoundsRemaining == 0 {
 			cmd := mob.Character.Charmed.ExpiredCommand
-			mob.Character.RemoveCharm()
+			if charmedUserId := mob.Character.RemoveCharm(); charmedUserId > 0 {
+				if charmedUser := users.GetByUserId(charmedUserId); charmedUser != nil {
+					charmedUser.Character.TrackCharmed(mob.InstanceId, false)
+				}
+			}
 			if cmd != `` {
 				cmds := strings.Split(cmd, `;`)
 				for _, cmd := range cmds {

@@ -68,6 +68,7 @@ const (
 	Brawling    SkillTag = `brawling`
 	Scribe      SkillTag = `scribe`
 	Protection  SkillTag = `protection`
+	Tame        SkillTag = `tame`
 )
 
 var (
@@ -100,6 +101,12 @@ var (
 		"paladin": {
 			Protection,
 			Brawling,
+		},
+		"ranger": {
+			Search,
+			Track,
+			Tame,
+			Map,
 		},
 	}
 )

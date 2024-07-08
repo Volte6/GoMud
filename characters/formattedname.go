@@ -76,3 +76,10 @@ func (f FormattedName) String() string {
 
 	return output
 }
+
+func GetFormattedAdjective(adjName string) string {
+	if newAdj, ok := adjectiveSwaps[adjName]; ok {
+		return newAdj
+	}
+	return adjName
+}

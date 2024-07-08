@@ -163,13 +163,13 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					continue
 				}
 
-				spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, partyUserId)
+				if partyUser := users.GetByUserId(partyUserId); partyUser != nil {
+					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, partyUserId)
 
-			}
-
-			for _, partyMobId := range p.GetMobs() {
-
-				spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, partyMobId)
+					for _, partyMobId := range partyUser.Character.GetCharmIds() {
+						spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, partyMobId)
+					}
+				}
 
 			}
 

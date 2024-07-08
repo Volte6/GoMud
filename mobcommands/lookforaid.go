@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -34,7 +33,7 @@ func LookForAid(rest string, mobId int, cmdQueue util.CommandQueue) (util.Messag
 			continue
 		}
 
-		if mob.Character.IsCharmed(playerId) || parties.IsMobPartied(mobId, playerId) {
+		if mob.Character.IsCharmed(playerId) {
 			cmdQueue.QueueCommand(0, mob.InstanceId, fmt.Sprintf("aid @%d", playerId)) // @ denotes a specific player id
 			continue
 		}

@@ -5,8 +5,8 @@ import (
 
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
@@ -29,7 +29,13 @@ func Befriend(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQ
 	if rest == `revert` {
 
 		if mob.Character.IsCharmed() {
-			mob.Character.RemoveCharm()
+
+			if charmedUserId := mob.Character.RemoveCharm(); charmedUserId > 0 {
+				if charmedUser := users.GetByUserId(charmedUserId); charmedUser != nil {
+					charmedUser.Character.TrackCharmed(mob.InstanceId, false)
+				}
+			}
+
 		}
 
 		response.Handled = true
@@ -42,6 +48,10 @@ func Befriend(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQ
 
 		mob.Character.Charm(playerId, characters.CharmPermanent, characters.CharmExpiredRevert)
 
+		if charmedUser := users.GetByUserId(playerId); charmedUser != nil {
+			charmedUser.Character.TrackCharmed(mob.InstanceId, true)
+		}
+
 		//response.SendUserMessage(playerId,
 		//	fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks at you with puppy dog eyes.`, mob.Character.Name),
 		//	true)
@@ -50,9 +60,6 @@ func Befriend(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQ
 			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks very friendly.`, mob.Character.Name),
 			true)
 
-		if plrParty := parties.Get(playerId); plrParty != nil {
-			plrParty.AddMob(mobId)
-		}
 	}
 
 	response.Handled = true

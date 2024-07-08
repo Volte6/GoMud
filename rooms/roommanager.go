@@ -235,6 +235,8 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 			guideMob.Character.Name = fmt.Sprintf(`%s's Guide`, user.Character.Name)
 			room.AddMob(guideMob.InstanceId)
 			guideMob.Character.Charm(userId, characters.CharmPermanent, characters.CharmExpiredDespawn)
+			// Track it
+			user.Character.TrackCharmed(guideMob.InstanceId, true)
 		}
 	}
 

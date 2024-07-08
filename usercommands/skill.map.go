@@ -165,13 +165,16 @@ func Map(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	}
 
 	if p := parties.Get(userId); p != nil {
-		for _, mid := range p.GetMobs() {
-			if tmpMob := mobs.GetInstance(mid); tmpMob != nil {
-				rGraph.AddRoomSymbolOverrides('☹', "Friend", tmpMob.Character.RoomId)
-			}
-		}
 		for _, uid := range p.GetMembers() {
 			if tmpUser := users.GetByUserId(uid); tmpUser != nil {
+
+				// Add any charmed mobs
+				for _, mid := range tmpUser.Character.GetCharmIds() {
+					if tmpMob := mobs.GetInstance(mid); tmpMob != nil {
+						rGraph.AddRoomSymbolOverrides('☹', "Friend", tmpMob.Character.RoomId)
+					}
+				}
+
 				rGraph.AddRoomSymbolOverrides('☺', "Player", tmpUser.Character.RoomId)
 			}
 		}

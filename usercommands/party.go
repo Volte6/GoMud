@@ -57,17 +57,6 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 		if currentParty = parties.New(userId); currentParty != nil {
 			response.SendUserMessage(userId, `You started a new party!`, true)
-
-			for _, instId := range room.GetMobs(rooms.FindCharmed) {
-				mob := mobs.GetInstance(instId)
-				if mob == nil {
-					continue
-				}
-				if mob.Character.IsCharmed(userId) {
-					currentParty.AddMob(instId)
-				}
-			}
-
 		} else {
 			response.SendUserMessage(userId, `Something went wrong.`, true)
 		}
@@ -123,25 +112,6 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			response.SendUserMessage(userId, `Something went wrong.`, true)
 		}
 
-		if mobInstId != 0 {
-			if mob := mobs.GetInstance(mobInstId); mob != nil {
-				if mob.Character.IsCharmed() {
-					for _, partyUId := range currentParty.UserIds {
-						if mob.Character.IsCharmed(partyUId) {
-							response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> joined your party.`, mob.Character.Name), true)
-							currentParty.AddMob(mobInstId)
-
-							response.Handled = true
-							return response, nil
-						}
-					}
-				}
-				response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> doesn't want to join you.`, mob.Character.Name), true)
-				response.Handled = true
-				return response, nil
-			}
-		}
-
 		response.Handled = true
 		return response, nil
 	}
@@ -166,16 +136,6 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 					continue
 				}
 				response.SendUserMessage(uid, fmt.Sprintf(`<ansi fg="username">%s</ansi> joined the party!`, user.Character.Name), true)
-			}
-
-			for _, instId := range room.GetMobs(rooms.FindCharmed) {
-				mob := mobs.GetInstance(instId)
-				if mob == nil {
-					continue
-				}
-				if mob.Character.IsCharmed(userId) {
-					currentParty.AddMob(instId)
-				}
 			}
 
 		} else {
@@ -208,6 +168,8 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		if currentParty != nil {
 			isInvited := currentParty.Invited(userId)
 			leaderId := currentParty.LeaderUserId
+
+			charmedMobInstanceIds := []int{}
 
 			for _, uid := range currentParty.UserIds {
 				uStatus := "In Party"
@@ -253,15 +215,17 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 					`<ansi fg="white-bold">%s</ansi>`}
 
 				formatting = append(formatting, rowFormat)
+
+				charmedMobInstanceIds = append(charmedMobInstanceIds, u.Character.GetCharmIds()...)
 			}
 
-			for _, mobInstanceId := range currentParty.GetMobs() {
+			for _, mobInstanceId := range charmedMobInstanceIds {
 				m := mobs.GetInstance(mobInstanceId)
 				mRoom := rooms.LoadRoom(m.Character.RoomId)
 				mHealthPct := int(math.Floor((float64(m.Character.Health) / float64(m.Character.HealthMax.Value)) * 100))
 				rows = append(rows, []string{
 					m.Character.Name,
-					`Friend`,
+					`♥friend`,
 					fmt.Sprintf(`%d`, m.Character.Level),
 					//fmt.Sprintf(`%d/%d`, m.Character.Health, m.Character.HealthMax.Value),
 					fmt.Sprintf(`%d%%`, mHealthPct),

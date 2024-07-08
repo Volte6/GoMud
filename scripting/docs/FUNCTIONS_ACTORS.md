@@ -10,9 +10,13 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.InstanceId() int](#actorobjectinstanceid-int)
   - [ActorObject.MobTypeId() int](#actorobjectmobtypeid-int)
   - [ActorObject.GetRace() string](#actorobjectgetrace-string)
+  - [ActorObject.GetLevel() int](#actorobjectgetlevel-int)
   - [ActorObject.GetStat(statName string) int](#actorobjectgetstatstatname-string-int)
   - [ActorObject.SetTempData(key string, value any)](#actorobjectsettempdatakey-string-value-any)
   - [ActorObject.GetTempData(key string) any](#actorobjectgettempdatakey-string-any)
+  - [ActorObject.SetMiscCharacterData(key string, value any)](#actorobjectsetmisccharacterdatakey-string-value-any)
+  - [ActorObject.GetMiscCharacterData(key string) any](#actorobjectgetmisccharacterdatakey-string-any)
+  - [ActorObject.GetMiscCharacterDataKeys(\[ prefix1, prefix2 \]) \[\]string](#actorobjectgetmisccharacterdatakeys-prefix1-prefix2--string)
   - [ActorObject.GetCharacterName( wrapInTags bool ) string](#actorobjectgetcharactername-wrapintags-bool--string)
   - [ActorObject.GetRoomId() int](#actorobjectgetroomid-int)
   - [ActorObject.HasQuest(questId string) bool](#actorobjecthasquestquestid-string-bool)
@@ -21,6 +25,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.AddHealth(amt int) int](#actorobjectaddhealthamt-int-int)
   - [ActorObject.Command(cmd string, waitTurns ...int)](#actorobjectcommandcmd-string-waitturns-int)
   - [ActorObject.TrainSkill(skillName string, skillLevel int)](#actorobjecttrainskillskillname-string-skilllevel-int)
+  - [ActorObject.GetSkillLevel(skillName string)](#actorobjectgetskilllevelskillname-string)
   - [ActorObject.MoveRoom(destRoomId int)](#actorobjectmoveroomdestroomid-int)
   - [ActorObject.UpdateItem(itemId ItemObject)](#actorobjectupdateitemitemid-itemobject)
   - [ActorObject.GiveItem(itemId ItemObject)](#actorobjectgiveitemitemid-itemobject)
@@ -43,9 +48,12 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetRaceKills(raceName string) int](#actorobjectgetracekillsracename-string-int)
   - [ActorObject.GetHealth() int](#actorobjectgethealth-int)
   - [ActorObject.GetHealthMax() int](#actorobjectgethealthmax-int)
+  - [ActorObject.GetHealthPct() float](#actorobjectgethealthpct-float)
   - [ActorObject.GetMana() int](#actorobjectgetmana-int)
   - [ActorObject.GetManaMax() int](#actorobjectgetmanamax-int)
+  - [ActorObject.GetManaPct() float](#actorobjectgetmanapct-float)
   - [ActorObject.SetAdjective(adj string, addIt bool)](#actorobjectsetadjectiveadj-string-addit-bool)
+  - [ActorObject.GetCharmCount() int](#actorobjectgetcharmcount-int)
 
 
 
@@ -91,6 +99,9 @@ _Note: Only useful for Mob ActorObjects - Returns zero otherwise._
 ## [ActorObject.GetRace() string](/scripting/actor_func.go)
 Gets the race name of the actor, such as Human, Elf, Rodent, etc.
 
+## [ActorObject.GetLevel() int](/scripting/actor_func.go)
+Returns the level of the actor
+
 ## [ActorObject.GetStat(statName string) int](/scripting/actor_func.go)
 Returns the named stat value.
 
@@ -116,6 +127,32 @@ _Note: This is useful for saving/retrieving data that a ActorObject can carry al
 |  Argument | Explanation |
 | --- | --- |
 | key | A unique identifier for the data. |
+
+## [ActorObject.SetMiscCharacterData(key string, value any)](/scripting/actor_func.go)
+Sets permanent data for the ActorObject. 
+
+_Note: This miscellaneous data is attached to the character data, not the user data. If the user changes characters, it will not follow._
+
+|  Argument | Explanation |
+| --- | --- |
+| key | A unique identifier for the data. |
+| value | What you will be saving. If null, frees from memory. |
+
+## [ActorObject.GetMiscCharacterData(key string) any](/scripting/actor_func.go)
+Gets permanent data for the ActorObject.
+
+_Note: This miscellaneous data is attached to the character data, not the user data. If the user changes characters, it will not follow._
+
+|  Argument | Explanation |
+| --- | --- |
+| key | A unique identifier for the data. |
+
+## [ActorObject.GetMiscCharacterDataKeys([ prefix1, prefix2 ]) []string](/scripting/actor_func.go)
+Gets a list of misc data keys for the ActorObject.
+
+|  Argument | Explanation |
+| --- | --- |
+| prefix1, prefix2, etc | Optional strings of prefixes to return matching keys. |
 
 ## [ActorObject.GetCharacterName( wrapInTags bool ) string](/scripting/actor_func.go)
 Retrieves the name of a ActorObject.
@@ -173,6 +210,14 @@ Sets an ActorObject skill level, if it's greater than what they already have
 |  Argument | Explanation |
 | --- | --- |
 | skillName | The name of the skill to train, such as `map` or `backstab`. |
+
+## [ActorObject.GetSkillLevel(skillName string)](/scripting/actor_func.go)
+Returns the current skil level for the skillName, or zero if none.
+
+|  Argument | Explanation |
+| --- | --- |
+| skillName | The name of the skill to train, such as `map` or `backstab`. |
+
 
 ## [ActorObject.MoveRoom(destRoomId int)](/scripting/actor_func.go)
 Quietly moves an ActorObject to a new room
@@ -314,11 +359,17 @@ Returns current actor health
 ## [ActorObject.GetHealthMax() int](/scripting/actor_func.go)
 Returns current actor max health
 
+## [ActorObject.GetHealthPct() float](/scripting/actor_func.go)
+Returns current actor health as a percentage
+
 ## [ActorObject.GetMana() int](/scripting/actor_func.go)
 Returns current actor mana
 
 ## [ActorObject.GetManaMax() int](/scripting/actor_func.go)
 Returns current actor max mana
+
+## [ActorObject.GetManaPct() float](/scripting/actor_func.go)
+Returns current actor mana as a percentage
 
 ## [ActorObject.SetAdjective(adj string, addIt bool)](/scripting/actor_func.go)
 Adds or removes a specific text adjective to the characters name
@@ -327,3 +378,6 @@ Adds or removes a specific text adjective to the characters name
 | --- | --- |
 | adj | Adjective such as "sleeping", "crying" or "busy" |
 | addIt | `true` to add it. `false` to remove it. |
+
+## [ActorObject.GetCharmCount() int](/scripting/actor_func.go)
+Returns the number of charmed creatures in the actors control

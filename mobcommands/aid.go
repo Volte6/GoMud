@@ -64,7 +64,7 @@ func Aid(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 
 			// Set spell Aid
 			spellAggro := characters.SpellAggroInfo{
-				SpellId:              `aid`,
+				SpellId:              `aidskill`,
 				SpellRest:            ``,
 				TargetUserIds:        []int{aidPlayerId},
 				TargetMobInstanceIds: []int{},
@@ -78,7 +78,7 @@ func Aid(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 
 			if continueCasting {
 
-				spellInfo := spells.GetSpell(`aid`)
+				spellInfo := spells.GetSpell(`aidskill`)
 				mob.Character.CancelBuffsWithFlag(buffs.Hidden)
 				mob.Character.SetCast(spellInfo.WaitRounds, spellAggro)
 			}
