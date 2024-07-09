@@ -81,6 +81,14 @@ type Mob struct {
 	tempDataStore   map[string]any
 }
 
+func MobInstanceExists(instanceId int) bool {
+	mobMutex.RLock()
+	defer mobMutex.RUnlock()
+
+	_, ok := mobInstances[instanceId]
+	return ok
+}
+
 func GetAllMobNames() []string {
 	return append([]string{}, allMobNames...)
 }

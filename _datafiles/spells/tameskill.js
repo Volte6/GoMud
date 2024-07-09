@@ -4,7 +4,7 @@ const SixtyMinutes = 60*60;
 const FifteenMinutes = 60*15;
 const FiveMinutes = 60*5;
 
-const MOD_SKILL_MIN = -50;
+const MOD_SKILL_MIN = 1;
 const MOD_SKILL_MAX = 100;
 
 const MOD_LEVELDIFF_MIN = -25;
@@ -12,7 +12,12 @@ const MOD_LEVELDIFF_MAX = 25;
 
 const MOD_HEALTHPERCENT_MAX = 50;
 
+const MOD_SIZE_SMALL = 0;
+const MOD_SIZE_MEDIUM = -10;
+const MOD_SIZE_LARGE = -25;
+
 const FACTOR_IS_AGGRO = .50;
+
 
 function getTameSkills(sourceActor) {
 
@@ -67,6 +72,22 @@ function calculateChanceIn100(sourceActor, targetActor) {
         proficiencyModifier = MOD_SKILL_MAX;
     }
 
+    // Every 10 successes they get better at it.
+    proficiencyModifier = Math.ceil( proficiencyModifier / 10 );
+
+    sizeModifier = 0;
+    switch( targetActor.GetSize() ) {
+        case "large":
+            sizeModifier = MOD_SIZE_LARGE;
+            break;
+        case "medium":
+        default:
+            sizeModifier = MOD_SIZE_MEDIUM;
+        break;
+        case "small":
+            sizeModifier = MOD_SIZE_SMALL;
+        break;
+    }
     // console.log('proficiencyModifier: '+proficiencyModifier);
 
     levelDiff = sourceActor.GetLevel() - targetActor.GetLevel();
@@ -87,20 +108,32 @@ function calculateChanceIn100(sourceActor, targetActor) {
         aggroModifier = FACTOR_IS_AGGRO;
     }
 
-    return Math.ceil( (proficiencyModifier + levelDiff + healthModifier) * aggroModifier );
+    return Math.ceil( (proficiencyModifier + levelDiff + healthModifier + sizeModifier) * aggroModifier );
 }
 
 // Called when the casting is initialized (cast command)
 // Return false if the casting should be ignored/aborted
 function onCast(sourceActor, targetActor) {
 
-    spellLevel = sourceActor.GetSkillLevel("tame");
-
-    race = targetActor.GetRace();
-
-    if ( race.toLowerCase() != "rodent" ) {
-        SendUserMessage(sourceActor.UserId(), 'This spell only works on rodents.');
+    
+    if ( targetActor.IsCharmed() ) {
+        SendUserMessage(sourceActor.UserId(), 'Already friendly!');
         return false;
+    }
+
+    skillLevel = sourceActor.GetSkillLevel("tame");
+    charmCt = sourceActor.GetCharmCount();
+    if ( charmCt >= skillLevel+1 ) {
+        SendUserMessage(sourceActor.UserId(), 'You can only have '+String(skillLevel+1)+' creatures following you at a time.');
+        return true;    
+    }
+
+
+    allTameSkills = getTameSkills(sourceActor);
+    proficiencyModifier = allTameSkills[targetActor.GetCharacterName(false)];
+    if ( proficiencyModifier == null ) {
+        SendUserMessage(sourceActor.UserId(), 'You don\'t know how to tame a '+targetActor.GetCharacterName(true)+'.');
+        return true;
     }
 
     chance = calculateChanceIn100(sourceActor, targetActor);
@@ -150,6 +183,11 @@ function onWait(sourceActor, targetActor) {
 // Return true to ignore any auto-retaliation from the target
 function onMagic(sourceActor, targetActor) {
 
+    if ( targetActor.IsCharmed() ) {
+        SendUserMessage(sourceActor.UserId(), 'Already friendly!');
+        return false;
+    }
+
     targetName = targetActor.GetCharacterName(true);
     sourceName = sourceActor.GetCharacterName(true);
 
@@ -160,7 +198,7 @@ function onMagic(sourceActor, targetActor) {
         SendUserMessage(sourceActor.UserId(), 'The '+targetName+' <ansi fg="182">RESISTS</ansi> your attempt to tame it!');
         SendRoomMessage(sourceActor.GetRoomId(), 'The '+targetName+' <ansi fg="182">RESISTS</ansi> '+sourceName+'\'s attempt to tame it!', sourceActor.UserId());
 
-        modifyTameSkill(sourceActor, targetActor, -1); 
+        // modifyTameSkill(sourceActor, targetActor, -1); 
         
         return false;
     }
@@ -170,20 +208,20 @@ function onMagic(sourceActor, targetActor) {
     SendUserMessage(sourceActor.UserId(), 'You <ansi fg="151">SUCCESSFULLY</ansi> tame the '+targetName+'!');
     SendRoomMessage(sourceActor.GetRoomId(), sourceName+' <ansi fg="151">SUCCESSFULLY</ansi> tames the '+targetName+'!', sourceActor.UserId());
     
-    spellLevel = sourceActor.GetSkillLevel("tame");
+    skillLevel = sourceActor.GetSkillLevel("tame");
     tameRounds = 0;
-    switch( spellLevel ) {
+    switch( skillLevel ) {
         case 4:
-            tameRounds = UnlimitedMinutes;
+            tameRounds = SixtyMinutes;
             break;
         case 3:
             tameRounds = UtilGetSecondsToRounds(SixtyMinutes);
             break;
         case 2:
-            tameRounds = UtilGetSecondsToRounds(FifteenMinutes);
+            tameRounds = UtilGetSecondsToRounds(SixtyMinutes);
             break;
         default:
-            tameRounds = UtilGetSecondsToRounds(FiveMinutes);
+            tameRounds = UtilGetSecondsToRounds(SixtyMinutes);
     }
 
     targetActor.CharmSet(sourceActor.UserId(), tameRounds, "emote reverts to a wild state.");

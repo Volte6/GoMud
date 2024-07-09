@@ -6,6 +6,7 @@ import (
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -28,6 +29,14 @@ func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
 		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+	}
+
+	maxCharmed := user.Character.GetSkillLevel(skills.Tame) + 1
+
+	if len(user.Character.GetCharmIds()) >= maxCharmed {
+		response.SendUserMessage(userId, fmt.Sprintf(`You can only have %d creatures following you at a time.`, maxCharmed), true)
+		response.Handled = true
+		return response, nil
 	}
 
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {

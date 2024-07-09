@@ -3,7 +3,6 @@ package usercommands
 import (
 	"errors"
 	"fmt"
-	"math"
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
@@ -55,8 +54,7 @@ func Tame(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		rows := [][]string{}
 
 		for creatureName, proficiency := range creatureTameSkill {
-			profPct := int(math.Ceil(float64(proficiency) / 100))
-			rows = append(rows, []string{creatureName, fmt.Sprintf("%d%%", profPct)})
+			rows = append(rows, []string{creatureName, fmt.Sprintf("%d", proficiency)})
 		}
 
 		onlineTableData := templates.GetTable(`Your taming proficiency`, headers, rows)

@@ -966,6 +966,26 @@ func (c *Character) GetSkillLevelCost(currentLevel int) int {
 	return currentLevel
 }
 
+func (c *Character) GetTameCreatureSkill(userId int, creatureName string) int {
+
+	skillValue := c.GetMiscData(`tameskill-` + creatureName)
+	if sVal, ok := skillValue.(int); ok {
+		return sVal
+	}
+	return -1
+
+}
+
+func (c *Character) GetMaxCharmedCreatures() int {
+	lvl := c.GetSkillLevel(skills.Tame)
+	return lvl + 1
+}
+
+func (c *Character) SetTameCreatureSkill(userId int, creatureName string, proficiency int) error {
+	c.SetMiscData(`tameskill-`+creatureName, proficiency)
+	return nil
+}
+
 func (c *Character) GetMemoryCapacity() int {
 	return c.GetSkillLevel(skills.Map)*c.Stats.Smarts.Value + 5
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
+	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
@@ -45,6 +46,13 @@ func (a ScriptActor) MobTypeId() int {
 
 func (a ScriptActor) GetRace() string {
 	return a.characterRecord.Race()
+}
+
+func (a ScriptActor) GetSize() string {
+	if r := races.GetRace(a.characterRecord.RaceId); r != nil {
+		return string(r.Size)
+	}
+	return string(races.Medium)
 }
 
 func (a ScriptActor) GetLevel() int {
@@ -401,19 +409,21 @@ func (a ScriptActor) IsCharmed(userId ...int) bool {
 }
 
 func (a ScriptActor) CharmSet(userId int, charmRounds int, onRevertCommand ...string) {
+
+	// If the player is in a party, add the mob to their party
+	if a.mobInstanceId < 1 {
+		return
+	}
+
 	if len(onRevertCommand) < 1 {
 		onRevertCommand = append(onRevertCommand, ``)
 	}
 	a.characterRecord.Charm(userId, charmRounds, onRevertCommand[0])
 
-	// If the player is in a party, add the mob to their party
-	if a.mobInstanceId > 0 {
-
-		if user := users.GetByUserId(userId); user != nil {
-			user.Character.TrackCharmed(a.mobInstanceId, true)
-		}
-
+	if user := users.GetByUserId(userId); user != nil {
+		user.Character.TrackCharmed(a.mobInstanceId, true)
 	}
+
 }
 
 func (a ScriptActor) CharmRemove() {

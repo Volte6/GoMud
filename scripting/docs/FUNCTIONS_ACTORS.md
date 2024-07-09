@@ -10,6 +10,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.InstanceId() int](#actorobjectinstanceid-int)
   - [ActorObject.MobTypeId() int](#actorobjectmobtypeid-int)
   - [ActorObject.GetRace() string](#actorobjectgetrace-string)
+  - [ActorObject.GetSize() string](#actorobjectgetsize-string)
   - [ActorObject.GetLevel() int](#actorobjectgetlevel-int)
   - [ActorObject.GetStat(statName string) int](#actorobjectgetstatstatname-string-int)
   - [ActorObject.SetTempData(key string, value any)](#actorobjectsettempdatakey-string-value-any)
@@ -53,6 +54,10 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetManaMax() int](#actorobjectgetmanamax-int)
   - [ActorObject.GetManaPct() float](#actorobjectgetmanapct-float)
   - [ActorObject.SetAdjective(adj string, addIt bool)](#actorobjectsetadjectiveadj-string-addit-bool)
+  - [ActorObject.IsCharmed( \[userId1, userId2, etc \] ) bool ](#actorobjectischarmed-userid1-userid2-etc---bool-)
+  - [ActorObject.CharmSet(userId int, charmRounds int, \[ onRevertCommand1, onRevertCommand2, etc \])](#actorobjectcharmsetuserid-int-charmrounds-int--onrevertcommand1-onrevertcommand2-etc-)
+  - [ActorObject.CharmRemove()](#actorobjectcharmremove)
+  - [ActorObject.CharmExpire()](#actorobjectcharmexpire)
   - [ActorObject.GetCharmCount() int](#actorobjectgetcharmcount-int)
 
 
@@ -98,6 +103,9 @@ _Note: Only useful for Mob ActorObjects - Returns zero otherwise._
 
 ## [ActorObject.GetRace() string](/scripting/actor_func.go)
 Gets the race name of the actor, such as Human, Elf, Rodent, etc.
+
+## [ActorObject.GetSize() string](/scripting/actor_func.go)
+Returns `small`, `medium`, or `large`
 
 ## [ActorObject.GetLevel() int](/scripting/actor_func.go)
 Returns the level of the actor
@@ -378,6 +386,28 @@ Adds or removes a specific text adjective to the characters name
 | --- | --- |
 | adj | Adjective such as "sleeping", "crying" or "busy" |
 | addIt | `true` to add it. `false` to remove it. |
+
+## [ActorObject.IsCharmed( [userId1, userId2, etc ] ) bool ](/scripting/actor_func.go)
+Sets a mob to charmed by a user for a set number of rounds.
+
+|  Argument | Explanation |
+| --- | --- |
+| userId | One or more users to test against. If ommitted, returns true if charmed at all by anyone. |
+
+## [ActorObject.CharmSet(userId int, charmRounds int, [ onRevertCommand1, onRevertCommand2, etc ])](/scripting/actor_func.go)
+Sets a mob to charmed by a user for a set number of rounds.
+
+|  Argument | Explanation |
+| --- | --- |
+| userId | userId that the mob will be charmed to |
+| charmRounds | How many rounds it should last, or -2 for unlimited. |
+| onRevertCommand | One or more commands for the mob to execute when the charm expires |
+
+## [ActorObject.CharmRemove()](/scripting/actor_func.go)
+Immediately discards any charm effect without expiration effects.
+
+## [ActorObject.CharmExpire()](/scripting/actor_func.go)
+Forces the current charm of the mob to expire
 
 ## [ActorObject.GetCharmCount() int](/scripting/actor_func.go)
 Returns the number of charmed creatures in the actors control

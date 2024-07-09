@@ -9,6 +9,7 @@ import (
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
+	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -92,6 +93,24 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 						fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
 						true)
 
+					// Chance to learn to tame the creature.
+					if util.Rand(100) == 1 {
+						if user.Character.GetSkillLevel(skills.Tame) > 0 {
+
+							currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)
+							if currentSkill < 50 {
+								user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
+								slog.Info("Tame Skill", "currentSkill", currentSkill, "next", (currentSkill + 1), "mobName", mob.Character.Name, "userId", user.UserId)
+								if currentSkill == -1 {
+									response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+								} else {
+									response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+								}
+							}
+
+						}
+					}
+
 					continue
 				}
 
@@ -133,6 +152,23 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 						response.SendUserMessage(user.UserId,
 							fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
 							true)
+
+						if util.Rand(100) == 1 {
+							if user.Character.GetSkillLevel(skills.Tame) > 0 {
+
+								currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)
+								if currentSkill < 50 {
+									user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
+
+									if currentSkill == -1 {
+										response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+									} else {
+										response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+									}
+								}
+
+							}
+						}
 					}
 
 				}
