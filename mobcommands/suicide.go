@@ -110,7 +110,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 					slog.Info("Tame Chance", "levelDelta", levelDelta, "skillsDelta", skillsDelta, "targetNumber", targetNumber)
 
 					if util.Rand(1000) < targetNumber {
-						if user.Character.GetSkillLevel(skills.Tame) > 0 {
+						if mob.IsTameable() && user.Character.GetSkillLevel(skills.Tame) > 0 {
 
 							currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)
 							if currentSkill < 50 {
@@ -184,7 +184,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 						slog.Info("Tame Chance", "levelDelta", levelDelta, "skillsDelta", skillsDelta, "targetNumber", targetNumber)
 
 						if util.Rand(1000) < targetNumber {
-							if user.Character.GetSkillLevel(skills.Tame) > 0 {
+							if mob.IsTameable() && user.Character.GetSkillLevel(skills.Tame) > 0 {
 
 								currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)
 								if currentSkill < 50 {
