@@ -8,6 +8,7 @@ angrycommands:
   - emote growls aggressively.
   - emote howls.
 knowsfirstaid: true
+tameable: true
 stats:
   strength:
     base: 1

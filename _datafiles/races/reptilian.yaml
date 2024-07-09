@@ -6,6 +6,7 @@ unarmedname: claws
 tnlscale: 1
 knowsfirstaid: true
 angrycommands: [emote hisses and spits.]
+tameable: true
 stats:
   vitality:
     base: 1

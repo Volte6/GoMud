@@ -112,7 +112,11 @@ function calculateChanceIn100(sourceActor, targetActor) {
 // Return false if the casting should be ignored/aborted
 function onCast(sourceActor, targetActor) {
 
-    
+    if ( !targetActor.IsTameable() ) {
+        SendUserMessage(sourceActor.UserId(), targetActor.GetCharacterName(true)+' can\'t be tamed!');
+        return false;
+    }
+
     if ( targetActor.IsCharmed() ) {
         SendUserMessage(sourceActor.UserId(), 'Already friendly!');
         return false;

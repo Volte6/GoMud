@@ -8,6 +8,7 @@ tnlscale: 1.0
 angrycommands: 
   - emote is looking dead...ly.
   - emote lets out a blood curdling scream.
+tameable: true
 stats:
   mysticism:
     base: 3

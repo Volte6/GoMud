@@ -5,6 +5,7 @@ size: large
 unarmedname: branches
 tnlscale: 1
 angrycommands: [emote creeks and sways with intent.]
+tameable: false
 stats:
   strength:
     base: 3

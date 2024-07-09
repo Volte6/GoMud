@@ -25,6 +25,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.AddGold(amt int \[, bankAmt int\])](#actorobjectaddgoldamt-int--bankamt-int)
   - [ActorObject.AddHealth(amt int) int](#actorobjectaddhealthamt-int-int)
   - [ActorObject.Command(cmd string, waitTurns ...int)](#actorobjectcommandcmd-string-waitturns-int)
+  - [ActorObject.IsTameable() bool](#actorobjectistameable-bool)
   - [ActorObject.TrainSkill(skillName string, skillLevel int)](#actorobjecttrainskillskillname-string-skilllevel-int)
   - [ActorObject.GetSkillLevel(skillName string)](#actorobjectgetskilllevelskillname-string)
   - [ActorObject.MoveRoom(destRoomId int \[, leaveCharmedMobsBehind bool\] )](#actorobjectmoveroomdestroomid-int--leavecharmedmobsbehind-bool-)
@@ -211,6 +212,9 @@ _Note: Don't underestimate the power of this function! Complex and interesting b
 | --- | --- |
 | cmd | The command to execute such as `look west` or `say goodbye`. |
 | waitTurns (optional) | The number of turns (NOT rounds) to wait before executing the command. |
+
+## [ActorObject.IsTameable() bool](/scripting/actor_func.go)
+Returns `true` if actor can be tamed.
 
 ## [ActorObject.TrainSkill(skillName string, skillLevel int)](/scripting/actor_func.go)
 Sets an ActorObject skill level, if it's greater than what they already have

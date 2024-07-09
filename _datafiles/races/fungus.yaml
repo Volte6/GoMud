@@ -5,6 +5,7 @@ size: medium
 unarmedname: spores
 angrycommands: [emote pulsates.]
 tnlscale: 1
+tameable: true
 stats:
   vitality:
     base: 4

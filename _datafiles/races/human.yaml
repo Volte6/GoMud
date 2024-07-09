@@ -11,6 +11,7 @@ angrycommands:
   - shout it's time to die!
   - shout oh man, it is on now!
   - shout i've been waiting for this moment.
+tameable: false
 stats:
   strength:
     base: 1

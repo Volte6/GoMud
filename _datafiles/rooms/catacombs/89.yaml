@@ -14,7 +14,9 @@ exits:
     roomid: 81
   north:
     roomid: 88
-gold: 3
+items:
+- itemid: 10002
+gold: 6
 spawninfo:
 - mobid: 15
   cooldown: 160

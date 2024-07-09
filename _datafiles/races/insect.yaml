@@ -5,6 +5,7 @@ size: small
 unarmedname: mandibles
 tnlscale: 1
 angrycommands: [emote chitters.]
+tameable: true
 stats:
   strength:
     base: 3
