@@ -293,21 +293,7 @@ func (a ScriptActor) IsTameable() bool {
 	if a.mobRecord == nil {
 		return false
 	}
-	if a.mobRecord.IsMerchant {
-		return false
-	}
-	if len(a.mobRecord.ShopStock) > 0 {
-		return false
-	}
-	if len(a.mobRecord.ShopServants) > 0 {
-		return false
-	}
-	if r := races.GetRace(a.characterRecord.RaceId); r != nil {
-		if !r.Tameable {
-			return false
-		}
-	}
-	return true
+	return a.mobRecord.IsTameable()
 }
 
 func (a ScriptActor) HasBuff(buffId int) bool {

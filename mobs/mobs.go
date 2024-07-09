@@ -216,6 +216,27 @@ func DestroyInstance(instanceId int) {
 	delete(mobInstances, instanceId)
 }
 
+func (m *Mob) IsTameable() bool {
+	if m.IsMerchant {
+		return false
+	}
+	if len(m.ShopStock) > 0 {
+		return false
+	}
+	if len(m.ShopServants) > 0 {
+		return false
+	}
+	if len(m.ScriptTag) > 0 {
+		return false
+	}
+	if r := races.GetRace(m.Character.RaceId); r != nil {
+		if !r.Tameable {
+			return false
+		}
+	}
+	return true
+}
+
 func (m *Mob) SetTempData(key string, value any) {
 
 	if m.tempDataStore == nil {

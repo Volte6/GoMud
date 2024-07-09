@@ -356,11 +356,6 @@ func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
 	return actualXP, xpScale
 }
 
-func (c *Character) IsTameable() bool {
-	isT := true
-	if c.Is	
-}
-
 func (c *Character) TrackCharmed(mobId int, add bool) {
 	for _, mobInstanceId := range c.CharmedMobs {
 		if mobInstanceId == mobId {
