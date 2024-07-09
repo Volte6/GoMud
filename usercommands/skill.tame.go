@@ -53,8 +53,8 @@ func Tame(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		rows := [][]string{}
 
-		for creatureName, proficiency := range creatureTameSkill {
-			rows = append(rows, []string{creatureName, fmt.Sprintf("%d", proficiency)})
+		for creatureName, modProficiency := range creatureTameSkill {
+			rows = append(rows, []string{creatureName, fmt.Sprintf("%d", modProficiency)})
 		}
 
 		onlineTableData := templates.GetTable(`Your taming proficiency`, headers, rows)

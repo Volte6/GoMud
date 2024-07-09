@@ -94,13 +94,27 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 						true)
 
 					// Chance to learn to tame the creature.
-					if util.Rand(100) == 1 {
+					levelDelta := user.Character.Level - mob.Character.Level
+					if levelDelta < 0 {
+						levelDelta = 0
+					}
+					skillsDelta := int((float64(user.Character.Stats.Perception.Value-mob.Character.Stats.Perception.Value) + float64(user.Character.Stats.Smarts.Value-mob.Character.Stats.Smarts.Value)) / 2)
+					if skillsDelta < 0 {
+						skillsDelta = 0
+					}
+					targetNumber := levelDelta + skillsDelta
+					if targetNumber < 1 {
+						targetNumber = 1
+					}
+
+					slog.Info("Tame Chance", "levelDelta", levelDelta, "skillsDelta", skillsDelta, "targetNumber", targetNumber)
+
+					if util.Rand(1000) < targetNumber {
 						if user.Character.GetSkillLevel(skills.Tame) > 0 {
 
 							currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)
 							if currentSkill < 50 {
 								user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
-								slog.Info("Tame Skill", "currentSkill", currentSkill, "next", (currentSkill + 1), "mobName", mob.Character.Name, "userId", user.UserId)
 								if currentSkill == -1 {
 									response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
 								} else {
@@ -153,7 +167,23 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 							fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
 							true)
 
-						if util.Rand(100) == 1 {
+						// Chance to learn to tame the creature.
+						levelDelta := user.Character.Level - mob.Character.Level
+						if levelDelta < 0 {
+							levelDelta = 0
+						}
+						skillsDelta := int((float64(user.Character.Stats.Perception.Value-mob.Character.Stats.Perception.Value) + float64(user.Character.Stats.Smarts.Value-mob.Character.Stats.Smarts.Value)) / 2)
+						if skillsDelta < 0 {
+							skillsDelta = 0
+						}
+						targetNumber := levelDelta + skillsDelta
+						if targetNumber < 1 {
+							targetNumber = 1
+						}
+
+						slog.Info("Tame Chance", "levelDelta", levelDelta, "skillsDelta", skillsDelta, "targetNumber", targetNumber)
+
+						if util.Rand(1000) < targetNumber {
 							if user.Character.GetSkillLevel(skills.Tame) > 0 {
 
 								currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)

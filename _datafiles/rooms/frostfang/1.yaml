@@ -21,7 +21,6 @@ exits:
     roomid: 12
   west:
     roomid: 7
-gold: 3
 spawninfo:
 - mobid: 2
   cooldown: 85

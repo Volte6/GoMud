@@ -27,7 +27,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.Command(cmd string, waitTurns ...int)](#actorobjectcommandcmd-string-waitturns-int)
   - [ActorObject.TrainSkill(skillName string, skillLevel int)](#actorobjecttrainskillskillname-string-skilllevel-int)
   - [ActorObject.GetSkillLevel(skillName string)](#actorobjectgetskilllevelskillname-string)
-  - [ActorObject.MoveRoom(destRoomId int)](#actorobjectmoveroomdestroomid-int)
+  - [ActorObject.MoveRoom(destRoomId int \[, leaveCharmedMobsBehind bool\] )](#actorobjectmoveroomdestroomid-int--leavecharmedmobsbehind-bool-)
   - [ActorObject.UpdateItem(itemId ItemObject)](#actorobjectupdateitemitemid-itemobject)
   - [ActorObject.GiveItem(itemId ItemObject)](#actorobjectgiveitemitemid-itemobject)
   - [ActorObject.TakeItem(itemId ItemObject)](#actorobjecttakeitemitemid-itemobject)
@@ -227,12 +227,13 @@ Returns the current skil level for the skillName, or zero if none.
 | skillName | The name of the skill to train, such as `map` or `backstab`. |
 
 
-## [ActorObject.MoveRoom(destRoomId int)](/scripting/actor_func.go)
+## [ActorObject.MoveRoom(destRoomId int [, leaveCharmedMobsBehind bool] )](/scripting/actor_func.go)
 Quietly moves an ActorObject to a new room
 
 |  Argument | Explanation |
 | --- | --- |
 | destRoomId | The room id to move them to. |
+| leaveCharmedMobsBehind | If true, does not also move charmed mobs with the user. |
 
 ## [ActorObject.UpdateItem(itemId ItemObject)](/scripting/actor_func.go)
 Accepts an ItemObject to update in the players backpack. If the item does not already exist in the players backpack, it is ignored.

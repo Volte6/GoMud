@@ -240,11 +240,22 @@ func (a ScriptActor) GetSkillLevel(skillName string) int {
 	return a.characterRecord.GetSkillLevel(skills.SkillTag(skillName))
 }
 
-func (a ScriptActor) MoveRoom(destRoomId int) {
+func (a ScriptActor) MoveRoom(destRoomId int, leaveCharmedMobs ...bool) {
 
 	if a.userRecord != nil {
 
-		rooms.MoveToRoom(a.userId, destRoomId)
+		rmNow := rooms.LoadRoom(a.characterRecord.RoomId)
+
+		if rmNext := rooms.LoadRoom(destRoomId); rmNext != nil {
+			rooms.MoveToRoom(a.userId, destRoomId)
+
+			if len(leaveCharmedMobs) < 1 || !leaveCharmedMobs[0] {
+				for _, mobInstId := range a.characterRecord.GetCharmIds() {
+					rmNow.RemoveMob(mobInstId)
+					rmNext.AddMob(mobInstId)
+				}
+			}
+		}
 
 	} else if a.mobRecord != nil {
 

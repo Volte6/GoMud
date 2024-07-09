@@ -65,15 +65,12 @@ function calculateChanceIn100(sourceActor, targetActor) {
     allTameSkills = getTameSkills(sourceActor);
     proficiencyModifier = allTameSkills[targetName];
     if ( proficiencyModifier == null ) {
-        proficiencyModifier = 0;
+        proficiencyModifier = MOD_SKILL_MIN;
     } else if ( proficiencyModifier < MOD_SKILL_MIN ) {
         proficiencyModifier = MOD_SKILL_MIN;
     } else if ( proficiencyModifier > MOD_SKILL_MAX ) {
         proficiencyModifier = MOD_SKILL_MAX;
     }
-
-    // Every 10 successes they get better at it.
-    proficiencyModifier = Math.ceil( proficiencyModifier / 10 );
 
     sizeModifier = 0;
     switch( targetActor.GetSize() ) {
@@ -197,13 +194,9 @@ function onMagic(sourceActor, targetActor) {
     if ( randNumber >= successChance ) {
         SendUserMessage(sourceActor.UserId(), 'The '+targetName+' <ansi fg="182">RESISTS</ansi> your attempt to tame it!');
         SendRoomMessage(sourceActor.GetRoomId(), 'The '+targetName+' <ansi fg="182">RESISTS</ansi> '+sourceName+'\'s attempt to tame it!', sourceActor.UserId());
-
-        // modifyTameSkill(sourceActor, targetActor, -1); 
         
         return false;
     }
-
-    modifyTameSkill(sourceActor, targetActor, 1);
 
     SendUserMessage(sourceActor.UserId(), 'You <ansi fg="151">SUCCESSFULLY</ansi> tame the '+targetName+'!');
     SendRoomMessage(sourceActor.GetRoomId(), sourceName+' <ansi fg="151">SUCCESSFULLY</ansi> tames the '+targetName+'!', sourceActor.UserId());
