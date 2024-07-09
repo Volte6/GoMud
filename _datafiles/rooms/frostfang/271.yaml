@@ -11,7 +11,6 @@ biome: city
 exits:
   southwest:
     roomid: 270
-gold: 9
 spawninfo:
 - mobid: 2
   cooldown: 100

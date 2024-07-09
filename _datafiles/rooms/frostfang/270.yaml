@@ -8,6 +8,8 @@ description: The Soldiers Barracks in Frostfang is a bastion of military discipl
   area.
 biome: city
 exits:
+  north:
+    roomid: 829
   northeast:
     roomid: 271
   west:

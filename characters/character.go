@@ -323,10 +323,12 @@ func (c *Character) TrackSpellCast(spellName string) bool {
 	return false
 }
 
-func (c *Character) LearnSpell(spellName string) {
+func (c *Character) LearnSpell(spellName string) bool {
 	if _, ok := c.SpellBook[spellName]; !ok {
 		c.SpellBook[spellName] = 1
+		return true
 	}
+	return false
 }
 
 func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {

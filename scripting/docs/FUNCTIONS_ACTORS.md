@@ -44,7 +44,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetAlignmentName() string](#actorobjectgetalignmentname-string)
   - [ActorObject.ChangeAlignment(alignmentChange int)](#actorobjectchangealignmentalignmentchange-int)
   - [ActorObject.HasSpell(spellId string)](#actorobjecthasspellspellid-string)
-  - [ActorObject.LearnSpell(spellId string)](#actorobjectlearnspellspellid-string)
+  - [ActorObject.LearnSpell(spellId string) bool](#actorobjectlearnspellspellid-string-bool)
   - [ActorObject.IsAggro(targetActor ActorObject)](#actorobjectisaggrotargetactor-actorobject)
   - [ActorObject.GetMobKills(mobId int) int](#actorobjectgetmobkillsmobid-int-int)
   - [ActorObject.GetRaceKills(raceName string) int](#actorobjectgetracekillsracename-string-int)
@@ -338,8 +338,8 @@ Returns true if the actor has the spell supplied
 | --- | --- |
 | spellId | The ID of the spell |
 
-## [ActorObject.LearnSpell(spellId string)](/scripting/actor_func.go)
-Adds the spell to the Actors spellbook.
+## [ActorObject.LearnSpell(spellId string) bool](/scripting/actor_func.go)
+Adds the spell to the Actors spellbook. Returns true if learned, false if already known.
 
 |  Argument | Explanation |
 | --- | --- |

@@ -1,0 +1,11 @@
+itemid: 10017
+name: dancing needle
+namesimple: needle
+description: A tiny bladed weapon the size of a sewing needle.
+type: weapon
+hands: 1
+subtype: stabbing
+damage:
+  diceroll: 3@1d2
+statmods:
+  speed: 12

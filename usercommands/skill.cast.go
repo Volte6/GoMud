@@ -1,6 +1,7 @@
 package usercommands
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
+	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -22,6 +24,14 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
 		return response, fmt.Errorf("user %d not found", userId)
+	}
+
+	skillLevel := user.Character.GetSkillLevel(skills.Cast)
+
+	if skillLevel == 0 {
+		response.SendUserMessage(userId, "You don't know how to cast spells yet.", true)
+		response.Handled = true
+		return response, errors.New(`you don't know how to cast spells yet`)
 	}
 
 	// Load current room details

@@ -74,6 +74,7 @@ function calculateChanceIn100(sourceActor, targetActor) {
 
     sizeModifier = 0;
     switch( targetActor.GetSize() ) {
+
         case "large":
             sizeModifier = MOD_SIZE_LARGE;
             break;

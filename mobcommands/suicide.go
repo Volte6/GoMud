@@ -29,7 +29,32 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
-	slog.Info(`Mob Death`, `name`, mob.Character.Name)
+	slog.Info(`Mob Death`, `name`, mob.Character.Name, `rest`, rest)
+
+	// Make sure to clean up any charm stuff if it's being removed
+	if charmedUserId := mob.Character.RemoveCharm(); charmedUserId > 0 {
+		if charmedUser := users.GetByUserId(charmedUserId); charmedUser != nil {
+			charmedUser.Character.TrackCharmed(mob.InstanceId, false)
+		}
+	}
+
+	// vanish is meant to remove the mob without any rewards/drops/etc.
+	if rest == `vanish` {
+
+		// Destroy any record of this mob.
+		mobs.DestroyInstance(mob.InstanceId)
+
+		// Clean up mob from room...
+		if r := rooms.LoadRoom(mob.HomeRoomId); r != nil {
+			r.CleanupMobSpawns(false)
+		}
+
+		// Remove from current room
+		room.RemoveMob(mob.InstanceId)
+
+		response.Handled = true
+		return response, nil
+	}
 
 	// Send a death msg to everyone in the room.
 	response.SendRoomMessage(mob.Character.RoomId,

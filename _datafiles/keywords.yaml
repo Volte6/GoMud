@@ -131,6 +131,7 @@ help-aliases:
   enchant:          [unenchant, uncurse]
   skulduggery:      [sneak, bump, backstab, pickpocket]
   bank:             [deposit, withdraw]
+  dual-wield:       [dualwield, dual]
   storage:          [store, unstore]
   strength:         [str]
   vitality:         [vit]

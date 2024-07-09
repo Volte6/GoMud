@@ -1,0 +1,27 @@
+roomid: 829
+zone: Frostfang
+title: Soldiers Training Yard
+description: Nestled within the fortified city of Frostfang, the training yard near
+  the soldiers' barracks is a bustling hub of activity, even amid the biting chill
+  of winter. Surrounded by high stone walls, the yard is a stark yet lively contrast
+  to the icy landscape beyond. Straw dummies stand in regimented rows, bearing the
+  scars of countless practice strikes, while wooden targets line the perimeter, punctuated
+  by arrows and throwing axes. The ground, compacted by the constant footfalls of
+  soldiers, is dusted with snow, which crunches underfoot as recruits spar and veterans
+  drill in disciplined formations. Despite the freezing temperatures, the air is filled
+  with the sharp clinks of metal on metal and the gruff commands of instructors, their
+  breath visible in the cold. Here, under the watchful eye of the Master-at-Arms,
+  warriors are forged, their skills honed against the ever-present backdrop of Frostfang's
+  icy embrace.
+biome: city
+exits:
+  south:
+    roomid: 270
+spawninfo:
+- mobid: 42
+  cooldown: 20
+  message: The master-at-arms enters the training yard.
+skilltraining:
+  brawling:
+    min: 1
+    max: 4

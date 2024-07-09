@@ -927,17 +927,17 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 				// Each mob has a 10% chance of doing an idle action.
 				if util.Rand(10) < mob.ActivityLevel {
 
-					idleAction := mob.CombatCommands[util.Rand(cmdCt)]
+					combatAction := mob.CombatCommands[util.Rand(cmdCt)]
 
-					if idleAction == `` { // blank is a no-op
+					if combatAction == `` { // blank is a no-op
 						continue
 					}
 
-					allCmds := strings.Split(idleAction, `;`)
+					allCmds := strings.Split(combatAction, `;`)
 					if len(allCmds) >= c.TurnsPerRound() {
 						w.QueueCommand(0, mob.InstanceId, `say I have a CombatAction that is too long. Please notify an admin.`)
 					} else {
-						for turnDelay, action := range strings.Split(idleAction, `;`) {
+						for turnDelay, action := range strings.Split(combatAction, `;`) {
 							w.QueueCommand(0, mob.InstanceId, action, turnDelay)
 						}
 					}
