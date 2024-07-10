@@ -726,135 +726,6 @@ func (c *Character) UseItem(i items.Item) int {
 	return 0
 }
 
-func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bool) {
-
-	spec := i.GetSpec()
-
-	if spec.Type != items.Weapon && spec.Subtype != items.Wearable {
-		return returnItems, false
-	}
-
-	iHandsRequired := c.HandsRequired(i)
-	if iHandsRequired > 2 {
-		return returnItems, false
-	}
-
-	// are botht he currently equipped weapon and this weapon claws?
-	bothMartial := false
-	if spec.Subtype == items.Claws && c.Equipment.Weapon.GetSpec().Subtype == items.Claws {
-		bothMartial = true
-	}
-
-	canDualWield := c.CanDualWield()
-
-	// Weapons can go in either hand.
-	// Only do this if this is a 1 handed weapon
-	if spec.Type == items.Weapon && iHandsRequired < 2 {
-
-		// If they can dual wield
-		if canDualWield || bothMartial {
-
-			// If they have a weapon equippment and it is 1 handed
-			if c.Equipment.Weapon.ItemId != 0 && c.HandsRequired(c.Equipment.Weapon) == 1 {
-				// If nothing is in their offhand
-				if c.Equipment.Offhand.ItemId == 0 {
-					// Put it in the offhand.
-					returnItems = append(returnItems, c.Equipment.Offhand)
-					c.Equipment.Offhand = i
-					return returnItems, true
-				}
-			}
-
-		}
-
-	}
-
-	// First handle weapon/offhand, since they are special cases
-	switch spec.Type {
-	case items.Weapon:
-		if c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-
-		if !c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
-			// If it's a 2 handed weapon, remove whatever is in the offhand
-			if iHandsRequired == 2 || !canDualWield && c.Equipment.Offhand.GetSpec().Type == items.Weapon {
-				returnItems = append(returnItems, c.Equipment.Offhand)
-				c.Equipment.Offhand = items.Item{}
-			}
-		}
-
-		returnItems = append(returnItems, c.Equipment.Weapon)
-		c.Equipment.Weapon = i
-	case items.Offhand:
-		if c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-
-		if !c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
-			// If they have a 2h weapon equipped, remove it
-			if c.HandsRequired(c.Equipment.Weapon) == 2 {
-				returnItems = append(returnItems, c.Equipment.Weapon)
-				c.Equipment.Weapon = items.Item{}
-			}
-		}
-		returnItems = append(returnItems, c.Equipment.Offhand)
-		c.Equipment.Offhand = i
-	case items.Head:
-		if c.Equipment.Head.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Head)
-		c.Equipment.Head = i
-	case items.Neck:
-		if c.Equipment.Neck.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Neck)
-		c.Equipment.Neck = i
-	case items.Body:
-		if c.Equipment.Body.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Body)
-		c.Equipment.Body = i
-	case items.Belt:
-		if c.Equipment.Belt.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Belt)
-		c.Equipment.Belt = i
-	case items.Gloves:
-		if c.Equipment.Gloves.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Gloves)
-		c.Equipment.Gloves = i
-	case items.Ring:
-		if c.Equipment.Ring.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Ring)
-		c.Equipment.Ring = i
-	case items.Legs:
-		if c.Equipment.Legs.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Legs)
-		c.Equipment.Legs = i
-	case items.Feet:
-		if c.Equipment.Feet.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Feet)
-		c.Equipment.Feet = i
-	default:
-		return returnItems, false
-	}
-
-	return returnItems, true
-}
-
 func (c *Character) FindInBackpack(itemName string) (items.Item, bool) {
 
 	if itemName == `` {
@@ -1205,9 +1076,9 @@ func (c *Character) HasBuff(buffId int) bool {
 	return c.Buffs.HasBuff(buffId)
 }
 
-func (c *Character) AddBuff(buffId int) error {
+func (c *Character) AddBuff(buffId int, triggerCountOverride ...int) error {
 	buffId = int(math.Abs(float64(buffId)))
-	if !c.Buffs.AddBuff(buffId) {
+	if !c.Buffs.AddBuff(buffId, triggerCountOverride...) {
 		return fmt.Errorf(`failed to add buff. target: "%s" buffId: %d`, c.Name, buffId)
 	}
 	c.Validate()
@@ -1667,46 +1538,198 @@ func (c *Character) GetAllWornItems() []items.Item {
 	return wornItems
 }
 
+func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bool) {
+
+	spec := i.GetSpec()
+
+	if spec.Type != items.Weapon && spec.Subtype != items.Wearable {
+		return returnItems, false
+	}
+
+	iHandsRequired := c.HandsRequired(i)
+	if iHandsRequired > 2 {
+		return returnItems, false
+	}
+
+	// are botht he currently equipped weapon and this weapon claws?
+	bothMartial := false
+	if spec.Subtype == items.Claws && c.Equipment.Weapon.GetSpec().Subtype == items.Claws {
+		bothMartial = true
+	}
+
+	canDualWield := c.CanDualWield()
+
+	// Weapons can go in either hand.
+	// Only do this if this is a 1 handed weapon
+	if spec.Type == items.Weapon && iHandsRequired < 2 {
+
+		// If they can dual wield
+		if canDualWield || bothMartial {
+
+			// If they have a weapon equippment and it is 1 handed
+			if c.Equipment.Weapon.ItemId != 0 && c.HandsRequired(c.Equipment.Weapon) == 1 {
+				// If nothing is in their offhand
+				if c.Equipment.Offhand.ItemId == 0 {
+					// Put it in the offhand.
+					returnItems = append(returnItems, c.Equipment.Offhand)
+					c.Equipment.Offhand = i
+
+					c.reapplyWornItemBuffs()
+
+					return returnItems, true
+				}
+			}
+
+		}
+
+	}
+
+	// First handle weapon/offhand, since they are special cases
+	switch spec.Type {
+	case items.Weapon:
+		if c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+
+		if !c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
+			// If it's a 2 handed weapon, remove whatever is in the offhand
+			if iHandsRequired == 2 || !canDualWield && c.Equipment.Offhand.GetSpec().Type == items.Weapon {
+				returnItems = append(returnItems, c.Equipment.Offhand)
+				c.Equipment.Offhand = items.Item{}
+			}
+		}
+
+		returnItems = append(returnItems, c.Equipment.Weapon)
+		c.Equipment.Weapon = i
+	case items.Offhand:
+		if c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+
+		if !c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
+			// If they have a 2h weapon equipped, remove it
+			if c.HandsRequired(c.Equipment.Weapon) == 2 {
+				returnItems = append(returnItems, c.Equipment.Weapon)
+				c.Equipment.Weapon = items.Item{}
+			}
+		}
+		returnItems = append(returnItems, c.Equipment.Offhand)
+		c.Equipment.Offhand = i
+	case items.Head:
+		if c.Equipment.Head.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Head)
+		c.Equipment.Head = i
+	case items.Neck:
+		if c.Equipment.Neck.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Neck)
+		c.Equipment.Neck = i
+	case items.Body:
+		if c.Equipment.Body.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Body)
+		c.Equipment.Body = i
+	case items.Belt:
+		if c.Equipment.Belt.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Belt)
+		c.Equipment.Belt = i
+	case items.Gloves:
+		if c.Equipment.Gloves.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Gloves)
+		c.Equipment.Gloves = i
+	case items.Ring:
+		if c.Equipment.Ring.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Ring)
+		c.Equipment.Ring = i
+	case items.Legs:
+		if c.Equipment.Legs.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Legs)
+		c.Equipment.Legs = i
+	case items.Feet:
+		if c.Equipment.Feet.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Feet)
+		c.Equipment.Feet = i
+	default:
+		return returnItems, false
+	}
+
+	c.reapplyWornItemBuffs(returnItems...)
+
+	return returnItems, true
+}
+
 func (c *Character) RemoveFromBody(i items.Item) bool {
+
 	if i.Equals(c.Equipment.Weapon) {
 		c.Equipment.Weapon = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Offhand) {
+	} else if i.Equals(c.Equipment.Offhand) {
 		c.Equipment.Offhand = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Head) {
+	} else if i.Equals(c.Equipment.Head) {
 		c.Equipment.Head = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Neck) {
+	} else if i.Equals(c.Equipment.Neck) {
 		c.Equipment.Neck = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Body) {
+	} else if i.Equals(c.Equipment.Body) {
 		c.Equipment.Body = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Belt) {
+	} else if i.Equals(c.Equipment.Belt) {
 		c.Equipment.Belt = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Gloves) {
+	} else if i.Equals(c.Equipment.Gloves) {
 		c.Equipment.Gloves = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Ring) {
+	} else if i.Equals(c.Equipment.Ring) {
 		c.Equipment.Ring = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Legs) {
+	} else if i.Equals(c.Equipment.Legs) {
 		c.Equipment.Legs = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Feet) {
+	} else if i.Equals(c.Equipment.Feet) {
 		c.Equipment.Feet = items.Item{}
-		return true
+	} else {
+		return false
 	}
-	return false
+
+	c.reapplyWornItemBuffs(i)
+
+	return true
+}
+
+func (c *Character) reapplyWornItemBuffs(removedItems ...items.Item) {
+
+	buffIdCount := map[int]int{}
+
+	// Make a list of all item buffs provided by existing worn items
+	for _, itm := range c.GetAllWornItems() {
+		spec := itm.GetSpec()
+		for _, buffId := range spec.WornBuffIds {
+			buffIdCount[buffId] = buffIdCount[buffId] + 1
+		}
+
+	}
+	// Remove any buffs that come specifically from item
+	for _, removedItem := range removedItems {
+		iSpec := removedItem.GetSpec()
+		if len(iSpec.WornBuffIds) > 0 {
+			for _, buffId := range iSpec.WornBuffIds {
+				buffIdCount[buffId] = buffIdCount[buffId] - 1
+			}
+		}
+	}
+
+	for buffId, ct := range buffIdCount {
+		if ct < 1 {
+			c.RemoveBuff(buffId)
+		} else {
+			c.AddBuff(buffId, buffs.TriggersLeftUnlimited)
+		}
+	}
 }

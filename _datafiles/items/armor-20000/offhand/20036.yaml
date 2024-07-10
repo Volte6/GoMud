@@ -1,0 +1,8 @@
+itemid: 20036
+name: lantern
+namesimple: lantern
+description: A simple handheld lantern.
+type: offhand
+subtype: wearable
+wornbuffids:
+  - 1
