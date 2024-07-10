@@ -9,6 +9,8 @@ description: The street is lined with quaint, ivy-covered cottages and stalls, e
   the breeze create a tranquil ambiance, making Lavender Walk a haven of peace and
   wellness in the bustling city of Mystarion.
 exits:
+  east:
+    roomid: 867
   north:
     roomid: 851
   south:

@@ -4,42 +4,6 @@ import (
 	"strings"
 )
 
-/****************
-	dual-wield
-	enchant
-	inspect
-	map
-	peep
-	portal
-	scribe
-	search
-	skulduggery
-	track
-	brawling
-	protection
-	herbalism
-	  - forage (find ingredients, special ones in each zone?)
-	  - mix (potions?)
-	alchemy
-	  - alchemize (turn items to gold)
-	  - combine (combine two items into one new item, retaining random stats from each)
-	beastmastery
-	  - call (calls a random beast/pet to follow you around) - higher level gets more interesting stuff
-	  - command (hunt) - find players, mobs, or items nearby
-	  - command (attack/break) - attack a player or mob
-	  - command (guard) - absorbs damage the player would have taken
-	healing
-	  - heal (minor heal self or others)
-	  - cure (cure poison)
-	  - majorheal (major heal self or others)
-	  -
-
-
-
-
-
- ****************/
-
 type SkillTag string
 
 func (s SkillTag) String(subtag ...string) string {

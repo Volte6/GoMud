@@ -1,0 +1,12 @@
+roomid: 868
+zone: Mystarion
+title: The Enchanted Brew
+description: The Enchanted Brew is a cozy, inviting shop nestled along Lavender Walk,
+  its entrance adorned with a charming sign and blooming flower boxes. As you step
+  inside, the air is filled with the fragrant aroma of freshly brewed teas and the
+  subtle, enchanting scent of magical potions. Shelves lined with beautifully crafted
+  jars and ornate tea tins showcase a wide array of herbal blends, each labeled with
+  its unique magical properties.
+exits:
+  west:
+    roomid: 852

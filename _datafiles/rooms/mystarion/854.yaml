@@ -9,5 +9,7 @@ description: At the north-most end of Lavender Walk, the pathway opens into a ch
   magical properties. The light from enchanted lanterns is softer, casting a gentle,
   golden glow that enhances the natural beauty of the area.
 exits:
+  east:
+    roomid: 869
   south:
     roomid: 853

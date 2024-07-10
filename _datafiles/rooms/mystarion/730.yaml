@@ -1,7 +1,13 @@
 roomid: 730
 zone: Mystarion
 title: Canal Bridge
-description: a bridge over the canal
+description: The bridge arches gracefully over the shimmering canal, a marvel of both
+  architecture and magic. Crafted from smooth, white stone and adorned with intricate
+  carvings of mythical creatures and flowing runes, the bridge seems to glow softly
+  in the moonlight. Delicate, enchanted lanterns line the railings, casting a warm,
+  inviting light that dances on the water below. The gentle sound of the canal's flowing
+  water is punctuated by the occasional soft hum of magical energy, creating a serene
+  and almost otherworldly atmosphere.
 exits:
   down-east:
     roomid: 729

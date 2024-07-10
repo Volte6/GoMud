@@ -55,6 +55,7 @@ const (
 	Object    ItemType = "object"    // A mundane object
 	Gemstone  ItemType = "gemstone"  // A gem
 	Lockpicks ItemType = "lockpicks" // Used for lockpicking
+	Botanical ItemType = "botanical" // A plant, herb, etc.
 
 	// Subtypes for wearables
 	Wearable  ItemSubType = "wearable"

@@ -1,0 +1,10 @@
+itemid: 20034
+name: leather robe
+namesimple: robe
+description: The leather robe, commonly worn by Mystarion citizens, is a versatile and elegant garment crafted from supple, enchanted leather that offers both protection and style. The robe's exterior is a deep, rich brown, embossed with intricate, arcane patterns that subtly glow in low light, hinting at its magical properties. The interior is lined with soft, comfortable fabric, making it suitable for both everyday wear and long hours of study or travel. A hood, often draped casually over the shoulders, provides an added air of mystery and protection against the elements. Fastened with ornate clasps and adorned with small, practical pockets, the leather robe is a testament to the seamless blend of practicality and enchantment in Mystarion's fashion.
+type: body
+subtype: wearable
+damagereduction: 7
+statmods:
+  mysticism: 12
+  perception: 8
