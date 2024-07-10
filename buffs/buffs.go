@@ -172,7 +172,6 @@ func (bs *Buffs) AddBuff(buffId int, triggerCountOverride ...int) bool {
 		if len(triggerCountOverride) > 0 {
 			triggersLeftCt = triggerCountOverride[0]
 		}
-		slog.Info("TEST ADD BUFF", "triggersLeftCt", triggersLeftCt)
 
 		newBuff := Buff{
 			BuffId:       buffInfo.BuffId,
