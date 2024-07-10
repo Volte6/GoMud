@@ -1,0 +1,13 @@
+roomid: 850
+zone: Mystarion
+title: Bloodroot Way
+description: At the very end of the south-most end of Bloodroot Way, the air is thick
+  with an almost palpable sense of arcane power, and the dim light from enchanted
+  lanterns struggles to pierce the heavy mist that lingers here. The cobblestones
+  are worn smooth by countless footsteps, and the surrounding walls are covered in
+  creeping ivy and arcane symbols that seem to shift and shimmer in the low light.
+  This area is known for its most potent and dangerous magical artifacts, guarded
+  closely by vendors who exude an aura of secrecy and caution.
+exits:
+  north:
+    roomid: 849

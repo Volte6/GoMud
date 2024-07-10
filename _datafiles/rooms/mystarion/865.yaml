@@ -1,0 +1,15 @@
+roomid: 865
+zone: Mystarion
+title: Arena Registration Booth
+description: The Arena Registration Booth stands proudly near the entrance of the
+  Grand Arcane Arena, a quaint yet bustling hub of activity. Constructed from sturdy
+  oak and draped with vibrant banners bearing the arena's sigil, the booth exudes
+  an air of both tradition and excitement. The front of the booth is lined with enchanted
+  lanterns that emit a welcoming glow, even in the brightest daylight. Inside, an
+  attendant sits behind a polished wooden counter, surrounded by stacks of parchment
+  scrolls, quills, and registration forms.
+exits:
+  east:
+    roomid: 866
+  west:
+    roomid: 859

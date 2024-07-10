@@ -1,0 +1,17 @@
+roomid: 864
+zone: Mystarion
+title: The Stands of the Arena
+description: From the stands of the Grand Arcane Arena, the view is nothing short
+  of spectacular. The circular arena floor stretches out below, a battleground of
+  enchanted sand and shimmering sigils, where summoned creatures and warriors clash
+  in displays of raw power and skill. The towering walls, covered in ancient glyphs
+  that pulse with arcane energy, seem to amplify the sounds of combat - the roar of
+  beasts, the crackle of spells, and the clash of weapons. High above, magical banners
+  ripple with the sigils of today's combatants, their vibrant colors vivid against
+  the sky. The crowd around you is a sea of excited faces, their collective energy
+  a palpable force that rises and falls with every blow struck below.
+exits:
+  east:
+    roomid: 863
+  northwest:
+    roomid: 859

@@ -1,0 +1,16 @@
+roomid: 842
+zone: Mystarion
+title: Bloodroot Way
+description: Halfway down the north-most end of Bloodroot Way, the shadows deepen,
+  and the air becomes thicker with the mingled scents of exotic herbs and smoldering
+  incense. Flickering lanterns, ensnared in webs of dark vines, cast an eerie, shifting
+  light on the cobblestones, illuminating the eclectic array of stalls and shops.
+  Vendors here peddle the most potent dark magic trinkets and otherworldly artifacts,
+  their whispers carrying promises of hidden power and forbidden knowledge. Ancient
+  tomes bound in cracked leather with glowing sigils sit beside vials of shimmering
+  elixirs, while strange, enchanted relics hover in mid-air, twinkling ominously.
+exits:
+  north:
+    roomid: 843
+  south:
+    roomid: 841

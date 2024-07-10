@@ -1,0 +1,18 @@
+roomid: 866
+zone: Mystarion
+title: The Combat Ring
+description: The center of the Grand Arcane Arena is a vast, circular battleground
+  that exudes an aura of ancient power and intense anticipation. The floor is a mosaic
+  of enchanted sand and arcane sigils that shimmer with latent energy, ready to respond
+  to the commands of skilled magicians and warriors. At the heart of the arena, a
+  large summoning circle etched in glowing runes serves as the focal point for conjuring
+  formidable creatures from other realms. The air is charged with magical essence,
+  humming with the echoes of past battles and the palpable tension of the crowd's
+  eager gaze. Surrounding the battleground, protective wards and shimmering barriers
+  ensure the safety of the audience while containing the raw power unleashed within.
+  The roar of the crowd rises and falls with each clash of magic and might, creating
+  a symphony of excitement that reverberates through the arena, making the center
+  a stage for legendary feats and epic confrontations.
+exits:
+  west:
+    roomid: 865

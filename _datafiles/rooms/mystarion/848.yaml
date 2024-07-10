@@ -1,0 +1,17 @@
+roomid: 848
+zone: Mystarion
+title: Bloodroot Way
+description: Halfway down the south-most end of Bloodroot Way, the atmosphere takes
+  on a peculiar, almost electric quality, with the scent of smoldering herbs and ancient
+  incense thick in the air. Lanterns, entwined with twisting, thorny vines, cast a
+  dim, haunting glow that dances over the cobblestones and highlights the wares of
+  the enigmatic vendors. This section of the alley is known for its peculiar blend
+  of dark magic and elemental curiosities, where stalls overflow with rare, enchanted
+  gemstones and mysterious artifacts. Ancient scrolls inscribed with forbidden spells
+  sit alongside vials containing swirling, iridescent potions. Strange, levitating
+  relics emit soft, pulsating lights, adding to the otherworldly ambiance.
+exits:
+  north:
+    roomid: 847
+  south:
+    roomid: 849

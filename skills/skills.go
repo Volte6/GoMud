@@ -54,38 +54,20 @@ func (s SkillTag) Sub(subtag string) SkillTag {
 	return SkillTag(string(s) + subtag)
 }
 
-/*
-Brawling *** Learn in the Barracks - ROOM 829 ***
-
-	Dualwield
-	Enchant
-	Inspect
-	Peep
-	Portal
-
-	Tame        *** TODO: Forest Nymph? ***
-	Scribe
-
-Protection
-
-	Aid
-	Pray
-	Rank
-*/
 const (
-	Cast        SkillTag = `cast`        // [LVL 1-4] TODO - far east city?
-	DualWield   SkillTag = `dual-wield`  // [LVL 1-4] TODO
+	Cast        SkillTag = `cast`        // TODO - far east city?
+	DualWield   SkillTag = `dual-wield`  // [LVL 1-4] Fishermans house - ROOM 758
 	Map         SkillTag = `map`         // [LVL 1-4] Frostwarden Rangers - ROOM 74
-	Enchant     SkillTag = `enchant`     // [LVL 1-4] TODO
-	Peep        SkillTag = `peep`        // [LVL 1-4] TODO
-	Inspect     SkillTag = `inspect`     // [LVL 1-4] TODO
-	Portal      SkillTag = `portal`      // [LVL 1-4] TODO
+	Enchant     SkillTag = `enchant`     // TODO
+	Peep        SkillTag = `peep`        // TODO
+	Inspect     SkillTag = `inspect`     // TODO
+	Portal      SkillTag = `portal`      // TODO
 	Search      SkillTag = `search`      // [LVL 1-4] Frostwarden Rangers - ROOM 74
 	Track       SkillTag = `track`       // [LVL 1-4] Frostwarden Rangers - ROOM 74
 	Skulduggery SkillTag = `skulduggery` // [LVL 1-4] Thieves Den - ROOM 491
 	Brawling    SkillTag = `brawling`    // [LVL 1-4] Soldiers Training Yard - ROOM 829
-	Scribe      SkillTag = `scribe`      // [LVL 1-4] TODO
-	Protection  SkillTag = `protection`  // [LVL 1-4] TODO
+	Scribe      SkillTag = `scribe`      // [LVL 1-4] Dark Acolyte's Chamber - ROOM 160
+	Protection  SkillTag = `protection`  // TODO
 	Tame        SkillTag = `tame`        // [LVL 1-4] Give mushroom to fairie in ROOOM 558, train in ROOM 830
 )
 

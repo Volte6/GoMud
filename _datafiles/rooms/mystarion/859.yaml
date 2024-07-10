@@ -1,0 +1,21 @@
+roomid: 859
+zone: Mystarion
+title: Grand Arcane Arena
+description: "The entrance to the Grand Arcane Arena is an awe-inspiring archway of
+  ancient stone, adorned with intricate carvings of mythical creatures and powerful
+  spells etched into its surface. Massive, enchanted gates stand open, glowing with
+  a faint, pulsing light that reflects the magic within. Flanking the entrance are
+  towering statues of legendary champions, their expressions fierce and determined,
+  as if guarding the passage to the battles beyond. As visitors step through the archway,
+  they are greeted by the exhilarating sounds of the arena b\0\x13 the distant roars
+  of summoned beasts, the clash of magical energies, and the thunderous applause of
+  the crowd."
+exits:
+  east:
+    roomid: 865
+  northeast:
+    roomid: 860
+  southeast:
+    roomid: 864
+  west:
+    roomid: 858

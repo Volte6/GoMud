@@ -1,0 +1,13 @@
+roomid: 836
+zone: Mystarion
+title: Opal Street
+description: Opal Street is a radiant avenue where the air shimmers with the prismatic
+  light reflecting off the myriad opalescent lamps that line the path. The cobblestones
+  underfoot glisten as if dusted with stardust, casting a magical glow on the elegant
+  shops and stalls that offer opal-infused jewelry, charms, and talismans. Each storefront
+  is adorned with intricate carvings and luminous gems, creating an atmosphere of
+  ethereal beauty. Artisans and jewelers, their hands sparkling with residual enchantment,
+  craft bespoke pieces that capture the essence of the mystical stones.
+exits:
+  north:
+    roomid: 727

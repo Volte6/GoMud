@@ -1,10 +1,18 @@
 roomid: 758
 zone: Frost Lake
-title: Lake Island
-description: The island's surface is covered in a soft blanket of snow, untouched
-  by the footprints of those who have ventured here before you. Tall, ancient pine
-  trees stand sentinel, their branches heavy with snow and icicles that shimmer like
-  crystal chandeliers in the gentle breeze.
+title: Fishermans House
+description: Nestled at the edge of the secluded island in the middle of Frost Lake
+  stands this Fisherman's House, a weathered and timeworn cottage that exudes a rustic
+  charm. Constructed from aged timber and stone, its sturdy walls have withstood countless
+  seasons of harsh weather, giving it a rugged, enduring presence. The roof, covered
+  in moss and lichen, blends seamlessly with the surrounding nature, as if the house
+  itself has grown out of the earth. A narrow, winding path leads from the pebbled
+  shore to the front door, flanked by wildflowers and tall grasses swaying gently
+  in the breeze. The windows, though small and clouded with age, offer a warm, inviting
+  glow from within, hinting at the cozy, lived-in space beyond. Outside, fishing nets
+  and rustic tools are strewn about, and a small wooden dock extends into the crystal-clear
+  waters, a testament to the solitary life of the old fisherman who calls this remote
+  haven his home.
 exits:
   east:
     roomid: 759
@@ -16,3 +24,11 @@ exits:
     roomid: 768
   west:
     roomid: 757
+spawninfo:
+- mobid: 44
+  cooldown: 30
+  message: An old fisherman enters the house
+skilltraining:
+  dual-wield:
+    min: 1
+    max: 4

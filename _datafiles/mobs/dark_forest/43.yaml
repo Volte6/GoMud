@@ -11,7 +11,7 @@ idlecommands:
   - 'emote darts from plant to plant, inspecting them.'
   - 'emote wipes their brow.'
 combatcommands:
-  - 'emote draww a foreign symbol in the air, and suddenly vanishes in a shower of sparks;suicide vanish'
+  - 'emote draws a foreign symbol in the air, and suddenly vanishes in a shower of sparks;suicide vanish'
 activitylevel: 3
 character:
   name: faerie folk
