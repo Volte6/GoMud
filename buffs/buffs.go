@@ -236,6 +236,9 @@ func (bs *Buffs) Trigger(buffId ...int) (triggeredBuffs []*Buff) {
 					triggeredBuffs = append(triggeredBuffs, b)
 					if b.TriggersLeft != TriggersLeftUnlimited {
 						b.TriggersLeft--
+					} else {
+						// If unimited, reset the counter to prevent some future overflow
+						b.RoundCounter = 0
 					}
 				}
 				bs.List[idx] = b
