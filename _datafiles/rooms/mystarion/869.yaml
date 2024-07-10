@@ -12,3 +12,7 @@ description: The Garden Nook is a verdant oasis on Lavender Walk, its entrance f
 exits:
   west:
     roomid: 854
+spawninfo:
+- mobid: 48
+  cooldown: 20
+  message: The gardener enters the shop.

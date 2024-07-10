@@ -549,6 +549,10 @@ func (c *Character) getFormattedName(viewingUserId int, uType string, renderFlag
 		f.Adjectives = append(f.Adjectives, `hidden`)
 	}
 
+	if c.HasBuffFlag(buffs.Poison) {
+		f.Adjectives = append(f.Adjectives, `poisoned`)
+	}
+
 	if c.Health < 1 {
 		f.Suffix = `downed`
 	} else if c.Aggro != nil && c.Aggro.UserId == viewingUserId {

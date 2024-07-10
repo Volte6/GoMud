@@ -1,4 +1,4 @@
-mobid:  46
+mobid:  47
 zone: Mystarion
 itemdropchance: 2
 hostile: false
@@ -11,14 +11,17 @@ idlecommands:
   - say If you're looking to sell something, I may be interested... as long as it's
     not too special or unique
   - emote is watching you
-  - restock 30011/10
-  - restock 30012/1
-  - restock 30013/2
+  - restock 12/8
+  - restock 13/6
+  - restock 14/9
+  - restock 15/3
+  - restock 16/5
+  - restock 17/1
 combatcommands:
   - 'say How dare you attack the citizens of Mystarion! We do not forget!'
 ismerchant: true
 character:
-  name: herbalist
+  name: brewer
   description: 'Clad in robes or garments adorned with subtle enchanted patterns, they move with a grace that hints at their familiarity with the arcane. Their eyes often sparkle with the knowledge of spells and the wisdom of the ages, reflecting a deep connection to the mystical forces that permeate their world. Whether they are scholars, artisans, merchants, or healers, each citizen carries a small token of their magical craft-an amulet, a vial of potion, or a wand-symbolizing their personal expertise.'
   raceid: 1
   level: 30

@@ -1,0 +1,10 @@
+itemid: 30013
+name: midnight bliss
+namesimple: tea
+description: A dark, velvety potion crafted from glimmering nightshade and shadowfern, known for its deep, rich flavor and mysterious allure, perfect for those seeking an enigmatic and profound experience.
+type: drink
+subtype: drinkable
+uses: 1
+value: 77
+buffids: 
+- 13

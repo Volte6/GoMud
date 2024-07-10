@@ -10,3 +10,7 @@ description: The Enchanted Brew is a cozy, inviting shop nestled along Lavender 
 exits:
   west:
     roomid: 852
+spawninfo:
+- mobid: 47
+  cooldown: 20
+  message: The brewer enters the shop.

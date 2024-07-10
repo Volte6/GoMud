@@ -1,3 +1,4 @@
+# Only applied by the tame skill
 spellid: tameskill
 name: Tame
 description: Attempts to tame a wild creature.

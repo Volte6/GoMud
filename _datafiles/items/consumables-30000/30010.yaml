@@ -1,0 +1,9 @@
+itemid: 30010
+name: moonshade leaf
+namesimple: leaf
+description: A silvery leaf that glows faintly in the dark, used to enhance dream magic and nocturnal rituals.
+type: botanical
+subtype: edible
+uses: 1
+value: 62
+

@@ -1,0 +1,8 @@
+itemid: 19
+name: the shadow herbarium
+namesimple: flower
+description: A collection of the most dangerous plants used in shadow magic and dark rituals, with instructions for safe handling.
+type: readable
+subtype: usable
+uses: 1
+value: 900
