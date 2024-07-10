@@ -5,6 +5,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -85,6 +86,18 @@ func Equip(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> wields their <ansi fg="item">%s</ansi>.`, user.Character.Name, matchItem.Name()),
 					true)
+			}
+
+			// Trigger any outstanding buff onStart events
+			if len(matchItem.GetSpec().WornBuffIds) > 0 {
+				for _, buff := range user.Character.Buffs.List {
+					if !buff.OnStartEvent {
+						if scriptResponse, err := scripting.TryBuffScriptEvent(`onStart`, user.UserId, 0, buff.BuffId, cmdQueue); err == nil {
+							response.AbsorbMessages(scriptResponse)
+							user.Character.TrackBuffStarted(buff.BuffId)
+						}
+					}
+				}
 			}
 
 			user.Character.Validate()

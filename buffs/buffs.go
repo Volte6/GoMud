@@ -10,7 +10,8 @@ const (
 )
 
 type Buff struct {
-	BuffId int // Which buff template does it refer to?
+	BuffId       int  // Which buff template does it refer to?
+	OnStartEvent bool // Has the onStart event been triggered?
 	// Need to instance track the following:
 	RoundCounter int `yaml:"roundcounter,omitempty"` // How many rounds have passed. Triggers on (RoundCounter%RoundInterval == 0)
 	TriggersLeft int `yaml:"triggersleft,omitempty"` // How many times it triggers
@@ -162,6 +163,12 @@ func (bs *Buffs) RemoveBuff(buffId int) {
 	// If this buff is already applied, just increase the trigger count
 	if index, ok := bs.buffIds[buffId]; ok {
 		bs.List[index].TriggersLeft = TriggersLeftExpired
+	}
+}
+
+func (bs *Buffs) Started(buffId int) {
+	if idx, ok := bs.buffIds[buffId]; ok {
+		bs.List[idx].OnStartEvent = true
 	}
 }
 

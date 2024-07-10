@@ -1086,6 +1086,10 @@ func (c *Character) AddBuff(buffId int, triggerCountOverride ...int) error {
 	return nil
 }
 
+func (c *Character) TrackBuffStarted(buffId int) {
+	c.Buffs.Started(buffId)
+}
+
 func (c *Character) GetBuffs(buffId ...int) []*buffs.Buff {
 	return c.Buffs.GetAllBuffs(buffId...)
 }

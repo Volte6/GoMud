@@ -1274,6 +1274,7 @@ func (w *World) TurnTick() {
 					//
 					if response, err := scripting.TryBuffScriptEvent(`onStart`, 0, buffMob.InstanceId, buffRequest.BuffId, w); err == nil {
 						messageQueue.AbsorbMessages(response)
+						buffMob.Character.TrackBuffStarted(buffRequest.BuffId)
 					}
 
 					//
@@ -1323,6 +1324,7 @@ func (w *World) TurnTick() {
 						//
 						if response, err := scripting.TryBuffScriptEvent(`onStart`, buffUser.UserId, 0, buffRequest.BuffId, w); err == nil {
 							messageQueue.AbsorbMessages(response)
+							buffUser.Character.TrackBuffStarted(buffRequest.BuffId)
 						}
 
 						//
