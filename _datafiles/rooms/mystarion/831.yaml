@@ -1,0 +1,17 @@
+roomid: 831
+zone: Mystarion
+title: Bloodroot Way
+description: Bloodroot Way is a shadowy, winding alley in the heart of Mystarion,
+  where the air hums with arcane whispers and the scent of exotic herbs. Dim, flickering
+  lanterns cast eerie, shifting shadows on the cobblestone path, illuminating the
+  eclectic stalls of vendors peddling dark magic trinkets and otherworldly artifacts.
+  Here, ancient tomes bound in leather with mysterious sigils line shelves beside
+  vials of glowing elixirs, while strange, enchanted relics hang suspended in the
+  air, twinkling with forbidden power. The vendors themselves, cloaked in obscurity,
+  murmur incantations and secrets to those daring enough to approach, making Bloodroot
+  Way a place of both peril and wonder for the curious magicians of Mystarion.
+exits:
+  north:
+    roomid: 718
+  south:
+    roomid: 845

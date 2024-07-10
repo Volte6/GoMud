@@ -1,0 +1,9 @@
+itemid: 30009
+name: glacial mint
+namesimple: mint
+description: A frosty herb that cools the air around it, perfect for ice spells and calming potions.
+type: botanical
+subtype: edible
+uses: 1
+value: 20
+

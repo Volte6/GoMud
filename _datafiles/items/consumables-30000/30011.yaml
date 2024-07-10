@@ -1,0 +1,10 @@
+itemid: 30011
+name: dreamweaver's tea
+namesimple: tea
+description: A soothing lavender and chamomile blend that promotes restful sleep and vivid dreams.
+type: drink
+subtype: drinkable
+uses: 2
+value: 110
+buffids: 
+- 15

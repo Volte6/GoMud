@@ -1,0 +1,11 @@
+itemid: 10019
+name: pruning shears
+namesimple: shears
+description: Pruning shears that glow softly in the moonlight, perfect for nighttime gardening.
+type: weapon
+hands: 1
+subtype: stabbing
+damage:
+  diceroll: 1d3
+statmods:
+  mysticism: 23

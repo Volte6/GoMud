@@ -205,6 +205,12 @@ func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, err
 				userManager.Connections[u.connectionId] = u.UserId
 				userManager.UserConnections[u.UserId] = u.connectionId
 
+				for _, mobInstId := range u.Character.GetCharmIds() {
+					if !mobs.MobInstanceExists(mobInstId) {
+						u.Character.TrackCharmed(mobInstId, false)
+					}
+				}
+
 				return "Reconnecting...", nil
 			}
 
@@ -223,6 +229,12 @@ func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, err
 	userManager.Usernames[u.Username] = u.UserId
 	userManager.Connections[u.connectionId] = u.UserId
 	userManager.UserConnections[u.UserId] = u.connectionId
+
+	for _, mobInstId := range u.Character.GetCharmIds() {
+		if !mobs.MobInstanceExists(mobInstId) {
+			u.Character.TrackCharmed(mobInstId, false)
+		}
+	}
 
 	return "", nil
 }

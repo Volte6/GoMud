@@ -235,6 +235,8 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 			guideMob.Character.Name = fmt.Sprintf(`%s's Guide`, user.Character.Name)
 			room.AddMob(guideMob.InstanceId)
 			guideMob.Character.Charm(userId, characters.CharmPermanent, characters.CharmExpiredDespawn)
+			// Track it
+			user.Character.TrackCharmed(guideMob.InstanceId, true)
 		}
 	}
 
@@ -812,7 +814,16 @@ func BuildRoom(fromRoomId int, exitName string, mapDirection ...string) (room *R
 	}
 
 	newRoom.Title = fromRoom.Title
-	newRoom.Description = fromRoom.Description
+
+	if strings.HasPrefix(fromRoom.Description, `h:`) {
+		hash := strings.TrimPrefix(fromRoom.Description, `h:`)
+		if description, ok := roomManager.roomDescriptionCache[hash]; ok {
+			newRoom.Description = description
+		}
+	} else {
+		newRoom.Description = fromRoom.Description
+	}
+
 	newRoom.MapSymbol = fromRoom.MapSymbol
 	newRoom.MapLegend = fromRoom.MapLegend
 	newRoom.Biome = fromRoom.Biome

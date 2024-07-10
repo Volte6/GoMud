@@ -10,9 +10,14 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.InstanceId() int](#actorobjectinstanceid-int)
   - [ActorObject.MobTypeId() int](#actorobjectmobtypeid-int)
   - [ActorObject.GetRace() string](#actorobjectgetrace-string)
+  - [ActorObject.GetSize() string](#actorobjectgetsize-string)
+  - [ActorObject.GetLevel() int](#actorobjectgetlevel-int)
   - [ActorObject.GetStat(statName string) int](#actorobjectgetstatstatname-string-int)
   - [ActorObject.SetTempData(key string, value any)](#actorobjectsettempdatakey-string-value-any)
   - [ActorObject.GetTempData(key string) any](#actorobjectgettempdatakey-string-any)
+  - [ActorObject.SetMiscCharacterData(key string, value any)](#actorobjectsetmisccharacterdatakey-string-value-any)
+  - [ActorObject.GetMiscCharacterData(key string) any](#actorobjectgetmisccharacterdatakey-string-any)
+  - [ActorObject.GetMiscCharacterDataKeys(\[ prefix1, prefix2 \]) \[\]string](#actorobjectgetmisccharacterdatakeys-prefix1-prefix2--string)
   - [ActorObject.GetCharacterName( wrapInTags bool ) string](#actorobjectgetcharactername-wrapintags-bool--string)
   - [ActorObject.GetRoomId() int](#actorobjectgetroomid-int)
   - [ActorObject.HasQuest(questId string) bool](#actorobjecthasquestquestid-string-bool)
@@ -20,8 +25,10 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.AddGold(amt int \[, bankAmt int\])](#actorobjectaddgoldamt-int--bankamt-int)
   - [ActorObject.AddHealth(amt int) int](#actorobjectaddhealthamt-int-int)
   - [ActorObject.Command(cmd string, waitTurns ...int)](#actorobjectcommandcmd-string-waitturns-int)
+  - [ActorObject.IsTameable() bool](#actorobjectistameable-bool)
   - [ActorObject.TrainSkill(skillName string, skillLevel int)](#actorobjecttrainskillskillname-string-skilllevel-int)
-  - [ActorObject.MoveRoom(destRoomId int)](#actorobjectmoveroomdestroomid-int)
+  - [ActorObject.GetSkillLevel(skillName string)](#actorobjectgetskilllevelskillname-string)
+  - [ActorObject.MoveRoom(destRoomId int \[, leaveCharmedMobsBehind bool\] )](#actorobjectmoveroomdestroomid-int--leavecharmedmobsbehind-bool-)
   - [ActorObject.UpdateItem(itemId ItemObject)](#actorobjectupdateitemitemid-itemobject)
   - [ActorObject.GiveItem(itemId ItemObject)](#actorobjectgiveitemitemid-itemobject)
   - [ActorObject.TakeItem(itemId ItemObject)](#actorobjecttakeitemitemid-itemobject)
@@ -37,15 +44,22 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetAlignmentName() string](#actorobjectgetalignmentname-string)
   - [ActorObject.ChangeAlignment(alignmentChange int)](#actorobjectchangealignmentalignmentchange-int)
   - [ActorObject.HasSpell(spellId string)](#actorobjecthasspellspellid-string)
-  - [ActorObject.LearnSpell(spellId string)](#actorobjectlearnspellspellid-string)
+  - [ActorObject.LearnSpell(spellId string) bool](#actorobjectlearnspellspellid-string-bool)
   - [ActorObject.IsAggro(targetActor ActorObject)](#actorobjectisaggrotargetactor-actorobject)
   - [ActorObject.GetMobKills(mobId int) int](#actorobjectgetmobkillsmobid-int-int)
   - [ActorObject.GetRaceKills(raceName string) int](#actorobjectgetracekillsracename-string-int)
   - [ActorObject.GetHealth() int](#actorobjectgethealth-int)
   - [ActorObject.GetHealthMax() int](#actorobjectgethealthmax-int)
+  - [ActorObject.GetHealthPct() float](#actorobjectgethealthpct-float)
   - [ActorObject.GetMana() int](#actorobjectgetmana-int)
   - [ActorObject.GetManaMax() int](#actorobjectgetmanamax-int)
+  - [ActorObject.GetManaPct() float](#actorobjectgetmanapct-float)
   - [ActorObject.SetAdjective(adj string, addIt bool)](#actorobjectsetadjectiveadj-string-addit-bool)
+  - [ActorObject.IsCharmed( \[userId1, userId2, etc \] ) bool ](#actorobjectischarmed-userid1-userid2-etc---bool-)
+  - [ActorObject.CharmSet(userId int, charmRounds int, \[ onRevertCommand1, onRevertCommand2, etc \])](#actorobjectcharmsetuserid-int-charmrounds-int--onrevertcommand1-onrevertcommand2-etc-)
+  - [ActorObject.CharmRemove()](#actorobjectcharmremove)
+  - [ActorObject.CharmExpire()](#actorobjectcharmexpire)
+  - [ActorObject.GetCharmCount() int](#actorobjectgetcharmcount-int)
 
 
 
@@ -91,6 +105,12 @@ _Note: Only useful for Mob ActorObjects - Returns zero otherwise._
 ## [ActorObject.GetRace() string](/scripting/actor_func.go)
 Gets the race name of the actor, such as Human, Elf, Rodent, etc.
 
+## [ActorObject.GetSize() string](/scripting/actor_func.go)
+Returns `small`, `medium`, or `large`
+
+## [ActorObject.GetLevel() int](/scripting/actor_func.go)
+Returns the level of the actor
+
 ## [ActorObject.GetStat(statName string) int](/scripting/actor_func.go)
 Returns the named stat value.
 
@@ -116,6 +136,32 @@ _Note: This is useful for saving/retrieving data that a ActorObject can carry al
 |  Argument | Explanation |
 | --- | --- |
 | key | A unique identifier for the data. |
+
+## [ActorObject.SetMiscCharacterData(key string, value any)](/scripting/actor_func.go)
+Sets permanent data for the ActorObject. 
+
+_Note: This miscellaneous data is attached to the character data, not the user data. If the user changes characters, it will not follow._
+
+|  Argument | Explanation |
+| --- | --- |
+| key | A unique identifier for the data. |
+| value | What you will be saving. If null, frees from memory. |
+
+## [ActorObject.GetMiscCharacterData(key string) any](/scripting/actor_func.go)
+Gets permanent data for the ActorObject.
+
+_Note: This miscellaneous data is attached to the character data, not the user data. If the user changes characters, it will not follow._
+
+|  Argument | Explanation |
+| --- | --- |
+| key | A unique identifier for the data. |
+
+## [ActorObject.GetMiscCharacterDataKeys([ prefix1, prefix2 ]) []string](/scripting/actor_func.go)
+Gets a list of misc data keys for the ActorObject.
+
+|  Argument | Explanation |
+| --- | --- |
+| prefix1, prefix2, etc | Optional strings of prefixes to return matching keys. |
 
 ## [ActorObject.GetCharacterName( wrapInTags bool ) string](/scripting/actor_func.go)
 Retrieves the name of a ActorObject.
@@ -167,6 +213,9 @@ _Note: Don't underestimate the power of this function! Complex and interesting b
 | cmd | The command to execute such as `look west` or `say goodbye`. |
 | waitTurns (optional) | The number of turns (NOT rounds) to wait before executing the command. |
 
+## [ActorObject.IsTameable() bool](/scripting/actor_func.go)
+Returns `true` if actor can be tamed.
+
 ## [ActorObject.TrainSkill(skillName string, skillLevel int)](/scripting/actor_func.go)
 Sets an ActorObject skill level, if it's greater than what they already have
 
@@ -174,12 +223,21 @@ Sets an ActorObject skill level, if it's greater than what they already have
 | --- | --- |
 | skillName | The name of the skill to train, such as `map` or `backstab`. |
 
-## [ActorObject.MoveRoom(destRoomId int)](/scripting/actor_func.go)
+## [ActorObject.GetSkillLevel(skillName string)](/scripting/actor_func.go)
+Returns the current skil level for the skillName, or zero if none.
+
+|  Argument | Explanation |
+| --- | --- |
+| skillName | The name of the skill to train, such as `map` or `backstab`. |
+
+
+## [ActorObject.MoveRoom(destRoomId int [, leaveCharmedMobsBehind bool] )](/scripting/actor_func.go)
 Quietly moves an ActorObject to a new room
 
 |  Argument | Explanation |
 | --- | --- |
 | destRoomId | The room id to move them to. |
+| leaveCharmedMobsBehind | If true, does not also move charmed mobs with the user. |
 
 ## [ActorObject.UpdateItem(itemId ItemObject)](/scripting/actor_func.go)
 Accepts an ItemObject to update in the players backpack. If the item does not already exist in the players backpack, it is ignored.
@@ -280,8 +338,8 @@ Returns true if the actor has the spell supplied
 | --- | --- |
 | spellId | The ID of the spell |
 
-## [ActorObject.LearnSpell(spellId string)](/scripting/actor_func.go)
-Adds the spell to the Actors spellbook.
+## [ActorObject.LearnSpell(spellId string) bool](/scripting/actor_func.go)
+Adds the spell to the Actors spellbook. Returns true if learned, false if already known.
 
 |  Argument | Explanation |
 | --- | --- |
@@ -314,11 +372,17 @@ Returns current actor health
 ## [ActorObject.GetHealthMax() int](/scripting/actor_func.go)
 Returns current actor max health
 
+## [ActorObject.GetHealthPct() float](/scripting/actor_func.go)
+Returns current actor health as a percentage
+
 ## [ActorObject.GetMana() int](/scripting/actor_func.go)
 Returns current actor mana
 
 ## [ActorObject.GetManaMax() int](/scripting/actor_func.go)
 Returns current actor max mana
+
+## [ActorObject.GetManaPct() float](/scripting/actor_func.go)
+Returns current actor mana as a percentage
 
 ## [ActorObject.SetAdjective(adj string, addIt bool)](/scripting/actor_func.go)
 Adds or removes a specific text adjective to the characters name
@@ -327,3 +391,28 @@ Adds or removes a specific text adjective to the characters name
 | --- | --- |
 | adj | Adjective such as "sleeping", "crying" or "busy" |
 | addIt | `true` to add it. `false` to remove it. |
+
+## [ActorObject.IsCharmed( [userId1, userId2, etc ] ) bool ](/scripting/actor_func.go)
+Sets a mob to charmed by a user for a set number of rounds.
+
+|  Argument | Explanation |
+| --- | --- |
+| userId | One or more users to test against. If ommitted, returns true if charmed at all by anyone. |
+
+## [ActorObject.CharmSet(userId int, charmRounds int, [ onRevertCommand1, onRevertCommand2, etc ])](/scripting/actor_func.go)
+Sets a mob to charmed by a user for a set number of rounds.
+
+|  Argument | Explanation |
+| --- | --- |
+| userId | userId that the mob will be charmed to |
+| charmRounds | How many rounds it should last, or -2 for unlimited. |
+| onRevertCommand | One or more commands for the mob to execute when the charm expires |
+
+## [ActorObject.CharmRemove()](/scripting/actor_func.go)
+Immediately discards any charm effect without expiration effects.
+
+## [ActorObject.CharmExpire()](/scripting/actor_func.go)
+Forces the current charm of the mob to expire
+
+## [ActorObject.GetCharmCount() int](/scripting/actor_func.go)
+Returns the number of charmed creatures in the actors control

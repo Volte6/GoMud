@@ -4,42 +4,6 @@ import (
 	"strings"
 )
 
-/****************
-	dual-wield
-	enchant
-	inspect
-	map
-	peep
-	portal
-	scribe
-	search
-	skulduggery
-	track
-	brawling
-	protection
-	herbalism
-	  - forage (find ingredients, special ones in each zone?)
-	  - mix (potions?)
-	alchemy
-	  - alchemize (turn items to gold)
-	  - combine (combine two items into one new item, retaining random stats from each)
-	beastmastery
-	  - call (calls a random beast/pet to follow you around) - higher level gets more interesting stuff
-	  - command (hunt) - find players, mobs, or items nearby
-	  - command (attack/break) - attack a player or mob
-	  - command (guard) - absorbs damage the player would have taken
-	healing
-	  - heal (minor heal self or others)
-	  - cure (cure poison)
-	  - majorheal (major heal self or others)
-	  -
-
-
-
-
-
- ****************/
-
 type SkillTag string
 
 func (s SkillTag) String(subtag ...string) string {
@@ -55,19 +19,20 @@ func (s SkillTag) Sub(subtag string) SkillTag {
 }
 
 const (
-	DualWield   SkillTag = `dual-wield`
-	Map         SkillTag = `map`
-	Enchant     SkillTag = `enchant`
-	Peep        SkillTag = `peep`
-	Inspect     SkillTag = `inspect`
-	Portal      SkillTag = `portal`
-	Script      SkillTag = `scribe`
-	Search      SkillTag = `search`
-	Track       SkillTag = `track`
-	Skulduggery SkillTag = `skulduggery`
-	Brawling    SkillTag = `brawling`
-	Scribe      SkillTag = `scribe`
-	Protection  SkillTag = `protection`
+	Cast        SkillTag = `cast`        // TODO - far east city?
+	DualWield   SkillTag = `dual-wield`  // [LVL 1-4] Fishermans house - ROOM 758
+	Map         SkillTag = `map`         // [LVL 1-4] Frostwarden Rangers - ROOM 74
+	Enchant     SkillTag = `enchant`     // TODO
+	Peep        SkillTag = `peep`        // TODO
+	Inspect     SkillTag = `inspect`     // TODO
+	Portal      SkillTag = `portal`      // TODO
+	Search      SkillTag = `search`      // [LVL 1-4] Frostwarden Rangers - ROOM 74
+	Track       SkillTag = `track`       // [LVL 1-4] Frostwarden Rangers - ROOM 74
+	Skulduggery SkillTag = `skulduggery` // [LVL 1-4] Thieves Den - ROOM 491
+	Brawling    SkillTag = `brawling`    // [LVL 1-4] Soldiers Training Yard - ROOM 829
+	Scribe      SkillTag = `scribe`      // [LVL 1-4] Dark Acolyte's Chamber - ROOM 160
+	Protection  SkillTag = `protection`  // TODO
+	Tame        SkillTag = `tame`        // [LVL 1-4] Give mushroom to fairie in ROOOM 558, train in ROOM 830
 )
 
 var (
@@ -100,6 +65,19 @@ var (
 		"paladin": {
 			Protection,
 			Brawling,
+		},
+		"ranger": {
+			Search,
+			Track,
+			Map,
+		},
+		"monster hunter": {
+			Track,
+			Tame,
+		},
+		"sorcerer": {
+			Cast,
+			Enchant,
 		},
 	}
 )

@@ -4,5 +4,4 @@ namesimple: ring
 description: A cheap ring.
 type: ring
 subtype: wearable
-
 damagereduction: 1

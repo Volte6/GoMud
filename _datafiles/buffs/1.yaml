@@ -1,6 +1,6 @@
 buffid: 1
 name: Illumination
-description: A glowing orb is following you.
+description: Light surrounds you.
 secret: false
 roundinterval: 75
 triggercount: 1

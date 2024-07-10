@@ -1,0 +1,11 @@
+roomid: 856
+zone: Mystarion
+title: Lavender Walk
+description: At the south-most end of Lavender Walk, the pathway comes to an abrupt
+  halt at an ancient, ivy-covered stone wall. The fragrant lavender plants grow dense
+  and wild up to the base of the wall, their purple blooms creating a vibrant contrast
+  against the weathered stones. Enchanted lanterns flicker gently, casting a soft,
+  soothing light on the surrounding area.
+exits:
+  north:
+    roomid: 855

@@ -1,0 +1,13 @@
+roomid: 837
+zone: Mystarion
+title: Mosswood Avenue
+description: Mosswood Avenue is a lush, verdant street where ancient trees with moss-covered
+  trunks create a canopy of dappled green light. The air is thick with the earthy
+  scent of damp foliage and blooming flowers, offering a refreshing respite from the
+  city's bustle. Along the avenue, quaint shops and apothecaries built from natural
+  materials blend seamlessly with the surrounding flora. Druids and nature magicians,
+  garbed in robes of deep green and brown, offer enchanted plants, earth-based charms,
+  and potent herbal remedies.
+exits:
+  south:
+    roomid: 724

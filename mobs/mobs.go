@@ -81,6 +81,14 @@ type Mob struct {
 	tempDataStore   map[string]any
 }
 
+func MobInstanceExists(instanceId int) bool {
+	mobMutex.RLock()
+	defer mobMutex.RUnlock()
+
+	_, ok := mobInstances[instanceId]
+	return ok
+}
+
 func GetAllMobNames() []string {
 	return append([]string{}, allMobNames...)
 }
@@ -206,6 +214,27 @@ func DestroyInstance(instanceId int) {
 	defer mobMutex.Unlock()
 
 	delete(mobInstances, instanceId)
+}
+
+func (m *Mob) IsTameable() bool {
+	if m.IsMerchant {
+		return false
+	}
+	if len(m.ShopStock) > 0 {
+		return false
+	}
+	if len(m.ShopServants) > 0 {
+		return false
+	}
+	if len(m.ScriptTag) > 0 {
+		return false
+	}
+	if r := races.GetRace(m.Character.RaceId); r != nil {
+		if !r.Tameable {
+			return false
+		}
+	}
+	return true
 }
 
 func (m *Mob) SetTempData(key string, value any) {

@@ -1,0 +1,10 @@
+itemid: 30008
+name: goldenbell
+namesimple: herb
+description: A bright yellow herb that chimes when touched, used to summon light and enhance joy in rituals.
+type: botanical
+subtype: edible
+uses: 1
+value: 72
+buffids: 
+- 1

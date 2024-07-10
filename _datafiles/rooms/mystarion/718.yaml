@@ -4,9 +4,13 @@ title: Main road west
 description: You are on the main western road, which leads out of Mysterion and down
   the mountain range. The air here is thick with the scent of exotic spices and freshly
   brewed potions, and the sounds of laughter and lively conversation mingle with the
-  distant echoes of magical incantations.
+  distant echoes of magical incantations. To the north and south is Bloodroot Way.
 exits:
   east:
     roomid: 719
+  north:
+    roomid: 832
+  south:
+    roomid: 831
   west:
     roomid: 717

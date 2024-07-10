@@ -1,0 +1,24 @@
+roomid: 830
+zone: Dark Forest
+title: Magical Grove
+description: You find yourself in a mesmerizing magical grove, where the air hums
+  with a mystical energy that tingles against their skin. The grove is a sanctuary
+  of vibrant colors and surreal beauty, with towering trees whose leaves shimmer in
+  iridescent hues, casting a kaleidoscope of patterns on the forest floor. The ground
+  is blanketed with soft, emerald moss, interspersed with clusters of glowing flowers
+  that pulse with a soft, rhythmic light. In the center of the grove stands an ancient,
+  arching gateway made of intertwined silver and gold vines, encrusted with sparkling
+  gems that twinkle like captured starlight. The gateway emits a faint, beckoning
+  glow, its surface rippling like a silken veil in the breeze.
+biome: forest
+exits:
+  gateway:
+    roomid: 558
+spawninfo:
+- mobid: 43
+  cooldown: 15
+  message: A small faerie enters the grove.
+skilltraining:
+  tame:
+    min: 1
+    max: 4

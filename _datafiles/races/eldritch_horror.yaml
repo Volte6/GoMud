@@ -6,6 +6,7 @@ size: medium
 unarmedname: tentacles
 tnlscale: 1
 angrycommands: [emote gibbers unintelligibly.]
+tameable: true
 stats:
   strength:
     base: 3

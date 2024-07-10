@@ -19,6 +19,7 @@
   - [RoomObject.SpawnMob(mobId int) int](#roomobjectspawnmobmobid-int-int)
   - [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](#roomobjectaddtemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int-roundttl-int)
   - [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](#roomobjectremovetemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int)
+  - [RoomObject.RepeatSpawnItem(itemId int, roundInterval int \[, containerName\]](#roomobjectrepeatspawnitemitemid-int-roundinterval-int--containername)
 
 ## [GetRoom(roomId int) RoomObject ](/scripting/room_func.go)
 Retrieves a RoomObject for a given roomId.
@@ -165,3 +166,15 @@ _Note: all 3 parameters much match an existing temporary exit for it to be remov
 | exitNameSimple | The simple plain text exit name. |
 | exitNameFancy | Should be the simple name, but can have color tags. |
 | exitRoomId | The roomId the exit should lead to. |
+
+## [RoomObject.RepeatSpawnItem(itemId int, roundInterval int [, containerName]](/scripting/room_func.go)
+Removes a temporary exit
+
+_Note: all 3 parameters much match an existing temporary exit for it to be removed._
+
+|  Argument | Explanation |
+| --- | --- |
+| itemId | What item? |
+| roundInterval | How many rounds until the item respawns after it is taken/removed from the room? |
+| containerName | Optional container for the item to spawn into. |
+

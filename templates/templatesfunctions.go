@@ -156,6 +156,9 @@ var (
 			return skills.GetProfession(allRanks)
 		},
 		"roundstotime": func(rounds int) string {
+			if rounds >= buffs.TriggersLeftUnlimited {
+				return `Unlimited`
+			}
 			return formatDuration(rounds * int(configs.GetConfig().RoundSeconds))
 		},
 		"secondsFrom": func(t time.Time) int {

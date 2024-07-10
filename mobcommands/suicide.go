@@ -9,6 +9,7 @@ import (
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
+	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -28,7 +29,32 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
-	slog.Info(`Mob Death`, `name`, mob.Character.Name)
+	slog.Info(`Mob Death`, `name`, mob.Character.Name, `rest`, rest)
+
+	// Make sure to clean up any charm stuff if it's being removed
+	if charmedUserId := mob.Character.RemoveCharm(); charmedUserId > 0 {
+		if charmedUser := users.GetByUserId(charmedUserId); charmedUser != nil {
+			charmedUser.Character.TrackCharmed(mob.InstanceId, false)
+		}
+	}
+
+	// vanish is meant to remove the mob without any rewards/drops/etc.
+	if rest == `vanish` {
+
+		// Destroy any record of this mob.
+		mobs.DestroyInstance(mob.InstanceId)
+
+		// Clean up mob from room...
+		if r := rooms.LoadRoom(mob.HomeRoomId); r != nil {
+			r.CleanupMobSpawns(false)
+		}
+
+		// Remove from current room
+		room.RemoveMob(mob.InstanceId)
+
+		response.Handled = true
+		return response, nil
+	}
 
 	// Send a death msg to everyone in the room.
 	response.SendRoomMessage(mob.Character.RoomId,
@@ -92,6 +118,38 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 						fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
 						true)
 
+					// Chance to learn to tame the creature.
+					levelDelta := user.Character.Level - mob.Character.Level
+					if levelDelta < 0 {
+						levelDelta = 0
+					}
+					skillsDelta := int((float64(user.Character.Stats.Perception.Value-mob.Character.Stats.Perception.Value) + float64(user.Character.Stats.Smarts.Value-mob.Character.Stats.Smarts.Value)) / 2)
+					if skillsDelta < 0 {
+						skillsDelta = 0
+					}
+					targetNumber := levelDelta + skillsDelta
+					if targetNumber < 1 {
+						targetNumber = 1
+					}
+
+					slog.Info("Tame Chance", "levelDelta", levelDelta, "skillsDelta", skillsDelta, "targetNumber", targetNumber)
+
+					if util.Rand(1000) < targetNumber {
+						if mob.IsTameable() && user.Character.GetSkillLevel(skills.Tame) > 0 {
+
+							currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)
+							if currentSkill < 50 {
+								user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
+								if currentSkill == -1 {
+									response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+								} else {
+									response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+								}
+							}
+
+						}
+					}
+
 					continue
 				}
 
@@ -133,6 +191,39 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 						response.SendUserMessage(user.UserId,
 							fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
 							true)
+
+						// Chance to learn to tame the creature.
+						levelDelta := user.Character.Level - mob.Character.Level
+						if levelDelta < 0 {
+							levelDelta = 0
+						}
+						skillsDelta := int((float64(user.Character.Stats.Perception.Value-mob.Character.Stats.Perception.Value) + float64(user.Character.Stats.Smarts.Value-mob.Character.Stats.Smarts.Value)) / 2)
+						if skillsDelta < 0 {
+							skillsDelta = 0
+						}
+						targetNumber := levelDelta + skillsDelta
+						if targetNumber < 1 {
+							targetNumber = 1
+						}
+
+						slog.Info("Tame Chance", "levelDelta", levelDelta, "skillsDelta", skillsDelta, "targetNumber", targetNumber)
+
+						if util.Rand(1000) < targetNumber {
+							if mob.IsTameable() && user.Character.GetSkillLevel(skills.Tame) > 0 {
+
+								currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)
+								if currentSkill < 50 {
+									user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
+
+									if currentSkill == -1 {
+										response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+									} else {
+										response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+									}
+								}
+
+							}
+						}
 					}
 
 				}

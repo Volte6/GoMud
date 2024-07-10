@@ -5,8 +5,8 @@ import (
 
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -29,6 +29,14 @@ func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
 		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+	}
+
+	maxCharmed := user.Character.GetSkillLevel(skills.Tame) + 1
+
+	if len(user.Character.GetCharmIds()) >= maxCharmed {
+		response.SendUserMessage(userId, fmt.Sprintf(`You can only have %d creatures following you at a time.`, maxCharmed), true)
+		response.Handled = true
+		return response, nil
 	}
 
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
@@ -89,13 +97,9 @@ func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			newMob := mobs.NewMobById(mobInfo.MobId, user.Character.RoomId)
 			// Charm 'em
 			newMob.Character.Charm(user.UserId, -2, characters.CharmExpiredRevert)
+			user.Character.TrackCharmed(newMob.InstanceId, true)
 
 			room.AddMob(newMob.InstanceId)
-			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
-				partyInfo.AddMob(newMob.InstanceId)
-			} else {
-				cmdQueue.QueueCommand(user.UserId, 0, `party start`)
-			}
 
 			response.SendUserMessage(user.UserId,
 				fmt.Sprintf(`You pay <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, hireInfo.Price, mob.Character.Name),

@@ -24,6 +24,19 @@ function onGive(mob, room, eventDetails) {
 
     if (eventDetails.gold > 0) {
 
+        if ( (user = GetUser(eventDetails.sourceId)) == null ) {
+            return false;
+        }
+
+        totalDonated = user.GetMiscCharacterData("donation-tally-sanctuary");
+        if (totalDonated == null) {
+            totalDonated = 0;
+        }
+
+        totalDonated += eventDetails.gold;
+
+        user.SetMiscCharacterData("donation-tally-sanctuary", totalDonated);
+
         if (eventDetails.gold < 100) {
             mob.Command("say Thank you for your donation.")
             mob.Command("emote nods softly.")
@@ -33,6 +46,29 @@ function onGive(mob, room, eventDetails) {
             mob.Command("emote claps his hands together in prayer and begins to chant.")
             mob.Command("uncurse")
         }
+
+        mob.Command("say You have donated a total of <ansi fg=\"gold\">"+String(totalDonated)+" gold</ansi>!")
+
+        if ( totalDonated >= 200 ) {
+            // Give the spell "heal"   
+            if ( user.LearnSpell("heal") ) {
+                mob.Command("say Thank you for supporting the Sanctuary of the Benevolent Heart!")
+                mob.Command("say I'll teach you the <ansi fg=\"spell-helpful\">Heal</ansi> spell. It can cure the gravest of wounds.")
+                mob.Command("emote Shows you some useful gestures.")
+                mob.Command("say Check your <ansi fg=\"command\">spellbook</ansi>.")
+            }
+
+        }
+        if ( totalDonated >= 1000 ) {
+            // Give the spell "healall"
+            if ( user.LearnSpell("healall") ) {
+                mob.Command("say Thank you for your extreme support of the Sanctuary of the Benevolent Heart!")
+                mob.Command("say I'll teach you the <ansi fg=\"spell-helpful\">Heal All</ansi> spell. It can affect your whole party!")
+                mob.Command("emote Shows you some useful gestures.")
+                mob.Command("say Check your <ansi fg=\"command\">spellbook</ansi>.")
+            }
+        }
+
         return true;
     }
     return false;

@@ -1,0 +1,15 @@
+roomid: 854
+zone: Mystarion
+title: Lavender Walk
+description: At the north-most end of Lavender Walk, the pathway opens into a charming,
+  sun-dappled square, where the fragrance of lavender mingles with the scent of wildflowers
+  and fresh herbs. Here, the cottages are slightly larger, their ivy-covered walls
+  adorned with hanging baskets of vibrant blooms. Stalls are arranged in a circular
+  pattern around a central fountain, which bubbles with water infused with calming,
+  magical properties. The light from enchanted lanterns is softer, casting a gentle,
+  golden glow that enhances the natural beauty of the area.
+exits:
+  east:
+    roomid: 869
+  south:
+    roomid: 853

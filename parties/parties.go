@@ -1,16 +1,11 @@
 package parties
 
-import (
-	"github.com/volte6/mud/mobs"
-)
-
 type Party struct {
-	LeaderUserId   int
-	UserIds        []int
-	MobInstanceIds []int
-	InviteUserIds  []int
-	AutoAttackers  []int
-	Position       map[int]string
+	LeaderUserId  int
+	UserIds       []int
+	InviteUserIds []int
+	AutoAttackers []int
+	Position      map[int]string
 }
 
 var (
@@ -22,12 +17,11 @@ func New(userId int) *Party {
 		return nil
 	}
 	p := &Party{
-		LeaderUserId:   userId,
-		UserIds:        []int{userId},
-		InviteUserIds:  []int{},
-		MobInstanceIds: []int{},
-		AutoAttackers:  []int{},
-		Position:       map[int]string{},
+		LeaderUserId:  userId,
+		UserIds:       []int{userId},
+		InviteUserIds: []int{},
+		AutoAttackers: []int{},
+		Position:      map[int]string{},
 	}
 	partyMap[userId] = p
 	return p
@@ -38,17 +32,6 @@ func Get(userId int) *Party {
 		return party
 	}
 	return nil
-}
-
-func IsMobPartied(mobInstId int, userId int) bool {
-	if p := Get(userId); p != nil {
-		for _, id := range p.GetMobs() {
-			if id == mobInstId {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 func (p *Party) ChanceToBeTargetted(userId int) int {
@@ -139,14 +122,6 @@ func (p *Party) Leave(userId int) bool {
 		}
 	}
 
-	for i := len(p.MobInstanceIds) - 1; i >= 0; i-- {
-		instId := p.MobInstanceIds[i]
-		m := mobs.GetInstance(instId)
-		if m == nil || m.Character.IsCharmed(userId) {
-			p.MobInstanceIds = append(p.MobInstanceIds[:i], p.MobInstanceIds[i+1:]...)
-		}
-	}
-
 	delete(partyMap, userId)
 
 	return true
@@ -224,36 +199,4 @@ func (p *Party) Disband() {
 
 func (p *Party) GetMembers() []int {
 	return append([]int{}, p.UserIds...)
-}
-
-func (p *Party) AddMob(mobInstanceId int) {
-	if len(p.MobInstanceIds) > 0 {
-		for _, id := range p.GetMobs() {
-			if id == mobInstanceId {
-				return
-			}
-		}
-	}
-	p.MobInstanceIds = append(p.MobInstanceIds, mobInstanceId)
-}
-
-func (p *Party) RemoveMob(mobInstanceId int) {
-	for i, id := range p.GetMobs() {
-		if id == mobInstanceId {
-			p.MobInstanceIds = append(p.MobInstanceIds[:i], p.MobInstanceIds[i+1:]...)
-			break
-		}
-	}
-}
-
-func (p *Party) GetMobs() []int {
-	ret := []int{}
-	for i := len(p.MobInstanceIds) - 1; i >= 0; i-- {
-		if m := mobs.GetInstance(p.MobInstanceIds[i]); m != nil {
-			ret = append(ret, p.MobInstanceIds[i])
-			continue
-		}
-		p.MobInstanceIds = append(p.MobInstanceIds[:i], p.MobInstanceIds[i+1:]...)
-	}
-	return ret
 }

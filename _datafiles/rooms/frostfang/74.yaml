@@ -19,33 +19,12 @@ spawninfo:
   cooldown: 20
   message: A trainer enters from a back room.
 skilltraining:
-  brawling:
-    min: 1
-    max: 4
-  dual-wield:
-    min: 1
-    max: 4
-  enchant:
-    min: 1
-    max: 4
-  inspect:
-    min: 1
-    max: 4
   map:
-    min: 2
-    max: 4
-  peep:
-    min: 1
-    max: 4
-  portal:
-    min: 1
-    max: 4
-  protection:
     min: 1
     max: 4
   search:
     min: 1
-    max: 1
+    max: 4
   track:
     min: 1
     max: 4

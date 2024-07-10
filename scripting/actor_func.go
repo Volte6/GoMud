@@ -8,6 +8,7 @@ import (
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
+	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
@@ -45,6 +46,17 @@ func (a ScriptActor) MobTypeId() int {
 
 func (a ScriptActor) GetRace() string {
 	return a.characterRecord.Race()
+}
+
+func (a ScriptActor) GetSize() string {
+	if r := races.GetRace(a.characterRecord.RaceId); r != nil {
+		return string(r.Size)
+	}
+	return string(races.Medium)
+}
+
+func (a ScriptActor) GetLevel() int {
+	return a.characterRecord.Level
 }
 
 func (a ScriptActor) GetStat(statName string) int {
@@ -117,6 +129,25 @@ func (a ScriptActor) GetTempData(key string) any {
 		}
 	}
 	return nil
+}
+
+func (a ScriptActor) SetMiscCharacterData(key string, value any) {
+
+	if _, ok := value.(ScriptActor); ok { // Don't store actor data.
+		return
+	}
+	a.characterRecord.SetMiscData(key, value)
+}
+
+func (a ScriptActor) GetMiscCharacterData(key string) any {
+	if value := a.characterRecord.GetMiscData(key); value != nil {
+		return value
+	}
+	return nil
+}
+
+func (a ScriptActor) GetMiscCharacterDataKeys(prefixMatches ...string) []string {
+	return a.characterRecord.GetMiscDataKeys(prefixMatches...)
 }
 
 func (a ScriptActor) GetCharacterName(wrapInTags bool) string {
@@ -205,11 +236,26 @@ func (a ScriptActor) TrainSkill(skillName string, skillLevel int) {
 
 }
 
-func (a ScriptActor) MoveRoom(destRoomId int) {
+func (a ScriptActor) GetSkillLevel(skillName string) int {
+	return a.characterRecord.GetSkillLevel(skills.SkillTag(skillName))
+}
+
+func (a ScriptActor) MoveRoom(destRoomId int, leaveCharmedMobs ...bool) {
 
 	if a.userRecord != nil {
 
-		rooms.MoveToRoom(a.userId, destRoomId)
+		rmNow := rooms.LoadRoom(a.characterRecord.RoomId)
+
+		if rmNext := rooms.LoadRoom(destRoomId); rmNext != nil {
+			rooms.MoveToRoom(a.userId, destRoomId)
+
+			if len(leaveCharmedMobs) < 1 || !leaveCharmedMobs[0] {
+				for _, mobInstId := range a.characterRecord.GetCharmIds() {
+					rmNow.RemoveMob(mobInstId)
+					rmNext.AddMob(mobInstId)
+				}
+			}
+		}
 
 	} else if a.mobRecord != nil {
 
@@ -241,6 +287,13 @@ func (a ScriptActor) TakeItem(itm ScriptItem) {
 			TryItemScriptEvent(`onLost`, *itm.itemRecord, a.userId, commandQueue)
 		}
 	}
+}
+
+func (a ScriptActor) IsTameable() bool {
+	if a.mobRecord == nil {
+		return false
+	}
+	return a.mobRecord.IsTameable()
 }
 
 func (a ScriptActor) HasBuff(buffId int) bool {
@@ -314,8 +367,8 @@ func (a ScriptActor) HasSpell(spellId string) bool {
 	return a.characterRecord.HasSpell(spellId)
 }
 
-func (a ScriptActor) LearnSpell(spellId string) {
-	a.characterRecord.LearnSpell(spellId)
+func (a ScriptActor) LearnSpell(spellId string) bool {
+	return a.characterRecord.LearnSpell(spellId)
 }
 
 func (a ScriptActor) IsAggro(actor ScriptActor) bool {
@@ -338,12 +391,20 @@ func (a ScriptActor) GetHealthMax() int {
 	return a.characterRecord.HealthMax.Value
 }
 
+func (a ScriptActor) GetHealthPct() float64 {
+	return float64(a.characterRecord.Health) / float64(a.characterRecord.HealthMax.Value)
+}
+
 func (a ScriptActor) GetMana() int {
 	return a.characterRecord.Mana
 }
 
 func (a ScriptActor) GetManaMax() int {
 	return a.characterRecord.ManaMax.Value
+}
+
+func (a ScriptActor) GetManaPct() float64 {
+	return float64(a.characterRecord.Mana) / float64(a.characterRecord.ManaMax.Value)
 }
 
 func (a ScriptActor) SetAdjective(adj string, addIt bool) {
@@ -366,28 +427,40 @@ func (a ScriptActor) IsCharmed(userId ...int) bool {
 }
 
 func (a ScriptActor) CharmSet(userId int, charmRounds int, onRevertCommand ...string) {
+
+	// If the player is in a party, add the mob to their party
+	if a.mobInstanceId < 1 {
+		return
+	}
+
 	if len(onRevertCommand) < 1 {
 		onRevertCommand = append(onRevertCommand, ``)
 	}
 	a.characterRecord.Charm(userId, charmRounds, onRevertCommand[0])
 
-	// If the player is in a party, add the mob to their party
-	if a.mobInstanceId > 0 {
-		if plrParty := parties.Get(userId); plrParty != nil {
-			plrParty.AddMob(a.mobInstanceId)
-		}
+	if user := users.GetByUserId(userId); user != nil {
+		user.Character.TrackCharmed(a.mobInstanceId, true)
 	}
+
 }
 
 func (a ScriptActor) CharmRemove() {
 	if a.characterRecord.Charmed == nil {
 		return
 	}
-	a.characterRecord.RemoveCharm()
+	charmUserId := a.characterRecord.RemoveCharm()
+
+	if user := users.GetByUserId(charmUserId); user != nil {
+		user.Character.TrackCharmed(a.mobInstanceId, false)
+	}
 }
 
 func (a ScriptActor) CharmExpire() {
 	a.characterRecord.Charmed.Expire()
+}
+
+func (a ScriptActor) GetCharmCount() int {
+	return len(a.characterRecord.GetCharmIds())
 }
 
 func (a ScriptActor) getScript() string {

@@ -37,6 +37,7 @@ type Race struct {
 	Size          Size
 	TNLScale      float32
 	UnarmedName   string
+	Tameable      bool
 	Damage        items.Damage
 	Selectable    bool
 	AngryCommands []string         // randomly chosen to queue when they are angry/entering combat.

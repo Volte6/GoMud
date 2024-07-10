@@ -1,12 +1,26 @@
 roomid: 558
 zone: Dark Forest
-title: Forest Road
-description: As you venture further along the old road, it leads you into the heart
-  of the foreboding Dark Forest. The transition from the tranquil Frost Lake to this
-  shadowy realm is abrupt and palpable. The once-clear path is now obscured by gnarled,
-  twisted branches that reach out like skeletal fingers from ancient trees, their
-  bark as black as night.
+title: Forest Clearing
+description: In the heart of The Dark Forest lies a mysterious clearing, bathed in
+  an eerie, otherworldly light that seems to defy the thick canopy above. The air
+  is thick with an unsettling stillness, broken only by the occasional whisper of
+  the wind through the ancient, gnarled trees that encircle the open space. The ground
+  here is carpeted with strange, luminescent plants that emit a soft, ethereal glow,
+  casting long shadows that dance and flicker like ghostly specters. At the center
+  of the clearing stands a weathered stone altar, covered in cryptic runes that pulse
+  with a faint, ominous energy, suggesting a forgotten power that still lingers in
+  this haunted grove. The atmosphere is heavy with a sense of both awe and foreboding,
+  as if the very essence of the forest is holding its breath, watching, waiting.
 biome: forest
 exits:
   northwest:
     roomid: 557
+spawninfo:
+- mobid: 43
+  cooldown: 15
+  message: A small faerie enters the clearing.
+  idlecommands:
+  - emote procures a piece of a mushrom, and with a wave of their hand, restore it
+    to a new mushroom.
+  - emote nods to themselves, pleased with their work.
+  scripttag: clearing

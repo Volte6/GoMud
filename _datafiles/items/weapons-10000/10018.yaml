@@ -1,0 +1,11 @@
+itemid: 10018
+name: jeweled dagger
+namesimple: dagger
+description: The jeweled dagger, with its gleaming blade and hilt encrusted with shimmering gems, exudes an aura of both lethal elegance and mystical power.
+type: weapon
+hands: 1
+subtype: stabbing
+damage:
+  diceroll: 3d3
+statmods:
+  speed: 4

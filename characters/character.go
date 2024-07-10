@@ -61,6 +61,7 @@ type Character struct {
 	Bank            int               // The gold the character has in the bank
 	SpellBook       map[string]int    `yaml:"spellbook,omitempty"` // The spells the character has learned
 	Charmed         *CharmInfo        `yaml:"-"`                   // If they are charmed, this is the info
+	CharmedMobs     []int             `yaml:"-"`                   // If they have charmed anyone, this is the list of mob instance ids
 	Items           []items.Item      // The items the character is holding
 	Buffs           buffs.Buffs       `yaml:"buffs,omitempty"` // The buffs the character has active
 	Equipment       Worn              // The equipment the character is wearing
@@ -76,6 +77,7 @@ type Character struct {
 	QuestProgress   map[int]string    `yaml:"questprogress,omitempty"` // quest progress tracking
 	KeyRing         map[string]string `yaml:"keyring,omitempty"`       // key is the lock id, value is the sequence
 	KD              KDStats           `yaml:"kd,omitempty"`            // Kill/Death stats
+	MiscData        map[string]any    `yaml:"miscdata,omitempty"`      // Any random other data that needs to be stored
 	roomHistory     []int             // A stack FILO of the last X rooms the character has been in
 	followers       []int             `yaml:"-"` // everyone following this user
 }
@@ -108,9 +110,11 @@ func New() *Character {
 		Gold:           25,
 		Bank:           100,
 		SpellBook:      make(map[string]int),
+		CharmedMobs:    []int{},
 		Items:          []items.Item{},
 		Buffs:          buffs.New(),
 		Equipment:      Worn{},
+		MiscData:       make(map[string]any),
 		roomHistory:    make([]int, 0, 10),
 		KeyRing:        make(map[string]string),
 	}
@@ -137,6 +141,58 @@ func (c *Character) DeductActionPoints(amount int) bool {
 		c.ActionPoints = 0
 	}
 	return true
+}
+
+func (c *Character) SetMiscData(key string, value any) {
+
+	if c.MiscData == nil {
+		c.MiscData = make(map[string]any)
+	}
+
+	if value == nil {
+		delete(c.MiscData, key)
+		return
+	}
+	c.MiscData[key] = value
+}
+
+func (c *Character) GetMiscData(key string) any {
+
+	if c.MiscData == nil {
+		c.MiscData = make(map[string]any)
+	}
+
+	if value, ok := c.MiscData[key]; ok {
+		return value
+	}
+	return nil
+}
+
+func (c *Character) GetMiscDataKeys(prefixMatch ...string) []string {
+
+	if c.MiscData == nil {
+		c.MiscData = make(map[string]any)
+	}
+
+	allKeys := []string{}
+	for key, _ := range c.MiscData {
+		allKeys = append(allKeys, key)
+	}
+
+	if len(prefixMatch) == 0 {
+		return allKeys
+	}
+
+	retKeys := []string{}
+	for _, prefix := range prefixMatch {
+		for _, key := range allKeys {
+			if finalKey, ok := strings.CutPrefix(key, prefix); ok {
+				retKeys = append(retKeys, finalKey)
+			}
+		}
+	}
+
+	return retKeys
 }
 
 func (c *Character) FindKeyInBackpack(lockId string) (items.Item, bool) {
@@ -267,10 +323,12 @@ func (c *Character) TrackSpellCast(spellName string) bool {
 	return false
 }
 
-func (c *Character) LearnSpell(spellName string) {
+func (c *Character) LearnSpell(spellName string) bool {
 	if _, ok := c.SpellBook[spellName]; !ok {
 		c.SpellBook[spellName] = 1
+		return true
 	}
+	return false
 }
 
 func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
@@ -298,6 +356,22 @@ func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
 	slog.Info(`GrantXP()`, `username`, c.Name, `xp`, xp, `xpscale`, xpScale, `actualXP`, actualXP)
 
 	return actualXP, xpScale
+}
+
+func (c *Character) TrackCharmed(mobId int, add bool) {
+	for _, mobInstanceId := range c.CharmedMobs {
+		if mobInstanceId == mobId {
+			if !add {
+				c.CharmedMobs = append(c.CharmedMobs[:mobInstanceId], c.CharmedMobs[mobInstanceId+1:]...)
+			}
+			return
+		}
+	}
+	c.CharmedMobs = append(c.CharmedMobs, mobId)
+}
+
+func (c *Character) GetCharmIds() []int {
+	return append([]int{}, c.CharmedMobs...)
 }
 
 func (c *Character) Charm(userId int, rounds int, expireCommand string) {
@@ -341,9 +415,15 @@ func (c *Character) IsCharmed(userId ...int) bool {
 	return false
 }
 
-func (c *Character) RemoveCharm() {
+// Returns userId of whoever had charmed them
+func (c *Character) RemoveCharm() int {
+	charmUserId := 0
 	c.SetAdjective(`charmed`, false)
-	c.Charmed = nil
+	if c.Charmed != nil {
+		charmUserId = c.Charmed.UserId
+		c.Charmed = nil
+	}
+	return charmUserId
 }
 
 func (c *Character) GetRandomItem() (items.Item, bool) {
@@ -467,6 +547,10 @@ func (c *Character) getFormattedName(viewingUserId int, uType string, renderFlag
 
 	if c.HasBuffFlag(buffs.Hidden) {
 		f.Adjectives = append(f.Adjectives, `hidden`)
+	}
+
+	if c.HasBuffFlag(buffs.Poison) {
+		f.Adjectives = append(f.Adjectives, `poisoned`)
 	}
 
 	if c.Health < 1 {
@@ -642,135 +726,6 @@ func (c *Character) UseItem(i items.Item) int {
 	return 0
 }
 
-func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bool) {
-
-	spec := i.GetSpec()
-
-	if spec.Type != items.Weapon && spec.Subtype != items.Wearable {
-		return returnItems, false
-	}
-
-	iHandsRequired := c.HandsRequired(i)
-	if iHandsRequired > 2 {
-		return returnItems, false
-	}
-
-	// are botht he currently equipped weapon and this weapon claws?
-	bothMartial := false
-	if spec.Subtype == items.Claws && c.Equipment.Weapon.GetSpec().Subtype == items.Claws {
-		bothMartial = true
-	}
-
-	canDualWield := c.CanDualWield()
-
-	// Weapons can go in either hand.
-	// Only do this if this is a 1 handed weapon
-	if spec.Type == items.Weapon && iHandsRequired < 2 {
-
-		// If they can dual wield
-		if canDualWield || bothMartial {
-
-			// If they have a weapon equippment and it is 1 handed
-			if c.Equipment.Weapon.ItemId != 0 && c.HandsRequired(c.Equipment.Weapon) == 1 {
-				// If nothing is in their offhand
-				if c.Equipment.Offhand.ItemId == 0 {
-					// Put it in the offhand.
-					returnItems = append(returnItems, c.Equipment.Offhand)
-					c.Equipment.Offhand = i
-					return returnItems, true
-				}
-			}
-
-		}
-
-	}
-
-	// First handle weapon/offhand, since they are special cases
-	switch spec.Type {
-	case items.Weapon:
-		if c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-
-		if !c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
-			// If it's a 2 handed weapon, remove whatever is in the offhand
-			if iHandsRequired == 2 || !canDualWield && c.Equipment.Offhand.GetSpec().Type == items.Weapon {
-				returnItems = append(returnItems, c.Equipment.Offhand)
-				c.Equipment.Offhand = items.Item{}
-			}
-		}
-
-		returnItems = append(returnItems, c.Equipment.Weapon)
-		c.Equipment.Weapon = i
-	case items.Offhand:
-		if c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-
-		if !c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
-			// If they have a 2h weapon equipped, remove it
-			if c.HandsRequired(c.Equipment.Weapon) == 2 {
-				returnItems = append(returnItems, c.Equipment.Weapon)
-				c.Equipment.Weapon = items.Item{}
-			}
-		}
-		returnItems = append(returnItems, c.Equipment.Offhand)
-		c.Equipment.Offhand = i
-	case items.Head:
-		if c.Equipment.Head.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Head)
-		c.Equipment.Head = i
-	case items.Neck:
-		if c.Equipment.Neck.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Neck)
-		c.Equipment.Neck = i
-	case items.Body:
-		if c.Equipment.Body.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Body)
-		c.Equipment.Body = i
-	case items.Belt:
-		if c.Equipment.Belt.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Belt)
-		c.Equipment.Belt = i
-	case items.Gloves:
-		if c.Equipment.Gloves.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Gloves)
-		c.Equipment.Gloves = i
-	case items.Ring:
-		if c.Equipment.Ring.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Ring)
-		c.Equipment.Ring = i
-	case items.Legs:
-		if c.Equipment.Legs.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Legs)
-		c.Equipment.Legs = i
-	case items.Feet:
-		if c.Equipment.Feet.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
-		}
-		returnItems = append(returnItems, c.Equipment.Feet)
-		c.Equipment.Feet = i
-	default:
-		return returnItems, false
-	}
-
-	return returnItems, true
-}
-
 func (c *Character) FindInBackpack(itemName string) (items.Item, bool) {
 
 	if itemName == `` {
@@ -886,6 +841,26 @@ func (c *Character) GetSkillLevel(skillName skills.SkillTag) int {
 
 func (c *Character) GetSkillLevelCost(currentLevel int) int {
 	return currentLevel
+}
+
+func (c *Character) GetTameCreatureSkill(userId int, creatureName string) int {
+
+	skillValue := c.GetMiscData(`tameskill-` + creatureName)
+	if sVal, ok := skillValue.(int); ok {
+		return sVal
+	}
+	return -1
+
+}
+
+func (c *Character) GetMaxCharmedCreatures() int {
+	lvl := c.GetSkillLevel(skills.Tame)
+	return lvl + 1
+}
+
+func (c *Character) SetTameCreatureSkill(userId int, creatureName string, proficiency int) error {
+	c.SetMiscData(`tameskill-`+creatureName, proficiency)
+	return nil
 }
 
 func (c *Character) GetMemoryCapacity() int {
@@ -1054,8 +1029,27 @@ func (c *Character) IsAggro(targetUserId int, targetMobInstanceId int) bool {
 		if c.Aggro.MobInstanceId > 0 && c.Aggro.MobInstanceId == targetMobInstanceId {
 			return true
 		}
+
 		if c.Aggro.UserId > 0 && c.Aggro.UserId == targetUserId {
 			return true
+		}
+
+		if c.Aggro.Type == SpellCast {
+			if len(c.Aggro.SpellInfo.TargetUserIds) > 0 {
+				for _, uId := range c.Aggro.SpellInfo.TargetUserIds {
+					if uId == targetUserId {
+						return true
+					}
+				}
+			}
+
+			if len(c.Aggro.SpellInfo.TargetMobInstanceIds) > 0 {
+				for _, mId := range c.Aggro.SpellInfo.TargetMobInstanceIds {
+					if mId == targetMobInstanceId {
+						return true
+					}
+				}
+			}
 		}
 
 	}
@@ -1082,9 +1076,9 @@ func (c *Character) HasBuff(buffId int) bool {
 	return c.Buffs.HasBuff(buffId)
 }
 
-func (c *Character) AddBuff(buffId int) error {
+func (c *Character) AddBuff(buffId int, triggerCountOverride ...int) error {
 	buffId = int(math.Abs(float64(buffId)))
-	if !c.Buffs.AddBuff(buffId) {
+	if !c.Buffs.AddBuff(buffId, triggerCountOverride...) {
 		return fmt.Errorf(`failed to add buff. target: "%s" buffId: %d`, c.Name, buffId)
 	}
 	c.Validate()
@@ -1454,8 +1448,10 @@ func (c *Character) Validate() error {
 }
 
 func (c *Character) Race() string {
-	r := races.GetRace(c.RaceId)
-	return r.Name
+	if r := races.GetRace(c.RaceId); r != nil {
+		return r.Name
+	}
+	return `Ghostly Spirit`
 }
 
 func (c *Character) AlignmentName() string {
@@ -1542,46 +1538,198 @@ func (c *Character) GetAllWornItems() []items.Item {
 	return wornItems
 }
 
+func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bool) {
+
+	spec := i.GetSpec()
+
+	if spec.Type != items.Weapon && spec.Subtype != items.Wearable {
+		return returnItems, false
+	}
+
+	iHandsRequired := c.HandsRequired(i)
+	if iHandsRequired > 2 {
+		return returnItems, false
+	}
+
+	// are botht he currently equipped weapon and this weapon claws?
+	bothMartial := false
+	if spec.Subtype == items.Claws && c.Equipment.Weapon.GetSpec().Subtype == items.Claws {
+		bothMartial = true
+	}
+
+	canDualWield := c.CanDualWield()
+
+	// Weapons can go in either hand.
+	// Only do this if this is a 1 handed weapon
+	if spec.Type == items.Weapon && iHandsRequired < 2 {
+
+		// If they can dual wield
+		if canDualWield || bothMartial {
+
+			// If they have a weapon equippment and it is 1 handed
+			if c.Equipment.Weapon.ItemId != 0 && c.HandsRequired(c.Equipment.Weapon) == 1 {
+				// If nothing is in their offhand
+				if c.Equipment.Offhand.ItemId == 0 {
+					// Put it in the offhand.
+					returnItems = append(returnItems, c.Equipment.Offhand)
+					c.Equipment.Offhand = i
+
+					c.reapplyWornItemBuffs()
+
+					return returnItems, true
+				}
+			}
+
+		}
+
+	}
+
+	// First handle weapon/offhand, since they are special cases
+	switch spec.Type {
+	case items.Weapon:
+		if c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+
+		if !c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
+			// If it's a 2 handed weapon, remove whatever is in the offhand
+			if iHandsRequired == 2 || !canDualWield && c.Equipment.Offhand.GetSpec().Type == items.Weapon {
+				returnItems = append(returnItems, c.Equipment.Offhand)
+				c.Equipment.Offhand = items.Item{}
+			}
+		}
+
+		returnItems = append(returnItems, c.Equipment.Weapon)
+		c.Equipment.Weapon = i
+	case items.Offhand:
+		if c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+
+		if !c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
+			// If they have a 2h weapon equipped, remove it
+			if c.HandsRequired(c.Equipment.Weapon) == 2 {
+				returnItems = append(returnItems, c.Equipment.Weapon)
+				c.Equipment.Weapon = items.Item{}
+			}
+		}
+		returnItems = append(returnItems, c.Equipment.Offhand)
+		c.Equipment.Offhand = i
+	case items.Head:
+		if c.Equipment.Head.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Head)
+		c.Equipment.Head = i
+	case items.Neck:
+		if c.Equipment.Neck.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Neck)
+		c.Equipment.Neck = i
+	case items.Body:
+		if c.Equipment.Body.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Body)
+		c.Equipment.Body = i
+	case items.Belt:
+		if c.Equipment.Belt.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Belt)
+		c.Equipment.Belt = i
+	case items.Gloves:
+		if c.Equipment.Gloves.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Gloves)
+		c.Equipment.Gloves = i
+	case items.Ring:
+		if c.Equipment.Ring.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Ring)
+		c.Equipment.Ring = i
+	case items.Legs:
+		if c.Equipment.Legs.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Legs)
+		c.Equipment.Legs = i
+	case items.Feet:
+		if c.Equipment.Feet.IsDisabled() { // Don't allow equipping on a disabled slot
+			return returnItems, false
+		}
+		returnItems = append(returnItems, c.Equipment.Feet)
+		c.Equipment.Feet = i
+	default:
+		return returnItems, false
+	}
+
+	c.reapplyWornItemBuffs(returnItems...)
+
+	return returnItems, true
+}
+
 func (c *Character) RemoveFromBody(i items.Item) bool {
+
 	if i.Equals(c.Equipment.Weapon) {
 		c.Equipment.Weapon = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Offhand) {
+	} else if i.Equals(c.Equipment.Offhand) {
 		c.Equipment.Offhand = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Head) {
+	} else if i.Equals(c.Equipment.Head) {
 		c.Equipment.Head = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Neck) {
+	} else if i.Equals(c.Equipment.Neck) {
 		c.Equipment.Neck = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Body) {
+	} else if i.Equals(c.Equipment.Body) {
 		c.Equipment.Body = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Belt) {
+	} else if i.Equals(c.Equipment.Belt) {
 		c.Equipment.Belt = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Gloves) {
+	} else if i.Equals(c.Equipment.Gloves) {
 		c.Equipment.Gloves = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Ring) {
+	} else if i.Equals(c.Equipment.Ring) {
 		c.Equipment.Ring = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Legs) {
+	} else if i.Equals(c.Equipment.Legs) {
 		c.Equipment.Legs = items.Item{}
-		return true
-	}
-	if i.Equals(c.Equipment.Feet) {
+	} else if i.Equals(c.Equipment.Feet) {
 		c.Equipment.Feet = items.Item{}
-		return true
+	} else {
+		return false
 	}
-	return false
+
+	c.reapplyWornItemBuffs(i)
+
+	return true
+}
+
+func (c *Character) reapplyWornItemBuffs(removedItems ...items.Item) {
+
+	buffIdCount := map[int]int{}
+
+	// Make a list of all item buffs provided by existing worn items
+	for _, itm := range c.GetAllWornItems() {
+		spec := itm.GetSpec()
+		for _, buffId := range spec.WornBuffIds {
+			buffIdCount[buffId] = buffIdCount[buffId] + 1
+		}
+
+	}
+	// Remove any buffs that come specifically from item
+	for _, removedItem := range removedItems {
+		iSpec := removedItem.GetSpec()
+		if len(iSpec.WornBuffIds) > 0 {
+			for _, buffId := range iSpec.WornBuffIds {
+				buffIdCount[buffId] = buffIdCount[buffId] - 1
+			}
+		}
+	}
+
+	for buffId, ct := range buffIdCount {
+		if ct < 1 {
+			c.RemoveBuff(buffId)
+		} else {
+			c.AddBuff(buffId, buffs.TriggersLeftUnlimited)
+		}
+	}
 }

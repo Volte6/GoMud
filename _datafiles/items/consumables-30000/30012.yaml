@@ -1,0 +1,11 @@
+itemid: 30012
+name: phoenix elixir
+namesimple: tea
+description: A fiery potion made from sunfire blooms that revitalizes and boosts energy levels.
+type: drink
+subtype: drinkable
+uses: 1
+value: 92
+buffids: 
+- 14
+- 16

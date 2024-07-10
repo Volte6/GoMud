@@ -1,0 +1,7 @@
+itemid: 18
+name: mystic seed packets
+namesimple: flower
+description: Assorted packets of rare and enchanted seeds, each claimed to have unique magical properties.
+type: botanical
+subtype: mundane
+value: 12

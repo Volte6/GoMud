@@ -15,6 +15,6 @@ function onTrigger(actor, triggersLeft) {
 
 // Invoked when the buff has run its course.
 function onEnd(actor, triggersLeft) {
-    SendUserMessage(actor.UserId(), "he poison wears off.")
+    SendUserMessage(actor.UserId(), "The poison wears off.")
     SendRoomMessage(actor.GetRoomId(), actor.GetCharacterName(true)+' looks a bit more normal.', actor.UserId())
 }

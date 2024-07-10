@@ -1,0 +1,17 @@
+roomid: 855
+zone: Mystarion
+title: Lavender Walk
+description: The street is lined with quaint, ivy-covered cottages and stalls, each
+  overflowing with bundles of fresh herbs, dried flowers, and potions in glass vials.
+  Enchanted lanterns emit a soft, purple glow, casting a calming light over the cobblestone
+  path. Herbalists and healers, clad in robes of earthy hues, offer remedies for ailments
+  and advice on natural magic. The gentle hum of bees and the rustle of leaves in
+  the breeze create a tranquil ambiance, making Lavender Walk a haven of peace and
+  wellness in the bustling city of Mystarion.
+exits:
+  east:
+    roomid: 870
+  north:
+    roomid: 834
+  south:
+    roomid: 856

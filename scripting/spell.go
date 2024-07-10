@@ -43,103 +43,80 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 	}
 
 	sourceActor := GetActor(sourceUserId, sourceMobInstanceId)
-	var arg any = nil
 
 	if eventName != `onCast` && eventName != `onWait` && eventName != `onMagic` && eventName != `onFail` {
 		return messageQueue, err
 	}
 
+	var stringArg string = ""
+	var singleTargetArg *ScriptActor = nil
+	var multiTargetArg []*ScriptActor = nil
+
 	if spellInfo.Type == spells.Neutral {
 
 		// arg is just whatever the user entered after the spell casting command
-		arg = spellAggro.SpellRest
+		stringArg = spellAggro.SpellRest
 
-	} else if spellInfo.Type == spells.HelpSingle {
-
-		// arg is a single actor
-		if len(spellAggro.TargetUserIds) > 0 {
-			arg = GetActor(spellAggro.TargetUserIds[0], 0)
-		} else if len(spellAggro.TargetMobInstanceIds) > 0 {
-			arg = GetActor(0, spellAggro.TargetMobInstanceIds[0])
-		}
-
-		// If no longer in the same room, notify the user
-		if sourceActor.GetRoomId() != arg.(*ScriptActor).GetRoomId() {
-			messageQueue.SendUserMessage(sourceUserId, `The target of your spell can't be found.`, true)
-			arg = nil
-		}
-
-	} else if spellInfo.Type == spells.HarmSingle {
+	} else if spellInfo.Type == spells.HelpSingle || spellInfo.Type == spells.HarmSingle {
 
 		// arg is a single actor
 		if len(spellAggro.TargetUserIds) > 0 {
-			arg = GetActor(spellAggro.TargetUserIds[0], 0)
+			singleTargetArg = GetActor(spellAggro.TargetUserIds[0], 0)
 		} else if len(spellAggro.TargetMobInstanceIds) > 0 {
-			arg = GetActor(0, spellAggro.TargetMobInstanceIds[0])
+			singleTargetArg = GetActor(0, spellAggro.TargetMobInstanceIds[0])
 		}
 
 		// If no longer in the same room, notify the user
-		if sourceActor.GetRoomId() != arg.(*ScriptActor).GetRoomId() {
-			messageQueue.SendUserMessage(sourceUserId, `No target can be found for your spell.`, true)
-			arg = nil
+		if singleTargetArg == nil || (sourceActor.GetRoomId() != singleTargetArg.GetRoomId()) {
+			messageQueue.SendUserMessage(sourceUserId, `Your target cannot be found.`, true)
+			messageQueue.Handled = true
+			return messageQueue, nil
 		}
 
-	} else if spellInfo.Type == spells.HelpMulti {
+	} else if spellInfo.Type == spells.HelpMulti || spellInfo.Type == spells.HarmMulti {
 
 		// arg is a list of actors
-		targetActors := []*ScriptActor{}
+		multiTargetArg = []*ScriptActor{}
 		for _, targetUserId := range spellAggro.TargetUserIds {
-			uActor := GetActor(targetUserId, 0)
-			if uActor.GetRoomId() == sourceActor.GetRoomId() {
-				targetActors = append(targetActors, uActor)
+			if uActor := GetActor(targetUserId, 0); uActor != nil {
+				if uActor.GetRoomId() == sourceActor.GetRoomId() {
+					multiTargetArg = append(multiTargetArg, uActor)
+				}
 			}
 		}
 		for _, targetMobInstanceId := range spellAggro.TargetMobInstanceIds {
-			mActor := GetActor(0, targetMobInstanceId)
-			if mActor.GetRoomId() == sourceActor.GetRoomId() {
-				targetActors = append(targetActors, mActor)
+			if mActor := GetActor(0, targetMobInstanceId); mActor != nil {
+				if mActor.GetRoomId() == sourceActor.GetRoomId() {
+					multiTargetArg = append(multiTargetArg, mActor)
+				}
 			}
 		}
 
-		if len(targetActors) == 0 {
-			messageQueue.SendUserMessage(sourceUserId, `No target can be found for your spell.`, true)
-		} else {
-			arg = targetActors
-		}
-
-	} else if spellInfo.Type == spells.HarmMulti {
-
-		// arg is a list of actors
-		targetActors := []*ScriptActor{}
-		for _, targetUserId := range spellAggro.TargetUserIds {
-			uActor := GetActor(targetUserId, 0)
-			if uActor.GetRoomId() == sourceActor.GetRoomId() {
-				targetActors = append(targetActors, uActor)
-			}
-		}
-		for _, targetMobInstanceId := range spellAggro.TargetMobInstanceIds {
-			mActor := GetActor(0, targetMobInstanceId)
-			if mActor.GetRoomId() == sourceActor.GetRoomId() {
-				targetActors = append(targetActors, mActor)
-			}
-		}
-
-		if len(targetActors) == 0 {
-			messageQueue.SendUserMessage(sourceUserId, `No target can be found for your spell.`, true)
-		} else {
-			arg = targetActors
+		if len(multiTargetArg) == 0 {
+			messageQueue.SendUserMessage(sourceUserId, `Your target cannot be found.`, true)
+			messageQueue.Handled = true
+			return messageQueue, nil
 		}
 
 	}
 
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 
+		var argValue goja.Value
+		if multiTargetArg != nil {
+			argValue = vmw.VM.ToValue(multiTargetArg)
+		} else if singleTargetArg != nil {
+			argValue = vmw.VM.ToValue(singleTargetArg)
+		} else {
+			argValue = vmw.VM.ToValue(stringArg)
+		}
+
 		tmr := time.AfterFunc(scriptItemTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)
 		})
 		res, err := onCommandFunc(goja.Undefined(),
 			vmw.VM.ToValue(sourceActor),
-			vmw.VM.ToValue(arg),
+			vmw.VM.ToValue(argValue),
 		)
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()

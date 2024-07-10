@@ -17,3 +17,5 @@ biome: city
 exits:
   west:
     roomid: 72
+items:
+- itemid: 10

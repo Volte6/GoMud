@@ -123,7 +123,7 @@ function onIdle(mob, room) {
         return true;
     }
 
-    randNum = UtilDiceRoll(1, 10);
+    randNum = UtilDiceRoll(1, 10)-1;
     if ( randNum < RANDOM_IDLE.length ) {
         mob.Command(RANDOM_IDLE[randNum]);
         return true;

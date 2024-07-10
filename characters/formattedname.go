@@ -32,6 +32,10 @@ var (
 		// Have they disconnected and are zombie status?
 		`zombie`:       `<ansi fg="77">z</ansi><ansi fg="77">O</ansi><ansi fg="113">m</ansi><ansi fg="72">B</ansi><ansi fg="65">i</ansi><ansi fg="78">e</ansi>`,
 		`zombie-short`: `<ansi fg="77">z</ansi>`,
+
+		// Have they disconnected and are zombie status?
+		`poisoned`:       `<ansi fg="53">☠</ansi><ansi fg="53">p</ansi><ansi fg="54">o</ansi><ansi fg="55">i</ansi><ansi fg="56">s</ansi><ansi fg="93">o</ansi><ansi fg="135">n</ansi><ansi fg="141">e</ansi><ansi fg="183">d</ansi>`,
+		`poisoned-short`: `<ansi fg="53">☠</ansi>`,
 	}
 )
 
@@ -75,4 +79,11 @@ func (f FormattedName) String() string {
 	}
 
 	return output
+}
+
+func GetFormattedAdjective(adjName string) string {
+	if newAdj, ok := adjectiveSwaps[adjName]; ok {
+		return newAdj
+	}
+	return adjName
 }

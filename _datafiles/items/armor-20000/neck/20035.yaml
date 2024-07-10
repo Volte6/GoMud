@@ -1,0 +1,10 @@
+itemid: 20035
+name: leather choker
+namesimple: choker
+description: A leather collar.
+type: neck
+subtype: wearable
+damagereduction: 4
+statmods:
+  mysticism: 3
+  perception: 10

@@ -178,6 +178,12 @@ func Train(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 					fmt.Sprintf(`The trainer shakes <ansi fg="username">%ss</ansi> hand while congratulating them. Must be nice.`, user.Character.Name),
 					true)
 
+				if match == string(skills.Tame) {
+					if newLevel == 1 {
+						user.Character.SetTameCreatureSkill(userId, `rat`, 0)
+						response.SendUserMessage(user.UserId, `You've learned how to tame a <ansi fg="mobname">rat</ansi>!`, true)
+					}
+				}
 			}
 
 		}

@@ -206,6 +206,10 @@ func (r ScriptRoom) SpawnMob(mobId int) int {
 
 }
 
+func (r ScriptRoom) RepeatSpawnItem(itemId int, roundFrequency int, containerName ...string) bool {
+	return r.roomRecord.RepeatSpawnItem(itemId, roundFrequency, containerName...)
+}
+
 func (r ScriptRoom) AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int) bool {
 	tmpExit := rooms.TemporaryRoomExit{
 		RoomId:  exitRoomId,

@@ -6,8 +6,6 @@ maxwander: 0
 activitylevel: 1
 groups: 
   - slum-ruffians
-idlecommands:
-  - 'say You have done well to make it this far into my domain. Perhaps you should train here.'
 combatcommands:
   - 'sneak'
   - 'sneak;;;backstab'

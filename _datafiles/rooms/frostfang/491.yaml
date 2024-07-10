@@ -15,6 +15,9 @@ spawninfo:
 - mobid: 30
   cooldown: 300
   message: A sneaky fellow enters from a back room.
+- mobid: 41
+  cooldown: 300
+  message: A student of the guild enters the room.
 skilltraining:
   skulduggery:
     min: 1

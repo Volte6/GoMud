@@ -1,7 +1,14 @@
 roomid: 716
 zone: Mystarion
 title: The north road
-description: The north road
+description: North Road is a wide, well-trodden path that stretches from the bustling
+  heart of Mystarion to the wild, untamed lands beyond the city's northern gates.
+  Flanked by ancient stone walls and tall, wind-swept trees, the road is lined with
+  waystations and merchant stalls selling travel provisions, enchanted maps, and protective
+  talismans. The air is filled with the scent of pine and the distant call of birds,
+  while the road itself is marked by magical runes that guide and protect travelers.
 exits:
+  east:
+    roomid: 857
   north:
     roomid: 668

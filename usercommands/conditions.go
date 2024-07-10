@@ -2,6 +2,7 @@ package usercommands
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/templates"
@@ -31,7 +32,7 @@ func Conditions(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 	for _, buff := range charBuffs {
 
 		spec := buffs.GetBuffSpec(buff.BuffId)
-		totalRounds := spec.RoundInterval * spec.TriggerCount
+		totalRounds := int(math.Ceil(float64(buff.TriggersLeft) * float64(spec.RoundInterval)))
 
 		newAffliction := buffInfo{
 			Name:        spec.Name,

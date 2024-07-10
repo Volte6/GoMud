@@ -1,0 +1,14 @@
+roomid: 857
+zone: Mystarion
+title: Valor's Path
+description: Valor's Path is a broad, majestic boulevard that extends from the bustling
+  North Road straight to the towering gates of the Grand Arcane Arena. Lined with
+  statues of legendary warriors and magicians, each monument is meticulously crafted
+  from enchanted stone, their eyes seemingly alive with a faint glow. Banners depicting
+  epic battles and iconic duels flutter from lamp posts, casting vibrant colors over
+  the cobblestones below.
+exits:
+  east:
+    roomid: 858
+  west:
+    roomid: 716

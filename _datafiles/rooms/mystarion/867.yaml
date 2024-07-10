@@ -1,0 +1,16 @@
+roomid: 867
+zone: Mystarion
+title: Bloom & Whisper Botanicals
+description: Bloom & Whisper Botanicals is a charming flower shop nestled along Lavender
+  Walk, its exterior adorned with cascading vines and vibrant blooms that entice passersby
+  with their intoxicating fragrance. The shop's windows display an enchanting array
+  of floral arrangements, from delicate bouquets to elaborate wreaths, each imbued
+  with subtle magical properties. Inside, the air is filled with the soothing scent
+  of lavender and other aromatic herbs, creating a tranquil and welcoming atmosphere.
+exits:
+  west:
+    roomid: 833
+spawninfo:
+- mobid: 46
+  cooldown: 20
+  message: The herbalist enters the shop.

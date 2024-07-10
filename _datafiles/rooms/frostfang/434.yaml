@@ -19,6 +19,8 @@ exits:
     roomid: 435
 items:
 - itemid: 20011
+- itemid: 20011
+- itemid: 20010
 spawninfo:
 - mobid: 12
   cooldown: 20

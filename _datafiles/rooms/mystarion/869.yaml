@@ -1,0 +1,18 @@
+roomid: 869
+zone: Mystarion
+title: The Garden Nook
+description: The Garden Nook is a verdant oasis on Lavender Walk, its entrance framed
+  by a charming wooden archway entwined with blooming vines and twinkling fairy lights.
+  Stepping inside, visitors are greeted by a lush, aromatic environment where every
+  corner bursts with greenery and the soothing sounds of trickling water from enchanted
+  fountains. Shelves and tables are artfully arranged with an array of enchanted plants,
+  from whispering ferns that sway to unheard melodies to vibrant, bioluminescent flowers
+  that glow softly in the twilight. The air is rich with the scent of fresh earth
+  and blooming flora, creating a tranquil, almost magical atmosphere.
+exits:
+  west:
+    roomid: 854
+spawninfo:
+- mobid: 48
+  cooldown: 20
+  message: The gardener enters the shop.

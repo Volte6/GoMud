@@ -1,0 +1,18 @@
+roomid: 870
+zone: Mystarion
+title: Mystic Garden Essentials
+description: Mystic Garden Essentials is a bustling hub for gardening and herbalist
+  enthusiasts, nestled just off Lavender Walk. The shop's entrance is adorned with
+  a charming archway woven from ivy and blooming flowers, inviting customers into
+  a world of verdant magic. Inside, wooden shelves are lined with an extensive array
+  of enchanted gardening tools, from self-watering pots to moonlit pruning shears,
+  each designed to enhance the growth and vitality of magical plants. The air is filled
+  with the earthy scent of soil and the subtle fragrance of herbs, creating a serene
+  and invigorating atmosphere.
+exits:
+  west:
+    roomid: 855
+spawninfo:
+- mobid: 49
+  cooldown: 20
+  message: The shop owner enters the room.

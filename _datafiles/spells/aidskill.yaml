@@ -1,4 +1,5 @@
-spellid: aid
+# Only applied by the aid skill
+spellid: aidskill
 name: Aid
 description: Revives a fallen ally
 type: helpsingle

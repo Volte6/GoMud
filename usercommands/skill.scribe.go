@@ -22,7 +22,7 @@ func Scribe(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		return response, fmt.Errorf("user %d not found", userId)
 	}
 
-	skillLevel := user.Character.GetSkillLevel(skills.Script)
+	skillLevel := user.Character.GetSkillLevel(skills.Scribe)
 
 	if skillLevel == 0 {
 		response.SendUserMessage(userId, "You don't know how to scribe.", true)

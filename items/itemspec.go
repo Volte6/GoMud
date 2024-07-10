@@ -55,6 +55,7 @@ const (
 	Object    ItemType = "object"    // A mundane object
 	Gemstone  ItemType = "gemstone"  // A gem
 	Lockpicks ItemType = "lockpicks" // Used for lockpicking
+	Botanical ItemType = "botanical" // A plant, herb, etc.
 
 	// Subtypes for wearables
 	Wearable  ItemSubType = "wearable"
@@ -134,7 +135,8 @@ type ItemSpec struct {
 	ItemId          int
 	Value           int
 	Uses            int         `yaml:"uses,omitempty"`            // How many uses it starts with
-	BuffIds         []int       `yaml:"buffids,omitempty"`         // What buffs it can apply (if used correctly)
+	BuffIds         []int       `yaml:"buffids,omitempty"`         // What buffs it can apply (if used)
+	WornBuffIds     []int       `yaml:"wornbuffids,omitempty"`     // BuffId's that are applied while worn, and expired when removed.
 	DamageReduction int         `yaml:"damagereduction,omitempty"` // % of damage it reduces when it blocks attacks
 	WaitRounds      int         `yaml:"waitrounds,omitempty"`      // How many extra rounds each combat requires
 	Hands           WeaponHands `yaml:"hands"`                     // How many hands it takes to wield

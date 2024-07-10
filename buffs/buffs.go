@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	TriggersLeftExpired = 0 // When it hits this number it will be pruned ASAP
+	TriggersLeftExpired   = 0 // When it hits this number it will be pruned ASAP
+	TriggersLeftUnlimited = 1000000000
 )
 
 type Buff struct {
@@ -164,17 +165,23 @@ func (bs *Buffs) RemoveBuff(buffId int) {
 	}
 }
 
-func (bs *Buffs) AddBuff(buffId int) bool {
+func (bs *Buffs) AddBuff(buffId int, triggerCountOverride ...int) bool {
 	if buffInfo := GetBuffSpec(buffId); buffInfo != nil {
+
+		triggersLeftCt := buffInfo.TriggerCount
+		if len(triggerCountOverride) > 0 {
+			triggersLeftCt = triggerCountOverride[0]
+		}
+
 		newBuff := Buff{
 			BuffId:       buffInfo.BuffId,
 			RoundCounter: 0,
-			TriggersLeft: buffInfo.TriggerCount,
+			TriggersLeft: triggersLeftCt,
 		}
 
 		if idx, ok := bs.buffIds[buffId]; ok {
 			slog.Info("Refreshing Buff", "buffName", buffInfo.Name, "buffId", buffId)
-			bs.List[idx].TriggersLeft = buffInfo.TriggerCount
+			bs.List[idx].TriggersLeft = triggersLeftCt
 
 			return true
 		}
@@ -220,7 +227,9 @@ func (bs *Buffs) Trigger(buffId ...int) (triggeredBuffs []*Buff) {
 				if b.RoundCounter%buffInfo.RoundInterval == 0 {
 					// It cannot be pruned unless it is triggered
 					triggeredBuffs = append(triggeredBuffs, b)
-					b.TriggersLeft--
+					if b.TriggersLeft != TriggersLeftUnlimited {
+						b.TriggersLeft--
+					}
 				}
 				bs.List[idx] = b
 			}
