@@ -29,6 +29,7 @@ func Inventory(rest string, userId int, cmdQueue util.CommandQueue) (util.Messag
 	typeSearchTerms := map[string]items.ItemType{
 		`weapons`:   items.Weapon,
 		`offhand`:   items.Offhand,
+		`holdable`:  items.Holdable,
 		`shields`:   items.Offhand,
 		`head`:      items.Head,
 		`neck`:      items.Neck,

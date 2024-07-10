@@ -494,8 +494,9 @@ func (c *Character) GetDefense() int {
 
 	//reduction = int(float64(reduction) / 9)
 
-	// If wearing a shield, defense gets a 50% boost
-	if c.Equipment.Offhand.ItemId != 0 && c.Equipment.Offhand.GetSpec().Type != items.Weapon {
+	// If wearing an offhand item like a shield, defense gets a 50% boost
+	// Holdables are not considered "shield" type items.
+	if c.Equipment.Offhand.ItemId != 0 && c.Equipment.Offhand.GetSpec().Type != items.Weapon && c.Equipment.Offhand.GetSpec().Type != items.Holdable {
 		reduction = int(float64(reduction) * 1.5)
 	}
 
@@ -1314,7 +1315,7 @@ func (c *Character) CanDualWield() bool {
 }
 
 // Returns whether a correction was in order
-func (c *Character) Validate() error {
+func (c *Character) Validate(recalculateItemBuffs ...bool) error {
 
 	if len(c.Description) == 0 {
 		c.Description = c.Name + " seems thoroughly uninteresting."
@@ -1387,7 +1388,7 @@ func (c *Character) Validate() error {
 						itemFoundInDisabledSlot = c.Equipment.Weapon
 					}
 					c.Equipment.Weapon = items.ItemDisabledSlot
-				case items.Offhand:
+				case items.Offhand, items.Holdable:
 					if c.Equipment.Offhand.ItemId > 0 { // Did we find somethign in a disabled slot?
 						itemFoundInDisabledSlot = c.Equipment.Offhand
 					}
@@ -1442,6 +1443,10 @@ func (c *Character) Validate() error {
 
 		}
 
+	}
+
+	if len(recalculateItemBuffs) > 0 && recalculateItemBuffs[0] {
+		c.reapplyWornItemBuffs()
 	}
 
 	return nil
@@ -1601,7 +1606,7 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 
 		returnItems = append(returnItems, c.Equipment.Weapon)
 		c.Equipment.Weapon = i
-	case items.Offhand:
+	case items.Offhand, items.Holdable:
 		if c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
 			return returnItems, false
 		}

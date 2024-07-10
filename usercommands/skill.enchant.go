@@ -72,7 +72,7 @@ func Enchant(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to enchant. Is it still worn, perhaps?", rest), true)
 	} else {
 
-		if matchItem.GetSpec().Type != items.Weapon && matchItem.GetSpec().Subtype != items.Wearable {
+		if (matchItem.GetSpec().Type != items.Weapon && matchItem.GetSpec().Subtype != items.Wearable) || matchItem.GetSpec().Type == items.Holdable {
 			response.SendUserMessage(userId, `Enchant only works on weapons and armor.`, true)
 			response.Handled = true
 			return response, nil

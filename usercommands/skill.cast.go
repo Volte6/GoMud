@@ -175,10 +175,7 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 				if partyUser := users.GetByUserId(partyUserId); partyUser != nil {
 					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, partyUserId)
-
-					for _, partyMobId := range partyUser.Character.GetCharmIds() {
-						spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, partyMobId)
-					}
+					spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, partyUser.Character.GetCharmIds()...)
 				}
 
 			}

@@ -4,5 +4,6 @@ namesimple: lantern
 description: A simple handheld lantern.
 type: offhand
 subtype: wearable
+breakchance: 5
 wornbuffids:
   - 1

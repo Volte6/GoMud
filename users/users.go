@@ -372,7 +372,7 @@ func LoadUser(username string) (*UserRecord, error) {
 	loadedUser.Character.SetRoomMemory(rebuiltMemory)
 	loadedUser.RoomMemoryBlob = ``
 
-	if err := loadedUser.Character.Validate(); err == nil {
+	if err := loadedUser.Character.Validate(true); err == nil {
 		SaveUser(*loadedUser)
 	}
 

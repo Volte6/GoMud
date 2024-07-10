@@ -30,22 +30,24 @@ const (
 	Unknown ItemType = ""
 
 	// Equipment
-	Weapon  ItemType = "weapon"
-	Offhand ItemType = "offhand"
-	Head    ItemType = "head"
-	Neck    ItemType = "neck"
-	Body    ItemType = "body"
-	Belt    ItemType = "belt"
-	Gloves  ItemType = "gloves"
-	Ring    ItemType = "ring"
-	Legs    ItemType = "legs"
-	Feet    ItemType = "feet"
+	Weapon   ItemType = "weapon"
+	Offhand  ItemType = "offhand"
+	Holdable ItemType = "holdable" // special type that can go into the offhand slot
+	Head     ItemType = "head"
+	Neck     ItemType = "neck"
+	Body     ItemType = "body"
+	Belt     ItemType = "belt"
+	Gloves   ItemType = "gloves"
+	Ring     ItemType = "ring"
+	Legs     ItemType = "legs"
+	Feet     ItemType = "feet"
 	// Consumables
 	Potion  ItemType = "potion"
 	Food    ItemType = "food"
 	Drink   ItemType = "drink"
 	Scroll  ItemType = "scroll"
 	Grenade ItemType = "grenade" // Expected to be thrown
+	Junk    ItemType = "junk"
 
 	// Other
 	Container ItemType = "container"
@@ -148,9 +150,10 @@ type ItemSpec struct {
 	Subtype         ItemSubType
 	Damage          Damage
 	Element         Element
-	StatMods        map[string]int `yaml:"statmods,omitempty"`  // What stats it modifies when equipped
-	Cursed          bool           `yaml:"cursed,omitempty"`    // Can't be removed once equipped
-	KeyLockId       string         `yaml:"keylockid,omitempty"` // Example: `778-north` - If it's a key, what lock does it open? roomid-exitname etc.
+	StatMods        map[string]int `yaml:"statmods,omitempty"`    // What stats it modifies when equipped
+	BreakChance     uint8          `yaml:"breakchance,omitempty"` // Chance in 100 that the item will break when used, or when the character is hit with it equipped, or if it is in the characters inventory during an explosion, etc.
+	Cursed          bool           `yaml:"cursed,omitempty"`      // Can't be removed once equipped
+	KeyLockId       string         `yaml:"keylockid,omitempty"`   // Example: `778-north` - If it's a key, what lock does it open? roomid-exitname etc.
 }
 
 func (i Element) String() string {

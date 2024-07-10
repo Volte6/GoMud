@@ -1,0 +1,7 @@
+itemid: 20
+name: junk
+namesimple: junk
+description: A broken object that can no longer be recognized.
+type: junk
+subtype: mundane
+value: 1

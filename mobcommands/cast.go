@@ -6,6 +6,7 @@ import (
 
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/spells"
@@ -45,12 +46,12 @@ func Cast(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		response.Handled = true
 		return response, nil
 	}
-
-	if mob.Character.Mana < spellInfo.Cost {
-		response.Handled = true
-		return response, nil
-	}
-
+	/*
+		if mob.Character.Mana < spellInfo.Cost {
+			response.Handled = true
+			return response, nil
+		}
+	*/
 	targetPlayerId := 0
 	targetMobInstanceId := 0
 
@@ -162,6 +163,28 @@ func Cast(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 				}
 			}
 
+		} else {
+
+			spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, mob.Character.Charmed.UserId)
+
+			// Targets self and all in party
+			if p := parties.Get(mob.Character.Charmed.UserId); p != nil {
+
+				for _, partyUserId := range p.GetMembers() {
+
+					if partyUserId == mob.Character.Charmed.UserId {
+						continue
+					}
+
+					if partyUser := users.GetByUserId(partyUserId); partyUser != nil {
+						spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, partyUserId)
+						spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, partyUser.Character.GetCharmIds()...)
+					}
+
+				}
+
+			}
+
 		}
 
 	} else if spellInfo.Type == spells.HarmMulti {
@@ -188,6 +211,11 @@ func Cast(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 				}
 			}
 		}
+
+	} else if spellInfo.Type == spells.HelpArea || spellInfo.Type == spells.HarmArea {
+
+		spellAggro.TargetUserIds = room.GetPlayers()
+		spellAggro.TargetMobInstanceIds = room.GetMobs()
 
 	}
 

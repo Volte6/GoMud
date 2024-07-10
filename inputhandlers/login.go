@@ -7,7 +7,6 @@ import (
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 type LoginState struct {
@@ -105,7 +104,7 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 			tmpUser, err := users.LoadUser(state.UserObject.Username)
 			if err != nil {
 				panic(err)
-			} else if !passwordMatch(tmpUser.Password, state.UserObject.Password) {
+			} else if !tmpUser.PasswordMatches(state.UserObject.Password) {
 				connectionPool.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
 				connectionPool.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
 				connectionPool.Remove(clientInput.ConnectionId)
@@ -164,17 +163,4 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 	// Once complete, return true to let main.go know we're done with this handler.
 	return true
 
-}
-
-func passwordMatch(input string, pw string) bool {
-
-	if input == pw {
-		return true
-	}
-
-	if util.Hash(input) == pw {
-		return true
-	}
-
-	return false
 }

@@ -683,6 +683,34 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				messageQueue.SendRoomMessages(defUser.Character.RoomId, roundResult.MessagesToTargetRoom, true, user.UserId, defUser.UserId)
 			}
 
+			// If the attack connected, check for damage to equipment.
+			if roundResult.Hit {
+				// For now, only focus on offhand items.
+				if defUser.Character.Equipment.Offhand.ItemId > 0 {
+
+					modifier := 0
+					if roundResult.Crit { // Crits double the chance of breakage for offhand items.
+						modifier = int(defUser.Character.Equipment.Offhand.GetSpec().BreakChance)
+					}
+
+					if defUser.Character.Equipment.Offhand.BreakTest(modifier) {
+						// Send message about the break
+
+						messageQueue.SendUserMessage(defUser.UserId, `<ansi fg="202">***</ansi>`, true)
+						messageQueue.SendUserMessage(defUser.UserId, fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> Your <ansi fg="item">%s</ansi> breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple()), true)
+						messageQueue.SendUserMessage(defUser.UserId, `<ansi fg="202">***</ansi>`, true)
+
+						messageQueue.SendRoomMessage(defUser.Character.RoomId, fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="username">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple(), defUser.Character.Name), true, defUser.UserId)
+
+						defUser.Character.RemoveFromBody(defUser.Character.Equipment.Offhand)
+						itm := items.New(20) // Broken item
+						if !defUser.Character.StoreItem(itm) {
+							room.AddItem(itm, false)
+						}
+					}
+				}
+			}
+
 			if user.Character.Health <= 0 || defUser.Character.Health <= 0 {
 				defUser.Character.EndAggro()
 				user.Character.EndAggro()
@@ -1054,6 +1082,34 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 				messageQueue.SendRoomMessages(defUser.Character.RoomId, roundResult.MessagesToTargetRoom, true, defUser.UserId)
 			}
 
+			// If the attack connected, check for damage to equipment.
+			if roundResult.Hit {
+				// For now, only focus on offhand items.
+				if defUser.Character.Equipment.Offhand.ItemId > 0 {
+
+					modifier := 0
+					if roundResult.Crit { // Crits double the chance of breakage for offhand items.
+						modifier = int(defUser.Character.Equipment.Offhand.GetSpec().BreakChance)
+					}
+
+					if defUser.Character.Equipment.Offhand.BreakTest(modifier) {
+						// Send message about the break
+
+						messageQueue.SendUserMessage(defUser.UserId, `<ansi fg="202">***</ansi>`, true)
+						messageQueue.SendUserMessage(defUser.UserId, fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> Your <ansi fg="item">%s</ansi> breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple()), true)
+						messageQueue.SendUserMessage(defUser.UserId, `<ansi fg="202">***</ansi>`, true)
+
+						messageQueue.SendRoomMessage(defUser.Character.RoomId, fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="username">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple(), defUser.Character.Name), true, defUser.UserId)
+
+						defUser.Character.RemoveFromBody(defUser.Character.Equipment.Offhand)
+						itm := items.New(20) // Broken item
+						if !defUser.Character.StoreItem(itm) {
+							room.AddItem(itm, false)
+						}
+					}
+				}
+			}
+
 			if mob.Character.Health <= 0 || defUser.Character.Health <= 0 {
 				mob.Character.EndAggro()
 				defUser.Character.EndAggro()
@@ -1138,6 +1194,33 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 					Type: characters.DefaultAttack,
 				}
 				w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack #%d", mob.InstanceId)) // # means mob
+			}
+
+			// If the attack connected, check for damage to equipment.
+			if roundResult.Hit {
+				// For now, only focus on offhand items.
+				if defMob.Character.Equipment.Offhand.ItemId > 0 {
+
+					modifier := 0
+					if roundResult.Crit { // Crits double the chance of breakage for offhand items.
+						modifier = int(defMob.Character.Equipment.Offhand.GetSpec().BreakChance)
+					}
+
+					if defMob.Character.Equipment.Offhand.BreakTest(modifier) {
+						// Send message about the break
+
+						if room := rooms.LoadRoom(roomId); room != nil {
+
+							messageQueue.SendRoomMessage(roomId, fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="mobname">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defMob.Character.Equipment.Offhand.NameSimple(), defMob.Character.Name), true)
+
+							defMob.Character.RemoveFromBody(defMob.Character.Equipment.Offhand)
+							itm := items.New(20) // Broken item
+							if !defMob.Character.StoreItem(itm) {
+								room.AddItem(itm, false)
+							}
+						}
+					}
+				}
 			}
 
 			if mob.Character.Health <= 0 || defMob.Character.Health <= 0 {

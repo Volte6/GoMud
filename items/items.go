@@ -49,6 +49,24 @@ func (i *Item) GetScript() string {
 	return i.GetSpec().GetScript()
 }
 
+// performs a break test and returns true if the item breaks
+// Pass a uint8 to increase the chance of breaking.
+func (i *Item) BreakTest(increaseChance ...int) bool {
+	bc := i.GetSpec().BreakChance
+	if bc < 1 {
+		return false
+	}
+	randNum := uint8(util.Rand(100))
+	if len(increaseChance) > 0 {
+		if uint8(increaseChance[0]) >= randNum {
+			randNum = 0
+		} else {
+			randNum -= uint8(increaseChance[0])
+		}
+	}
+	return bc > randNum
+}
+
 func (i *Item) SetTempData(key string, value any) {
 
 	if i.tempDataStore == nil {

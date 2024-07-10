@@ -3,6 +3,7 @@ package users
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"math"
 	"regexp"
 	"strconv"
@@ -69,6 +70,21 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 		lock:           sync.RWMutex{},
 		tempDataStore:  make(map[string]any),
 	}
+}
+
+func (u *UserRecord) PasswordMatches(input string) bool {
+
+	slog.Info("PASSWORD", "input", input, "pw", u.Password)
+	if input == u.Password {
+		return true
+	}
+
+	// In case we reset the password to a plaintext string
+	if input == util.Hash(u.Password) {
+		return true
+	}
+
+	return false
 }
 
 func (u *UserRecord) SetProgressBar(pb *progressbar.ProgressBar) {
