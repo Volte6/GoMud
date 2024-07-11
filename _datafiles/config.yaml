@@ -53,6 +53,13 @@ FileAnsiAliases: _datafiles/ansi-aliases.yaml
 #   Keywords are used to match commands to actions
 #   Also used for aliases
 FileKeywords: _datafiles/keywords.yaml
+# - AllowItemBuffRemoval - 
+#   Whether to allow the removal of buffs assigned by items using spells etc. 
+#   By default, once an item has buffed a player, the player cannot remove the 
+#   buff unless they removing the item. However, if set to true, players can 
+#   temporarily remove the buff with spells, items, etc. and the buff will not 
+#   return until the player re-equips the item, or logs out and back in.
+AllowItemBuffRemoval: false
 # - CarefulSaveFiles -
 #   If true, save files will be written to a temporary file and then saved over
 #   the actual file. This takes longer, but helps prevent file corruption if

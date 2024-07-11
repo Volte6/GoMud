@@ -102,9 +102,11 @@ func GetBuffSpec(buffId int) *BuffSpec {
 	if buffId < 0 {
 		buffId *= -1
 	}
+
 	if buff, ok := buffs[buffId]; ok {
 		return buff
 	}
+
 	return nil
 }
 

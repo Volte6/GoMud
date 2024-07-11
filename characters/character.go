@@ -1077,9 +1077,9 @@ func (c *Character) HasBuff(buffId int) bool {
 	return c.Buffs.HasBuff(buffId)
 }
 
-func (c *Character) AddBuff(buffId int, triggerCountOverride ...int) error {
+func (c *Character) AddBuff(buffId int, fromItem ...bool) error {
 	buffId = int(math.Abs(float64(buffId)))
-	if !c.Buffs.AddBuff(buffId, triggerCountOverride...) {
+	if !c.Buffs.AddBuff(buffId, fromItem...) {
 		return fmt.Errorf(`failed to add buff. target: "%s" buffId: %d`, c.Name, buffId)
 	}
 	c.Validate()
@@ -1091,7 +1091,7 @@ func (c *Character) TrackBuffStarted(buffId int) {
 }
 
 func (c *Character) GetBuffs(buffId ...int) []*buffs.Buff {
-	return c.Buffs.GetAllBuffs(buffId...)
+	return c.Buffs.GetBuffs(buffId...)
 }
 
 func (c *Character) RemoveBuff(buffId int) {
@@ -1716,6 +1716,15 @@ func (c *Character) reapplyWornItemBuffs(removedItems ...items.Item) {
 
 	buffIdCount := map[int]int{}
 
+	// Track any buffs that come from an item
+	// If these don't show up as still being required by an item (such as a yaml file was changed)
+	// This will cause them to be removed.
+	for _, b := range c.Buffs.List {
+		if b.ItemBuff {
+			buffIdCount[b.BuffId] = 0
+		}
+	}
+
 	// Make a list of all item buffs provided by existing worn items
 	for _, itm := range c.GetAllWornItems() {
 		spec := itm.GetSpec()
@@ -1738,7 +1747,7 @@ func (c *Character) reapplyWornItemBuffs(removedItems ...items.Item) {
 		if ct < 1 {
 			c.RemoveBuff(buffId)
 		} else {
-			c.AddBuff(buffId, buffs.TriggersLeftUnlimited)
+			c.AddBuff(buffId, true)
 		}
 	}
 }

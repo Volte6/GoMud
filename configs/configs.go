@@ -26,6 +26,7 @@ type config struct {
 	FolderTemplates              ConfigString      `yaml:"FolderTemplates"`
 	FileAnsiAliases              ConfigString      `yaml:"FileAnsiAliases"`
 	FileKeywords                 ConfigString      `yaml:"FileKeywords"`
+	AllowItemBuffRemoval         ConfigBool        `yaml:"AllowItemBuffRemoval"`
 	CarefulSaveFiles             ConfigBool        `yaml:"CarefulSaveFiles"`
 	AuctionsEnabled              ConfigBool        `yaml:"AuctionsEnabled"`
 	AuctionsAnonymous            ConfigBool        `yaml:"AuctionsAnonymous"`

@@ -7,6 +7,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
@@ -44,6 +45,8 @@ func SayTo(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		return response, nil
 	}
 
+	toUser := users.GetByUserId(playerId)
+
 	rest = strings.TrimSpace(rest[len(args[0]):])
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 
@@ -51,6 +54,7 @@ func SayTo(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		response.SendUserMessage(playerId, fmt.Sprintf(`someone says to you, "<ansi fg="yellow">%s</ansi>"`, rest), true)
 	} else {
 		response.SendUserMessage(playerId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to you, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to <ansi fg="username">%s</ansi>, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, toUser.Character.Name, rest), true)
 	}
 
 	response.Handled = true

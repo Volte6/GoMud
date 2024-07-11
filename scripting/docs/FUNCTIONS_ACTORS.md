@@ -36,7 +36,6 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GiveBuff(buffId int)](#actorobjectgivebuffbuffid-int)
   - [ActorObject.HasBuffFlag(buffFlag string) bool](#actorobjecthasbuffflagbuffflag-string-bool)
   - [ActorObject.CancelBuffWithFlag(buffFlag string) bool](#actorobjectcancelbuffwithflagbuffflag-string-bool)
-  - [ActorObject.ExpireBuff(buffId int)](#actorobjectexpirebuffbuffid-int)
   - [ActorObject.RemoveBuff(buffId int)](#actorobjectremovebuffbuffid-int)
   - [ActorObject.HasItemId(itemId int, \[excludeWorn bool\]) bool](#actorobjecthasitemiditemid-int-excludeworn-bool-bool)
   - [ActorObject.GetBackpackItems() \[\]ItemObject](#actorobjectgetbackpackitems-itemobject)
@@ -290,13 +289,6 @@ Cancels any buffs that have the flag provided. Returns `true` if one or more wer
 |  Argument | Explanation |
 | --- | --- |
 | buffFlag | The buff flag to check [see buffspec.go](../buffs/buffspec.go). |
-
-## [ActorObject.ExpireBuff(buffId int)](/scripting/actor_func.go)
-Expire a buff immediately
-
-|  Argument | Explanation |
-| --- | --- |
-| buffId | The ID of the buff to expire |
 
 ## [ActorObject.RemoveBuff(buffId int)](/scripting/actor_func.go)
 Remove a buff without triggering onEnd

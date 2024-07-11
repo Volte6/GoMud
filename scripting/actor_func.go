@@ -6,6 +6,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/races"
@@ -309,15 +310,30 @@ func (a ScriptActor) HasBuffFlag(buffFlag string) bool {
 }
 
 func (a ScriptActor) CancelBuffWithFlag(buffFlag string) bool {
-	return a.characterRecord.CancelBuffsWithFlag(buffs.Flag(strings.ToLower(buffFlag)))
+
+	found := false
+
+	for _, buffId := range a.characterRecord.Buffs.GetBuffIdsWithFlag(buffs.Flag(strings.ToLower(buffFlag))) {
+		found = found || a.RemoveBuff(buffId)
+	}
+
+	return found
 }
 
-func (a ScriptActor) ExpireBuff(buffId int) {
-	a.characterRecord.Buffs.CancelBuffId(buffId)
-}
+// Remove a buff silently
+func (a ScriptActor) RemoveBuff(buffId int) bool {
 
-func (a ScriptActor) RemoveBuff(buffId int) {
-	a.characterRecord.Buffs.RemoveBuff(buffId * -1)
+	if !configs.GetConfig().AllowItemBuffRemoval {
+		buffList := a.characterRecord.GetBuffs(buffId)
+		if len(buffList) > 0 {
+			if buffList[0].ItemBuff {
+				return false
+			}
+		}
+	}
+
+	return a.characterRecord.Buffs.RemoveBuff(buffId)
+
 }
 
 func (a ScriptActor) HasItemId(itemId int, excludeWorn ...bool) bool {

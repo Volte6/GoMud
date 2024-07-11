@@ -3,7 +3,6 @@ package users
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"math"
 	"regexp"
 	"strconv"
@@ -74,7 +73,6 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 
 func (u *UserRecord) PasswordMatches(input string) bool {
 
-	slog.Info("PASSWORD", "input", input, "pw", u.Password)
 	if input == u.Password {
 		return true
 	}

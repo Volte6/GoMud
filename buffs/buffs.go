@@ -12,6 +12,7 @@ const (
 type Buff struct {
 	BuffId       int  // Which buff template does it refer to?
 	OnStartEvent bool // Has the onStart event been triggered?
+	ItemBuff     bool // Is this buff from a worn item
 	// Need to instance track the following:
 	RoundCounter int `yaml:"roundcounter,omitempty"` // How many rounds have passed. Triggers on (RoundCounter%RoundInterval == 0)
 	TriggersLeft int `yaml:"triggersleft,omitempty"` // How many times it triggers
@@ -55,6 +56,7 @@ func (bs *Buffs) Validate(forceRebuild ...bool) {
 	if bs.buffIds == nil {
 		bs.buffIds = make(map[int]int)
 	}
+
 	if (len(bs.List) != len(bs.buffIds)) || (len(forceRebuild) > 0 && forceRebuild[0]) {
 		// Rebuild
 		bs.buffIds = make(map[int]int)
@@ -88,9 +90,9 @@ func (bs *Buff) Name() string {
 	return ""
 }
 
-func (bs *Buffs) CancelBuffId(buffId int) bool {
-	if idx, ok := bs.buffIds[buffId]; ok {
-		bs.List[idx].TriggersLeft = TriggersLeftExpired
+func (bs *Buffs) RemoveBuff(buffId int) bool {
+	if index, ok := bs.buffIds[buffId]; ok {
+		bs.List[index].TriggersLeft = TriggersLeftExpired
 		return true
 	}
 	return false
@@ -105,7 +107,7 @@ func (bs *Buffs) TriggersLeft(buffId int) int {
 
 func (bs *Buffs) GetBuffIdsWithFlag(action Flag) []int {
 	buffIds := []int{}
-	for idx := range bs.buffFlags[action] {
+	for _, idx := range bs.buffFlags[action] {
 		buffIds = append(buffIds, bs.List[idx].BuffId)
 	}
 	return buffIds
@@ -114,7 +116,7 @@ func (bs *Buffs) GetBuffIdsWithFlag(action Flag) []int {
 func (bs *Buffs) HasFlag(action Flag, expire bool) bool {
 
 	if action != All {
-		if _, ok := bs.buffFlags[action]; !ok || len(bs.buffFlags[action]) == 0 {
+		if _, ok := bs.buffFlags[action]; !ok {
 			return false
 		}
 	}
@@ -123,6 +125,7 @@ func (bs *Buffs) HasFlag(action Flag, expire bool) bool {
 	for index, b := range bs.List {
 		bSpec := GetBuffSpec(b.BuffId)
 		for _, p := range bSpec.Flags {
+
 			if b.Expired() {
 				continue
 			}
@@ -159,36 +162,32 @@ func (bs *Buffs) HasBuff(buffId int) bool {
 	return false
 }
 
-func (bs *Buffs) RemoveBuff(buffId int) {
-	// If this buff is already applied, just increase the trigger count
-	if index, ok := bs.buffIds[buffId]; ok {
-		bs.List[index].TriggersLeft = TriggersLeftExpired
-	}
-}
-
 func (bs *Buffs) Started(buffId int) {
 	if idx, ok := bs.buffIds[buffId]; ok {
 		bs.List[idx].OnStartEvent = true
 	}
 }
 
-func (bs *Buffs) AddBuff(buffId int, triggerCountOverride ...int) bool {
+func (bs *Buffs) AddBuff(buffId int, fromItem ...bool) bool {
 	if buffInfo := GetBuffSpec(buffId); buffInfo != nil {
-
-		triggersLeftCt := buffInfo.TriggerCount
-		if len(triggerCountOverride) > 0 {
-			triggersLeftCt = triggerCountOverride[0]
-		}
 
 		newBuff := Buff{
 			BuffId:       buffInfo.BuffId,
 			RoundCounter: 0,
-			TriggersLeft: triggersLeftCt,
+			ItemBuff:     false,
+			TriggersLeft: buffInfo.TriggerCount,
+		}
+
+		if len(fromItem) > 0 && fromItem[0] {
+			newBuff.TriggersLeft = TriggersLeftUnlimited
+			newBuff.ItemBuff = true
 		}
 
 		if idx, ok := bs.buffIds[buffId]; ok {
-			slog.Info("Refreshing Buff", "buffName", buffInfo.Name, "buffId", buffId)
-			bs.List[idx].TriggersLeft = triggersLeftCt
+			bs.List[idx].TriggersLeft = newBuff.TriggersLeft
+			bs.List[idx].ItemBuff = newBuff.ItemBuff
+
+			slog.Info("Refreshing Buff", "buffName", buffInfo.Name, "buffId", buffId, "idx", idx, "triggersLeft", bs.List[idx].TriggersLeft, "itemBuff", bs.List[idx].ItemBuff)
 
 			return true
 		}
@@ -251,7 +250,7 @@ func (bs *Buffs) Trigger(buffId ...int) (triggeredBuffs []*Buff) {
 	return triggeredBuffs
 }
 
-func (bs *Buffs) GetAllBuffs(buffId ...int) []*Buff {
+func (bs *Buffs) GetBuffs(buffId ...int) []*Buff {
 	retBuffs := []*Buff{}
 	for _, b := range bs.List {
 		if !b.Expired() {
@@ -261,6 +260,7 @@ func (bs *Buffs) GetAllBuffs(buffId ...int) []*Buff {
 					if b.BuffId != id {
 						continue
 					}
+					slog.Info("Found buff", "buffId", b.BuffId, "buffName", b.Name())
 					retBuffs = append(retBuffs, b)
 				}
 			} else {
