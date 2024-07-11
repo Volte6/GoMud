@@ -77,10 +77,10 @@ func Sell(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		}
 
 		response.SendUserMessage(user.UserId,
-			fmt.Sprintf(`You sell a <ansi fg="itemname">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, item.Name(), sellValue),
+			fmt.Sprintf(`You sell a <ansi fg="itemname">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, item.DisplayName(), sellValue),
 			true)
 		response.SendRoomMessage(room.RoomId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> sells a <ansi fg="itemname">%s</ansi>.`, user.Character.Name, item.Name()),
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> sells a <ansi fg="itemname">%s</ansi>.`, user.Character.Name, item.DisplayName()),
 			true)
 
 		// Trigger lost event

@@ -27,7 +27,7 @@ var (
 	PermissionAdmin string = "admin" // Logged in and has special powers
 
 	PromptDefault         = `{8}[{t} {T} {255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:`
-	promptDefaultCompiled = CompilePrompt(PromptDefault)
+	promptDefaultCompiled = util.ConvertColorShortTags(PromptDefault)
 	promptColorRegex      = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
 	promptFindTagsRegex   = regexp.MustCompile(`\{[a-zA-Z%:\-]+\}`)
 )
@@ -393,19 +393,6 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 	}
 
 	return promptPrefix + promptOut.String() + promptSuffix
-}
-
-func CompilePrompt(input string) string {
-
-	if promptColorRegex.MatchString(input) {
-		input = `<ansi bg="" fg="">` + promptColorRegex.ReplaceAllString(input, `</ansi><ansi fg="$1" bg="$2">`) + `</ansi>`
-	}
-
-	input = strings.ReplaceAll(input, ` bg=""`, ``)
-	input = strings.ReplaceAll(input, ` fg=""`, ``)
-	input = strings.ReplaceAll(input, `<ansi></ansi>`, ``)
-
-	return input
 }
 
 func (u *UserRecord) RoundTick() {

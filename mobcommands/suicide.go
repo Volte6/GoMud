@@ -235,7 +235,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 	// Check for any dropped loot...
 	for _, item := range mob.Character.Items {
-		msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.Name())
+		msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.DisplayName())
 		response.SendRoomMessage(mob.Character.RoomId, msg, true)
 		room.AddItem(item, false)
 	}
@@ -252,7 +252,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 			continue
 		}
 
-		msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.Name())
+		msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.DisplayName())
 		response.SendRoomMessage(mob.Character.RoomId, msg, true)
 		room.AddItem(item, false)
 	}

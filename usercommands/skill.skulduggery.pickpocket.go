@@ -109,7 +109,7 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 					m.Character.RemoveItem(itemStolen)
 					user.Character.StoreItem(itemStolen)
 
-					stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, itemStolen.Name()))
+					stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, itemStolen.DisplayName()))
 				}
 
 				if len(stolenStuff) < 1 {
@@ -201,7 +201,7 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 						cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
 					}
 
-					stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, itemStolen.Name()))
+					stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, itemStolen.DisplayName()))
 				}
 
 				if len(stolenStuff) < 1 {

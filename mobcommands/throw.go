@@ -80,12 +80,12 @@ func Throw(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		// Tell the old room they are leaving
 		response.SendRoomMessage(room.RoomId,
-			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, mob.Character.Name, itemMatch.Name(), exitName),
+			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, mob.Character.Name, itemMatch.DisplayName(), exitName),
 			true)
 
 		// Tell the new room the item arrived
 		response.SendRoomMessage(throwToRoom.RoomId,
-			fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.Name(), returnExitName),
+			fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
 			true)
 
 		response.Handled = true
@@ -130,12 +130,12 @@ func Throw(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				throwToRoom.AddItem(itemMatch, false)
 
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, mob.Character.Name, itemMatch.Name(), tempExit.Title),
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, mob.Character.Name, itemMatch.DisplayName(), tempExit.Title),
 					true)
 
 				// Tell the new room the item arrived
 				response.SendRoomMessage(tempExit.RoomId,
-					fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.Name(), returnExitName),
+					fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
 					true)
 
 				response.Handled = true

@@ -37,7 +37,7 @@ func Remove(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 			mob.Character.CancelBuffsWithFlag(buffs.Hidden)
 
 			response.SendRoomMessage(mob.Character.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, matchItem.Name()),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, matchItem.DisplayName()),
 				true)
 
 			mob.Character.StoreItem(matchItem)

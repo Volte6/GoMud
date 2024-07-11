@@ -202,7 +202,7 @@ func Auction(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 
 	user.ClearPrompt()
 
-	response.SendUserMessage(userId, fmt.Sprintf("Auctioning your <ansi fg=\"item\">%s</ansi> for <ansi fg=\"gold\">%d gold</ansi>.", matchItem.Name(), amt), true)
+	response.SendUserMessage(userId, fmt.Sprintf("Auctioning your <ansi fg=\"item\">%s</ansi> for <ansi fg=\"gold\">%d gold</ansi>.", matchItem.DisplayName(), amt), true)
 
 	if auctions.StartAuction(matchItem, userId, amt) {
 		user.Character.RemoveItem(matchItem)

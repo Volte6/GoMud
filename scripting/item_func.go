@@ -68,8 +68,11 @@ func (i ScriptItem) MarkLastUsed(clear ...bool) uint64 {
 	return i.itemRecord.LastUsedRound
 }
 
-func (i ScriptItem) Name() string {
-	return i.itemRecord.Name()
+func (i ScriptItem) Name(simpleVersion ...bool) string {
+	if len(simpleVersion) > 0 && simpleVersion[0] {
+		return i.Name()
+	}
+	return i.itemRecord.DisplayName()
 }
 
 func (i ScriptItem) NameSimple() string {

@@ -20,7 +20,7 @@ func Spells(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		return response, fmt.Errorf(`user %d not found`, userId)
 	}
 
-	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `Cost`, `Wait`, `Casts`}
+	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `MPs`, `Wait`, `Casts`}
 
 	helpfulRowFormatting := [][]string{}
 	helpfulRows := [][]string{}
@@ -47,7 +47,7 @@ func Spells(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			helpOrHarm := strings.ToLower(sp.Type.HelpOrHarmString())
 
 			targetColor := `spell-` + helpOrHarm
-			target := sp.Type.TargetTypeString()
+			target := sp.Type.TargetTypeString(true)
 
 			formatRow := []string{
 				`<ansi fg="yellow-bold">%s</ansi>`,

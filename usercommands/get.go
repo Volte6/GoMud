@@ -140,10 +140,10 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 				}
 
 				response.SendUserMessage(userId,
-					fmt.Sprintf(`You take the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>.`, matchItem.Name(), containerName),
+					fmt.Sprintf(`You take the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>.`, matchItem.DisplayName(), containerName),
 					true)
 				response.SendRoomMessage(user.Character.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>...`, user.Character.Name, matchItem.Name(), containerName),
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>...`, user.Character.Name, matchItem.DisplayName(), containerName),
 					true)
 
 				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId, cmdQueue); err == nil {
@@ -152,7 +152,7 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			} else {
 				response.SendUserMessage(userId,
-					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()),
+					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 					true)
 			}
 
@@ -205,10 +205,10 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 				}
 
 				response.SendUserMessage(userId,
-					fmt.Sprintf(`You pick up the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()),
+					fmt.Sprintf(`You pick up the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 					true)
 				response.SendRoomMessage(user.Character.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, user.Character.Name, matchItem.Name()),
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
 					true)
 
 				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId, cmdQueue); err == nil {
@@ -217,7 +217,7 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			} else {
 				response.SendUserMessage(userId,
-					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()),
+					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 					true)
 			}
 		}

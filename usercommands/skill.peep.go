@@ -84,7 +84,7 @@ func Peep(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 				for _, item := range u.Character.Items {
 
-					iName := item.Name()
+					iName := item.DisplayName()
 					iNameFormatted := fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, iName)
 
 					iSpec := item.GetSpec()
@@ -146,7 +146,7 @@ func Peep(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 				for _, item := range m.Character.Items {
 
-					iName := item.Name()
+					iName := item.DisplayName()
 					iNameFormatted := fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, iName)
 
 					iSpec := item.GetSpec()

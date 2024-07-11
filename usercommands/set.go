@@ -166,13 +166,13 @@ func Set(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			user.SetConfigOption(`prompt`, nil)
 			user.SetConfigOption(`prompt-compiled`, nil)
 			user.SetConfigOption(`prompt`, users.PromptDefault)
-			user.SetConfigOption(`prompt-compiled`, users.CompilePrompt(users.PromptDefault))
+			user.SetConfigOption(`prompt-compiled`, util.ConvertColorShortTags(users.PromptDefault))
 		} else if promptStr == `none` {
 			user.SetConfigOption(`prompt`, ``)
 			user.SetConfigOption(`prompt-compiled`, ``)
 		} else {
 			user.SetConfigOption(`prompt`, promptStr)
-			user.SetConfigOption(`prompt-compiled`, users.CompilePrompt(promptStr))
+			user.SetConfigOption(`prompt-compiled`, util.ConvertColorShortTags(promptStr))
 		}
 
 		response.SendUserMessage(userId, "Prompt set.", true)
@@ -205,7 +205,7 @@ func Set(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			user.SetConfigOption(`fprompt-compiled`, ``)
 		} else {
 			user.SetConfigOption(`fprompt`, promptStr)
-			user.SetConfigOption(`fprompt-compiled`, users.CompilePrompt(promptStr))
+			user.SetConfigOption(`fprompt-compiled`, util.ConvertColorShortTags(promptStr))
 		}
 
 		response.SendUserMessage(userId, "fprompt set.", true)

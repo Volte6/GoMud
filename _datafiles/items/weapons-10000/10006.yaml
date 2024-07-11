@@ -1,5 +1,6 @@
 itemid: 10006
 name: glowing battleaxe
+displayname: ":glowing"
 namesimple: battleaxe
 description: The battleaxe, robust and formidable, commands attention with its radiant glow that emanates from the core of its blade.
 type: weapon
@@ -10,3 +11,5 @@ damage:
 statmods:
   speed: -10
 cursed: true
+wornbuffids:
+  - 1

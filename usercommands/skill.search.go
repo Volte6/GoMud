@@ -77,7 +77,7 @@ func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			if !item.IsValid() {
 				room.RemoveItem(item, true)
 			}
-			name := item.Name() + ` <ansi fg="black-bold">(stashed)</ansi>`
+			name := item.DisplayName() + ` <ansi fg="black-bold">(stashed)</ansi>`
 			stashedItems = append(stashedItems, name)
 		}
 
@@ -166,17 +166,7 @@ func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 	if skillLevel >= 3 {
 		// Find props
-		randProp := room.GetRandomNoun()
-		if len(randProp) > 0 {
 
-			roll := util.Rand(100)
-
-			util.LogRoll(`Find Prop`, roll, searchOddsIn100)
-
-			if roll < searchOddsIn100 {
-				response.SendUserMessage(userId, fmt.Sprintf(`You found something interesting... It's not clear what it means, but something about "<ansi fg="secret-exit">%s</ansi>"`, randProp), true)
-			}
-		}
 	}
 
 	response.Handled = true

@@ -1190,19 +1190,25 @@ func (c *Character) Heal(hp int, mana int) {
 }
 
 func (c *Character) HealthPerRound() int {
-	healAmt := math.Round(float64(c.Stats.Vitality.Value)/8) +
-		math.Round(float64(c.Level)/12) +
-		1.0
+	return 1
+	/*
+		healAmt := math.Round(float64(c.Stats.Vitality.Value)/8) +
+			math.Round(float64(c.Level)/12) +
+			1.0
 
-	return int(healAmt)
+		return int(healAmt)
+	*/
 }
 
 func (c *Character) ManaPerRound() int {
-	healAmt := math.Round(float64(c.Stats.Mysticism.Value)/8) +
-		math.Round(float64(c.Level)/12) +
-		1.0
+	return 1
+	/*
+		healAmt := math.Round(float64(c.Stats.Mysticism.Value)/8) +
+			math.Round(float64(c.Level)/12) +
+			1.0
 
-	return int(healAmt)
+		return int(healAmt)
+	*/
 }
 
 // Where 1000 = a full round
@@ -1547,17 +1553,17 @@ func (c *Character) GetAllWornItems() []items.Item {
 	return wornItems
 }
 
-func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bool) {
+func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bool, failureReason string) {
 
 	spec := i.GetSpec()
 
 	if spec.Type != items.Weapon && spec.Subtype != items.Wearable {
-		return returnItems, false
+		return returnItems, false, `That item cannot be equipped.`
 	}
 
 	iHandsRequired := c.HandsRequired(i)
 	if iHandsRequired > 2 {
-		return returnItems, false
+		return returnItems, false, `That requires too many hands.`
 	}
 
 	// are botht he currently equipped weapon and this weapon claws?
@@ -1580,12 +1586,12 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 				// If nothing is in their offhand
 				if c.Equipment.Offhand.ItemId == 0 {
 					// Put it in the offhand.
-					returnItems = append(returnItems, c.Equipment.Offhand)
+					//returnItems = append(returnItems, c.Equipment.Offhand)
 					c.Equipment.Offhand = i
 
 					c.reapplyWornItemBuffs()
 
-					return returnItems, true
+					return returnItems, true, ``
 				}
 			}
 
@@ -1597,7 +1603,7 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 	switch spec.Type {
 	case items.Weapon:
 		if c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't use a weapon.`
 		}
 
 		if !c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
@@ -1608,16 +1614,24 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 			}
 		}
 
+		if c.Equipment.Weapon.IsCursed() {
+			return returnItems, false, `Your ` + c.Equipment.Weapon.DisplayName() + ` is cursed and prevents you from removing it.`
+		}
+
 		returnItems = append(returnItems, c.Equipment.Weapon)
 		c.Equipment.Weapon = i
 	case items.Offhand, items.Holdable:
 		if c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't hold things in an offhand.`
 		}
 
 		if !c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
 			// If they have a 2h weapon equipped, remove it
 			if c.HandsRequired(c.Equipment.Weapon) == 2 {
+				// If the weapon is cursed, do not allow the offhand to be equipped
+				if c.Equipment.Weapon.IsCursed() {
+					return returnItems, false, `Your ` + c.Equipment.Weapon.DisplayName() + ` is cursed and prevents you from removing it.`
+				}
 				returnItems = append(returnItems, c.Equipment.Weapon)
 				c.Equipment.Weapon = items.Item{}
 			}
@@ -1626,59 +1640,59 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 		c.Equipment.Offhand = i
 	case items.Head:
 		if c.Equipment.Head.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your head.`
 		}
 		returnItems = append(returnItems, c.Equipment.Head)
 		c.Equipment.Head = i
 	case items.Neck:
 		if c.Equipment.Neck.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your neck.`
 		}
 		returnItems = append(returnItems, c.Equipment.Neck)
 		c.Equipment.Neck = i
 	case items.Body:
 		if c.Equipment.Body.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your body.`
 		}
 		returnItems = append(returnItems, c.Equipment.Body)
 		c.Equipment.Body = i
 	case items.Belt:
 		if c.Equipment.Belt.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your head.`
 		}
 		returnItems = append(returnItems, c.Equipment.Belt)
 		c.Equipment.Belt = i
 	case items.Gloves:
 		if c.Equipment.Gloves.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things as gloves.`
 		}
 		returnItems = append(returnItems, c.Equipment.Gloves)
 		c.Equipment.Gloves = i
 	case items.Ring:
 		if c.Equipment.Ring.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear rings.`
 		}
 		returnItems = append(returnItems, c.Equipment.Ring)
 		c.Equipment.Ring = i
 	case items.Legs:
 		if c.Equipment.Legs.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your legs.`
 		}
 		returnItems = append(returnItems, c.Equipment.Legs)
 		c.Equipment.Legs = i
 	case items.Feet:
 		if c.Equipment.Feet.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your feet.`
 		}
 		returnItems = append(returnItems, c.Equipment.Feet)
 		c.Equipment.Feet = i
 	default:
-		return returnItems, false
+		return returnItems, false, `Unrecognized object.`
 	}
 
 	c.reapplyWornItemBuffs(returnItems...)
 
-	return returnItems, true
+	return returnItems, true, ``
 }
 
 func (c *Character) RemoveFromBody(i items.Item) bool {

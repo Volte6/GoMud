@@ -68,12 +68,12 @@ func Show(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			// Tell the shower
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`You show the <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, showItem.Name(), targetUser.Character.Name),
+				fmt.Sprintf(`You show the <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, showItem.DisplayName(), targetUser.Character.Name),
 				true)
 
 			// Tell the Showee
 			response.SendUserMessage(targetUser.UserId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> shows you their <ansi fg="item">%s</ansi>.`, user.Character.Name, showItem.Name()),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> shows you their <ansi fg="item">%s</ansi>.`, user.Character.Name, showItem.DisplayName()),
 				true)
 
 			response.SendUserMessage(targetUser.UserId,
@@ -82,7 +82,7 @@ func Show(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			// Tell the rest of the room
 			response.SendRoomMessage(room.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, user.Character.Name, showItem.Name(), targetUser.Character.Name),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, user.Character.Name, showItem.DisplayName(), targetUser.Character.Name),
 				true,
 				targetUser.UserId)
 
@@ -109,7 +109,7 @@ func Show(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			if showItem.ItemId > 0 {
 
 				response.SendUserMessage(userId,
-					fmt.Sprintf(`You show the <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, showItem.Name(), targetMob.Character.Name),
+					fmt.Sprintf(`You show the <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, showItem.DisplayName(), targetMob.Character.Name),
 					true)
 
 				// Do trigger of onShow
@@ -118,7 +118,7 @@ func Show(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				}
 
 				response.SendRoomMessage(user.Character.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, showItem.Name(), targetMob.Character.Name),
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, showItem.DisplayName(), targetMob.Character.Name),
 					true)
 
 			} else {

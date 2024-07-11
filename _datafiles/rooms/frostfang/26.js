@@ -2,7 +2,6 @@
 const verbs = ["touch", "push", "press", "take", "rub", "polish"];
 const nouns = ["raven", "eyes", "bird"];
 
-
 // cmd specific handler
 function onCommand_look(rest, user, room) {
 

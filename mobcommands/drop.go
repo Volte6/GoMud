@@ -84,7 +84,7 @@ func Drop(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		mob.Character.RemoveItem(matchItem)
 
 		response.SendRoomMessage(mob.Character.RoomId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.Name()),
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()),
 			true)
 	}
 

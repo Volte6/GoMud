@@ -78,12 +78,12 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 			// Tell the player they are throwing the item
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`You hurl the <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, itemMatch.Name(), targetMob.Character.Name),
+				fmt.Sprintf(`You hurl the <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, itemMatch.DisplayName(), targetMob.Character.Name),
 				true)
 
 			// Tell the old room they are leaving
 			response.SendRoomMessage(room.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, user.Character.Name, itemMatch.Name(), targetMob.Character.Name),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, user.Character.Name, itemMatch.DisplayName(), targetMob.Character.Name),
 				true)
 
 			// If grenades are dropped, they explode and affect everyone in the room!
@@ -106,16 +106,16 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 		// Tell the player they are throwing the item
 		response.SendUserMessage(userId,
-			fmt.Sprintf(`You hurl the <ansi fg="itemname">%s</ansi> at <ansi fg="username">%s</ansi>.`, itemMatch.Name(), targetUser.Character.Name),
+			fmt.Sprintf(`You hurl the <ansi fg="itemname">%s</ansi> at <ansi fg="username">%s</ansi>.`, itemMatch.DisplayName(), targetUser.Character.Name),
 			true)
 
 		response.SendUserMessage(targetUser.UserId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> hurls their <ansi fg="itemname">%s</ansi> at you.`, itemMatch.Name(), user.Character.Name),
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> hurls their <ansi fg="itemname">%s</ansi> at you.`, itemMatch.DisplayName(), user.Character.Name),
 			true)
 
 		// Tell the old room they are leaving
 		response.SendRoomMessage(room.RoomId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="itemname">%s</ansi> at <ansi fg="username">%s</ansi>.`, user.Character.Name, itemMatch.Name(), targetUser.Character.Name),
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="itemname">%s</ansi> at <ansi fg="username">%s</ansi>.`, user.Character.Name, itemMatch.DisplayName(), targetUser.Character.Name),
 			true,
 			targetUser.UserId)
 
@@ -167,17 +167,17 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 			// Tell the player they are throwing the item
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`You hurl the <ansi fg="item">%s</ansi> towards the %s exit.`, itemMatch.Name(), exitName),
+				fmt.Sprintf(`You hurl the <ansi fg="item">%s</ansi> towards the %s exit.`, itemMatch.DisplayName(), exitName),
 				true)
 
 			// Tell the old room they are leaving
 			response.SendRoomMessage(room.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, user.Character.Name, itemMatch.Name(), exitName),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, user.Character.Name, itemMatch.DisplayName(), exitName),
 				true)
 
 			// Tell the new room the item arrived
 			response.SendRoomMessage(throwToRoom.RoomId,
-				fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.Name(), returnExitName),
+				fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
 				true)
 
 			// If grenades are dropped, they explode and affect everyone in the room!
@@ -229,17 +229,17 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 					// Tell the player they are throwing the item
 					response.SendUserMessage(userId,
-						fmt.Sprintf(`You hurl the <ansi fg="item">%s</ansi> towards the %s exit.`, itemMatch.Name(), tempExit.Title),
+						fmt.Sprintf(`You hurl the <ansi fg="item">%s</ansi> towards the %s exit.`, itemMatch.DisplayName(), tempExit.Title),
 						true)
 
 					// Tell the old room they are leaving
 					response.SendRoomMessage(room.RoomId,
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, user.Character.Name, itemMatch.Name(), tempExit.Title),
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, user.Character.Name, itemMatch.DisplayName(), tempExit.Title),
 						true)
 
 					// Tell the new room the item arrived
 					response.SendRoomMessage(tempExit.RoomId,
-						fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.Name(), returnExitName),
+						fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
 						true)
 
 					// If grenades are dropped, they explode and affect everyone in the room!

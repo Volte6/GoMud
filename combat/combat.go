@@ -140,7 +140,7 @@ func GetWaitMessages(stepType items.Intensity, sourceChar *characters.Character,
 	}
 
 	if sourceChar.Equipment.Weapon.ItemId > 0 {
-		tokenReplacements[items.TokenItemName] = sourceChar.Equipment.Weapon.Name()
+		tokenReplacements[items.TokenItemName] = sourceChar.Equipment.Weapon.DisplayName()
 	}
 
 	if sourceType == Mob {
@@ -281,7 +281,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 				itemSpec := weapon.GetSpec()
 
-				weaponName = weapon.Name()
+				weaponName = weapon.DisplayName()
 
 				weaponSubType = itemSpec.Subtype
 				attacks, dCount, dSides, dBonus, critBuffs = weapon.GetDiceRoll()
@@ -377,7 +377,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 				}
 
 				if sourceChar.Equipment.Weapon.ItemId > 0 {
-					tokenReplacements[items.TokenItemName] = sourceChar.Equipment.Weapon.Name()
+					tokenReplacements[items.TokenItemName] = sourceChar.Equipment.Weapon.DisplayName()
 				}
 
 				if sourceType == Mob {

@@ -111,7 +111,7 @@ func Get(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 		mob.Character.StoreItem(matchItem)
 
 		response.SendRoomMessage(mob.Character.RoomId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, mob.Character.Name, matchItem.Name()),
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()),
 			true)
 	}
 

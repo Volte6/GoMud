@@ -146,7 +146,7 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 
 			if allowIdleMessages {
 				chanceIn100 := 5
-				if room.RoomId == -1 || len(room.Props) > 0 {
+				if room.RoomId == -1 {
 					chanceIn100 = 20
 				}
 
@@ -1015,7 +1015,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 					for _, itm := range mob.Character.Items {
 						iSpec := itm.GetSpec()
 						if iSpec.Type == items.Weapon {
-							possibleWeapons = append(possibleWeapons, itm.Name())
+							possibleWeapons = append(possibleWeapons, itm.DisplayName())
 						}
 					}
 
@@ -1564,7 +1564,7 @@ func (w *World) ProcessAuction(tNow time.Time) {
 
 			if user := users.GetByUserId(a.HighestBidUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
-					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">You have won the auction for the <ansi fg="item">%s</ansi>! It has been added to your backpack.</ansi>%s`, a.ItemData.Name(), term.CRLFStr))
+					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">You have won the auction for the <ansi fg="item">%s</ansi>! It has been added to your backpack.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr))
 					w.GetConnectionPool().SendTo([]byte(msg), user.ConnectionId())
 				}
 			}
@@ -1572,7 +1572,7 @@ func (w *World) ProcessAuction(tNow time.Time) {
 		} else {
 			if user := users.GetByUserId(a.SellerUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
-					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.Name(), term.CRLFStr))
+					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr))
 					w.GetConnectionPool().SendTo([]byte(msg), user.ConnectionId())
 				}
 			}

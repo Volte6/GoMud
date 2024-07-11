@@ -77,46 +77,6 @@ type Sign struct {
 	Expires       time.Time // When this sign expires.
 }
 
-type PropTrigger struct {
-	RoomId            int    `yaml:"roomid,omitempty"`            // What room id to move them to if any
-	BuffId            int    `yaml:"buffid,omitempty"`            // What buffId to apply if any
-	ItemId            int    `yaml:"itemid,omitempty"`            // What item id to give them if any
-	QuestToken        string `yaml:"questtoken,omitempty"`        // What quest token to give them if any
-	SkillInfo         string `yaml:"skillinfo,omitempty"`         // skill to give, format: skillId:skillLevel such as "map:1"
-	Affected          string `yaml:"affected,omitempty"`          // Who is affected? If nobody, then nobody. But an item id would have to drop to the floor then.
-	DescriptionPlayer string `yaml:"descriptionplayer,omitempty"` // "You press the eyes of the raven, and follow a secret entrance to the west!"
-	DescriptionRoom   string `yaml:"descriptionroom,omitempty"`   // "%s presses in the eyes of the raven, and falls through to the room to the west!"
-	MapInfo           string `yaml:"mapinfo,omitempty"`           // roomId[/wide] - if wide, then it will be a wide map
-}
-
-type RequirementType string
-
-const (
-	RequiresQuestToken    RequirementType = "questtoken"
-	RequiresNotQuestToken RequirementType = "notquesttoken"
-	RequiresItemId        RequirementType = "itemid"
-	RequiresBuffId        RequirementType = "buffid"
-	RequiresBuffFlag      RequirementType = "buff-flag"
-	RequiresNoMobs        RequirementType = "nomobs"
-)
-
-type PropRequirement struct {
-	Type             RequirementType
-	IdNumber         int    `yaml:"idnumber,omitempty"`
-	IdString         string `yaml:"idstring,omitempty"`
-	RejectionMessage string `yaml:"rejectionmessage,omitempty"`
-}
-
-type RoomProp struct {
-	Nouns         []string          `yaml:"nouns,omitempty,flow"`   // A list of nouns to match in order to interact with it. For example "raven", "eyes", "bird", "raven eyes"
-	Verbs         []string          `yaml:"verbs,omitempty,flow"`   // A list of verbs to match in order to trigger it, for example "touch raven", "poke eyes", "press bird"
-	Requirements  []PropRequirement `yaml:"requirements,omitempty"` // A list of requirements to interact with the prop
-	Cooldown      int               `yaml:"cooldown,omitempty"`     // How many seconds before the prop can be triggered again?
-	Description   string            `yaml:"description,omitempty"`  // The description of the noun when looked at (if any)
-	Trigger       PropTrigger       `yaml:"trigger,omitempty"`      // Details of what triggers when a verb+noun is matched
-	lastTriggered time.Time         // When was the prop last triggered?
-}
-
 type GameLock struct {
 	Difficulty    uint8  `yaml:"difficulty,omitempty"` // 0 - no lock. greater than zero = difficulty to unlock.
 	UnlockedUntil uint64 `yaml:"-"`                    // What round it was unlocked at, when util.GetRoundCount() > UnlockedUntil, it is relocked (set to zero).
@@ -183,13 +143,13 @@ type Room struct {
 	IsStorage         bool   `yaml:"isstorage,omitempty"` // Is this a storage room? If so, players can add/remove objects here.
 	Title             string
 	Description       string
-	Props             []RoomProp           `yaml:"props,omitempty"`      // A list of props in the room
 	MapSymbol         string               `yaml:"mapsymbol,omitempty"`  // The symbol to use when generating a map of the zone
 	MapLegend         string               `yaml:"maplegend,omitempty"`  // The text to display in the legend for this room. Should be one word.
 	Biome             string               `yaml:"biome,omitempty"`      // The biome of the room. Used for weather generation.
 	Containers        map[string]Container `yaml:"containers,omitempty"` // If this room has a chest, what is in it?
 	Exits             map[string]RoomExit
-	ExitsTemp         map[string]TemporaryRoomExit `yaml:"-"` // Temporary exits that will be removed after a certain time. Don't bother saving on sever shutting down.
+	ExitsTemp         map[string]TemporaryRoomExit `yaml:"-"`               // Temporary exits that will be removed after a certain time. Don't bother saving on sever shutting down.
+	Nouns             map[string]string            `yaml:"nouns,omitempty"` // Interesting nouns to highlight in the room or reveal on succesful searches.
 	Items             []items.Item                 `yaml:"items,omitempty"`
 	Gold              int                          `yaml:"gold,omitempty"`              // How much gold is on the ground?
 	SpawnInfo         []SpawnInfo                  `yaml:"spawninfo,omitempty"`         // key is creature ID, value is spawn chance
@@ -344,22 +304,6 @@ func (r *Room) GetScriptPath() string {
 	return strings.Replace(roomDataFilesPath+`/`+r.Filepath(), `.yaml`, `.js`, 1)
 }
 
-func (r *Room) GetNouns() []string {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	nouns := []string{}
-	if len(r.Props) < 1 {
-		return nouns
-	}
-
-	for _, prop := range r.Props {
-		nouns = append(nouns, prop.Nouns...)
-	}
-
-	return nouns
-}
-
 func (r *Room) FindTemporaryExitByUserId(userId int) (TemporaryRoomExit, bool) {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
@@ -411,22 +355,6 @@ func (r *Room) AddTemporaryExit(exitName string, t TemporaryRoomExit) bool {
 	}
 	r.ExitsTemp[exitName] = t
 	return true
-}
-
-func (r *Room) GetRandomNoun() string {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	if len(r.Props) == 0 {
-		return ""
-	}
-
-	propNouns := []string{}
-	for _, prop := range r.Props {
-		propNouns = append(propNouns, prop.Nouns...)
-	}
-
-	return propNouns[util.Rand(len(propNouns))]
 }
 
 // The purpose of Prepare() is to ensure a room is properly setup before anyone looks into it or enters it
@@ -786,195 +714,6 @@ func (r *Room) FindOnFloor(itemName string, stash bool) (items.Item, bool) {
 	return items.Item{}, false
 }
 
-func (r *Room) TryLookProp(cmd string, restOfInput string) (description string, ok bool) {
-	// Check for a matching noun and if found, return the description
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	if cmd == "look" {
-
-		restOfInput = strings.ToLower(restOfInput)
-
-		for _, prop := range r.Props {
-			for _, noun := range prop.Nouns {
-				if strings.Contains(restOfInput, noun) {
-					return prop.Description, true
-				}
-			}
-		}
-
-	}
-
-	return "", false
-}
-
-// Tries a trigger, and if it finds a match, returns the trigger and whether it's on cooldown.
-func (r *Room) TryTrigger(cmd string, restOfInput string, userId int) (matchingTrigger *PropTrigger, onCooldown bool, rejectionMessage string) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	if len(r.Props) == 0 {
-		return matchingTrigger, onCooldown, rejectionMessage
-	}
-
-	user := users.GetByUserId(userId)
-	if user == nil {
-		return matchingTrigger, onCooldown, rejectionMessage
-	}
-
-	restOfInput = strings.ToLower(restOfInput)
-
-	onCooldown = false
-	for p, prop := range r.Props {
-
-		verbMatch := false
-		if len(prop.Verbs) > 0 {
-			for _, verb := range prop.Verbs {
-				if cmd != verb {
-					continue
-				}
-				verbMatch = true
-				break
-			}
-		}
-
-		nounMatch := true
-		if len(prop.Nouns) > 0 {
-			nounMatch = false
-			for _, noun := range prop.Nouns {
-				// Changed from contains
-				if noun != `` { // empty nouns always match.
-					if !strings.HasPrefix(noun, restOfInput) || restOfInput == `` { // Can't match nouns if there is no noun provided
-						continue
-					}
-				}
-
-				nounMatch = true
-				break
-			}
-		}
-
-		if verbMatch && nounMatch {
-
-			rejected := false
-
-			for _, req := range prop.Requirements {
-
-				// Quest token (have or not have)
-				if req.Type == RequiresQuestToken {
-
-					rejected = !user.Character.HasQuest(req.IdString)
-					if rejected {
-						rejectionMessage = req.RejectionMessage
-						break
-					}
-
-					continue
-				}
-
-				if req.Type == RequiresNotQuestToken {
-					rejected = user.Character.HasQuest(req.IdString)
-					if rejected {
-						rejectionMessage = req.RejectionMessage
-						break
-					}
-
-					continue
-				}
-
-				// ItemId (have or not have)
-				if req.Type == RequiresItemId {
-
-					if req.IdNumber > 0 {
-						_, found := user.Character.FindInBackpack(fmt.Sprintf(`!%d`, req.IdNumber))
-						if !found {
-							_, found = user.Character.FindOnBody(fmt.Sprintf(`!%d`, req.IdNumber))
-						}
-						rejected = !found
-					} else if req.IdNumber < 0 {
-						_, found := user.Character.FindInBackpack(fmt.Sprintf(`!%d`, req.IdNumber*-1))
-						if !found {
-							_, found = user.Character.FindOnBody(fmt.Sprintf(`!%d`, req.IdNumber*-1))
-						}
-						rejected = found
-					}
-
-					if rejected {
-						rejectionMessage = req.RejectionMessage
-						break
-					}
-
-					continue
-				}
-
-				// BuffId (have or not have)
-				if req.Type == RequiresBuffId {
-
-					if req.IdNumber > 0 {
-						rejected = !user.Character.HasBuff(req.IdNumber) // positive buffId means they must have this buff
-					} else if req.IdNumber < 0 { // negative buffId means they must not have this buff
-						rejected = user.Character.HasBuff(req.IdNumber * -1)
-					}
-
-					if rejected {
-						rejectionMessage = req.RejectionMessage
-						break
-					}
-
-					continue
-				}
-
-				if req.Type == RequiresBuffFlag {
-
-					rejected = !user.Character.HasBuffFlag(buffs.Flag(req.IdString)) // positive buffId means they must have this buff
-
-					if rejected {
-						rejectionMessage = req.RejectionMessage
-						break
-					}
-
-					continue
-				}
-
-				// No mobs in the room
-				if req.Type == RequiresNoMobs {
-					if len(r.mobs) > 0 {
-						rejected = true
-						rejectionMessage = req.RejectionMessage
-					}
-
-					continue
-				}
-			}
-
-			if rejected {
-				if len(rejectionMessage) == 0 {
-					rejectionMessage = "Something prevents it..."
-				}
-				return matchingTrigger, onCooldown, rejectionMessage
-			}
-
-			// We have a match!
-			matchingTrigger = &r.Props[p].Trigger
-
-			// Check if the prop is on cooldown
-			if prop.Cooldown > 0 {
-				if time.Now().After(prop.lastTriggered.Add(time.Second * time.Duration(prop.Cooldown))) {
-					r.Props[p].lastTriggered = time.Now()
-				} else {
-					onCooldown = true
-				}
-			}
-
-			// return the match data
-			return matchingTrigger, onCooldown, rejectionMessage
-
-		}
-	}
-
-	return matchingTrigger, onCooldown, rejectionMessage
-}
-
 func (r *Room) MarkVisited(userId int) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
@@ -1227,6 +966,19 @@ func (r *Room) HasVisited(userId int) bool {
 
 	_, ok := r.visitors[userId]
 	return ok
+}
+
+func (r *Room) GetDescriptionFormatted(lineSplit int, highlightNouns bool) string {
+
+	desc := util.SplitStringNL(r.GetDescription(), 80)
+
+	if highlightNouns {
+		for noun, _ := range r.Nouns {
+			desc = strings.ReplaceAll(desc, noun, fmt.Sprintf("<ansi fg=\"187\">%s</ansi>", noun))
+		}
+	}
+
+	return desc
 }
 
 func (r *Room) GetDescription() string {
@@ -1608,7 +1360,6 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		Permission:     user.Permission, // The permission level of the user viewing the room
 		RoomSymbol:     roomSymbol,
 		RoomLegend:     roomLegend,
-		Nouns:          r.GetNouns(),
 		IsDark:         b.IsDark(),
 		IsNight:        gametime.IsNight(),
 	}
@@ -1878,18 +1629,6 @@ func (r *Room) Validate() error {
 	}
 	if r.GetDescription() == "" {
 		return errors.New("description cannot be empty")
-	}
-
-	if len(r.Props) > 0 {
-		for p, prop := range r.Props {
-			// make all verbs and all nouns lowercase.
-			for i, verb := range prop.Verbs {
-				r.Props[p].Verbs[i] = strings.ToLower(verb)
-			}
-			for i, noun := range prop.Nouns {
-				r.Props[p].Nouns[i] = strings.ToLower(noun)
-			}
-		}
 	}
 
 	if len(r.SpawnInfo) > 0 {

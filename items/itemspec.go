@@ -143,6 +143,7 @@ type ItemSpec struct {
 	WaitRounds      int         `yaml:"waitrounds,omitempty"`      // How many extra rounds each combat requires
 	Hands           WeaponHands `yaml:"hands"`                     // How many hands it takes to wield
 	Name            string
+	DisplayName     string `yaml:"displayname,omitempty"` // Name that is typically displayed to the user
 	NameSimple      string // A simpler name for the item, for example "Golden Battleaxe" should be "Battleaxe" or "Axe" for simple
 	Description     string
 	QuestToken      string `yaml:"questtoken,omitempty"` // Grants this quest if given/picked up
@@ -292,6 +293,14 @@ func (i *ItemSpec) Validate() error {
 
 	if i.NameSimple == `` {
 		i.NameSimple = i.Name
+	}
+
+	if i.DisplayName != `` {
+		// a : prefix means it's a color pattern specified that will be applied to the regular name
+		if i.DisplayName[0:1] == `:` {
+			i.DisplayName = ApplyColorPattern(i.Name, i.DisplayName[1:])
+		}
+		i.DisplayName = util.ConvertColorShortTags(i.DisplayName)
 	}
 
 	i.Damage.InitDiceRoll(i.Damage.DiceRoll)

@@ -56,7 +56,7 @@ func Alchemy(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 		mob.Character.RemoveItem(matchItem)
 		mob.Character.Gold += 1
 		response.SendRoomMessage(mob.Character.RoomId,
-			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> chants softly. Their <ansi fg="item">%s</ansi> slowly levitates in the air, trembles briefly and then in a flash of light becomes a gold coin!`, mob.Character.Name, matchItem.Name()),
+			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> chants softly. Their <ansi fg="item">%s</ansi> slowly levitates in the air, trembles briefly and then in a flash of light becomes a gold coin!`, mob.Character.Name, matchItem.DisplayName()),
 			true)
 	}
 

@@ -44,19 +44,30 @@ func (s SpellType) HelpOrHarmString() string {
 	switch s {
 	case Neutral:
 		return `Neutral`
-	case HelpSingle:
+	case HelpSingle, HelpMulti, HelpArea:
 		return `Helpful`
-	case HelpMulti:
-		return `Helpful`
-	case HarmSingle:
-		return `Harmful`
-	case HarmMulti:
+	case HarmSingle, HarmMulti, HarmArea:
 		return `Harmful`
 	}
 	return `Unknown`
 }
 
-func (s SpellType) TargetTypeString() string {
+func (s SpellType) TargetTypeString(short ...bool) string {
+	// Return a short version
+	if len(short) > 0 && short[0] {
+		switch s {
+		case Neutral:
+			return `Unknown`
+		case HelpSingle, HarmSingle:
+			return `Single`
+		case HelpMulti, HarmMulti:
+			return `Group`
+		case HelpArea, HarmArea:
+			return `Area`
+		}
+		return `Unknown`
+	}
+	// Regular handling
 	switch s {
 	case Neutral:
 		return `Unknown`
@@ -68,6 +79,8 @@ func (s SpellType) TargetTypeString() string {
 		return `Group Target`
 	case HarmMulti:
 		return `Group Target`
+	case HelpArea, HarmArea:
+		return `Area Target`
 	}
 	return `Unknown`
 }

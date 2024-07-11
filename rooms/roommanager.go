@@ -399,11 +399,6 @@ func loadAllRoomZones() error {
 			roomsWithoutEntrances[exit.RoomId] = ``
 		}
 
-		for _, prop := range loadedRoom.Props {
-			if prop.Trigger.RoomId > 0 {
-				roomsWithoutEntrances[prop.Trigger.RoomId] = ``
-			}
-		}
 	}
 
 	for roomId, filePath := range roomsWithoutEntrances {
@@ -827,14 +822,6 @@ func BuildRoom(fromRoomId int, exitName string, mapDirection ...string) (room *R
 	newRoom.MapSymbol = fromRoom.MapSymbol
 	newRoom.MapLegend = fromRoom.MapLegend
 	newRoom.Biome = fromRoom.Biome
-
-	for _, prop := range fromRoom.Props {
-		// Make sure it's not a complex triggered action, and just a descriptive prop.
-		// If so, copy it.
-		if len(prop.Verbs) == 0 {
-			newRoom.Props = append(newRoom.Props, prop)
-		}
-	}
 
 	if len(fromRoom.IdleMessages) > 0 {
 		//newRoom.IdleMessages = fromRoom.IdleMessages

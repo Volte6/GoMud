@@ -105,10 +105,10 @@ func Drop(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		room.AddItem(matchItem, false)
 
 		response.SendUserMessage(userId,
-			fmt.Sprintf(`You drop the <ansi fg="item">%s</ansi>.`, matchItem.Name()),
+			fmt.Sprintf(`You drop the <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),
 			true)
 		response.SendRoomMessage(user.Character.RoomId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.Name()),
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
 			true)
 
 		// If grenades are dropped, they explode and affect everyone in the room!

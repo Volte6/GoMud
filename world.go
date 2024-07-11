@@ -1170,7 +1170,7 @@ func (w *World) TurnTick() {
 
 							room.RemoveItem(itm, false)
 
-							messageQueue.SendRoomMessage(actionRequest.RoomId, fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> <ansi fg="red">EXPLODES</ansi>!`, itm.Name()), true)
+							messageQueue.SendRoomMessage(actionRequest.RoomId, fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> <ansi fg="red">EXPLODES</ansi>!`, itm.DisplayName()), true)
 
 							hitMobs := true
 							hitPlayers := true

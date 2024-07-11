@@ -48,21 +48,6 @@ Alternatively could handle in game world, but may be useful to have this process
 
 https://www.asciiart.eu/
 
-
-# Notes on triggers and props
-
-To setup a trigger/prop who's sole purpose is to interrupt a user command and/or block progress conditionally, keep a prop/trigger bare such as:
-```
-props:
-- requiresbuffid: 2
-  messagerejectgeneric: The guards step before you. "You must be invited to enter
-    the castle," they say. "We cannot let you pass."
-  verbs:
-  - north
-```
-
-The above would interrupt the "north" command, and send back the `messagerejectgeneric`, unless the player has the required buff id
-
 # Concurrent reads/writes
 
 Create more interface methods to RWLock/RWUnlock properties.

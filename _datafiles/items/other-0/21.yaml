@@ -1,0 +1,10 @@
+itemid: 21
+name: stat coupon
+namesimple: coupon
+displayname: ":coupon"
+description: Grants a stat point when used.
+type: object
+subtype: usable
+uses: 1
+value: 1
+

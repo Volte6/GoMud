@@ -38,8 +38,8 @@ func Rename(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 	} else {
 		// Swap the item location
 		user.Character.RemoveItem(matchItem)
-		oldNameSimple := matchItem.Name()
-		oldName := matchItem.Name()
+		oldNameSimple := matchItem.DisplayName()
+		oldName := matchItem.DisplayName()
 		matchItem.Rename(strings.TrimSpace(rest))
 		user.Character.StoreItem(matchItem)
 

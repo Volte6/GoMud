@@ -479,6 +479,20 @@ func (a ScriptActor) GetCharmCount() int {
 	return len(a.characterRecord.GetCharmIds())
 }
 
+func (a ScriptActor) GiveTrainingPoints(ct int) {
+	if ct < 1 {
+		return
+	}
+	a.characterRecord.TrainingPoints += ct
+}
+
+func (a ScriptActor) GiveStatPoints(ct int) {
+	if ct < 1 {
+		return
+	}
+	a.characterRecord.StatPoints += ct
+}
+
 func (a ScriptActor) getScript() string {
 	if a.mobRecord != nil {
 		return a.mobRecord.GetScript()

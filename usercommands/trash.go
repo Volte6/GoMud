@@ -31,12 +31,12 @@ func Trash(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		user.Character.RemoveItem(matchItem)
 
 		response.SendUserMessage(userId,
-			fmt.Sprintf(`You trash the <ansi fg="item">%s</ansi> for good.`, matchItem.Name()),
+			fmt.Sprintf(`You trash the <ansi fg="item">%s</ansi> for good.`, matchItem.DisplayName()),
 			true)
 
 		if !isSneaking {
 			response.SendRoomMessage(user.Character.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> destroys <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.Name()),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> destroys <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
 				true)
 		}
 

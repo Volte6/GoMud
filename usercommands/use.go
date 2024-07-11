@@ -38,7 +38,7 @@ func Use(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 		if itemSpec.Subtype != items.Usable {
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`You can't use <ansi fg="itemname">%s</ansi>.`, matchItem.Name()),
+				fmt.Sprintf(`You can't use <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 				true)
 			response.Handled = true
 			return response, nil
@@ -46,8 +46,8 @@ func Use(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You use the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()), true)
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> uses their <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.Name()), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You use the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> uses their <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()), true)
 
 		// If no more uses, will be lost, so trigger event
 		if usesLeft := user.Character.UseItem(matchItem); usesLeft < 1 {
