@@ -41,7 +41,7 @@ const (
 
 var (
 	logger = slog.New(
-		util.GetColorLogHandler(os.Stdout, slog.LevelDebug),
+		util.GetColorLogHandler(os.Stderr, slog.LevelDebug),
 	)
 
 	sigChan            = make(chan os.Signal, 1)
