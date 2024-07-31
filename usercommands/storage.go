@@ -105,7 +105,7 @@ func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		user.Character.RemoveItem(itm)
 		user.ItemStorage.AddItem(itm)
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You placed the <ansi fg="itemname">%s</ansi> into storage.`, itm.Name()), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You placed the <ansi fg="itemname">%s</ansi> into storage.`, itm.DisplayName()), true)
 
 		// Trigger lost event
 		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itm, userId, cmdQueue); err == nil {
@@ -153,7 +153,7 @@ func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 
 			user.ItemStorage.RemoveItem(itm)
 
-			response.SendUserMessage(userId, fmt.Sprintf(`You removed the <ansi fg="itemname">%s</ansi> from storage.`, itm.Name()), true)
+			response.SendUserMessage(userId, fmt.Sprintf(`You removed the <ansi fg="itemname">%s</ansi> from storage.`, itm.DisplayName()), true)
 
 			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, itm, userId, cmdQueue); err == nil {
 				response.AbsorbMessages(scriptResponse)

@@ -11,6 +11,13 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Peep Skill
+Level 1 - Reveals the type and value of items.
+Level 2 - Reveals weapon damage or uses an item has left.
+Level 3 - Reveals any stat modifiers an item has.
+Level 4 - Reveals special magical properties like elemental effects.
+*/
 func Inspect(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
@@ -51,10 +58,10 @@ func Inspect(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		}
 
 		response.SendUserMessage(userId,
-			fmt.Sprintf(`You inspect the <ansi fg="item">%s</ansi>.`, matchItem.Name()),
+			fmt.Sprintf(`You inspect the <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),
 			true)
 		response.SendRoomMessage(user.Character.RoomId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> inspects their <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.Name()),
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> inspects their <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
 			true)
 
 		type inspectDetails struct {

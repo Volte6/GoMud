@@ -122,7 +122,7 @@ func Inventory(rest string, userId int, cmdQueue util.CommandQueue) (util.Messag
 	for _, item := range itemList {
 
 		iName := item.Name()
-		iNameFormatted := fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, iName)
+		iNameFormatted := fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, item.DisplayName())
 
 		iSpec := item.GetSpec()
 		if iSpec.Subtype == items.Drinkable || iSpec.Subtype == items.Edible || iSpec.Subtype == items.Usable || iSpec.Type == items.Lockpicks {

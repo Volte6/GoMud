@@ -10,7 +10,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ItemObject.AddUsesLeft(amount int) int](#itemobjectaddusesleftamount-int-int)
   - [ItemObject.GetLastUsedRound() uint64](#itemobjectgetlastusedround-uint64)
   - [ItemObject.MarkLastUsed(clear bool) uint64](#itemobjectmarklastusedclear-bool-uint64)
-  - [ItemObject.Name() string](#itemobjectname-string)
+  - [ItemObject.DisplayName( \[plainFormat bool\] ) string](#itemobjectdisplayname-plainformat-bool--string)
   - [ItemObject.NameSimple() string](#itemobjectnamesimple-string)
   - [ItemObject.NameComplex() string](#itemobjectnamecomplex-string)
   - [ItemObject.SetTempData(key string, value any)](#itemobjectsettempdatakey-string-value-any)
@@ -53,8 +53,12 @@ Set the last used round to the current round, or optionally clear it.
 | --- | --- |
 | clear (optional) | If true, will clear the last used back to zero |
 
-## [ItemObject.Name() string](/scripting/item_func.go)
+## [ItemObject.DisplayName( [plainFormat bool] ) string](/scripting/item_func.go)
 Returns the name of the object, such as "Glowing Battleaxe"
+
+|  Argument | Explanation |
+| --- | --- |
+| plainFormat (optional) | If true, will provide plain text name without special colors. |
 
 ## [ItemObject.NameSimple() string](/scripting/item_func.go)
 Returns the simple name of the object. For example, a "Glowing Battleaxe" may just be "Axe"

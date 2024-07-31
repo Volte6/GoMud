@@ -19,9 +19,8 @@ exits:
     roomid: 27
   south:
     roomid: 25
-items:
-- itemid: 20011
-- itemid: 20011
+nouns:
+  raven's eyes: The raven's eyes look smooth and shiny.
 spawninfo:
 - mobid: 1
   cooldown: 10

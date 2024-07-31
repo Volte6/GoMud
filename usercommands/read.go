@@ -33,8 +33,8 @@ func Read(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	if readItem, found := user.Character.FindInBackpack(rest); found {
 		iSpec := readItem.GetSpec()
 		if iSpec.Type == items.Readable {
-			foundItemName = readItem.Name()
-			foundItemLongName = readItem.Name()
+			foundItemName = readItem.DisplayName()
+			foundItemLongName = readItem.DisplayName()
 			foundItemDescription = string(readItem.GetBlob())
 			if len(foundItemDescription) == 0 {
 				foundItemDescription = iSpec.Description

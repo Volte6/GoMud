@@ -9,6 +9,7 @@ description: The cut in the bridge is clean, as if sliced by a giant blade, leav
   tangle of trees and undergrowth, hinting at forgotten paths and lost journeys.
 mapsymbol: B
 maplegend: Bridge
+biome: forest
 exits:
   east:
     roomid: 567

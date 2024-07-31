@@ -60,7 +60,7 @@ func Offer(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			continue
 		}
 
-		cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`say I can give you <ansi fg="gold">%d gold</ansi> for that <ansi fg="itemname">%s</ansi>.`, sellValue, item.Name()))
+		cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`say I can give you <ansi fg="gold">%d gold</ansi> for that <ansi fg="itemname">%s</ansi>.`, sellValue, item.DisplayName()))
 
 		break
 	}

@@ -15,6 +15,7 @@ idlecommands:
   - restock 18/3
   - restock 19/1
   - restock 10019/1
+  - restock 23/8
 combatcommands:
   - 'say How dare you attack the citizens of Mystarion! We do not forget!'
 ismerchant: true

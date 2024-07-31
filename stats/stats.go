@@ -1,5 +1,7 @@
 package stats
 
+import "math"
+
 const (
 	BaseModFactor         = 0.3333333334 // How much of a scaling to aply to levels before multiplying by racial stat
 	NaturalGainsModFactor = 0.5          // Free stats gained per level modded by this.
@@ -19,6 +21,7 @@ type Statistics struct {
 type StatInfo struct {
 	Training int `yaml:"training,omitempty"` // How much it's been trained with Training Points spending
 	Value    int `yaml:"-"`                  // Final calculated value
+	ValueAdj int `yaml:"-"`                  // Final calculated value (Adjusted)
 	Base     int `yaml:"base,omitempty"`     // Base stat value
 	Mods     int `yaml:"-"`                  // How much it's modded by equipment, spells, etc.
 }
@@ -49,4 +52,9 @@ func (si *StatInfo) GainsForLevel(level int) int {
 
 func (si *StatInfo) Recalculate(level int) {
 	si.Value = si.GainsForLevel(level) + si.Training + si.Mods
+	si.ValueAdj = si.Value
+	if si.ValueAdj >= 105 {
+		overage := si.ValueAdj - 100
+		si.ValueAdj = 100 + int(math.Round(math.Sqrt(float64(overage))*2))
+	}
 }

@@ -20,7 +20,7 @@ func Spells(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		return response, fmt.Errorf(`user %d not found`, userId)
 	}
 
-	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `Cost`, `Wait`, `Casts`}
+	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `MPs`, `Wait`, `Casts`, `% Chance`}
 
 	helpfulRowFormatting := [][]string{}
 	helpfulRows := [][]string{}
@@ -47,7 +47,7 @@ func Spells(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			helpOrHarm := strings.ToLower(sp.Type.HelpOrHarmString())
 
 			targetColor := `spell-` + helpOrHarm
-			target := sp.Type.TargetTypeString()
+			target := sp.Type.TargetTypeString(true)
 
 			formatRow := []string{
 				`<ansi fg="yellow-bold">%s</ansi>`,
@@ -57,9 +57,18 @@ func Spells(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 				`<ansi fg="magenta">%s</ansi>`,
 				`<ansi fg="white">%s</ansi>`,
 				`<ansi fg="red">%s</ansi>`,
+				`<ansi fg="red">%s</ansi>`,
 			}
 
-			row := []string{sp.SpellId, sp.Name, sp.Description, target, fmt.Sprintf(`%d`, sp.Cost), fmt.Sprintf(`%d rnds`, sp.WaitRounds), fmt.Sprintf(`%d`, casts)}
+			row := []string{sp.SpellId,
+				sp.Name,
+				sp.Description,
+				target,
+				fmt.Sprintf(`%d`, sp.Cost),
+				fmt.Sprintf(`%d rnds`, sp.WaitRounds),
+				fmt.Sprintf(`%d`, casts),
+				fmt.Sprintf(`%d%%`, user.Character.GetBaseCastSuccessChance(sp.SpellId)),
+			}
 
 			if helpOrHarm == `helpful` {
 				helpfulRowFormatting = append(helpfulRowFormatting, formatRow)
@@ -86,8 +95,8 @@ func Spells(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 	if len(harmfulRows) > 0 {
 
 		if len(rows) > 0 {
-			rowFormatting = append(rowFormatting, []string{`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`})
-			rows = append(rows, []string{``, ``, ``, ``, ``, ``, ``})
+			rowFormatting = append(rowFormatting, []string{`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`})
+			rows = append(rows, []string{``, ``, ``, ``, ``, ``, ``, ``})
 		}
 
 		for i := 0; i < len(harmfulRows); i++ {
@@ -99,8 +108,8 @@ func Spells(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 	if len(neutralRows) > 0 {
 
 		if len(rows) > 0 {
-			rowFormatting = append(rowFormatting, []string{`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`})
-			rows = append(rows, []string{``, ``, ``, ``, ``, ``, ``})
+			rowFormatting = append(rowFormatting, []string{`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`})
+			rows = append(rows, []string{``, ``, ``, ``, ``, ``, ``, ``})
 		}
 
 		for i := 0; i < len(neutralRows); i++ {

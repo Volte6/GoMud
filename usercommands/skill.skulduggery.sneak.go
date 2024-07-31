@@ -12,6 +12,10 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+SkullDuggery Skill
+Level 1 - Sneak
+*/
 func Sneak(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)

@@ -17,5 +17,7 @@ exits:
     roomid: 218
   north:
     roomid: 216
+  west:
+    roomid: 871
 idlemessages:
 - The wind howls from every direction

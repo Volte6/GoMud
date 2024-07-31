@@ -1,9 +1,5 @@
 package buffs
 
-import (
-	"log/slog"
-)
-
 const (
 	TriggersLeftExpired   = 0 // When it hits this number it will be pruned ASAP
 	TriggersLeftUnlimited = 1000000000
@@ -186,9 +182,6 @@ func (bs *Buffs) AddBuff(buffId int, fromItem ...bool) bool {
 		if idx, ok := bs.buffIds[buffId]; ok {
 			bs.List[idx].TriggersLeft = newBuff.TriggersLeft
 			bs.List[idx].ItemBuff = newBuff.ItemBuff
-
-			slog.Info("Refreshing Buff", "buffName", buffInfo.Name, "buffId", buffId, "idx", idx, "triggersLeft", bs.List[idx].TriggersLeft, "itemBuff", bs.List[idx].ItemBuff)
-
 			return true
 		}
 
@@ -202,7 +195,6 @@ func (bs *Buffs) AddBuff(buffId int, fromItem ...bool) bool {
 			bs.buffFlags[flag] = append(bs.buffFlags[flag], listIndex)
 		}
 
-		slog.Debug("Added Buff", "buffName", buffInfo.Name, "buffId", buffId)
 		return true
 	}
 
@@ -260,7 +252,6 @@ func (bs *Buffs) GetBuffs(buffId ...int) []*Buff {
 					if b.BuffId != id {
 						continue
 					}
-					slog.Info("Found buff", "buffId", b.BuffId, "buffName", b.Name())
 					retBuffs = append(retBuffs, b)
 				}
 			} else {

@@ -1,5 +1,6 @@
 itemid: 20036
 name: lantern
+displayname: ":glowing"
 namesimple: lantern
 description: A simple handheld lantern.
 type: offhand

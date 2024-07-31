@@ -252,22 +252,6 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 		}
 	}
 
-	// Try any room props, only return if the response indicates it was handled
-	if !userDisabled {
-		if response, err := RoomProps(cmd, rest, userId, cmdQueue); err != nil {
-			finalResponse.AbsorbMessages(response)
-			if response.NextCommand != `` {
-				finalResponse.NextCommand = response.NextCommand
-			}
-			return finalResponse, err
-		} else if response.Handled {
-			finalResponse.AbsorbMessages(response)
-			finalResponse.Handled = true
-			return finalResponse, err
-		}
-
-	}
-
 	if cmdInfo, ok := userCommands[cmd]; ok {
 
 		if userDisabled && !cmdInfo.AllowedWhenDowned && !cmdInfo.AdminOnly {

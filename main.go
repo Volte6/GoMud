@@ -14,6 +14,7 @@ import (
 
 	"log/slog"
 
+	"github.com/Volte6/ansitags"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
@@ -41,7 +42,7 @@ const (
 
 var (
 	logger = slog.New(
-		util.GetColorLogHandler(os.Stdout, slog.LevelDebug),
+		util.GetColorLogHandler(os.Stderr, slog.LevelDebug),
 	)
 
 	sigChan            = make(chan os.Signal, 1)
@@ -117,6 +118,10 @@ func main() {
 	templates.LoadAliases()
 	keywords.LoadAliases()
 	gametime.SetToDay(-5)
+
+	for name, str := range items.GetDebugColorPatternOutput() {
+		slog.Info("Color Pattern Test", name, ansitags.Parse(str))
+	}
 
 	scripting.Setup(int(c.ScriptLoadTimeoutMs), int(c.ScriptRoomTimeoutMs))
 

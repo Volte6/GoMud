@@ -65,27 +65,27 @@ func (a ScriptActor) GetStat(statName string) int {
 	statName = strings.ToLower(statName)
 
 	if strings.HasPrefix(statName, "st") {
-		return a.characterRecord.Stats.Strength.Value
+		return a.characterRecord.Stats.Strength.ValueAdj
 	}
 
 	if strings.HasPrefix(statName, "sp") {
-		return a.characterRecord.Stats.Speed.Value
+		return a.characterRecord.Stats.Speed.ValueAdj
 	}
 
 	if strings.HasPrefix(statName, "sm") {
-		return a.characterRecord.Stats.Smarts.Value
+		return a.characterRecord.Stats.Smarts.ValueAdj
 	}
 
 	if strings.HasPrefix(statName, "vi") {
-		return a.characterRecord.Stats.Vitality.Value
+		return a.characterRecord.Stats.Vitality.ValueAdj
 	}
 
 	if strings.HasPrefix(statName, "my") {
-		return a.characterRecord.Stats.Mysticism.Value
+		return a.characterRecord.Stats.Mysticism.ValueAdj
 	}
 
 	if strings.HasPrefix(statName, "pe") {
-		return a.characterRecord.Stats.Perception.Value
+		return a.characterRecord.Stats.Perception.ValueAdj
 	}
 
 	return 0
@@ -189,6 +189,49 @@ func (a ScriptActor) GiveQuest(questId string) {
 
 }
 
+func (a ScriptActor) GetPartyMembers() []ScriptActor {
+
+	partyMembers := []ScriptActor{}
+	partyUserId := 0
+
+	if a.userRecord == nil {
+		if a.mobRecord.Character.Charmed == nil {
+			return partyMembers
+		}
+
+		partyUserId = a.mobRecord.Character.Charmed.UserId
+	} else {
+		partyUserId = a.userId
+	}
+
+	if partyUserId < 1 {
+		return partyMembers
+	}
+
+	// If in a party, give to all party members.
+	if party := parties.Get(partyUserId); party != nil {
+		for _, userId := range party.GetMembers() {
+
+			if a := GetActor(userId, 0); a != nil {
+				partyMembers = append(partyMembers, *a)
+			}
+
+		}
+	}
+
+	mobPartyMembers := []ScriptActor{}
+
+	for _, char := range partyMembers {
+		for _, mobInstId := range char.characterRecord.GetCharmIds() {
+			if a := GetActor(0, mobInstId); a != nil {
+				mobPartyMembers = append(mobPartyMembers, *a)
+			}
+		}
+	}
+
+	return append(partyMembers, mobPartyMembers...)
+}
+
 func (a ScriptActor) AddGold(amt int, bankAmt ...int) {
 	a.characterRecord.Gold += amt
 	if a.characterRecord.Gold < 0 {
@@ -213,7 +256,11 @@ func (a ScriptActor) Command(cmd string, waitTurns ...int) {
 	commandQueue.QueueCommand(a.userId, a.mobInstanceId, cmd, waitTurns[0])
 }
 
-func (a ScriptActor) TrainSkill(skillName string, skillLevel int) {
+func (a ScriptActor) TrainSkill(skillName string, skillLevel int) bool {
+
+	if a.userRecord == nil {
+		return false
+	}
 
 	skillName = strings.ToLower(skillName)
 	currentLevel := a.characterRecord.GetSkillLevel(skills.SkillTag(skillName))
@@ -221,20 +268,20 @@ func (a ScriptActor) TrainSkill(skillName string, skillLevel int) {
 	if currentLevel < skillLevel {
 		newLevel := a.characterRecord.TrainSkill(skillName, skillLevel)
 
-		if a.userRecord != nil {
-			skillData := struct {
-				SkillName  string
-				SkillLevel int
-			}{
-				SkillName:  skillName,
-				SkillLevel: newLevel,
-			}
-			skillUpTxt, _ := templates.Process("character/skillup", skillData)
-			messageQueue.SendUserMessage(a.userId, skillUpTxt, true)
+		skillData := struct {
+			SkillName  string
+			SkillLevel int
+		}{
+			SkillName:  skillName,
+			SkillLevel: newLevel,
 		}
+		skillUpTxt, _ := templates.Process("character/skillup", skillData)
+		messageQueue.SendUserMessage(a.userId, skillUpTxt, true)
+
+		return true
 
 	}
-
+	return false
 }
 
 func (a ScriptActor) GetSkillLevel(skillName string) int {
@@ -427,6 +474,24 @@ func (a ScriptActor) SetAdjective(adj string, addIt bool) {
 	a.characterRecord.SetAdjective(adj, addIt)
 }
 
+func (a ScriptActor) GetCharmCount() int {
+	return len(a.characterRecord.GetCharmIds())
+}
+
+func (a ScriptActor) GiveTrainingPoints(ct int) {
+	if ct < 1 {
+		return
+	}
+	a.characterRecord.TrainingPoints += ct
+}
+
+func (a ScriptActor) GiveStatPoints(ct int) {
+	if ct < 1 {
+		return
+	}
+	a.characterRecord.StatPoints += ct
+}
+
 // ////////////////////////////////////////////////////////
 //
 // Functions only really useful for mobs
@@ -473,10 +538,6 @@ func (a ScriptActor) CharmRemove() {
 
 func (a ScriptActor) CharmExpire() {
 	a.characterRecord.Charmed.Expire()
-}
-
-func (a ScriptActor) GetCharmCount() int {
-	return len(a.characterRecord.GetCharmIds())
 }
 
 func (a ScriptActor) getScript() string {

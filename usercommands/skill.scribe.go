@@ -12,6 +12,13 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Scribe Skill
+Level 1 - Scribe to a scrap of paper
+Level 2 - Scribe to a sign
+Level 3 - Scribe a hidden rune
+Level 4 - Scribe a map
+*/
 func Scribe(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)

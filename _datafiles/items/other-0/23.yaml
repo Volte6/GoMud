@@ -1,0 +1,6 @@
+itemid: 23
+name: rope
+namesimple: rope
+description: A basic rope. Useful when you need it, a burden when you don't.
+type: object
+subtype: mundane

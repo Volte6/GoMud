@@ -13,12 +13,14 @@ import (
 )
 
 type SpellType string
+type SpellSchool string
 
 type SpellData struct {
 	SpellId     string
 	Name        string
 	Description string
 	Type        SpellType
+	School      SpellSchool
 	Cost        int
 	WaitRounds  int
 	Difficulty  int // Augments final success chance by this %
@@ -34,6 +36,10 @@ const (
 	HelpMulti  SpellType = "helpmulti"  // Helpful, defaults on party - mass heal etc
 	HarmArea   SpellType = "harmarea"   // Hits everyone in the room, even if hidden or friendly
 	HelpArea   SpellType = "helparea"   // Hits everyone in the room, even if hidden
+
+	SchoolRestoration SpellSchool = "restoration" // Healing, curing conditions, etc.
+	SchoolIllusion    SpellSchool = "illusion"    // Light, darkness, invisibility, blink, etc.
+	SchoolConjuration SpellSchool = "conjuration" // Summoning, teleportation, etc.
 )
 
 var (
@@ -44,19 +50,30 @@ func (s SpellType) HelpOrHarmString() string {
 	switch s {
 	case Neutral:
 		return `Neutral`
-	case HelpSingle:
+	case HelpSingle, HelpMulti, HelpArea:
 		return `Helpful`
-	case HelpMulti:
-		return `Helpful`
-	case HarmSingle:
-		return `Harmful`
-	case HarmMulti:
+	case HarmSingle, HarmMulti, HarmArea:
 		return `Harmful`
 	}
 	return `Unknown`
 }
 
-func (s SpellType) TargetTypeString() string {
+func (s SpellType) TargetTypeString(short ...bool) string {
+	// Return a short version
+	if len(short) > 0 && short[0] {
+		switch s {
+		case Neutral:
+			return `Unknown`
+		case HelpSingle, HarmSingle:
+			return `Single`
+		case HelpMulti, HarmMulti:
+			return `Group`
+		case HelpArea, HarmArea:
+			return `Area`
+		}
+		return `Unknown`
+	}
+	// Regular handling
 	switch s {
 	case Neutral:
 		return `Unknown`
@@ -68,6 +85,8 @@ func (s SpellType) TargetTypeString() string {
 		return `Group Target`
 	case HarmMulti:
 		return `Group Target`
+	case HelpArea, HarmArea:
+		return `Area Target`
 	}
 	return `Unknown`
 }
@@ -118,7 +137,18 @@ func (s *SpellData) Filepath() string {
 }
 
 func (s *SpellData) Validate() error {
+
+	if s.Difficulty < 0 {
+		s.Difficulty = 0
+	} else if s.Difficulty > 100 {
+		s.Difficulty = 100
+	}
+
 	return nil
+}
+
+func (s *SpellData) GetDifficulty() int {
+	return s.Difficulty
 }
 
 func (s *SpellData) GetScript() string {

@@ -39,7 +39,7 @@ func Stash(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 
 		response.SendUserMessage(userId,
-			fmt.Sprintf(`You stash the <ansi fg="itemname">%s</ansi>. To get it back, try <ansi fg="command">get %s from stash</ansi>`, matchItem.Name(), matchItem.Name()),
+			fmt.Sprintf(`You stash the <ansi fg="itemname">%s</ansi>. To get it back, try <ansi fg="command">get %s from stash</ansi>`, matchItem.DisplayName(), matchItem.DisplayName()),
 			true)
 
 		if !isSneaking {

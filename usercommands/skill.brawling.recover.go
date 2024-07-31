@@ -8,6 +8,10 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Brawling Skill
+Level 1 - Enter a state of rest where health is recovered more quickly
+*/
 func Recover(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)

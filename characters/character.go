@@ -14,6 +14,7 @@ import (
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/skills"
+	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/stats"
 	"github.com/volte6/mud/util"
 	//
@@ -129,6 +130,63 @@ func (c *Character) GetDescription() string {
 	}
 	hash := strings.TrimPrefix(c.Description, `h:`)
 	return descriptionCache[hash]
+}
+
+/*
+All spells should have a 10% minimum chance of success.
+*/
+func (c *Character) GetBaseCastSuccessChance(spellId string) int {
+
+	sp := spells.GetSpell(spellId)
+	if sp == nil {
+		return -1
+	}
+
+	// start with 100% chance of success
+	targetNumber := 100
+
+	// subtract spell difficulty
+	// 1-100
+	targetNumber -= sp.GetDifficulty()
+
+	// add spell level bonus
+	// 10-30
+	skillLevel := c.GetSkillLevel(skills.Cast)
+	//targetNumber += (skillLevel * 5)
+	//targetNumber -= 5 // cancel out the first level
+
+	// add the proficiency of the spell (more casts == better)
+	// 0-20
+	profFactor := 1.0
+	if skillLevel == 2 {
+		profFactor = 1.25 // .25 more than lvl 1
+	} else if skillLevel == 3 {
+		profFactor = 1.75 // .50 more than lvl 2
+	} else if skillLevel == 4 {
+		profFactor = 2.50 // .75 more than lvl 3
+	}
+	casts := c.SpellBook[spellId]
+	proficiency := int(math.Floor((float64(casts) / 50 * profFactor))) // after 50 casts proficiency is 1
+	if proficiency < 0 {
+		proficiency = 0
+	} else if proficiency > 20 {
+		proficiency = 20
+	}
+	targetNumber += proficiency
+
+	targetNumber += int(math.Floor(float64(c.Stats.Mysticism.ValueAdj) / 5))
+
+	// add by any stat mods for casting, or casting school
+	// 0-xx
+	targetNumber += c.Equipment.StatMod(`casting`, `casting-`+string(sp.School))
+
+	if targetNumber < 0 {
+		targetNumber = 0
+	} else if targetNumber > 100 {
+		targetNumber = 100
+	}
+
+	return targetNumber
 }
 
 func (c *Character) DeductActionPoints(amount int) bool {
@@ -266,9 +324,9 @@ func (c *Character) GetDefaultDiceRoll() (attacks int, dCount int, dSides int, b
 	bonus = raceInfo.Damage.BonusDamage
 	buffOnCrit = raceInfo.Damage.CritBuffIds
 
-	dCount += int(math.Floor((float64(c.Stats.Speed.Value) / 50)))
-	dSides += int(math.Floor((float64(c.Stats.Strength.Value) / 12)))
-	bonus += int(math.Floor((float64(c.Stats.Perception.Value) / 25)))
+	dCount += int(math.Floor((float64(c.Stats.Speed.ValueAdj) / 50)))
+	dSides += int(math.Floor((float64(c.Stats.Strength.ValueAdj) / 12)))
+	bonus += int(math.Floor((float64(c.Stats.Perception.ValueAdj) / 25)))
 
 	if dCount < 1 {
 		dCount = 1
@@ -463,7 +521,7 @@ func (c *Character) GetHealthAppearance() string {
 }
 
 func (c *Character) GetBackpackCapacity() int {
-	return int(math.Ceil(float64(c.Stats.Strength.Value)/3)) + 3
+	return int(math.Ceil(float64(c.Stats.Strength.ValueAdj)/3)) + 3
 }
 
 func (c *Character) GetFollowers() []int {
@@ -865,11 +923,11 @@ func (c *Character) SetTameCreatureSkill(userId int, creatureName string, profic
 }
 
 func (c *Character) GetMemoryCapacity() int {
-	return c.GetSkillLevel(skills.Map)*c.Stats.Smarts.Value + 5
+	return c.GetSkillLevel(skills.Map)*c.Stats.Smarts.ValueAdj + 5
 }
 
 func (c *Character) GetMapSprawlCapacity() int {
-	return c.GetSkillLevel(skills.Map) + (c.Stats.Smarts.Value >> 2)
+	return c.GetSkillLevel(skills.Map) + (c.Stats.Smarts.ValueAdj >> 2)
 }
 
 // Return all rooms the player can remember visiting
@@ -1121,7 +1179,7 @@ func (c *Character) ApplyManaChange(manaChange int) {
 }
 
 func (c *Character) BarterPrice(startPrice int) int {
-	factor := (float64(c.Stats.Perception.Value) / 3) / 100 // 100 = 33% discount, 0 = 0% discount, 300 = 100% discount
+	factor := (float64(c.Stats.Perception.ValueAdj) / 3) / 100 // 100 = 33% discount, 0 = 0% discount, 300 = 100% discount
 	if factor > .75 {
 		factor = .75
 	}
@@ -1190,26 +1248,32 @@ func (c *Character) Heal(hp int, mana int) {
 }
 
 func (c *Character) HealthPerRound() int {
-	healAmt := math.Round(float64(c.Stats.Vitality.Value)/8) +
-		math.Round(float64(c.Level)/12) +
-		1.0
+	return 1 + c.Equipment.StatMod(`healthrecovery`)
+	/*
+		healAmt := math.Round(float64(c.Stats.Vitality.ValueAdj)/8) +
+			math.Round(float64(c.Level)/12) +
+			1.0
 
-	return int(healAmt)
+		return int(healAmt)
+	*/
 }
 
 func (c *Character) ManaPerRound() int {
-	healAmt := math.Round(float64(c.Stats.Mysticism.Value)/8) +
-		math.Round(float64(c.Level)/12) +
-		1.0
+	return 1 + c.Equipment.StatMod(`manarecovery`)
+	/*
+		healAmt := math.Round(float64(c.Stats.Mysticism.ValueAdj)/8) +
+			math.Round(float64(c.Level)/12) +
+			1.0
 
-	return int(healAmt)
+		return int(healAmt)
+	*/
 }
 
 // Where 1000 = a full round
 func (c *Character) MovementCost() int {
-	modifier := 3                             // by default they should be able to move 3 times per round.
-	modifier += int(c.Level / 15)             // Every 15 levels, get an extra movement.
-	modifier += int(c.Stats.Speed.Value / 15) // Every 15 speed, get an extra movement
+	modifier := 3                                // by default they should be able to move 3 times per round.
+	modifier += int(c.Level / 15)                // Every 15 levels, get an extra movement.
+	modifier += int(c.Stats.Speed.ValueAdj / 15) // Every 15 speed, get an extra movement
 	return int(1000 / modifier)
 }
 
@@ -1251,13 +1315,13 @@ func (c *Character) RecalculateStats() {
 		c.Buffs.StatMod("healthmax") + // Any sort of spell buffs etc. are just direct modifiers
 		c.Equipment.StatMod("healthmax") + // However many points you have from equipment, you get 1 hp per point
 		c.Level + // For every level you get 1 hp
-		c.Stats.Vitality.Value*4 // for every vitality you get 3hp
+		c.Stats.Vitality.ValueAdj*4 // for every vitality you get 3hp
 
 	c.ManaMax.Mods = 4 +
 		c.Buffs.StatMod("manamax") + // Any sort of spell buffs etc. are just direct modifiers
 		c.Equipment.StatMod("manamax") + // However many points you have from equipment, you get 1 hp per point
 		c.Level + // For every level you get 1 mp
-		c.Stats.Mysticism.Value*3 // for every Mysticism you get 2mp
+		c.Stats.Mysticism.ValueAdj*3 // for every Mysticism you get 2mp
 
 	// Set max action points
 	c.ActionPointsMax.Mods = 200 // hard coded for now
@@ -1547,17 +1611,17 @@ func (c *Character) GetAllWornItems() []items.Item {
 	return wornItems
 }
 
-func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bool) {
+func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bool, failureReason string) {
 
 	spec := i.GetSpec()
 
 	if spec.Type != items.Weapon && spec.Subtype != items.Wearable {
-		return returnItems, false
+		return returnItems, false, `That item cannot be equipped.`
 	}
 
 	iHandsRequired := c.HandsRequired(i)
 	if iHandsRequired > 2 {
-		return returnItems, false
+		return returnItems, false, `That requires too many hands.`
 	}
 
 	// are botht he currently equipped weapon and this weapon claws?
@@ -1580,12 +1644,12 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 				// If nothing is in their offhand
 				if c.Equipment.Offhand.ItemId == 0 {
 					// Put it in the offhand.
-					returnItems = append(returnItems, c.Equipment.Offhand)
+					//returnItems = append(returnItems, c.Equipment.Offhand)
 					c.Equipment.Offhand = i
 
 					c.reapplyWornItemBuffs()
 
-					return returnItems, true
+					return returnItems, true, ``
 				}
 			}
 
@@ -1597,7 +1661,7 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 	switch spec.Type {
 	case items.Weapon:
 		if c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't use a weapon.`
 		}
 
 		if !c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
@@ -1608,16 +1672,24 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 			}
 		}
 
+		if c.Equipment.Weapon.IsCursed() {
+			return returnItems, false, `Your ` + c.Equipment.Weapon.DisplayName() + ` is cursed and prevents you from removing it.`
+		}
+
 		returnItems = append(returnItems, c.Equipment.Weapon)
 		c.Equipment.Weapon = i
 	case items.Offhand, items.Holdable:
 		if c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't hold things in an offhand.`
 		}
 
 		if !c.Equipment.Weapon.IsDisabled() { // Don't allow equipping on a disabled slot
 			// If they have a 2h weapon equipped, remove it
 			if c.HandsRequired(c.Equipment.Weapon) == 2 {
+				// If the weapon is cursed, do not allow the offhand to be equipped
+				if c.Equipment.Weapon.IsCursed() {
+					return returnItems, false, `Your ` + c.Equipment.Weapon.DisplayName() + ` is cursed and prevents you from removing it.`
+				}
 				returnItems = append(returnItems, c.Equipment.Weapon)
 				c.Equipment.Weapon = items.Item{}
 			}
@@ -1626,59 +1698,59 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 		c.Equipment.Offhand = i
 	case items.Head:
 		if c.Equipment.Head.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your head.`
 		}
 		returnItems = append(returnItems, c.Equipment.Head)
 		c.Equipment.Head = i
 	case items.Neck:
 		if c.Equipment.Neck.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your neck.`
 		}
 		returnItems = append(returnItems, c.Equipment.Neck)
 		c.Equipment.Neck = i
 	case items.Body:
 		if c.Equipment.Body.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your body.`
 		}
 		returnItems = append(returnItems, c.Equipment.Body)
 		c.Equipment.Body = i
 	case items.Belt:
 		if c.Equipment.Belt.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your head.`
 		}
 		returnItems = append(returnItems, c.Equipment.Belt)
 		c.Equipment.Belt = i
 	case items.Gloves:
 		if c.Equipment.Gloves.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things as gloves.`
 		}
 		returnItems = append(returnItems, c.Equipment.Gloves)
 		c.Equipment.Gloves = i
 	case items.Ring:
 		if c.Equipment.Ring.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear rings.`
 		}
 		returnItems = append(returnItems, c.Equipment.Ring)
 		c.Equipment.Ring = i
 	case items.Legs:
 		if c.Equipment.Legs.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your legs.`
 		}
 		returnItems = append(returnItems, c.Equipment.Legs)
 		c.Equipment.Legs = i
 	case items.Feet:
 		if c.Equipment.Feet.IsDisabled() { // Don't allow equipping on a disabled slot
-			return returnItems, false
+			return returnItems, false, `You can't wear things on your feet.`
 		}
 		returnItems = append(returnItems, c.Equipment.Feet)
 		c.Equipment.Feet = i
 	default:
-		return returnItems, false
+		return returnItems, false, `Unrecognized object.`
 	}
 
 	c.reapplyWornItemBuffs(returnItems...)
 
-	return returnItems, true
+	return returnItems, true, ``
 }
 
 func (c *Character) RemoveFromBody(i items.Item) bool {

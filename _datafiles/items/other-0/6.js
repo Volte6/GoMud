@@ -1,8 +1,8 @@
 
 function onCommand_use(user, item, room) {
     
-    SendUserMessage(user.UserId(), "You unroll the <ansi fg=\"itemname\">Sleeping Bag</ansi> and hop in.");
-    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" unrolls their <ansi fg=\"itemname\">Sleeping Bag</ansi> and crawls inside.", user.UserId())
+    SendUserMessage(user.UserId(), "You unroll the <ansi fg=\"itemname\">"+item.Name()+"</ansi> and hop in.");
+    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" unrolls their <ansi fg=\"itemname\">"+item.Name()+"</ansi> and crawls inside.", user.UserId())
 
     user.CancelBuffWithFlag("hidden"); // cancel any hidden buff (most item use should do this if it's noticeable)
 

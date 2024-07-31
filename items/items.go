@@ -201,6 +201,7 @@ func (i *Item) Rename(newName string) {
 	if i.Spec == nil {
 		specCopy := *GetItemSpec(i.ItemId)
 		specCopy.Name = newName
+		specCopy.DisplayName = ``
 		i.Spec = &specCopy
 	}
 }
@@ -361,13 +362,29 @@ func (i *Item) AttrString() string {
 	return fmt.Sprintf(`<ansi fg="item-flags">[%s]</ansi>`, strings.Join(flags, ``))
 }
 
-func (i *Item) Name() string {
-
+func (i *Item) DisplayName() string {
 	if i.ItemId < 1 { // Used to represent item slots that are disabled
 		if i.ItemId == 0 { // Used to represent item slots that are empty
 			return `<ansi fg="item-nothing">-nothing-</ansi>`
 		} else {
 			return `<ansi fg="item-nothing">***disabled***</ansi>`
+		}
+	}
+
+	spec := i.GetSpec()
+	if spec.DisplayName != `` {
+		return spec.DisplayName
+	}
+	return spec.Name
+}
+
+func (i *Item) Name() string {
+
+	if i.ItemId < 1 { // Used to represent item slots that are disabled
+		if i.ItemId == 0 { // Used to represent item slots that are empty
+			return `-nothing-`
+		} else {
+			return `***disabled***`
 		}
 	}
 
@@ -378,9 +395,9 @@ func (i *Item) NameSimple() string {
 
 	if i.ItemId < 1 { // Used to represent item slots that are disabled
 		if i.ItemId == 0 { // Used to represent item slots that are empty
-			return `<ansi fg="item-nothing">-nothing-</ansi>`
+			return `-nothing-`
 		} else {
-			return `<ansi fg="item-nothing">***disabled***</ansi>`
+			return `***disabled***`
 		}
 	}
 
@@ -397,7 +414,7 @@ func (i *Item) NameComplex() string {
 		}
 	}
 
-	nm := i.GetSpec().Name
+	nm := i.DisplayName()
 
 	if i.GetSpec().Damage.BonusDamage > 0 {
 		nm = fmt.Sprintf(`%s <ansi fg="item-bonus-damage">+%d</ansi>`, nm, i.GetSpec().Damage.BonusDamage)
@@ -437,20 +454,26 @@ func (i *Item) NameMatch(input string, allowContains bool) (partialMatch bool, f
 	return false, false
 }
 
-func (i *Item) StatMod(statName string) int {
+func (i *Item) StatMod(statName ...string) int {
 
 	if i.ItemId < 1 {
 		return 0
 	}
 
+	retAmt := 0
+
 	itemInfo := i.GetSpec()
 	if len(itemInfo.StatMods) == 0 {
-		return 0
+		return retAmt
 	}
-	if modAmt, ok := itemInfo.StatMods[statName]; ok {
-		return modAmt
+
+	for _, stat := range statName {
+		if modAmt, ok := itemInfo.StatMods[stat]; ok {
+			retAmt += modAmt
+		}
 	}
-	return 0
+
+	return retAmt
 }
 
 func startsWithVowel(s string) bool {

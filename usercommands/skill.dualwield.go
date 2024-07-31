@@ -9,6 +9,13 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Dual WIeld
+Level 1 - You can dual wield weapons that you normally couldn't. Attacks use a random weapon.
+Level 2 - Occasionaly you will attack with both weapons in one round.
+Level 3 - You will always attack with both weapons when Dual wielding.
+Level 4 - Dual wielding incurs fewer penalties
+*/
 func DualWield(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)

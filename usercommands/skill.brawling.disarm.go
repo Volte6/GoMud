@@ -10,6 +10,10 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Brawling Skill
+Level 4 - Attempt to disarm an opponent.
+*/
 func Disarm(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
@@ -62,7 +66,7 @@ func Disarm(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 				return response, nil
 			}
 
-			chanceIn100 := (user.Character.Stats.Speed.Value + user.Character.Stats.Smarts.Value) - (m.Character.Stats.Strength.Value + m.Character.Stats.Perception.Value)
+			chanceIn100 := (user.Character.Stats.Speed.ValueAdj + user.Character.Stats.Smarts.ValueAdj) - (m.Character.Stats.Strength.ValueAdj + m.Character.Stats.Perception.ValueAdj)
 			if chanceIn100 < 0 {
 				chanceIn100 = 0
 			}
@@ -106,7 +110,7 @@ func Disarm(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		if u != nil {
 
-			chanceIn100 := (user.Character.Stats.Speed.Value + user.Character.Stats.Smarts.Value) - (u.Character.Stats.Strength.Value + u.Character.Stats.Perception.Value)
+			chanceIn100 := (user.Character.Stats.Speed.ValueAdj + user.Character.Stats.Smarts.ValueAdj) - (u.Character.Stats.Strength.ValueAdj + u.Character.Stats.Perception.ValueAdj)
 			if chanceIn100 < 0 {
 				chanceIn100 = 0
 			}

@@ -17,6 +17,8 @@ type roomNode struct {
 	xPos        int                 // Its x position relative to the root node
 	yPos        int                 // Its y position relative to the root node
 	Sprawl      int                 // how far from the start point this is
+	MobIds      []int               // all mob instance ids in this room
+	UserIds     []int               // all user ids in this room
 }
 
 type symbolOverride struct {
@@ -182,7 +184,7 @@ func NewRoomGraph(maxWidth int, maxHeight int, uidPov int, mode MapMode) *RoomGr
 	return rGraph
 }
 
-func newNode(roomId int, roomSymbol string, roomLegend string) *roomNode {
+func newNode(roomId int, roomSymbol string, roomLegend string, allMobsInstanceIds []int, allPlayerUserIds []int) *roomNode {
 	if len(roomSymbol) == 0 {
 		roomSymbol = defaultMapSymbol // *
 	}
@@ -195,6 +197,8 @@ func newNode(roomId int, roomSymbol string, roomLegend string) *roomNode {
 		SecretExits: make(map[string]struct{}),
 		Symbol:      []rune(roomSymbol)[0],
 		Legend:      roomLegend,
+		MobIds:      allMobsInstanceIds,
+		UserIds:     allPlayerUserIds,
 	}
 }
 
@@ -229,6 +233,34 @@ func (m *Map1D) String() string {
 
 func (r *RoomGraph) RoomCount() int {
 	return len(r.trackedRoomIds)
+}
+
+func (r *RoomGraph) RoomIds() []int {
+	allRoomIds := make([]int, 0, len(r.trackedRoomIds))
+	for roomId, _ := range r.trackedRoomIds {
+		allRoomIds = append(allRoomIds, roomId)
+	}
+	return allRoomIds
+}
+
+func (r *RoomGraph) RoomIdsWithPlayers() []int {
+	allRoomIds := make([]int, 0, len(r.trackedRoomIds))
+	for roomId, roomNode := range r.trackedRoomIds {
+		if len(roomNode.UserIds) > 0 {
+			allRoomIds = append(allRoomIds, roomId)
+		}
+	}
+	return allRoomIds
+}
+
+func (r *RoomGraph) RoomIdsWithMobs() []int {
+	allRoomIds := make([]int, 0, len(r.trackedRoomIds))
+	for roomId, roomNode := range r.trackedRoomIds {
+		if len(roomNode.MobIds) > 0 {
+			allRoomIds = append(allRoomIds, roomId)
+		}
+	}
+	return allRoomIds
 }
 
 // Whatever the room normally shows, it will show this instead.
@@ -390,7 +422,7 @@ func (r *RoomGraph) addNode(sourceRoomNode *roomNode, direction string, roomId i
 	if r.povUserId > 0 {
 		// Secret exits aren't included unless the player has recently been there
 		if isSecretExit {
-			if !newRoomData.HasVisited(r.povUserId) {
+			if !newRoomData.HasVisited(r.povUserId, VisitorUser) {
 				return nil
 			}
 		} else {
@@ -403,7 +435,7 @@ func (r *RoomGraph) addNode(sourceRoomNode *roomNode, direction string, roomId i
 
 			if r.mode == MapModeTracking {
 				// If the player isn't around or they haven't visited the room, recently
-				if !newRoomData.HasVisited(r.povUserId) {
+				if !newRoomData.HasVisited(r.povUserId, VisitorUser) {
 					return nil
 				}
 			}
@@ -438,7 +470,7 @@ func (r *RoomGraph) addNode(sourceRoomNode *roomNode, direction string, roomId i
 	}
 
 	// This is a new room so we need to handle it accordingly.
-	newRoomNode := newNode(newRoomData.RoomId, mapSymbol, mapLegend)
+	newRoomNode := newNode(newRoomData.RoomId, mapSymbol, mapLegend, newRoomData.GetMobs(), newRoomData.GetPlayers())
 	newRoomNode.Sprawl = sourceRoomNode.Sprawl + 1
 
 	// Track the position relative to the source room, for the new room.
@@ -563,7 +595,7 @@ func (r *RoomGraph) Build(rootRoomId int, overrideRoomIdSymbols map[int]rune) er
 	}
 
 	// Create the root node
-	var newRoomNode *roomNode = newNode(roomNow.RoomId, mapSymbol, mapLegend)
+	var newRoomNode *roomNode = newNode(roomNow.RoomId, mapSymbol, mapLegend, roomNow.GetMobs(), roomNow.GetPlayers())
 	r.Root = newRoomNode                          // Make it the root.
 	r.trackedRoomIds[r.Root.RoomId] = newRoomNode // Mark it tracked
 

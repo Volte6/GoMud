@@ -13,6 +13,10 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+SkullDuggery Skill
+Level 3 - Backstab
+*/
 func Bump(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
@@ -76,7 +80,7 @@ func Bump(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				levelDelta = 1
 			}
 
-			chanceIn100 := user.Character.Stats.Strength.Value / 2
+			chanceIn100 := user.Character.Stats.Strength.ValueAdj / 2
 			chanceIn100 /= levelDelta
 			if chanceIn100 < 0 {
 				chanceIn100 = 1
@@ -118,7 +122,7 @@ func Bump(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			if levelDelta < 1 {
 				levelDelta = 1
 			}
-			chanceIn100 := user.Character.Stats.Strength.Value / 2
+			chanceIn100 := user.Character.Stats.Strength.ValueAdj / 2
 			chanceIn100 /= levelDelta
 			if chanceIn100 < 0 {
 				chanceIn100 = 1

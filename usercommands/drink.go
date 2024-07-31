@@ -37,7 +37,7 @@ func Drink(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 		if itemSpec.Subtype != items.Drinkable {
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`You can't drink <ansi fg="itemname">%s</ansi>.`, matchItem.Name()),
+				fmt.Sprintf(`You can't drink <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 				true)
 			response.Handled = true
 			return response, nil
@@ -47,8 +47,8 @@ func Drink(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 		user.Character.UseItem(matchItem)
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You drink the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()), true)
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> drinks <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.Name()), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You drink the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> drinks <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()), true)
 
 		for _, buffId := range itemSpec.BuffIds {
 			cmdQueue.QueueBuff(user.UserId, 0, buffId)

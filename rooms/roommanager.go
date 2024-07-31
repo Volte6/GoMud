@@ -63,6 +63,7 @@ type RoomTemplateDetails struct {
 	TinyMapDescription string
 	IsDark             bool
 	IsNight            bool
+	TrackingString     string
 }
 
 var (
@@ -157,7 +158,7 @@ func RoomMaintenance(out *connection.ConnectionTracker) bool {
 
 		// Consider unloading rooms from memory?
 		if roundCount%roomUnloadTimeoutRounds == 0 {
-			if room.lastVisitor < unloadRoundThreshold {
+			if room.lastVisited < unloadRoundThreshold {
 				unloadRooms = append(unloadRooms, room)
 			}
 		}
@@ -211,13 +212,14 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 
 	roomManager.Lock()
 
-	currentRoom.MarkVisited(userId)
+	currentRoom.MarkVisited(userId, VisitorUser, 1)
 
 	if len, _ := currentRoom.RemovePlayer(userId); len < 1 {
 		delete(roomManager.roomsWithUsers, currentRoom.RoomId)
 	}
 
-	newRoom.MarkVisited(userId)
+	newRoom.MarkVisited(userId, VisitorUser)
+
 	playerCt := newRoom.addPlayer(userId)
 	roomManager.roomsWithUsers[newRoom.RoomId] = playerCt
 
@@ -399,11 +401,6 @@ func loadAllRoomZones() error {
 			roomsWithoutEntrances[exit.RoomId] = ``
 		}
 
-		for _, prop := range loadedRoom.Props {
-			if prop.Trigger.RoomId > 0 {
-				roomsWithoutEntrances[prop.Trigger.RoomId] = ``
-			}
-		}
 	}
 
 	for roomId, filePath := range roomsWithoutEntrances {
@@ -570,7 +567,7 @@ func loadRoomFromFile(roomFilePath string) (*Room, error) {
 	}
 
 	// Automatically set the last visitor to now (reset the timer)
-	roomPtr.lastVisitor = util.GetRoundCount()
+	roomPtr.lastVisited = util.GetRoundCount()
 
 	addRoomToMemory(roomPtr)
 
@@ -827,14 +824,6 @@ func BuildRoom(fromRoomId int, exitName string, mapDirection ...string) (room *R
 	newRoom.MapSymbol = fromRoom.MapSymbol
 	newRoom.MapLegend = fromRoom.MapLegend
 	newRoom.Biome = fromRoom.Biome
-
-	for _, prop := range fromRoom.Props {
-		// Make sure it's not a complex triggered action, and just a descriptive prop.
-		// If so, copy it.
-		if len(prop.Verbs) == 0 {
-			newRoom.Props = append(newRoom.Props, prop)
-		}
-	}
 
 	if len(fromRoom.IdleMessages) > 0 {
 		//newRoom.IdleMessages = fromRoom.IdleMessages

@@ -1,0 +1,22 @@
+roomid: 874
+zone: Dark Forest
+title: Dark Chasm
+description: Descending into the chasm, you leave the oppressive shadows of the Dark
+  Forest behind and enter a realm where the light barely penetrates, casting long,
+  eerie shadows on the rough, uneven walls. The air is thick and damp, filled with
+  the scent of earth and decay. The ground beneath your feet is a treacherous mix
+  of loose stones and ancient roots that snake across the path, threatening to trip
+  the unwary. Strange, bioluminescent fungi cling to the walls, casting a ghostly
+  glow that illuminates the chasm in an otherworldly light. The distant sound of dripping
+  water echoes through the cavernous expanse, creating an unsettling symphony that
+  sets your nerves on edge.
+mapsymbol: B
+maplegend: Bridge
+biome: forest
+exits:
+  north:
+    roomid: 877
+  southeast:
+    roomid: 876
+  west:
+    roomid: 873

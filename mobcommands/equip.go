@@ -58,7 +58,7 @@ func Equip(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		}
 
 		// Swap the item location
-		oldItems, wearSuccess := mob.Character.Wear(matchItem)
+		oldItems, wearSuccess, _ := mob.Character.Wear(matchItem)
 
 		if wearSuccess {
 
@@ -78,7 +78,7 @@ func Equip(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					if oldItem.ItemId != 0 {
 
 						response.SendRoomMessage(mob.Character.RoomId,
-							fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, oldItem.Name()),
+							fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, oldItem.DisplayName()),
 							true)
 
 						mob.Character.StoreItem(oldItem)
@@ -88,11 +88,11 @@ func Equip(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				if iSpec.Subtype == items.Wearable {
 
 					response.SendRoomMessage(mob.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.Name()),
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()),
 						true)
 				} else {
 					response.SendRoomMessage(mob.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> wields <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.Name()),
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> wields <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()),
 						true)
 				}
 

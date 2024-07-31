@@ -21,7 +21,7 @@ import (
 )
 
 const roomDataFilesPath = "_datafiles/rooms"
-const visitorTrackingTimeout = 30   // 2 minutes (in rounds)
+const visitorTrackingTimeout = 180  // 180 seconds (3 minutes?)
 const roomUnloadTimeoutRounds = 450 // 1800 seconds (30 minutes) / 4 seconds (1 round) = 450 rounds
 const defaultMapSymbol = `•`
 
@@ -49,6 +49,7 @@ type SpawnInfo struct {
 }
 
 type FindFlag uint16
+type VisitorType string
 
 const (
 	AffectsNone   = ""
@@ -69,52 +70,15 @@ const (
 	FindFighting          = FindFightingPlayer | FindFightingMob // Currently in combat (aggro)
 	FindIdle              = FindCharmed | FindNeutral            // Not aggro or hostile
 	FindAll      FindFlag = 0b111111111
+	// Visitor types
+	VisitorUser = "user"
+	VisitorMob  = "mob"
 )
 
 type Sign struct {
 	VisibleUserId int       // What user can see it? If 0, then everyone can see it.
 	DisplayText   string    // What text to display
 	Expires       time.Time // When this sign expires.
-}
-
-type PropTrigger struct {
-	RoomId            int    `yaml:"roomid,omitempty"`            // What room id to move them to if any
-	BuffId            int    `yaml:"buffid,omitempty"`            // What buffId to apply if any
-	ItemId            int    `yaml:"itemid,omitempty"`            // What item id to give them if any
-	QuestToken        string `yaml:"questtoken,omitempty"`        // What quest token to give them if any
-	SkillInfo         string `yaml:"skillinfo,omitempty"`         // skill to give, format: skillId:skillLevel such as "map:1"
-	Affected          string `yaml:"affected,omitempty"`          // Who is affected? If nobody, then nobody. But an item id would have to drop to the floor then.
-	DescriptionPlayer string `yaml:"descriptionplayer,omitempty"` // "You press the eyes of the raven, and follow a secret entrance to the west!"
-	DescriptionRoom   string `yaml:"descriptionroom,omitempty"`   // "%s presses in the eyes of the raven, and falls through to the room to the west!"
-	MapInfo           string `yaml:"mapinfo,omitempty"`           // roomId[/wide] - if wide, then it will be a wide map
-}
-
-type RequirementType string
-
-const (
-	RequiresQuestToken    RequirementType = "questtoken"
-	RequiresNotQuestToken RequirementType = "notquesttoken"
-	RequiresItemId        RequirementType = "itemid"
-	RequiresBuffId        RequirementType = "buffid"
-	RequiresBuffFlag      RequirementType = "buff-flag"
-	RequiresNoMobs        RequirementType = "nomobs"
-)
-
-type PropRequirement struct {
-	Type             RequirementType
-	IdNumber         int    `yaml:"idnumber,omitempty"`
-	IdString         string `yaml:"idstring,omitempty"`
-	RejectionMessage string `yaml:"rejectionmessage,omitempty"`
-}
-
-type RoomProp struct {
-	Nouns         []string          `yaml:"nouns,omitempty,flow"`   // A list of nouns to match in order to interact with it. For example "raven", "eyes", "bird", "raven eyes"
-	Verbs         []string          `yaml:"verbs,omitempty,flow"`   // A list of verbs to match in order to trigger it, for example "touch raven", "poke eyes", "press bird"
-	Requirements  []PropRequirement `yaml:"requirements,omitempty"` // A list of requirements to interact with the prop
-	Cooldown      int               `yaml:"cooldown,omitempty"`     // How many seconds before the prop can be triggered again?
-	Description   string            `yaml:"description,omitempty"`  // The description of the noun when looked at (if any)
-	Trigger       PropTrigger       `yaml:"trigger,omitempty"`      // Details of what triggers when a verb+noun is matched
-	lastTriggered time.Time         // When was the prop last triggered?
 }
 
 type GameLock struct {
@@ -183,27 +147,27 @@ type Room struct {
 	IsStorage         bool   `yaml:"isstorage,omitempty"` // Is this a storage room? If so, players can add/remove objects here.
 	Title             string
 	Description       string
-	Props             []RoomProp           `yaml:"props,omitempty"`      // A list of props in the room
 	MapSymbol         string               `yaml:"mapsymbol,omitempty"`  // The symbol to use when generating a map of the zone
 	MapLegend         string               `yaml:"maplegend,omitempty"`  // The text to display in the legend for this room. Should be one word.
 	Biome             string               `yaml:"biome,omitempty"`      // The biome of the room. Used for weather generation.
 	Containers        map[string]Container `yaml:"containers,omitempty"` // If this room has a chest, what is in it?
 	Exits             map[string]RoomExit
-	ExitsTemp         map[string]TemporaryRoomExit `yaml:"-"` // Temporary exits that will be removed after a certain time. Don't bother saving on sever shutting down.
-	Items             []items.Item                 `yaml:"items,omitempty"`
-	Gold              int                          `yaml:"gold,omitempty"`              // How much gold is on the ground?
-	SpawnInfo         []SpawnInfo                  `yaml:"spawninfo,omitempty"`         // key is creature ID, value is spawn chance
-	SkillTraining     map[string]TrainingRange     `yaml:"skilltraining,omitempty"`     // list of skills that can be trained in this room
-	Signs             []Sign                       `yaml:"sign,omitempty"`              // list of scribbles in the room
-	Stash             []items.Item                 `yaml:"stash,omitempty"`             // list of items in the room that are not visible to players
-	IdleMessages      []string                     `yaml:"idlemessages,omitempty"`      // list of messages that can be displayed to players in the room
-	LastIdleMessage   uint8                        `yaml:"-"`                           // index of the last idle message displayed
-	LongTermDataStore map[string]any               `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
-	players           []int                        `yaml:"-"`                           // list of user IDs currently in the room
-	mobs              []int                        `yaml:"-"`                           // list of mob instance IDs currently in the room. Does not get saved.
-	visitors          map[int]uint64               `yaml:"visitors,omitempty"`          // list of user IDs that have visited this room, and the last round they did
-	lastVisitor       uint64                       `yaml:"-"`                           // last round a visitor was in the room
-	tempDataStore     map[string]any               `yaml:"-"`                           // Temporary data store for the room
+	ExitsTemp         map[string]TemporaryRoomExit   `yaml:"-"`               // Temporary exits that will be removed after a certain time. Don't bother saving on sever shutting down.
+	Nouns             map[string]string              `yaml:"nouns,omitempty"` // Interesting nouns to highlight in the room or reveal on succesful searches.
+	Items             []items.Item                   `yaml:"items,omitempty"`
+	Gold              int                            `yaml:"gold,omitempty"`              // How much gold is on the ground?
+	SpawnInfo         []SpawnInfo                    `yaml:"spawninfo,omitempty"`         // key is creature ID, value is spawn chance
+	SkillTraining     map[string]TrainingRange       `yaml:"skilltraining,omitempty"`     // list of skills that can be trained in this room
+	Signs             []Sign                         `yaml:"sign,omitempty"`              // list of scribbles in the room
+	Stash             []items.Item                   `yaml:"stash,omitempty"`             // list of items in the room that are not visible to players
+	IdleMessages      []string                       `yaml:"idlemessages,omitempty"`      // list of messages that can be displayed to players in the room
+	LastIdleMessage   uint8                          `yaml:"-"`                           // index of the last idle message displayed
+	LongTermDataStore map[string]any                 `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
+	players           []int                          `yaml:"-"`                           // list of user IDs currently in the room
+	mobs              []int                          `yaml:"-"`                           // list of mob instance IDs currently in the room. Does not get saved.
+	visitors          map[VisitorType]map[int]uint64 `yaml:"-"`                           // list of user IDs that have visited this room, and the last round they did
+	lastVisited       uint64                         `yaml:"-"`                           // last round a visitor was in the room
+	tempDataStore     map[string]any                 `yaml:"-"`                           // Temporary data store for the room
 }
 
 type TrainingRange struct {
@@ -240,7 +204,7 @@ func NewRoom(zone string) *Room {
 		MapSymbol:     ``,
 		Exits:         make(map[string]RoomExit),
 		players:       []int{},
-		visitors:      make(map[int]uint64),
+		visitors:      make(map[VisitorType]map[int]uint64),
 		tempDataStore: make(map[string]any),
 	}
 
@@ -344,22 +308,6 @@ func (r *Room) GetScriptPath() string {
 	return strings.Replace(roomDataFilesPath+`/`+r.Filepath(), `.yaml`, `.js`, 1)
 }
 
-func (r *Room) GetNouns() []string {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	nouns := []string{}
-	if len(r.Props) < 1 {
-		return nouns
-	}
-
-	for _, prop := range r.Props {
-		nouns = append(nouns, prop.Nouns...)
-	}
-
-	return nouns
-}
-
 func (r *Room) FindTemporaryExitByUserId(userId int) (TemporaryRoomExit, bool) {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
@@ -411,22 +359,6 @@ func (r *Room) AddTemporaryExit(exitName string, t TemporaryRoomExit) bool {
 	}
 	r.ExitsTemp[exitName] = t
 	return true
-}
-
-func (r *Room) GetRandomNoun() string {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	if len(r.Props) == 0 {
-		return ""
-	}
-
-	propNouns := []string{}
-	for _, prop := range r.Props {
-		propNouns = append(propNouns, prop.Nouns...)
-	}
-
-	return propNouns[util.Rand(len(propNouns))]
 }
 
 // The purpose of Prepare() is to ensure a room is properly setup before anyone looks into it or enters it
@@ -644,6 +576,10 @@ func (r *Room) CleanupMobSpawns(noCooldown bool) {
 }
 
 func (r *Room) AddMob(mobInstanceId int) {
+
+	// Do before lock
+	r.MarkVisited(mobInstanceId, VisitorMob)
+
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -658,6 +594,10 @@ func (r *Room) AddMob(mobInstanceId int) {
 }
 
 func (r *Room) RemoveMob(mobInstanceId int) {
+
+	// Do before lock
+	r.MarkVisited(mobInstanceId, VisitorMob, 1)
+
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -786,204 +726,30 @@ func (r *Room) FindOnFloor(itemName string, stash bool) (items.Item, bool) {
 	return items.Item{}, false
 }
 
-func (r *Room) TryLookProp(cmd string, restOfInput string) (description string, ok bool) {
-	// Check for a matching noun and if found, return the description
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	if cmd == "look" {
-
-		restOfInput = strings.ToLower(restOfInput)
-
-		for _, prop := range r.Props {
-			for _, noun := range prop.Nouns {
-				if strings.Contains(restOfInput, noun) {
-					return prop.Description, true
-				}
-			}
-		}
-
-	}
-
-	return "", false
-}
-
-// Tries a trigger, and if it finds a match, returns the trigger and whether it's on cooldown.
-func (r *Room) TryTrigger(cmd string, restOfInput string, userId int) (matchingTrigger *PropTrigger, onCooldown bool, rejectionMessage string) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	if len(r.Props) == 0 {
-		return matchingTrigger, onCooldown, rejectionMessage
-	}
-
-	user := users.GetByUserId(userId)
-	if user == nil {
-		return matchingTrigger, onCooldown, rejectionMessage
-	}
-
-	restOfInput = strings.ToLower(restOfInput)
-
-	onCooldown = false
-	for p, prop := range r.Props {
-
-		verbMatch := false
-		if len(prop.Verbs) > 0 {
-			for _, verb := range prop.Verbs {
-				if cmd != verb {
-					continue
-				}
-				verbMatch = true
-				break
-			}
-		}
-
-		nounMatch := true
-		if len(prop.Nouns) > 0 {
-			nounMatch = false
-			for _, noun := range prop.Nouns {
-				// Changed from contains
-				if noun != `` { // empty nouns always match.
-					if !strings.HasPrefix(noun, restOfInput) || restOfInput == `` { // Can't match nouns if there is no noun provided
-						continue
-					}
-				}
-
-				nounMatch = true
-				break
-			}
-		}
-
-		if verbMatch && nounMatch {
-
-			rejected := false
-
-			for _, req := range prop.Requirements {
-
-				// Quest token (have or not have)
-				if req.Type == RequiresQuestToken {
-
-					rejected = !user.Character.HasQuest(req.IdString)
-					if rejected {
-						rejectionMessage = req.RejectionMessage
-						break
-					}
-
-					continue
-				}
-
-				if req.Type == RequiresNotQuestToken {
-					rejected = user.Character.HasQuest(req.IdString)
-					if rejected {
-						rejectionMessage = req.RejectionMessage
-						break
-					}
-
-					continue
-				}
-
-				// ItemId (have or not have)
-				if req.Type == RequiresItemId {
-
-					if req.IdNumber > 0 {
-						_, found := user.Character.FindInBackpack(fmt.Sprintf(`!%d`, req.IdNumber))
-						if !found {
-							_, found = user.Character.FindOnBody(fmt.Sprintf(`!%d`, req.IdNumber))
-						}
-						rejected = !found
-					} else if req.IdNumber < 0 {
-						_, found := user.Character.FindInBackpack(fmt.Sprintf(`!%d`, req.IdNumber*-1))
-						if !found {
-							_, found = user.Character.FindOnBody(fmt.Sprintf(`!%d`, req.IdNumber*-1))
-						}
-						rejected = found
-					}
-
-					if rejected {
-						rejectionMessage = req.RejectionMessage
-						break
-					}
-
-					continue
-				}
-
-				// BuffId (have or not have)
-				if req.Type == RequiresBuffId {
-
-					if req.IdNumber > 0 {
-						rejected = !user.Character.HasBuff(req.IdNumber) // positive buffId means they must have this buff
-					} else if req.IdNumber < 0 { // negative buffId means they must not have this buff
-						rejected = user.Character.HasBuff(req.IdNumber * -1)
-					}
-
-					if rejected {
-						rejectionMessage = req.RejectionMessage
-						break
-					}
-
-					continue
-				}
-
-				if req.Type == RequiresBuffFlag {
-
-					rejected = !user.Character.HasBuffFlag(buffs.Flag(req.IdString)) // positive buffId means they must have this buff
-
-					if rejected {
-						rejectionMessage = req.RejectionMessage
-						break
-					}
-
-					continue
-				}
-
-				// No mobs in the room
-				if req.Type == RequiresNoMobs {
-					if len(r.mobs) > 0 {
-						rejected = true
-						rejectionMessage = req.RejectionMessage
-					}
-
-					continue
-				}
-			}
-
-			if rejected {
-				if len(rejectionMessage) == 0 {
-					rejectionMessage = "Something prevents it..."
-				}
-				return matchingTrigger, onCooldown, rejectionMessage
-			}
-
-			// We have a match!
-			matchingTrigger = &r.Props[p].Trigger
-
-			// Check if the prop is on cooldown
-			if prop.Cooldown > 0 {
-				if time.Now().After(prop.lastTriggered.Add(time.Second * time.Duration(prop.Cooldown))) {
-					r.Props[p].lastTriggered = time.Now()
-				} else {
-					onCooldown = true
-				}
-			}
-
-			// return the match data
-			return matchingTrigger, onCooldown, rejectionMessage
-
-		}
-	}
-
-	return matchingTrigger, onCooldown, rejectionMessage
-}
-
-func (r *Room) MarkVisited(userId int) {
+func (r *Room) MarkVisited(id int, vType VisitorType, subtrackTurns ...int) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
 	if r.visitors == nil {
-		r.visitors = map[int]uint64{}
+		r.visitors = make(map[VisitorType]map[int]uint64)
 	}
-	r.visitors[userId] = util.GetRoundCount() + visitorTrackingTimeout
-	r.lastVisitor = util.GetRoundCount()
+
+	if _, ok := r.visitors[vType]; !ok {
+		r.visitors[vType] = make(map[int]uint64)
+	}
+
+	lastSeen := util.GetTurnCount() + uint64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
+
+	if len(subtrackTurns) > 0 {
+		if uint64(subtrackTurns[0]) > lastSeen {
+			lastSeen = 0
+		} else {
+			lastSeen -= uint64(subtrackTurns[0])
+		}
+	}
+
+	r.visitors[vType][id] = lastSeen
+	r.lastVisited = util.GetRoundCount()
 }
 
 func (r *Room) PlayerCt() int {
@@ -1206,27 +972,48 @@ func (r *Room) AreMobsAttacking(userId int) bool {
 }
 
 // Returns a list of recent visitors and how cold the trail is getting
-func (r *Room) Visitors() map[int]float64 {
+func (r *Room) Visitors(vType VisitorType) map[int]float64 {
 
 	ret := make(map[int]float64)
 
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
-	for userId, expires := range r.visitors {
-		ret[userId] = float64(expires-util.GetRoundCount()) / visitorTrackingTimeout
+	if _, ok := r.visitors[vType]; ok {
+		for userId, expires := range r.visitors[vType] {
+			ret[userId] = float64(expires-util.GetTurnCount()) / float64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
+		}
+
 	}
 
 	return ret
 }
 
-func (r *Room) HasVisited(userId int) bool {
+func (r *Room) HasVisited(id int, vType VisitorType) bool {
 	//	r.PruneVisitors()
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
-	_, ok := r.visitors[userId]
+	if _, ok := r.visitors[vType]; !ok {
+		return false
+	}
+
+	_, ok := r.visitors[vType][id]
+
 	return ok
+}
+
+func (r *Room) GetDescriptionFormatted(lineSplit int, highlightNouns bool) string {
+
+	desc := util.SplitStringNL(r.GetDescription(), 80)
+
+	if highlightNouns {
+		for noun, _ := range r.Nouns {
+			desc = strings.ReplaceAll(desc, noun, fmt.Sprintf("<ansi fg=\"187\">%s</ansi>", noun))
+		}
+	}
+
+	return desc
 }
 
 func (r *Room) GetDescription() string {
@@ -1558,24 +1345,39 @@ func (r *Room) PruneVisitors() int {
 	defer r.mutex.Unlock()
 
 	if r.visitors == nil {
+		r.visitors = make(map[VisitorType]map[int]uint64)
 		return 0
 	}
 
 	// Make sure whoever is here has the freshest mark.
 	for _, userId := range r.players {
-		if r.visitors == nil {
-			r.visitors = make(map[int]uint64)
+		if _, ok := r.visitors[VisitorUser]; ok {
+			r.visitors[VisitorUser][userId] = util.GetTurnCount() + uint64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
 		}
-		r.visitors[userId] = util.GetRoundCount() + visitorTrackingTimeout
+	}
+
+	for _, mobId := range r.mobs {
+		if _, ok := r.visitors[VisitorMob]; ok {
+			r.visitors[VisitorMob][mobId] = util.GetTurnCount() + uint64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
+		}
 	}
 
 	pruneCt := 0
-	for userId, expires := range r.visitors {
-		// Check whether expires is older than now
-		if expires < util.GetRoundCount() {
-			delete(r.visitors, userId)
-			pruneCt++
+
+	for vType, _ := range r.visitors {
+
+		for id, expires := range r.visitors[vType] {
+			// Check whether expires is older than now
+			if expires < util.GetTurnCount() {
+				delete(r.visitors[vType], id)
+				pruneCt++
+
+				if len(r.visitors[vType]) < 1 {
+					delete(r.visitors, vType)
+				}
+			}
 		}
+
 	}
 	return pruneCt
 }
@@ -1608,9 +1410,9 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		Permission:     user.Permission, // The permission level of the user viewing the room
 		RoomSymbol:     roomSymbol,
 		RoomLegend:     roomLegend,
-		Nouns:          r.GetNouns(),
 		IsDark:         b.IsDark(),
 		IsNight:        gametime.IsNight(),
+		TrackingString: ``,
 	}
 
 	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {
@@ -1694,7 +1496,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		// If it's a secret room we need to make sure the player has recently been there before including it in the exits
 		if exitInfo.Secret { //&& user.Permission != users.PermissionAdmin {
 			if targetRm := LoadRoom(exitInfo.RoomId); targetRm != nil {
-				if targetRm.HasVisited(user.UserId) {
+				if targetRm.HasVisited(user.UserId, VisitorUser) {
 					details.VisibleExits[exitStr] = exitInfo
 				}
 			}
@@ -1703,7 +1505,208 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		}
 	}
 
+	if searchMobName := user.Character.GetMiscData(`tracking-mob`); searchMobName != nil {
+
+		if searchMobNameStr, ok := searchMobName.(string); ok {
+
+			if r.isInRoom(searchMobNameStr, ``) {
+
+				details.TrackingString = `Tracking <ansi fg="mobname">` + searchMobNameStr + `</ansi>... They are here!`
+				user.Character.RemoveBuff(26)
+
+			} else {
+
+				allNames := []string{}
+
+				for mobInstId, _ := range r.Visitors(VisitorMob) {
+					if mob := mobs.GetInstance(mobInstId); mob != nil {
+						allNames = append(allNames, mob.Character.Name)
+					}
+				}
+
+				match, closeMatch := util.FindMatchIn(searchMobNameStr, allNames...)
+				if match == `` && closeMatch == `` {
+
+					details.TrackingString = `You lost the trail of <ansi fg="mobname">` + searchMobNameStr + `</ansi>`
+					user.Character.RemoveBuff(26)
+
+				} else {
+
+					exitName := r.findMobExit(0, searchMobNameStr)
+					if exitName == `` {
+
+						details.TrackingString = `You lost the trail of <ansi fg="username">` + searchMobNameStr + `</ansi>`
+						user.Character.RemoveBuff(26)
+
+					} else {
+
+						details.TrackingString = `Tracking <ansi fg="mobname">` + searchMobNameStr + `</ansi>... They went <ansi fg="exit">` + exitName + `</ansi>`
+					}
+
+				}
+			}
+		}
+
+	}
+
+	if searchUserName := user.Character.GetMiscData(`tracking-user`); searchUserName != nil {
+		if searchUserNameStr, ok := searchUserName.(string); ok {
+
+			if r.isInRoom(``, searchUserNameStr) {
+
+				details.TrackingString = `Tracking <ansi fg="username">` + searchUserNameStr + `</ansi>... They are here!`
+				user.Character.RemoveBuff(26)
+
+			} else {
+
+				allNames := []string{}
+
+				for userId, _ := range r.Visitors(VisitorUser) {
+					if u := users.GetByUserId(userId); u != nil {
+						allNames = append(allNames, u.Character.Name)
+					}
+				}
+
+				match, closeMatch := util.FindMatchIn(searchUserNameStr, allNames...)
+				if match == `` && closeMatch == `` {
+
+					details.TrackingString = `You lost the trail of <ansi fg="username">` + searchUserNameStr + `</ansi>`
+					user.Character.RemoveBuff(26)
+
+				} else {
+
+					exitName := r.findUserExit(0, searchUserNameStr)
+					if exitName == `` {
+
+						details.TrackingString = `You lost the trail of <ansi fg="username">` + searchUserNameStr + `</ansi>`
+						user.Character.RemoveBuff(26)
+
+					} else {
+
+						details.TrackingString = `Tracking <ansi fg="username">` + searchUserNameStr + `</ansi>... They went <ansi fg="exit">` + exitName + `</ansi>`
+					}
+
+				}
+			}
+
+		}
+	}
+
 	return details
+}
+
+func (r *Room) isInRoom(mobName string, userName string) bool {
+
+	if mobName != `` {
+		for _, mobInstId := range r.mobs {
+			if mob := mobs.GetInstance(mobInstId); mob != nil {
+				if strings.HasPrefix(mob.Character.Name, mobName) {
+					return true
+				}
+			}
+		}
+	}
+
+	if userName != `` {
+		for _, userId := range r.players {
+			if user := users.GetByUserId(userId); user != nil {
+				if strings.HasPrefix(user.Character.Name, userName) {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+
+}
+
+func (r *Room) findMobExit(mobId int, mobName string) string {
+
+	freshestTime := float64(0)
+	freshestExitName := ``
+
+	for exitName, exitInfo := range r.Exits {
+
+		// Skip secret exits
+		if exitInfo.Secret {
+			continue
+		}
+
+		exitRoom := LoadRoom(exitInfo.RoomId)
+		if exitRoom == nil {
+			continue
+		}
+
+		for mId, timeLeft := range exitRoom.Visitors(VisitorMob) {
+
+			if mobId > 0 && mobId != mId {
+				continue
+			}
+
+			if visitorMob := mobs.GetInstance(mId); visitorMob != nil {
+
+				if len(mobName) > 0 && !strings.HasPrefix(visitorMob.Character.Name, mobName) {
+					continue
+				}
+
+				if timeLeft > freshestTime {
+					freshestTime = timeLeft
+					freshestExitName = exitName
+				}
+
+			}
+
+		}
+
+	}
+
+	return freshestExitName
+
+}
+
+func (r *Room) findUserExit(userId int, userName string) string {
+
+	freshestTime := float64(0)
+	freshestExitName := ``
+
+	for exitName, exitInfo := range r.Exits {
+
+		// Skip secret exits
+		if exitInfo.Secret {
+			continue
+		}
+
+		exitRoom := LoadRoom(exitInfo.RoomId)
+		if exitRoom == nil {
+			continue
+		}
+
+		for uId, timeLeft := range exitRoom.Visitors(VisitorMob) {
+
+			if userId > 0 && userId != uId {
+				continue
+			}
+
+			if visitorUser := users.GetByUserId(uId); visitorUser != nil {
+
+				if len(userName) > 0 && !strings.HasPrefix(visitorUser.Character.Name, userName) {
+					continue
+				}
+
+				if timeLeft > freshestTime {
+					freshestTime = timeLeft
+					freshestExitName = exitName
+				}
+
+			}
+
+		}
+
+	}
+
+	return freshestExitName
+
 }
 
 func (r *Room) RoundTick() {
@@ -1878,18 +1881,6 @@ func (r *Room) Validate() error {
 	}
 	if r.GetDescription() == "" {
 		return errors.New("description cannot be empty")
-	}
-
-	if len(r.Props) > 0 {
-		for p, prop := range r.Props {
-			// make all verbs and all nouns lowercase.
-			for i, verb := range prop.Verbs {
-				r.Props[p].Verbs[i] = strings.ToLower(verb)
-			}
-			for i, noun := range prop.Nouns {
-				r.Props[p].Nouns[i] = strings.ToLower(noun)
-			}
-		}
 	}
 
 	if len(r.SpawnInfo) > 0 {

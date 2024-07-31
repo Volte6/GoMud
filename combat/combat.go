@@ -140,7 +140,7 @@ func GetWaitMessages(stepType items.Intensity, sourceChar *characters.Character,
 	}
 
 	if sourceChar.Equipment.Weapon.ItemId > 0 {
-		tokenReplacements[items.TokenItemName] = sourceChar.Equipment.Weapon.Name()
+		tokenReplacements[items.TokenItemName] = sourceChar.Equipment.Weapon.DisplayName()
 	}
 
 	if sourceType == Mob {
@@ -187,7 +187,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 	attackResult := AttackResult{}
 
-	attackCount := int(math.Ceil(float64(sourceChar.Stats.Speed.Value-targetChar.Stats.Speed.Value) / 25))
+	attackCount := int(math.Ceil(float64(sourceChar.Stats.Speed.ValueAdj-targetChar.Stats.Speed.ValueAdj) / 25))
 	if attackCount < 1 {
 		attackCount = 1
 	}
@@ -281,7 +281,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 				itemSpec := weapon.GetSpec()
 
-				weaponName = weapon.Name()
+				weaponName = weapon.DisplayName()
 
 				weaponSubType = itemSpec.Subtype
 				attacks, dCount, dSides, dBonus, critBuffs = weapon.GetDiceRoll()
@@ -299,7 +299,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 				attackSourceDamage := 0
 				attackSourceReduction := 0
 
-				if Hits(sourceChar.Stats.Speed.Value, targetChar.Stats.Speed.Value, penalty) {
+				if Hits(sourceChar.Stats.Speed.ValueAdj, targetChar.Stats.Speed.ValueAdj, penalty) {
 					attackResult.Hit = true
 					attackTargetDamage = util.RollDice(dCount, dSides) + dBonus
 
@@ -377,7 +377,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 				}
 
 				if sourceChar.Equipment.Weapon.ItemId > 0 {
-					tokenReplacements[items.TokenItemName] = sourceChar.Equipment.Weapon.Name()
+					tokenReplacements[items.TokenItemName] = sourceChar.Equipment.Weapon.DisplayName()
 				}
 
 				if sourceType == Mob {
@@ -510,7 +510,7 @@ func Crits(sourceChar characters.Character, targetChar characters.Character) boo
 	if levelDiff < 1 {
 		levelDiff = 1
 	}
-	critChance := 5 + int(math.Round(float64(sourceChar.Stats.Strength.Value+sourceChar.Stats.Speed.Value)/float64(levelDiff)))
+	critChance := 5 + int(math.Round(float64(sourceChar.Stats.Strength.ValueAdj+sourceChar.Stats.Speed.ValueAdj)/float64(levelDiff)))
 
 	if sourceChar.HasBuffFlag(buffs.Accuracy) {
 		critChance *= 2

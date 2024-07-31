@@ -38,7 +38,7 @@ func Eat(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 		if itemSpec.Subtype != items.Edible {
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`You can't eat <ansi fg="itemname">%s</ansi>.`, matchItem.Name()),
+				fmt.Sprintf(`You can't eat <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 				true)
 			response.Handled = true
 			return response, nil
@@ -46,8 +46,8 @@ func Eat(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You eat some of the <ansi fg="itemname">%s</ansi>.`, matchItem.Name()), true)
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> eats some <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.Name()), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You eat some of the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> eats some <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()), true)
 
 		// If no more uses, will be lost, so trigger event
 		if usesLeft := user.Character.UseItem(matchItem); usesLeft < 1 {

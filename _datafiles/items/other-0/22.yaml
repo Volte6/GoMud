@@ -1,0 +1,9 @@
+itemid: 22
+name: training coupon
+namesimple: coupon
+displayname: ":coupon"
+description: Grants a training point when used.
+type: object
+subtype: usable
+uses: 1
+value: 1

@@ -1,0 +1,15 @@
+roomid: 871
+zone: Whispering Wastes
+title: Strange Obelisk
+description: Just outside of the entrance to the mirror caves stands an ancient obelisk,
+  its surface etched with mysterious runes that glow faintly with an otherworldly
+  light. The obelisk is partially buried in a mound of snow, but its presence exudes
+  an eerie sense of foreboding. The sky above is a turbulent swirl of grey clouds,
+  and the ground crunches underfoot with each step, the stillness broken only by the
+  whispering wind and the distant echoes of unseen creatures within the caves.
+mapsymbol: ^
+maplegend: Obelisk
+biome: snow
+exits:
+  east:
+    roomid: 217

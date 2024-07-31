@@ -48,7 +48,7 @@ STORY = [
 
 function onCommand_read(user, item, room) {
 
-    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" thumbs through their <ansi fg=\"item\">"+item.Name()+"</ansi> book.", user.UserId());   
+    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" thumbs through their <ansi fg=\"item\">"+item.DisplayName()+"</ansi> book.", user.UserId());   
 
     SendUserMessage(user.UserId(), "");
     SendUserMessage(user.UserId(), "<ansi fg=\"14\">The History of Frostfang</ansi>");

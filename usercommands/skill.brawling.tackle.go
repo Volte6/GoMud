@@ -10,6 +10,10 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Brawling Skill
+Level 3 - Attempt to tackle an opponent, making them miss a round.
+*/
 func Tackle(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
@@ -54,7 +58,7 @@ func Tackle(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		if m != nil {
 
-			chanceIn100 := user.Character.Stats.Speed.Value - m.Character.Stats.Perception.Value
+			chanceIn100 := user.Character.Stats.Speed.ValueAdj - m.Character.Stats.Perception.ValueAdj
 			if chanceIn100 < 0 {
 				chanceIn100 = 0
 			}
@@ -96,7 +100,7 @@ func Tackle(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		if u != nil {
 
-			chanceIn100 := user.Character.Stats.Speed.Value - u.Character.Stats.Perception.Value
+			chanceIn100 := user.Character.Stats.Speed.ValueAdj - u.Character.Stats.Perception.ValueAdj
 			if chanceIn100 < 0 {
 				chanceIn100 = 0
 			}

@@ -48,6 +48,8 @@ var (
 		`the`, // also strip this because it's unnecessary
 		`my`,  // also strip this because it's unnecessary
 	}
+
+	colorShortTagRegex = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
 )
 
 const ()
@@ -173,11 +175,16 @@ func SplitString(input string, lineWidth int) []string {
 }
 
 // Splits a string by adding line breaks at the end of each line
-func SplitStringNL(input string, lineWidth int) string {
+func SplitStringNL(input string, lineWidth int, nlPrefix ...string) string {
 
 	output := strings.Builder{}
 
 	words := strings.Fields(input) // Split the input into words
+
+	linePrefix := ""
+	if len(nlPrefix) > 0 {
+		linePrefix = nlPrefix[0]
+	}
 
 	currentLine := ""
 	for _, word := range words {
@@ -188,6 +195,9 @@ func SplitStringNL(input string, lineWidth int) string {
 				currentLine += " " + word
 			}
 		} else {
+			if linePrefix != "" && output.Len() > 0 {
+				output.WriteString(linePrefix)
+			}
 			output.WriteString(currentLine)
 			output.WriteString(term.CRLFStr)
 			currentLine = word
@@ -195,6 +205,9 @@ func SplitStringNL(input string, lineWidth int) string {
 	}
 
 	if currentLine != "" {
+		if linePrefix != "" && output.Len() > 0 {
+			output.WriteString(linePrefix)
+		}
 		output.WriteString(currentLine)
 	}
 
@@ -695,4 +708,26 @@ func StripPrepositions(input string) string {
 	}
 
 	return input
+}
+
+func ConvertColorShortTags(input string) string {
+
+	colorShortTagRegex = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
+	if colorShortTagRegex.MatchString(input) {
+		input = `<ansi>` + colorShortTagRegex.ReplaceAllString(input, `</ansi><ansi fg="$1" bg="$2">`) + `</ansi>`
+
+		input = strings.ReplaceAll(input, ` bg=""`, ``)
+		input = strings.ReplaceAll(input, ` fg=""`, ``)
+		input = strings.ReplaceAll(input, `<ansi></ansi>`, ``)
+		input = strings.ReplaceAll(input, `</ansi></ansi>`, ``)
+	}
+
+	return input
+}
+
+func PercentOfTotal(value1 int, value2 int) float64 {
+	if value1 == 0 {
+		return 0
+	}
+	return (float64(value1) + float64(value2)) / float64(value1)
 }

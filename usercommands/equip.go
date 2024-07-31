@@ -44,14 +44,14 @@ func Equip(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		iSpec := matchItem.GetSpec()
 		if iSpec.Type != items.Weapon && iSpec.Subtype != items.Wearable {
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`Your <ansi fg="item">%s</ansi> doesn't look very fashionable.`, matchItem.Name()),
+				fmt.Sprintf(`Your <ansi fg="item">%s</ansi> doesn't look very fashionable.`, matchItem.DisplayName()),
 				true)
 			response.Handled = true
 			return response, nil
 		}
 
 		// Swap the item location
-		oldItems, wearSuccess := user.Character.Wear(matchItem)
+		oldItems, wearSuccess, failureReason := user.Character.Wear(matchItem)
 
 		if wearSuccess {
 
@@ -62,10 +62,10 @@ func Equip(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			for _, oldItem := range oldItems {
 				if oldItem.ItemId != 0 {
 					response.SendUserMessage(userId,
-						fmt.Sprintf(`You remove your <ansi fg="item">%s</ansi> and return it to your backpack.`, oldItem.Name()),
+						fmt.Sprintf(`You remove your <ansi fg="item">%s</ansi> and return it to your backpack.`, oldItem.DisplayName()),
 						true)
 					response.SendRoomMessage(user.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, user.Character.Name, oldItem.Name()),
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, user.Character.Name, oldItem.DisplayName()),
 						true)
 
 					user.Character.StoreItem(oldItem)
@@ -74,17 +74,17 @@ func Equip(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 			if iSpec.Subtype == items.Wearable {
 				response.SendUserMessage(userId,
-					fmt.Sprintf(`You wear your <ansi fg="item">%s</ansi>.`, matchItem.Name()),
+					fmt.Sprintf(`You wear your <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),
 					true)
 				response.SendRoomMessage(user.Character.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on their <ansi fg="item">%s</ansi>.`, user.Character.Name, matchItem.Name()),
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on their <ansi fg="item">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()),
 					true)
 			} else {
 				response.SendUserMessage(userId,
-					fmt.Sprintf(`You wield your <ansi fg="item">%s</ansi>. You're feeling dangerous.`, matchItem.Name()),
+					fmt.Sprintf(`You wield your <ansi fg="item">%s</ansi>. You're feeling dangerous.`, matchItem.DisplayName()),
 					true)
 				response.SendRoomMessage(user.Character.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> wields their <ansi fg="item">%s</ansi>.`, user.Character.Name, matchItem.Name()),
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> wields their <ansi fg="item">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()),
 					true)
 			}
 
@@ -100,10 +100,13 @@ func Equip(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 				}
 			}
 
-			user.Character.Validate()
+			user.Character.Validate(true)
 		} else {
+			if len(failureReason) == 1 {
+				failureReason = fmt.Sprintf(`You can't figure out how to equip the <ansi fg="item">%s</ansi>.`, matchItem.DisplayName())
+			}
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`You can't figure out how to equip the <ansi fg="item">%s</ansi>.`, matchItem.Name()),
+				failureReason,
 				true)
 		}
 

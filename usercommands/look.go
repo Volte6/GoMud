@@ -105,7 +105,7 @@ func Look(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					room.RemoveItem(item, false)
 					continue
 				}
-				chestStuff = append(chestStuff, item.Name())
+				chestStuff = append(chestStuff, item.DisplayName())
 			}
 
 			textOut, _ := templates.Process("descriptions/insidecontainer", chestStuff)
@@ -188,14 +188,14 @@ func Look(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			response.SendUserMessage(userId, ``, true)
 
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`You look at the <ansi fg="item">%s</ansi> %s:`, lookItem.Name(), lookDestination),
+				fmt.Sprintf(`You look at the <ansi fg="item">%s</ansi> %s:`, lookItem.DisplayName(), lookDestination),
 				true)
 
 			response.SendUserMessage(userId, ``, true)
 
 			if !isSneaking {
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, user.Character.Name, lookItem.Name()),
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, user.Character.Name, lookItem.DisplayName()),
 					true)
 			}
 
@@ -240,7 +240,7 @@ func Look(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 				itemNames := []string{}
 				for _, item := range u.Character.Items {
-					itemNames = append(itemNames, item.Name())
+					itemNames = append(itemNames, item.DisplayName())
 				}
 
 				invData := map[string]any{
@@ -267,7 +267,7 @@ func Look(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 				itemNames := []string{}
 				for _, item := range m.Character.Items {
-					itemNames = append(itemNames, item.Name())
+					itemNames = append(itemNames, item.DisplayName())
 				}
 
 				invData := map[string]any{
@@ -395,7 +395,7 @@ func lookRoom(userId int, roomId int, response *util.MessageQueue, secretLook bo
 			room.RemoveItem(item, false)
 			continue
 		}
-		groundStuff = append(groundStuff, item.Name())
+		groundStuff = append(groundStuff, item.DisplayName())
 	}
 
 	groundDetails := map[string]any{

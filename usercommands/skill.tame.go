@@ -16,6 +16,13 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Skill Tame
+Level 1 - Tame up to 2 creatures
+Level 2 - Tame up to 3 creatures
+Level 3 - Tame up to 4 creatures
+Level 4 - Tame up to 5 creatures
+*/
 func Tame(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)

@@ -40,7 +40,7 @@ func Drink(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		mob.Character.UseItem(matchItem)
 
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> drinks <ansi fg="itemname">%s</ansi>.`, mob.Character.Name, matchItem.Name()), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> drinks <ansi fg="itemname">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()), true)
 
 		for _, buffId := range itemSpec.BuffIds {
 			cmdQueue.QueueBuff(0, mob.InstanceId, buffId)

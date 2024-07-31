@@ -38,7 +38,7 @@ func Remove(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		if matchItem.IsCursed() && user.Character.Health > 0 {
 			if user.Character.GetSkillLevel(skills.Enchant) < 4 {
 				response.SendUserMessage(userId,
-					fmt.Sprintf(`You can't seem to remove your <ansi fg="item">%s</ansi>... It's <ansi fg="red-bold">CURSED!</ansi>`, matchItem.Name()),
+					fmt.Sprintf(`You can't seem to remove your <ansi fg="item">%s</ansi>... It's <ansi fg="red-bold">CURSED!</ansi>`, matchItem.DisplayName()),
 					true)
 
 				response.Handled = true
@@ -54,16 +54,16 @@ func Remove(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		if user.Character.RemoveFromBody(matchItem) {
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`You remove your <ansi fg="item">%s</ansi> and return it to your backpack.`, matchItem.Name()),
+				fmt.Sprintf(`You remove your <ansi fg="item">%s</ansi> and return it to your backpack.`, matchItem.DisplayName()),
 				true)
 			response.SendRoomMessage(user.Character.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, user.Character.Name, matchItem.Name()),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, user.Character.Name, matchItem.DisplayName()),
 				true)
 
 			user.Character.StoreItem(matchItem)
 		} else {
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`You can't seem to remove your <ansi fg="item">%s</ansi>.`, matchItem.Name()),
+				fmt.Sprintf(`You can't seem to remove your <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),
 				true)
 		}
 

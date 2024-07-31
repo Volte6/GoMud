@@ -72,7 +72,7 @@ func Look(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			if !isSneaking {
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.Name()),
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.DisplayName()),
 					true)
 			}
 
@@ -128,7 +128,7 @@ func Look(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			if !isSneaking {
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.Name()),
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.DisplayName()),
 					true)
 			}
 

@@ -64,7 +64,7 @@ func Show(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			// Tell the Showee
 			response.SendUserMessage(targetUser.UserId,
-				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows you their <ansi fg="item">%s</ansi>.`, mob.Character.Name, showItem.Name()),
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows you their <ansi fg="item">%s</ansi>.`, mob.Character.Name, showItem.DisplayName()),
 				true)
 
 			response.SendUserMessage(targetUser.UserId,
@@ -73,7 +73,7 @@ func Show(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			// Tell the rest of the room
 			response.SendRoomMessage(room.RoomId,
-				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, mob.Character.Name, showItem.Name(), targetUser.Character.Name),
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, mob.Character.Name, showItem.DisplayName(), targetUser.Character.Name),
 				true,
 				targetUser.UserId)
 
@@ -98,7 +98,7 @@ func Show(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			if showItem.ItemId > 0 {
 
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, showItem.Name(), targetMob.Character.Name),
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, showItem.DisplayName(), targetMob.Character.Name),
 					true)
 
 			}

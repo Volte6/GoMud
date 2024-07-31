@@ -240,13 +240,13 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 						continue
 					}
 
-					speedDelta := mob.Character.Stats.Speed.Value - user.Character.Stats.Speed.Value
+					speedDelta := mob.Character.Stats.Speed.ValueAdj - user.Character.Stats.Speed.ValueAdj
 					if speedDelta < 1 {
 						speedDelta = 1
 					}
 
 					// Chance that a mob follows the player
-					targetVal := 20 + mob.Character.Stats.Perception.Value + speedDelta
+					targetVal := 20 + mob.Character.Stats.Perception.ValueAdj + speedDelta
 
 					roll := util.Rand(100)
 

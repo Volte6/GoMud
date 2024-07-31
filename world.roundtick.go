@@ -146,7 +146,7 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 
 			if allowIdleMessages {
 				chanceIn100 := 5
-				if room.RoomId == -1 || len(room.Props) > 0 {
+				if room.RoomId == -1 {
 					chanceIn100 = 20
 				}
 
@@ -452,7 +452,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 					}
 
 					// if equal, 20% chance of fleeing... at best, 40% chance
-					chanceIn100 := int(float64(user.Character.Stats.Speed.Value) / (float64(user.Character.Stats.Speed.Value) + float64(mob.Character.Stats.Speed.Value)) * 40)
+					chanceIn100 := int(float64(user.Character.Stats.Speed.ValueAdj) / (float64(user.Character.Stats.Speed.ValueAdj) + float64(mob.Character.Stats.Speed.ValueAdj)) * 40)
 					roll := util.Rand(100)
 
 					util.LogRoll(`Flee`, roll, chanceIn100)
@@ -472,7 +472,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 					}
 
 					// if equal, 20% chance of fleeing... at best, 40% chance
-					chanceIn100 := int(float64(user.Character.Stats.Speed.Value) / (float64(user.Character.Stats.Speed.Value) + float64(u.Character.Stats.Speed.Value)) * 40)
+					chanceIn100 := int(float64(user.Character.Stats.Speed.ValueAdj) / (float64(user.Character.Stats.Speed.ValueAdj) + float64(u.Character.Stats.Speed.ValueAdj)) * 40)
 					roll := util.Rand(100)
 
 					util.LogRoll(`Flee`, roll, chanceIn100)
@@ -531,6 +531,19 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				}
 
 				continue
+			}
+
+			roll := util.RollDice(1, 100)
+			successChance := user.Character.GetBaseCastSuccessChance(user.Character.Aggro.SpellInfo.SpellId)
+			if roll >= successChance {
+
+				// fail
+				messageQueue.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your spell fizzles! <ansi fg="magenta">***</ansi> (Rolled %d on %d%% chance of success)`, roll, successChance), true)
+				messageQueue.SendRoomMessage(roomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to cast a spell but it <ansi fg="magenta">fizzles</ansi>!`, user.Character.Name), true, userId)
+				user.Character.Aggro = nil
+
+				continue
+
 			}
 
 			allowRetaliation := true
@@ -829,7 +842,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			//
 			// Hostility default to 5 minutes
 			for _, groupName := range defMob.Groups {
-				mobs.MakeHostile(groupName, user.UserId, c.MinutesToRounds(2)-user.Character.Stats.Perception.Value)
+				mobs.MakeHostile(groupName, user.UserId, c.MinutesToRounds(2)-user.Character.Stats.Perception.ValueAdj)
 			}
 
 			// Mobs get aggro when attacked
@@ -907,6 +920,17 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 				}
 
 				continue
+			}
+
+			successChance := mob.Character.GetBaseCastSuccessChance(mob.Character.Aggro.SpellInfo.SpellId)
+			if util.RollDice(1, 100) >= successChance {
+
+				// fail
+				messageQueue.SendRoomMessage(mob.Character.RoomId, fmt.Sprintf(`<ansi fg="mobnamme">%s</ansi> tries to cast a spell but it <ansi fg="magenta">fizzles</ansi>!`, mob.Character.Name), true)
+				mob.Character.Aggro = nil
+
+				continue
+
 			}
 
 			allowRetaliation := true
@@ -1008,14 +1032,14 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 				roll := util.Rand(100)
 
-				util.LogRoll(`Look for weapon`, roll, mob.Character.Stats.Perception.Value)
+				util.LogRoll(`Look for weapon`, roll, mob.Character.Stats.Perception.ValueAdj)
 
-				if roll < mob.Character.Stats.Perception.Value {
+				if roll < mob.Character.Stats.Perception.ValueAdj {
 					possibleWeapons := []string{}
 					for _, itm := range mob.Character.Items {
 						iSpec := itm.GetSpec()
 						if iSpec.Type == items.Weapon {
-							possibleWeapons = append(possibleWeapons, itm.Name())
+							possibleWeapons = append(possibleWeapons, itm.DisplayName())
 						}
 					}
 
@@ -1564,7 +1588,7 @@ func (w *World) ProcessAuction(tNow time.Time) {
 
 			if user := users.GetByUserId(a.HighestBidUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
-					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">You have won the auction for the <ansi fg="item">%s</ansi>! It has been added to your backpack.</ansi>%s`, a.ItemData.Name(), term.CRLFStr))
+					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">You have won the auction for the <ansi fg="item">%s</ansi>! It has been added to your backpack.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr))
 					w.GetConnectionPool().SendTo([]byte(msg), user.ConnectionId())
 				}
 			}
@@ -1572,7 +1596,7 @@ func (w *World) ProcessAuction(tNow time.Time) {
 		} else {
 			if user := users.GetByUserId(a.SellerUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
-					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.Name(), term.CRLFStr))
+					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr))
 					w.GetConnectionPool().SendTo([]byte(msg), user.ConnectionId())
 				}
 			}

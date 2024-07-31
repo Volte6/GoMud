@@ -69,10 +69,10 @@ func Spawn(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 					room.AddItem(itm, false)
 
 					response.SendUserMessage(userId,
-						fmt.Sprintf(`You wave your hands around and <ansi fg="item">%s</ansi> appears from thin air and falls to the ground.`, itm.Name()),
+						fmt.Sprintf(`You wave your hands around and <ansi fg="item">%s</ansi> appears from thin air and falls to the ground.`, itm.DisplayName()),
 						true)
 					response.SendRoomMessage(user.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> waves their hands around and <ansi fg="item">%s</ansi> appears from thin air and falls to the ground.`, user.Character.Name, itm.Name()),
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> waves their hands around and <ansi fg="item">%s</ansi> appears from thin air and falls to the ground.`, user.Character.Name, itm.DisplayName()),
 						true)
 
 					response.Handled = true

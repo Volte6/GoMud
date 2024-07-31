@@ -25,7 +25,7 @@ const (
 	Enchant     SkillTag = `enchant`     // TODO
 	Peep        SkillTag = `peep`        // TODO
 	Inspect     SkillTag = `inspect`     // TODO
-	Portal      SkillTag = `portal`      // TODO
+	Portal      SkillTag = `portal`      // [LVL 1] Touch the obelisk in ROOOM 871
 	Search      SkillTag = `search`      // [LVL 1-4] Frostwarden Rangers - ROOM 74
 	Track       SkillTag = `track`       // [LVL 1-4] Frostwarden Rangers - ROOM 74
 	Skulduggery SkillTag = `skulduggery` // [LVL 1-4] Thieves Den - ROOM 491

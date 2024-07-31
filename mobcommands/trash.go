@@ -29,7 +29,7 @@ func Trash(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 			if !isSneaking {
 				response.SendRoomMessage(mob.Character.RoomId,
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> destroys <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.Name()),
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> destroys <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()),
 					true)
 			}
 		*/

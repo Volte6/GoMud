@@ -98,10 +98,10 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			}
 
 			response.SendUserMessage(userId,
-				fmt.Sprintf(`You give the <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, giveItem.Name(), targetUser.Character.Name),
+				fmt.Sprintf(`You give the <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, giveItem.DisplayName(), targetUser.Character.Name),
 				true)
 			response.SendUserMessage(targetUser.UserId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> gives you their <ansi fg="item">%s</ansi>.`, user.Character.Name, giveItem.Name()),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> gives you their <ansi fg="item">%s</ansi>.`, user.Character.Name, giveItem.DisplayName()),
 				true)
 			response.SendRoomMessage(user.Character.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> gives <ansi fg="username">%s</ansi> a <ansi fg="itemname">%s</ansi>.`, user.Character.Name, targetUser.Character.Name, giveItem.NameSimple()),
@@ -185,10 +185,10 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					user.Character.RemoveItem(giveItem)
 
 					response.SendUserMessage(userId,
-						fmt.Sprintf(`You give the <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, giveItem.Name(), m.Character.Name),
+						fmt.Sprintf(`You give the <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, giveItem.DisplayName(), m.Character.Name),
 						true)
 					response.SendRoomMessage(room.RoomId,
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> gave their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, giveItem.Name(), m.Character.Name),
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> gave their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, giveItem.DisplayName(), m.Character.Name),
 						true)
 
 					// Trigger onLost event
@@ -206,7 +206,7 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					}
 				}
 
-				cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`emote considers the <ansi fg="itemname">%s</ansi> for a moment.`, giveItem.Name()))
+				cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`emote considers the <ansi fg="itemname">%s</ansi> for a moment.`, giveItem.DisplayName()))
 				cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`gearup !%d`, giveItem.ItemId))
 
 			} else {
