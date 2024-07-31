@@ -13,6 +13,11 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Protection Skill
+Level 1 - Aid (revive) a player
+Level 3 - Aid (revive) a player, even during combat
+*/
 func Aid(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)

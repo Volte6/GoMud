@@ -12,6 +12,10 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Protection Skill
+Level 4 - Pray to gods for a blessing
+*/
 func Pray(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
@@ -59,7 +63,7 @@ func Pray(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	}
 
 	possibleBuffIds := []int{4, 11, 14, 16, 17, 18}
-	totalBuffCount := 1 + int(float64(user.Character.Stats.Mysticism.Value)/15) + util.Rand(2)
+	totalBuffCount := 1 + int(float64(user.Character.Stats.Mysticism.ValueAdj)/15) + util.Rand(2)
 
 	if totalBuffCount > len(possibleBuffIds) {
 		totalBuffCount = len(possibleBuffIds)

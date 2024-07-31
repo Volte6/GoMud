@@ -454,20 +454,26 @@ func (i *Item) NameMatch(input string, allowContains bool) (partialMatch bool, f
 	return false, false
 }
 
-func (i *Item) StatMod(statName string) int {
+func (i *Item) StatMod(statName ...string) int {
 
 	if i.ItemId < 1 {
 		return 0
 	}
 
+	retAmt := 0
+
 	itemInfo := i.GetSpec()
 	if len(itemInfo.StatMods) == 0 {
-		return 0
+		return retAmt
 	}
-	if modAmt, ok := itemInfo.StatMods[statName]; ok {
-		return modAmt
+
+	for _, stat := range statName {
+		if modAmt, ok := itemInfo.StatMods[stat]; ok {
+			retAmt += modAmt
+		}
 	}
-	return 0
+
+	return retAmt
 }
 
 func startsWithVowel(s string) bool {

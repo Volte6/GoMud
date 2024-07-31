@@ -14,6 +14,7 @@ import (
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/skills"
+	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/stats"
 	"github.com/volte6/mud/util"
 	//
@@ -129,6 +130,63 @@ func (c *Character) GetDescription() string {
 	}
 	hash := strings.TrimPrefix(c.Description, `h:`)
 	return descriptionCache[hash]
+}
+
+/*
+All spells should have a 10% minimum chance of success.
+*/
+func (c *Character) GetBaseCastSuccessChance(spellId string) int {
+
+	sp := spells.GetSpell(spellId)
+	if sp == nil {
+		return -1
+	}
+
+	// start with 100% chance of success
+	targetNumber := 100
+
+	// subtract spell difficulty
+	// 1-100
+	targetNumber -= sp.GetDifficulty()
+
+	// add spell level bonus
+	// 10-30
+	skillLevel := c.GetSkillLevel(skills.Cast)
+	//targetNumber += (skillLevel * 5)
+	//targetNumber -= 5 // cancel out the first level
+
+	// add the proficiency of the spell (more casts == better)
+	// 0-20
+	profFactor := 1.0
+	if skillLevel == 2 {
+		profFactor = 1.25 // .25 more than lvl 1
+	} else if skillLevel == 3 {
+		profFactor = 1.75 // .50 more than lvl 2
+	} else if skillLevel == 4 {
+		profFactor = 2.50 // .75 more than lvl 3
+	}
+	casts := c.SpellBook[spellId]
+	proficiency := int(math.Floor((float64(casts) / 50 * profFactor))) // after 50 casts proficiency is 1
+	if proficiency < 0 {
+		proficiency = 0
+	} else if proficiency > 20 {
+		proficiency = 20
+	}
+	targetNumber += proficiency
+
+	targetNumber += int(math.Floor(float64(c.Stats.Mysticism.ValueAdj) / 5))
+
+	// add by any stat mods for casting, or casting school
+	// 0-xx
+	targetNumber += c.Equipment.StatMod(`casting`, `casting-`+string(sp.School))
+
+	if targetNumber < 0 {
+		targetNumber = 0
+	} else if targetNumber > 100 {
+		targetNumber = 100
+	}
+
+	return targetNumber
 }
 
 func (c *Character) DeductActionPoints(amount int) bool {
@@ -266,9 +324,9 @@ func (c *Character) GetDefaultDiceRoll() (attacks int, dCount int, dSides int, b
 	bonus = raceInfo.Damage.BonusDamage
 	buffOnCrit = raceInfo.Damage.CritBuffIds
 
-	dCount += int(math.Floor((float64(c.Stats.Speed.Value) / 50)))
-	dSides += int(math.Floor((float64(c.Stats.Strength.Value) / 12)))
-	bonus += int(math.Floor((float64(c.Stats.Perception.Value) / 25)))
+	dCount += int(math.Floor((float64(c.Stats.Speed.ValueAdj) / 50)))
+	dSides += int(math.Floor((float64(c.Stats.Strength.ValueAdj) / 12)))
+	bonus += int(math.Floor((float64(c.Stats.Perception.ValueAdj) / 25)))
 
 	if dCount < 1 {
 		dCount = 1
@@ -463,7 +521,7 @@ func (c *Character) GetHealthAppearance() string {
 }
 
 func (c *Character) GetBackpackCapacity() int {
-	return int(math.Ceil(float64(c.Stats.Strength.Value)/3)) + 3
+	return int(math.Ceil(float64(c.Stats.Strength.ValueAdj)/3)) + 3
 }
 
 func (c *Character) GetFollowers() []int {
@@ -865,11 +923,11 @@ func (c *Character) SetTameCreatureSkill(userId int, creatureName string, profic
 }
 
 func (c *Character) GetMemoryCapacity() int {
-	return c.GetSkillLevel(skills.Map)*c.Stats.Smarts.Value + 5
+	return c.GetSkillLevel(skills.Map)*c.Stats.Smarts.ValueAdj + 5
 }
 
 func (c *Character) GetMapSprawlCapacity() int {
-	return c.GetSkillLevel(skills.Map) + (c.Stats.Smarts.Value >> 2)
+	return c.GetSkillLevel(skills.Map) + (c.Stats.Smarts.ValueAdj >> 2)
 }
 
 // Return all rooms the player can remember visiting
@@ -1121,7 +1179,7 @@ func (c *Character) ApplyManaChange(manaChange int) {
 }
 
 func (c *Character) BarterPrice(startPrice int) int {
-	factor := (float64(c.Stats.Perception.Value) / 3) / 100 // 100 = 33% discount, 0 = 0% discount, 300 = 100% discount
+	factor := (float64(c.Stats.Perception.ValueAdj) / 3) / 100 // 100 = 33% discount, 0 = 0% discount, 300 = 100% discount
 	if factor > .75 {
 		factor = .75
 	}
@@ -1190,9 +1248,9 @@ func (c *Character) Heal(hp int, mana int) {
 }
 
 func (c *Character) HealthPerRound() int {
-	return 1
+	return 1 + c.Equipment.StatMod(`healthrecovery`)
 	/*
-		healAmt := math.Round(float64(c.Stats.Vitality.Value)/8) +
+		healAmt := math.Round(float64(c.Stats.Vitality.ValueAdj)/8) +
 			math.Round(float64(c.Level)/12) +
 			1.0
 
@@ -1201,9 +1259,9 @@ func (c *Character) HealthPerRound() int {
 }
 
 func (c *Character) ManaPerRound() int {
-	return 1
+	return 1 + c.Equipment.StatMod(`manarecovery`)
 	/*
-		healAmt := math.Round(float64(c.Stats.Mysticism.Value)/8) +
+		healAmt := math.Round(float64(c.Stats.Mysticism.ValueAdj)/8) +
 			math.Round(float64(c.Level)/12) +
 			1.0
 
@@ -1213,9 +1271,9 @@ func (c *Character) ManaPerRound() int {
 
 // Where 1000 = a full round
 func (c *Character) MovementCost() int {
-	modifier := 3                             // by default they should be able to move 3 times per round.
-	modifier += int(c.Level / 15)             // Every 15 levels, get an extra movement.
-	modifier += int(c.Stats.Speed.Value / 15) // Every 15 speed, get an extra movement
+	modifier := 3                                // by default they should be able to move 3 times per round.
+	modifier += int(c.Level / 15)                // Every 15 levels, get an extra movement.
+	modifier += int(c.Stats.Speed.ValueAdj / 15) // Every 15 speed, get an extra movement
 	return int(1000 / modifier)
 }
 
@@ -1257,13 +1315,13 @@ func (c *Character) RecalculateStats() {
 		c.Buffs.StatMod("healthmax") + // Any sort of spell buffs etc. are just direct modifiers
 		c.Equipment.StatMod("healthmax") + // However many points you have from equipment, you get 1 hp per point
 		c.Level + // For every level you get 1 hp
-		c.Stats.Vitality.Value*4 // for every vitality you get 3hp
+		c.Stats.Vitality.ValueAdj*4 // for every vitality you get 3hp
 
 	c.ManaMax.Mods = 4 +
 		c.Buffs.StatMod("manamax") + // Any sort of spell buffs etc. are just direct modifiers
 		c.Equipment.StatMod("manamax") + // However many points you have from equipment, you get 1 hp per point
 		c.Level + // For every level you get 1 mp
-		c.Stats.Mysticism.Value*3 // for every Mysticism you get 2mp
+		c.Stats.Mysticism.ValueAdj*3 // for every Mysticism you get 2mp
 
 	// Set max action points
 	c.ActionPointsMax.Mods = 200 // hard coded for now

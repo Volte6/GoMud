@@ -13,6 +13,10 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+SkullDuggery Skill
+Level 4 - Pickpocket
+*/
 func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
@@ -76,7 +80,7 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 				levelDelta = 1
 			}
 
-			chanceIn100 := (user.Character.Stats.Speed.Value+user.Character.Stats.Smarts.Value+user.Character.Stats.Perception.Value)/3 - m.Character.Stats.Perception.Value
+			chanceIn100 := (user.Character.Stats.Speed.ValueAdj+user.Character.Stats.Smarts.ValueAdj+user.Character.Stats.Perception.ValueAdj)/3 - m.Character.Stats.Perception.ValueAdj
 			chanceIn100 /= levelDelta
 			if chanceIn100 < 0 {
 				chanceIn100 = 1
@@ -163,7 +167,7 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 				levelDelta = 1
 			}
 
-			chanceIn100 := (user.Character.Stats.Speed.Value+user.Character.Stats.Smarts.Value+user.Character.Stats.Perception.Value)/3 - p.Character.Stats.Perception.Value
+			chanceIn100 := (user.Character.Stats.Speed.ValueAdj+user.Character.Stats.Smarts.ValueAdj+user.Character.Stats.Perception.ValueAdj)/3 - p.Character.Stats.Perception.ValueAdj
 			chanceIn100 /= levelDelta
 			if chanceIn100 < 0 {
 				chanceIn100 = 1

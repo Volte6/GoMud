@@ -21,7 +21,7 @@ import (
 )
 
 const roomDataFilesPath = "_datafiles/rooms"
-const visitorTrackingTimeout = 30   // 2 minutes (in rounds)
+const visitorTrackingTimeout = 180  // 180 seconds (3 minutes?)
 const roomUnloadTimeoutRounds = 450 // 1800 seconds (30 minutes) / 4 seconds (1 round) = 450 rounds
 const defaultMapSymbol = `•`
 
@@ -49,6 +49,7 @@ type SpawnInfo struct {
 }
 
 type FindFlag uint16
+type VisitorType string
 
 const (
 	AffectsNone   = ""
@@ -69,6 +70,9 @@ const (
 	FindFighting          = FindFightingPlayer | FindFightingMob // Currently in combat (aggro)
 	FindIdle              = FindCharmed | FindNeutral            // Not aggro or hostile
 	FindAll      FindFlag = 0b111111111
+	// Visitor types
+	VisitorUser = "user"
+	VisitorMob  = "mob"
 )
 
 type Sign struct {
@@ -148,22 +152,22 @@ type Room struct {
 	Biome             string               `yaml:"biome,omitempty"`      // The biome of the room. Used for weather generation.
 	Containers        map[string]Container `yaml:"containers,omitempty"` // If this room has a chest, what is in it?
 	Exits             map[string]RoomExit
-	ExitsTemp         map[string]TemporaryRoomExit `yaml:"-"`               // Temporary exits that will be removed after a certain time. Don't bother saving on sever shutting down.
-	Nouns             map[string]string            `yaml:"nouns,omitempty"` // Interesting nouns to highlight in the room or reveal on succesful searches.
-	Items             []items.Item                 `yaml:"items,omitempty"`
-	Gold              int                          `yaml:"gold,omitempty"`              // How much gold is on the ground?
-	SpawnInfo         []SpawnInfo                  `yaml:"spawninfo,omitempty"`         // key is creature ID, value is spawn chance
-	SkillTraining     map[string]TrainingRange     `yaml:"skilltraining,omitempty"`     // list of skills that can be trained in this room
-	Signs             []Sign                       `yaml:"sign,omitempty"`              // list of scribbles in the room
-	Stash             []items.Item                 `yaml:"stash,omitempty"`             // list of items in the room that are not visible to players
-	IdleMessages      []string                     `yaml:"idlemessages,omitempty"`      // list of messages that can be displayed to players in the room
-	LastIdleMessage   uint8                        `yaml:"-"`                           // index of the last idle message displayed
-	LongTermDataStore map[string]any               `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
-	players           []int                        `yaml:"-"`                           // list of user IDs currently in the room
-	mobs              []int                        `yaml:"-"`                           // list of mob instance IDs currently in the room. Does not get saved.
-	visitors          map[int]uint64               `yaml:"visitors,omitempty"`          // list of user IDs that have visited this room, and the last round they did
-	lastVisitor       uint64                       `yaml:"-"`                           // last round a visitor was in the room
-	tempDataStore     map[string]any               `yaml:"-"`                           // Temporary data store for the room
+	ExitsTemp         map[string]TemporaryRoomExit   `yaml:"-"`               // Temporary exits that will be removed after a certain time. Don't bother saving on sever shutting down.
+	Nouns             map[string]string              `yaml:"nouns,omitempty"` // Interesting nouns to highlight in the room or reveal on succesful searches.
+	Items             []items.Item                   `yaml:"items,omitempty"`
+	Gold              int                            `yaml:"gold,omitempty"`              // How much gold is on the ground?
+	SpawnInfo         []SpawnInfo                    `yaml:"spawninfo,omitempty"`         // key is creature ID, value is spawn chance
+	SkillTraining     map[string]TrainingRange       `yaml:"skilltraining,omitempty"`     // list of skills that can be trained in this room
+	Signs             []Sign                         `yaml:"sign,omitempty"`              // list of scribbles in the room
+	Stash             []items.Item                   `yaml:"stash,omitempty"`             // list of items in the room that are not visible to players
+	IdleMessages      []string                       `yaml:"idlemessages,omitempty"`      // list of messages that can be displayed to players in the room
+	LastIdleMessage   uint8                          `yaml:"-"`                           // index of the last idle message displayed
+	LongTermDataStore map[string]any                 `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
+	players           []int                          `yaml:"-"`                           // list of user IDs currently in the room
+	mobs              []int                          `yaml:"-"`                           // list of mob instance IDs currently in the room. Does not get saved.
+	visitors          map[VisitorType]map[int]uint64 `yaml:"-"`                           // list of user IDs that have visited this room, and the last round they did
+	lastVisited       uint64                         `yaml:"-"`                           // last round a visitor was in the room
+	tempDataStore     map[string]any                 `yaml:"-"`                           // Temporary data store for the room
 }
 
 type TrainingRange struct {
@@ -200,7 +204,7 @@ func NewRoom(zone string) *Room {
 		MapSymbol:     ``,
 		Exits:         make(map[string]RoomExit),
 		players:       []int{},
-		visitors:      make(map[int]uint64),
+		visitors:      make(map[VisitorType]map[int]uint64),
 		tempDataStore: make(map[string]any),
 	}
 
@@ -572,6 +576,10 @@ func (r *Room) CleanupMobSpawns(noCooldown bool) {
 }
 
 func (r *Room) AddMob(mobInstanceId int) {
+
+	// Do before lock
+	r.MarkVisited(mobInstanceId, VisitorMob)
+
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -586,6 +594,10 @@ func (r *Room) AddMob(mobInstanceId int) {
 }
 
 func (r *Room) RemoveMob(mobInstanceId int) {
+
+	// Do before lock
+	r.MarkVisited(mobInstanceId, VisitorMob, 1)
+
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -714,15 +726,30 @@ func (r *Room) FindOnFloor(itemName string, stash bool) (items.Item, bool) {
 	return items.Item{}, false
 }
 
-func (r *Room) MarkVisited(userId int) {
+func (r *Room) MarkVisited(id int, vType VisitorType, subtrackTurns ...int) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
 	if r.visitors == nil {
-		r.visitors = map[int]uint64{}
+		r.visitors = make(map[VisitorType]map[int]uint64)
 	}
-	r.visitors[userId] = util.GetRoundCount() + visitorTrackingTimeout
-	r.lastVisitor = util.GetRoundCount()
+
+	if _, ok := r.visitors[vType]; !ok {
+		r.visitors[vType] = make(map[int]uint64)
+	}
+
+	lastSeen := util.GetTurnCount() + uint64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
+
+	if len(subtrackTurns) > 0 {
+		if uint64(subtrackTurns[0]) > lastSeen {
+			lastSeen = 0
+		} else {
+			lastSeen -= uint64(subtrackTurns[0])
+		}
+	}
+
+	r.visitors[vType][id] = lastSeen
+	r.lastVisited = util.GetRoundCount()
 }
 
 func (r *Room) PlayerCt() int {
@@ -945,26 +972,34 @@ func (r *Room) AreMobsAttacking(userId int) bool {
 }
 
 // Returns a list of recent visitors and how cold the trail is getting
-func (r *Room) Visitors() map[int]float64 {
+func (r *Room) Visitors(vType VisitorType) map[int]float64 {
 
 	ret := make(map[int]float64)
 
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
-	for userId, expires := range r.visitors {
-		ret[userId] = float64(expires-util.GetRoundCount()) / visitorTrackingTimeout
+	if _, ok := r.visitors[vType]; ok {
+		for userId, expires := range r.visitors[vType] {
+			ret[userId] = float64(expires-util.GetTurnCount()) / float64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
+		}
+
 	}
 
 	return ret
 }
 
-func (r *Room) HasVisited(userId int) bool {
+func (r *Room) HasVisited(id int, vType VisitorType) bool {
 	//	r.PruneVisitors()
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
-	_, ok := r.visitors[userId]
+	if _, ok := r.visitors[vType]; !ok {
+		return false
+	}
+
+	_, ok := r.visitors[vType][id]
+
 	return ok
 }
 
@@ -1310,24 +1345,39 @@ func (r *Room) PruneVisitors() int {
 	defer r.mutex.Unlock()
 
 	if r.visitors == nil {
+		r.visitors = make(map[VisitorType]map[int]uint64)
 		return 0
 	}
 
 	// Make sure whoever is here has the freshest mark.
 	for _, userId := range r.players {
-		if r.visitors == nil {
-			r.visitors = make(map[int]uint64)
+		if _, ok := r.visitors[VisitorUser]; ok {
+			r.visitors[VisitorUser][userId] = util.GetTurnCount() + uint64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
 		}
-		r.visitors[userId] = util.GetRoundCount() + visitorTrackingTimeout
+	}
+
+	for _, mobId := range r.mobs {
+		if _, ok := r.visitors[VisitorMob]; ok {
+			r.visitors[VisitorMob][mobId] = util.GetTurnCount() + uint64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
+		}
 	}
 
 	pruneCt := 0
-	for userId, expires := range r.visitors {
-		// Check whether expires is older than now
-		if expires < util.GetRoundCount() {
-			delete(r.visitors, userId)
-			pruneCt++
+
+	for vType, _ := range r.visitors {
+
+		for id, expires := range r.visitors[vType] {
+			// Check whether expires is older than now
+			if expires < util.GetTurnCount() {
+				delete(r.visitors[vType], id)
+				pruneCt++
+
+				if len(r.visitors[vType]) < 1 {
+					delete(r.visitors, vType)
+				}
+			}
 		}
+
 	}
 	return pruneCt
 }
@@ -1362,6 +1412,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		RoomLegend:     roomLegend,
 		IsDark:         b.IsDark(),
 		IsNight:        gametime.IsNight(),
+		TrackingString: ``,
 	}
 
 	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {
@@ -1445,7 +1496,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		// If it's a secret room we need to make sure the player has recently been there before including it in the exits
 		if exitInfo.Secret { //&& user.Permission != users.PermissionAdmin {
 			if targetRm := LoadRoom(exitInfo.RoomId); targetRm != nil {
-				if targetRm.HasVisited(user.UserId) {
+				if targetRm.HasVisited(user.UserId, VisitorUser) {
 					details.VisibleExits[exitStr] = exitInfo
 				}
 			}
@@ -1454,7 +1505,208 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		}
 	}
 
+	if searchMobName := user.Character.GetMiscData(`tracking-mob`); searchMobName != nil {
+
+		if searchMobNameStr, ok := searchMobName.(string); ok {
+
+			if r.isInRoom(searchMobNameStr, ``) {
+
+				details.TrackingString = `Tracking <ansi fg="mobname">` + searchMobNameStr + `</ansi>... They are here!`
+				user.Character.RemoveBuff(26)
+
+			} else {
+
+				allNames := []string{}
+
+				for mobInstId, _ := range r.Visitors(VisitorMob) {
+					if mob := mobs.GetInstance(mobInstId); mob != nil {
+						allNames = append(allNames, mob.Character.Name)
+					}
+				}
+
+				match, closeMatch := util.FindMatchIn(searchMobNameStr, allNames...)
+				if match == `` && closeMatch == `` {
+
+					details.TrackingString = `You lost the trail of <ansi fg="mobname">` + searchMobNameStr + `</ansi>`
+					user.Character.RemoveBuff(26)
+
+				} else {
+
+					exitName := r.findMobExit(0, searchMobNameStr)
+					if exitName == `` {
+
+						details.TrackingString = `You lost the trail of <ansi fg="username">` + searchMobNameStr + `</ansi>`
+						user.Character.RemoveBuff(26)
+
+					} else {
+
+						details.TrackingString = `Tracking <ansi fg="mobname">` + searchMobNameStr + `</ansi>... They went <ansi fg="exit">` + exitName + `</ansi>`
+					}
+
+				}
+			}
+		}
+
+	}
+
+	if searchUserName := user.Character.GetMiscData(`tracking-user`); searchUserName != nil {
+		if searchUserNameStr, ok := searchUserName.(string); ok {
+
+			if r.isInRoom(``, searchUserNameStr) {
+
+				details.TrackingString = `Tracking <ansi fg="username">` + searchUserNameStr + `</ansi>... They are here!`
+				user.Character.RemoveBuff(26)
+
+			} else {
+
+				allNames := []string{}
+
+				for userId, _ := range r.Visitors(VisitorUser) {
+					if u := users.GetByUserId(userId); u != nil {
+						allNames = append(allNames, u.Character.Name)
+					}
+				}
+
+				match, closeMatch := util.FindMatchIn(searchUserNameStr, allNames...)
+				if match == `` && closeMatch == `` {
+
+					details.TrackingString = `You lost the trail of <ansi fg="username">` + searchUserNameStr + `</ansi>`
+					user.Character.RemoveBuff(26)
+
+				} else {
+
+					exitName := r.findUserExit(0, searchUserNameStr)
+					if exitName == `` {
+
+						details.TrackingString = `You lost the trail of <ansi fg="username">` + searchUserNameStr + `</ansi>`
+						user.Character.RemoveBuff(26)
+
+					} else {
+
+						details.TrackingString = `Tracking <ansi fg="username">` + searchUserNameStr + `</ansi>... They went <ansi fg="exit">` + exitName + `</ansi>`
+					}
+
+				}
+			}
+
+		}
+	}
+
 	return details
+}
+
+func (r *Room) isInRoom(mobName string, userName string) bool {
+
+	if mobName != `` {
+		for _, mobInstId := range r.mobs {
+			if mob := mobs.GetInstance(mobInstId); mob != nil {
+				if strings.HasPrefix(mob.Character.Name, mobName) {
+					return true
+				}
+			}
+		}
+	}
+
+	if userName != `` {
+		for _, userId := range r.players {
+			if user := users.GetByUserId(userId); user != nil {
+				if strings.HasPrefix(user.Character.Name, userName) {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+
+}
+
+func (r *Room) findMobExit(mobId int, mobName string) string {
+
+	freshestTime := float64(0)
+	freshestExitName := ``
+
+	for exitName, exitInfo := range r.Exits {
+
+		// Skip secret exits
+		if exitInfo.Secret {
+			continue
+		}
+
+		exitRoom := LoadRoom(exitInfo.RoomId)
+		if exitRoom == nil {
+			continue
+		}
+
+		for mId, timeLeft := range exitRoom.Visitors(VisitorMob) {
+
+			if mobId > 0 && mobId != mId {
+				continue
+			}
+
+			if visitorMob := mobs.GetInstance(mId); visitorMob != nil {
+
+				if len(mobName) > 0 && !strings.HasPrefix(visitorMob.Character.Name, mobName) {
+					continue
+				}
+
+				if timeLeft > freshestTime {
+					freshestTime = timeLeft
+					freshestExitName = exitName
+				}
+
+			}
+
+		}
+
+	}
+
+	return freshestExitName
+
+}
+
+func (r *Room) findUserExit(userId int, userName string) string {
+
+	freshestTime := float64(0)
+	freshestExitName := ``
+
+	for exitName, exitInfo := range r.Exits {
+
+		// Skip secret exits
+		if exitInfo.Secret {
+			continue
+		}
+
+		exitRoom := LoadRoom(exitInfo.RoomId)
+		if exitRoom == nil {
+			continue
+		}
+
+		for uId, timeLeft := range exitRoom.Visitors(VisitorMob) {
+
+			if userId > 0 && userId != uId {
+				continue
+			}
+
+			if visitorUser := users.GetByUserId(uId); visitorUser != nil {
+
+				if len(userName) > 0 && !strings.HasPrefix(visitorUser.Character.Name, userName) {
+					continue
+				}
+
+				if timeLeft > freshestTime {
+					freshestTime = timeLeft
+					freshestExitName = exitName
+				}
+
+			}
+
+		}
+
+	}
+
+	return freshestExitName
+
 }
 
 func (r *Room) RoundTick() {

@@ -13,6 +13,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Searcg Skill
+Level 1 - Find secret exits or hidden players/mobs
+Level 2 - Find objects stashed in the area
+Level 3 - ???
+Level 4 - You are always aware of hidden players/mobs in the area
+
+(Lvl 1) <ansi fg="skill">search</ansi> Search for secret exits or hidden players/mobs.
+(Lvl 2) <ansi fg="skill">search</ansi> Finds objects that may be hidden in the area.
+(Lvl 3) <ansi fg="skill">search</ansi> Finds special/unknown "things of interest" in the area.
+(Lvl 4) <ansi fg="skill">search</ansi> Doubles your chance of success when searching.
+*/
 func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
@@ -46,10 +58,7 @@ func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 	}
 
 	// 10% + 1% for every 2 smarts
-	searchOddsIn100 := 5 + int(math.Ceil(float64(user.Character.Stats.Smarts.Value)/4)) + int(math.Ceil(float64(user.Character.Stats.Perception.Value)/2))
-	if skillLevel > 3 {
-		searchOddsIn100 *= 2
-	}
+	searchOddsIn100 := 10 + int(math.Ceil(float64(user.Character.Stats.Perception.ValueAdj)/2))
 
 	response.SendUserMessage(userId, "You snoop around for a bit...\n", true)
 	response.SendRoomMessage(user.Character.RoomId,

@@ -13,3 +13,4 @@ steps:
 rewards:
   experience: 1000
   gold: 100
+  itemid: 22

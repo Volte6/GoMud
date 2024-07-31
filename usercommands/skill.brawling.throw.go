@@ -15,6 +15,10 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Brawling Skill
+Level 2 - You can throw objects at NPCs or other rooms.
+*/
 func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)

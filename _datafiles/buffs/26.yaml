@@ -1,0 +1,8 @@
+buffid: 26
+name: Actively Tracking
+description: You are tracking someone.
+roundinterval: 15
+triggercount: 3
+flags:
+  - cancel-on-combat
+

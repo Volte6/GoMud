@@ -65,27 +65,27 @@ func (a ScriptActor) GetStat(statName string) int {
 	statName = strings.ToLower(statName)
 
 	if strings.HasPrefix(statName, "st") {
-		return a.characterRecord.Stats.Strength.Value
+		return a.characterRecord.Stats.Strength.ValueAdj
 	}
 
 	if strings.HasPrefix(statName, "sp") {
-		return a.characterRecord.Stats.Speed.Value
+		return a.characterRecord.Stats.Speed.ValueAdj
 	}
 
 	if strings.HasPrefix(statName, "sm") {
-		return a.characterRecord.Stats.Smarts.Value
+		return a.characterRecord.Stats.Smarts.ValueAdj
 	}
 
 	if strings.HasPrefix(statName, "vi") {
-		return a.characterRecord.Stats.Vitality.Value
+		return a.characterRecord.Stats.Vitality.ValueAdj
 	}
 
 	if strings.HasPrefix(statName, "my") {
-		return a.characterRecord.Stats.Mysticism.Value
+		return a.characterRecord.Stats.Mysticism.ValueAdj
 	}
 
 	if strings.HasPrefix(statName, "pe") {
-		return a.characterRecord.Stats.Perception.Value
+		return a.characterRecord.Stats.Perception.ValueAdj
 	}
 
 	return 0
@@ -213,7 +213,11 @@ func (a ScriptActor) Command(cmd string, waitTurns ...int) {
 	commandQueue.QueueCommand(a.userId, a.mobInstanceId, cmd, waitTurns[0])
 }
 
-func (a ScriptActor) TrainSkill(skillName string, skillLevel int) {
+func (a ScriptActor) TrainSkill(skillName string, skillLevel int) bool {
+
+	if a.userRecord == nil {
+		return false
+	}
 
 	skillName = strings.ToLower(skillName)
 	currentLevel := a.characterRecord.GetSkillLevel(skills.SkillTag(skillName))
@@ -221,20 +225,20 @@ func (a ScriptActor) TrainSkill(skillName string, skillLevel int) {
 	if currentLevel < skillLevel {
 		newLevel := a.characterRecord.TrainSkill(skillName, skillLevel)
 
-		if a.userRecord != nil {
-			skillData := struct {
-				SkillName  string
-				SkillLevel int
-			}{
-				SkillName:  skillName,
-				SkillLevel: newLevel,
-			}
-			skillUpTxt, _ := templates.Process("character/skillup", skillData)
-			messageQueue.SendUserMessage(a.userId, skillUpTxt, true)
+		skillData := struct {
+			SkillName  string
+			SkillLevel int
+		}{
+			SkillName:  skillName,
+			SkillLevel: newLevel,
 		}
+		skillUpTxt, _ := templates.Process("character/skillup", skillData)
+		messageQueue.SendUserMessage(a.userId, skillUpTxt, true)
+
+		return true
 
 	}
-
+	return false
 }
 
 func (a ScriptActor) GetSkillLevel(skillName string) int {
@@ -427,6 +431,24 @@ func (a ScriptActor) SetAdjective(adj string, addIt bool) {
 	a.characterRecord.SetAdjective(adj, addIt)
 }
 
+func (a ScriptActor) GetCharmCount() int {
+	return len(a.characterRecord.GetCharmIds())
+}
+
+func (a ScriptActor) GiveTrainingPoints(ct int) {
+	if ct < 1 {
+		return
+	}
+	a.characterRecord.TrainingPoints += ct
+}
+
+func (a ScriptActor) GiveStatPoints(ct int) {
+	if ct < 1 {
+		return
+	}
+	a.characterRecord.StatPoints += ct
+}
+
 // ////////////////////////////////////////////////////////
 //
 // Functions only really useful for mobs
@@ -473,24 +495,6 @@ func (a ScriptActor) CharmRemove() {
 
 func (a ScriptActor) CharmExpire() {
 	a.characterRecord.Charmed.Expire()
-}
-
-func (a ScriptActor) GetCharmCount() int {
-	return len(a.characterRecord.GetCharmIds())
-}
-
-func (a ScriptActor) GiveTrainingPoints(ct int) {
-	if ct < 1 {
-		return
-	}
-	a.characterRecord.TrainingPoints += ct
-}
-
-func (a ScriptActor) GiveStatPoints(ct int) {
-	if ct < 1 {
-		return
-	}
-	a.characterRecord.StatPoints += ct
 }
 
 func (a ScriptActor) getScript() string {

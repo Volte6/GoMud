@@ -15,6 +15,13 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Skill Map
+Level 1 - Map a 5x5 area
+Level 2 - Map a 9x7 area
+Level 3 - Map a 13x9 area
+Level 4 - Map a 17x9 area, and enables the "wide" version.
+*/
 func Map(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
@@ -104,7 +111,7 @@ func Map(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 	mapMaxWidth := 33
 	//mapWidthDelta := mapMaxWidth - mapWidth // 16/?
-	mapWidth += int(float64(user.Character.Stats.Perception.Value) / 5)
+	mapWidth += int(float64(user.Character.Stats.Perception.ValueAdj) / 5)
 	if mapWidth > mapMaxWidth {
 		mapWidth = mapMaxWidth
 	}
@@ -148,6 +155,7 @@ func Map(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	} else {
 		rGraph = rooms.GenerateZoneMap(zone, roomId, userId, int(math.Ceil(float64(mapWidth)/2))<<1, int(math.Ceil(float64(mapHeight)/2))<<1, mapMode)
 	}
+
 	if skillLevel > 4 {
 		for _, rid := range rooms.GetRoomsWithMobs() {
 			if roomInfo := rooms.LoadRoom(rid); roomInfo != nil {

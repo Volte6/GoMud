@@ -14,6 +14,13 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Portal Skill
+Level 1 - Teleport back to town square
+Level 2 - Teleport back to the root of the area you are in
+Level 3 - Set a new destination for your portal teleportation
+Level 4 - Create a physical portal that you can share with players, or return through.
+*/
 func Portal(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
@@ -64,7 +71,7 @@ func Portal(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		}
 	}
 
-	portalLifeInSeconds := 30 + (user.Character.Stats.Mysticism.Value * 10) // 0 mysticism = 30 seconds, 100 mysticism = 1030 seconds
+	portalLifeInSeconds := 30 + (user.Character.Stats.Mysticism.ValueAdj * 10) // 0 mysticism = 30 seconds, 100 mysticism = 1030 seconds
 
 	// Make sure we haven't borked anything
 	if portalTargetRoomId < 1 {

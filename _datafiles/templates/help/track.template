@@ -12,8 +12,8 @@ With each level of training, your tracking skill will reach farther out to find 
 
 <ansi fg="yellow">Usage: </ansi>
 
-(Lvl 1-3) <ansi fg="skill">track henry</ansi> Search for <ansi fg="username">henry</ansi> around your area.
-(Lvl 4)   <ansi fg="skill">track</ansi>       See who has recently visited the room you are in.
-
-The distance to which you can track someone is calcaulted as:  <ansi fg="red">skillLevel*2 + Perception/10</ansi>
+(Lvl 1) <ansi fg="skill">track</ansi> See the most recent mob/player to pass through this room, excluding any present mobs/players.
+(Lvl 2) <ansi fg="skill">track</ansi> See all recent mobs/players to pass through this room, excluding any present mobs/players.
+(Lvl 3) <ansi fg="skill">track</ansi> Shows exit information for all tracked players or mobs.
+(Lvl 4)       Enhances the <ansi fg="skill">map</ansi> skill to show nearby mobs and players, including the mini map.
 

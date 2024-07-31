@@ -16,6 +16,13 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Cast Skill
+Level 1 - You can cast spells
+Level 2 - Become proficient in a spell at 125% rate
+Level 3 - Become proficient in a spell at 175% rate
+Level 4 - Become proficient in a spell at 250% rate
+*/
 func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)

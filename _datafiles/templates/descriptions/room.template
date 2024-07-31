@@ -14,3 +14,6 @@
        <ansi fg="yellow-bold">This is an item storage location!</ansi> Type <ansi fg="command">storage</ansi> to store/unstore. 
     <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
 {{ end }}
+{{- if ne (len .TrackingString) 0 }}
+<ansi fg="182">{{ .TrackingString }}</ansi>
+{{ end }}

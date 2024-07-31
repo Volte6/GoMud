@@ -15,6 +15,13 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Peep Skill
+Level 1 - Always visibly see the health % of an NPC
+Level 2 - Reveals detailed stats of a player or mob.
+Level 3 - Reveals detailed stats of the player or mob, plus equipment and items
+Level 4 - eveals detailed stats of the player or mob, plus equipment and items, and tells you the % chance of dropping items.
+*/
 func Peep(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)

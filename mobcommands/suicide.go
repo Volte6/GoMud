@@ -123,7 +123,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 					if levelDelta < 0 {
 						levelDelta = 0
 					}
-					skillsDelta := int((float64(user.Character.Stats.Perception.Value-mob.Character.Stats.Perception.Value) + float64(user.Character.Stats.Smarts.Value-mob.Character.Stats.Smarts.Value)) / 2)
+					skillsDelta := int((float64(user.Character.Stats.Perception.ValueAdj-mob.Character.Stats.Perception.ValueAdj) + float64(user.Character.Stats.Smarts.ValueAdj-mob.Character.Stats.Smarts.ValueAdj)) / 2)
 					if skillsDelta < 0 {
 						skillsDelta = 0
 					}
@@ -197,7 +197,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 						if levelDelta < 0 {
 							levelDelta = 0
 						}
-						skillsDelta := int((float64(user.Character.Stats.Perception.Value-mob.Character.Stats.Perception.Value) + float64(user.Character.Stats.Smarts.Value-mob.Character.Stats.Smarts.Value)) / 2)
+						skillsDelta := int((float64(user.Character.Stats.Perception.ValueAdj-mob.Character.Stats.Perception.ValueAdj) + float64(user.Character.Stats.Smarts.ValueAdj-mob.Character.Stats.Smarts.ValueAdj)) / 2)
 						if skillsDelta < 0 {
 							skillsDelta = 0
 						}

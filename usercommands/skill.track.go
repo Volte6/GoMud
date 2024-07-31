@@ -3,9 +3,10 @@ package usercommands
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"math"
+	"strings"
 
+	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
@@ -13,6 +14,21 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+type trackingInfo struct {
+	Name            string
+	Type            string // mob / user
+	Strength        string
+	NumericStrength float64
+	ExitName        string
+}
+
+/*
+Skill Track
+Level 1 - Display the last player or mob to walk through here (not the currently player or current mobs)
+Level 2 - Display all players and mobs to recently walk through here
+Level 3 - Shows exit information for all tracked players or mobs
+Level 4 - Specify a mob or username and every room you enter will tell you what exit they took.
+*/
 func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
@@ -31,23 +47,22 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		return response, errors.New(`you don't know how to track`)
 	}
 
-	trackDistance := skillLevel*2 + int(math.Ceil(float64(user.Character.Stats.Perception.Value)/10)) // Keep the number even
-
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
 		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
-	if rest == "" {
+	currentMobs := room.GetMobs()
+	currentUsers := room.GetPlayers()
 
-		if skillLevel < 4 {
-			response.SendUserMessage(userId, "Track who?", true)
-			response.Handled = true
-			return response, fmt.Errorf("track who?")
-		}
+	//
+	// If no argument supplied
+	// Handle skill level 1 and 2
+	//
+	if rest == `` {
 
-		if !user.Character.TryCooldown(skills.Track.String(), 2) {
+		if !user.Character.TryCooldown(skills.Track.String(), 1) {
 			response.SendUserMessage(userId,
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())),
 				true)
@@ -55,96 +70,410 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			return response, errors.New(`you're doing that too often`)
 		}
 
-		type TrackInfo struct {
-			Name     string
-			Strength string
-		}
+		visitorData := make([]trackingInfo, 0)
 
-		visitorData := make([]TrackInfo, 0)
+		for mId, timeLeft := range room.Visitors(rooms.VisitorMob) {
 
-		visitors := room.Visitors()
-		for visitorUserId, trailStrength := range visitors {
-			if visitorUserId == userId {
+			skip := false
+			for _, currentRoomMobId := range currentMobs {
+				if mId == currentRoomMobId {
+					skip = true
+					break
+				}
+			}
+
+			checkMob := mobs.GetInstance(mId)
+			if checkMob == nil {
+				skip = true
+			}
+
+			if skip {
 				continue
 			}
-			strengthStr := ""
-			strength := int(math.Round(trailStrength * 100))
-			if strength < 10 {
-				strengthStr = "Dead"
-			} else if strength < 25 {
-				strengthStr = "Weak"
-			} else if strength < 50 {
-				strengthStr = "Good"
-			} else if strength < 75 {
-				strengthStr = "Warm"
-			} else {
-				strengthStr = "Hot"
+
+			newTrackInfo := trackingInfo{
+				Name:            checkMob.Character.Name,
+				Type:            `mob`,
+				Strength:        trailStrengthToString(timeLeft),
+				NumericStrength: timeLeft,
 			}
 
-			visitorData = append(visitorData, TrackInfo{
-				Name:     users.GetByUserId(visitorUserId).Character.Name,
-				Strength: strengthStr,
-			})
+			if skillLevel >= 3 {
+				newTrackInfo.ExitName = findExited(room, mId, rooms.VisitorMob)
+			}
+
+			if skillLevel == 1 {
+
+				if len(visitorData) == 0 {
+					visitorData = append(visitorData, newTrackInfo)
+				} else if visitorData[0].NumericStrength < timeLeft {
+					visitorData[0] = newTrackInfo
+				}
+
+				continue
+			}
+
+			visitorData = append(visitorData, newTrackInfo)
 		}
 
-		trackTxt, _ := templates.Process("descriptions/track", visitorData)
-		response.SendUserMessage(userId, trackTxt, false)
+		for uId, timeLeft := range room.Visitors(rooms.VisitorUser) {
+
+			if uId == userId {
+				continue
+			}
+
+			skip := false
+			for _, currentRoomUserId := range currentUsers {
+				if uId == currentRoomUserId {
+					skip = true
+					break
+				}
+			}
+
+			checkUser := users.GetByUserId(uId)
+			if checkUser == nil {
+				skip = true
+			}
+
+			if skip {
+				continue
+			}
+
+			newTrackInfo := trackingInfo{
+				Name:            checkUser.Character.Name,
+				Type:            `user`,
+				Strength:        trailStrengthToString(timeLeft),
+				NumericStrength: timeLeft,
+			}
+
+			if skillLevel >= 3 {
+				newTrackInfo.ExitName = findExited(room, uId, rooms.VisitorUser)
+			}
+
+			if skillLevel == 1 {
+
+				if len(visitorData) == 0 {
+					visitorData = append(visitorData, newTrackInfo)
+				} else if visitorData[0].NumericStrength < timeLeft {
+					visitorData[0] = newTrackInfo
+				}
+
+				continue
+			}
+
+			visitorData = append(visitorData, newTrackInfo)
+		}
+
+		//
+		// If a any visitors are revealed...
+		//
+		if len(visitorData) > 0 {
+			trackTxt, _ := templates.Process("descriptions/track", visitorData)
+			response.SendUserMessage(userId, trackTxt, false)
+		} else {
+			response.SendUserMessage(userId, "You don't see any tracks.", true)
+		}
 
 		response.Handled = true
 		return response, nil
+
 	}
 
-	if !user.Character.TryCooldown(skills.Track.String(), 2) {
+	// only level 3 and 4 can specify a target
+	if skillLevel < 3 {
+
+		response.SendUserMessage(userId, "You can't track a specific person or mob... yet.", true)
+
+		response.Handled = true
+		return response, errors.New(`you can't track a specific person or mob yet`)
+
+	}
+
+	if !user.Character.TryCooldown(skills.Track.String(), 1) {
+
 		response.SendUserMessage(userId,
 			fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())),
 			true)
+
 		response.Handled = true
 		return response, errors.New(`you're doing that too often`)
+
 	}
 
-	trackedUser := users.GetByCharacterName(rest)
-	if trackedUser == nil {
-		response.SendUserMessage(userId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> isn't around.`, rest),
-			true)
+	//
+	// At skill level 3, search the room and adjacent rooms for quarry
+	//
+	if skillLevel >= 3 {
+
+		foundPlayerId, foundMobId := room.FindByName(rest, rooms.FindAll)
+
+		if foundPlayerId > 0 {
+			foundUser := users.GetByUserId(foundPlayerId)
+			if foundUser != nil {
+				response.SendUserMessage(userId,
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> is in the room with you!`, foundUser.Character.Name),
+					true)
+				response.Handled = true
+				return response, nil
+
+			}
+
+		}
+
+		if foundMobId > 0 {
+			foundMob := mobs.GetInstance(foundMobId)
+			if foundMob != nil {
+				response.SendUserMessage(userId,
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is in the room with you!`, foundMob.Character.Name),
+					true)
+				response.Handled = true
+				return response, nil
+
+			}
+		}
+
+		// at skill level 4, becomes an active tracking skill
+		if skillLevel >= 4 {
+
+			allNames := []string{}
+
+			for uId, _ := range room.Visitors(rooms.VisitorUser) {
+
+				if uId == userId {
+					continue
+				}
+
+				if visitorUser := users.GetByUserId(uId); visitorUser != nil {
+					allNames = append(allNames, visitorUser.Character.Name)
+				}
+
+			}
+
+			match, closeMatch := util.FindMatchIn(rest, allNames...)
+			if match != `` {
+
+				user.Character.SetMiscData("tracking-user", match)
+				user.Character.SetMiscData("tracking-mob", nil)
+				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
+
+				response.Handled = true
+				return response, nil
+
+			} else if closeMatch != `` {
+
+				user.Character.SetMiscData("tracking-user", closeMatch)
+				user.Character.SetMiscData("tracking-mob", nil)
+				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
+
+				response.Handled = true
+				return response, nil
+
+			}
+
+			allNames = []string{}
+
+			for mId, _ := range room.Visitors(rooms.VisitorMob) {
+				if visitorMob := mobs.GetInstance(mId); visitorMob != nil {
+					allNames = append(allNames, visitorMob.Character.Name)
+				}
+			}
+
+			match, closeMatch = util.FindMatchIn(rest, allNames...)
+			if match != `` {
+
+				user.Character.SetMiscData("tracking-user", nil)
+				user.Character.SetMiscData("tracking-mob", match)
+				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
+
+				response.Handled = true
+				return response, nil
+
+			} else if closeMatch != `` {
+
+				user.Character.SetMiscData("tracking-user", nil)
+				user.Character.SetMiscData("tracking-mob", closeMatch)
+				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
+
+				response.Handled = true
+				return response, nil
+
+			}
+
+			response.SendUserMessage(userId, "You don't see any tracks.", true)
+
+			response.Handled = true
+			return response, nil
+		}
+
+		/*
+			type TrackInfo struct {
+				Name            string
+				Type            string // mob / user
+				Strength        string
+				NumericStrength float64
+				ExitName        string
+			}
+		*/
+
+		allUsersAndMobs := make(map[string]trackingInfo)
+
+		for exitName, exitInfo := range room.Exits {
+
+			// Skip secret exits
+			if exitInfo.Secret {
+				continue
+			}
+
+			exitRoom := rooms.LoadRoom(exitInfo.RoomId)
+			if exitRoom == nil {
+				continue
+			}
+
+			for uId, timeLeft := range room.Visitors(rooms.VisitorUser) {
+
+				if uId == userId {
+					continue
+				}
+
+				if visitorUser := users.GetByUserId(uId); visitorUser != nil {
+
+					if !strings.HasPrefix(visitorUser.Character.Name, rest) {
+						continue
+					}
+
+					userTrackInfo, ok := allUsersAndMobs[visitorUser.Character.Name]
+
+					if ok {
+
+						if userTrackInfo.NumericStrength < timeLeft {
+							allUsersAndMobs[visitorUser.Character.Name] = trackingInfo{
+								Name:            visitorUser.Character.Name,
+								Type:            `user`,
+								Strength:        trailStrengthToString(timeLeft),
+								NumericStrength: timeLeft,
+								ExitName:        exitName,
+							}
+						}
+
+					} else {
+						allUsersAndMobs[visitorUser.Character.Name] = trackingInfo{
+							Name:            visitorUser.Character.Name,
+							Type:            `user`,
+							Strength:        trailStrengthToString(timeLeft),
+							NumericStrength: timeLeft,
+							ExitName:        exitName,
+						}
+					}
+
+				}
+
+			}
+
+			for mId, timeLeft := range room.Visitors(rooms.VisitorMob) {
+
+				if visitorMob := mobs.GetInstance(mId); visitorMob != nil {
+
+					if !strings.HasPrefix(visitorMob.Character.Name, rest) {
+						continue
+					}
+
+					mobTrackInfo, ok := allUsersAndMobs[visitorMob.Character.Name]
+
+					if ok {
+
+						if mobTrackInfo.NumericStrength < timeLeft {
+							allUsersAndMobs[visitorMob.Character.Name] = trackingInfo{
+								Name:            visitorMob.Character.Name,
+								Type:            `mob`,
+								Strength:        trailStrengthToString(timeLeft),
+								NumericStrength: timeLeft,
+								ExitName:        exitName,
+							}
+						}
+
+					} else {
+						allUsersAndMobs[visitorMob.Character.Name] = trackingInfo{
+							Name:            visitorMob.Character.Name,
+							Type:            `mob`,
+							Strength:        trailStrengthToString(timeLeft),
+							NumericStrength: timeLeft,
+							ExitName:        exitName,
+						}
+					}
+
+				}
+			}
+
+			// Search for the strongest tracking in adjacent room
+
+		}
+
+		visitorData := make([]trackingInfo, len(allUsersAndMobs))
+		for _, vInfo := range allUsersAndMobs {
+			visitorData = append(visitorData, vInfo)
+		}
+
+		//
+		// If a any visitors are revealed...
+		//
+		if len(visitorData) > 0 {
+			trackTxt, _ := templates.Process("descriptions/track", visitorData)
+			response.SendUserMessage(userId, trackTxt, false)
+		} else {
+			response.SendUserMessage(userId, "You don't see any tracks.", true)
+		}
+
 		response.Handled = true
 		return response, nil
 	}
-
-	if trackedUser.Character.RoomId == user.Character.RoomId {
-		response.SendUserMessage(userId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> is in the room with you!`, trackedUser.Character.Name),
-			true)
-		response.Handled = true
-		return response, nil
-	}
-
-	rGraph := rooms.GenerateZoneMap(user.Character.Zone, user.Character.RoomId, trackedUser.UserId, trackDistance, trackDistance, rooms.MapModeTracking)
-
-	if rGraph.RoomCount() <= 1 {
-		response.SendUserMessage(userId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> isn't around.`, rest),
-			true)
-		response.Handled = true
-		return response, nil
-	}
-
-	mapData, err := rooms.DrawZoneMap(rGraph, "Tracking "+trackedUser.Character.Name, 65, 18)
-
-	if err != nil {
-		return response, err
-	}
-
-	mapTxt, err := templates.Process("maps/map", mapData)
-	if err != nil {
-		slog.Error("Map", "error", err.Error())
-		response.SendUserMessage(userId, fmt.Sprintf(`No map found for "%s"`, rest), true)
-		response.Handled = true
-		return response, err
-	}
-
-	response.SendUserMessage(userId, mapTxt, false)
 
 	response.Handled = true
 	return response, nil
+}
+
+func trailStrengthToString(trailStrength float64) string {
+	strengthStr := ""
+	strength := int(math.Round(trailStrength * 100))
+	if strength < 15 {
+		strengthStr = "Dead"
+	} else if strength < 50 {
+		strengthStr = "Weak"
+	} else if strength < 70 {
+		strengthStr = "Good"
+	} else if strength < 90 {
+		strengthStr = "Warm"
+	} else {
+		strengthStr = "Hot"
+	}
+	return strengthStr
+}
+
+func findExited(room *rooms.Room, targetId int, targetType string) string {
+
+	var bestExit string = ``
+	var bestStrength float64 = 0
+
+	for exitName, exitInfo := range room.Exits {
+
+		if exitInfo.Secret {
+			continue
+		}
+
+		if testRoom := rooms.LoadRoom(exitInfo.RoomId); testRoom != nil {
+
+			for vId, vStr := range testRoom.Visitors(rooms.VisitorType(targetType)) {
+				if vId != targetId {
+					continue
+				}
+				if vStr < bestStrength {
+					continue
+				}
+				bestExit = exitName
+				bestStrength = vStr
+			}
+		}
+
+	}
+
+	return bestExit
 }

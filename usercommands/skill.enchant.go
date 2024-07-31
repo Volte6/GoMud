@@ -21,6 +21,13 @@ func Unenchant(rest string, userId int, cmdQueue util.CommandQueue) (util.Messag
 	return Enchant("remove "+rest, userId, cmdQueue)
 }
 
+/*
+Enchant Skill
+Level 1 - Enchant a weapon with a damage bonus.
+Level 2 - Enchant equipment with a defensive bonus.
+Level 3 - Add a stat bonus to a weapon or equipment in addition to the above.
+Level 4 - Remove the enchantment or curse from any object.
+*/
 func Enchant(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
@@ -151,9 +158,9 @@ func Enchant(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		*/
 
 		chanceToDestroy := 50
-		chanceToDestroy -= skillLevel * 10                           // 10-40% reduction
-		chanceToDestroy += int(matchItem.Enchantments) * 20          // 20% greater chance for each enchantment.
-		chanceToDestroy -= user.Character.Stats.Mysticism.Value >> 2 // 1% less chance for each 4 mysticism points
+		chanceToDestroy -= skillLevel * 10                              // 10-40% reduction
+		chanceToDestroy += int(matchItem.Enchantments) * 20             // 20% greater chance for each enchantment.
+		chanceToDestroy -= user.Character.Stats.Mysticism.ValueAdj >> 2 // 1% less chance for each 4 mysticism points
 
 		if onlyConsider {
 			response.SendUserMessage(userId,
@@ -178,12 +185,12 @@ func Enchant(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 
 		// At skill level 1, can enchant only weapons
 		if matchItem.GetSpec().Type == items.Weapon {
-			damageBonus = int(math.Ceil(math.Sqrt(float64(user.Character.Stats.Mysticism.Value))))
+			damageBonus = int(math.Ceil(math.Sqrt(float64(user.Character.Stats.Mysticism.ValueAdj))))
 		}
 
 		// At skill level 2, can enchant weapons and armor
 		if skillLevel >= 2 && matchItem.GetSpec().Subtype == items.Wearable {
-			defenseBonus = int(math.Ceil(math.Sqrt(float64(user.Character.Stats.Mysticism.Value))))
+			defenseBonus = int(math.Ceil(math.Sqrt(float64(user.Character.Stats.Mysticism.ValueAdj))))
 		}
 
 		// At skill level 3, can  provide stat bonuses
@@ -194,7 +201,7 @@ func Enchant(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 			for i := 0; i < bonusCt; i++ {
 				// select a random stat
 				chosenStat := allStats[util.Rand(len(allStats))]
-				statBonus[chosenStat] = int(math.Ceil(math.Sqrt(float64(user.Character.Stats.Mysticism.Value))))
+				statBonus[chosenStat] = int(math.Ceil(math.Sqrt(float64(user.Character.Stats.Mysticism.ValueAdj))))
 			}
 		}
 

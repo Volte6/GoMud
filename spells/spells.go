@@ -13,12 +13,14 @@ import (
 )
 
 type SpellType string
+type SpellSchool string
 
 type SpellData struct {
 	SpellId     string
 	Name        string
 	Description string
 	Type        SpellType
+	School      SpellSchool
 	Cost        int
 	WaitRounds  int
 	Difficulty  int // Augments final success chance by this %
@@ -34,6 +36,10 @@ const (
 	HelpMulti  SpellType = "helpmulti"  // Helpful, defaults on party - mass heal etc
 	HarmArea   SpellType = "harmarea"   // Hits everyone in the room, even if hidden or friendly
 	HelpArea   SpellType = "helparea"   // Hits everyone in the room, even if hidden
+
+	SchoolRestoration SpellSchool = "restoration" // Healing, curing conditions, etc.
+	SchoolIllusion    SpellSchool = "illusion"    // Light, darkness, invisibility, blink, etc.
+	SchoolConjuration SpellSchool = "conjuration" // Summoning, teleportation, etc.
 )
 
 var (
@@ -131,7 +137,18 @@ func (s *SpellData) Filepath() string {
 }
 
 func (s *SpellData) Validate() error {
+
+	if s.Difficulty < 0 {
+		s.Difficulty = 0
+	} else if s.Difficulty > 100 {
+		s.Difficulty = 100
+	}
+
 	return nil
+}
+
+func (s *SpellData) GetDifficulty() int {
+	return s.Difficulty
 }
 
 func (s *SpellData) GetScript() string {

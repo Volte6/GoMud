@@ -10,6 +10,10 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+/*
+Protection Skill
+Level 2 - Front/Backrank
+*/
 func Rank(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)

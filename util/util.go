@@ -724,3 +724,10 @@ func ConvertColorShortTags(input string) string {
 
 	return input
 }
+
+func PercentOfTotal(value1 int, value2 int) float64 {
+	if value1 == 0 {
+		return 0
+	}
+	return (float64(value1) + float64(value2)) / float64(value1)
+}

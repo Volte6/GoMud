@@ -15,18 +15,18 @@ type Worn struct {
 	Feet    items.Item `yaml:"feet,omitempty"`
 }
 
-func (w *Worn) StatMod(stat string) int {
+func (w *Worn) StatMod(stat ...string) int {
 
-	return w.Weapon.StatMod(stat) +
-		w.Offhand.StatMod(stat) +
-		w.Head.StatMod(stat) +
-		w.Neck.StatMod(stat) +
-		w.Body.StatMod(stat) +
-		w.Belt.StatMod(stat) +
-		w.Gloves.StatMod(stat) +
-		w.Ring.StatMod(stat) +
-		w.Legs.StatMod(stat) +
-		w.Feet.StatMod(stat)
+	return w.Weapon.StatMod(stat...) +
+		w.Offhand.StatMod(stat...) +
+		w.Head.StatMod(stat...) +
+		w.Neck.StatMod(stat...) +
+		w.Body.StatMod(stat...) +
+		w.Belt.StatMod(stat...) +
+		w.Gloves.StatMod(stat...) +
+		w.Ring.StatMod(stat...) +
+		w.Legs.StatMod(stat...) +
+		w.Feet.StatMod(stat...)
 }
 
 func (w *Worn) EnableAll() {
