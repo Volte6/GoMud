@@ -189,6 +189,49 @@ func (a ScriptActor) GiveQuest(questId string) {
 
 }
 
+func (a ScriptActor) GetPartyMembers() []ScriptActor {
+
+	partyMembers := []ScriptActor{}
+	partyUserId := 0
+
+	if a.userRecord == nil {
+		if a.mobRecord.Character.Charmed == nil {
+			return partyMembers
+		}
+
+		partyUserId = a.mobRecord.Character.Charmed.UserId
+	} else {
+		partyUserId = a.userId
+	}
+
+	if partyUserId < 1 {
+		return partyMembers
+	}
+
+	// If in a party, give to all party members.
+	if party := parties.Get(partyUserId); party != nil {
+		for _, userId := range party.GetMembers() {
+
+			if a := GetActor(userId, 0); a != nil {
+				partyMembers = append(partyMembers, *a)
+			}
+
+		}
+	}
+
+	mobPartyMembers := []ScriptActor{}
+
+	for _, char := range partyMembers {
+		for _, mobInstId := range char.characterRecord.GetCharmIds() {
+			if a := GetActor(0, mobInstId); a != nil {
+				mobPartyMembers = append(mobPartyMembers, *a)
+			}
+		}
+	}
+
+	return append(partyMembers, mobPartyMembers...)
+}
+
 func (a ScriptActor) AddGold(amt int, bankAmt ...int) {
 	a.characterRecord.Gold += amt
 	if a.characterRecord.Gold < 0 {

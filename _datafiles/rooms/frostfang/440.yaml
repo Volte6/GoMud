@@ -15,8 +15,3 @@ exits:
     roomid: 439
   south:
     roomid: 441
-items:
-- itemid: 20011
-- itemid: 10009
-- itemid: 3
-gold: 13

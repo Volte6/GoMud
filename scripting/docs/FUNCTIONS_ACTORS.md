@@ -22,6 +22,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetRoomId() int](#actorobjectgetroomid-int)
   - [ActorObject.HasQuest(questId string) bool](#actorobjecthasquestquestid-string-bool)
   - [ActorObject.GiveQuest(questId string)](#actorobjectgivequestquestid-string)
+  - [ActorObject.GetPartyMembers() \[\]Actor](#actorobjectgetpartymembers-actor)
   - [ActorObject.AddGold(amt int \[, bankAmt int\])](#actorobjectaddgoldamt-int--bankamt-int)
   - [ActorObject.AddHealth(amt int) int](#actorobjectaddhealthamt-int-int)
   - [ActorObject.Command(cmd string, waitTurns ...int)](#actorobjectcommandcmd-string-waitturns-int)
@@ -185,6 +186,9 @@ Grants a quest or progress on a quest to a ActorObject. If they are in a party, 
 |  Argument | Explanation |
 | --- | --- |
 | questId | The quest identifier string to give, such as `3-start`. |
+
+## [ActorObject.GetPartyMembers() []Actor](/scripting/actor_func.go)
+Returns a list of actors in the party, both players and mobs.
 
 ## [ActorObject.AddGold(amt int [, bankAmt int])](/scripting/actor_func.go)
 Update how much gold an ActorObject has
