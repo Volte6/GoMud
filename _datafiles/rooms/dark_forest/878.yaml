@@ -1,0 +1,28 @@
+roomid: 878
+zone: Dark Forest
+title: Inside of the waterfall
+description: Behind the cascading waterfall lies a hidden cave, its entrance shrouded
+  in mist and the constant roar of falling water. Inside, the cave is cool and damp,
+  the walls slick with moisture and glistening in the dim light that filters through
+  the water. The floor is uneven, covered in smooth, wet stones and patches of soft,
+  green moss. Strange, bioluminescent fungi cling to the walls and ceiling, casting
+  an ethereal, bluish glow that dances with the reflections from the water outside.
+  The air is filled with the sound of water dripping from stalactites, creating a
+  rhythmic, almost musical pattern that echoes softly through the cavern. The scent
+  of fresh, clean water mingles with the earthy aroma of the cave, creating an atmosphere
+  that is both invigorating and mysterious.
+mapsymbol: B
+maplegend: Bridge
+biome: forest
+containers:
+  ornate chest:
+    lock:
+      difficulty: 8
+exits:
+  out:
+    roomid: 877
+spawninfo:
+- container: ornate chest
+  gold: 1
+  cooldown: 21600
+

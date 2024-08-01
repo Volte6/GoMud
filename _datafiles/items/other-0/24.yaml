@@ -1,0 +1,8 @@
+itemid: 24
+name: spellbound projectiles
+namesimple: spellbook
+description: A book that describes spells used for casting magical projectiles.
+type: readable
+subtype: usable
+uses: 1
+value: 350

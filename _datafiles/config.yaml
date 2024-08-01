@@ -283,7 +283,7 @@ BannedNames:
 #   update this to a large number (like 100000), so that as new rooms are 
 #   created they will be far beyond the range of any room id's expected through
 #   a code update.
-NextRoomId: 878
+NextRoomId: 880
 # - LogIntervalRoundCount - 
 #   How often to log the round count. Can help judge logs a little better.
 LogIntervalRoundCount: 1
