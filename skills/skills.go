@@ -19,7 +19,7 @@ func (s SkillTag) Sub(subtag string) SkillTag {
 }
 
 const (
-	Cast        SkillTag = `cast`        // TODO - far east city?
+	Cast        SkillTag = `cast`        // [LVL 1-4] Frostfang Magic Academy - ROOM 879
 	DualWield   SkillTag = `dual-wield`  // [LVL 1-4] Fishermans house - ROOM 758
 	Map         SkillTag = `map`         // [LVL 1-4] Frostwarden Rangers - ROOM 74
 	Enchant     SkillTag = `enchant`     // TODO

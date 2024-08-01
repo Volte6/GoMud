@@ -14,6 +14,15 @@ description: Behind the cascading waterfall lies a hidden cave, its entrance shr
 mapsymbol: B
 maplegend: Bridge
 biome: forest
+containers:
+  ornate chest:
+    lock:
+      difficulty: 8
 exits:
   out:
     roomid: 877
+spawninfo:
+- container: ornate chest
+  gold: 1
+  cooldown: 21600
+
