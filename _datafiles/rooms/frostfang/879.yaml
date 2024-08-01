@@ -1,0 +1,22 @@
+roomid: 879
+zone: Frostfang
+title: Magic Academy
+description: Nestled in the heart of Frostfang, the Magic Academy stands as a beacon
+  of ancient wisdom and arcane power amid the icy wilderness. The grand structure,
+  built from gleaming white stone and adorned with intricate carvings of mythical
+  creatures, rises majestically against the backdrop of snow-capped peaks. Frost-covered
+  spires and turrets reach toward the sky, each glistening like a crystalline beacon
+  in the winter sun. Inside, the halls are warm and inviting, illuminated by floating
+  orbs of soft, magical light.
+biome: city
+exits:
+  east:
+    roomid: 5
+spawninfo:
+- mobid: 50
+  cooldown: 20
+  message: A mage enters the room.
+skilltraining:
+  cast:
+    min: 1
+    max: 4

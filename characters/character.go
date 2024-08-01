@@ -1174,8 +1174,15 @@ func (c *Character) ApplyHealthChange(healthChange int) int {
 	return newHealth - oldHealth
 }
 
-func (c *Character) ApplyManaChange(manaChange int) {
+func (c *Character) ApplyManaChange(manaChange int) int {
+	oldMana := c.Mana
 	c.Mana += manaChange
+	if c.Mana < 0 {
+		c.Mana = 0
+	} else if c.Mana > c.ManaMax.Value {
+		c.Mana = c.ManaMax.Value
+	}
+	return c.Mana - oldMana
 }
 
 func (c *Character) BarterPrice(startPrice int) int {

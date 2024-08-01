@@ -249,6 +249,10 @@ func (a ScriptActor) AddHealth(amt int) int {
 	return a.characterRecord.ApplyHealthChange(amt)
 }
 
+func (a ScriptActor) AddMana(amt int) int {
+	return a.characterRecord.ApplyManaChange(amt)
+}
+
 func (a ScriptActor) Command(cmd string, waitTurns ...int) {
 	if len(waitTurns) < 1 {
 		waitTurns = append(waitTurns, 0)

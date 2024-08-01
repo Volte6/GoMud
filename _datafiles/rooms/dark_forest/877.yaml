@@ -1,15 +1,13 @@
 roomid: 877
 zone: Dark Forest
 title: Dark Chasm
-description: Descending into the chasm, you leave the oppressive shadows of the Dark
-  Forest behind and enter a realm where the light barely penetrates, casting long,
-  eerie shadows on the rough, uneven walls. The air is thick and damp, filled with
-  the scent of earth and decay. The ground beneath your feet is a treacherous mix
-  of loose stones and ancient roots that snake across the path, threatening to trip
-  the unwary. Strange, bioluminescent fungi cling to the walls, casting a ghostly
-  glow that illuminates the chasm in an otherworldly light. The distant sound of dripping
-  water echoes through the cavernous expanse, creating an unsettling symphony that
-  sets your nerves on edge.
+description: At the northernmost reachable part of the chasm, the light barely penetrates,
+  casting long, eerie shadows on the rough, uneven walls. A waterfall cascades from
+  above, its waters crashing into the chasm floor and feeding the river that winds
+  through the center. The air is thick and damp, filled with the scent of earth and
+  decay, mingled with the fresh, cool mist from the waterfall. The ground beneath
+  your feet is a treacherous mix of loose stones and ancient roots that snake across
+  the path, threatening to trip the unwary.
 mapsymbol: B
 maplegend: Bridge
 biome: forest
@@ -18,3 +16,6 @@ exits:
     roomid: 874
   southeast:
     roomid: 875
+  waterfall:
+    roomid: 878
+    secret: true
