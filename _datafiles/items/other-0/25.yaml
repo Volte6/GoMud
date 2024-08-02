@@ -1,0 +1,7 @@
+itemid: 25
+name: stormwatcher key
+namesimple: key
+description: A large key made of iron.
+type: key
+subtype: generic
+keylockid: 202-north

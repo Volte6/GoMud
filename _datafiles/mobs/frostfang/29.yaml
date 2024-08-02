@@ -33,3 +33,5 @@ character:
       itemid: 20002
     feet:
       itemid: 20003
+  items:
+    - itemid: 8

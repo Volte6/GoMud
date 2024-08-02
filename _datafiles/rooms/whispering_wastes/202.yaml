@@ -8,11 +8,16 @@ description: Standing at the edge of the Stormwatcher's Keep, the world unfolds 
   in a myriad of sparkling lights. The air is crisp and invigorating, filled with
   the scent of pine and the distant echo of the howling wind. The Keep itself, a formidable
   structure of stone and iron, stands sentinel against the backdrop of the wilderness,
-  its towers reaching skyward like fingers grasping at the clouds.
+  its towers reaching skyward like fingers grasping at the clouds. A large Iron door
+  blocks your way in.
 mapsymbol: K
 maplegend: Keep
 biome: snow
 exits:
+  north:
+    roomid: 880
+    lock:
+      difficulty: 7
   southwest:
     roomid: 201
 idlemessages:
