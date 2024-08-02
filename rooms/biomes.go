@@ -52,6 +52,12 @@ var (
 			litArea:     true,
 			description: `Cities are generally well protected, with well built roads. Usually they will have shops, inns, and law enforcement. Fighting and Killing in cities can lead to a lasting bad reputation.`,
 		},
+		`fort`: {
+			name:        `Fort`,
+			symbol:      '•',
+			litArea:     true,
+			description: `Forts are structures built to house soldiers or people.`,
+		},
 		`road`: {
 			name:        `Road`,
 			symbol:      '•',
