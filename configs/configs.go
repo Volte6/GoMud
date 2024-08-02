@@ -3,6 +3,7 @@ package configs
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"math"
 	"os"
 	"reflect"
@@ -573,8 +574,13 @@ func ReloadConfig() error {
 
 	overridePath := overridePath()
 
+	slog.Info("ReloadConfig()", "overridePath", overridePath)
+
 	if _, err := os.Stat(util.FilePath(overridePath)); err == nil {
 		if overridePath != `` {
+
+			slog.Info("ReloadConfig()", "Loading overrides", true)
+
 			overrideBytes, err := os.ReadFile(util.FilePath(overridePath))
 			if err != nil {
 				return err
@@ -589,6 +595,7 @@ func ReloadConfig() error {
 			tmpConfigData.SetOverrides(overrides)
 		}
 	} else {
+		slog.Info("ReloadConfig()", "Loading overrides", false)
 		tmpConfigData.SetOverrides(map[string]any{})
 	}
 

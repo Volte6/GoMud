@@ -55,11 +55,11 @@ var (
 
 func main() {
 
-	configs.ReloadConfig()
-	c := configs.GetConfig()
-
 	// Setup the default logger
 	slog.SetDefault(logger)
+
+	configs.ReloadConfig()
+	c := configs.GetConfig()
 
 	slog.Info(`========================`)
 	//
