@@ -281,7 +281,7 @@ func (c *config) SetOverrides(overrides map[string]any) error {
 			return fmt.Errorf("Set method missing")
 		}
 		// Prepare arguments and call the method as before
-		args := []reflect.Value{reflect.ValueOf(value)}
+		args := []reflect.Value{reflect.ValueOf(fmt.Sprintf(`%v`, value))}
 		method.Call(args)
 
 	}
