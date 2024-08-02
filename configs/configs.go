@@ -152,7 +152,9 @@ func SetVal(propName string, propVal string, force ...bool) error {
 	// set the map value
 	reflect.ValueOf(overrides).SetMapIndex(reflect.ValueOf(propName), fieldVal)
 
-	configData.SetOverrides(overrides)
+	if err := configData.SetOverrides(overrides); err != nil {
+		slog.Error("SetVal()", "error", err)
+	}
 
 	configData.Validate()
 
@@ -245,6 +247,8 @@ func (c *config) SetOverrides(overrides map[string]any) error {
 	structValue := reflect.ValueOf(c).Elem()
 	for name, value := range c.overrides {
 
+		slog.Info("SetOverrides()", "name", name, "value", value)
+
 		structFieldValue := structValue.FieldByName(name)
 
 		if !structFieldValue.IsValid() {
@@ -255,13 +259,30 @@ func (c *config) SetOverrides(overrides map[string]any) error {
 			return fmt.Errorf("Cannot set %s field value", name)
 		}
 
-		val := reflect.ValueOf(value)
+		// Get the reflect.Value of instance
+		val := reflect.ValueOf(c).Elem() // Use Elem() because we start with a pointer
 
-		if structFieldValue.Type() != val.Type() {
-			return errors.New("Provided value type didn't match obj field type")
+		// Find the field by name
+		fieldVal := val.FieldByName(name)
+
+		if !fieldVal.IsValid() {
+			return fmt.Errorf("no such field: %s in obj", name)
 		}
 
-		structFieldValue.Set(val)
+		// If fieldVal is struct and Set has a pointer receiver, you need to get the address of fieldVal
+		if !fieldVal.CanAddr() {
+			return fmt.Errorf("field is not addressable")
+		}
+
+		fieldValPtr := fieldVal.Addr() // Get a pointer to the field
+		method := fieldValPtr.MethodByName("Set")
+
+		if !method.IsValid() {
+			return fmt.Errorf("Set method missing")
+		}
+		// Prepare arguments and call the method as before
+		args := []reflect.Value{reflect.ValueOf(value)}
+		method.Call(args)
 
 	}
 
@@ -592,7 +613,9 @@ func ReloadConfig() error {
 				return err
 			}
 
-			tmpConfigData.SetOverrides(overrides)
+			if err := tmpConfigData.SetOverrides(overrides); err != nil {
+				slog.Error("ReloadConfig()", "error", err)
+			}
 		}
 	} else {
 		slog.Info("ReloadConfig()", "Loading overrides", false)
