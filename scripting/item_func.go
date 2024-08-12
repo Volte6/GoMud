@@ -91,6 +91,10 @@ func (i ScriptItem) GetTempData(key string) any {
 	return i.itemRecord.GetTempData(key)
 }
 
+func (i ScriptItem) ShorthandId() string {
+	return i.itemRecord.ShorthandId()
+}
+
 // Converts an item into a ScriptItem for use in the scripting engine
 func GetItem(i items.Item) *ScriptItem {
 	sItm := newScriptItem(i)

@@ -391,6 +391,13 @@ func (i *Item) Name() string {
 	return i.GetSpec().Name
 }
 
+func (i *Item) ShorthandId() string {
+	if i.ItemId < 1 { // Used to represent item slots that are disabled
+		return ``
+	}
+	return fmt.Sprintf(`!%d`, i.ItemId)
+}
+
 func (i *Item) NameSimple() string {
 
 	if i.ItemId < 1 { // Used to represent item slots that are disabled

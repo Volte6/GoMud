@@ -85,6 +85,10 @@ func (u *UserRecord) PasswordMatches(input string) bool {
 	return false
 }
 
+func (u *UserRecord) ShorthandId() string {
+	return fmt.Sprintf(`@%d`, u.UserId)
+}
+
 func (u *UserRecord) SetProgressBar(pb *progressbar.ProgressBar) {
 	u.progress = pb
 }

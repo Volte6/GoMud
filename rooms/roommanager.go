@@ -232,13 +232,15 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 
 	if (len(isSpawn) > 0 && isSpawn[0]) || formerRoomId == -1 {
 		if user.Character.Level < 5 {
-			room := LoadRoom(toRoomId)
-			guideMob := mobs.NewMobById(38, 1)
-			guideMob.Character.Name = fmt.Sprintf(`%s's Guide`, user.Character.Name)
-			room.AddMob(guideMob.InstanceId)
-			guideMob.Character.Charm(userId, characters.CharmPermanent, characters.CharmExpiredDespawn)
-			// Track it
-			user.Character.TrackCharmed(guideMob.InstanceId, true)
+			if toRoomId != -1 {
+				room := LoadRoom(toRoomId)
+				guideMob := mobs.NewMobById(38, 1)
+				guideMob.Character.Name = fmt.Sprintf(`%s's Guide`, user.Character.Name)
+				room.AddMob(guideMob.InstanceId)
+				guideMob.Character.Charm(userId, characters.CharmPermanent, characters.CharmExpiredDespawn)
+				// Track it
+				user.Character.TrackCharmed(guideMob.InstanceId, true)
+			}
 		}
 	}
 

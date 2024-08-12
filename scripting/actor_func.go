@@ -558,6 +558,21 @@ func (a ScriptActor) getScriptTag() string {
 	return ""
 }
 
+func (a ScriptActor) ShorthandId() string {
+
+	if a.userRecord != nil {
+
+		return a.userRecord.ShorthandId()
+
+	} else if a.mobRecord != nil {
+
+		return a.mobRecord.ShorthandId()
+
+	}
+
+	return ``
+}
+
 // ////////////////////////////////////////////////////////
 //
 // # These functions get exported to the scripting engine

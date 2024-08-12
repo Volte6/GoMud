@@ -216,6 +216,10 @@ func DestroyInstance(instanceId int) {
 	delete(mobInstances, instanceId)
 }
 
+func (m *Mob) ShorthandId() string {
+	return fmt.Sprintf(`#%d`, m.InstanceId)
+}
+
 func (m *Mob) IsTameable() bool {
 	if m.IsMerchant {
 		return false

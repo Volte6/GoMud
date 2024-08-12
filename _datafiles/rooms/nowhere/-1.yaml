@@ -18,9 +18,6 @@ description: "As your senses attune to the stillness around, you find yourself e
 exits:
   drift:
     roomid: -1
-  float:
-    roomid: -1
-    secret: true
 idlemessages:
 - Type <ansi fg="command">help races</ansi> to see a list of available races.
 - Type <ansi fg="command">start</ansi> to begin playing.

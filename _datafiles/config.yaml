@@ -109,11 +109,11 @@ RoundSeconds: 4
 # - OnDeathEquipmentDropChance -
 #   The chance that a player will drop a piece of worn/backpack equipment when 
 #   they die. This is a percentage, so 0.5 is 50% chance.
-OnDeathEquipmentDropChance: 1
+OnDeathEquipmentDropChance: 0.25
 # - OnDeathAlwaysDropBackpack -
 #   If true, players will always drop their backpack contents when they die. 
 #   If false, it will failover to OnDeathEquipmentDropChance.
-OnDeathAlwaysDropBackpack: true
+OnDeathAlwaysDropBackpack: false
 # - OnDeathXPPenalty -
 #   What penalty is applies to a players XP when they die.
 #   none - no penalty

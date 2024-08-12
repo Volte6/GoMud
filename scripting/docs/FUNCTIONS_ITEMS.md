@@ -15,6 +15,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ItemObject.NameComplex() string](#itemobjectnamecomplex-string)
   - [ItemObject.SetTempData(key string, value any)](#itemobjectsettempdatakey-string-value-any)
   - [ItemObject.GetTempData(key string) any](#itemobjectgettempdatakey-string-any)
+  - [ItemObject.ShorthandId() string](#itemobjectshorthandid-string)
 
 ## [CreateItem(itemId int) ItemObject ](/scripting/item_func.go)
 Creates a new instance of an item and returns it.
@@ -80,3 +81,7 @@ Sets temporary data of any sort on the item. This data is not saved/loaded when 
 |  Argument | Explanation |
 | --- | --- |
 | key | The name to retrieve data under. |
+
+
+## [ItemObject.ShorthandId() string](/scripting/item_func.go)
+Returns the shorthand ID string to refer to the item ( `!123` )
