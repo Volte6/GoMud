@@ -14,6 +14,12 @@
        <ansi fg="yellow-bold">This is an item storage location!</ansi> Type <ansi fg="command">storage</ansi> to store/unstore. 
     <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
 {{ end }}
+{{- if eq .Room.RoomId -1 }}
+    <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>
+       <ansi fg="yellow-bold">Type <ansi fg="command">help races</ansi> to see a list of available races.</ansi>
+       <ansi fg="yellow-bold">Type <ansi fg="command">start</ansi> to begin playing.</ansi>
+    <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
+{{ end }}
 {{- if ne (len .TrackingString) 0 }}
 <ansi fg="182">{{ .TrackingString }}</ansi>
 {{ end }}
