@@ -185,8 +185,9 @@ ScriptRoomTimeoutMs: 10
 #   The maximum number of telnet connections the server will accept.
 MaxTelnetConnections: 50
 # - TelnetPort -
-#   The port the server listens on for telnet connections
-TelnetPort: 33333
+#   The port the server listens on for telnet connections. Listen on multiple 
+#   ports by separating them with commas. For example, "33333,33334,33335"
+TelnetPort: 33333,44444
 # - WebPort -
 #   The port the server listens on for web requests
 WebPort: 80
