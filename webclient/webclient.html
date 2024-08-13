@@ -46,7 +46,7 @@
 
         document.getElementById('connectBtn').addEventListener('click', function() {
             // Connect to the WebSocket
-            socket = new WebSocket('ws://localhost:80');
+            socket = new WebSocket('ws://localhost:80/ws');
 
             socket.onopen = function() {
                 appendToOutput("Connected to the server!");

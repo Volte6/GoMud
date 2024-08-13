@@ -36,6 +36,7 @@ import (
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 	"github.com/volte6/mud/version"
+	"github.com/volte6/mud/webclient"
 )
 
 const (
@@ -144,16 +145,16 @@ func main() {
 	// Set the server to be alive
 	serverAlive.Store(true)
 
+	webclient.Listen(int(c.WebPort), &wg)
+
 	allTelnetPorts := strings.Split(string(c.TelnetPort), `,`)
 
 	allServerListeners := make([]net.Listener, 0, len(allTelnetPorts))
 	for _, port := range allTelnetPorts {
 		if p, err := strconv.Atoi(port); err == nil {
-
 			if s := TelnetListenOnPort(p, &wg); s != nil {
 				allServerListeners = append(allServerListeners, s)
 			}
-
 		}
 	}
 
@@ -187,6 +188,8 @@ func main() {
 	for _, s := range allServerListeners {
 		s.Close()
 	}
+
+	webclient.Shutdown()
 
 	// Just an ephemeral goroutine that spins its wheels until the program shuts down")
 	go func() {
