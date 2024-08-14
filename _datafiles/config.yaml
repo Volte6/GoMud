@@ -188,6 +188,9 @@ MaxTelnetConnections: 50
 #   The port the server listens on for telnet connections. Listen on multiple 
 #   ports by separating them with commas. For example, "33333,33334,33335"
 TelnetPort: 33333,44444
+# - LocalPort -
+#   A port that can only be accessed via localhost, but will not limit based on connection count
+LocalPort: 9999
 # - WebPort -
 #   The port the server listens on for web requests
 WebPort: 80

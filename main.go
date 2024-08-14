@@ -152,10 +152,14 @@ func main() {
 	allServerListeners := make([]net.Listener, 0, len(allTelnetPorts))
 	for _, port := range allTelnetPorts {
 		if p, err := strconv.Atoi(port); err == nil {
-			if s := TelnetListenOnPort(p, &wg); s != nil {
+			if s := TelnetListenOnPort(``, p, &wg, int(c.MaxTelnetConnections)); s != nil {
 				allServerListeners = append(allServerListeners, s)
 			}
 		}
+	}
+
+	if c.LocalPort > 0 {
+		TelnetListenOnPort(`127.0.0.1`, int(c.LocalPort), &wg, 0)
 	}
 
 	go worldManager.InputWorker(workerShutdownChan, &wg)
@@ -494,9 +498,9 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 }
 
-func TelnetListenOnPort(portNum int, wg *sync.WaitGroup) net.Listener {
+func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxConnections int) net.Listener {
 
-	server, err := net.Listen("tcp", fmt.Sprintf(":%d", portNum))
+	server, err := net.Listen("tcp", fmt.Sprintf("%s:%d", hostname, portNum))
 	if err != nil {
 		slog.Error("Error creating server", "error", err)
 		return nil
@@ -519,11 +523,12 @@ func TelnetListenOnPort(portNum int, wg *sync.WaitGroup) net.Listener {
 				continue
 			}
 
-			connCt := worldManager.GetConnectionPool().ActiveConnectionCount()
-			if connCt >= int(configs.GetConfig().MaxTelnetConnections) {
-				conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", connCt)))
-				conn.Close()
-				continue
+			if maxConnections > 0 {
+				if worldManager.GetConnectionPool().ActiveConnectionCount() >= maxConnections {
+					conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", connCt)))
+					conn.Close()
+					continue
+				}
 			}
 
 			wg.Add(1)
