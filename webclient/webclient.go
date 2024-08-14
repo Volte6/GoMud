@@ -96,7 +96,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		if string(message) == "GOODBYE" {
+		if strings.ToUpper(string(message)) == "QUIT" {
 			log.Println("Closing WebSocket connection...")
 			break
 		}

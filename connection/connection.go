@@ -31,6 +31,7 @@ func (c *ConnectionTracker) Add(conn net.Conn) *ConnectionDetails {
 	connDetails := NewConnectionDetails(
 		uId,
 		conn,
+		nil,
 	)
 
 	c.netConnections.Store(connDetails.ConnectionId(), connDetails)
