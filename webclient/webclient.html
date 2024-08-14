@@ -46,7 +46,7 @@
 
         document.getElementById('connectBtn').addEventListener('click', function() {
             // Connect to the WebSocket
-            socket = new WebSocket('ws://localhost:80');
+            socket = new WebSocket('ws://localhost:80/ws');
 
             socket.onopen = function() {
                 appendToOutput("Connected to the server!");
@@ -84,8 +84,66 @@
 
         function appendToOutput(message) {
             const output = document.getElementById('output');
-            output.textContent += message + '\n';
+            output.innerHTML += ansiToHtml(message) + '\n';
             output.scrollTop = output.scrollHeight;
+        }
+
+        function ansiToHtml(ansiString) {
+
+            /*
+            const testString = "\x1b[0;31mRed text\x1b[0m and \x1b[1;32mBold green text\x1b[0m.\n" +
+                                "\x1b[38;5;82m256-color text (green)\x1b[0m and \x1b[48;5;196m256-color background (red)\x1b[0m.\n" +
+                                "\x1b[38;5;208mAnother 256-color text (orange)\x1b[0m with \x1b[48;5;21mblue background\x1b[0m.";
+            ansiString += testString;
+            */
+
+            // Map ANSI 16-color codes to CSS color names
+            const ansi16Colors = {
+                '30': 'black', '31': 'red', '32': 'green', '33': 'yellow',
+                '34': 'blue', '35': 'magenta', '36': 'cyan', '37': 'white',
+                '90': 'gray', '91': 'lightcoral', '92': 'lightgreen', '93': 'lightyellow',
+                '94': 'lightblue', '95': 'lightpink', '96': 'lightcyan', '97': 'white'
+            };
+
+            // Generate 256-color palette (only the most common shades)
+            function ansi256Color(n) {
+                if (n >= 0 && n <= 7) { // Standard colors
+                    return ansi16Colors['3' + n];
+                } else if (n >= 8 && n <= 15) { // High-intensity colors
+                    return ansi16Colors['9' + (n - 8)];
+                } else if (n >= 16 && n <= 231) { // 6x6x6 color cube
+                    n -= 16;
+                    const r = Math.floor(n / 36) % 6 * 51,
+                        g = Math.floor(n / 6) % 6 * 51,
+                        b = n % 6 * 51;
+                    return `rgb(${r},${g},${b})`;
+                } else if (n >= 232 && n <= 255) { // Grayscale from black to white
+                    const gray = (n - 232) * 10 + 8;
+                    return `rgb(${gray},${gray},${gray})`;
+                }
+                return ''; // Invalid color code
+            }
+
+            // Regular expression to match ANSI escape codes
+            const ansiRegex = /\x1b\[(\d+);?(\d*);?(\d*)?m/g;
+
+            return ansiString.replace(ansiRegex, (match, p1, p2, p3) => {
+                let style = '';
+
+                if (p1 === '38' && p2 === '5' && p3) { // 256-color foreground
+                    style += `color:${ansi256Color(parseInt(p3))};`;
+                } else if (p1 === '48' && p2 === '5' && p3) { // 256-color background
+                    style += `background-color:${ansi256Color(parseInt(p3))};`;
+                } else if (p1 in ansi16Colors) { // Standard 16-color foreground
+                    style += `color:${ansi16Colors[p1]};`;
+                } else if (p1 === '1') { // Bold
+                    style += 'font-weight:bold;';
+                } else if (p1 === '0') { // Reset
+                    return '</span>';
+                }
+
+                return `<span style="${style}">`;
+            }).replace(/\x1b\[0m/g, '</span>'); // Close spans when encountering reset code
         }
     </script>
 </body>

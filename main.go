@@ -8,7 +8,10 @@ import (
 	"os/signal"
 	"runtime"
 	"slices"
+	"strconv"
+	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -33,6 +36,7 @@ import (
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 	"github.com/volte6/mud/version"
+	"github.com/volte6/mud/webclient"
 )
 
 const (
@@ -48,9 +52,12 @@ var (
 	sigChan            = make(chan os.Signal, 1)
 	workerShutdownChan = make(chan bool, 1)
 
-	serverAlive = false
+	serverAlive atomic.Bool
 
 	worldManager = NewWorld(sigChan)
+
+	// Start a pool of worker goroutines
+	wg sync.WaitGroup
 )
 
 func main() {
@@ -131,70 +138,29 @@ func main() {
 	// Capture OS signals to gracefully shutdown the server
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	// Start a pool of worker goroutines
-	var wg sync.WaitGroup
+	//
+	// Spin up server listeners
+	//
 
-	// Start the TCP server
-	server, err := net.Listen("tcp", fmt.Sprintf(":%d", c.TelnetPort))
-	if err != nil {
-		slog.Error("Error creating server", "error", err)
-		return
+	// Set the server to be alive
+	serverAlive.Store(true)
+
+	webclient.Listen(int(c.WebPort), &wg)
+
+	allTelnetPorts := strings.Split(string(c.TelnetPort), `,`)
+
+	allServerListeners := make([]net.Listener, 0, len(allTelnetPorts))
+	for _, port := range allTelnetPorts {
+		if p, err := strconv.Atoi(port); err == nil {
+			if s := TelnetListenOnPort(p, &wg); s != nil {
+				allServerListeners = append(allServerListeners, s)
+			}
+		}
 	}
-	defer server.Close()
-
-	// TODO: This is pretty lazy, but works for my testing.
-	//       Get rid of later.
-	go func() {
-		ipPort := fmt.Sprintf(`%s %d`, util.GetMyIP(), c.TelnetPort)
-
-		util.SetServerAddress(`<ansi fg="red">` + ipPort + `</ansi>`)
-
-		slog.Info("TCP listening.", "port", c.TelnetPort)
-		slog.Info(``)
-		slog.Warn(`Public IP Address`, `Address`, ipPort)
-		slog.Info(``)
-	}()
-
-	// keep track of whether we are accepting connections or not
-	serverAlive = true
 
 	go worldManager.InputWorker(workerShutdownChan, &wg)
 	go worldManager.MaintenanceWorker(workerShutdownChan, &wg)
 	go worldManager.GameTickWorker(workerShutdownChan, &wg)
-
-	// Start a goroutine to accept incoming connections, so that we can use a signal to stop the server
-	go func() {
-
-		// Loop to accept connections
-		for {
-			conn, err := server.Accept()
-
-			if !serverAlive {
-				slog.Error("Connections disabled.")
-				return
-			}
-
-			if err != nil {
-				slog.Error("Connection error", "error", err)
-				continue
-			}
-
-			connCt := worldManager.GetConnectionPool().ActiveConnectionCount()
-			if connCt >= int(configs.GetConfig().MaxTelnetConnections) {
-				conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", connCt)))
-				conn.Close()
-				continue
-			}
-
-			wg.Add(1)
-			// hand off the connection to a handler goroutine so that we can continue handling new connections
-			go handleTelnetConnection(
-				worldManager.GetConnectionPool().Add(conn),
-				&wg,
-			)
-
-		}
-	}()
 
 	// block until a signal comes in
 	<-sigChan
@@ -205,7 +171,7 @@ func main() {
 	}
 	worldManager.GetConnectionPool().Broadcast([]byte(tplTxt))
 
-	serverAlive = false // immediately stop processing incoming connections
+	serverAlive.Store(false) // immediately stop processing incoming connections
 
 	// some last minute stats reporting
 	totalConnections, totalDisconnections := worldManager.GetConnectionPool().Stats()
@@ -219,8 +185,11 @@ func main() {
 	// cleanup all connections
 	worldManager.GetConnectionPool().Cleanup()
 
-	// close the server
-	server.Close()
+	for _, s := range allServerListeners {
+		s.Close()
+	}
+
+	webclient.Shutdown()
 
 	// Just an ephemeral goroutine that spins its wheels until the program shuts down")
 	go func() {
@@ -523,4 +492,49 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 	}
 
+}
+
+func TelnetListenOnPort(portNum int, wg *sync.WaitGroup) net.Listener {
+
+	server, err := net.Listen("tcp", fmt.Sprintf(":%d", portNum))
+	if err != nil {
+		slog.Error("Error creating server", "error", err)
+		return nil
+	}
+
+	// Start a goroutine to accept incoming connections, so that we can use a signal to stop the server
+	go func() {
+
+		// Loop to accept connections
+		for {
+			conn, err := server.Accept()
+
+			if !serverAlive.Load() {
+				slog.Error("Connections disabled.")
+				return
+			}
+
+			if err != nil {
+				slog.Error("Connection error", "error", err)
+				continue
+			}
+
+			connCt := worldManager.GetConnectionPool().ActiveConnectionCount()
+			if connCt >= int(configs.GetConfig().MaxTelnetConnections) {
+				conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", connCt)))
+				conn.Close()
+				continue
+			}
+
+			wg.Add(1)
+			// hand off the connection to a handler goroutine so that we can continue handling new connections
+			go handleTelnetConnection(
+				worldManager.GetConnectionPool().Add(conn),
+				wg,
+			)
+
+		}
+	}()
+
+	return server
 }

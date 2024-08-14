@@ -7,6 +7,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type ConnectState uint32
@@ -120,6 +122,7 @@ type ConnectionDetails struct {
 	settings          ClientSettings
 	settingsMutex     sync.Mutex
 	conn              net.Conn
+	wsConn            *websocket.Conn
 	handlerMutex      sync.Mutex
 	inputHandlerNames []string
 	inputHandlers     []InputHandler
@@ -193,18 +196,44 @@ func (cd *ConnectionDetails) Write(p []byte) (n int, err error) {
 
 	p = []byte(strings.ReplaceAll(string(p), "\n", "\r\n"))
 
+	if cd.wsConn != nil {
+		err := cd.wsConn.WriteMessage(websocket.TextMessage, p)
+		if err != nil {
+			return 0, err
+		}
+		return len(p), nil
+	}
+
 	return cd.conn.Write(p)
 }
 
 func (cd *ConnectionDetails) Read(p []byte) (n int, err error) {
+
+	if cd.wsConn != nil {
+		// read the bytes and then copy them into p
+		_, message, err := cd.wsConn.ReadMessage()
+		if err != nil {
+			return 0, err
+		}
+		copy(p, message)
+		return len(message), nil
+	}
+
 	return cd.conn.Read(p)
 }
 
 func (cd *ConnectionDetails) Close() {
+	if cd.wsConn != nil {
+		cd.wsConn.Close()
+		return
+	}
 	cd.conn.Close()
 }
 
 func (cd *ConnectionDetails) RemoteAddr() net.Addr {
+	if cd.wsConn != nil {
+		return cd.wsConn.RemoteAddr()
+	}
 	return cd.conn.RemoteAddr()
 }
 
@@ -245,7 +274,7 @@ func (cd *ConnectionDetails) SetMonochrome(mono bool) {
 	cd.settings.Monochrome = mono
 }
 
-func NewConnectionDetails(connId ConnectionId, c net.Conn) *ConnectionDetails {
+func NewConnectionDetails(connId ConnectionId, c net.Conn, wsC *websocket.Conn) *ConnectionDetails {
 	return &ConnectionDetails{
 		state:        Login,
 		connectionId: connId,
@@ -256,5 +285,6 @@ func NewConnectionDetails(connId ConnectionId, c net.Conn) *ConnectionDetails {
 		},
 		inputDisabled: false,
 		conn:          c,
+		wsConn:        wsC,
 	}
 }

@@ -44,7 +44,7 @@ type config struct {
 	ScriptLoadTimeoutMs          ConfigInt         `yaml:"ScriptLoadTimeoutMs"`          // How long to spend the first time a script is loaded into memory
 	ScriptRoomTimeoutMs          ConfigInt         `yaml:"ScriptRoomTimeoutMs"`          // How many milliseconds to allow a script to run before it is interrupted
 	MaxTelnetConnections         ConfigInt         `yaml:"MaxTelnetConnections"`         // Maximum number of telnet connections to accept
-	TelnetPort                   ConfigInt         `yaml:"TelnetPort"`                   // Port used to accept telnet connections
+	TelnetPort                   ConfigString      `yaml:"TelnetPort"`                   // One or more Ports used to accept telnet connections
 	WebPort                      ConfigInt         `yaml:"WebPort"`                      // Port used for web requests
 	NextRoomId                   ConfigInt         `yaml:"NextRoomId"`                   // The next room id to use when creating a new room
 	LootGoblinRoundCount         ConfigInt         `yaml:"LootGoblinRoundCount"`         // How often to spawn a loot goblin
@@ -425,8 +425,8 @@ func (c *config) Validate() {
 		c.MaxTelnetConnections = 50 // default
 	}
 
-	if c.TelnetPort < 1 {
-		c.TelnetPort = 33333 // default
+	if c.TelnetPort == `` {
+		c.TelnetPort = `33333` // default
 	}
 
 	if c.WebPort < 1 {
