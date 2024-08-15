@@ -525,7 +525,7 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 
 			if maxConnections > 0 {
 				if worldManager.GetConnectionPool().ActiveConnectionCount() >= maxConnections {
-					conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", connCt)))
+					conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", worldManager.GetConnectionPool().ActiveConnectionCount())))
 					conn.Close()
 					continue
 				}
