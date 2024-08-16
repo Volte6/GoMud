@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -18,6 +19,7 @@ import (
 	"log/slog"
 
 	"github.com/Volte6/ansitags"
+	"github.com/gorilla/websocket"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
@@ -145,17 +147,21 @@ func main() {
 	// Set the server to be alive
 	serverAlive.Store(true)
 
-	webclient.Listen(int(c.WebPort), &wg)
+	webclient.Listen(int(c.WebPort), &wg, HandleWebSocketConnection)
 
 	allTelnetPorts := strings.Split(string(c.TelnetPort), `,`)
 
 	allServerListeners := make([]net.Listener, 0, len(allTelnetPorts))
 	for _, port := range allTelnetPorts {
 		if p, err := strconv.Atoi(port); err == nil {
-			if s := TelnetListenOnPort(p, &wg); s != nil {
+			if s := TelnetListenOnPort(``, p, &wg, int(c.MaxTelnetConnections)); s != nil {
 				allServerListeners = append(allServerListeners, s)
 			}
 		}
+	}
+
+	if c.LocalPort > 0 {
+		TelnetListenOnPort(`127.0.0.1`, int(c.LocalPort), &wg, 0)
 	}
 
 	go worldManager.InputWorker(workerShutdownChan, &wg)
@@ -494,9 +500,94 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 }
 
-func TelnetListenOnPort(portNum int, wg *sync.WaitGroup) net.Listener {
+func HandleWebSocketConnection(conn *websocket.Conn) {
 
-	server, err := net.Listen("tcp", fmt.Sprintf(":%d", portNum))
+	var userObject *users.UserRecord
+	connDetails := worldManager.GetConnectionPool().Add(nil, conn)
+	connDetails.AddInputHandler("LoginInputHandler", inputhandlers.LoginInputHandler)
+
+	// Describes whatever the client sent us
+	clientInput := &connection.ClientInput{
+		ConnectionId: connDetails.ConnectionId(),
+		DataIn:       []byte{},
+		Buffer:       make([]byte, 0, connection.ReadBufferSize), // DataIn is appended to this buffer after processing
+		EnterPressed: false,
+		Clipboard:    []byte{},
+		History:      connection.InputHistory{},
+	}
+
+	var sharedState map[string]any = make(map[string]any)
+
+	// Invoke the login handler for the first time
+	// The default behavior is to just send a welcome screen first
+	inputhandlers.LoginInputHandler(clientInput, worldManager.GetConnectionPool(), sharedState)
+
+	for {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Read error:", err)
+			break
+		}
+
+		clientInput.DataIn = message
+		clientInput.Buffer = message
+		clientInput.EnterPressed = true
+
+		// Input handler processes any special commands, transforms input, sets flags from input, etc
+		okContinue, lastHandler, err := connDetails.HandleInput(clientInput, worldManager.GetConnectionPool(), sharedState)
+		if !okContinue {
+			continue
+		}
+
+		if lastHandler == "LoginInputHandler" {
+			// Remove the login handler
+			connDetails.RemoveInputHandler("LoginInputHandler")
+			// Replace it with a regular echo handler.
+			connDetails.AddInputHandler("EchoInputHandler", inputhandlers.EchoInputHandler)
+			// Add admin command handler
+			connDetails.AddInputHandler("HistoryInputHandler", inputhandlers.HistoryInputHandler) // Put history tracking after login handling, since login handling aborts input until complete
+
+			if val, ok := sharedState["LoginInputHandler"]; ok {
+				state := val.(*inputhandlers.LoginState)
+				userObject = state.UserObject
+			}
+
+			if userObject.Permission == users.PermissionAdmin {
+				connDetails.AddInputHandler("AdminCommandInputHandler", inputhandlers.AdminCommandInputHandler)
+			}
+
+			connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
+
+			// Add a signal handler (shortcut ctrl combos) after the AnsiHandler
+			// This captures signals and replaces user input so should happen after AnsiHandler to ensure it happens before other processes.
+			connDetails.AddInputHandler("SignalHandler", inputhandlers.SignalHandler, "AnsiHandler")
+
+			connDetails.SetState(connection.LoggedIn)
+
+			worldManager.EnterWorld(userObject.Character.RoomId, userObject.Character.Zone, userObject.UserId)
+		}
+
+		//c := configs.GetConfig()
+
+		if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			log.Println("Write error:", err)
+			break
+		}
+
+		wi := WorldInput{
+			FromId:    userObject.UserId,
+			InputText: string(message),
+		}
+
+		// Buffer should be processed as an in-game command
+		worldManager.Input(wi)
+
+	}
+}
+
+func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxConnections int) net.Listener {
+
+	server, err := net.Listen("tcp", fmt.Sprintf("%s:%d", hostname, portNum))
 	if err != nil {
 		slog.Error("Error creating server", "error", err)
 		return nil
@@ -519,17 +610,18 @@ func TelnetListenOnPort(portNum int, wg *sync.WaitGroup) net.Listener {
 				continue
 			}
 
-			connCt := worldManager.GetConnectionPool().ActiveConnectionCount()
-			if connCt >= int(configs.GetConfig().MaxTelnetConnections) {
-				conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", connCt)))
-				conn.Close()
-				continue
+			if maxConnections > 0 {
+				if worldManager.GetConnectionPool().ActiveConnectionCount() >= maxConnections {
+					conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", worldManager.GetConnectionPool().ActiveConnectionCount())))
+					conn.Close()
+					continue
+				}
 			}
 
 			wg.Add(1)
 			// hand off the connection to a handler goroutine so that we can continue handling new connections
 			go handleTelnetConnection(
-				worldManager.GetConnectionPool().Add(conn),
+				worldManager.GetConnectionPool().Add(conn, nil),
 				wg,
 			)
 

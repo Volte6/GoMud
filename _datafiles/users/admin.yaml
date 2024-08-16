@@ -14,6 +14,7 @@ character:
     them strength, wisdom, or fortune beyond their wildest dreams. Conversely, he
     can also mete out justice to those who would seek to disrupt the balance of the
     world, swiftly and decisively.
+  adjectives: []
   roomid: 7
   zone: Frostfang
   raceid: 1
@@ -34,9 +35,10 @@ character:
   experience: 550846
   trainingpoints: 26
   statpoints: 27
-  health: 150
-  alignment: 0
+  health: 153
   mana: 94
+  actionpoints: 214
+  alignment: 0
   gold: 0
   bank: 0
   items:
@@ -78,4 +80,5 @@ character:
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/5yQQU5EMQxDL/QWjfMTp/e/GGo1SCAGFqhObMm1F4lu7lAPVXSeXU2Z1mv/gfL9/Bl0/4jHN/2kDr3F6Rpq0wt5kDeahSbQCE2iedA22oP2Jtcip8gxtfryO/2f+eUmgUjsxjb2vLhJjhsikngIE4OaDPI6X5Kn3rgOrjrvIwAA//8aP9gMjgEAAA==
+roommemoryblob: H4sIAAAAAAAA/5yQQW4FMQxCL/QWMR4b5/4XqzL9lVp12sVXCCARWCS6Ceqiis7D1ZRpvfgflO/HX0X3r3r88FfqyCPO1lCbXsiDvNEsNIFGaBLNhbbRHrQ3uRY5RY6p1bc++XfuH38SiMRubGPPS5vkpCEiiYswMajJIO/kW/PMG9fB7T7PRwAAAP//tWYCYowBAAA=
+configoptions: {}

@@ -7,6 +7,8 @@ import (
 	"os"
 	"sync"
 	"sync/atomic"
+
+	"github.com/gorilla/websocket"
 )
 
 const ReadBufferSize = 1024
@@ -24,14 +26,14 @@ func (c *ConnectionTracker) Signal(s os.Signal) {
 	c.shutdownChannel <- s
 }
 
-func (c *ConnectionTracker) Add(conn net.Conn) *ConnectionDetails {
+func (c *ConnectionTracker) Add(conn net.Conn, wsConn *websocket.Conn) *ConnectionDetails {
 
 	uId := ConnectionId(atomic.AddUint64(&c.connectCounter, 1))
 
 	connDetails := NewConnectionDetails(
 		uId,
 		conn,
-		nil,
+		wsConn,
 	)
 
 	c.netConnections.Store(connDetails.ConnectionId(), connDetails)

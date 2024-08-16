@@ -25,7 +25,7 @@ var (
 	}
 )
 
-func Listen(webPort int, wg *sync.WaitGroup) {
+func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
 
 	slog.Info("Starting web server", "webport", webPort)
 
@@ -35,7 +35,17 @@ func Listen(webPort int, wg *sync.WaitGroup) {
 	httpServer = &http.Server{Addr: fmt.Sprintf(`:%d`, webPort)}
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/client", serveClient)
-	http.HandleFunc("/ws", handleWebSocket)
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Println("WebSocket upgrade failed:", err)
+			return
+		}
+		defer conn.Close()
+
+		webSocketHandler(conn)
+	})
 
 	go func() {
 		defer wg.Done()
@@ -79,33 +89,6 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 func serveClient(w http.ResponseWriter, r *http.Request) {
 	// read contents of webclient.html and print it out
 	http.ServeFile(w, r, "webclient/webclient.html")
-}
-
-func handleWebSocket(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("WebSocket upgrade failed:", err)
-		return
-	}
-	defer conn.Close()
-
-	for {
-		_, message, err := conn.ReadMessage()
-		if err != nil {
-			log.Println("Read error:", err)
-			break
-		}
-
-		if strings.ToUpper(string(message)) == "QUIT" {
-			log.Println("Closing WebSocket connection...")
-			break
-		}
-
-		if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
-			log.Println("Write error:", err)
-			break
-		}
-	}
 }
 
 func Shutdown() {

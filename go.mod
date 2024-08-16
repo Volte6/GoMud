@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/Volte6/ansitags v0.0.0-20240205002851-61e010ad9511
 	github.com/dop251/goja v0.0.0-20231027120936-b396bb4c349d
+	github.com/gorilla/websocket v1.5.3
 )
 
 require (

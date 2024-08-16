@@ -45,6 +45,7 @@ type config struct {
 	ScriptRoomTimeoutMs          ConfigInt         `yaml:"ScriptRoomTimeoutMs"`          // How many milliseconds to allow a script to run before it is interrupted
 	MaxTelnetConnections         ConfigInt         `yaml:"MaxTelnetConnections"`         // Maximum number of telnet connections to accept
 	TelnetPort                   ConfigString      `yaml:"TelnetPort"`                   // One or more Ports used to accept telnet connections
+	LocalPort                    ConfigInt         `yaml:"LocalPort"`                    // Port used for admin connections, localhost only
 	WebPort                      ConfigInt         `yaml:"WebPort"`                      // Port used for web requests
 	NextRoomId                   ConfigInt         `yaml:"NextRoomId"`                   // The next room id to use when creating a new room
 	LootGoblinRoundCount         ConfigInt         `yaml:"LootGoblinRoundCount"`         // How often to spawn a loot goblin
