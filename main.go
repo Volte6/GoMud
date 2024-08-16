@@ -502,13 +502,69 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 func HandleWebSocketConnection(conn *websocket.Conn) {
 
-	//var userObject *users.UserRecord
+	var userObject *users.UserRecord
+	connDetails := worldManager.GetConnectionPool().Add(nil, conn)
+	connDetails.AddInputHandler("LoginInputHandler", inputhandlers.LoginInputHandler)
+
+	// Describes whatever the client sent us
+	clientInput := &connection.ClientInput{
+		ConnectionId: connDetails.ConnectionId(),
+		DataIn:       []byte{},
+		Buffer:       make([]byte, 0, connection.ReadBufferSize), // DataIn is appended to this buffer after processing
+		EnterPressed: false,
+		Clipboard:    []byte{},
+		History:      connection.InputHistory{},
+	}
+
+	var sharedState map[string]any = make(map[string]any)
+
+	// Invoke the login handler for the first time
+	// The default behavior is to just send a welcome screen first
+	inputhandlers.LoginInputHandler(clientInput, worldManager.GetConnectionPool(), sharedState)
 
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Read error:", err)
 			break
+		}
+
+		clientInput.DataIn = message
+		clientInput.Buffer = message
+		clientInput.EnterPressed = true
+
+		// Input handler processes any special commands, transforms input, sets flags from input, etc
+		okContinue, lastHandler, err := connDetails.HandleInput(clientInput, worldManager.GetConnectionPool(), sharedState)
+		if !okContinue {
+			continue
+		}
+
+		if lastHandler == "LoginInputHandler" {
+			// Remove the login handler
+			connDetails.RemoveInputHandler("LoginInputHandler")
+			// Replace it with a regular echo handler.
+			connDetails.AddInputHandler("EchoInputHandler", inputhandlers.EchoInputHandler)
+			// Add admin command handler
+			connDetails.AddInputHandler("HistoryInputHandler", inputhandlers.HistoryInputHandler) // Put history tracking after login handling, since login handling aborts input until complete
+
+			if val, ok := sharedState["LoginInputHandler"]; ok {
+				state := val.(*inputhandlers.LoginState)
+				userObject = state.UserObject
+			}
+
+			if userObject.Permission == users.PermissionAdmin {
+				connDetails.AddInputHandler("AdminCommandInputHandler", inputhandlers.AdminCommandInputHandler)
+			}
+
+			connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
+
+			// Add a signal handler (shortcut ctrl combos) after the AnsiHandler
+			// This captures signals and replaces user input so should happen after AnsiHandler to ensure it happens before other processes.
+			connDetails.AddInputHandler("SignalHandler", inputhandlers.SignalHandler, "AnsiHandler")
+
+			connDetails.SetState(connection.LoggedIn)
+
+			worldManager.EnterWorld(userObject.Character.RoomId, userObject.Character.Zone, userObject.UserId)
 		}
 
 		//c := configs.GetConfig()
@@ -522,6 +578,15 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 			log.Println("Write error:", err)
 			break
 		}
+
+		wi := WorldInput{
+			FromId:    userObject.UserId,
+			InputText: string(message),
+		}
+
+		// Buffer should be processed as an in-game command
+		worldManager.Input(wi)
+
 	}
 }
 
@@ -561,7 +626,7 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 			wg.Add(1)
 			// hand off the connection to a handler goroutine so that we can continue handling new connections
 			go handleTelnetConnection(
-				worldManager.GetConnectionPool().Add(conn),
+				worldManager.GetConnectionPool().Add(conn, nil),
 				wg,
 			)
 

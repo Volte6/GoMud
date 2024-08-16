@@ -50,7 +50,7 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 		// Everything else gets echoed back normally.
 		connectionPool.SendTo(clientInput.DataIn, clientInput.ConnectionId)
 	}
-
+	slog.Info("TESTING 2", "dataIn", string(clientInput.DataIn), "buffer", string(clientInput.Buffer), "enterPressed", clientInput.EnterPressed)
 	// We only care about processing input after they hit enter.
 	if !clientInput.EnterPressed {
 		return false
