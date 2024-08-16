@@ -569,11 +569,6 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 		//c := configs.GetConfig()
 
-		if strings.ToUpper(string(message)) == "QUIT" {
-			log.Println("Closing WebSocket connection...")
-			break
-		}
-
 		if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
 			log.Println("Write error:", err)
 			break

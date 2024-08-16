@@ -54,7 +54,7 @@
             };
 
             socket.onmessage = function(event) {
-                appendToOutput(event.data);
+                processServerText(event.data);
             };
 
             socket.onerror = function(error) {
@@ -82,9 +82,25 @@
             }
         });
 
+        function clearScreen() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+        }
+
+        function eraseLastLine() {
+            const output = document.getElementById('output');
+            lastPos = output.innerHTML.lastIndexOf('\n');
+            output.innerHTML = output.innerHTML.substring(0, lastPos+1);
+        }
+
+        function processServerText(message) {
+            message = processOutput(message);
+            appendToOutput(message);
+        }
+
         function appendToOutput(message) {
             const output = document.getElementById('output');
-            output.innerHTML += ansiToHtml(message) + '\n';
+            output.innerHTML += ansiToHtml(message);
             output.scrollTop = output.scrollHeight;
         }
 
@@ -144,6 +160,93 @@
 
                 return `<span style="${style}">`;
             }).replace(/\x1b\[0m/g, '</span>'); // Close spans when encountering reset code
+        }
+
+        function splitByAnsiCodes(input) {
+            // Regular expression to match ANSI escape codes
+            const ansiRegex = /(\x1b\[[0-9;]*[ABCDGHhJKlMmRT])/g;
+            // Split the string using the regex, and filter out empty strings
+            return input.split(ansiRegex).filter(part => part !== '');
+        }
+
+        function processOutput(outputString) {
+
+            finalOutput = [];
+            parts = splitByAnsiCodes(outputString);
+
+            // Loop through parts
+            for (let i = 0; i < parts.length; i++) {
+                // Check if the part is an ANSI code
+                if (parts[i].startsWith('\x1b[')) {
+
+                    category = categorizeAnsiCode(parts[i]);
+
+                    // Check whether last character is an 'm'
+                    if ( category == 'color' ) {
+                        // Process the ANSI code
+                        //finalOutput += parts[i];
+                        /*
+                        if ( i < parts.length - 1 ) {
+                            finalOutput.push( ansiToHtml(parts[i]+parts[i+1]) );
+                            i++;
+                        } else {
+                            finalOutput.push( ansiToHtml(parts[i]) );
+                        }
+                        */
+
+                        finalOutput.push( ansiToHtml(parts[i]) );
+
+                    } else if ( category == 'clearScreen' ) {
+                        // Process the ANSI code
+                        //finalOutput.push( "[CLEAR SCREEN]" );
+                        clearScreen();
+                        finalOutput = [];
+
+                    } else if ( category == 'eraseLine' ) {
+                        // Process the ANSI code
+                        //finalOutput.push( "[ERASE LINE]" );
+
+                        appendToOutput(finalOutput.join(''));
+                        eraseLastLine();
+                        finalOutput = [];
+
+                    } else if ( category == 'cursorMove' ) {
+                        // Process the ANSI code
+                        finalOutput.push( "[CURSOR MOVE]" );
+                    } else if ( category == 'other' ) {
+                        // Process the ANSI code
+                        console.log("OTHER: " + parts[i].replace('\x1b[','ESC['));
+                    } else {
+                        // Process the ANSI code
+                        finalOutput.push( "[NOOP: " + parts[i].replace('\x1b[','ESC[') +"]" );
+                    }
+
+                } else {
+                    // Process the text
+                    finalOutput.push( parts[i] );
+                }
+            }
+
+            return finalOutput.join('');
+        }
+
+        function categorizeAnsiCode(code) {
+            // Regex patterns for different types of ANSI escape codes
+            const regexPatterns = {
+                color: /^\x1b\[[0-9;]*m$/,       // Matches color codes
+                eraseLine: /^\x1b\[[0-9]*K$/,     // Matches erase line codes
+                cursorMove: /^\x1b\[[0-9;]*[ABCD]$/, // Matches cursor movement (up, down, forward, back)
+                clearScreen: /^\x1b\[2J$/,        // Matches clear screen code
+                other: /^\x1b\[[^m]*$/            // Matches other escape sequences
+            };
+
+            for (const [type, regex] of Object.entries(regexPatterns)) {
+                if (regex.test(code)) {
+                    return type;
+                }
+            }
+
+            return 'unknown'; // If no pattern matches
         }
         
     </script>
