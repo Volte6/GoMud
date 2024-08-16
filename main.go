@@ -502,7 +502,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 func HandleWebSocketConnection(conn *websocket.Conn) {
 
-	var userObject *users.UserRecord
+	//var userObject *users.UserRecord
 
 	for {
 		_, message, err := conn.ReadMessage()
@@ -511,7 +511,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 			break
 		}
 
-		c := configs.GetConfig()
+		//c := configs.GetConfig()
 
 		if strings.ToUpper(string(message)) == "QUIT" {
 			log.Println("Closing WebSocket connection...")
