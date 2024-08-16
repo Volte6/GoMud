@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -18,6 +19,7 @@ import (
 	"log/slog"
 
 	"github.com/Volte6/ansitags"
+	"github.com/gorilla/websocket"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
@@ -145,7 +147,7 @@ func main() {
 	// Set the server to be alive
 	serverAlive.Store(true)
 
-	webclient.Listen(int(c.WebPort), &wg)
+	webclient.Listen(int(c.WebPort), &wg, HandleWebSocketConnection)
 
 	allTelnetPorts := strings.Split(string(c.TelnetPort), `,`)
 
@@ -496,6 +498,31 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 	}
 
+}
+
+func HandleWebSocketConnection(conn *websocket.Conn) {
+
+	var userObject *users.UserRecord
+
+	for {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Read error:", err)
+			break
+		}
+
+		c := configs.GetConfig()
+
+		if strings.ToUpper(string(message)) == "QUIT" {
+			log.Println("Closing WebSocket connection...")
+			break
+		}
+
+		if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			log.Println("Write error:", err)
+			break
+		}
+	}
 }
 
 func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxConnections int) net.Listener {
