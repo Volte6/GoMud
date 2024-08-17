@@ -66,7 +66,6 @@ type Character struct {
 	Items           []items.Item      // The items the character is holding
 	Buffs           buffs.Buffs       `yaml:"buffs,omitempty"` // The buffs the character has active
 	Equipment       Worn              // The equipment the character is wearing
-	Energy          int               `yaml:"energy,omitempty"`        // The energy the character has
 	TNLScale        float32           `yaml:"-"`                       // The experience scale of the character. Don't write to yaml since is dynamically calculated.
 	HealthMax       stats.StatInfo    `yaml:"-"`                       // The maximum health of the character. Don't write to yaml since is dynamically calculated.
 	ManaMax         stats.StatInfo    `yaml:"-"`                       // The maximum mana of the character. Don't write to yaml since is dynamically calculated.
@@ -189,12 +188,16 @@ func (c *Character) GetBaseCastSuccessChance(spellId string) int {
 	return targetNumber
 }
 
+func (c *Character) CarryCapacity() int {
+	return 10 + int(c.Stats.Strength.ValueAdj/10)
+}
+
 func (c *Character) DeductActionPoints(amount int) bool {
 
 	if c.ActionPoints < amount {
 		return false
 	}
-	c.ActionPoints -= 10
+	c.ActionPoints -= amount
 	if c.ActionPoints < 0 {
 		c.ActionPoints = 0
 	}

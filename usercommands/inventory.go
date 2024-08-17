@@ -150,6 +150,7 @@ func Inventory(rest string, userId int, cmdQueue util.CommandQueue) (util.Messag
 		`AttackDamage`:       diceRoll,
 		`RaceInfo`:           raceInfo,
 		`Searching`:          len(rest) > 0,
+		`Count`:              fmt.Sprintf(`(%d/%d)`, len(itemList), user.Character.CarryCapacity()),
 	}
 
 	tplTxt, _ := templates.Process("character/inventory", invData)

@@ -48,7 +48,12 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 
 	if goRoomId > 0 || exitName != `` {
 
-		if !user.Character.DeductActionPoints(10) {
+		actionCost := 10
+		if len(user.Character.Items) > user.Character.CarryCapacity() {
+			actionCost = 50
+		}
+
+		if !user.Character.DeductActionPoints(actionCost) {
 			response.SendUserMessage(userId, "Youre too tired to move!", true)
 			response.Handled = true
 			return response, nil

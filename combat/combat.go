@@ -156,7 +156,7 @@ func GetWaitMessages(stepType items.Intensity, sourceChar *characters.Character,
 		toDefenderMsg = toDefenderMsg.SetTokenValue(tokenName, tokenValue)
 		toAttackerRoomMsg = toAttackerRoomMsg.SetTokenValue(tokenName, tokenValue)
 		if len(string(toDefenderRoomMsg)) > 0 {
-			toDefenderRoomMsg = toAttackerRoomMsg.SetTokenValue(tokenName, tokenValue)
+			toDefenderRoomMsg = toDefenderRoomMsg.SetTokenValue(tokenName, tokenValue)
 		}
 	}
 
@@ -174,8 +174,10 @@ func GetWaitMessages(stepType items.Intensity, sourceChar *characters.Character,
 			attackResult.SendToSourceRoom(templates.AnsiParse(string(toAttackerRoomMsg)))
 		}
 
-		if string(toDefenderRoomMsg) != `` {
-			attackResult.SendToTargetRoom(templates.AnsiParse(string(toDefenderRoomMsg)))
+		if sourceChar.RoomId != targetChar.RoomId {
+			if string(toDefenderRoomMsg) != `` {
+				attackResult.SendToTargetRoom(templates.AnsiParse(string(toDefenderRoomMsg)))
+			}
 		}
 
 	}
