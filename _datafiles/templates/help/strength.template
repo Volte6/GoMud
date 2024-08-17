@@ -8,5 +8,5 @@ Besides various skils that use strength, here are some other general uses for it
 
 * Unarmed combat gains 1 extra D-side for every 4 strength
 * Crit chance is <ansi fg="red">5 + (AttackStrength+AttackSpeed) / levelDifference</ansi>
-* You can carry <ansi fg="red">10 + (Strength/10)</ansi> objects without emcumbering your movement.
+* You can carry <ansi fg="red">8 + (Strength/6)</ansi> objects without emcumbering your movement.
 

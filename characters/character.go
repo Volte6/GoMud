@@ -189,7 +189,7 @@ func (c *Character) GetBaseCastSuccessChance(spellId string) int {
 }
 
 func (c *Character) CarryCapacity() int {
-	return 10 + int(c.Stats.Strength.ValueAdj/10)
+	return 8 + int(c.Stats.Strength.ValueAdj/6)
 }
 
 func (c *Character) DeductActionPoints(amount int) bool {
