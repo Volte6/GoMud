@@ -9,7 +9,7 @@ function onAsk(mob, room, eventDetails) {
     }
 
     match = UtilFindMatchIn(eventDetails.askText, nouns);
-    if ( match.exact.length > 0 ) {
+    if ( match.found ) {
 
         mob.Command("emote sighs.")
         mob.Command("say It's so sad, trying to restore the forest to its old self.")

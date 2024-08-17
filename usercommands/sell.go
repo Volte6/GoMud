@@ -40,6 +40,12 @@ func Sell(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		return response, nil
 	}
 
+	if itemSpec.QuestToken != `` {
+		response.SendUserMessage(user.UserId, "Quest items cannot be sold!", true)
+		response.Handled = true
+		return response, nil
+	}
+
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
 
 		mob := mobs.GetInstance(mobId)

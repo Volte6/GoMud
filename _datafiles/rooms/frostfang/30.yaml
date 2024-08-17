@@ -30,5 +30,5 @@ spawninfo:
   cooldown: 30
   message: A rat wanders out from nowhere and looks at you.
 - mobid: 1
-  cooldown: 40
+  cooldown: 21
   message: A rat falls from the sky.

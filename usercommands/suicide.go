@@ -47,7 +47,10 @@ func Suicide(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		}
 	}
 
-	user.Character.Gold = 0
+	if user.Character.Gold > 0 {
+		resp, _ := Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), userId, cmdQueue)
+		response.AbsorbMessages(resp)
+	}
 
 	if config.OnDeathAlwaysDropBackpack {
 		resp, _ := Drop("all", userId, cmdQueue)

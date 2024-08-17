@@ -14,7 +14,7 @@ function onAsk(mob, room, eventDetails) {
     }
 
     match = UtilFindMatchIn(eventDetails.askText, nouns);
-    if ( match.exact.length > 0 ) {
+    if ( match.found ) {
 
         mob.Command("emote thinks for a moment.")
         mob.Command("say I took a book called The History of Frostfang out with me weeks ago and can't remember where I left it.")
@@ -65,7 +65,12 @@ function onGive(mob, room, eventDetails) {
         mob.Command("emote Shows you some useful gestures.")
         mob.Command("say Check your <ansi fg=\"command\">spellbook</ansi>.")
 
-        user.LearnSpell("illum")
+        partyMembers = user.GetPartyMembers();
+        for( i = 0; i < partyMembers.length; i++ ) {    
+            a = partyMembers[i];
+            a.LearnSpell("illum")
+        }
+        
 
         return true;
     }

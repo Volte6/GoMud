@@ -9,7 +9,7 @@ function onAsk(mob, room, eventDetails) {
     }
 
     match = UtilFindMatchIn(eventDetails.askText, startQuestSubjects);
-    if ( match.found && match.exact.length > 0 ) {
+    if ( match.found ) {
 
         if ( user.HasQuest("2-start") ) {
             mob.Command("say Maybe you could snoop around there a bit and see if you can discover anything. They are just south of Town Square.");

@@ -281,6 +281,14 @@ BannedNames:
 - "anything"
 - "everything"
 - "all"
+- "north*"
+- "south*"
+- "east*"
+- "west*"
+- "up"
+- "down"
+- "chest"
+- "door"
 # - NextRoomID -
 # This number is auto-updated to the highest number of rooms in the game. 
 #   If creating your own rooms but don't want to risk an update conflicting, 

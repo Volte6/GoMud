@@ -1,7 +1,6 @@
 
 const nouns = ["quest", "hunger", "hungry", "belly", "food"]
 
-
 function onCommand(cmd, rest, mob, room, eventDetails) {
     if (cmd == "wave") {
         mob.Command("wave")
@@ -16,7 +15,7 @@ function onAsk(mob, room, eventDetails) {
     }
 
     match = UtilFindMatchIn(eventDetails.askText, nouns);
-    if ( match.exact.length > 0 ) {
+    if ( match.found ) {
 
         mob.Command("emote rubs his belly.")
         mob.Command("say I forgot my lunch today, and I'm so hungry.")

@@ -16,3 +16,5 @@ spawninfo:
   cooldown: 60
   message: sophie steps out from another room.
   name: sophie
+  scripttag: locketsadness
+  questflags: [1-return]

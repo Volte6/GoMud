@@ -183,6 +183,7 @@ command-aliases:
   picklock:         ['pick', 'lockpick']
   keyring:          ['key', 'keys']
   whisper:          ['/w']
+  unlock:           ['open']
   'party chat':     ['pchat', 'psay']
   'bank deposit':   ['deposit']
   'bank withdraw':  ['withdraw']

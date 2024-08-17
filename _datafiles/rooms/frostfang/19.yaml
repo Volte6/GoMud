@@ -15,5 +15,5 @@ exits:
     roomid: 16
 spawninfo:
 - mobid: 1
-  cooldown: 30
+  cooldown: 8
   message: A rat wanders out from nowhere and looks at you.

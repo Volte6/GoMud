@@ -79,6 +79,7 @@ type Mob struct {
 	PreventIdle     bool         `yaml:"-"`                   // Whether they can't possibly be idle
 	ScriptTag       string       `yaml:"scripttag"`           // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
 	tempDataStore   map[string]any
+	QuestFlags      []string `yaml:"questflags,omitempty,flow"` // What quest flags are set on this mob?
 }
 
 func MobInstanceExists(instanceId int) bool {

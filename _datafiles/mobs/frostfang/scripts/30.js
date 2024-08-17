@@ -22,7 +22,7 @@ function onAsk(mob, room, eventDetails) {
     }
 
     match = UtilFindMatchIn(eventDetails.askText, ASK_SUBJECTS);
-    if ( match.found && match.exact.length > 0 ) {
+    if ( match.found ) {
 
         mob.Command("say Look, we haven't had issues with rats ever since we discovered how to control them.");
         mob.Command("say If you can recover the amethyst from the bank vault for us, I'll teach you too.");

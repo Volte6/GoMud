@@ -9,7 +9,7 @@ function onAsk(mob, room, eventDetails) {
         // Waiting for a player to ask about the rats
         if ( !user.HasQuest("7-start") ) {
             startMatch = UtilFindMatchIn(eventDetails.askText, startNouns);
-            if ( startMatch.exact.length > 0 ) {           
+            if ( startMatch.found ) {           
                     mob.Command("say I'm worried about the rats in the slums. They're everywhere!");
                     mob.Command("say I'm running out of traps and don't seem to be making a dent in the rat numbers.");
                     mob.Command("say If you can kill 25 of them, come back and see me. I'll pay you for your trouble.");
@@ -39,7 +39,7 @@ function onAsk(mob, room, eventDetails) {
     if ( user.HasQuest("7-end") ) {
 
         tMatch = UtilFindMatchIn(eventDetails.askText, thievesNouns);
-        if ( tMatch.exact.length > 0 ) { 
+        if ( tMatch.found ) { 
 
             askTimes = mob.GetTempData(`ask-`+String(user.UserId()));
             if ( askTimes == null ) {

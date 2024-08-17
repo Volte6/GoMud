@@ -81,7 +81,7 @@ func Drop(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			fmt.Sprintf(`You drop <ansi fg="gold">%d gold</ansi> on the floor.`, dropAmt),
 			true)
 		response.SendRoomMessage(room.RoomId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi>" drops <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, dropAmt),
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, dropAmt),
 			true)
 
 		response.Handled = true

@@ -20,3 +20,4 @@ spawninfo:
   cooldown: 25
   message: A priest emerges from a confession booth
   scripttag: sanctuary
+  questflags: [2-start]

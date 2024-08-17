@@ -20,3 +20,4 @@ spawninfo:
 - mobid: 8
   cooldown: 100
   message: The King has decided to make an appearance!
+  questflags: [2-inform]

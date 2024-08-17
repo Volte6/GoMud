@@ -17,3 +17,4 @@ spawninfo:
   message: A soldier walks into the barracks.
   maxwander: 2
   scripttag: hungry
+  questflags: [4-return]

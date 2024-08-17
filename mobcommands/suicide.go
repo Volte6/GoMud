@@ -63,7 +63,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 	mobXP := mob.Character.XPTL(mob.Character.Level - 1)
 
-	xpVal := mobXP / 150
+	xpVal := mobXP / 125
 
 	xpVariation := xpVal / 100
 	if xpVariation < 1 {

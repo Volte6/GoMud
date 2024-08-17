@@ -20,13 +20,13 @@ exits:
     roomid: 20
 spawninfo:
 - mobid: 1
-  cooldown: 90
+  cooldown: 15
   message: A rat scurries out from a dark hole and wiggles its whiskers.
 - mobid: 1
-  cooldown: 32
+  cooldown: 20
   message: A rat wanders out from nowhere and looks at you.
 - mobid: 1
-  cooldown: 60
+  cooldown: 10
   message: A rat falls from the sky.
 stash:
 - itemid: 10001

@@ -8,7 +8,7 @@ function onAsk(mob, room, eventDetails) {
     }
 
     match = UtilFindMatchIn(eventDetails.askText, asksubjects);
-    if ( match.exact.length < 1 ) {
+    if ( !match.found ) {
         return false;
     }
 

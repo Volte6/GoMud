@@ -417,10 +417,10 @@ func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
 }
 
 func (c *Character) TrackCharmed(mobId int, add bool) {
-	for _, mobInstanceId := range c.CharmedMobs {
+	for pos, mobInstanceId := range c.CharmedMobs {
 		if mobInstanceId == mobId {
 			if !add {
-				c.CharmedMobs = append(c.CharmedMobs[:mobInstanceId], c.CharmedMobs[mobInstanceId+1:]...)
+				c.CharmedMobs = append(c.CharmedMobs[:pos], c.CharmedMobs[pos+1:]...)
 			}
 			return
 		}
@@ -1282,6 +1282,10 @@ func (c *Character) MovementCost() int {
 	modifier += int(c.Level / 15)                // Every 15 levels, get an extra movement.
 	modifier += int(c.Stats.Speed.ValueAdj / 15) // Every 15 speed, get an extra movement
 	return int(1000 / modifier)
+}
+
+func (c *Character) StatMod(statName string) int {
+	return c.Equipment.StatMod(statName) + c.Buffs.StatMod(statName)
 }
 
 func (c *Character) RecalculateStats() {
