@@ -49,12 +49,20 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 	if goRoomId > 0 || exitName != `` {
 
 		actionCost := 10
+		encumbered := false
 		if len(user.Character.Items) > user.Character.CarryCapacity() {
 			actionCost = 50
+			encumbered = true
 		}
 
 		if !user.Character.DeductActionPoints(actionCost) {
-			response.SendUserMessage(userId, "Youre too tired to move!", true)
+
+			if encumbered {
+				response.SendUserMessage(userId, "You're too tired to move!", true)
+			} else {
+				response.SendUserMessage(userId, "You're too encumbered to move!", true)
+			}
+
 			response.Handled = true
 			return response, nil
 		}
