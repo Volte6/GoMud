@@ -80,7 +80,7 @@ func (f FormattedName) String() string {
 	}
 
 	if f.QuestAlert {
-		output = `<ansi fg="questflag">*</ansi>` + output
+		output = `<ansi fg="questflag">★</ansi>` + output
 	}
 
 	return output

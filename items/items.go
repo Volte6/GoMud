@@ -373,7 +373,7 @@ func (i *Item) DisplayName() string {
 
 	prefix := ``
 	if i.GetSpec().QuestToken != `` {
-		prefix = `<ansi fg="questflag">*</ansi>`
+		prefix = `<ansi fg="questflag">★</ansi>`
 	}
 
 	spec := i.GetSpec()
