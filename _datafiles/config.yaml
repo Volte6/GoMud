@@ -315,3 +315,11 @@ Locked:
 - OnLoginCommands
 - BannedNames
 
+################################################################################
+#
+#   ChatGPT Configurations
+#
+################################################################################
+# - ChatGPTKey - 
+#   Your OpenAI Key. If empty, will not use ChatGPT.
+ChatGPTKey: ''

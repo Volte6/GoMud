@@ -17,7 +17,7 @@ import (
 
 /*
 SkullDuggery Skill
-Level 1 - Sneak
+Level 2 - Backstab
 */
 func Backstab(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
 
@@ -32,7 +32,7 @@ func Backstab(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
 	// If they don't have a skill, act like it's not a valid command
-	if skillLevel < 1 {
+	if skillLevel < 2 {
 		return response, nil
 	}
 

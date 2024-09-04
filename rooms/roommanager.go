@@ -64,6 +64,7 @@ type RoomTemplateDetails struct {
 	IsDark             bool
 	IsNight            bool
 	TrackingString     string
+	ExtraMessages      []string
 }
 
 var (
@@ -233,7 +234,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	if (len(isSpawn) > 0 && isSpawn[0]) || formerRoomId == -1 {
 		if user.Character.Level < 5 {
 
-			if toRoomId != -1 {
+			if toRoomId > -1 {
 				room := LoadRoom(toRoomId)
 				guideMob := mobs.NewMobById(38, 1)
 				guideMob.Character.Name = fmt.Sprintf(`%s's Guide`, user.Character.Name)

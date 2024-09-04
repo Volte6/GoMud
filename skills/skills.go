@@ -32,7 +32,7 @@ const (
 	Brawling    SkillTag = `brawling`    // [LVL 1-4] Soldiers Training Yard - ROOM 829
 	Scribe      SkillTag = `scribe`      // [LVL 1-4] Dark Acolyte's Chamber - ROOM 160
 	Protection  SkillTag = `protection`  // TODO
-	Tame        SkillTag = `tame`        // [LVL 1-4] Give mushroom to fairie in ROOOM 558, train in ROOM 830
+	Tame        SkillTag = `tame`        // [LVL 1-4] Give mushroom to fairie in ROOM 558, train in ROOM 830
 )
 
 var (
@@ -44,13 +44,13 @@ var (
 			Inspect,
 		},
 		"assassin": {
-			DualWield,
 			Skulduggery,
+			DualWield,
 			Track,
 		},
 		"explorer": {
-			Portal,
 			Map,
+			Portal,
 			Scribe,
 		},
 		"arcane scholar": {
@@ -59,21 +59,21 @@ var (
 			Inspect,
 		},
 		"warrior": {
-			DualWield,
 			Brawling,
+			DualWield,
 		},
 		"paladin": {
 			Protection,
 			Brawling,
 		},
 		"ranger": {
+			Map,
 			Search,
 			Track,
-			Map,
 		},
 		"monster hunter": {
-			Track,
 			Tame,
+			Track,
 		},
 		"sorcerer": {
 			Cast,

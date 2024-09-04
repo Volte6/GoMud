@@ -164,6 +164,10 @@ func (a ScriptActor) GetCharacterName(wrapInTags bool) string {
 	return a.characterRecord.Name
 }
 
+func (a ScriptActor) SetCharacterName(newName string) {
+	a.characterRecord.Name = newName
+}
+
 func (a ScriptActor) GetRoomId() int {
 	return a.characterRecord.RoomId
 }

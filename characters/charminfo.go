@@ -10,7 +10,7 @@ var ()
 
 type CharmInfo struct {
 	UserId          int    // Charmed or serving a player?
-	RoundsRemaining int    // If -2, never expires
+	RoundsRemaining int    // If -1, never expires
 	ExpiredCommand  string // Any valid mob commands such as `emote bows and waves farewell;despawn`
 }
 

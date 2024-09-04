@@ -189,7 +189,7 @@ func (c *Character) GetBaseCastSuccessChance(spellId string) int {
 }
 
 func (c *Character) CarryCapacity() int {
-	return 8 + int(c.Stats.Strength.ValueAdj/6)
+	return 5 + int(math.Floor(float64(c.Stats.Strength.ValueAdj/3)))
 }
 
 func (c *Character) DeductActionPoints(amount int) bool {
@@ -521,10 +521,6 @@ func (c *Character) GetHealthAppearance() string {
 	}
 
 	return fmt.Sprintf(`<ansi fg="username">%s</ansi> is in <ansi fg="%s">perfect health.</ansi>`, c.Name, className)
-}
-
-func (c *Character) GetBackpackCapacity() int {
-	return int(math.Ceil(float64(c.Stats.Strength.ValueAdj)/3)) + 3
 }
 
 func (c *Character) GetFollowers() []int {

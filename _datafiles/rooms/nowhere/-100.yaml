@@ -1,0 +1,10 @@
+roomid: -100
+zone: Nowhere
+zoneroot: true
+title: Training Hall
+description: |-
+  You stand in a grand hall dedicated to training the next generation of adventurers. 
+  The walls are lined with weapons and armor, and the floor is covered in straw and sawdust. 
+exits:
+  east:
+    roomid: -100

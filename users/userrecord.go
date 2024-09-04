@@ -358,7 +358,7 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 					promptOut.WriteString(strconv.Itoa(len(u.Character.Items)))
 
 				case "{I}":
-					promptOut.WriteString(strconv.Itoa(u.Character.GetBackpackCapacity()))
+					promptOut.WriteString(strconv.Itoa(u.Character.CarryCapacity()))
 
 				case "{lvl}":
 					promptOut.WriteString(strconv.Itoa(u.Character.Level))

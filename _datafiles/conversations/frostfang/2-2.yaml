@@ -1,0 +1,95 @@
+Conversations:
+  'guard:guard':
+  -
+    - mob1:
+      - emote bundles up a little tighter against the cold.
+      - say Cold night, isn't it? Frostbite could set in if you're not careful.
+    - mob2:
+      - say Aye, colder than usual. I swear it feels like the wind''s cutting right through this armor.
+    - mob1:
+      - say Heard anything from the Frostwarden rangers? Last I knew, they were out in the Whispering Wastes, tracking something.
+    - mob2:
+      - say Not much, just that they''re keeping an eye on the southern routes. Talk of a pack of wolves getting too close to the city.
+    - mob1:
+      - say Wolves, huh? We''ll need to keep a closer watch on the southern gates then. Don''t want any surprises.
+    - mob2:
+      - say Agreed. The last thing we need is a panic in the Slums. It''s bad enough down there without adding hungry wolves to the mix.
+    - mob1:
+      - say True. Stay sharp. The night''s only just begun.
+    - mob2:
+      - say Right. We''ll make it through, like always.
+  - 
+    - mob1:
+      - say Ivar at the Hacking Hut was complaining again today. Says the cold's been warping the handles on his axes.
+    - mob2:
+      - say I don''t blame him. This winter''s been harsher than usual. Even the best wood starts to crack in this weather.
+    - mob1:
+      - say He was muttering something about finding better materials. Maybe going to Mystarion to see if he can find something more resilient.
+    - mob2:
+      - say Mystarion, huh? That''s quite a journey just for axe handles. But if anyone can find something special, it''d be Ivar.
+    - mob1:
+      - say True. That man''s more stubborn than the steel he works with. I wouldn''t be surprised if he comes back with some enchanted wood or something.
+    - mob2:
+      - say Well, I wish him luck. We could use a bit of that magic ourselves on nights like this.
+    - mob1:
+      - say Couldn''t hurt. Maybe next time he should bring us back something to keep warm too.
+    - mob2:
+      - say Now that would be something worth the wait.
+  -
+    - mob1: 
+      - say Spotted a couple of rats near the western gate again. They''re getting bolder.
+    - mob2: 
+      - say Yeah, I''ve seen them too. They''re even starting to scurry around the armory. Must be the cold driving them in.
+    - mob1: 
+      - say Probably. They''re a nuisance, though. I saw one gnawing at a sack of grain by the Frostfire Inn. The wench wasn''t too happy about that.
+    - mob2: 
+      - say I can imagine. We''ll need to set some traps or something. Last thing we need is an infestation on top of everything else.
+    - mob1: 
+      - say Agreed. I''ll talk to Ivar at the Hacking Hut. He might have something we can use to deal with them.
+    - mob2: 
+      - say Good idea. Let''s nip this in the bud before it becomes a bigger problem.
+    - mob1: 
+      - say Right. One less thing to worry about on these long nights.
+  -
+    - mob1: 
+      - say Passed by The Sanctuary of the Benevolent Heart earlier. They were handing out blankets and soup to the folks from the Slums.
+    - mob2: 
+      - say Yeah, they do what they can. Not sure it makes much difference, though. The Slums are still the Slums.
+    - mob1: 
+      - say True. Guess it keeps them from freezing to death, at least. But it''s not like it''s going to change anything down there.
+    - mob2: 
+      - say Exactly. The same people, the same problems. The Sanctuary can give out all the blankets and soup they want, but the Slums will still be a mess.
+    - mob1: 
+      - say Well, better them handling it than us. I''ve got enough on my plate without worrying about every beggar in the city.
+    - mob2: 
+      - say No argument here. We''ve got our own work to do. Let the Sanctuary deal with their charity. We''ll keep the city secure.
+    - mob1: 
+      - say Right. As long as they keep things from getting too out of hand down there, that''s good enough for me.
+    - mob2: 
+      - say Same here. We''ve got bigger things to focus on.
+  -
+    - mob1: 
+      - say The captain was in a foul mood today. Heard he had to break up another fight in the Slums.
+    - mob2: 
+      - say Again? Seems like every week there''s some new trouble down there. Can''t blame him for being fed up.
+    - mob1: 
+      - say Right. The city comes first. 
+  -
+    - mob1: 
+      - say You hear about the captain''s latest order? He''s telling us to keep a closer eye on the eastern gate. Says there''ve been more sightings in the dark forest.
+    - mob2: 
+      - say Yeah, I heard. Those woods are crawling with all sorts of nasties—ents, sentient mushrooms, imps. Can''t say I''m eager to run into any of them.
+    - mob1: 
+      - say No kidding. One of the Frostwarden rangers told me they spotted a spider the size of a horse out there last week. Damn thing just vanished into the trees like it was nothing.
+    - mob2: 
+      - say Spiders that big? That''s the last thing we need. As if the cold wasn''t bad enough, now we''ve got to worry about getting snatched up by some oversized arachnid.
+    - mob1: 
+      - say Exactly. The forest''s always been dangerous, but it feels like things are getting worse. Maybe the cold''s driving them closer to the city.
+    - mob2: 
+      - say Could be. Whatever the reason, I''m not keen on having any of those creatures anywhere near Frostfang. If one of them gets through the gate...
+    - mob1: 
+      - say Yeah, we''ll have more than just rats to deal with. Let''s just hope the captain''s right to tighten security. Last thing we need is something creeping in during the night.
+    - mob2: 
+      - say Agreed. I''ll be keeping my eyes peeled on this side of the wall, thank you very much. No interest in finding out how big a spider''s web really is.
+    - mob1: 
+      - say Same here. Let''s just hope they stay in the forest where they belong.

@@ -16,7 +16,7 @@
   - [GetMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool \[,mapMarker string, mapMarker string\]) string](#getmapmaproomid-int-mapsize-string-mapheight-int-mapwidth-int-mapname-string-showsecrets-bool-mapmarker-string-mapmarker-string-string)
   - [RoomObject.HasQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjecthasquestquestid-string-partyuserid-int-int)
   - [RoomObject.MissingQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjectmissingquestquestid-string-partyuserid-int-int)
-  - [RoomObject.SpawnMob(mobId int) int](#roomobjectspawnmobmobid-int-int)
+  - [RoomObject.SpawnMob(mobId int) Actor](#roomobjectspawnmobmobid-int-actor)
   - [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](#roomobjectaddtemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int-roundttl-int)
   - [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](#roomobjectremovetemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int)
   - [RoomObject.RepeatSpawnItem(itemId int, roundInterval int \[, containerName\]](#roomobjectrepeatspawnitemitemid-int-roundinterval-int--containername)
@@ -139,8 +139,8 @@ _Note: This could be useful for situations where you want to disallow a whole pa
 | questId | The identifier of the quest such as `3-start`. |
 | partyUserId (optional) | Only check the specified user and their party |
 
-## [RoomObject.SpawnMob(mobId int) int](/scripting/room_func.go)
-Creates a new instance of MobId,and returns the `mobInstanceId` of the mob.
+## [RoomObject.SpawnMob(mobId int) Actor](/scripting/room_func.go)
+Creates a new instance of MobId,and returns the `Actor` of the mob.
 
 |  Argument | Explanation |
 | --- | --- |

@@ -19,6 +19,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetMiscCharacterData(key string) any](#actorobjectgetmisccharacterdatakey-string-any)
   - [ActorObject.GetMiscCharacterDataKeys(\[ prefix1, prefix2 \]) \[\]string](#actorobjectgetmisccharacterdatakeys-prefix1-prefix2--string)
   - [ActorObject.GetCharacterName( wrapInTags bool ) string](#actorobjectgetcharactername-wrapintags-bool--string)
+  - [ActorObject.SetCharacterName( newName string )](#actorobjectsetcharactername-newname-string-)
   - [ActorObject.GetRoomId() int](#actorobjectgetroomid-int)
   - [ActorObject.HasQuest(questId string) bool](#actorobjecthasquestquestid-string-bool)
   - [ActorObject.GiveQuest(questId string)](#actorobjectgivequestquestid-string)
@@ -170,6 +171,13 @@ Retrieves the name of a ActorObject.
 |  Argument | Explanation |
 | --- | --- |
 | wrapInTags | If true, will return the name wrapped in ansi tags with the fg set to `username` or `mobname`. |
+
+## [ActorObject.SetCharacterName( newName string )](/scripting/actor_func.go)
+Retrieves the name of a ActorObject.
+
+|  Argument | Explanation |
+| --- | --- |
+| newName | The new name for the mob or player. |
 
 ## [ActorObject.GetRoomId() int](/scripting/actor_func.go)
 Returns the roomId a ActorObject is in.
@@ -402,7 +410,7 @@ Sets a mob to charmed by a user for a set number of rounds.
 |  Argument | Explanation |
 | --- | --- |
 | userId | userId that the mob will be charmed to |
-| charmRounds | How many rounds it should last, or -2 for unlimited. |
+| charmRounds | How many rounds it should last, or -1 for unlimited. |
 | onRevertCommand | One or more commands for the mob to execute when the charm expires |
 
 ## [ActorObject.CharmRemove()](/scripting/actor_func.go)
