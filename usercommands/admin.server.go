@@ -31,7 +31,7 @@ func Server(rest string, userId int) (util.MessageQueue, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.server", nil)
-		response.SendUserMessage(userId, infoOutput, false)
+		response.SendUserMessage(userId, infoOutput)
 		response.Handled = true
 		return response, nil
 	}
@@ -47,7 +47,7 @@ func Server(rest string, userId int) (util.MessageQueue, error) {
 			rows := [][]string{}
 			formatting := []string{`<ansi fg="yellow-bold">%s</ansi>`, `<ansi fg="red-bold">%s</ansi>`}
 
-			response.SendUserMessage(userId, ``, true)
+			response.SendUserMessage(userId, ``)
 
 			cfgData := configs.GetConfig().AllConfigData()
 			cfgKeys := make([]string, 0, len(cfgData))
@@ -64,7 +64,7 @@ func Server(rest string, userId int) (util.MessageQueue, error) {
 
 			settingsTable := templates.GetTable("Server Settings", headers, rows, formatting)
 			tplTxt, _ := templates.Process("tables/generic", settingsTable)
-			response.SendUserMessage(userId, tplTxt, true)
+			response.SendUserMessage(userId, tplTxt)
 
 			response.Handled = true
 			return response, nil
@@ -73,13 +73,13 @@ func Server(rest string, userId int) (util.MessageQueue, error) {
 		if args[0] == "day" {
 			gametime.SetToDay(-1)
 			gd := gametime.GetDate()
-			response.SendUserMessage(userId, `Time set to `+gd.String(), true)
+			response.SendUserMessage(userId, `Time set to `+gd.String())
 			response.Handled = true
 			return response, nil
 		} else if args[0] == "night" {
 			gametime.SetToNight(-1)
 			gd := gametime.GetDate()
-			response.SendUserMessage(userId, `Time set to `+gd.String(), true)
+			response.SendUserMessage(userId, `Time set to `+gd.String())
 			response.Handled = true
 			return response, nil
 		} else if args[0] == "time" && len(args) > 1 {
@@ -103,7 +103,7 @@ func Server(rest string, userId int) (util.MessageQueue, error) {
 
 			gametime.SetTime(hour, minutes)
 			gd := gametime.GetDate()
-			response.SendUserMessage(userId, `Time set to `+gd.String(), true)
+			response.SendUserMessage(userId, `Time set to `+gd.String())
 			response.Handled = true
 			return response, nil
 		}
@@ -112,12 +112,12 @@ func Server(rest string, userId int) (util.MessageQueue, error) {
 		configValue := strings.Join(args[1:], ` `)
 
 		if err := configs.SetVal(configName, configValue); err != nil {
-			response.SendUserMessage(userId, fmt.Sprintf(`config change error: %s=%s (%s)`, configName, configValue, err), true)
+			response.SendUserMessage(userId, fmt.Sprintf(`config change error: %s=%s (%s)`, configName, configValue, err))
 			response.Handled = true
 			return response, nil
 		}
 
-		response.SendUserMessage(userId, fmt.Sprintf(`config changed: %s=%s`, configName, configValue), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`config changed: %s=%s`, configName, configValue))
 
 		response.Handled = true
 		return response, nil
@@ -125,7 +125,7 @@ func Server(rest string, userId int) (util.MessageQueue, error) {
 
 	if rest == "reload-ansi" {
 		templates.LoadAliases()
-		response.SendUserMessage(userId, `ansi aliases reloaded`, true)
+		response.SendUserMessage(userId, `ansi aliases reloaded`)
 		response.Handled = true
 		return response, nil
 	}
@@ -155,9 +155,9 @@ func Server(rest string, userId int) (util.MessageQueue, error) {
 		//
 		// General Go stats
 		//
-		response.SendUserMessage(userId, ``, true)
-		response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="yellow-bold">IP/Port:</ansi>    <ansi fg="red">%s</ansi>`, util.GetServerAddress()), true)
-		response.SendUserMessage(userId, ``, true)
+		response.SendUserMessage(userId, ``)
+		response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="yellow-bold">IP/Port:</ansi>    <ansi fg="red">%s</ansi>`, util.GetServerAddress()))
+		response.SendUserMessage(userId, ``)
 
 		//
 		// Special timing related stats
@@ -191,7 +191,7 @@ func Server(rest string, userId int) (util.MessageQueue, error) {
 
 		tblData := templates.GetTable(`Timer Stats`, headers, rows, formatting)
 		tplTxt, _ := templates.Process("tables/generic", tblData)
-		response.SendUserMessage(userId, tplTxt, true)
+		response.SendUserMessage(userId, tplTxt)
 
 		//
 		// Alternative rendering
@@ -305,7 +305,7 @@ func Server(rest string, userId int) (util.MessageQueue, error) {
 		memRepRows = append(memRepRows, rowData)
 		memRepTblData := templates.GetTable(`Specific Memory`, memRepHeaders, memRepRows, memRepFormatting)
 		memRepTxt, _ := templates.Process("tables/generic", memRepTblData)
-		response.SendUserMessage(userId, memRepTxt, true)
+		response.SendUserMessage(userId, memRepTxt)
 	}
 
 	response.Handled = true

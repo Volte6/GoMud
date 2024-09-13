@@ -31,7 +31,7 @@ func Drink(rest string, userId int) (util.MessageQueue, error) {
 	matchItem, found := user.Character.FindInBackpack(rest)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf(`You don't have a "%s" to drink.`, rest), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You don't have a "%s" to drink.`, rest))
 	} else {
 
 		itemSpec := matchItem.GetSpec()
@@ -39,7 +39,7 @@ func Drink(rest string, userId int) (util.MessageQueue, error) {
 		if itemSpec.Subtype != items.Drinkable {
 			response.SendUserMessage(userId,
 				fmt.Sprintf(`You can't drink <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
-				true)
+			)
 			response.Handled = true
 			return response, nil
 		}
@@ -48,8 +48,8 @@ func Drink(rest string, userId int) (util.MessageQueue, error) {
 
 		user.Character.UseItem(matchItem)
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You drink the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()), true)
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> drinks <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You drink the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()))
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> drinks <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()))
 
 		for _, buffId := range itemSpec.BuffIds {
 

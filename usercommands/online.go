@@ -97,7 +97,7 @@ func Online(rest string, userId int) (util.MessageQueue, error) {
 
 	onlineResultsTable := templates.GetTable(tableTitle, headers, rows, allFormatting...)
 	tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
-	response.SendUserMessage(userId, tplTxt, false)
+	response.SendUserMessage(userId, tplTxt)
 
 	response.Handled = true
 	return response, nil

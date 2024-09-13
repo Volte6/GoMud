@@ -67,7 +67,7 @@ func RestockServant(rest string, mobId int) (util.MessageQueue, error) {
 	}
 
 	if restocked {
-		response.SendRoomMessage(mob.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> presents some help for hire`, mob.Character.Name), true)
+		response.SendRoomMessage(mob.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> presents some help for hire`, mob.Character.Name))
 	}
 
 	response.Handled = true

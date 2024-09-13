@@ -37,13 +37,13 @@ func Aid(rest string, userId int) (util.MessageQueue, error) {
 	skillLevel := user.Character.GetSkillLevel(skills.Protection)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to provide aid.", true)
+		response.SendUserMessage(userId, "You don't know how to provide aid.")
 		response.Handled = true
 		return response, fmt.Errorf("you don't know how to provide aid")
 	}
 
 	if skillLevel < 3 && !room.IsCalm() {
-		response.SendUserMessage(userId, "You can only do that in calm rooms!", true)
+		response.SendUserMessage(userId, "You can only do that in calm rooms!")
 		response.Handled = true
 		return response, nil
 	}
@@ -61,13 +61,13 @@ func Aid(rest string, userId int) (util.MessageQueue, error) {
 		if p != nil {
 
 			if p.Character.Health > 0 {
-				response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is not in need of aid!`, p.Character.Name), true)
+				response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is not in need of aid!`, p.Character.Name))
 				response.Handled = true
 				return response, nil
 			}
 
 			if user.Character.Aggro != nil {
-				response.SendUserMessage(userId, "You are too busy to aid anyone!", true)
+				response.SendUserMessage(userId, "You are too busy to aid anyone!")
 				response.Handled = true
 				return response, nil
 			}
@@ -98,7 +98,7 @@ func Aid(rest string, userId int) (util.MessageQueue, error) {
 		return response, nil
 	}
 
-	response.SendUserMessage(userId, "Aid whom?", true)
+	response.SendUserMessage(userId, "Aid whom?")
 	response.Handled = true
 	return response, nil
 }

@@ -35,24 +35,24 @@ func Map(rest string, userId int) (util.MessageQueue, error) {
 	skillLevel := user.Character.GetSkillLevel(skills.Map)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to map.", true)
+		response.SendUserMessage(userId, "You don't know how to map.")
 		response.Handled = true
 		return response, errors.New(`you don't know how to map`)
 	}
 
 	if rest == "memory" {
-		response.SendUserMessage(userId, fmt.Sprintf("You currently remember %d of %d possible rooms.", len(user.Character.GetRoomMemory()), user.Character.GetMemoryCapacity()), true)
+		response.SendUserMessage(userId, fmt.Sprintf("You currently remember %d of %d possible rooms.", len(user.Character.GetRoomMemory()), user.Character.GetMemoryCapacity()))
 		response.Handled = true
 		return response, nil
 	}
 	if rest == "sprawl" {
-		response.SendUserMessage(userId, fmt.Sprintf("The reach of your maps is %d rooms.", user.Character.GetMapSprawlCapacity()), true)
+		response.SendUserMessage(userId, fmt.Sprintf("The reach of your maps is %d rooms.", user.Character.GetMapSprawlCapacity()))
 		response.Handled = true
 		return response, nil
 	}
 
 	if rest == "wide" && skillLevel < 4 {
-		response.SendUserMessage(userId, "You don't know how to create a wide map.", true)
+		response.SendUserMessage(userId, "You don't know how to create a wide map.")
 		response.Handled = true
 		return response, errors.New(`you don't know how to create a wide map`)
 	}
@@ -60,7 +60,7 @@ func Map(rest string, userId int) (util.MessageQueue, error) {
 	if !user.Character.TryCooldown(skills.Map.String(), 1) {
 		response.SendUserMessage(userId,
 			`You can only create 1 map per round.`,
-			true)
+		)
 		response.Handled = true
 		return response, errors.New(`you're doing that too often`)
 	}
@@ -82,7 +82,7 @@ func Map(rest string, userId int) (util.MessageQueue, error) {
 
 	// First check for a premade map.
 	if mapTxt, err := templates.Process("maps/"+rooms.ZoneNameSanitize(zone), zone); err == nil {
-		response.SendUserMessage(userId, mapTxt, false)
+		response.SendUserMessage(userId, mapTxt)
 		response.Handled = true
 		return response, nil
 	}
@@ -211,12 +211,12 @@ func Map(rest string, userId int) (util.MessageQueue, error) {
 	mapTxt, err := templates.Process("maps/map", mapData)
 	if err != nil {
 		slog.Error("Map", "error", err.Error())
-		response.SendUserMessage(userId, `No map found (or an error occured)"`, true)
+		response.SendUserMessage(userId, `No map found (or an error occured)"`)
 		response.Handled = true
 		return response, err
 	}
 
-	response.SendUserMessage(userId, mapTxt, false)
+	response.SendUserMessage(userId, mapTxt)
 
 	response.Handled = true
 	return response, nil

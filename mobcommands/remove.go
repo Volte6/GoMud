@@ -38,7 +38,7 @@ func Remove(rest string, mobId int) (util.MessageQueue, error) {
 
 			response.SendRoomMessage(mob.Character.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, matchItem.DisplayName()),
-				true)
+			)
 
 			mob.Character.StoreItem(matchItem)
 		}

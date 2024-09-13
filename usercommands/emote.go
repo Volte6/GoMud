@@ -103,10 +103,10 @@ func Emote(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if len(rest) == 0 {
-		response.SendUserMessage(userId, "You emote.", true)
+		response.SendUserMessage(userId, "You emote.")
 		response.SendRoomMessage(user.Character.RoomId,
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> emotes.`, user.Character.Name),
-			true)
+		)
 		response.Handled = true
 		return response, nil
 	}
@@ -116,12 +116,12 @@ func Emote(rest string, userId int) (util.MessageQueue, error) {
 	} else {
 		response.SendUserMessage(userId,
 			fmt.Sprintf(`You emote: <ansi fg="username">%s</ansi> <ansi fg="blue">%s</ansi>`, user.Character.Name, rest),
-			true)
+		)
 	}
 
 	response.SendRoomMessage(user.Character.RoomId,
 		fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="blue">%s</ansi>`, user.Character.Name, rest),
-		true)
+	)
 
 	response.Handled = true
 	return response, nil

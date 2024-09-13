@@ -33,14 +33,14 @@ func Rank(rest string, userId int) (util.MessageQueue, error) {
 	skillLevel := user.Character.GetSkillLevel(skills.Protection)
 
 	if skillLevel < 1 {
-		response.SendUserMessage(userId, "You don't know how to change your combat rank.", true)
+		response.SendUserMessage(userId, "You don't know how to change your combat rank.")
 		response.Handled = true
 		return response, fmt.Errorf("you don't know how to change your combat rank.")
 	}
 
 	party := parties.Get(userId)
 	if party == nil {
-		response.SendUserMessage(userId, "You must be in a party to change your combat rank.", true)
+		response.SendUserMessage(userId, "You must be in a party to change your combat rank.")
 		response.Handled = true
 		return response, fmt.Errorf("you must be in a party to change your combat rank.")
 	}
@@ -53,8 +53,8 @@ func Rank(rest string, userId int) (util.MessageQueue, error) {
 		party.SetRank(userId, `middle`)
 	}
 
-	response.SendUserMessage(userId, fmt.Sprintf(`You are now fighting from the <ansi fg="magenta">%s</ansi> rank.`, party.GetRank(userId)), true)
-	response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now fighting from the <ansi fg="magenta">%s</ansi> rank.`, user.Character.Name, party.GetRank(userId)), true, userId)
+	response.SendUserMessage(userId, fmt.Sprintf(`You are now fighting from the <ansi fg="magenta">%s</ansi> rank.`, party.GetRank(userId)))
+	response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now fighting from the <ansi fg="magenta">%s</ansi> rank.`, user.Character.Name, party.GetRank(userId)), userId)
 
 	response.Handled = true
 	return response, nil

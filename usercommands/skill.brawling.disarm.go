@@ -32,7 +32,7 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if user.Character.Aggro == nil {
-		response.SendUserMessage(userId, "Disarm is only used while in combat!", true)
+		response.SendUserMessage(userId, "Disarm is only used while in combat!")
 		response.Handled = true
 		return response, nil
 	}
@@ -48,7 +48,7 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 
 	if attackMobInstanceId > 0 || attackPlayerId > 0 {
 		if !user.Character.TryCooldown(skills.Brawling.String(`disarm`), 15) {
-			response.SendUserMessage(userId, fmt.Sprintf("You can try disarming again in %d rounds.", user.Character.GetCooldown(skills.Brawling.String(`disarm`))), true)
+			response.SendUserMessage(userId, fmt.Sprintf("You can try disarming again in %d rounds.", user.Character.GetCooldown(skills.Brawling.String(`disarm`))))
 			response.Handled = true
 			return response, nil
 		}
@@ -61,7 +61,7 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 		if m != nil {
 
 			if m.Character.Equipment.Weapon.ItemId == 0 {
-				response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> has no weapon to disarm!`, m.Character.Name), true)
+				response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> has no weapon to disarm!`, m.Character.Name))
 				response.Handled = true
 				return response, nil
 			}
@@ -79,11 +79,10 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You disarm <ansi fg="mobname">%s</ansi>!`, m.Character.Name),
-					true)
+				)
 
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> disarms <ansi fg="mobname">%s</ansi>!`, user.Character.Name, m.Character.Name),
-					true,
 					userId,
 				)
 
@@ -94,11 +93,10 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 			} else {
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You try to disarm <ansi fg="mobname">%s</ansi> and fail!`, m.Character.Name),
-					true)
+				)
 
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to disarm <ansi fg="mobname">%s</ansi> and fails!`, user.Character.Name, m.Character.Name),
-					true,
 					userId,
 				)
 
@@ -123,15 +121,14 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You disarm <ansi fg="username">%s</ansi>!`, u.Character.Name),
-					true)
+				)
 
 				response.SendUserMessage(attackPlayerId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> disarms you!`, user.Character.Name),
-					true)
+				)
 
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> disarms <ansi fg="username">%s</ansi>!`, user.Character.Name, u.Character.Name),
-					true,
 					userId,
 					attackPlayerId,
 				)
@@ -143,15 +140,14 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 			} else {
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You try to disarm <ansi fg="username">%s</ansi> and miss!`, u.Character.Name),
-					true)
+				)
 
 				response.SendUserMessage(attackPlayerId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to disarm you and misses!`, user.Character.Name),
-					true)
+				)
 
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to disarm <ansi fg="username">%s</ansi> and misses!`, user.Character.Name, u.Character.Name),
-					true,
 					userId,
 					attackPlayerId,
 				)

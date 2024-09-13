@@ -28,7 +28,7 @@ func Offer(rest string, userId int) (util.MessageQueue, error) {
 
 	item, found := user.Character.FindInBackpack(rest)
 	if !found {
-		response.SendUserMessage(user.UserId, "You don't have that item.", true)
+		response.SendUserMessage(user.UserId, "You don't have that item.")
 		response.Handled = true
 		return response, nil
 	}

@@ -53,7 +53,7 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 			}
 
 			if !isSneaking {
-				response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> peers toward the %s.`, mob.Character.Name, exitName), true)
+				response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> peers toward the %s.`, mob.Character.Name, exitName))
 			}
 
 			if lookRoomId > 0 {
@@ -73,7 +73,7 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 			if !isSneaking {
 				response.SendRoomMessage(room.RoomId,
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.DisplayName()),
-					true)
+				)
 			}
 
 			response.Handled = true
@@ -95,11 +95,10 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 				if !isSneaking {
 					response.SendUserMessage(u.UserId,
 						fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at you.`, mob.Character.Name),
-						true)
+					)
 
 					response.SendRoomMessage(room.RoomId,
 						fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at <ansi fg="username">%s</ansi>.`, mob.Character.Name, u.Character.Name),
-						true,
 						u.UserId)
 				}
 
@@ -111,7 +110,7 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 					targetName := m.Character.GetMobName(0).String()
 					response.SendRoomMessage(room.RoomId,
 						fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at %s.`, mob.Character.Name, targetName),
-						true)
+					)
 				}
 
 			}
@@ -129,7 +128,7 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 			if !isSneaking {
 				response.SendRoomMessage(room.RoomId,
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.DisplayName()),
-					true)
+				)
 			}
 
 			response.Handled = true
@@ -144,7 +143,7 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 		if !secretLook && !isSneaking {
 			response.SendRoomMessage(room.RoomId,
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking around.`, mob.Character.Name),
-				true)
+			)
 
 			// Make it a "secret looks" now because we don't want another look message sent out by the lookRoom() func
 			secretLook = true
@@ -176,11 +175,11 @@ func lookRoom(mobId int, roomId int, response *util.MessageQueue, secretLook boo
 		if lookFromName == "" {
 			response.SendRoomMessage(room.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking into the room from somewhere...`, mob.Character.Name),
-				true)
+			)
 		} else {
 			response.SendRoomMessage(room.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking into the room from the <ansi fg="exit">%s</ansi> exit`, mob.Character.Name, lookFromName),
-				true)
+			)
 		}
 	}
 

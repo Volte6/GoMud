@@ -32,7 +32,7 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 	skillLevel := user.Character.GetSkillLevel(skills.Scribe)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to scribe.", true)
+		response.SendUserMessage(userId, "You don't know how to scribe.")
 		response.Handled = true
 		return response, fmt.Errorf("you don't know how to scribe")
 	}
@@ -52,7 +52,7 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) == 0 {
-		response.SendUserMessage(userId, "Type `help scribe` for more information on the scribe skill.", true)
+		response.SendUserMessage(userId, "Type `help scribe` for more information on the scribe skill.")
 		response.Handled = true
 		return response, nil
 	}
@@ -66,38 +66,38 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 		noteItem.SetBlob(rest)
 		user.Character.StoreItem(noteItem)
 
-		response.SendUserMessage(userId, "You write a note, and tuck it away safely.", true)
+		response.SendUserMessage(userId, "You write a note, and tuck it away safely.")
 
 	} else if scribeType == "sign" {
 
 		if skillLevel < 2 {
 
-			response.SendUserMessage(userId, "You don't know how to create signs yet.", true)
+			response.SendUserMessage(userId, "You don't know how to create signs yet.")
 
 		} else if !user.Character.TryCooldown(skills.Scribe.String(), 10) {
 
 			// There's a cooldown on this skill
 			response.SendUserMessage(userId,
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Scribe.String())),
-				true)
+			)
 			response.Handled = true
 			return response, fmt.Errorf("you're doing that too often")
 
 		} else {
 			// Write a sign in the room
 			if len(rest) > 50 {
-				response.SendUserMessage(userId, "That won't fit! Keep it under 50 letters.", true)
+				response.SendUserMessage(userId, "That won't fit! Keep it under 50 letters.")
 			} else {
 				if replaced := room.AddSign(rest, 0, 7); replaced {
-					response.SendUserMessage(userId, "You knock down the old sign and replace it with a new one.", true)
+					response.SendUserMessage(userId, "You knock down the old sign and replace it with a new one.")
 					response.SendRoomMessage(user.Character.RoomId,
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> knocks down the old sign and replaces it with a new one.`, user.Character.Name),
-						true)
+					)
 				} else {
-					response.SendUserMessage(userId, "You find some junk wood and scrawl a message onto it.", true)
+					response.SendUserMessage(userId, "You find some junk wood and scrawl a message onto it.")
 					response.SendRoomMessage(user.Character.RoomId,
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> finds some junk wood and scrawls a message onto it.`, user.Character.Name),
-						true)
+					)
 				}
 			}
 		}
@@ -105,14 +105,14 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 
 		if skillLevel < 3 {
 
-			response.SendUserMessage(userId, "You don't know how to create runes yet.", true)
+			response.SendUserMessage(userId, "You don't know how to create runes yet.")
 
 		} else if !user.Character.TryCooldown(skills.Scribe.String(), 2) {
 
 			// There's a cooldown on this skill
 			response.SendUserMessage(userId,
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Scribe.String())),
-				true)
+			)
 			response.Handled = true
 			return response, fmt.Errorf("you're doing that too often")
 
@@ -120,12 +120,12 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 
 			// Write a rune in the room
 			if len(rest) > 50 {
-				response.SendUserMessage(userId, "That won't fit! Keep it under 50 letters.", true)
+				response.SendUserMessage(userId, "That won't fit! Keep it under 50 letters.")
 			} else {
 				if replaced := room.AddSign(rest, userId, 7); replaced {
-					response.SendUserMessage(userId, "You scratch out the old rune and replace it with a new one.", true)
+					response.SendUserMessage(userId, "You scratch out the old rune and replace it with a new one.")
 				} else {
-					response.SendUserMessage(userId, "You scratch a rune into the floor.", true)
+					response.SendUserMessage(userId, "You scratch a rune into the floor.")
 				}
 			}
 
@@ -135,14 +135,14 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 
 		if skillLevel < 4 {
 
-			response.SendUserMessage(userId, "You don't know how to scribe maps yet.", true)
+			response.SendUserMessage(userId, "You don't know how to scribe maps yet.")
 
 		} else if !user.Character.TryCooldown(skills.Scribe.String(), 30) {
 
 			// There's a cooldown on this skill
 			response.SendUserMessage(userId,
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Scribe.String())),
-				true)
+			)
 			response.Handled = true
 			return response, fmt.Errorf("you're doing that too often")
 
@@ -150,7 +150,7 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 			// Draw a map of the room and write it to an item
 			resp, err := Map("", userId)
 			if err != nil {
-				response.SendUserMessage(userId, err.Error(), true)
+				response.SendUserMessage(userId, err.Error())
 				return response, err
 			}
 
@@ -162,7 +162,7 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 			mapItem.SetBlob(templates.AnsiParse(mapContents))
 			user.Character.StoreItem(mapItem)
 
-			response.SendUserMessage(userId, "You draw a map of the area, as much as you can remember it.", true)
+			response.SendUserMessage(userId, "You draw a map of the area, as much as you can remember it.")
 		}
 	}
 

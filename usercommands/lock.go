@@ -29,7 +29,7 @@ func Lock(rest string, userId int) (util.MessageQueue, error) {
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 1 {
-		response.SendUserMessage(userId, "Unlock what?", true)
+		response.SendUserMessage(userId, "Unlock what?")
 		response.Handled = true
 		return response, nil
 	}
@@ -42,7 +42,7 @@ func Lock(rest string, userId int) (util.MessageQueue, error) {
 		container := room.Containers[containerName]
 
 		if container.Lock.IsLocked() {
-			response.SendUserMessage(userId, "That's already locked.", true)
+			response.SendUserMessage(userId, "That's already locked.")
 			response.Handled = true
 			return response, nil
 		}
@@ -60,8 +60,8 @@ func Lock(rest string, userId int) (util.MessageQueue, error) {
 			container.Lock.SetLocked()
 			room.Containers[containerName] = container
 
-			response.SendUserMessage(userId, fmt.Sprintf(`You use a key to relock the <ansi fg="container">%s</ansi>.`, containerName), true)
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to relock the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName), true)
+			response.SendUserMessage(userId, fmt.Sprintf(`You use a key to relock the <ansi fg="container">%s</ansi>.`, containerName))
+			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to relock the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName))
 		} else if hasBackpackKey {
 
 			itmSpec := backpackKeyItm.GetSpec()
@@ -74,13 +74,12 @@ func Lock(rest string, userId int) (util.MessageQueue, error) {
 			user.Character.SetKey(`key-`+lockId, fmt.Sprintf(`%d`, backpackKeyItm.ItemId))
 			user.Character.RemoveItem(backpackKeyItm)
 
-			response.SendUserMessage(userId, fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to lock the <ansi fg="container">%s</ansi>, and add it to your key ring for the future.`, itmSpec.Name, containerName), true)
+			response.SendUserMessage(userId, fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to lock the <ansi fg="container">%s</ansi>, and add it to your key ring for the future.`, itmSpec.Name, containerName))
 			response.SendRoomMessage(room.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to lock the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName),
-				true,
 				userId)
 		} else {
-			response.SendUserMessage(userId, `You do not have the key for that.`, true)
+			response.SendUserMessage(userId, `You do not have the key for that.`)
 		}
 
 		response.Handled = true
@@ -91,7 +90,7 @@ func Lock(rest string, userId int) (util.MessageQueue, error) {
 		exitInfo := room.Exits[exitName]
 
 		if exitInfo.Lock.IsLocked() {
-			response.SendUserMessage(userId, "That's already locked.", true)
+			response.SendUserMessage(userId, "That's already locked.")
 			response.Handled = true
 			return response, nil
 		}
@@ -109,8 +108,8 @@ func Lock(rest string, userId int) (util.MessageQueue, error) {
 			exitInfo.Lock.SetLocked()
 			room.Exits[exitName] = exitInfo
 
-			response.SendUserMessage(userId, fmt.Sprintf(`You use a key to relock the <ansi fg="exit">%s</ansi> lock.`, exitName), true)
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to relock the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), true)
+			response.SendUserMessage(userId, fmt.Sprintf(`You use a key to relock the <ansi fg="exit">%s</ansi> lock.`, exitName))
+			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to relock the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName))
 		} else if hasBackpackKey {
 
 			itmSpec := backpackKeyItm.GetSpec()
@@ -123,13 +122,12 @@ func Lock(rest string, userId int) (util.MessageQueue, error) {
 			user.Character.SetKey(`key-`+lockId, fmt.Sprintf(`%d`, backpackKeyItm.ItemId))
 			user.Character.RemoveItem(backpackKeyItm)
 
-			response.SendUserMessage(userId, fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to lock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName), true)
+			response.SendUserMessage(userId, fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to lock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName))
 			response.SendRoomMessage(room.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to lock the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
-				true,
 				userId)
 		} else {
-			response.SendUserMessage(userId, `You do not have the key for that.`, true)
+			response.SendUserMessage(userId, `You do not have the key for that.`)
 		}
 
 		response.Handled = true
@@ -137,7 +135,7 @@ func Lock(rest string, userId int) (util.MessageQueue, error) {
 
 	}
 
-	response.SendUserMessage(userId, "There is no such exit or container.", true)
+	response.SendUserMessage(userId, "There is no such exit or container.")
 	response.Handled = true
 	return response, nil
 

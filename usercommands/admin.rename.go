@@ -24,7 +24,7 @@ func Rename(rest string, userId int) (util.MessageQueue, error) {
 	if len(args) < 2 {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.rename", nil)
-		response.SendUserMessage(userId, infoOutput, false)
+		response.SendUserMessage(userId, infoOutput)
 		response.Handled = true
 		return response, nil
 	}
@@ -34,7 +34,7 @@ func Rename(rest string, userId int) (util.MessageQueue, error) {
 	rest = strings.Join(args[1:], " ")
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to rename.", rest), true)
+		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to rename.", rest))
 	} else {
 		// Swap the item location
 		user.Character.RemoveItem(matchItem)
@@ -45,10 +45,10 @@ func Rename(rest string, userId int) (util.MessageQueue, error) {
 
 		response.SendUserMessage(userId,
 			fmt.Sprintf(`You chant softly and wave your hand over the <ansi fg="item">%s</ansi>. Success!`, oldNameSimple),
-			true)
+		)
 		response.SendRoomMessage(user.Character.RoomId,
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> chants softly and waves their hand over <ansi fg="item">%s</ansi>, causing it to glow briefly.`, user.Character.Name, oldName),
-			true)
+		)
 	}
 
 	response.Handled = true

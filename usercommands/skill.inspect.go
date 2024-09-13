@@ -29,13 +29,13 @@ func Inspect(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if user.Character.GetSkillLevel(skills.Inspect) == 0 {
-		response.SendUserMessage(userId, "You don't know how to inspect.", true)
+		response.SendUserMessage(userId, "You don't know how to inspect.")
 		response.Handled = true
 		return response, fmt.Errorf("you don't know how to inspect")
 	}
 
 	if len(rest) == 0 {
-		response.SendUserMessage(userId, "Type `help inspect` for more information on the inspect skill.", true)
+		response.SendUserMessage(userId, "Type `help inspect` for more information on the inspect skill.")
 		response.Handled = true
 		return response, nil
 	}
@@ -46,23 +46,23 @@ func Inspect(rest string, userId int) (util.MessageQueue, error) {
 	matchItem, found := user.Character.FindInBackpack(rest)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to inspect. Is it still worn, perhaps?", rest), true)
+		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to inspect. Is it still worn, perhaps?", rest))
 	} else {
 
 		if !user.Character.TryCooldown(skills.Inspect.String(), 3) {
 			response.SendUserMessage(userId,
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Inspect.String())),
-				true)
+			)
 			response.Handled = true
 			return response, errors.New(`you're doing that too often`)
 		}
 
 		response.SendUserMessage(userId,
 			fmt.Sprintf(`You inspect the <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),
-			true)
+		)
 		response.SendRoomMessage(user.Character.RoomId,
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> inspects their <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
-			true)
+		)
 
 		type inspectDetails struct {
 			InspectLevel int
@@ -79,7 +79,7 @@ func Inspect(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		inspectTxt, _ := templates.Process("descriptions/inspect", details)
-		response.SendUserMessage(userId, inspectTxt, false)
+		response.SendUserMessage(userId, inspectTxt)
 
 	}
 

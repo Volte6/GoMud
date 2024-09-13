@@ -14,8 +14,9 @@ character:
     them strength, wisdom, or fortune beyond their wildest dreams. Conversely, he
     can also mete out justice to those who would seek to disrupt the balance of the
     world, swiftly and decisively.
-  adjectives: []
-  roomid: 7
+  adjectives:
+  - zombie
+  roomid: 12
   zone: Frostfang
   raceid: 1
   stats:
@@ -35,7 +36,7 @@ character:
   experience: 550846
   trainingpoints: 26
   statpoints: 27
-  health: 153
+  health: 161
   mana: 94
   actionpoints: 214
   alignment: 0
@@ -80,5 +81,5 @@ character:
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/5yQQW4FMQxCL/QWMR4b5/4XqzL9lVp12sVXCCARWCS6Ceqiis7D1ZRpvfgflO/HX0X3r3r88FfqyCPO1lCbXsiDvNEsNIFGaBLNhbbRHrQ3uRY5RY6p1bc++XfuH38SiMRubGPPS5vkpCEiiYswMajJIO/kW/PMG9fB7T7PRwAAAP//tWYCYowBAAA=
+roommemoryblob: H4sIAAAAAAAA/5yPUaqsIQyDN/Q92PRvU/e/sYsyzD0Dw3k4GM2HwUjLtH5TmWqq6DynL58bv9KOD35Sx77qdA216YU8yBvNQhNohCbRPGgb7UF7k2uRU+SYWn39G/9lB/X8H+09VCASu7GNPS9vkpOGiCQewsSgJoO8yY+Xp964ji59rPv1u0r/AgAA//9tVr1ohwEAAA==
 configoptions: {}

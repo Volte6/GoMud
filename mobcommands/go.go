@@ -148,12 +148,12 @@ func Go(rest string, mobId int) (util.MessageQueue, error) {
 		response.SendRoomMessage(room.RoomId,
 			fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> leaves towards the <ansi fg="exit">%s</ansi> exit.`, mob.Character.Name, exitName),
-			), true)
+			))
 		// Tell the new room they have arrived
 		response.SendRoomMessage(destRoom.RoomId,
 			fmt.Sprintf(string(c.EnterRoomMessageWrapper),
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> enters from %s.`, mob.Character.Name, enterFromExit),
-			), true)
+			))
 
 		response.Handled = true
 	}

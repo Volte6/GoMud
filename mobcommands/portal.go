@@ -102,7 +102,7 @@ func Portal(rest string, mobId int) (util.MessageQueue, error) {
 
 	response.SendRoomMessage(room.RoomId,
 		fmt.Sprintf(`<ansi fg="mobname">%s</ansi> squints really hard, and a %s appears!`, mob.Character.Name, newPortal.Title),
-		true)
+	)
 
 	// Modify it for this room
 	newPortal.RoomId = mob.Character.RoomId
@@ -110,7 +110,7 @@ func Portal(rest string, mobId int) (util.MessageQueue, error) {
 
 	response.SendRoomMessage(targetRoom.RoomId,
 		fmt.Sprintf(`A %s appears!`, newPortal.Title),
-		true)
+	)
 
 	response.Handled = true
 	return response, nil

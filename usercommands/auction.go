@@ -25,7 +25,7 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 
 		response.SendUserMessage(userId,
 			`Auctions are disabled. See <ansi fg="command">help set</ansi> for learn how to change this.`,
-			true)
+		)
 
 		response.Handled = true
 		return response, nil
@@ -39,9 +39,9 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 
 		if currentAuction != nil {
 			auctionTxt, _ := templates.Process("auctions/auction-update", currentAuction)
-			response.SendUserMessage(userId, auctionTxt, true)
+			response.SendUserMessage(userId, auctionTxt)
 		} else {
-			response.SendUserMessage(userId, `No current auctions. You can auction something, though!`, true)
+			response.SendUserMessage(userId, `No current auctions. You can auction something, though!`)
 		}
 		response.Handled = true
 		return response, nil
@@ -83,7 +83,7 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 		historyTableData := templates.GetTable(`Past Auctions`, headers, rows, formatting)
 
 		tplTxt, _ := templates.Process("tables/generic", historyTableData)
-		response.SendUserMessage(userId, tplTxt, true)
+		response.SendUserMessage(userId, tplTxt)
 
 		response.Handled = true
 		return response, nil
@@ -92,25 +92,25 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 	if args[0] == `bid` {
 
 		if currentAuction == nil {
-			response.SendUserMessage(userId, `There is not an auction to bid on.`, true)
+			response.SendUserMessage(userId, `There is not an auction to bid on.`)
 			response.Handled = true
 			return response, nil
 		}
 
 		if currentAuction.SellerUserId == userId {
-			response.SendUserMessage(userId, `You cannot bid on your own auction.`, true)
+			response.SendUserMessage(userId, `You cannot bid on your own auction.`)
 			response.Handled = true
 			return response, nil
 		}
 
 		if currentAuction.HighestBidUserId == userId {
-			response.SendUserMessage(userId, `You are already the highest bidder.`, true)
+			response.SendUserMessage(userId, `You are already the highest bidder.`)
 			response.Handled = true
 			return response, nil
 		}
 
 		if len(args) < 2 {
-			response.SendUserMessage(userId, `Bid how much?`, true)
+			response.SendUserMessage(userId, `Bid how much?`)
 			response.Handled = true
 			return response, nil
 		}
@@ -122,19 +122,19 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 
 		amt, _ := strconv.Atoi(args[1])
 		if amt < minBid {
-			response.SendUserMessage(userId, fmt.Sprintf(`You must bid at least <ansi fg="gold">%d gold</ansi>.`, minBid), true)
+			response.SendUserMessage(userId, fmt.Sprintf(`You must bid at least <ansi fg="gold">%d gold</ansi>.`, minBid))
 			response.Handled = true
 			return response, nil
 		}
 
 		if amt > user.Character.Gold {
-			response.SendUserMessage(userId, `You don't have that much gold.`, true)
+			response.SendUserMessage(userId, `You don't have that much gold.`)
 			response.Handled = true
 			return response, nil
 		}
 
 		if err := auctions.Bid(userId, amt); err != nil {
-			response.SendUserMessage(userId, err.Error(), true)
+			response.SendUserMessage(userId, err.Error())
 			response.Handled = true
 			return response, nil
 		}
@@ -147,7 +147,7 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 			if u := users.GetByUserId(uid); u != nil {
 				auctionOn := u.GetConfigOption(`auction`)
 				if auctionOn == nil || auctionOn.(bool) {
-					response.SendUserMessage(uid, auctionTxt, true)
+					response.SendUserMessage(uid, auctionTxt)
 				}
 			}
 		}
@@ -158,7 +158,7 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 
 	// If there is already an auction happening, abort this attempt.
 	if currentAuction != nil {
-		response.SendUserMessage(userId, `There is already an auction in progress.`, true)
+		response.SendUserMessage(userId, `There is already an auction in progress.`)
 		response.Handled = true
 		return response, nil
 	}
@@ -167,7 +167,7 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 	matchItem, found := user.Character.FindInBackpack(rest)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to auction.", rest), true)
+		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to auction.", rest))
 		response.Handled = true
 		return response, nil
 	}
@@ -180,7 +180,7 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if questionConfirm.Response != `Yes` {
-		response.SendUserMessage(userId, `Aborting auction`, true)
+		response.SendUserMessage(userId, `Aborting auction`)
 		user.ClearPrompt()
 		response.Handled = true
 		return response, nil
@@ -194,7 +194,7 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 
 	amt, _ := strconv.Atoi(questionAmount.Response)
 	if amt < 1 {
-		response.SendUserMessage(userId, `Aborting auction`, true)
+		response.SendUserMessage(userId, `Aborting auction`)
 		user.ClearPrompt()
 		response.Handled = true
 		return response, nil
@@ -202,7 +202,7 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 
 	user.ClearPrompt()
 
-	response.SendUserMessage(userId, fmt.Sprintf("Auctioning your <ansi fg=\"item\">%s</ansi> for <ansi fg=\"gold\">%d gold</ansi>.", matchItem.DisplayName(), amt), true)
+	response.SendUserMessage(userId, fmt.Sprintf("Auctioning your <ansi fg=\"item\">%s</ansi> for <ansi fg=\"gold\">%d gold</ansi>.", matchItem.DisplayName(), amt))
 
 	if auctions.StartAuction(matchItem, userId, amt) {
 		user.Character.RemoveItem(matchItem)

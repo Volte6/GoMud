@@ -299,7 +299,7 @@ func (a ScriptActor) TrainSkill(skillName string, skillLevel int) bool {
 			SkillLevel: newLevel,
 		}
 		skillUpTxt, _ := templates.Process("character/skillup", skillData)
-		messageQueue.SendUserMessage(a.userId, skillUpTxt, true)
+		messageQueue.SendUserMessage(a.userId, skillUpTxt)
 
 		return true
 

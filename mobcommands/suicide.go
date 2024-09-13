@@ -59,7 +59,7 @@ func Suicide(rest string, mobId int) (util.MessageQueue, error) {
 	// Send a death msg to everyone in the room.
 	response.SendRoomMessage(mob.Character.RoomId,
 		fmt.Sprintf(`<ansi fg="mobname">%s</ansi> has died.`, mob.Character.Name),
-		true)
+	)
 
 	mobXP := mob.Character.XPTL(mob.Character.Level - 1)
 
@@ -116,7 +116,7 @@ func Suicide(rest string, mobId int) (util.MessageQueue, error) {
 
 					response.SendUserMessage(user.UserId,
 						fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
-						true)
+					)
 
 					// Chance to learn to tame the creature.
 					levelDelta := user.Character.Level - mob.Character.Level
@@ -141,9 +141,9 @@ func Suicide(rest string, mobId int) (util.MessageQueue, error) {
 							if currentSkill < 50 {
 								user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
 								if currentSkill == -1 {
-									response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+									response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name))
 								} else {
-									response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+									response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name))
 								}
 							}
 
@@ -190,7 +190,7 @@ func Suicide(rest string, mobId int) (util.MessageQueue, error) {
 
 						response.SendUserMessage(user.UserId,
 							fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
-							true)
+						)
 
 						// Chance to learn to tame the creature.
 						levelDelta := user.Character.Level - mob.Character.Level
@@ -216,9 +216,9 @@ func Suicide(rest string, mobId int) (util.MessageQueue, error) {
 									user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
 
 									if currentSkill == -1 {
-										response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+										response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name))
 									} else {
-										response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+										response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name))
 									}
 								}
 
@@ -236,7 +236,7 @@ func Suicide(rest string, mobId int) (util.MessageQueue, error) {
 	// Check for any dropped loot...
 	for _, item := range mob.Character.Items {
 		msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.DisplayName())
-		response.SendRoomMessage(mob.Character.RoomId, msg, true)
+		response.SendRoomMessage(mob.Character.RoomId, msg)
 		room.AddItem(item, false)
 	}
 
@@ -253,13 +253,13 @@ func Suicide(rest string, mobId int) (util.MessageQueue, error) {
 		}
 
 		msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.DisplayName())
-		response.SendRoomMessage(mob.Character.RoomId, msg, true)
+		response.SendRoomMessage(mob.Character.RoomId, msg)
 		room.AddItem(item, false)
 	}
 
 	if mob.Character.Gold > 0 {
 		msg := fmt.Sprintf(`<ansi fg="yellow-bold">%d gold</ansi> drops to the ground.`, mob.Character.Gold)
-		response.SendRoomMessage(mob.Character.RoomId, msg, true)
+		response.SendRoomMessage(mob.Character.RoomId, msg)
 		room.Gold += mob.Character.Gold
 	}
 

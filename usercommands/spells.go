@@ -120,25 +120,25 @@ func Spells(rest string, userId int) (util.MessageQueue, error) {
 
 	onlineResultsTable := templates.GetTable(`Spells`, headers, rows, rowFormatting...)
 	tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
-	response.SendUserMessage(userId, tplTxt, false)
+	response.SendUserMessage(userId, tplTxt)
 
 	/*
 		if len(neutralRows) > 0 {
 			onlineResultsTable := templates.GetTable(`<ansi fg="spell-neutral">Neutral</ansi> Spells`, headers, neutralRows, neutralRowFormatting...)
 			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
-			response.SendUserMessage(userId, tplTxt, false)
+			response.SendUserMessage(userId, tplTxt)
 		}
 
 		if len(harmfulRows) > 0 {
 			onlineResultsTable := templates.GetTable(`<ansi fg="spell-helpful">Helpful</ansi> Spells`, headers, harmfulRows, harmfulRowFormatting...)
 			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
-			response.SendUserMessage(userId, tplTxt, false)
+			response.SendUserMessage(userId, tplTxt)
 		}
 
 		if len(helpfulRows) > 0 {
 			onlineResultsTable := templates.GetTable(`<ansi fg="spell-harmful">Harmful</ansi> Spells`, headers, helpfulRows, helpfulRowFormatting...)
 			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
-			response.SendUserMessage(userId, tplTxt, false)
+			response.SendUserMessage(userId, tplTxt)
 		}
 	*/
 	response.Handled = true

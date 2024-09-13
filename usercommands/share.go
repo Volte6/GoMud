@@ -30,7 +30,7 @@ func Share(rest string, userId int) (util.MessageQueue, error) {
 
 	party := parties.Get(userId)
 	if party == nil {
-		response.SendUserMessage(userId, "You can only share in a party.", true)
+		response.SendUserMessage(userId, "You can only share in a party.")
 		response.Handled = true
 		return response, nil
 	}
@@ -48,13 +48,13 @@ func Share(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		if giveGoldAmount < 0 {
-			response.SendUserMessage(userId, "You can't share a negative amount of gold.", true)
+			response.SendUserMessage(userId, "You can't share a negative amount of gold.")
 			response.Handled = true
 			return response, nil
 		}
 
 		if giveGoldAmount > user.Character.Gold {
-			response.SendUserMessage(userId, "You don't have that much gold to share.", true)
+			response.SendUserMessage(userId, "You don't have that much gold to share.")
 			response.Handled = true
 			return response, nil
 		}
@@ -88,7 +88,7 @@ func Share(rest string, userId int) (util.MessageQueue, error) {
 
 	} else {
 
-		response.SendUserMessage(userId, `You can share gold by typing <ansi fg="command">share [amt] gold</ansi>?`, true)
+		response.SendUserMessage(userId, `You can share gold by typing <ansi fg="command">share [amt] gold</ansi>?`)
 	}
 
 	response.Handled = true

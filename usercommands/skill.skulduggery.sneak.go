@@ -35,19 +35,19 @@ func Sneak(rest string, userId int) (util.MessageQueue, error) {
 	// Must be sneaking
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 	if isSneaking {
-		response.SendUserMessage(userId, "You're already hidden!", true)
+		response.SendUserMessage(userId, "You're already hidden!")
 		response.Handled = true
 		return response, nil
 	}
 
 	if user.Character.Aggro != nil {
-		response.SendUserMessage(userId, "You can't do that while in combat!", true)
+		response.SendUserMessage(userId, "You can't do that while in combat!")
 		response.Handled = true
 		return response, nil
 	}
 
 	if room := rooms.LoadRoom(user.Character.RoomId); room != nil && !room.IsCalm() {
-		response.SendUserMessage(userId, "You can only do that in calm rooms!", true)
+		response.SendUserMessage(userId, "You can only do that in calm rooms!")
 		response.Handled = true
 		return response, nil
 	}

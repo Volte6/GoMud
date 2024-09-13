@@ -57,8 +57,7 @@ func Befriend(rest string, mobId int) (util.MessageQueue, error) {
 		//	true)
 
 		response.SendRoomMessage(room.RoomId,
-			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks very friendly.`, mob.Character.Name),
-			true)
+			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks very friendly.`, mob.Character.Name))
 
 	}
 

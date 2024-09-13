@@ -63,10 +63,8 @@ func (u *MessageQueue) Len(lenType MessageType) int {
 	return u.roomMsgCt
 }
 
-func (u *MessageQueue) SendUserMessage(userId int, msg string, newLine bool) {
-	if newLine {
-		msg += term.CRLFStr
-	}
+func (u *MessageQueue) SendUserMessage(userId int, msg string) {
+	msg += term.CRLFStr
 	u.messages = append(u.messages, message{
 		MsgType: MsgUser,
 		UserId:  userId,
@@ -76,12 +74,10 @@ func (u *MessageQueue) SendUserMessage(userId int, msg string, newLine bool) {
 	u.userMsgCt++
 }
 
-func (u *MessageQueue) SendUserMessages(userId int, msgs []string, newLine bool) {
+func (u *MessageQueue) SendUserMessages(userId int, msgs []string) {
 
 	for _, msg := range msgs {
-		if newLine {
-			msg += term.CRLFStr
-		}
+		msg += term.CRLFStr
 		u.messages = append(u.messages, message{
 			MsgType: MsgUser,
 			UserId:  userId,
@@ -92,10 +88,8 @@ func (u *MessageQueue) SendUserMessages(userId int, msgs []string, newLine bool)
 	u.userMsgCt += len(msgs)
 }
 
-func (u *MessageQueue) SendRoomMessage(roomId int, msg string, newLine bool, excludeIds ...int) {
-	if newLine {
-		msg += term.CRLFStr
-	}
+func (u *MessageQueue) SendRoomMessage(roomId int, msg string, excludeIds ...int) {
+	msg += term.CRLFStr
 	u.messages = append(u.messages, message{
 		MsgType:        MsgRoom,
 		RoomId:         roomId,
@@ -105,12 +99,10 @@ func (u *MessageQueue) SendRoomMessage(roomId int, msg string, newLine bool, exc
 	u.roomMsgCt++
 }
 
-func (u *MessageQueue) SendRoomMessages(roomId int, msgs []string, newLine bool, excludeIds ...int) {
+func (u *MessageQueue) SendRoomMessages(roomId int, msgs []string, excludeIds ...int) {
 
 	for _, msg := range msgs {
-		if newLine {
-			msg += term.CRLFStr
-		}
+		msg += term.CRLFStr
 		u.messages = append(u.messages, message{
 			MsgType:        MsgRoom,
 			RoomId:         roomId,

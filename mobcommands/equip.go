@@ -78,8 +78,7 @@ func Equip(rest string, mobId int) (util.MessageQueue, error) {
 					if oldItem.ItemId != 0 {
 
 						response.SendRoomMessage(mob.Character.RoomId,
-							fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, oldItem.DisplayName()),
-							true)
+							fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, oldItem.DisplayName()))
 
 						mob.Character.StoreItem(oldItem)
 					}
@@ -88,12 +87,10 @@ func Equip(rest string, mobId int) (util.MessageQueue, error) {
 				if iSpec.Subtype == items.Wearable {
 
 					response.SendRoomMessage(mob.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()),
-						true)
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
 				} else {
 					response.SendRoomMessage(mob.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> wields <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()),
-						true)
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> wields <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
 				}
 
 				mob.Character.Validate()

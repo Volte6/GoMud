@@ -38,14 +38,14 @@ func Equip(rest string, userId int) (util.MessageQueue, error) {
 	matchItem, found := user.Character.FindInBackpack(rest)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf(`You don't have a "%s" to wear.`, rest), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You don't have a "%s" to wear.`, rest))
 	} else {
 
 		iSpec := matchItem.GetSpec()
 		if iSpec.Type != items.Weapon && iSpec.Subtype != items.Wearable {
 			response.SendUserMessage(userId,
 				fmt.Sprintf(`Your <ansi fg="item">%s</ansi> doesn't look very fashionable.`, matchItem.DisplayName()),
-				true)
+			)
 			response.Handled = true
 			return response, nil
 		}
@@ -63,10 +63,10 @@ func Equip(rest string, userId int) (util.MessageQueue, error) {
 				if oldItem.ItemId != 0 {
 					response.SendUserMessage(userId,
 						fmt.Sprintf(`You remove your <ansi fg="item">%s</ansi> and return it to your backpack.`, oldItem.DisplayName()),
-						true)
+					)
 					response.SendRoomMessage(user.Character.RoomId,
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, user.Character.Name, oldItem.DisplayName()),
-						true)
+					)
 
 					user.Character.StoreItem(oldItem)
 				}
@@ -75,17 +75,17 @@ func Equip(rest string, userId int) (util.MessageQueue, error) {
 			if iSpec.Subtype == items.Wearable {
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You wear your <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),
-					true)
+				)
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on their <ansi fg="item">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()),
-					true)
+				)
 			} else {
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You wield your <ansi fg="item">%s</ansi>. You're feeling dangerous.`, matchItem.DisplayName()),
-					true)
+				)
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> wields their <ansi fg="item">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()),
-					true)
+				)
 			}
 
 			// Trigger any outstanding buff onStart events
@@ -107,7 +107,7 @@ func Equip(rest string, userId int) (util.MessageQueue, error) {
 			}
 			response.SendUserMessage(userId,
 				failureReason,
-				true)
+			)
 		}
 
 	}

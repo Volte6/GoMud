@@ -89,10 +89,10 @@ func Consider(rest string, userId int) (util.MessageQueue, error) {
 
 			response.SendUserMessage(userId,
 				fmt.Sprintf(`You consider <ansi fg="%sname">%s</ansi>...`, considerType, considerName),
-				true)
+			)
 			response.SendUserMessage(userId,
 				fmt.Sprintf(`It is estimated that your chances to kill <ansi fg="%sname">%s</ansi> are %s (%f)`, considerType, considerName, prediction, ratio),
-				true)
+			)
 		}
 	}
 

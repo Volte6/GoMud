@@ -36,7 +36,7 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 {
-		response.SendUserMessage(userId, "Give what? To whom?", true)
+		response.SendUserMessage(userId, "Give what? To whom?")
 		response.Handled = true
 		return response, nil
 	}
@@ -54,13 +54,13 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 		giveGoldAmount = int(g)
 
 		if giveGoldAmount < 0 {
-			response.SendUserMessage(userId, "You can't give a negative amount of gold.", true)
+			response.SendUserMessage(userId, "You can't give a negative amount of gold.")
 			response.Handled = true
 			return response, nil
 		}
 
 		if giveGoldAmount > user.Character.Gold {
-			response.SendUserMessage(userId, "You don't have that much gold to give.", true)
+			response.SendUserMessage(userId, "You don't have that much gold to give.")
 			response.Handled = true
 			return response, nil
 		}
@@ -73,7 +73,7 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 		giveItem, found = user.Character.FindInBackpack(giveWhat)
 
 		if !found {
-			response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to give.", giveWhat), true)
+			response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to give.", giveWhat))
 			response.Handled = true
 			return response, nil
 		}
@@ -105,13 +105,12 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 
 			response.SendUserMessage(userId,
 				fmt.Sprintf(`You give the <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, giveItem.DisplayName(), targetUser.Character.Name),
-				true)
+			)
 			response.SendUserMessage(targetUser.UserId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> gives you their <ansi fg="item">%s</ansi>.`, user.Character.Name, giveItem.DisplayName()),
-				true)
+			)
 			response.SendRoomMessage(user.Character.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> gives <ansi fg="username">%s</ansi> a <ansi fg="itemname">%s</ansi>.`, user.Character.Name, targetUser.Character.Name, giveItem.NameSimple()),
-				true,
 				user.UserId,
 				targetUser.UserId)
 
@@ -130,10 +129,9 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You count out <ansi fg="gold">%d gold</ansi> and put it back in your pocket.`, giveGoldAmount),
-					true)
+				)
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> counts out some <ansi fg="gold">gold</ansi> and put it back in their pocket.`, user.Character.Name),
-					true,
 					user.UserId)
 
 			} else {
@@ -142,18 +140,17 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You give <ansi fg="gold">%d gold</ansi> to <ansi fg="username">%s</ansi>.`, giveGoldAmount, targetUser.Character.Name),
-					true)
+				)
 				response.SendUserMessage(targetUser.UserId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> gives you <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, giveGoldAmount),
-					true)
+				)
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> gives <ansi fg="username">%s</ansi> some <ansi fg="gold">gold</ansi>.`, user.Character.Name, targetUser.Character.Name),
-					true,
 					user.UserId,
 					targetUser.UserId)
 			}
 		} else {
-			response.SendUserMessage(userId, "Something went wrong.", true)
+			response.SendUserMessage(userId, "Something went wrong.")
 		}
 
 		response.Handled = true
@@ -181,10 +178,10 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 
 					response.SendUserMessage(userId,
 						fmt.Sprintf(`You give <ansi fg="gold">%d gold</ansi> to <ansi fg="username">%s</ansi>.`, giveGoldAmount, m.Character.Name),
-						true)
+					)
 					response.SendRoomMessage(room.RoomId,
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> gave some gold to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, m.Character.Name),
-						true)
+					)
 				} else {
 
 					m.Character.StoreItem(giveItem)
@@ -192,10 +189,10 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 
 					response.SendUserMessage(userId,
 						fmt.Sprintf(`You give the <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, giveItem.DisplayName(), m.Character.Name),
-						true)
+					)
 					response.SendRoomMessage(room.RoomId,
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> gave their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, giveItem.DisplayName(), m.Character.Name),
-						true)
+					)
 
 					// Trigger onLost event
 					if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, giveItem, userId); err == nil {
@@ -217,7 +214,7 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 				m.Command(fmt.Sprintf(`gearup !%d`, giveItem.ItemId))
 
 			} else {
-				response.SendUserMessage(userId, "Something went wrong.", true)
+				response.SendUserMessage(userId, "Something went wrong.")
 			}
 
 		}
@@ -226,7 +223,7 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 		return response, nil
 	}
 
-	response.SendUserMessage(userId, "Who???", true)
+	response.SendUserMessage(userId, "Who???")
 
 	response.Handled = true
 	return response, nil

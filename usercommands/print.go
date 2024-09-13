@@ -8,7 +8,7 @@ func Print(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
-	response.SendUserMessage(userId, rest, true)
+	response.SendUserMessage(userId, rest)
 
 	response.Handled = true
 	return response, nil

@@ -38,7 +38,7 @@ func Search(rest string, userId int) (util.MessageQueue, error) {
 	skillLevel := user.Character.GetSkillLevel(skills.Search)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to search.", true)
+		response.SendUserMessage(userId, "You don't know how to search.")
 		response.Handled = true
 		return response, fmt.Errorf("you don't know how to search")
 	}
@@ -46,7 +46,7 @@ func Search(rest string, userId int) (util.MessageQueue, error) {
 	if !user.Character.TryCooldown(skills.Search.String(), 2) {
 		response.SendUserMessage(userId,
 			fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Search.String())),
-			true)
+		)
 		response.Handled = true
 		return response, fmt.Errorf("you're doing that too often")
 	}
@@ -60,10 +60,10 @@ func Search(rest string, userId int) (util.MessageQueue, error) {
 	// 10% + 1% for every 2 smarts
 	searchOddsIn100 := 10 + int(math.Ceil(float64(user.Character.Stats.Perception.ValueAdj)/2))
 
-	response.SendUserMessage(userId, "You snoop around for a bit...\n", true)
+	response.SendUserMessage(userId, "You snoop around for a bit...\n")
 	response.SendRoomMessage(user.Character.RoomId,
 		fmt.Sprintf(`<ansi fg="username">%s</ansi> is snooping around.`, user.Character.Name),
-		true)
+	)
 
 	// Check room exists
 	for exit, exitInfo := range room.Exits {
@@ -74,7 +74,7 @@ func Search(rest string, userId int) (util.MessageQueue, error) {
 			util.LogRoll(`Secret Exit`, roll, searchOddsIn100)
 
 			if roll < searchOddsIn100 {
-				response.SendUserMessage(userId, fmt.Sprintf(`You found a secret exit: <ansi fg="secret-exit">%s</ansi>`, exit), true)
+				response.SendUserMessage(userId, fmt.Sprintf(`You found a secret exit: <ansi fg="secret-exit">%s</ansi>`, exit))
 			}
 		}
 	}
@@ -126,7 +126,7 @@ func Search(rest string, userId int) (util.MessageQueue, error) {
 			}
 
 			whoTxt, _ := templates.Process("descriptions/who", details)
-			response.SendUserMessage(userId, whoTxt, false)
+			response.SendUserMessage(userId, whoTxt)
 
 		}
 
@@ -163,14 +163,14 @@ func Search(rest string, userId int) (util.MessageQueue, error) {
 			}
 
 			whoTxt, _ := templates.Process("descriptions/who", details)
-			response.SendUserMessage(userId, whoTxt, false)
+			response.SendUserMessage(userId, whoTxt)
 
 		}
 
 		//stashedItems := map[string][]string{}
 		//stashedItems["Stashed here:"] = room.Stash
 		textOut, _ := templates.Process("descriptions/ontheground", stashedItems)
-		response.SendUserMessage(userId, textOut, false)
+		response.SendUserMessage(userId, textOut)
 	}
 
 	if skillLevel >= 3 {

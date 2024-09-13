@@ -15,16 +15,16 @@ func Reload(rest string, userId int) (util.MessageQueue, error) {
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.reload", nil)
 		response.Handled = true
-		response.SendUserMessage(userId, infoOutput, false)
+		response.SendUserMessage(userId, infoOutput)
 		return response, nil
 	}
 
 	switch strings.ToLower(rest) {
 	case `items`:
 		items.LoadDataFiles()
-		response.SendUserMessage(userId, `Items reloaded.`, true)
+		response.SendUserMessage(userId, `Items reloaded.`)
 	default:
-		response.SendUserMessage(userId, `Unknown reload command.`, true)
+		response.SendUserMessage(userId, `Unknown reload command.`)
 	}
 	response.Handled = true
 	return response, nil

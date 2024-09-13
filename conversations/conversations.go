@@ -18,18 +18,17 @@ func (c *Conversation) NextActions() []string {
 	if c.Position >= len(c.ActionList) {
 		return []string{}
 	}
-	
+
 	return c.ActionList[pos]
 }
 
-
 func GetConversation(id int) *Conversation {
+	/*
+		if conversation, ok := conversations[id]; ok {
 
-	if conversation, ok := conversations[id]; ok {
-
-		if conversation.
-		return &conversation
-	}
-
+			if conversation.
+			return &conversation
+		}
+	*/
 	return nil
 }

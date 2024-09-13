@@ -49,7 +49,7 @@ func Conditions(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	tplTxt, _ := templates.Process("character/conditions", afflictions)
-	response.SendUserMessage(userId, tplTxt, false)
+	response.SendUserMessage(userId, tplTxt)
 
 	response.Handled = true
 	return response, nil

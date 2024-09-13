@@ -23,7 +23,7 @@ func Trash(rest string, userId int) (util.MessageQueue, error) {
 	matchItem, found := user.Character.FindInBackpack(rest)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf(`You don't have a "%s" to trash.`, rest), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You don't have a "%s" to trash.`, rest))
 	} else {
 
 		isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
@@ -31,13 +31,11 @@ func Trash(rest string, userId int) (util.MessageQueue, error) {
 		user.Character.RemoveItem(matchItem)
 
 		response.SendUserMessage(userId,
-			fmt.Sprintf(`You trash the <ansi fg="item">%s</ansi> for good.`, matchItem.DisplayName()),
-			true)
+			fmt.Sprintf(`You trash the <ansi fg="item">%s</ansi> for good.`, matchItem.DisplayName()))
 
 		if !isSneaking {
 			response.SendRoomMessage(user.Character.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> destroys <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
-				true)
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> destroys <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()))
 		}
 
 		iSpec := matchItem.GetSpec()
@@ -50,8 +48,7 @@ func Trash(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		response.SendUserMessage(user.UserId,
-			fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi>%s!`, grantXP, xpMsgExtra),
-			true)
+			fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi>%s!`, grantXP, xpMsgExtra))
 
 		// Trigger lost event
 		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId); err == nil {

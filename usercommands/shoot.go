@@ -31,7 +31,7 @@ func Shoot(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if user.Character.Equipment.Weapon.GetSpec().Subtype != items.Shooting {
-		response.SendUserMessage(userId, `You don't have a shooting weapon.`, true)
+		response.SendUserMessage(userId, `You don't have a shooting weapon.`)
 		response.Handled = true
 		return response, nil
 	}
@@ -44,7 +44,7 @@ func Shoot(rest string, userId int) (util.MessageQueue, error) {
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 2 {
-		response.SendUserMessage(userId, `Syntax: <ansi fg="command">shoot [target] [exit]</ansi>`, true)
+		response.SendUserMessage(userId, `Syntax: <ansi fg="command">shoot [target] [exit]</ansi>`)
 		response.Handled = true
 		return response, nil
 	}
@@ -59,7 +59,7 @@ func Shoot(rest string, userId int) (util.MessageQueue, error) {
 
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
-			response.SendUserMessage(userId, fmt.Sprintf("The %s exit is locked.", exitName), true)
+			response.SendUserMessage(userId, fmt.Sprintf("The %s exit is locked.", exitName))
 			response.Handled = true
 			return response, nil
 		}
@@ -70,13 +70,13 @@ func Shoot(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if attackRoomId == 0 {
-		response.SendUserMessage(userId, `Could not find where you wanted to shoot`, true)
+		response.SendUserMessage(userId, `Could not find where you wanted to shoot`)
 		response.Handled = true
 		return response, nil
 	}
 
 	if attackPlayerId == 0 && attackMobInstanceId == 0 {
-		response.SendUserMessage(userId, `Could not find your target.`, true)
+		response.SendUserMessage(userId, `Could not find your target.`)
 		response.Handled = true
 		return response, nil
 	}
@@ -98,7 +98,7 @@ func Shoot(rest string, userId int) (util.MessageQueue, error) {
 		if m != nil {
 
 			if m.Character.IsCharmed(userId) {
-				response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name), true)
+				response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
 				response.Handled = true
 				return response, nil
 			}
@@ -107,12 +107,12 @@ func Shoot(rest string, userId int) (util.MessageQueue, error) {
 
 			response.SendUserMessage(userId,
 				fmt.Sprintf(`You prepare to shoot at <ansi fg="mobname">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, m.Character.Name, exitName),
-				true)
+			)
 
 			if !isSneaking {
 				response.SendRoomMessage(room.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to shoot at <ansi fg="mobname">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, m.Character.Name, exitName),
-					true)
+				)
 			}
 
 		}
@@ -125,7 +125,7 @@ func Shoot(rest string, userId int) (util.MessageQueue, error) {
 
 			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
 				if partyInfo.IsMember(attackPlayerId) {
-					response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name), true)
+					response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name))
 					response.Handled = true
 					return response, nil
 				}
@@ -135,13 +135,13 @@ func Shoot(rest string, userId int) (util.MessageQueue, error) {
 
 			response.SendUserMessage(userId,
 				fmt.Sprintf(`You prepare to shoot at <ansi fg="username">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, p.Character.Name, exitName),
-				true)
+			)
 
 			if !isSneaking {
 
 				response.SendRoomMessage(room.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to shoot at <ansi fg="username">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, p.Character.Name, exitName),
-					true)
+				)
 
 			}
 

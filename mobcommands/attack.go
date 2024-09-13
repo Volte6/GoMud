@@ -85,11 +85,10 @@ func Attack(rest string, mobId int) (util.MessageQueue, error) {
 
 			if !isSneaking {
 
-				response.SendUserMessage(u.UserId, fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight you!`, mob.Character.Name), true)
+				response.SendUserMessage(u.UserId, fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight you!`, mob.Character.Name))
 
 				response.SendRoomMessage(room.RoomId,
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> prepares to fight <ansi fg="username">%s</ansi>`, mob.Character.Name, u.Character.Name),
-					true,
 					u.UserId)
 
 			}
@@ -109,8 +108,7 @@ func Attack(rest string, mobId int) (util.MessageQueue, error) {
 			if !isSneaking {
 
 				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, mob.Character.Name, m.Character.Name),
-					true)
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, mob.Character.Name, m.Character.Name))
 
 			}
 
@@ -122,8 +120,7 @@ func Attack(rest string, mobId int) (util.MessageQueue, error) {
 
 	if !isSneaking {
 		response.SendRoomMessage(room.RoomId,
-			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks confused and upset.`, mob.Character.Name),
-			true)
+			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks confused and upset.`, mob.Character.Name))
 	}
 
 	response.Handled = true

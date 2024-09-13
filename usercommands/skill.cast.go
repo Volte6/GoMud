@@ -36,7 +36,7 @@ func Cast(rest string, userId int) (util.MessageQueue, error) {
 	skillLevel := user.Character.GetSkillLevel(skills.Cast)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to cast spells yet.", true)
+		response.SendUserMessage(userId, "You don't know how to cast spells yet.")
 		response.Handled = true
 		return response, errors.New(`you don't know how to cast spells yet`)
 	}
@@ -50,7 +50,7 @@ func Cast(rest string, userId int) (util.MessageQueue, error) {
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 1 {
-		response.SendUserMessage(userId, "Cast What? At Whom?", true)
+		response.SendUserMessage(userId, "Cast What? At Whom?")
 		response.Handled = true
 		return response, nil
 	}
@@ -61,13 +61,13 @@ func Cast(rest string, userId int) (util.MessageQueue, error) {
 	spellInfo := spells.GetSpell(spellName)
 
 	if spellInfo == nil || !user.Character.HasSpell(spellName) {
-		response.SendUserMessage(userId, fmt.Sprintf(`You don't know a spell called <ansi fg="spellname">%s</ansi>.`, spellName), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You don't know a spell called <ansi fg="spellname">%s</ansi>.`, spellName))
 		response.Handled = true
 		return response, nil
 	}
 
 	if user.Character.Mana < spellInfo.Cost {
-		response.SendUserMessage(userId, fmt.Sprintf(`You don't have enough mana to cast <ansi fg="spellname">%s</ansi>.`, spellName), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You don't have enough mana to cast <ansi fg="spellname">%s</ansi>.`, spellName))
 		response.Handled = true
 		return response, nil
 	}
@@ -241,7 +241,7 @@ func Cast(rest string, userId int) (util.MessageQueue, error) {
 
 	} else {
 
-		response.SendUserMessage(userId, `Couldn't find a target for the spell.`, true)
+		response.SendUserMessage(userId, `Couldn't find a target for the spell.`)
 
 	}
 

@@ -29,7 +29,7 @@ func DualWield(rest string, userId int) (util.MessageQueue, error) {
 	skillLevel := user.Character.GetSkillLevel(skills.DualWield)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You haven't learned how to dual wield.", true)
+		response.SendUserMessage(userId, "You haven't learned how to dual wield.")
 		response.Handled = true
 		return response, errors.New(`you haven't learned how to dual wield`)
 	}

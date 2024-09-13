@@ -16,9 +16,9 @@ func Save(rest string, userId int) (util.MessageQueue, error) {
 		return response, fmt.Errorf("user %d not found", userId)
 	}
 
-	response.SendUserMessage(userId, "Saving...", true)
+	response.SendUserMessage(userId, "Saving...")
 	users.SaveUser(*user)
-	response.SendUserMessage(userId, "done.", true)
+	response.SendUserMessage(userId, "done.")
 
 	response.Handled = true
 	return response, nil

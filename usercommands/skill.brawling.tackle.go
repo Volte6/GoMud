@@ -33,7 +33,7 @@ func Tackle(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if user.Character.Aggro == nil {
-		response.SendUserMessage(userId, "Tackle is only used while in combat!", true)
+		response.SendUserMessage(userId, "Tackle is only used while in combat!")
 		response.Handled = true
 		return response, nil
 	}
@@ -45,7 +45,7 @@ func Tackle(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if !user.Character.TryCooldown(skills.Brawling.String(`tackle`), 5) {
-		response.SendUserMessage(userId, "You are too tired to tackle again so soon!", true)
+		response.SendUserMessage(userId, "You are too tired to tackle again so soon!")
 		response.Handled = true
 		return response, nil
 	}
@@ -72,11 +72,10 @@ func Tackle(rest string, userId int) (util.MessageQueue, error) {
 
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You lunge and tackle <ansi fg="mobname">%s</ansi>!`, m.Character.Name),
-					true)
+				)
 
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges and tackles <ansi fg="mobname">%s</ansi>!`, user.Character.Name, m.Character.Name),
-					true,
 					userId,
 				)
 
@@ -89,11 +88,10 @@ func Tackle(rest string, userId int) (util.MessageQueue, error) {
 			} else {
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You try to tackle <ansi fg="mobname">%s</ansi> and miss!`, m.Character.Name),
-					true)
+				)
 
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to tackle <ansi fg="mobname">%s</ansi> and misses!`, user.Character.Name, m.Character.Name),
-					true,
 					userId,
 				)
 
@@ -118,15 +116,14 @@ func Tackle(rest string, userId int) (util.MessageQueue, error) {
 
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You lunge and tackle <ansi fg="username">%s</ansi>!`, u.Character.Name),
-					true)
+				)
 
 				response.SendUserMessage(attackPlayerId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges and tackles you!`, user.Character.Name),
-					true)
+				)
 
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges and tackles <ansi fg="username">%s</ansi>!`, user.Character.Name, u.Character.Name),
-					true,
 					userId,
 					attackPlayerId,
 				)
@@ -140,15 +137,14 @@ func Tackle(rest string, userId int) (util.MessageQueue, error) {
 			} else {
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You lunge to tackle <ansi fg="username">%s</ansi> and miss!`, u.Character.Name),
-					true)
+				)
 
 				response.SendUserMessage(attackPlayerId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges to tackles you and misses!`, user.Character.Name),
-					true)
+				)
 
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges to tackle <ansi fg="username">%s</ansi> and misses!`, user.Character.Name, u.Character.Name),
-					true,
 					userId,
 					attackPlayerId,
 				)

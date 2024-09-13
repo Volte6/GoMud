@@ -41,13 +41,13 @@ func Bump(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if user.Character.Aggro != nil {
-		response.SendUserMessage(userId, "You can't do that while in combat!", true)
+		response.SendUserMessage(userId, "You can't do that while in combat!")
 		response.Handled = true
 		return response, nil
 	}
 
 	if room.AreMobsAttacking(userId) {
-		response.SendUserMessage(userId, "You can't do that while you are under attack!", true)
+		response.SendUserMessage(userId, "You can't do that while you are under attack!")
 		response.Handled = true
 		return response, nil
 	}
@@ -59,7 +59,7 @@ func Bump(rest string, userId int) (util.MessageQueue, error) {
 	if pickPlayerId > 0 || pickMobInstanceId > 0 {
 
 		if !user.Character.TryCooldown(skills.Brawling.String(`bump`), configs.GetConfig().MinutesToRounds(1)) {
-			response.SendUserMessage(userId, fmt.Sprintf("You need to wait %d rounds before you can do that again!", user.Character.GetCooldown(skills.Brawling.String(`bump`))), true)
+			response.SendUserMessage(userId, fmt.Sprintf("You need to wait %d rounds before you can do that again!", user.Character.GetCooldown(skills.Brawling.String(`bump`))))
 			response.Handled = true
 			return response, nil
 		}
@@ -103,11 +103,10 @@ func Bump(rest string, userId int) (util.MessageQueue, error) {
 
 			response.SendUserMessage(userId,
 				fmt.Sprintf(`You "accidentally" bump into <ansi fg="mobname">%s</ansi>.`, m.Character.Name),
-				true)
+			)
 
 			response.SendRoomMessage(user.Character.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> accidentally bumps into <ansi fg="mobname">%s</ansi>!`, user.Character.Name, m.Character.Name),
-				true,
 			)
 
 		}
@@ -144,15 +143,14 @@ func Bump(rest string, userId int) (util.MessageQueue, error) {
 
 			response.SendUserMessage(userId,
 				fmt.Sprintf(`You "accidentally" bump into <ansi fg="username">%s</ansi>.`, p.Character.Name),
-				true)
+			)
 
 			response.SendUserMessage(pickPlayerId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> accidentally bumps into you.`, user.Character.Name),
-				true)
+			)
 
 			response.SendRoomMessage(user.Character.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> accidentally bumps into <ansi fg="username">%s</ansi>!`, user.Character.Name, p.Character.Name),
-				true,
 				pickPlayerId,
 			)
 
@@ -160,19 +158,17 @@ func Bump(rest string, userId int) (util.MessageQueue, error) {
 
 	} else {
 
-		response.SendUserMessage(userId, "Pickpocket who?", true)
+		response.SendUserMessage(userId, "Pickpocket who?")
 	}
 
 	if goldDropped > 0 {
 
 		response.SendUserMessage(user.UserId,
 			fmt.Sprintf(`<ansi fg="gold">%d gold</ansi> jingles as it drops into the floor!`, goldDropped),
-			true,
 		)
 
 		response.SendRoomMessage(user.Character.RoomId,
 			fmt.Sprintf(`<ansi fg="gold">%d gold</ansi> jingles as it drops into the floor!`, goldDropped),
-			true,
 		)
 
 		room.Gold += goldDropped

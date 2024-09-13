@@ -20,7 +20,7 @@ func Locate(rest string, userId int) (util.MessageQueue, error) {
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.locate", nil)
 		response.Handled = true
-		response.SendUserMessage(userId, infoOutput, false)
+		response.SendUserMessage(userId, infoOutput)
 		return response, nil
 	}
 
@@ -34,11 +34,11 @@ func Locate(rest string, userId int) (util.MessageQueue, error) {
 
 		response.SendUserMessage(userId,
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> is in room #<ansi fg="yellow-bold">%d</ansi> - <ansi fg="magenta">%s</ansi> <ansi fg="red">【%s】</ansi>`, locateUser.Character.Name, room.RoomId, room.Title, locateUser.Character.Zone),
-			true)
+		)
 
 		response.SendUserMessage(locateUser.UserId,
 			`You get the feeling someone is looking for you...`,
-			true)
+		)
 
 	}
 
@@ -143,7 +143,7 @@ func Locate(rest string, userId int) (util.MessageQueue, error) {
 				if ct >= matchesPerPage {
 					onlineTableData := templates.GetTable(fmt.Sprintf(`Matches for "%s" [Page %d/%d]`, rest, pageNow+1, pageCt), headers, rows)
 					tplTxt, _ := templates.Process("tables/generic", onlineTableData)
-					response.SendUserMessage(userId, tplTxt, true)
+					response.SendUserMessage(userId, tplTxt)
 					rows = [][]string{}
 					ct = 0
 					pageNow++
@@ -156,7 +156,7 @@ func Locate(rest string, userId int) (util.MessageQueue, error) {
 		if pageNow < pageCt {
 			onlineTableData := templates.GetTable(fmt.Sprintf(`Matches for "%s" [Page %d/%d]`, rest, pageNow+1, pageCt), headers, rows)
 			tplTxt, _ := templates.Process("tables/generic", onlineTableData)
-			response.SendUserMessage(userId, tplTxt, true)
+			response.SendUserMessage(userId, tplTxt)
 		}
 
 		response.Handled = true
@@ -165,7 +165,7 @@ func Locate(rest string, userId int) (util.MessageQueue, error) {
 
 	response.SendUserMessage(userId,
 		fmt.Sprintf("No user or mob found with the name %s", rest),
-		true)
+	)
 
 	response.Handled = true
 	return response, nil

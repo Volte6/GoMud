@@ -113,7 +113,7 @@ func Quests(rest string, userId int) (util.MessageQueue, error) {
 	})
 
 	questTxt, _ := templates.Process("character/quests", qInfo)
-	response.SendUserMessage(userId, questTxt, false)
+	response.SendUserMessage(userId, questTxt)
 
 	response.Handled = true
 	return response, nil

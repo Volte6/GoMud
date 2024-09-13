@@ -32,7 +32,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) == 0 {
-		response.SendUserMessage(userId, "Get what?", true)
+		response.SendUserMessage(userId, "Get what?")
 		response.Handled = true
 		return response, nil
 	}
@@ -98,7 +98,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 		if args[0] == goldName || (len(args[0]) < 5 && goldName[0:len(args[0])-1] == args[0]) {
 
 			if container.Gold < 1 {
-				response.SendUserMessage(userId, "There's no gold to grab.", true)
+				response.SendUserMessage(userId, "There's no gold to grab.")
 			} else {
 
 				user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
@@ -110,10 +110,10 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi> from the <ansi fg="container">%s</ansi>.`, goldAmt, containerName),
-					true)
+				)
 				response.SendRoomMessage(room.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up some <ansi fg="gold">gold</ansi> from the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName),
-					true)
+				)
 			}
 
 			response.Handled = true
@@ -123,7 +123,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 		matchItem, found := container.FindItem(rest)
 
 		if !found {
-			response.SendUserMessage(userId, fmt.Sprintf(`You don't see a %s in the <ansi fg="container">%s</ansi>.`, rest, containerName), true)
+			response.SendUserMessage(userId, fmt.Sprintf(`You don't see a %s in the <ansi fg="container">%s</ansi>.`, rest, containerName))
 		} else {
 
 			user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
@@ -147,10 +147,10 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You take the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>.`, matchItem.DisplayName(), containerName),
-					true)
+				)
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>...`, user.Character.Name, matchItem.DisplayName(), containerName),
-					true)
+				)
 
 				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId); err == nil {
 					response.AbsorbMessages(scriptResponse)
@@ -159,7 +159,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 			} else {
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
-					true)
+				)
 			}
 
 		}
@@ -170,7 +170,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 		if args[0] == goldName || (len(args[0]) < 5 && goldName[0:len(args[0])-1] == args[0]) {
 
 			if room.Gold < 1 {
-				response.SendUserMessage(userId, "There's no gold to grab.", true)
+				response.SendUserMessage(userId, "There's no gold to grab.")
 			} else {
 
 				user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
@@ -181,10 +181,10 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi>.`, goldAmt),
-					true)
+				)
 				response.SendRoomMessage(room.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up some <ansi fg="gold">gold</ansi>.`, user.Character.Name),
-					true)
+				)
 			}
 
 			response.Handled = true
@@ -195,7 +195,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 		matchItem, found := room.FindOnFloor(rest, getFromStash)
 
 		if !found {
-			response.SendUserMessage(userId, fmt.Sprintf("You don't see a %s around.", rest), true)
+			response.SendUserMessage(userId, fmt.Sprintf("You don't see a %s around.", rest))
 		} else {
 
 			user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
@@ -217,10 +217,10 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You pick up the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
-					true)
+				)
 				response.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
-					true)
+				)
 
 				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId); err == nil {
 					response.AbsorbMessages(scriptResponse)
@@ -229,7 +229,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 			} else {
 				response.SendUserMessage(userId,
 					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
-					true)
+				)
 			}
 		}
 

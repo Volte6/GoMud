@@ -49,7 +49,7 @@ func Tame(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to tame.", true)
+		response.SendUserMessage(userId, "You don't know how to tame.")
 		response.Handled = true
 		return response, errors.New(`you don't know how to tame`)
 	}
@@ -66,9 +66,9 @@ func Tame(rest string, userId int) (util.MessageQueue, error) {
 
 		onlineTableData := templates.GetTable(`Your taming proficiency`, headers, rows)
 		tplTxt, _ := templates.Process("tables/generic", onlineTableData)
-		response.SendUserMessage(userId, tplTxt, true)
+		response.SendUserMessage(userId, tplTxt)
 
-		response.SendUserMessage(userId, `<ansi fg="command">help tame</ansi> to find out more.`, true)
+		response.SendUserMessage(userId, `<ansi fg="command">help tame</ansi> to find out more.`)
 
 		response.Handled = true
 		return response, nil
@@ -87,7 +87,7 @@ func Tame(rest string, userId int) (util.MessageQueue, error) {
 		if mob := mobs.GetInstance(mobId); mob != nil {
 
 			if mob.Character.IsCharmed(userId) {
-				response.SendUserMessage(userId, "They are already charmed.", true)
+				response.SendUserMessage(userId, "They are already charmed.")
 				response.Handled = true
 				return response, errors.New(`they are already charmed`)
 			}
@@ -119,7 +119,7 @@ func Tame(rest string, userId int) (util.MessageQueue, error) {
 
 	}
 
-	response.SendUserMessage(userId, "You don't see that here.", true)
+	response.SendUserMessage(userId, "You don't see that here.")
 	response.Handled = true
 	return response, errors.New(`you don't see that here`)
 

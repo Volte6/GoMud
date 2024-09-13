@@ -25,7 +25,7 @@ func Follow(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if rest == "" {
-		response.SendUserMessage(userId, "Follow whom?", true)
+		response.SendUserMessage(userId, "Follow whom?")
 		response.Handled = true
 		return response, nil
 	}
@@ -41,11 +41,11 @@ func Follow(rest string, userId int) (util.MessageQueue, error) {
 
 		response.SendUserMessage(userId,
 			fmt.Sprintf(`You follow <ansi fg="username">%s</ansi>.`, followUser.Character.Name),
-			true)
+		)
 
 		response.SendUserMessage(followUser.UserId,
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> is following you.`, user.Character.Name),
-			true)
+		)
 
 		followUser.Character.AddFollower(userId)
 

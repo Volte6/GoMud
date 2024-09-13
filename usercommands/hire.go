@@ -34,7 +34,7 @@ func Hire(rest string, userId int) (util.MessageQueue, error) {
 	maxCharmed := user.Character.GetSkillLevel(skills.Tame) + 1
 
 	if len(user.Character.GetCharmIds()) >= maxCharmed {
-		response.SendUserMessage(userId, fmt.Sprintf(`You can only have %d creatures following you at a time.`, maxCharmed), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You can only have %d creatures following you at a time.`, maxCharmed))
 		response.Handled = true
 		return response, nil
 	}
@@ -107,10 +107,10 @@ func Hire(rest string, userId int) (util.MessageQueue, error) {
 
 			response.SendUserMessage(user.UserId,
 				fmt.Sprintf(`You pay <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, hireInfo.Price, mob.Character.Name),
-				true)
+			)
 			response.SendRoomMessage(room.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, hireInfo.Price, mob.Character.Name),
-				true)
+			)
 
 			newMob.Command(`emote is ready to serve.`)
 

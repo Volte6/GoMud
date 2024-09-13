@@ -81,12 +81,12 @@ func Throw(rest string, mobId int) (util.MessageQueue, error) {
 		// Tell the old room they are leaving
 		response.SendRoomMessage(room.RoomId,
 			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, mob.Character.Name, itemMatch.DisplayName(), exitName),
-			true)
+		)
 
 		// Tell the new room the item arrived
 		response.SendRoomMessage(throwToRoom.RoomId,
 			fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
-			true)
+		)
 
 		response.Handled = true
 	}
@@ -131,12 +131,12 @@ func Throw(rest string, mobId int) (util.MessageQueue, error) {
 
 				response.SendRoomMessage(room.RoomId,
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, mob.Character.Name, itemMatch.DisplayName(), tempExit.Title),
-					true)
+				)
 
 				// Tell the new room the item arrived
 				response.SendRoomMessage(tempExit.RoomId,
 					fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
-					true)
+				)
 
 				response.Handled = true
 

@@ -13,7 +13,7 @@ func Prepare(rest string, userId int) (util.MessageQueue, error) {
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.prepare", nil)
 		response.Handled = true
-		response.SendUserMessage(userId, infoOutput, false)
+		response.SendUserMessage(userId, infoOutput)
 		return response, nil
 	}
 
@@ -25,7 +25,7 @@ func Prepare(rest string, userId int) (util.MessageQueue, error) {
 
 	response.SendUserMessage(userId,
 		"All rooms have been Prepare()'ed",
-		true)
+	)
 
 	response.Handled = true
 	return response, nil

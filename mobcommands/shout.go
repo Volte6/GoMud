@@ -37,15 +37,15 @@ func Shout(rest string, mobId int) (util.MessageQueue, error) {
 	rest = strings.ToUpper(rest)
 
 	if isSneaking {
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`someone shouts, "<ansi fg="yellow">%s</ansi>"`, rest), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`someone shouts, "<ansi fg="yellow">%s</ansi>"`, rest))
 	} else {
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shouts, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shouts, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest))
 	}
 
 	for _, roomInfo := range room.Exits {
 		if otherRoom := rooms.LoadRoom(roomInfo.RoomId); otherRoom != nil {
 			if sourceExit := otherRoom.FindExitTo(room.RoomId); sourceExit != `` {
-				response.SendRoomMessage(otherRoom.RoomId, fmt.Sprintf(`Someone is shouting from the <ansi fg="exit">%s</ansi> direction.`, sourceExit), true)
+				response.SendRoomMessage(otherRoom.RoomId, fmt.Sprintf(`Someone is shouting from the <ansi fg="exit">%s</ansi> direction.`, sourceExit))
 			}
 		}
 	}

@@ -12,7 +12,7 @@ func SendUserMessage(userId int, message string) {
 	if disableMessageQueue || userId == 0 {
 		return
 	}
-	messageQueue.SendUserMessage(userId, message, true)
+	messageQueue.SendUserMessage(userId, message)
 }
 
 func SendRoomMessage(roomId int, message string, excludeIds ...int) {
@@ -20,7 +20,7 @@ func SendRoomMessage(roomId int, message string, excludeIds ...int) {
 		return
 	}
 
-	messageQueue.SendRoomMessage(roomId, message, true, excludeIds...)
+	messageQueue.SendRoomMessage(roomId, message, excludeIds...)
 }
 
 func SendBroadcast(message string) {

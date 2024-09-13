@@ -41,7 +41,7 @@ func Command(rest string, userId int) (util.MessageQueue, error) {
 
 		infoOutput, _ := templates.Process("admincommands/help/command.command", mobCommands)
 		response.Handled = true
-		response.SendUserMessage(userId, infoOutput, false)
+		response.SendUserMessage(userId, infoOutput)
 		return response, nil
 	}
 

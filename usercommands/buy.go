@@ -103,10 +103,10 @@ func Buy(rest string, userId int) (util.MessageQueue, error) {
 
 			response.SendUserMessage(user.UserId,
 				fmt.Sprintf(`You buy a <ansi fg="itemname">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, item.DisplayName(), item.GetSpec().Value),
-				true)
+			)
 			response.SendRoomMessage(room.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> buys a <ansi fg="itemname">%s</ansi> from <ansi fg="mobname">%s</ansi>.`, user.Character.Name, item.DisplayName(), mob.Character.Name),
-				true)
+			)
 
 			break
 

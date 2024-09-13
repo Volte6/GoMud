@@ -16,7 +16,7 @@ func Time(rest string, userId int) (util.MessageQueue, error) {
 		dayNight = `night`
 	}
 
-	response.SendUserMessage(userId, `It is now `+gd.String()+`. It is `+dayNight+`.`, true)
+	response.SendUserMessage(userId, `It is now `+gd.String()+`. It is `+dayNight+`.`)
 
 	response.Handled = true
 	return response, nil

@@ -36,7 +36,7 @@ func Pray(rest string, userId int) (util.MessageQueue, error) {
 	skillLevel := user.Character.GetSkillLevel(skills.Protection)
 
 	if skillLevel < 4 {
-		response.SendUserMessage(userId, "You don't know how to pray.", true)
+		response.SendUserMessage(userId, "You don't know how to pray.")
 		response.Handled = true
 		return response, fmt.Errorf("you don't know how to pray")
 	}
@@ -44,7 +44,7 @@ func Pray(rest string, userId int) (util.MessageQueue, error) {
 	if !user.Character.TryCooldown(skills.Protection.String(), configs.GetConfig().MinutesToRounds(5)) {
 		response.SendUserMessage(userId,
 			`You can only pray once every 5 minutes.`,
-			true)
+		)
 		response.Handled = true
 		return response, errors.New(`you can only pray once every 5 minutes`)
 	}
@@ -58,7 +58,7 @@ func Pray(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if prayPlayerId == 0 && prayMobId == 0 {
-		response.SendUserMessage(userId, "Aid whom?", true)
+		response.SendUserMessage(userId, "Aid whom?")
 		response.Handled = true
 		return response, nil
 	}
@@ -73,12 +73,12 @@ func Pray(rest string, userId int) (util.MessageQueue, error) {
 	if prayPlayerId > 0 {
 
 		if prayPlayerId == userId {
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> begins to pray.`, user.Character.Name), true, user.UserId)
+			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> begins to pray.`, user.Character.Name), user.UserId)
 		} else {
 			targetUser := users.GetByUserId(prayPlayerId)
 			if targetUser != nil {
-				response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over <ansi fg="username">%s</ansi> and begins to pray.`, user.Character.Name, targetUser.Character.Name), true, user.UserId, targetUser.UserId)
-				response.SendUserMessage(targetUser.UserId, fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over you and begins to pray.`, user.Character.Name), true)
+				response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over <ansi fg="username">%s</ansi> and begins to pray.`, user.Character.Name, targetUser.Character.Name), user.UserId, targetUser.UserId)
+				response.SendUserMessage(targetUser.UserId, fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over you and begins to pray.`, user.Character.Name))
 			}
 		}
 
@@ -92,13 +92,13 @@ func Pray(rest string, userId int) (util.MessageQueue, error) {
 			})
 
 			possibleBuffIds = append(possibleBuffIds[:randBuffIndex], possibleBuffIds[randBuffIndex+1:]...)
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> glows for a moment.`, user.Character.Name), true)
+			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> glows for a moment.`, user.Character.Name))
 		}
 
 	} else if prayMobId > 0 {
 
 		if mob := mobs.GetInstance(prayMobId); mob != nil {
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over <ansi fg="mobname">%s</ansi> and begins to pray.`, user.Character.Name, mob.Character.Name), true, user.UserId)
+			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over <ansi fg="mobname">%s</ansi> and begins to pray.`, user.Character.Name, mob.Character.Name), user.UserId)
 
 			for i := 0; i < totalBuffCount; i++ {
 				randBuffIndex := util.Rand(len(possibleBuffIds))
@@ -110,12 +110,12 @@ func Pray(rest string, userId int) (util.MessageQueue, error) {
 				})
 
 				possibleBuffIds = append(possibleBuffIds[:randBuffIndex], possibleBuffIds[randBuffIndex+1:]...)
-				response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> glows for a moment.`, mob.Character.Name), true)
+				response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> glows for a moment.`, mob.Character.Name))
 			}
 		}
 
 	} else {
-		response.SendUserMessage(userId, "Pray for whom?", true)
+		response.SendUserMessage(userId, "Pray for whom?")
 	}
 
 	response.Handled = true

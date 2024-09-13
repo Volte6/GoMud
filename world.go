@@ -732,10 +732,9 @@ func (w *World) processInput(userId int, inputText string) {
 			if len(command) > 0 {
 				commandResponse.SendUserMessage(userId,
 					fmt.Sprintf(`<ansi fg="command">%s</ansi> not recognized. Type <ansi fg="command">help</ansi> for commands.`, command),
-					true)
+				)
 				commandResponse.SendRoomMessage(user.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> looks a little confused.`, user.Character.Name),
-					true,
 					userId)
 			}
 		}
@@ -816,7 +815,7 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 			if len(command) > 0 {
 				commandResponse.SendRoomMessage(mob.Character.RoomId,
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks a little confused (%s %s).`, mob.Character.Name, command, remains),
-					true)
+				)
 
 			}
 		}
@@ -861,8 +860,6 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 // Optionally capture any user output and return it.
 func (w *World) DispatchMessages(u util.MessageQueue) {
 
-	redrawPrompts := make(map[uint64]string)
-
 	for {
 
 		message, err := u.GetNextMessage()
@@ -870,64 +867,13 @@ func (w *World) DispatchMessages(u util.MessageQueue) {
 			break
 		}
 
-		message.Msg = templates.AnsiParse(message.Msg)
+		events.AddToQueue(events.Message{
+			UserId:         message.UserId,
+			ExcludeUserIds: message.ExcludeUserIds,
+			RoomId:         message.RoomId,
+			Text:           message.Msg,
+		})
 
-		switch message.MsgType {
-
-		case util.MsgUser:
-			if user := users.GetByUserId(message.UserId); user != nil {
-				message.Msg = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Msg
-				w.connectionPool.SendTo([]byte(message.Msg), user.ConnectionId())
-				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-					redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
-				}
-			}
-
-		case util.MsgRoom:
-
-			if message.RoomId == 0 {
-				w.connectionPool.Broadcast([]byte(message.Msg))
-				break
-			}
-
-			if room := rooms.LoadRoom(message.RoomId); err == nil {
-				for _, userId := range room.GetPlayers() {
-					skip := false
-
-					if u.UserId > 0 && u.UserId == userId {
-						continue
-					}
-
-					exLen := len(message.ExcludeUserIds)
-					if exLen > 0 {
-						for _, excludeId := range message.ExcludeUserIds {
-							if excludeId == userId {
-								skip = true
-								break
-							}
-						}
-					}
-
-					if skip {
-						continue
-					}
-
-					if user := users.GetByUserId(userId); user != nil {
-						message.Msg = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Msg
-						w.connectionPool.SendTo([]byte(message.Msg), user.ConnectionId())
-						if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-							redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
-						}
-					}
-				}
-			}
-		}
-
-	}
-
-	for connectionId, prompt := range redrawPrompts {
-		prompt = templates.AnsiParse(prompt)
-		w.connectionPool.SendTo([]byte(prompt), connectionId)
 	}
 
 }
@@ -984,6 +930,79 @@ func (w *World) MessageTick() {
 		w.connectionPool.Broadcast([]byte(term.AnsiMoveCursorColumn.String() +
 			term.AnsiEraseLine.String() +
 			broadcast.Text))
+	}
+
+	redrawPrompts := make(map[uint64]string)
+
+	eq = events.GetQueue(events.Message{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		message, typeOk := e.(events.Message)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
+			continue
+		}
+
+		slog.Debug("Message", "length", len(message.Text))
+
+		message.Text = templates.AnsiParse(message.Text)
+
+		if message.UserId > 0 {
+			if user := users.GetByUserId(message.UserId); user != nil {
+				message.Text = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Text
+				w.connectionPool.SendTo([]byte(message.Text), user.ConnectionId())
+				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
+					redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
+				}
+			}
+		}
+
+		if message.RoomId > 0 {
+
+			room := rooms.LoadRoom(message.RoomId)
+			if room == nil {
+				continue
+			}
+
+			for _, userId := range room.GetPlayers() {
+				skip := false
+
+				if message.UserId > 0 && message.UserId == userId {
+					continue
+				}
+
+				exLen := len(message.ExcludeUserIds)
+				if exLen > 0 {
+					for _, excludeId := range message.ExcludeUserIds {
+						if excludeId == userId {
+							skip = true
+							break
+						}
+					}
+				}
+
+				if skip {
+					continue
+				}
+
+				if user := users.GetByUserId(userId); user != nil {
+					message.Text = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Text
+					w.connectionPool.SendTo([]byte(message.Text), user.ConnectionId())
+					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
+						redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
+					}
+				}
+			}
+
+		}
+
+	}
+
+	for connectionId, prompt := range redrawPrompts {
+		prompt = templates.AnsiParse(prompt)
+		w.connectionPool.SendTo([]byte(prompt), connectionId)
 	}
 }
 
@@ -1163,7 +1182,7 @@ func (w *World) TurnTick() {
 
 						room.RemoveItem(itm, false)
 
-						messageQueue.SendRoomMessage(action.RoomId, fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> <ansi fg="red">EXPLODES</ansi>!`, itm.DisplayName()), true)
+						messageQueue.SendRoomMessage(action.RoomId, fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> <ansi fg="red">EXPLODES</ansi>!`, itm.DisplayName()))
 
 						hitMobs := true
 						hitPlayers := true
@@ -1374,22 +1393,22 @@ func (w *World) TurnTick() {
 					if stepName == `start` {
 						if !questInfo.Secret {
 							questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have been given a new quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-							messageQueue.SendUserMessage(questUser.UserId, questUpTxt, true)
+							messageQueue.SendUserMessage(questUser.UserId, questUpTxt)
 						}
 					} else if stepName == `end` {
 
 						if !questInfo.Secret {
 							questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have completed the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-							messageQueue.SendUserMessage(questUser.UserId, questUpTxt, true)
+							messageQueue.SendUserMessage(questUser.UserId, questUpTxt)
 						}
 
 						// Message to player?
 						if len(questInfo.Rewards.PlayerMessage) > 0 {
-							messageQueue.SendUserMessage(questUser.UserId, questInfo.Rewards.PlayerMessage, true)
+							messageQueue.SendUserMessage(questUser.UserId, questInfo.Rewards.PlayerMessage)
 						}
 						// Message to room?
 						if len(questInfo.Rewards.RoomMessage) > 0 {
-							messageQueue.SendRoomMessage(questUser.Character.RoomId, questInfo.Rewards.RoomMessage, true, questUser.UserId)
+							messageQueue.SendRoomMessage(questUser.Character.RoomId, questInfo.Rewards.RoomMessage, questUser.UserId)
 						}
 						// New quest to start?
 						if len(questInfo.Rewards.QuestId) > 0 {
@@ -1402,13 +1421,13 @@ func (w *World) TurnTick() {
 						}
 						// Gold reward?
 						if questInfo.Rewards.Gold > 0 {
-							messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="gold">%d gold</ansi>!`, questInfo.Rewards.Gold), true)
+							messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="gold">%d gold</ansi>!`, questInfo.Rewards.Gold))
 							questUser.Character.Gold += questInfo.Rewards.Gold
 						}
 						// Item reward?
 						if questInfo.Rewards.ItemId > 0 {
 							newItm := items.New(questInfo.Rewards.ItemId)
-							messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="itemname">%s</ansi>!`, newItm.NameSimple()), true)
+							messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="itemname">%s</ansi>!`, newItm.NameSimple()))
 							questUser.Character.StoreItem(newItm)
 
 							iSpec := newItm.GetSpec()
@@ -1441,7 +1460,7 @@ func (w *World) TurnTick() {
 								xpMsgExtra = fmt.Sprintf(` <ansi fg="yellow">(%d%% scale)</ansi>`, xpScale)
 							}
 
-							messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="experience">%d experience points</ansi>%s!`, grantXP, xpMsgExtra), true)
+							messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="experience">%d experience points</ansi>%s!`, grantXP, xpMsgExtra))
 						}
 						// Skill reward?
 						if questInfo.Rewards.SkillInfo != `` {
@@ -1462,21 +1481,21 @@ func (w *World) TurnTick() {
 										SkillLevel: newLevel,
 									}
 									skillUpTxt, _ := templates.Process("character/skillup", skillData)
-									messageQueue.SendUserMessage(questUser.UserId, skillUpTxt, true)
+									messageQueue.SendUserMessage(questUser.UserId, skillUpTxt)
 								}
 
 							}
 						}
 						// Move them to another room/area?
 						if questInfo.Rewards.RoomId > 0 {
-							messageQueue.SendUserMessage(questUser.UserId, `You are suddenly moved to a new place!`, true)
-							messageQueue.SendRoomMessage(questUser.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is suddenly moved to a new place!`, questUser.Character.Name), true, questUser.UserId)
+							messageQueue.SendUserMessage(questUser.UserId, `You are suddenly moved to a new place!`)
+							messageQueue.SendRoomMessage(questUser.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is suddenly moved to a new place!`, questUser.Character.Name), questUser.UserId)
 							rooms.MoveToRoom(questUser.UserId, questInfo.Rewards.RoomId)
 						}
 					} else {
 						if !questInfo.Secret {
 							questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You've made progress on the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-							messageQueue.SendUserMessage(questUser.UserId, questUpTxt, true)
+							messageQueue.SendUserMessage(questUser.UserId, questUpTxt)
 						}
 					}
 

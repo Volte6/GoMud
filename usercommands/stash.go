@@ -30,7 +30,7 @@ func Stash(rest string, userId int) (util.MessageQueue, error) {
 	matchItem, found := user.Character.FindInBackpack(rest)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to stash.", rest), true)
+		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to stash.", rest))
 	} else {
 		// Swap the item location
 		room.AddItem(matchItem, true)
@@ -39,13 +39,11 @@ func Stash(rest string, userId int) (util.MessageQueue, error) {
 		isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 
 		response.SendUserMessage(userId,
-			fmt.Sprintf(`You stash the <ansi fg="itemname">%s</ansi>. To get it back, try <ansi fg="command">get %s from stash</ansi>`, matchItem.DisplayName(), matchItem.DisplayName()),
-			true)
+			fmt.Sprintf(`You stash the <ansi fg="itemname">%s</ansi>. To get it back, try <ansi fg="command">get %s from stash</ansi>`, matchItem.DisplayName(), matchItem.DisplayName()))
 
 		if !isSneaking {
 			response.SendRoomMessage(user.Character.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> is attempting to look unsuspicious.`, user.Character.Name),
-				true)
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> is attempting to look unsuspicious.`, user.Character.Name))
 		}
 
 		// Trigger lost event

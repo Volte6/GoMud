@@ -67,7 +67,7 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 
 		// If no longer in the same room, notify the user
 		if singleTargetArg == nil || (sourceActor.GetRoomId() != singleTargetArg.GetRoomId()) {
-			messageQueue.SendUserMessage(sourceUserId, `Your target cannot be found.`, true)
+			messageQueue.SendUserMessage(sourceUserId, `Your target cannot be found.`)
 			messageQueue.Handled = true
 			return messageQueue, nil
 		}
@@ -92,7 +92,7 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 		}
 
 		if len(multiTargetArg) == 0 {
-			messageQueue.SendUserMessage(sourceUserId, `Your target cannot be found.`, true)
+			messageQueue.SendUserMessage(sourceUserId, `Your target cannot be found.`)
 			messageQueue.Handled = true
 			return messageQueue, nil
 		}

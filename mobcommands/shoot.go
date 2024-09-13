@@ -101,7 +101,7 @@ func Shoot(rest string, mobId int) (util.MessageQueue, error) {
 			if !isSneaking {
 				response.SendRoomMessage(room.RoomId,
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> prepares to shoot at <ansi fg="mobname">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, mob.Character.Name, m.Character.Name, exitName),
-					true)
+				)
 			}
 
 		}
@@ -118,7 +118,7 @@ func Shoot(rest string, mobId int) (util.MessageQueue, error) {
 
 				response.SendRoomMessage(room.RoomId,
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> prepares to shoot at <ansi fg="username">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, mob.Character.Name, p.Character.Name, exitName),
-					true)
+				)
 
 			}
 

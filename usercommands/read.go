@@ -45,19 +45,19 @@ func Read(rest string, userId int) (util.MessageQueue, error) {
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 
 	if len(foundItemName) == 0 {
-		response.SendUserMessage(userId, fmt.Sprintf(`You don't have a "%s" that can be read.`, rest), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You don't have a "%s" that can be read.`, rest))
 	} else {
 		response.SendUserMessage(userId,
 			fmt.Sprintf(`You look at <ansi fg="item">%s</ansi>...`, foundItemLongName),
-			true)
+		)
 
 		if !isSneaking {
 			response.SendRoomMessage(user.Character.RoomId,
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> looks at their <ansi fg="item">%s</ansi>...`, user.Character.Name, foundItemName),
-				true)
+			)
 		}
 
-		response.SendUserMessage(userId, foundItemDescription, true)
+		response.SendUserMessage(userId, foundItemDescription)
 	}
 
 	response.Handled = true

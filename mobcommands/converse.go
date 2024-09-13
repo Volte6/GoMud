@@ -36,9 +36,9 @@ func Converse(rest string, mobId int) (util.MessageQueue, error) {
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 
 	if isSneaking {
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`someone says, "<ansi fg="yellow">%s</ansi>"`, rest), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`someone says, "<ansi fg="yellow">%s</ansi>"`, rest))
 	} else {
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest))
 	}
 
 	roomMobs := room.GetMobs(rooms.FindIdle)

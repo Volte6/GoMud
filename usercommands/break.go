@@ -19,12 +19,12 @@ func Break(rest string, userId int) (util.MessageQueue, error) {
 
 	if user.Character.Aggro != nil {
 		user.Character.Aggro = nil
-		response.SendUserMessage(userId, `You break off combat.`, true)
+		response.SendUserMessage(userId, `You break off combat.`)
 		response.SendRoomMessage(user.Character.RoomId,
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> breaks off combat.`, user.Character.Name),
-			true)
+		)
 	} else {
-		response.SendUserMessage(userId, `You aren't in combat!`, true)
+		response.SendUserMessage(userId, `You aren't in combat!`)
 	}
 
 	response.Handled = true

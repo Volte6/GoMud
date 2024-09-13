@@ -37,20 +37,20 @@ func Shout(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if isSneaking {
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`someone shouts, "<ansi fg="yellow">%s</ansi>"`, rest), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`someone shouts, "<ansi fg="yellow">%s</ansi>"`, rest))
 	} else {
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> shouts, "<ansi fg="yellow">%s</ansi>"`, user.Character.Name, rest), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> shouts, "<ansi fg="yellow">%s</ansi>"`, user.Character.Name, rest))
 	}
 
 	for _, roomInfo := range room.Exits {
 		if otherRoom := rooms.LoadRoom(roomInfo.RoomId); otherRoom != nil {
 			if sourceExit := otherRoom.FindExitTo(room.RoomId); sourceExit != `` {
-				response.SendRoomMessage(otherRoom.RoomId, fmt.Sprintf(`Someone shouts from the <ansi fg="exit">%s</ansi> direction, "<ansi fg="yellow">%s</ansi>"`, sourceExit, rest), true)
+				response.SendRoomMessage(otherRoom.RoomId, fmt.Sprintf(`Someone shouts from the <ansi fg="exit">%s</ansi> direction, "<ansi fg="yellow">%s</ansi>"`, sourceExit, rest))
 			}
 		}
 	}
 
-	response.SendUserMessage(userId, fmt.Sprintf(`You shout, "<ansi fg="yellow">%s</ansi>"`, rest), true)
+	response.SendUserMessage(userId, fmt.Sprintf(`You shout, "<ansi fg="yellow">%s</ansi>"`, rest))
 
 	response.Handled = true
 	return response, nil

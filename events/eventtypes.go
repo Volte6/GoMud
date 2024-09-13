@@ -46,8 +46,10 @@ type Broadcast struct {
 func (b Broadcast) Type() string { return `Broadcast` }
 
 type Message struct {
-	UserId int
-	Text   string
+	UserId         int
+	ExcludeUserIds []int
+	RoomId         int
+	Text           string
 }
 
 func (m Message) Type() string { return `Message` }

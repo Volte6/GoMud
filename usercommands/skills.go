@@ -37,12 +37,12 @@ func Skills(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	skillTxt, _ := templates.Process("character/skills", skillData)
-	response.SendUserMessage(userId, skillTxt, false)
+	response.SendUserMessage(userId, skillTxt)
 
 	if rest == `extra` {
-		response.SendUserMessage(userId, `<ansi fg="yellow">Cooldown Tracking:</ansi>`, true)
+		response.SendUserMessage(userId, `<ansi fg="yellow">Cooldown Tracking:</ansi>`)
 		for name, rnds := range user.Character.GetAllCooldowns() {
-			response.SendUserMessage(userId, fmt.Sprintf(` <ansi fg="yellow">%s</ansi>: <ansi fg="red">%d</ansi>`, name, rnds), true)
+			response.SendUserMessage(userId, fmt.Sprintf(` <ansi fg="yellow">%s</ansi>: <ansi fg="red">%d</ansi>`, name, rnds))
 		}
 	}
 

@@ -33,7 +33,7 @@ func Drop(rest string, userId int) (util.MessageQueue, error) {
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) == 0 {
-		response.SendUserMessage(userId, `Drop what?`, true)
+		response.SendUserMessage(userId, `Drop what?`)
 
 		response.Handled = true
 		return response, nil
@@ -64,13 +64,13 @@ func Drop(rest string, userId int) (util.MessageQueue, error) {
 		g, _ := strconv.ParseInt(args[0], 10, 32)
 		dropAmt := int(g)
 		if dropAmt < 1 {
-			response.SendUserMessage(userId, "Oops!", true)
+			response.SendUserMessage(userId, "Oops!")
 			response.Handled = true
 			return response, nil
 		}
 
 		if dropAmt > user.Character.Gold {
-			response.SendUserMessage(userId, fmt.Sprintf("You don't have a %d gold to drop.", dropAmt), true)
+			response.SendUserMessage(userId, fmt.Sprintf("You don't have a %d gold to drop.", dropAmt))
 		}
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -80,10 +80,10 @@ func Drop(rest string, userId int) (util.MessageQueue, error) {
 
 		response.SendUserMessage(userId,
 			fmt.Sprintf(`You drop <ansi fg="gold">%d gold</ansi> on the floor.`, dropAmt),
-			true)
+		)
 		response.SendRoomMessage(room.RoomId,
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, dropAmt),
-			true)
+		)
 
 		response.Handled = true
 		return response, nil
@@ -93,7 +93,7 @@ func Drop(rest string, userId int) (util.MessageQueue, error) {
 	matchItem, found := user.Character.FindInBackpack(rest)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to drop.", rest), true)
+		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to drop.", rest))
 	} else {
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -107,10 +107,10 @@ func Drop(rest string, userId int) (util.MessageQueue, error) {
 
 		response.SendUserMessage(userId,
 			fmt.Sprintf(`You drop the <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),
-			true)
+		)
 		response.SendRoomMessage(user.Character.RoomId,
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
-			true)
+		)
 
 		// If grenades are dropped, they explode and affect everyone in the room!
 		if iSpec.Type == items.Grenade {

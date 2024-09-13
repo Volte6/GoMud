@@ -44,7 +44,7 @@ func Appraise(rest string, userId int) (util.MessageQueue, error) {
 
 		item, found := user.Character.FindInBackpack(rest)
 		if !found {
-			response.SendUserMessage(user.UserId, "You don't have that item.", true)
+			response.SendUserMessage(user.UserId, "You don't have that item.")
 			response.Handled = true
 			return response, nil
 		}
@@ -80,11 +80,11 @@ func Appraise(rest string, userId int) (util.MessageQueue, error) {
 		user.Character.Gold -= appraisePrice
 		mob.Character.Gold += appraisePrice
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You give <ansi fg="mobname">%s</ansi> %d gold to appraise <ansi fg="itemname">%s</ansi>.`, mob.Character.Name, appraisePrice, itemSpec.Name), true)
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> appraises <ansi fg="itemname">%s</ansi>.`, user.Character.Name, itemSpec.Name), true)
+		response.SendUserMessage(userId, fmt.Sprintf(`You give <ansi fg="mobname">%s</ansi> %d gold to appraise <ansi fg="itemname">%s</ansi>.`, mob.Character.Name, appraisePrice, itemSpec.Name))
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> appraises <ansi fg="itemname">%s</ansi>.`, user.Character.Name, itemSpec.Name))
 
 		inspectTxt, _ := templates.Process("descriptions/inspect", details)
-		response.SendUserMessage(userId, inspectTxt, false)
+		response.SendUserMessage(userId, inspectTxt)
 
 		break
 	}

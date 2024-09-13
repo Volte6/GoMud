@@ -76,7 +76,7 @@ func Ask(rest string, userId int) (util.MessageQueue, error) {
 			}
 		}
 
-		response.SendUserMessage(userId, `You must <ansi fg="command">ask</ansi> <ansi fg="mobname">someone</ansi> <ansi fg="yellow">something</ansi>`, true)
+		response.SendUserMessage(userId, `You must <ansi fg="command">ask</ansi> <ansi fg="mobname">someone</ansi> <ansi fg="yellow">something</ansi>`)
 		response.Handled = true
 		return response, nil
 	}
@@ -92,7 +92,7 @@ func Ask(rest string, userId int) (util.MessageQueue, error) {
 
 		mob := mobs.GetInstance(mobId)
 		if mob == nil {
-			response.SendUserMessage(userId, `Nobody found by that name`, true)
+			response.SendUserMessage(userId, `Nobody found by that name`)
 			response.Handled = true
 			return response, nil
 		}
@@ -100,7 +100,7 @@ func Ask(rest string, userId int) (util.MessageQueue, error) {
 		args = args[1:]
 
 		if !mob.Character.IsCharmed() {
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> asks <ansi fg="mobname">%s</ansi> about "%s"`, user.Character.Name, mob.Character.Name, strings.Join(args, ` `)), true, user.UserId)
+			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> asks <ansi fg="mobname">%s</ansi> about "%s"`, user.Character.Name, mob.Character.Name, strings.Join(args, ` `)), user.UserId)
 		}
 
 		// players may type "ask <mob> to <do something>"
@@ -156,7 +156,7 @@ func Ask(rest string, userId int) (util.MessageQueue, error) {
 
 	} else {
 
-		response.SendUserMessage(userId, `ask who what?`, true)
+		response.SendUserMessage(userId, `ask who what?`)
 
 	}
 

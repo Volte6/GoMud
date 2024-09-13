@@ -23,54 +23,54 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 
 	if len(args) == 0 {
 
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">description:</ansi>`, true)
-		response.SendUserMessage(userId, `<ansi fg="yellow">`+util.SplitStringNL(user.Character.Description, 80)+`</ansi>`, true)
-		response.SendUserMessage(userId, ``, true)
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">description:</ansi>`)
+		response.SendUserMessage(userId, `<ansi fg="yellow">`+util.SplitStringNL(user.Character.Description, 80)+`</ansi>`)
+		response.SendUserMessage(userId, ``)
 
 		on := user.GetConfigOption(`auction`)
 		onTxt := `<ansi fg="red">OFF</ansi>`
 		if on == nil || on.(bool) {
 			onTxt = `<ansi fg="green">ON</ansi>`
 		}
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">auction:</ansi> `, true)
-		response.SendUserMessage(userId, onTxt, true)
-		response.SendUserMessage(userId, ``, true)
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">auction:</ansi> `)
+		response.SendUserMessage(userId, onTxt)
+		response.SendUserMessage(userId, ``)
 
 		on = user.GetConfigOption(`shortadjectives`)
 		onTxt = `<ansi fg="red">OFF</ansi>`
 		if on == nil || on.(bool) {
 			onTxt = `<ansi fg="green">ON</ansi>`
 		}
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">shortadjectives:</ansi> `, true)
-		response.SendUserMessage(userId, onTxt, true)
-		response.SendUserMessage(userId, ``, true)
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">shortadjectives:</ansi> `)
+		response.SendUserMessage(userId, onTxt)
+		response.SendUserMessage(userId, ``)
 
 		on = user.GetConfigOption(`tinymap`)
 		onTxt = `<ansi fg="red">OFF</ansi>`
 		if on == nil || on.(bool) {
 			onTxt = `<ansi fg="green">ON</ansi>`
 		}
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">tinymap:</ansi> `, true)
-		response.SendUserMessage(userId, onTxt, true)
-		response.SendUserMessage(userId, ``, true)
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">tinymap:</ansi> `)
+		response.SendUserMessage(userId, onTxt)
+		response.SendUserMessage(userId, ``)
 
 		currentPrompt := user.GetConfigOption(`prompt`)
 		if currentPrompt == nil {
 			currentPrompt = users.PromptDefault
 		}
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">prompt: </ansi> `, true)
-		response.SendUserMessage(userId, currentPrompt.(string), true)
-		response.SendUserMessage(userId, ``, true)
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">prompt: </ansi> `)
+		response.SendUserMessage(userId, currentPrompt.(string))
+		response.SendUserMessage(userId, ``)
 
 		currentPrompt = user.GetConfigOption(`fprompt`)
 		if currentPrompt == nil {
 			currentPrompt = users.PromptDefault
 		}
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">fprompt:</ansi> `, true)
-		response.SendUserMessage(userId, currentPrompt.(string), true)
-		response.SendUserMessage(userId, ``, true)
+		response.SendUserMessage(userId, `<ansi fg="yellow-bold">fprompt:</ansi> `)
+		response.SendUserMessage(userId, currentPrompt.(string))
+		response.SendUserMessage(userId, ``)
 
-		response.SendUserMessage(userId, `See: <ansi fg="command">help set</ansi>`, true)
+		response.SendUserMessage(userId, `See: <ansi fg="command">help set</ansi>`)
 
 		response.Handled = true
 		return response, nil
@@ -87,7 +87,7 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 		}
 		user.Character.Description = rest
 
-		response.SendUserMessage(userId, "Description set. Look at yourself to confirm.", true)
+		response.SendUserMessage(userId, "Description set. Look at yourself to confirm.")
 		response.Handled = true
 		return response, nil
 	}
@@ -99,10 +99,10 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 		}
 		if !on.(bool) {
 			on = true
-			response.SendUserMessage(userId, `Auctions turned <ansi fg="red">ON</ansi>.`, true)
+			response.SendUserMessage(userId, `Auctions turned <ansi fg="red">ON</ansi>.`)
 		} else {
 			on = false
-			response.SendUserMessage(userId, `Auctions turned <ansi fg="red">OFF</ansi>.`, true)
+			response.SendUserMessage(userId, `Auctions turned <ansi fg="red">OFF</ansi>.`)
 		}
 
 		user.SetConfigOption(`auction`, on)
@@ -116,10 +116,10 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 		on := user.GetConfigOption(`shortadjectives`)
 		if on == nil || !on.(bool) {
 			on = true
-			response.SendUserMessage(userId, `Short Adjectives turned <ansi fg="red">ON</ansi>.`, true)
+			response.SendUserMessage(userId, `Short Adjectives turned <ansi fg="red">ON</ansi>.`)
 		} else {
 			on = false
-			response.SendUserMessage(userId, `Short Adjectives turned <ansi fg="red">OFF</ansi>.`, true)
+			response.SendUserMessage(userId, `Short Adjectives turned <ansi fg="red">OFF</ansi>.`)
 		}
 
 		user.SetConfigOption(`shortadjectives`, on)
@@ -133,10 +133,10 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 		on := user.GetConfigOption(`tinymap`)
 		if on == nil || !on.(bool) {
 			on = true
-			response.SendUserMessage(userId, `Tinymap turned <ansi fg="red">ON</ansi>.`, true)
+			response.SendUserMessage(userId, `Tinymap turned <ansi fg="red">ON</ansi>.`)
 		} else {
 			on = false
-			response.SendUserMessage(userId, `Tinymap turned <ansi fg="red">OFF</ansi>.`, true)
+			response.SendUserMessage(userId, `Tinymap turned <ansi fg="red">OFF</ansi>.`)
 		}
 
 		user.SetConfigOption(`tinymap`, on)
@@ -153,9 +153,9 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 			if currentPrompt == nil {
 				currentPrompt = users.PromptDefault
 			}
-			response.SendUserMessage(userId, "Your current prompt:\n", true)
-			response.SendUserMessage(userId, currentPrompt.(string), true)
-			response.SendUserMessage(userId, "\n"+`Type <ansi fg="command">help set-prompt</ansi> for more info on customizing prompts.`+"\n", true)
+			response.SendUserMessage(userId, "Your current prompt:\n")
+			response.SendUserMessage(userId, currentPrompt.(string))
+			response.SendUserMessage(userId, "\n"+`Type <ansi fg="command">help set-prompt</ansi> for more info on customizing prompts.`+"\n")
 			response.Handled = true
 			return response, nil
 		}
@@ -175,7 +175,7 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 			user.SetConfigOption(`prompt-compiled`, util.ConvertColorShortTags(promptStr))
 		}
 
-		response.SendUserMessage(userId, "Prompt set.", true)
+		response.SendUserMessage(userId, "Prompt set.")
 		response.Handled = true
 		return response, nil
 
@@ -188,9 +188,9 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 			if currentPrompt == nil {
 				currentPrompt = users.PromptDefault
 			}
-			response.SendUserMessage(userId, "Your current fprompt:\n", true)
-			response.SendUserMessage(userId, currentPrompt.(string), true)
-			response.SendUserMessage(userId, "\n"+`Type <ansi fg="command">help set-prompt</ansi> for more info on customizing prompts.`+"\n", true)
+			response.SendUserMessage(userId, "Your current fprompt:\n")
+			response.SendUserMessage(userId, currentPrompt.(string))
+			response.SendUserMessage(userId, "\n"+`Type <ansi fg="command">help set-prompt</ansi> for more info on customizing prompts.`+"\n")
 			response.Handled = true
 			return response, nil
 		}
@@ -208,7 +208,7 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 			user.SetConfigOption(`fprompt-compiled`, util.ConvertColorShortTags(promptStr))
 		}
 
-		response.SendUserMessage(userId, "fprompt set.", true)
+		response.SendUserMessage(userId, "fprompt set.")
 		response.Handled = true
 		return response, nil
 
@@ -218,7 +218,7 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 	if len(setTarget) == 2 && setTarget[0] == '=' {
 		macroNum, _ := strconv.Atoi(string(args[0][1]))
 		if macroNum == 0 {
-			response.SendUserMessage(userId, "Invalid macro number supplied.", true)
+			response.SendUserMessage(userId, "Invalid macro number supplied.")
 			response.Handled = true
 			return response, nil
 		}
@@ -236,7 +236,7 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 
 			response.SendUserMessage(userId,
 				fmt.Sprintf(`Macro <ansi fg="command">=%d</ansi> deleted.`, macroNum),
-				true)
+			)
 		} else {
 
 			for _, cmd := range strings.Split(rest, ";") {
@@ -244,7 +244,7 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 					if cmd[0] == '=' {
 						response.SendUserMessage(userId,
 							`You cannot reference macros inside of a macro`,
-							true)
+						)
 						response.Handled = true
 						return response, nil
 					}
@@ -255,7 +255,7 @@ func Set(rest string, userId int) (util.MessageQueue, error) {
 
 			response.SendUserMessage(userId,
 				fmt.Sprintf(`Macro set. Type <ansi fg="command">=%d</ansi> or press <ansi fg="command">F%d</ansi> to use it.`, macroNum, macroNum),
-				true)
+			)
 		}
 
 		response.Handled = true

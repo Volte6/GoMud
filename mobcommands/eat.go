@@ -40,7 +40,7 @@ func Eat(rest string, mobId int) (util.MessageQueue, error) {
 
 		mob.Character.UseItem(matchItem)
 
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> eats some <ansi fg="itemname">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()), true)
+		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> eats some <ansi fg="itemname">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
 
 		for _, buffId := range itemSpec.BuffIds {
 
