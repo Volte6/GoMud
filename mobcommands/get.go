@@ -66,7 +66,7 @@ func Get(rest string, mobId int) (util.MessageQueue, error) {
 			mob.Character.Gold += goldAmt
 			room.Gold -= goldAmt
 
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> picks up <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, goldAmt))
 		}
 
@@ -109,7 +109,7 @@ func Get(rest string, mobId int) (util.MessageQueue, error) {
 		room.RemoveItem(matchItem, getFromStash)
 		mob.Character.StoreItem(matchItem)
 
-		response.SendRoomMessage(mob.Character.RoomId,
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))
 	}
 

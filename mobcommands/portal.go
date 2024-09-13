@@ -100,7 +100,7 @@ func Portal(rest string, mobId int) (util.MessageQueue, error) {
 		return response, fmt.Errorf("failed to add temporary exit to room")
 	}
 
-	response.SendRoomMessage(room.RoomId,
+	room.SendText(
 		fmt.Sprintf(`<ansi fg="mobname">%s</ansi> squints really hard, and a %s appears!`, mob.Character.Name, newPortal.Title),
 	)
 
@@ -108,7 +108,7 @@ func Portal(rest string, mobId int) (util.MessageQueue, error) {
 	newPortal.RoomId = mob.Character.RoomId
 	targetRoom.AddTemporaryExit(newPortalExitName, newPortal)
 
-	response.SendRoomMessage(targetRoom.RoomId,
+	room.SendText(
 		fmt.Sprintf(`A %s appears!`, newPortal.Title),
 	)
 

@@ -14,8 +14,8 @@ All new commands must return a `util.MessageQueue` containing any messages to go
 
 func Glarble(rest string, userId int) (util.MessageQueue, error) {
     response := NewUserCommandResponse(userId)
-    response.SendRoomMessage(1, `This glarble goes out to all players in room 1`)
-    response.SenUsermMessage(1, `This glarble goes out to userId 1`, true)
+    room.SendText(`This glarble goes out to all players in room`)
+    user.SendText(`This glarble goes out to the user`)
     response.Handled = true
 
     return response, nil

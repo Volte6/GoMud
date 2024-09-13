@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
@@ -28,14 +29,20 @@ func Inspect(rest string, userId int) (util.MessageQueue, error) {
 		return response, fmt.Errorf("user %d not found", userId)
 	}
 
+	// Load current room details
+	room := rooms.LoadRoom(user.Character.RoomId)
+	if room == nil {
+		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+	}
+
 	if user.Character.GetSkillLevel(skills.Inspect) == 0 {
-		response.SendUserMessage(userId, "You don't know how to inspect.")
+		user.SendText("You don't know how to inspect.")
 		response.Handled = true
 		return response, fmt.Errorf("you don't know how to inspect")
 	}
 
 	if len(rest) == 0 {
-		response.SendUserMessage(userId, "Type `help inspect` for more information on the inspect skill.")
+		user.SendText("Type `help inspect` for more information on the inspect skill.")
 		response.Handled = true
 		return response, nil
 	}
@@ -46,22 +53,23 @@ func Inspect(rest string, userId int) (util.MessageQueue, error) {
 	matchItem, found := user.Character.FindInBackpack(rest)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to inspect. Is it still worn, perhaps?", rest))
+		user.SendText(fmt.Sprintf("You don't have a %s to inspect. Is it still worn, perhaps?", rest))
 	} else {
 
 		if !user.Character.TryCooldown(skills.Inspect.String(), 3) {
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Inspect.String())),
 			)
 			response.Handled = true
 			return response, errors.New(`you're doing that too often`)
 		}
 
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`You inspect the <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),
 		)
-		response.SendRoomMessage(user.Character.RoomId,
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> inspects their <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
+			userId,
 		)
 
 		type inspectDetails struct {
@@ -79,7 +87,7 @@ func Inspect(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		inspectTxt, _ := templates.Process("descriptions/inspect", details)
-		response.SendUserMessage(userId, inspectTxt)
+		user.SendText(inspectTxt)
 
 	}
 

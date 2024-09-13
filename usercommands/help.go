@@ -81,7 +81,7 @@ func Help(rest string, userId int) (util.MessageQueue, error) {
 
 		helpTxt, err = templates.Process("help/help", helpCommandList)
 		if err != nil {
-			response.SendUserMessage(userId, err.Error())
+			user.SendText(err.Error())
 			response.Handled = true
 		}
 	} else {
@@ -124,13 +124,13 @@ func Help(rest string, userId int) (util.MessageQueue, error) {
 
 		helpTxt, err = templates.Process("help/"+helpName, helpVars)
 		if err != nil {
-			response.SendUserMessage(userId, fmt.Sprintf(`No help found for "%s"`, helpName))
+			user.SendText(fmt.Sprintf(`No help found for "%s"`, helpName))
 			response.Handled = true
 			return response, err
 		}
 	}
 
-	response.SendUserMessage(userId, helpTxt)
+	user.SendText(helpTxt)
 
 	response.Handled = true
 	return response, nil

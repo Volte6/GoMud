@@ -53,7 +53,7 @@ func Jobs(rest string, userId int) (util.MessageQueue, error) {
 	})
 
 	jobsTxt, _ := templates.Process("character/jobs", jobProgress)
-	response.SendUserMessage(userId, jobsTxt)
+	user.SendText(jobsTxt)
 
 	response.Handled = true
 	return response, nil

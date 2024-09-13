@@ -5,6 +5,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
 )
 
@@ -16,6 +17,11 @@ func Remove(rest string, mobId int) (util.MessageQueue, error) {
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
 		return response, fmt.Errorf("mob %d not found", mobId)
+	}
+
+	room := rooms.LoadRoom(mob.Character.RoomId)
+	if room == nil {
+		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if rest == "all" {
@@ -36,7 +42,7 @@ func Remove(rest string, mobId int) (util.MessageQueue, error) {
 
 			mob.Character.CancelBuffsWithFlag(buffs.Hidden)
 
-			response.SendRoomMessage(mob.Character.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, matchItem.DisplayName()),
 			)
 

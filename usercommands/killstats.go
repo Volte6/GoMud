@@ -98,7 +98,7 @@ func Killstats(rest string, userId int) (util.MessageQueue, error) {
 
 	searchResultsTable := templates.GetTable(tableTitle, headers, rows, formatting)
 	tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
-	response.SendUserMessage(userId, tplTxt)
+	user.SendText(tplTxt)
 
 	response.Handled = true
 	return response, nil

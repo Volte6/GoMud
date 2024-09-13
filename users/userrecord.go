@@ -109,6 +109,15 @@ func (u *UserRecord) Command(inputTxt string, waitTurns ...int) {
 
 }
 
+func (u *UserRecord) SendText(txt string) {
+
+	events.AddToQueue(events.Message{
+		UserId: u.UserId,
+		Text:   txt + "\n",
+	})
+
+}
+
 func (u *UserRecord) SetTempData(key string, value any) {
 	u.lock.Lock()
 	defer u.lock.Unlock()

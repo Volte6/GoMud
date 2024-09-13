@@ -32,13 +32,13 @@ func Use(rest string, userId int) (util.MessageQueue, error) {
 	matchItem, found := user.Character.FindInBackpack(rest)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf(`You don't have a "%s" to use.`, rest))
+		user.SendText(fmt.Sprintf(`You don't have a "%s" to use.`, rest))
 	} else {
 
 		itemSpec := matchItem.GetSpec()
 
 		if itemSpec.Subtype != items.Usable {
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You can't use <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()))
 			response.Handled = true
 			return response, nil
@@ -46,8 +46,8 @@ func Use(rest string, userId int) (util.MessageQueue, error) {
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You use the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()))
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> uses their <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()))
+		user.SendText(fmt.Sprintf(`You use the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()))
+		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> uses their <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()), userId)
 
 		// If no more uses, will be lost, so trigger event
 		if usesLeft := user.Character.UseItem(matchItem); usesLeft < 1 {

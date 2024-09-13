@@ -19,7 +19,7 @@ func Cooldowns(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	cdTxt, _ := templates.Process("character/cooldowns", user.Character.GetAllCooldowns())
-	response.SendUserMessage(userId, cdTxt)
+	user.SendText(cdTxt)
 
 	response.Handled = true
 	return response, nil

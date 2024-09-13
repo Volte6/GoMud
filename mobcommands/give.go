@@ -93,8 +93,8 @@ func Give(rest string, mobId int) (util.MessageQueue, error) {
 
 			}
 
-			response.SendUserMessage(targetUser.UserId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> gives you their <ansi fg="item">%s</ansi>.`, mob.Character.Name, giveItem.DisplayName()),
+			targetUser.SendText(
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> gives you their <ansi fg="item">%s</ansi>.`, mob.Character.Name, giveItem.DisplayName()),
 			)
 
 		} else if giveGoldAmount > 0 {
@@ -102,8 +102,8 @@ func Give(rest string, mobId int) (util.MessageQueue, error) {
 			targetUser.Character.Gold += giveGoldAmount
 			mob.Character.Gold -= giveGoldAmount
 
-			response.SendUserMessage(targetUser.UserId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> gives you <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, giveGoldAmount),
+			targetUser.SendText(
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> gives you <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, giveGoldAmount),
 			)
 
 		}
@@ -129,7 +129,7 @@ func Give(rest string, mobId int) (util.MessageQueue, error) {
 				m.Character.StoreItem(giveItem)
 				mob.Character.RemoveItem(giveItem)
 
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> gave their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, giveItem.DisplayName(), m.Character.Name),
 				)
 			} else if giveGoldAmount > 0 {
@@ -137,7 +137,7 @@ func Give(rest string, mobId int) (util.MessageQueue, error) {
 				m.Character.Gold += giveGoldAmount
 				mob.Character.Gold -= giveGoldAmount
 
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> gave some gold to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, m.Character.Name),
 				)
 			}

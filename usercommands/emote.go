@@ -3,6 +3,7 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -102,10 +103,17 @@ func Emote(rest string, userId int) (util.MessageQueue, error) {
 		return response, fmt.Errorf("user %d not found", userId)
 	}
 
+	// Load current room details
+	room := rooms.LoadRoom(user.Character.RoomId)
+	if room == nil {
+		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+	}
+
 	if len(rest) == 0 {
-		response.SendUserMessage(userId, "You emote.")
-		response.SendRoomMessage(user.Character.RoomId,
+		user.SendText("You emote.")
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> emotes.`, user.Character.Name),
+			userId,
 		)
 		response.Handled = true
 		return response, nil
@@ -114,13 +122,14 @@ func Emote(rest string, userId int) (util.MessageQueue, error) {
 	if rest[0] == '@' && len(rest) > 1 {
 		rest = rest[1:]
 	} else {
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`You emote: <ansi fg="username">%s</ansi> <ansi fg="blue">%s</ansi>`, user.Character.Name, rest),
 		)
 	}
 
-	response.SendRoomMessage(user.Character.RoomId,
+	room.SendText(
 		fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="blue">%s</ansi>`, user.Character.Name, rest),
+		userId,
 	)
 
 	response.Handled = true

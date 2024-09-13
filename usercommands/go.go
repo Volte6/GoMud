@@ -24,14 +24,14 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if user.Character.Aggro != nil {
-		response.SendUserMessage(userId, "You can't do that! You are in combat!")
+		user.SendText("You can't do that! You are in combat!")
 		response.Handled = true
 		return response, nil
 	}
 
 	// If has a buff that prevents combat, skip the player
 	if user.Character.HasBuffFlag(buffs.NoMovement) {
-		response.SendUserMessage(userId, "You can't do that!")
+		user.SendText("You can't do that!")
 		response.Handled = true
 		return response, nil
 	}
@@ -58,9 +58,9 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 		if !user.Character.DeductActionPoints(actionCost) {
 
 			if encumbered {
-				response.SendUserMessage(userId, "You're too tired to move!")
+				user.SendText("You're too tired to move!")
 			} else {
-				response.SendUserMessage(userId, "You're too encumbered to move!")
+				user.SendText("You're too encumbered to move!")
 			}
 
 			response.Handled = true
@@ -87,8 +87,8 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 
 			if lockpickItm.ItemId > 0 && hasSequence {
 
-				response.SendUserMessage(userId, `You know this lock well, you quickly pick it.`)
-				response.SendRoomMessage(room.RoomId,
+				user.SendText(`You know this lock well, you quickly pick it.`)
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> quickly picks the lock on the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
 					userId)
 
@@ -96,8 +96,8 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 				room.Exits[exitName] = exitInfo
 
 			} else if hasKey {
-				response.SendUserMessage(userId, fmt.Sprintf(`You use the key on your key ring to unlock the <ansi fg="exit">%s</ansi> exit.`, exitName))
-				response.SendRoomMessage(room.RoomId,
+				user.SendText(fmt.Sprintf(`You use the key on your key ring to unlock the <ansi fg="exit">%s</ansi> exit.`, exitName))
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to unlock the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
 					userId)
 
@@ -110,8 +110,8 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 
 					itmSpec := backpackKeyItm.GetSpec()
 
-					response.SendUserMessage(userId, fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to unlock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName))
-					response.SendRoomMessage(room.RoomId,
+					user.SendText(fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to unlock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName))
+					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to unlock the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
 						userId)
 
@@ -126,7 +126,7 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 				}
 
 				if exitInfo.Lock.IsLocked() {
-					response.SendUserMessage(userId, `There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.`)
+					user.SendText(`There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.`)
 					response.Handled = true
 					return response, nil
 				}
@@ -169,7 +169,7 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		if err := rooms.MoveToRoom(user.UserId, destRoom.RoomId); err != nil {
-			response.SendUserMessage(userId, "Oops, couldn't move there!")
+			user.SendText("Oops, couldn't move there!")
 		} else {
 
 			if scriptResponse, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId); err == nil {
@@ -184,26 +184,28 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 
 			// Tell the player they are moving
 			if isSneaking {
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 						fmt.Sprintf(`You <ansi fg="black-bold">sneak</ansi> towards the %s exit.`, exitName),
 					))
 			} else {
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 						fmt.Sprintf(`You head towards the <ansi fg="exit">%s</ansi> exit.`, exitName),
 					))
 
 				// Tell the old room they are leaving
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> leaves towards the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
-					))
+					),
+					userId)
 				// Tell the new room they have arrived
-				response.SendRoomMessage(destRoom.RoomId,
+				destRoom.SendText(
 					fmt.Sprintf(string(c.EnterRoomMessageWrapper),
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> enters from %s.`, user.Character.Name, enterFromExit),
-					))
+					),
+					userId)
 			}
 
 			if currentParty := parties.Get(userId); currentParty != nil {
@@ -216,7 +218,7 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 						}
 						if partyUser := users.GetByUserId(partyMemberId); partyUser != nil {
 							if partyUser.Character.RoomId == room.RoomId {
-								response.SendUserMessage(partyMemberId, `    You follow the party leader.`)
+								partyUser.SendText(`You follow the party leader.`)
 								partyUser.Command(rest)
 							}
 						}
@@ -301,7 +303,7 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 						}
 					}
 
-					response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> notices you as you enter!`, mob.Character.Name))
+					user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> notices you as you enter!`, mob.Character.Name))
 
 					mob.Command(`lookfortrouble`, 4)
 
@@ -317,15 +319,16 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 	if !response.Handled {
 
 		if rest == "north" || rest == "south" || rest == "east" || rest == "west" || rest == "up" || rest == "down" || rest == "northwest" || rest == "northeast" || rest == "southwest" || rest == "southeast" {
-			response.SendUserMessage(userId, "You're bumping into walls.")
+			user.SendText("You're bumping into walls.")
 			if !user.Character.HasBuffFlag(buffs.Hidden) {
 
 				c := configs.GetConfig()
 
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> is bumping into walls.`, user.Character.Name),
-					))
+					),
+					userId)
 			}
 			response.Handled = true
 		}

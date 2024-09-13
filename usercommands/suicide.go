@@ -7,6 +7,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -25,12 +26,14 @@ func Suicide(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if user.Character.Zone == `Shadow Realm` {
-		response.SendUserMessage(userId, `You're already dead!`)
+		user.SendText(`You're already dead!`)
 		response.Handled = true
 		return response, errors.New(`already dead`)
 	}
 
-	response.SendRoomMessage(0, fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> has <ansi fg="red-bold">DIED!</ansi> <ansi fg="magenta-bold">***</ansi>`, user.Character.Name))
+	events.AddToQueue(events.Broadcast{
+		Text: fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> has <ansi fg="red-bold">DIED!</ansi> <ansi fg="magenta-bold">***</ansi>`, user.Character.Name),
+	})
 
 	if config.OnDeathEquipmentDropChance >= 0 {
 		chanceInt := int(config.OnDeathEquipmentDropChance * 100)
@@ -78,13 +81,13 @@ func Suicide(rest string, userId int) (util.MessageQueue, error) {
 				user.Character.Experience = user.Character.XPTNL()
 				user.Character.Level++
 
-				response.SendUserMessage(userId, fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>.`, oldExperience-user.Character.Experience))
+				user.SendText(fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>.`, oldExperience-user.Character.Experience))
 			} else if lossPct > 0 { // Are they losing a set %?
 
 				loss := int(math.Floor(float64(user.Character.Experience) * lossPct))
 				user.Character.Experience -= loss
 
-				response.SendUserMessage(userId, fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>.`, loss))
+				user.SendText(fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>.`, loss))
 			}
 		}
 

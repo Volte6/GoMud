@@ -6,6 +6,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
 )
 
@@ -17,6 +18,11 @@ func Equip(rest string, mobId int) (util.MessageQueue, error) {
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
 		return response, fmt.Errorf("mob %d not found", mobId)
+	}
+
+	room := rooms.LoadRoom(mob.Character.RoomId)
+	if room == nil {
+		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if rest == "all" {
@@ -77,7 +83,7 @@ func Equip(rest string, mobId int) (util.MessageQueue, error) {
 				for _, oldItem := range oldItems {
 					if oldItem.ItemId != 0 {
 
-						response.SendRoomMessage(mob.Character.RoomId,
+						room.SendText(
 							fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, oldItem.DisplayName()))
 
 						mob.Character.StoreItem(oldItem)
@@ -86,10 +92,10 @@ func Equip(rest string, mobId int) (util.MessageQueue, error) {
 
 				if iSpec.Subtype == items.Wearable {
 
-					response.SendRoomMessage(mob.Character.RoomId,
+					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
 				} else {
-					response.SendRoomMessage(mob.Character.RoomId,
+					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> wields <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
 				}
 

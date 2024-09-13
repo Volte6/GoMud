@@ -65,7 +65,7 @@ func Drop(rest string, mobId int) (util.MessageQueue, error) {
 			room.Gold += dropAmt
 			mob.Character.Gold -= dropAmt
 
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> drops <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, dropAmt))
 
 			response.Handled = true
@@ -82,7 +82,7 @@ func Drop(rest string, mobId int) (util.MessageQueue, error) {
 		room.AddItem(matchItem, false)
 		mob.Character.RemoveItem(matchItem)
 
-		response.SendRoomMessage(mob.Character.RoomId,
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))
 	}
 

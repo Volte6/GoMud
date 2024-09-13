@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -19,12 +20,18 @@ func Rename(rest string, userId int) (util.MessageQueue, error) {
 		return response, fmt.Errorf("user %d not found", userId)
 	}
 
+	// Load current room details
+	room := rooms.LoadRoom(user.Character.RoomId)
+	if room == nil {
+		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+	}
+
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 2 {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.rename", nil)
-		response.SendUserMessage(userId, infoOutput)
+		user.SendText(infoOutput)
 		response.Handled = true
 		return response, nil
 	}
@@ -34,7 +41,7 @@ func Rename(rest string, userId int) (util.MessageQueue, error) {
 	rest = strings.Join(args[1:], " ")
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to rename.", rest))
+		user.SendText(fmt.Sprintf("You don't have a %s to rename.", rest))
 	} else {
 		// Swap the item location
 		user.Character.RemoveItem(matchItem)
@@ -43,11 +50,12 @@ func Rename(rest string, userId int) (util.MessageQueue, error) {
 		matchItem.Rename(strings.TrimSpace(rest))
 		user.Character.StoreItem(matchItem)
 
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`You chant softly and wave your hand over the <ansi fg="item">%s</ansi>. Success!`, oldNameSimple),
 		)
-		response.SendRoomMessage(user.Character.RoomId,
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> chants softly and waves their hand over <ansi fg="item">%s</ansi>, causing it to glow briefly.`, user.Character.Name, oldName),
+			userId,
 		)
 	}
 

@@ -28,7 +28,7 @@ func QuestToken(rest string, userId int) (util.MessageQueue, error) {
 	if len(args) == 0 {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.questtoken", nil)
-		response.SendUserMessage(userId, infoOutput)
+		user.SendText(infoOutput)
 	} else if args[0] == "list" {
 
 		allTokens := user.Character.GetQuestProgress()
@@ -55,7 +55,7 @@ func QuestToken(rest string, userId int) (util.MessageQueue, error) {
 
 		searchResultsTable := templates.GetTable("Quest Tokens", headers, rows)
 		tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
-		response.SendUserMessage(userId, tplTxt)
+		user.SendText(tplTxt)
 
 	} else if args[0] == "all" {
 
@@ -77,7 +77,7 @@ func QuestToken(rest string, userId int) (util.MessageQueue, error) {
 
 		searchResultsTable := templates.GetTable("Quest Tokens", headers, rows)
 		tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
-		response.SendUserMessage(userId, tplTxt)
+		user.SendText(tplTxt)
 
 	} else {
 

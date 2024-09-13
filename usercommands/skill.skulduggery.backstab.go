@@ -39,7 +39,7 @@ func Backstab(rest string, userId int) (util.MessageQueue, error) {
 	// Must be sneaking
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 	if !isSneaking {
-		response.SendUserMessage(userId, "You can't backstab unless you're hidden!")
+		user.SendText("You can't backstab unless you're hidden!")
 		response.Handled = true
 		return response, nil
 	}
@@ -67,7 +67,7 @@ func Backstab(rest string, userId int) (util.MessageQueue, error) {
 
 	for _, wpnSubType := range wpnSubtypeChecks {
 		if !items.CanBackstab(wpnSubType) {
-			response.SendUserMessage(userId, fmt.Sprintf(`%s weapons can't be used to backstab.`, wpnSubType))
+			user.SendText(fmt.Sprintf(`%s weapons can't be used to backstab.`, wpnSubType))
 			response.Handled = true
 			return response, nil
 		}
@@ -104,7 +104,7 @@ func Backstab(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if attackMobInstanceId == 0 && attackPlayerId == 0 {
-		response.SendUserMessage(userId, "You attack the darkness!")
+		user.SendText("You attack the darkness!")
 		response.Handled = true
 		return response, nil
 	}
@@ -114,7 +114,7 @@ func Backstab(rest string, userId int) (util.MessageQueue, error) {
 		m := mobs.GetInstance(attackMobInstanceId)
 
 		if m.Character.IsCharmed(userId) {
-			response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
+			user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
 			response.Handled = true
 			return response, nil
 		}
@@ -123,7 +123,7 @@ func Backstab(rest string, userId int) (util.MessageQueue, error) {
 
 			user.Character.SetAggro(0, attackMobInstanceId, characters.BackStab, 2)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You prepare to backstab <ansi fg="mobname">%s</ansi>`, m.Character.Name),
 			)
 
@@ -132,7 +132,7 @@ func Backstab(rest string, userId int) (util.MessageQueue, error) {
 	} else if attackPlayerId > 0 {
 
 		if !configs.GetConfig().PVPEnabled {
-			response.SendUserMessage(userId, `PVP is currently disabled.`)
+			user.SendText(`PVP is currently disabled.`)
 			response.Handled = true
 			return response, nil
 		}
@@ -143,7 +143,7 @@ func Backstab(rest string, userId int) (util.MessageQueue, error) {
 
 			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
 				if partyInfo.IsMember(attackPlayerId) {
-					response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name))
+					user.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name))
 					response.Handled = true
 					return response, nil
 				}
@@ -151,7 +151,7 @@ func Backstab(rest string, userId int) (util.MessageQueue, error) {
 
 			user.Character.SetAggro(attackPlayerId, 0, characters.BackStab, 2)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You prepare to backstab <ansi fg="username">%s</ansi>`, p.Character.Name),
 			)
 		}

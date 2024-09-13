@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
 
 	"github.com/volte6/mud/users"
@@ -19,21 +20,27 @@ func Zap(rest string, userId int) (util.MessageQueue, error) {
 		return response, fmt.Errorf("user %d not found", userId)
 	}
 
+	// Load current room details
+	room := rooms.LoadRoom(user.Character.RoomId)
+	if room == nil {
+		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+	}
+
 	if user.Character.Aggro == nil || user.Character.Aggro.MobInstanceId == 0 {
-		response.SendUserMessage(userId, "You are not in combat.")
+		user.SendText("You are not in combat.")
 		response.Handled = true
 		return response, nil
 	}
 
 	mob := mobs.GetInstance(user.Character.Aggro.MobInstanceId)
 	if mob == nil {
-		response.SendUserMessage(userId, "Zap Mob not found.")
+		user.SendText("Zap Mob not found.")
 		response.Handled = true
 		return response, nil
 	}
 
-	response.SendUserMessage(userId, fmt.Sprintf(`You zap <ansi fg="mobname">%s</ansi> with a bolt of lightning!`, mob.Character.Name))
-	response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps <ansi fg="mobname">%s</ansi> with a bolt of lightning!`, user.Character.Name, mob.Character.Name))
+	user.SendText(fmt.Sprintf(`You zap <ansi fg="mobname">%s</ansi> with a bolt of lightning!`, mob.Character.Name))
+	room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps <ansi fg="mobname">%s</ansi> with a bolt of lightning!`, user.Character.Name, mob.Character.Name), userId)
 	mob.Character.Health = 1
 
 	response.Handled = true

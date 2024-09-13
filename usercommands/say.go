@@ -34,12 +34,12 @@ func Say(rest string, userId int) (util.MessageQueue, error) {
 		rest = drunkify(rest)
 	}
 	if isSneaking {
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`someone says, "<ansi fg="yellow">%s</ansi>"`, rest))
+		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="yellow">%s</ansi>"`, rest), userId)
 	} else {
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> says, "<ansi fg="yellow">%s</ansi>"`, user.Character.Name, rest))
+		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> says, "<ansi fg="yellow">%s</ansi>"`, user.Character.Name, rest), userId)
 	}
 
-	response.SendUserMessage(userId, fmt.Sprintf(`You say, "<ansi fg="yellow">%s</ansi>"`, rest))
+	user.SendText(fmt.Sprintf(`You say, "<ansi fg="yellow">%s</ansi>"`, rest))
 
 	response.Handled = true
 	return response, nil

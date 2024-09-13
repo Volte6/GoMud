@@ -8,6 +8,7 @@ import (
 
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -38,16 +39,22 @@ func Enchant(rest string, userId int) (util.MessageQueue, error) {
 		return response, fmt.Errorf("user %d not found", userId)
 	}
 
+	// Load current room details
+	room := rooms.LoadRoom(user.Character.RoomId)
+	if room == nil {
+		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+	}
+
 	skillLevel := user.Character.GetSkillLevel(skills.Enchant)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to enchant.")
+		user.SendText("You don't know how to enchant.")
 		response.Handled = true
 		return response, fmt.Errorf("you don't know how to enchant")
 	}
 
 	if len(rest) == 0 {
-		response.SendUserMessage(userId, `Type <ansi fg="command">help enchant</ansi> for more information on the enchant skill.`)
+		user.SendText(`Type <ansi fg="command">help enchant</ansi> for more information on the enchant skill.`)
 		response.Handled = true
 		return response, nil
 	}
@@ -67,7 +74,7 @@ func Enchant(rest string, userId int) (util.MessageQueue, error) {
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 1 {
-		response.SendUserMessage(userId, `You must be more specific.`)
+		user.SendText(`You must be more specific.`)
 		response.Handled = true
 		return response, nil
 	}
@@ -83,18 +90,18 @@ func Enchant(rest string, userId int) (util.MessageQueue, error) {
 	matchItem, found := user.Character.FindInBackpack(rest)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to enchant. Is it still worn, perhaps?", rest))
+		user.SendText(fmt.Sprintf("You don't have a %s to enchant. Is it still worn, perhaps?", rest))
 	} else {
 
 		if (matchItem.GetSpec().Type != items.Weapon && matchItem.GetSpec().Subtype != items.Wearable) || matchItem.GetSpec().Type == items.Holdable {
-			response.SendUserMessage(userId, `Enchant only works on weapons and armor.`)
+			user.SendText(`Enchant only works on weapons and armor.`)
 			response.Handled = true
 			return response, nil
 		}
 
 		if removeCurse || removeEnchantment {
 			if skillLevel < 4 {
-				response.SendUserMessage(userId, `Your skills are not good enough. Type <ansi fg="command">help enchant</ansi> for more information on the enchant skill.`)
+				user.SendText(`Your skills are not good enough. Type <ansi fg="command">help enchant</ansi> for more information on the enchant skill.`)
 				response.Handled = true
 				return response, nil
 			}
@@ -103,7 +110,7 @@ func Enchant(rest string, userId int) (util.MessageQueue, error) {
 		if removeCurse {
 
 			if !matchItem.IsCursed() {
-				response.SendUserMessage(userId, `That's not cursed.`)
+				user.SendText(`That's not cursed.`)
 				response.Handled = true
 				return response, nil
 			}
@@ -112,11 +119,12 @@ func Enchant(rest string, userId int) (util.MessageQueue, error) {
 			matchItem.Uncurse()
 			user.Character.StoreItem(matchItem)
 
-			response.SendRoomMessage(user.Character.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their cursed <ansi fg="itemname">%s</ansi> concentrates. An malevolent ethereal whisp seems to float away.`, user.Character.Name, matchItem.DisplayName()),
+				userId,
 			)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You remove the curse from the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 			)
 
@@ -127,16 +135,17 @@ func Enchant(rest string, userId int) (util.MessageQueue, error) {
 		if removeEnchantment {
 
 			if skillLevel < 4 {
-				response.SendUserMessage(userId, `Type <ansi fg="command">help enchant</ansi> for more information on the enchant skill.`)
+				user.SendText(`Type <ansi fg="command">help enchant</ansi> for more information on the enchant skill.`)
 				response.Handled = true
 				return response, nil
 			}
 
-			response.SendRoomMessage(user.Character.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their <ansi fg="itemname">%s</ansi> and slowly waves their hand over it. Runes appear to glow on the surface, which fade as they float away.`, user.Character.Name, matchItem.DisplayName()),
+				userId,
 			)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You remove the enchantment from the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 			)
 
@@ -151,7 +160,7 @@ func Enchant(rest string, userId int) (util.MessageQueue, error) {
 
 		/*
 			if matchItem.IsEnchanted() {
-				response.SendUserMessage(userId, fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> is already enchanted.`, matchItem.DisplayName()))
+				user.SendText( fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> is already enchanted.`, matchItem.DisplayName()))
 				response.Handled = true
 				return response, nil
 			}
@@ -163,7 +172,7 @@ func Enchant(rest string, userId int) (util.MessageQueue, error) {
 		chanceToDestroy -= user.Character.Stats.Mysticism.ValueAdj >> 2 // 1% less chance for each 4 mysticism points
 
 		if onlyConsider {
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`Your <ansi fg="itemname">%s</ansi> has been enchanted %d times. There is a %d%% chance it would be destroyed.`, matchItem.DisplayName(), matchItem.Enchantments, chanceToDestroy),
 			)
 			response.Handled = true
@@ -171,7 +180,7 @@ func Enchant(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		if !user.Character.TryCooldown(skills.Enchant.String(), configs.GetConfig().MinutesToRounds(15)) {
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Enchant.String())),
 			)
 			response.Handled = true
@@ -220,8 +229,8 @@ func Enchant(rest string, userId int) (util.MessageQueue, error) {
 		util.LogRoll(`Enchant->Destroy`, roll, chanceToDestroy)
 
 		if roll < chanceToDestroy {
-			response.SendUserMessage(userId, fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> explodes in a shower of sparks!`, matchItem.DisplayName()))
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their <ansi fg="itemname">%s</ansi> and slowly waves their hand over it. The <ansi fg="itemname">%s</ansi> explodes in a shower of sparks!`, user.Character.Name, matchItem.DisplayName(), matchItem.DisplayName()), userId)
+			user.SendText(fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> explodes in a shower of sparks!`, matchItem.DisplayName()))
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their <ansi fg="itemname">%s</ansi> and slowly waves their hand over it. The <ansi fg="itemname">%s</ansi> explodes in a shower of sparks!`, user.Character.Name, matchItem.DisplayName(), matchItem.DisplayName()), userId)
 			response.Handled = true
 			return response, nil
 		}
@@ -229,28 +238,29 @@ func Enchant(rest string, userId int) (util.MessageQueue, error) {
 		matchItem.Enchant(damageBonus, defenseBonus, statBonus, cursed)
 		user.Character.StoreItem(matchItem)
 
-		response.SendRoomMessage(user.Character.RoomId,
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their <ansi fg="itemname">%s</ansi> and slowly waves their hand over it. The <ansi fg="itemname">%s</ansi> glows briefly for a moment and then the glow fades away.`, user.Character.Name, matchItem.DisplayName(), matchItem.DisplayName()),
+			userId,
 		)
 
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`You enchant the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 		)
 
 		if cursed {
-			response.SendUserMessage(userId, fmt.Sprintf(`%14s  %s`, ``, `<ansi fg="red-bold">CURSED!</ansi>`))
+			user.SendText(fmt.Sprintf(`%14s  %s`, ``, `<ansi fg="red-bold">CURSED!</ansi>`))
 		}
 
 		if damageBonus > 0 {
-			response.SendUserMessage(userId, fmt.Sprintf(`%14s: +%d`, `Damage Bonus`, damageBonus))
+			user.SendText(fmt.Sprintf(`%14s: +%d`, `Damage Bonus`, damageBonus))
 		}
 		if defenseBonus > 0 {
-			response.SendUserMessage(userId, fmt.Sprintf(`%14s: +%d`, `Armor`, defenseBonus))
+			user.SendText(fmt.Sprintf(`%14s: +%d`, `Armor`, defenseBonus))
 		}
 		if len(statBonus) > 0 {
 			for statName, statBonusAmt := range statBonus {
 				statName = strings.Title(statName)
-				response.SendUserMessage(userId, fmt.Sprintf(`%14s: +%d`, statName, statBonusAmt))
+				user.SendText(fmt.Sprintf(`%14s: +%d`, statName, statBonusAmt))
 			}
 		}
 

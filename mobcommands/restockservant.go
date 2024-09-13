@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
 )
 
@@ -17,6 +18,11 @@ func RestockServant(rest string, mobId int) (util.MessageQueue, error) {
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
 		return response, fmt.Errorf("mob %d not found", mobId)
+	}
+
+	room := rooms.LoadRoom(mob.Character.RoomId)
+	if room == nil {
+		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	// Nothing to restock...
@@ -67,7 +73,7 @@ func RestockServant(rest string, mobId int) (util.MessageQueue, error) {
 	}
 
 	if restocked {
-		response.SendRoomMessage(mob.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> presents some help for hire`, mob.Character.Name))
+		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> presents some help for hire`, mob.Character.Name))
 	}
 
 	response.Handled = true

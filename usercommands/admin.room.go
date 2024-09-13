@@ -39,7 +39,7 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 	if len(args) == 0 {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.room", nil)
-		response.SendUserMessage(userId, infoOutput)
+		user.SendText(infoOutput)
 
 		response.Handled = true
 		return response, nil
@@ -60,7 +60,7 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 				room.SpawnInfo = sourceRoom.SpawnInfo
 				rooms.SaveRoom(*room)
 
-				response.SendUserMessage(userId, "Spawn info copied/overwritten.")
+				user.SendText("Spawn info copied/overwritten.")
 			}
 		}
 
@@ -72,7 +72,7 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 				room.IdleMessages = append(room.IdleMessages, sourceRoom.IdleMessages...)
 				rooms.SaveRoom(*room)
 
-				response.SendUserMessage(userId, "IdleMessages copied/overwritten.")
+				user.SendText("IdleMessages copied/overwritten.")
 			}
 		}
 
@@ -85,12 +85,12 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 
 		targetRoom := rooms.LoadRoom(roomId)
 		if targetRoom == nil {
-			response.SendUserMessage(userId, fmt.Sprintf("Room %d not found.", roomId))
+			user.SendText(fmt.Sprintf("Room %d not found.", roomId))
 			return response, fmt.Errorf("room %d not found", roomId)
 		}
 
 		infoOutput, _ := templates.Process("admincommands/ingame/roominfo", targetRoom)
-		response.SendUserMessage(userId, infoOutput)
+		user.SendText(infoOutput)
 
 	} else if len(args) >= 2 && roomCmd == "exit" {
 
@@ -104,7 +104,7 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 		// Will be erasing it.
 		if roomId == 0 {
 			if _, ok := room.Exits[direction]; !ok {
-				response.SendUserMessage(userId, fmt.Sprintf("Exit %s does not exist.", direction))
+				user.SendText(fmt.Sprintf("Exit %s does not exist.", direction))
 				return response, nil
 			}
 			delete(room.Exits, direction)
@@ -112,18 +112,18 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		if _, ok := room.Exits[direction]; ok {
-			response.SendUserMessage(userId, fmt.Sprintf("Exit %s already exists (overwriting).", direction))
+			user.SendText(fmt.Sprintf("Exit %s already exists (overwriting).", direction))
 		}
 
 		targetRoom := rooms.LoadRoom(roomId)
 		if targetRoom == nil {
 			err := fmt.Errorf(`room %d not found`, roomId)
-			response.SendUserMessage(userId, err.Error())
+			user.SendText(err.Error())
 			return response, err
 		}
 
 		rooms.ConnectRoom(room.RoomId, targetRoom.RoomId, direction)
-		response.SendUserMessage(userId, fmt.Sprintf("Exit %s added.", direction))
+		user.SendText(fmt.Sprintf("Exit %s added.", direction))
 
 	} else if len(args) >= 2 && roomCmd == "secretexit" {
 
@@ -133,15 +133,15 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 				exit.Secret = false
 				room.Exits[direction] = exit
 				rooms.SaveRoom(*room)
-				response.SendUserMessage(userId, fmt.Sprintf("Exit %s secrecy REMOVED.", direction))
+				user.SendText(fmt.Sprintf("Exit %s secrecy REMOVED.", direction))
 			} else {
 				exit.Secret = true
 				room.Exits[direction] = exit
 				rooms.SaveRoom(*room)
-				response.SendUserMessage(userId, fmt.Sprintf("Exit %s secrecy ADDED.", direction))
+				user.SendText(fmt.Sprintf("Exit %s secrecy ADDED.", direction))
 			}
 		} else {
-			response.SendUserMessage(userId, fmt.Sprintf("Exit %s not found.", direction))
+			user.SendText(fmt.Sprintf("Exit %s not found.", direction))
 		}
 
 	} else if len(args) >= 2 && roomCmd == "set" {
@@ -191,14 +191,14 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 		} else if propertyName == "zone" {
 			// Try moving it to the new zone.
 			if err := rooms.MoveToZone(room.RoomId, propertyValue); err != nil {
-				response.SendUserMessage(userId, err.Error())
+				user.SendText(err.Error())
 				return response, err
 			}
 
 		} else if propertyName == "biome" {
 			room.Biome = strings.ToLower(propertyValue)
 		} else {
-			response.SendUserMessage(userId,
+			user.SendText(
 				`Invalid property provided to <ansi fg="command">room set</ansi>.`,
 			)
 			return response, fmt.Errorf("room %d not found", roomId)
@@ -213,14 +213,14 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 			rGraph := rooms.NewRoomGraph(100, 100, 0, rooms.MapModeAll)
 			err := rGraph.Build(user.Character.RoomId, nil)
 			if err != nil {
-				response.SendUserMessage(userId, err.Error())
+				user.SendText(err.Error())
 				response.Handled = true
 				return response, err
 			}
 
 			map2D, cX, cY := rGraph.Generate2DMap(61, 61, user.Character.RoomId)
 			if len(map2D) < 1 {
-				response.SendUserMessage(userId, "Error generating a 2d map")
+				user.SendText("Error generating a 2d map")
 				response.Handled = true
 				return response, nil
 			}
@@ -247,11 +247,13 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 
 		if gotoRoomId != 0 {
 			if err := rooms.MoveToRoom(user.UserId, gotoRoomId); err != nil {
-				response.SendUserMessage(userId, err.Error())
+				user.SendText(err.Error())
 
 			} else {
-				response.SendUserMessage(userId, fmt.Sprintf("Moved to room %d.", gotoRoomId))
-				response.SendRoomMessage(gotoRoomId,
+				user.SendText(fmt.Sprintf("Moved to room %d.", gotoRoomId))
+
+				gotoRoom := rooms.LoadRoom(gotoRoomId)
+				gotoRoom.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> appears in a flash of light!`, user.Character.Name),
 					user.UserId,
 				)
@@ -268,8 +270,8 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 							}
 
 							rooms.MoveToRoom(partyUser.UserId, gotoRoomId)
-							response.SendUserMessage(partyUser.UserId, fmt.Sprintf("Moved to room %d.", gotoRoomId))
-							response.SendRoomMessage(gotoRoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> appears in a flash of light!`, partyUser.Character.Name), partyUser.UserId)
+							user.SendText(fmt.Sprintf("Moved to room %d.", gotoRoomId))
+							room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> appears in a flash of light!`, partyUser.Character.Name), partyUser.UserId)
 
 							for _, mInstanceId := range room.GetMobs(rooms.FindCharmed) {
 								if mob := mobs.GetInstance(mInstanceId); mob != nil {
@@ -286,7 +288,7 @@ func Room(rest string, userId int) (util.MessageQueue, error) {
 				response.NextCommand = "look" // Force them to look at the new room they are in.
 			}
 		} else {
-			response.SendUserMessage(userId, fmt.Sprintf("Invalid room comand: %s", args[0]))
+			user.SendText(fmt.Sprintf("Invalid room comand: %s", args[0]))
 		}
 	}
 

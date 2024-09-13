@@ -169,7 +169,7 @@ func KeyRing(rest string, userId int) (util.MessageQueue, error) {
 
 	keyRingTable := templates.GetTable(`Your Keyring:`, headers, rows, allFormatting...)
 	tplTxt, _ := templates.Process("tables/generic", keyRingTable)
-	response.SendUserMessage(userId, tplTxt)
+	user.SendText(tplTxt)
 
 	response.Handled = true
 	return response, nil

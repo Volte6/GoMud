@@ -66,7 +66,7 @@ func Buff(rest string, userId int) (util.MessageQueue, error) {
 
 			searchResultsTable := templates.GetTable("Search Results", headers, rows)
 			tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
-			response.SendUserMessage(userId, tplTxt)
+			user.SendText(tplTxt)
 		} else {
 
 			targetUserId := 0
@@ -104,7 +104,7 @@ func Buff(rest string, userId int) (util.MessageQueue, error) {
 			}
 
 			if buffId == 0 {
-				response.SendUserMessage(userId, "buffId must be an integer > 0.")
+				user.SendText("buffId must be an integer > 0.")
 				response.Handled = true
 				return response, nil
 
@@ -123,10 +123,10 @@ func Buff(rest string, userId int) (util.MessageQueue, error) {
 							BuffId:        buffId,
 						})
 
-						response.SendUserMessage(userId, fmt.Sprintf("Buff %d (%s) applied to %s.", buffId, buffSpec.Name, targetUser.Character.Name))
+						user.SendText(fmt.Sprintf("Buff %d (%s) applied to %s.", buffId, buffSpec.Name, targetUser.Character.Name))
 
 					} else {
-						response.SendUserMessage(userId, fmt.Sprintf("Buff Id %d not found.", buffId))
+						user.SendText(fmt.Sprintf("Buff Id %d not found.", buffId))
 					}
 
 					response.Handled = true
@@ -147,10 +147,10 @@ func Buff(rest string, userId int) (util.MessageQueue, error) {
 							BuffId:        buffId,
 						})
 
-						response.SendUserMessage(userId, fmt.Sprintf("Buff %d (%s) applied to %s.", buffSpec.BuffId, buffSpec.Name, targetMob.Character.Name))
+						user.SendText(fmt.Sprintf("Buff %d (%s) applied to %s.", buffSpec.BuffId, buffSpec.Name, targetMob.Character.Name))
 
 					} else {
-						response.SendUserMessage(userId, fmt.Sprintf("Buff Id %d not found.", buffId))
+						user.SendText(fmt.Sprintf("Buff Id %d not found.", buffId))
 					}
 
 					response.Handled = true
@@ -161,11 +161,11 @@ func Buff(rest string, userId int) (util.MessageQueue, error) {
 		}
 	}
 
-	response.SendUserMessage(userId, "target not found.")
+	user.SendText("target not found.")
 
 	// send some sort of help info?
 	infoOutput, _ := templates.Process("admincommands/help/command.buff", nil)
-	response.SendUserMessage(userId, infoOutput)
+	user.SendText(infoOutput)
 
 	response.Handled = true
 	return response, nil

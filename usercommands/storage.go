@@ -32,7 +32,7 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if !room.IsStorage {
-		response.SendUserMessage(userId, `You are not at a storage location.`+term.CRLFStr)
+		user.SendText(`You are not at a storage location.` + term.CRLFStr)
 		response.Handled = true
 		return response, nil
 	}
@@ -47,14 +47,14 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		storageTxt, _ := templates.Process("character/storage", itemNames)
-		response.SendUserMessage(userId, storageTxt)
+		user.SendText(storageTxt)
 
 		response.Handled = true
 		return response, nil
 	}
 
 	if rest == `add` || rest == `remove` {
-		response.SendUserMessage(userId, fmt.Sprintf(`%s what?%s`, rest, term.CRLFStr))
+		user.SendText(fmt.Sprintf(`%s what?%s`, rest, term.CRLFStr))
 		response.Handled = true
 		return response, nil
 	}
@@ -62,7 +62,7 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 || (args[0] != `add` && args[0] != `remove`) {
-		response.SendUserMessage(userId, `Try <ansi fg="command">help storage</ansi> for more information about storage.`+term.CRLFStr)
+		user.SendText(`Try <ansi fg="command">help storage</ansi> for more information about storage.` + term.CRLFStr)
 		response.Handled = true
 		return response, nil
 	}
@@ -74,7 +74,7 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 
 		spaceLeft := 20 - len(itemsInStorage)
 		if spaceLeft < 1 {
-			response.SendUserMessage(userId, `You can have 20 objects in storage`)
+			user.SendText(`You can have 20 objects in storage`)
 			response.Handled = true
 			return response, nil
 		}
@@ -97,7 +97,7 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 		itm, found := user.Character.FindInBackpack(itemName)
 
 		if !found {
-			response.SendUserMessage(userId, fmt.Sprintf(`You don't have a %s to add to storage.%s`, itemName, term.CRLFStr))
+			user.SendText(fmt.Sprintf(`You don't have a %s to add to storage.%s`, itemName, term.CRLFStr))
 			response.Handled = true
 			return response, nil
 		}
@@ -105,7 +105,7 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 		user.Character.RemoveItem(itm)
 		user.ItemStorage.AddItem(itm)
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You placed the <ansi fg="itemname">%s</ansi> into storage.`, itm.DisplayName()))
+		user.SendText(fmt.Sprintf(`You placed the <ansi fg="itemname">%s</ansi> into storage.`, itm.DisplayName()))
 
 		// Trigger lost event
 		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itm, userId); err == nil {
@@ -144,7 +144,7 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		if !found {
-			response.SendUserMessage(userId, fmt.Sprintf(`You don't have a %s in storage.`, itemName))
+			user.SendText(fmt.Sprintf(`You don't have a %s in storage.`, itemName))
 			response.Handled = true
 			return response, nil
 		}
@@ -153,14 +153,14 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 
 			user.ItemStorage.RemoveItem(itm)
 
-			response.SendUserMessage(userId, fmt.Sprintf(`You removed the <ansi fg="itemname">%s</ansi> from storage.`, itm.DisplayName()))
+			user.SendText(fmt.Sprintf(`You removed the <ansi fg="itemname">%s</ansi> from storage.`, itm.DisplayName()))
 
 			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, itm, userId); err == nil {
 				response.AbsorbMessages(scriptResponse)
 			}
 
 		} else {
-			response.SendUserMessage(userId, `You can't carry that!`)
+			user.SendText(`You can't carry that!`)
 		}
 
 	}

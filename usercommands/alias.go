@@ -37,7 +37,7 @@ func Alias(rest string, userId int) (util.MessageQueue, error) {
 	headers := []string{"Alias", "Command"}
 	rows := [][]string{}
 
-	response.SendUserMessage(userId, `<ansi fg="yellow">Built in Aliases:</ansi>`)
+	user.SendText(`<ansi fg="yellow">Built in Aliases:</ansi>`)
 
 	for _, outCmd := range allOutCmds {
 		inCmds := reverseLookup[outCmd]
@@ -50,7 +50,7 @@ func Alias(rest string, userId int) (util.MessageQueue, error) {
 
 	aliasTableData := templates.GetTable(`Default Aliases`, headers, rows, tableFormatting)
 	aliasTxt, _ := templates.Process("tables/generic", aliasTableData)
-	response.SendUserMessage(userId, aliasTxt)
+	user.SendText(aliasTxt)
 
 	response.Handled = true
 	return response, nil

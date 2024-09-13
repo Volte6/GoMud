@@ -116,13 +116,13 @@ func Emote(rest string, mobId int) (util.MessageQueue, error) {
 	}
 
 	if len(rest) == 0 {
-		response.SendRoomMessage(mob.Character.RoomId,
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> emotes.`, mob.Character.Name))
 		response.Handled = true
 		return response, nil
 	}
 
-	response.SendRoomMessage(mob.Character.RoomId,
+	room.SendText(
 		fmt.Sprintf(`<ansi fg="mobname">%s</ansi> <ansi fg="blue">%s</ansi>`, mob.Character.Name, rest))
 
 	response.Handled = true

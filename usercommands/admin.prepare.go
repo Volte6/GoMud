@@ -1,8 +1,11 @@
 package usercommands
 
 import (
+	"fmt"
+
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
+	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
@@ -10,10 +13,16 @@ func Prepare(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
+	// Load user details
+	user := users.GetByUserId(userId)
+	if user == nil { // Something went wrong. User not found.
+		return response, fmt.Errorf("user %d not found", userId)
+	}
+
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.prepare", nil)
 		response.Handled = true
-		response.SendUserMessage(userId, infoOutput)
+		user.SendText(infoOutput)
 		return response, nil
 	}
 
@@ -23,7 +32,7 @@ func Prepare(rest string, userId int) (util.MessageQueue, error) {
 		room.Prepare(false) // we are preparing all rooms, no need to check adjacent rooms
 	}
 
-	response.SendUserMessage(userId,
+	user.SendText(
 		"All rooms have been Prepare()'ed",
 	)
 

@@ -1,6 +1,7 @@
 package usercommands
 
 import (
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/util"
 )
@@ -16,7 +17,10 @@ func Time(rest string, userId int) (util.MessageQueue, error) {
 		dayNight = `night`
 	}
 
-	response.SendUserMessage(userId, `It is now `+gd.String()+`. It is `+dayNight+`.`)
+	events.AddToQueue(events.Message{
+		UserId: userId,
+		Text:   `It is now ` + gd.String() + `. It is ` + dayNight + `.`,
+	})
 
 	response.Handled = true
 	return response, nil

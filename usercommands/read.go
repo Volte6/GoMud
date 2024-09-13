@@ -5,6 +5,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -20,9 +21,10 @@ func Read(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	// Load current room details
-	/*
-		room := rooms.LoadRoom(user.Character.RoomId)
-	*/
+	room := rooms.LoadRoom(user.Character.RoomId)
+	if room == nil {
+		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+	}
 
 	// Check whether the user has an item in their inventory that matches
 
@@ -45,19 +47,20 @@ func Read(rest string, userId int) (util.MessageQueue, error) {
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 
 	if len(foundItemName) == 0 {
-		response.SendUserMessage(userId, fmt.Sprintf(`You don't have a "%s" that can be read.`, rest))
+		user.SendText(fmt.Sprintf(`You don't have a "%s" that can be read.`, rest))
 	} else {
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`You look at <ansi fg="item">%s</ansi>...`, foundItemLongName),
 		)
 
 		if !isSneaking {
-			response.SendRoomMessage(user.Character.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> looks at their <ansi fg="item">%s</ansi>...`, user.Character.Name, foundItemName),
+				userId,
 			)
 		}
 
-		response.SendUserMessage(userId, foundItemDescription)
+		user.SendText(foundItemDescription)
 	}
 
 	response.Handled = true

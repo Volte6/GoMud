@@ -88,32 +88,6 @@ func (u *MessageQueue) SendUserMessages(userId int, msgs []string) {
 	u.userMsgCt += len(msgs)
 }
 
-func (u *MessageQueue) SendRoomMessage(roomId int, msg string, excludeIds ...int) {
-	msg += term.CRLFStr
-	u.messages = append(u.messages, message{
-		MsgType:        MsgRoom,
-		RoomId:         roomId,
-		Msg:            msg,
-		ExcludeUserIds: excludeIds,
-	})
-	u.roomMsgCt++
-}
-
-func (u *MessageQueue) SendRoomMessages(roomId int, msgs []string, excludeIds ...int) {
-
-	for _, msg := range msgs {
-		msg += term.CRLFStr
-		u.messages = append(u.messages, message{
-			MsgType:        MsgRoom,
-			RoomId:         roomId,
-			Msg:            msg,
-			ExcludeUserIds: excludeIds,
-		})
-	}
-
-	u.roomMsgCt += len(msgs)
-}
-
 // Gets all user messages to a specific user as a single string.
 func (u *MessageQueue) GetUserMessagesAsString(userId int) string {
 	userMessages := strings.Builder{}

@@ -32,7 +32,7 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if user.Character.Aggro == nil {
-		response.SendUserMessage(userId, "Disarm is only used while in combat!")
+		user.SendText("Disarm is only used while in combat!")
 		response.Handled = true
 		return response, nil
 	}
@@ -48,7 +48,7 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 
 	if attackMobInstanceId > 0 || attackPlayerId > 0 {
 		if !user.Character.TryCooldown(skills.Brawling.String(`disarm`), 15) {
-			response.SendUserMessage(userId, fmt.Sprintf("You can try disarming again in %d rounds.", user.Character.GetCooldown(skills.Brawling.String(`disarm`))))
+			user.SendText(fmt.Sprintf("You can try disarming again in %d rounds.", user.Character.GetCooldown(skills.Brawling.String(`disarm`))))
 			response.Handled = true
 			return response, nil
 		}
@@ -61,7 +61,7 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 		if m != nil {
 
 			if m.Character.Equipment.Weapon.ItemId == 0 {
-				response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> has no weapon to disarm!`, m.Character.Name))
+				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> has no weapon to disarm!`, m.Character.Name))
 				response.Handled = true
 				return response, nil
 			}
@@ -77,11 +77,11 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 
 			if roll < chanceIn100 {
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You disarm <ansi fg="mobname">%s</ansi>!`, m.Character.Name),
 				)
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> disarms <ansi fg="mobname">%s</ansi>!`, user.Character.Name, m.Character.Name),
 					userId,
 				)
@@ -91,11 +91,11 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 				m.Character.StoreItem(removedItem)
 
 			} else {
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You try to disarm <ansi fg="mobname">%s</ansi> and fail!`, m.Character.Name),
 				)
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to disarm <ansi fg="mobname">%s</ansi> and fails!`, user.Character.Name, m.Character.Name),
 					userId,
 				)
@@ -119,15 +119,17 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 
 			if roll < chanceIn100 {
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You disarm <ansi fg="username">%s</ansi>!`, u.Character.Name),
 				)
 
-				response.SendUserMessage(attackPlayerId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> disarms you!`, user.Character.Name),
-				)
+				if atkUser := users.GetByUserId(attackPlayerId); atkUser != nil {
+					atkUser.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> disarms you!`, user.Character.Name),
+					)
+				}
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> disarms <ansi fg="username">%s</ansi>!`, user.Character.Name, u.Character.Name),
 					userId,
 					attackPlayerId,
@@ -138,15 +140,17 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 				u.Character.StoreItem(removedItem)
 
 			} else {
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You try to disarm <ansi fg="username">%s</ansi> and miss!`, u.Character.Name),
 				)
 
-				response.SendUserMessage(attackPlayerId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to disarm you and misses!`, user.Character.Name),
-				)
+				if atkUser := users.GetByUserId(attackPlayerId); atkUser != nil {
+					atkUser.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to disarm you and misses!`, user.Character.Name),
+					)
+				}
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to disarm <ansi fg="username">%s</ansi> and misses!`, user.Character.Name, u.Character.Name),
 					userId,
 					attackPlayerId,

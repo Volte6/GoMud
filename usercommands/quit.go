@@ -26,7 +26,7 @@ func Quit(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if user.Character.Aggro != nil {
-		response.SendUserMessage(userId, "You're too busy to quit right now!")
+		user.SendText("You're too busy to quit right now!")
 		response.Handled = true
 		return response, nil
 	}

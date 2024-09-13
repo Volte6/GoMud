@@ -183,9 +183,7 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 
 							msg := idleMsgs[idleMsgIndex]
 							if msg != `` {
-								messageQueue.SendRoomMessage(roomId,
-									msg,
-								)
+								room.SendText(msg)
 							}
 
 						}
@@ -402,7 +400,7 @@ func (w *World) HandleRespawns() (messageQueue util.MessageQueue) {
 							room.SpawnInfo[idx] = spawnInfo
 
 							if len(spawnInfo.Message) > 0 {
-								messageQueue.SendRoomMessage(room.RoomId, spawnInfo.Message)
+								room.SendText(spawnInfo.Message)
 							}
 						}
 					}
@@ -442,16 +440,15 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 		roomId := user.Character.RoomId
 
+		uRoom := rooms.LoadRoom(roomId)
+		if uRoom == nil {
+			continue
+		}
+
 		if user.Character.Aggro.Type == characters.Flee {
 
 			// Revert to Default combat regardless of outcome
 			user.Character.SetAggro(user.Character.Aggro.UserId, user.Character.Aggro.MobInstanceId, characters.DefaultAttack)
-
-			// The test to flee is performed against every mob attacking the player.
-			uRoom := rooms.LoadRoom(roomId)
-			if uRoom == nil {
-				continue
-			}
 
 			blockedByMob := ``
 			for _, mobInstId := range uRoom.GetMobs(rooms.FindFighting) {
@@ -474,6 +471,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			}
 
 			blockedByPlayer := ``
+			blockedByPlayerId := 0
 			for _, userId := range uRoom.GetPlayers(rooms.FindFighting) {
 				if u := users.GetByUserId(userId); u != nil {
 					if u.Character.Aggro == nil || u.Character.Aggro.UserId != userId {
@@ -488,20 +486,21 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 					if roll >= chanceIn100 {
 						blockedByPlayer = u.Character.Name
+						blockedByPlayerId = u.UserId
 						break
 					}
 				}
 			}
 
 			if blockedByMob != `` {
-				messageQueue.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="red-bold"><ansi fg="mobname">%s</ansi> blocks you from fleeing!</ansi>`, blockedByMob))
-				messageQueue.SendRoomMessage(roomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is blocked from fleeing by <ansi fg="mobname">%s</ansi>!`, user.Character.Name, blockedByMob), userId)
+				user.SendText(fmt.Sprintf(`<ansi fg="red-bold"><ansi fg="mobname">%s</ansi> blocks you from fleeing!</ansi>`, blockedByMob))
+				uRoom.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is blocked from fleeing by <ansi fg="mobname">%s</ansi>!`, user.Character.Name, blockedByMob), user.UserId)
 				continue
 			}
 
 			if blockedByPlayer != `` {
-				messageQueue.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="red-bold"><ansi fg="username">%s</ansi> blocks you from fleeing!</ansi>`, blockedByPlayer))
-				messageQueue.SendRoomMessage(roomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is blocked from fleeing by <ansi fg="username">%s</ansi>!`, user.Character.Name, blockedByPlayer), userId)
+				user.SendText(fmt.Sprintf(`<ansi fg="red-bold"><ansi fg="username">%s</ansi> blocks you from fleeing!</ansi>`, blockedByPlayer))
+				uRoom.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is blocked from fleeing by <ansi fg="username">%s</ansi>!`, user.Character.Name, blockedByPlayer), userId, blockedByPlayerId)
 				continue
 			}
 
@@ -513,8 +512,8 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				continue
 			}
 
-			messageQueue.SendUserMessage(userId, fmt.Sprintf(`You flee to the <ansi fg="exit">%s</ansi> exit!`, exitName))
-			messageQueue.SendRoomMessage(roomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> flees to the <ansi fg="exit">%s</ansi> exit!`, user.Character.Name, exitName), userId)
+			user.SendText(fmt.Sprintf(`You flee to the <ansi fg="exit">%s</ansi> exit!`, exitName))
+			uRoom.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> flees to the <ansi fg="exit">%s</ansi> exit!`, user.Character.Name, exitName), userId)
 
 			rooms.MoveToRoom(userId, exitRoomId)
 
@@ -547,8 +546,8 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			if roll >= successChance {
 
 				// fail
-				messageQueue.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your spell fizzles! <ansi fg="magenta">***</ansi> (Rolled %d on %d%% chance of success)`, roll, successChance))
-				messageQueue.SendRoomMessage(roomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to cast a spell but it <ansi fg="magenta">fizzles</ansi>!`, user.Character.Name), userId)
+				user.SendText(fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your spell fizzles! <ansi fg="magenta">***</ansi> (Rolled %d on %d%% chance of success)`, roll, successChance))
+				uRoom.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to cast a spell but it <ansi fg="magenta">fizzles</ansi>!`, user.Character.Name), userId)
 				user.Character.Aggro = nil
 
 				continue
@@ -598,6 +597,14 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			defUser := users.GetByUserId(user.Character.Aggro.UserId)
 
+			uRoom := rooms.LoadRoom(roomId)
+			defRoom := rooms.LoadRoom(defUser.Character.RoomId)
+
+			if uRoom == nil || defRoom == nil {
+				user.Character.Aggro = nil
+				continue
+			}
+
 			targetFound := true
 			if defUser == nil {
 				targetFound = false
@@ -606,19 +613,10 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				if user.Character.Aggro.ExitName == `` {
 					targetFound = false
 				} else {
-					// Make sure the target is still at the exit
-
-					uRoom := rooms.LoadRoom(roomId)
-					if uRoom == nil {
-						user.Character.Aggro = nil
-						continue
-					}
-
 					// If the exitId doesn't match the target room id, can't find em
 					if _, exitRoomId := uRoom.FindExitByName(user.Character.Aggro.ExitName); exitRoomId != defUser.Character.RoomId {
 						targetFound = false
 					}
-
 				}
 
 			}
@@ -644,15 +642,24 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 				roundResult := combat.GetWaitMessages(items.Wait, user.Character, defUser.Character, combat.User, combat.User)
 
-				messageQueue.SendUserMessages(user.UserId, roundResult.MessagesToSource)
-				messageQueue.SendUserMessages(defUser.UserId, roundResult.MessagesToTarget)
+				for _, msg := range roundResult.MessagesToSource {
+					user.SendText(msg)
+				}
+
+				for _, msg := range roundResult.MessagesToTarget {
+					defUser.SendText(msg)
+				}
 
 				if len(roundResult.MessagesToSourceRoom) > 0 {
-					messageQueue.SendRoomMessages(user.Character.RoomId, roundResult.MessagesToSourceRoom, user.UserId, defUser.UserId)
+					for _, msg := range roundResult.MessagesToSourceRoom {
+						uRoom.SendText(msg, user.UserId, defUser.UserId)
+					}
 				}
 
 				if len(roundResult.MessagesToTargetRoom) > 0 {
-					messageQueue.SendRoomMessages(defUser.Character.RoomId, roundResult.MessagesToTargetRoom, user.UserId, defUser.UserId)
+					for _, msg := range roundResult.MessagesToTargetRoom {
+						defRoom.SendText(msg, user.UserId, defUser.UserId)
+					}
 				}
 
 				continue
@@ -660,7 +667,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			// Can't see them, can't fight them.
 			if defUser.Character.HasBuffFlag(buffs.Hidden) {
-				messageQueue.SendUserMessage(user.UserId, "You can't seem to find your target.")
+				user.SendText("You can't seem to find your target.")
 				continue
 			}
 
@@ -707,15 +714,20 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			}
 
-			messageQueue.SendUserMessages(user.UserId, roundResult.MessagesToSource)
-			messageQueue.SendUserMessages(defUser.UserId, roundResult.MessagesToTarget)
-
-			if len(roundResult.MessagesToSourceRoom) > 0 {
-				messageQueue.SendRoomMessages(user.Character.RoomId, roundResult.MessagesToSourceRoom, user.UserId, defUser.UserId)
+			for _, msg := range roundResult.MessagesToSource {
+				user.SendText(msg)
 			}
 
-			if len(roundResult.MessagesToTargetRoom) > 0 {
-				messageQueue.SendRoomMessages(defUser.Character.RoomId, roundResult.MessagesToTargetRoom, user.UserId, defUser.UserId)
+			for _, msg := range roundResult.MessagesToTarget {
+				defUser.SendText(msg)
+			}
+
+			for _, msg := range roundResult.MessagesToSourceRoom {
+				uRoom.SendText(msg, user.UserId, defUser.UserId)
+			}
+
+			for _, msg := range roundResult.MessagesToTargetRoom {
+				defRoom.SendText(msg, user.UserId, defUser.UserId)
 			}
 
 			// If the attack connected, check for damage to equipment.
@@ -731,11 +743,11 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 					if defUser.Character.Equipment.Offhand.BreakTest(modifier) {
 						// Send message about the break
 
-						messageQueue.SendUserMessage(defUser.UserId, `<ansi fg="202">***</ansi>`)
-						messageQueue.SendUserMessage(defUser.UserId, fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> Your <ansi fg="item">%s</ansi> breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple()))
-						messageQueue.SendUserMessage(defUser.UserId, `<ansi fg="202">***</ansi>`)
+						defUser.SendText(`<ansi fg="202">***</ansi>`)
+						defUser.SendText(fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> Your <ansi fg="item">%s</ansi> breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple()))
+						defUser.SendText(`<ansi fg="202">***</ansi>`)
 
-						messageQueue.SendRoomMessage(defUser.Character.RoomId, fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="username">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple(), defUser.Character.Name), defUser.UserId)
+						defRoom.SendText(fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="username">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple(), defUser.Character.Name), defUser.UserId)
 
 						defUser.Character.RemoveFromBody(defUser.Character.Equipment.Offhand)
 						itm := items.New(20) // Broken item
@@ -761,6 +773,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			affectedMobInstanceIds = append(affectedMobInstanceIds, user.Character.Aggro.MobInstanceId)
 
 			defMob := mobs.GetInstance(user.Character.Aggro.MobInstanceId)
+			defRoom := rooms.LoadRoom(defMob.Character.RoomId)
 
 			targetFound := true
 			if defMob == nil {
@@ -808,14 +821,16 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 				roundResult := combat.GetWaitMessages(items.Wait, user.Character, &defMob.Character, combat.User, combat.Mob)
 
-				messageQueue.SendUserMessages(user.UserId, roundResult.MessagesToSource)
-
-				if len(roundResult.MessagesToSourceRoom) > 0 {
-					messageQueue.SendRoomMessages(user.Character.RoomId, roundResult.MessagesToSourceRoom, user.UserId)
+				for _, msg := range roundResult.MessagesToSource {
+					user.SendText(msg)
 				}
 
-				if len(roundResult.MessagesToTargetRoom) > 0 {
-					messageQueue.SendRoomMessages(defMob.Character.RoomId, roundResult.MessagesToTargetRoom, user.UserId)
+				for _, msg := range roundResult.MessagesToSourceRoom {
+					uRoom.SendText(msg, user.UserId)
+				}
+
+				for _, msg := range roundResult.MessagesToTargetRoom {
+					defRoom.SendText(msg, user.UserId)
 				}
 
 				continue
@@ -823,7 +838,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			// Can't see them, can't fight them.
 			if defMob.Character.HasBuffFlag(buffs.Hidden) {
-				messageQueue.SendUserMessage(user.UserId, "You can't seem to find your target.")
+				user.SendText("You can't seem to find your target.")
 				continue
 			}
 
@@ -853,15 +868,16 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			}
 
-			messageQueue.SendUserMessages(user.UserId, roundResult.MessagesToSource)
-			// messageQueue.SendUserMessages(defMob.InstanceId, roundResult.MessagesToTarget, true) // mobs don't get messages
-
-			if len(roundResult.MessagesToSourceRoom) > 0 {
-				messageQueue.SendRoomMessages(user.Character.RoomId, roundResult.MessagesToSourceRoom, user.UserId)
+			for _, msg := range roundResult.MessagesToSource {
+				user.SendText(msg)
 			}
 
-			if len(roundResult.MessagesToTargetRoom) > 0 {
-				messageQueue.SendRoomMessages(defMob.Character.RoomId, roundResult.MessagesToTargetRoom, user.UserId)
+			for _, msg := range roundResult.MessagesToSourceRoom {
+				uRoom.SendText(msg, user.UserId)
+			}
+
+			for _, msg := range roundResult.MessagesToTargetRoom {
+				defRoom.SendText(msg, user.UserId)
 			}
 
 			// Handle any scripted behavior now.
@@ -941,6 +957,13 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 			continue
 		}
 
+		mobRoom := rooms.LoadRoom(mob.Character.RoomId)
+
+		if mobRoom == nil {
+			mob.Character.Aggro = nil
+			continue
+		}
+
 		// Disable any buffs that are cancelled by combat
 		mob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
@@ -960,7 +983,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 			if util.RollDice(1, 100) >= successChance {
 
 				// fail
-				messageQueue.SendRoomMessage(mob.Character.RoomId, fmt.Sprintf(`<ansi fg="mobnamme">%s</ansi> tries to cast a spell but it <ansi fg="magenta">fizzles</ansi>!`, mob.Character.Name))
+				mobRoom.SendText(fmt.Sprintf(`<ansi fg="mobnamme">%s</ansi> tries to cast a spell but it <ansi fg="magenta">fizzles</ansi>!`, mob.Character.Name))
 				mob.Character.Aggro = nil
 
 				continue
@@ -1040,8 +1063,9 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 		if mob.Character.Aggro != nil && mob.Character.Aggro.UserId > 0 {
 
 			defUser := users.GetByUserId(mob.Character.Aggro.UserId)
+			defRoom := rooms.LoadRoom(defUser.Character.RoomId)
 
-			if defUser == nil || mob.Character.RoomId != defUser.Character.RoomId {
+			if defUser == nil || defRoom == nil || mob.Character.RoomId != defUser.Character.RoomId {
 				mob.Character.Aggro = nil
 				continue
 			}
@@ -1091,14 +1115,16 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 				roundResult := combat.GetWaitMessages(items.Wait, &mob.Character, defUser.Character, combat.Mob, combat.User)
 
-				messageQueue.SendUserMessages(defUser.UserId, roundResult.MessagesToTarget)
-
-				if len(roundResult.MessagesToSourceRoom) > 0 {
-					messageQueue.SendRoomMessages(mob.Character.RoomId, roundResult.MessagesToSourceRoom, defUser.UserId)
+				for _, msg := range roundResult.MessagesToTarget {
+					defUser.SendText(msg)
 				}
 
-				if len(roundResult.MessagesToTargetRoom) > 0 {
-					messageQueue.SendRoomMessages(defUser.Character.RoomId, roundResult.MessagesToTargetRoom, defUser.UserId)
+				for _, msg := range roundResult.MessagesToSourceRoom {
+					mobRoom.SendText(msg, defUser.UserId)
+				}
+
+				for _, msg := range roundResult.MessagesToTargetRoom {
+					defRoom.SendText(msg, defUser.UserId)
 				}
 
 				continue
@@ -1144,14 +1170,16 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 			}
 
-			messageQueue.SendUserMessages(defUser.UserId, roundResult.MessagesToTarget)
-
-			if len(roundResult.MessagesToSourceRoom) > 0 {
-				messageQueue.SendRoomMessages(mob.Character.RoomId, roundResult.MessagesToSourceRoom, defUser.UserId)
+			for _, msg := range roundResult.MessagesToTarget {
+				defUser.SendText(msg)
 			}
 
-			if len(roundResult.MessagesToTargetRoom) > 0 {
-				messageQueue.SendRoomMessages(defUser.Character.RoomId, roundResult.MessagesToTargetRoom, defUser.UserId)
+			for _, msg := range roundResult.MessagesToSourceRoom {
+				mobRoom.SendText(msg, defUser.UserId)
+			}
+
+			for _, msg := range roundResult.MessagesToTargetRoom {
+				defRoom.SendText(msg, defUser.UserId)
 			}
 
 			// If the attack connected, check for damage to equipment.
@@ -1167,11 +1195,11 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 					if defUser.Character.Equipment.Offhand.BreakTest(modifier) {
 						// Send message about the break
 
-						messageQueue.SendUserMessage(defUser.UserId, `<ansi fg="202">***</ansi>`)
-						messageQueue.SendUserMessage(defUser.UserId, fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> Your <ansi fg="item">%s</ansi> breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple()))
-						messageQueue.SendUserMessage(defUser.UserId, `<ansi fg="202">***</ansi>`)
+						defUser.SendText(`<ansi fg="202">***</ansi>`)
+						defUser.SendText(fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> Your <ansi fg="item">%s</ansi> breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple()))
+						defUser.SendText(`<ansi fg="202">***</ansi>`)
 
-						messageQueue.SendRoomMessage(defUser.Character.RoomId, fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="username">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple(), defUser.Character.Name), defUser.UserId)
+						defRoom.SendText(fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="username">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple(), defUser.Character.Name), defUser.UserId)
 
 						defUser.Character.RemoveFromBody(defUser.Character.Equipment.Offhand)
 						itm := items.New(20) // Broken item
@@ -1196,6 +1224,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 			affectedMobInstanceIds = append(affectedMobInstanceIds, mob.Character.Aggro.MobInstanceId)
 
 			defMob := mobs.GetInstance(mob.Character.Aggro.MobInstanceId)
+			defRoom := rooms.LoadRoom(defMob.Character.RoomId)
 
 			if defMob == nil || mob.Character.RoomId != defMob.Character.RoomId {
 				mob.Character.Aggro = nil
@@ -1216,12 +1245,12 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 				roundResult := combat.GetWaitMessages(items.Wait, &mob.Character, &defMob.Character, combat.Mob, combat.Mob)
 
-				if len(roundResult.MessagesToSourceRoom) > 0 {
-					messageQueue.SendRoomMessages(mob.Character.RoomId, roundResult.MessagesToSourceRoom)
+				for _, msg := range roundResult.MessagesToSourceRoom {
+					mobRoom.SendText(msg)
 				}
 
-				if len(roundResult.MessagesToTargetRoom) > 0 {
-					messageQueue.SendRoomMessages(defMob.Character.RoomId, roundResult.MessagesToTargetRoom)
+				for _, msg := range roundResult.MessagesToTargetRoom {
+					defRoom.SendText(msg)
 				}
 
 				continue
@@ -1255,12 +1284,12 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 				})
 			}
 
-			if len(roundResult.MessagesToSourceRoom) > 0 {
-				messageQueue.SendRoomMessages(mob.Character.RoomId, roundResult.MessagesToSourceRoom)
+			for _, msg := range roundResult.MessagesToSourceRoom {
+				mobRoom.SendText(msg)
 			}
 
-			if len(roundResult.MessagesToTargetRoom) > 0 {
-				messageQueue.SendRoomMessages(defMob.Character.RoomId, roundResult.MessagesToTargetRoom)
+			for _, msg := range roundResult.MessagesToTargetRoom {
+				defRoom.SendText(msg)
 			}
 
 			// Handle any scripted behavior now.
@@ -1292,14 +1321,14 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 					if defMob.Character.Equipment.Offhand.BreakTest(modifier) {
 						// Send message about the break
 
-						if room := rooms.LoadRoom(roomId); room != nil {
+						if defRoom := rooms.LoadRoom(defMob.Character.RoomId); defRoom != nil {
 
-							messageQueue.SendRoomMessage(roomId, fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="mobname">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defMob.Character.Equipment.Offhand.NameSimple(), defMob.Character.Name))
+							defRoom.SendText(fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="mobname">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defMob.Character.Equipment.Offhand.NameSimple(), defMob.Character.Name))
 
 							defMob.Character.RemoveFromBody(defMob.Character.Equipment.Offhand)
 							itm := items.New(20) // Broken item
 							if !defMob.Character.StoreItem(itm) {
-								room.AddItem(itm, false)
+								defRoom.AddItem(itm, false)
 							}
 						}
 					}
@@ -1340,13 +1369,13 @@ func (w *World) HandleAffected(affectedPlayerIds []int, affectedMobInstanceIds [
 
 			} else if user.Character.Health < 1 {
 
-				messageQueue.SendUserMessage(userId,
-					`<ansi fg="red">you drop to the ground!</ansi>`,
-				)
+				user.SendText(`<ansi fg="red">you drop to the ground!</ansi>`)
 
-				messageQueue.SendRoomMessage(user.Character.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="red">drops to the ground!</ansi>`, user.Character.Name),
-					user.UserId)
+				if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+					room.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="red">drops to the ground!</ansi>`, user.Character.Name),
+						user.UserId)
+				}
 
 			}
 		}
@@ -1484,8 +1513,10 @@ func (w *World) HandleAutoHealing(roundNumber uint64) util.MessageQueue {
 			} else {
 				if user.Character.Health > -10 {
 					user.Character.Health--
-					messageQueue.SendUserMessage(userId, `<ansi fg="red">you are bleeding out!</ansi>`)
-					messageQueue.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is <ansi fg="red">bleeding out</ansi>! Somebody needs to provide aid!`, user.Character.Name), userId)
+					user.SendText(`<ansi fg="red">you are bleeding out!</ansi>`)
+					if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+						room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is <ansi fg="red">bleeding out</ansi>! Somebody needs to provide aid!`, user.Character.Name), userId)
+					}
 				}
 			}
 		} else {
@@ -1538,7 +1569,7 @@ func (w *World) HandleShadowRealm(roundNumber uint64) util.MessageQueue {
 			}
 			// Spawn a portal in the room that leads to the portal location
 			deadRoom.AddTemporaryExit("shimmering portal", tmpExit)
-			messageQueue.SendRoomMessage(75, `<ansi fg="magenta-bold">A shimmering portal appears in the room.</ansi>`)
+			deadRoom.SendText(`<ansi fg="magenta-bold">A shimmering portal appears in the room.</ansi>`)
 		}
 	}
 
@@ -1560,9 +1591,12 @@ func (w *World) HandleDroppedPlayers(droppedPlayers []int) util.MessageQueue {
 			messageQueue.SendUserMessage(userId,
 				`<ansi fg="red">you drop to the ground!</ansi>`,
 			)
-			messageQueue.SendRoomMessage(user.Character.RoomId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="red">drops to the ground!</ansi>`, user.Character.Name),
-				user.UserId)
+
+			if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
+				room.SendText(
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="red">drops to the ground!</ansi>`, user.Character.Name),
+					user.UserId)
+			}
 		}
 	}
 

@@ -31,13 +31,13 @@ func Recover(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if user.Character.Aggro != nil {
-		response.SendUserMessage(userId, "You cannot recover while in combat!")
+		user.SendText("You cannot recover while in combat!")
 		response.Handled = true
 		return response, nil
 	}
 
 	if !user.Character.TryCooldown(skills.Brawling.String(`recover`), 25) {
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf("You need to wait %d more rounds to do that again.", user.Character.GetCooldown(skills.Brawling.String(`recover`))),
 		)
 		response.Handled = true

@@ -109,7 +109,7 @@ func Attack(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if attackMobInstanceId == 0 && attackPlayerId == 0 {
-		response.SendUserMessage(userId, "You attack the darkness!")
+		user.SendText("You attack the darkness!")
 		response.Handled = true
 		return response, nil
 	}
@@ -130,7 +130,7 @@ func Attack(rest string, userId int) (util.MessageQueue, error) {
 
 		if m != nil {
 			if m.Character.IsCharmed(userId) {
-				response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
+				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
 				response.Handled = true
 				return response, nil
 			}
@@ -155,13 +155,14 @@ func Attack(rest string, userId int) (util.MessageQueue, error) {
 
 			user.Character.SetAggro(0, attackMobInstanceId, characters.DefaultAttack)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You prepare to enter into mortal combat with <ansi fg="mobname">%s</ansi>`, m.Character.Name),
 			)
 
 			if !isSneaking {
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, user.Character.Name, m.Character.Name),
+					userId,
 				)
 			}
 
@@ -180,7 +181,7 @@ func Attack(rest string, userId int) (util.MessageQueue, error) {
 	} else if attackPlayerId > 0 {
 
 		if !configs.GetConfig().PVPEnabled {
-			response.SendUserMessage(userId, `PVP is currently disabled.`)
+			user.SendText(`PVP is currently disabled.`)
 			response.Handled = true
 			return response, nil
 		}
@@ -191,7 +192,7 @@ func Attack(rest string, userId int) (util.MessageQueue, error) {
 
 			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
 				if partyInfo.IsMember(attackPlayerId) {
-					response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name))
+					user.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name))
 					response.Handled = true
 					return response, nil
 				}
@@ -214,17 +215,17 @@ func Attack(rest string, userId int) (util.MessageQueue, error) {
 
 			user.Character.SetAggro(attackPlayerId, 0, characters.DefaultAttack)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You prepare to enter into mortal combat with <ansi fg="username">%s</ansi>`, p.Character.Name),
 			)
 
 			if !isSneaking {
 
-				response.SendUserMessage(attackPlayerId,
+				p.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight you!`, user.Character.Name),
 				)
 
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, user.Character.Name, p.Character.Name),
 					userId, attackPlayerId)
 			}

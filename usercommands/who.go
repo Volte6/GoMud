@@ -28,7 +28,7 @@ func Who(rest string, userId int) (util.MessageQueue, error) {
 	details := room.GetRoomDetails(user)
 
 	whoTxt, _ := templates.Process("descriptions/who", details)
-	response.SendUserMessage(userId, whoTxt)
+	user.SendText(whoTxt)
 
 	response.Handled = true
 	return response, nil

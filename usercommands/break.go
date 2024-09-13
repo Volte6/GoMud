@@ -3,6 +3,7 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -17,14 +18,21 @@ func Break(rest string, userId int) (util.MessageQueue, error) {
 		return response, fmt.Errorf("user %d not found", userId)
 	}
 
+	// Load current room details
+	room := rooms.LoadRoom(user.Character.RoomId)
+	if room == nil {
+		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+	}
+
 	if user.Character.Aggro != nil {
 		user.Character.Aggro = nil
-		response.SendUserMessage(userId, `You break off combat.`)
-		response.SendRoomMessage(user.Character.RoomId,
+		user.SendText(`You break off combat.`)
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> breaks off combat.`, user.Character.Name),
+			userId,
 		)
 	} else {
-		response.SendUserMessage(userId, `You aren't in combat!`)
+		user.SendText(`You aren't in combat!`)
 	}
 
 	response.Handled = true

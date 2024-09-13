@@ -28,7 +28,7 @@ func Exits(rest string, userId int) (util.MessageQueue, error) {
 	details := room.GetRoomDetails(user)
 
 	exitTxt, _ := templates.Process("descriptions/exits", details)
-	response.SendUserMessage(userId, exitTxt)
+	user.SendText(exitTxt)
 
 	response.Handled = true
 	return response, nil

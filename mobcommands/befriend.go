@@ -52,11 +52,7 @@ func Befriend(rest string, mobId int) (util.MessageQueue, error) {
 			charmedUser.Character.TrackCharmed(mob.InstanceId, true)
 		}
 
-		//response.SendUserMessage(playerId,
-		//	fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks at you with puppy dog eyes.`, mob.Character.Name),
-		//	true)
-
-		response.SendRoomMessage(room.RoomId,
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks very friendly.`, mob.Character.Name))
 
 	}

@@ -17,10 +17,16 @@ func Locate(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
+	// Load user details
+	user := users.GetByUserId(userId)
+	if user == nil { // Something went wrong. User not found.
+		return response, fmt.Errorf("user %d not found", userId)
+	}
+
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.locate", nil)
 		response.Handled = true
-		response.SendUserMessage(userId, infoOutput)
+		user.SendText(infoOutput)
 		return response, nil
 	}
 
@@ -32,11 +38,11 @@ func Locate(rest string, userId int) (util.MessageQueue, error) {
 			return response, fmt.Errorf(`room %d not found`, locateUser.Character.RoomId)
 		}
 
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> is in room #<ansi fg="yellow-bold">%d</ansi> - <ansi fg="magenta">%s</ansi> <ansi fg="red">【%s】</ansi>`, locateUser.Character.Name, room.RoomId, room.Title, locateUser.Character.Zone),
 		)
 
-		response.SendUserMessage(locateUser.UserId,
+		locateUser.SendText(
 			`You get the feeling someone is looking for you...`,
 		)
 
@@ -143,7 +149,7 @@ func Locate(rest string, userId int) (util.MessageQueue, error) {
 				if ct >= matchesPerPage {
 					onlineTableData := templates.GetTable(fmt.Sprintf(`Matches for "%s" [Page %d/%d]`, rest, pageNow+1, pageCt), headers, rows)
 					tplTxt, _ := templates.Process("tables/generic", onlineTableData)
-					response.SendUserMessage(userId, tplTxt)
+					user.SendText(tplTxt)
 					rows = [][]string{}
 					ct = 0
 					pageNow++
@@ -156,14 +162,14 @@ func Locate(rest string, userId int) (util.MessageQueue, error) {
 		if pageNow < pageCt {
 			onlineTableData := templates.GetTable(fmt.Sprintf(`Matches for "%s" [Page %d/%d]`, rest, pageNow+1, pageCt), headers, rows)
 			tplTxt, _ := templates.Process("tables/generic", onlineTableData)
-			response.SendUserMessage(userId, tplTxt)
+			user.SendText(tplTxt)
 		}
 
 		response.Handled = true
 		return response, nil
 	}
 
-	response.SendUserMessage(userId,
+	user.SendText(
 		fmt.Sprintf("No user or mob found with the name %s", rest),
 	)
 

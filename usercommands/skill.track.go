@@ -43,7 +43,7 @@ func Track(rest string, userId int) (util.MessageQueue, error) {
 	skillLevel := user.Character.GetSkillLevel(skills.Track)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to track.")
+		user.SendText("You don't know how to track.")
 		response.Handled = true
 		return response, errors.New(`you don't know how to track`)
 	}
@@ -64,7 +64,7 @@ func Track(rest string, userId int) (util.MessageQueue, error) {
 	if rest == `` {
 
 		if !user.Character.TryCooldown(skills.Track.String(), 1) {
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())))
 			response.Handled = true
 			return response, errors.New(`you're doing that too often`)
@@ -169,9 +169,9 @@ func Track(rest string, userId int) (util.MessageQueue, error) {
 		//
 		if len(visitorData) > 0 {
 			trackTxt, _ := templates.Process("descriptions/track", visitorData)
-			response.SendUserMessage(userId, trackTxt)
+			user.SendText(trackTxt)
 		} else {
-			response.SendUserMessage(userId, "You don't see any tracks.")
+			user.SendText("You don't see any tracks.")
 		}
 
 		response.Handled = true
@@ -182,7 +182,7 @@ func Track(rest string, userId int) (util.MessageQueue, error) {
 	// only level 3 and 4 can specify a target
 	if skillLevel < 3 {
 
-		response.SendUserMessage(userId, "You can't track a specific person or mob... yet.")
+		user.SendText("You can't track a specific person or mob... yet.")
 
 		response.Handled = true
 		return response, errors.New(`you can't track a specific person or mob yet`)
@@ -191,7 +191,7 @@ func Track(rest string, userId int) (util.MessageQueue, error) {
 
 	if !user.Character.TryCooldown(skills.Track.String(), 1) {
 
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())))
 
 		response.Handled = true
@@ -209,7 +209,7 @@ func Track(rest string, userId int) (util.MessageQueue, error) {
 		if foundPlayerId > 0 {
 			foundUser := users.GetByUserId(foundPlayerId)
 			if foundUser != nil {
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> is in the room with you!`, foundUser.Character.Name))
 				response.Handled = true
 				return response, nil
@@ -221,7 +221,7 @@ func Track(rest string, userId int) (util.MessageQueue, error) {
 		if foundMobId > 0 {
 			foundMob := mobs.GetInstance(foundMobId)
 			if foundMob != nil {
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is in the room with you!`, foundMob.Character.Name))
 				response.Handled = true
 				return response, nil
@@ -316,7 +316,7 @@ func Track(rest string, userId int) (util.MessageQueue, error) {
 
 			}
 
-			response.SendUserMessage(userId, "You don't see any tracks.")
+			user.SendText("You don't see any tracks.")
 
 			response.Handled = true
 			return response, nil
@@ -435,9 +435,9 @@ func Track(rest string, userId int) (util.MessageQueue, error) {
 		//
 		if len(visitorData) > 0 {
 			trackTxt, _ := templates.Process("descriptions/track", visitorData)
-			response.SendUserMessage(userId, trackTxt)
+			user.SendText(trackTxt)
 		} else {
-			response.SendUserMessage(userId, "You don't see any tracks.")
+			user.SendText("You don't see any tracks.")
 		}
 
 		response.Handled = true

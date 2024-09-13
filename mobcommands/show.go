@@ -63,16 +63,16 @@ func Show(rest string, mobId int) (util.MessageQueue, error) {
 		if showItem.ItemId > 0 {
 
 			// Tell the Showee
-			response.SendUserMessage(targetUser.UserId,
+			targetUser.SendText(
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows you their <ansi fg="item">%s</ansi>.`, mob.Character.Name, showItem.DisplayName()),
 			)
 
-			response.SendUserMessage(targetUser.UserId,
-				"\n"+showItem.GetLongDescription()+"\n",
+			targetUser.SendText(
+				"\n" + showItem.GetLongDescription() + "\n",
 			)
 
 			// Tell the rest of the room
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, mob.Character.Name, showItem.DisplayName(), targetUser.Character.Name),
 				targetUser.UserId)
 
@@ -96,7 +96,7 @@ func Show(rest string, mobId int) (util.MessageQueue, error) {
 
 			if showItem.ItemId > 0 {
 
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, showItem.DisplayName(), targetMob.Character.Name),
 				)
 

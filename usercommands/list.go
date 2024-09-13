@@ -75,8 +75,8 @@ func List(rest string, userId int) (util.MessageQueue, error) {
 
 			onlineTableData := templates.GetTable(fmt.Sprintf(`For Sale by %s`, mob.Character.Name), headers, rows)
 			tplTxt, _ := templates.Process("tables/shoplist", onlineTableData)
-			response.SendUserMessage(userId, tplTxt)
-			response.SendUserMessage(userId, fmt.Sprintf(`To buy something, type: <ansi fg="command">buy [name]</ansi>%s`, term.CRLFStr))
+			user.SendText(tplTxt)
+			user.SendText(fmt.Sprintf(`To buy something, type: <ansi fg="command">buy [name]</ansi>%s`, term.CRLFStr))
 
 		}
 
@@ -109,9 +109,9 @@ func List(rest string, userId int) (util.MessageQueue, error) {
 
 			onlineTableData := templates.GetTable(`Mercs for Hire`, headers, rows)
 			tplTxt, _ := templates.Process("tables/shoplist", onlineTableData)
-			response.SendUserMessage(userId, tplTxt)
+			user.SendText(tplTxt)
 
-			response.SendUserMessage(userId, fmt.Sprintf(`To hire a mercenary, type: <ansi fg="command">hire [name]</ansi>%s`, term.CRLFStr))
+			user.SendText(fmt.Sprintf(`To hire a mercenary, type: <ansi fg="command">hire [name]</ansi>%s`, term.CRLFStr))
 
 		}
 
@@ -128,7 +128,7 @@ func List(rest string, userId int) (util.MessageQueue, error) {
 		return response, nil
 	}
 
-	response.SendUserMessage(userId, "Visit a merchant to list and buy objects.")
+	user.SendText("Visit a merchant to list and buy objects.")
 
 	response.Handled = true
 	return response, nil

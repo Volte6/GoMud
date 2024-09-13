@@ -28,12 +28,12 @@ func Biome(rest string, userId int) (util.MessageQueue, error) {
 	biome, ok := rooms.GetBiome(room.Biome)
 
 	if !ok {
-		response.SendUserMessage(userId, `No biome information found about this area.`)
+		user.SendText(`No biome information found about this area.`)
 		return response, fmt.Errorf(`biome %d not found`, room.Biome)
 	}
 
 	biomeTxt, _ := templates.Process("descriptions/biome", biome)
-	response.SendUserMessage(userId, biomeTxt)
+	user.SendText(biomeTxt)
 
 	response.Handled = true
 	return response, nil

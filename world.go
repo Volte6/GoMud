@@ -730,12 +730,8 @@ func (w *World) processInput(userId int, inputText string) {
 
 		if !commandResponse.Handled {
 			if len(command) > 0 {
-				commandResponse.SendUserMessage(userId,
-					fmt.Sprintf(`<ansi fg="command">%s</ansi> not recognized. Type <ansi fg="command">help</ansi> for commands.`, command),
-				)
-				commandResponse.SendRoomMessage(user.Character.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> looks a little confused.`, user.Character.Name),
-					userId)
+				user.SendText(fmt.Sprintf(`<ansi fg="command">%s</ansi> not recognized. Type <ansi fg="command">help</ansi> for commands.`, command))
+				user.Command(`emote looks a little confused`)
 			}
 		}
 
@@ -813,10 +809,7 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 		if !commandResponse.Handled {
 			if len(command) > 0 {
-				commandResponse.SendRoomMessage(mob.Character.RoomId,
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks a little confused (%s %s).`, mob.Character.Name, command, remains),
-				)
-
+				mob.Command(fmt.Sprintf(`emote looks a little confused (%s %s).`, mob.Character.Name, command, remains))
 			}
 		}
 
@@ -865,6 +858,10 @@ func (w *World) DispatchMessages(u util.MessageQueue) {
 		message, err := u.GetNextMessage()
 		if err != nil {
 			break
+		}
+
+		if u.UserId > 0 {
+			message.ExcludeUserIds = append(message.ExcludeUserIds, u.UserId)
 		}
 
 		events.AddToQueue(events.Message{
@@ -945,17 +942,19 @@ func (w *World) MessageTick() {
 			continue
 		}
 
-		slog.Debug("Message", "length", len(message.Text))
+		slog.Debug("Message", "userId", message.UserId, "length", len(message.Text))
 
 		message.Text = templates.AnsiParse(message.Text)
 
 		if message.UserId > 0 {
+
 			if user := users.GetByUserId(message.UserId); user != nil {
-				message.Text = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Text
-				w.connectionPool.SendTo([]byte(message.Text), user.ConnectionId())
+
+				w.connectionPool.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+message.Text), user.ConnectionId())
 				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
 					redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
 				}
+
 			}
 		}
 
@@ -969,7 +968,7 @@ func (w *World) MessageTick() {
 			for _, userId := range room.GetPlayers() {
 				skip := false
 
-				if message.UserId > 0 && message.UserId == userId {
+				if message.UserId == userId {
 					continue
 				}
 
@@ -1182,7 +1181,7 @@ func (w *World) TurnTick() {
 
 						room.RemoveItem(itm, false)
 
-						messageQueue.SendRoomMessage(action.RoomId, fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> <ansi fg="red">EXPLODES</ansi>!`, itm.DisplayName()))
+						room.SendText(fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> <ansi fg="red">EXPLODES</ansi>!`, itm.DisplayName()))
 
 						hitMobs := true
 						hitPlayers := true
@@ -1408,7 +1407,9 @@ func (w *World) TurnTick() {
 						}
 						// Message to room?
 						if len(questInfo.Rewards.RoomMessage) > 0 {
-							messageQueue.SendRoomMessage(questUser.Character.RoomId, questInfo.Rewards.RoomMessage, questUser.UserId)
+							if room := rooms.LoadRoom(questUser.Character.RoomId); room != nil {
+								room.SendText(questInfo.Rewards.RoomMessage, questUser.UserId)
+							}
 						}
 						// New quest to start?
 						if len(questInfo.Rewards.QuestId) > 0 {
@@ -1489,7 +1490,11 @@ func (w *World) TurnTick() {
 						// Move them to another room/area?
 						if questInfo.Rewards.RoomId > 0 {
 							messageQueue.SendUserMessage(questUser.UserId, `You are suddenly moved to a new place!`)
-							messageQueue.SendRoomMessage(questUser.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is suddenly moved to a new place!`, questUser.Character.Name), questUser.UserId)
+
+							if room := rooms.LoadRoom(questUser.Character.RoomId); room != nil {
+								room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is suddenly moved to a new place!`, questUser.Character.Name), questUser.UserId)
+							}
+
 							rooms.MoveToRoom(questUser.UserId, questInfo.Rewards.RoomId)
 						}
 					} else {

@@ -34,7 +34,7 @@ func Show(rest string, userId int) (util.MessageQueue, error) {
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 {
-		response.SendUserMessage(userId, "Show what? To whom?")
+		user.SendText("Show what? To whom?")
 		response.Handled = true
 		return response, nil
 	}
@@ -50,7 +50,7 @@ func Show(rest string, userId int) (util.MessageQueue, error) {
 	showItem, found = user.Character.FindInBackpack(objectName)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to show.", objectName))
+		user.SendText(fmt.Sprintf("You don't have a %s to show.", objectName))
 		response.Handled = true
 		return response, nil
 	}
@@ -67,26 +67,27 @@ func Show(rest string, userId int) (util.MessageQueue, error) {
 		if showItem.ItemId > 0 {
 
 			// Tell the shower
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You show the <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, showItem.DisplayName(), targetUser.Character.Name),
 			)
 
 			// Tell the Showee
-			response.SendUserMessage(targetUser.UserId,
+			targetUser.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> shows you their <ansi fg="item">%s</ansi>.`, user.Character.Name, showItem.DisplayName()),
 			)
 
-			response.SendUserMessage(targetUser.UserId,
-				"\n"+showItem.GetLongDescription()+"\n",
+			targetUser.SendText(
+				"\n" + showItem.GetLongDescription() + "\n",
 			)
 
 			// Tell the rest of the room
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, user.Character.Name, showItem.DisplayName(), targetUser.Character.Name),
-				targetUser.UserId)
+				targetUser.UserId,
+				userId)
 
 		} else {
-			response.SendUserMessage(userId, "Something went wrong.")
+			user.SendText("Something went wrong.")
 		}
 
 		response.Handled = true
@@ -107,7 +108,7 @@ func Show(rest string, userId int) (util.MessageQueue, error) {
 
 			if showItem.ItemId > 0 {
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You show the <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, showItem.DisplayName(), targetMob.Character.Name),
 				)
 
@@ -116,12 +117,13 @@ func Show(rest string, userId int) (util.MessageQueue, error) {
 					response.AbsorbMessages(res)
 				}
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, showItem.DisplayName(), targetMob.Character.Name),
+					userId,
 				)
 
 			} else {
-				response.SendUserMessage(userId, "Something went wrong.")
+				user.SendText("Something went wrong.")
 			}
 
 		}
@@ -130,7 +132,7 @@ func Show(rest string, userId int) (util.MessageQueue, error) {
 		return response, nil
 	}
 
-	response.SendUserMessage(userId, "Who???")
+	user.SendText("Who???")
 
 	response.Handled = true
 	return response, nil

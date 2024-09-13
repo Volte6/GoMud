@@ -26,7 +26,7 @@ func Status(rest string, userId int) (util.MessageQueue, error) {
 		args := util.SplitButRespectQuotes(rest)
 
 		if len(args) < 2 || args[0] != `train` {
-			response.SendUserMessage(userId, "stat WHAT???")
+			user.SendText("stat WHAT???")
 			response.Handled = true
 			return response, nil
 		}
@@ -45,13 +45,13 @@ func Status(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		if user.Character.StatPoints < trainQty {
-			response.SendUserMessage(userId, "You don't have enough stat points to do that.")
+			user.SendText("You don't have enough stat points to do that.")
 			response.Handled = true
 			return response, nil
 		}
 
 		if len(match) == 0 {
-			response.SendUserMessage(userId, "It's not clear which stat you want to improve.")
+			user.SendText("It's not clear which stat you want to improve.")
 			response.Handled = true
 			return response, nil
 		}
@@ -85,14 +85,14 @@ func Status(rest string, userId int) (util.MessageQueue, error) {
 
 		user.Character.Validate()
 
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`Your base <ansi fg="yellow">%s</ansi> improves from <ansi fg="cyan">%d</ansi> to <ansi fg="cyan-bold">%d</ansi>!`, match, before, after))
 		response.Handled = true
 		return response, nil
 	}
 
 	tplTxt, _ := templates.Process("character/status", user)
-	response.SendUserMessage(userId, tplTxt)
+	user.SendText(tplTxt)
 
 	response.NextCommand = "inventory"
 	response.Handled = true

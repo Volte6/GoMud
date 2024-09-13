@@ -154,7 +154,7 @@ func Inventory(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	tplTxt, _ := templates.Process("character/inventory", invData)
-	response.SendUserMessage(userId, tplTxt)
+	user.SendText(tplTxt)
 
 	response.Handled = true
 	return response, nil

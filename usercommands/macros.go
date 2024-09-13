@@ -18,18 +18,18 @@ func Macros(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if len(user.Macros) == 0 {
-		response.SendUserMessage(userId, "You have no macros set.")
+		user.SendText("You have no macros set.")
 		response.Handled = true
 		return response, nil
 	}
 
-	response.SendUserMessage(userId, `<ansi fg="yellow">Your macros:</ansi>`)
+	user.SendText(`<ansi fg="yellow">Your macros:</ansi>`)
 	for number, macroCommand := range user.Macros {
-		response.SendUserMessage(userId, ``)
-		response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="yellow">%s:</ansi>`, number))
-		response.SendUserMessage(userId, fmt.Sprintf(`    <ansi fg="command">%s</ansi>`, macroCommand))
+		user.SendText(``)
+		user.SendText(fmt.Sprintf(`<ansi fg="yellow">%s:</ansi>`, number))
+		user.SendText(fmt.Sprintf(`    <ansi fg="command">%s</ansi>`, macroCommand))
 	}
-	response.SendUserMessage(userId, ``)
+	user.SendText(``)
 
 	response.Handled = true
 	return response, nil

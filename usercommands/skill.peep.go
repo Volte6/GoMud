@@ -35,26 +35,26 @@ func Peep(rest string, userId int) (util.MessageQueue, error) {
 	skillLevel := user.Character.GetSkillLevel(skills.Peep)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to peep.")
+		user.SendText("You don't know how to peep.")
 		response.Handled = true
 		return response, errors.New(`you don't know how to peep`)
 	}
 
 	if len(rest) == 0 {
-		response.SendUserMessage(userId, "Type `help peep` for more information on the peep skill.")
+		user.SendText("Type `help peep` for more information on the peep skill.")
 		response.Handled = true
 		return response, nil
 	}
 
 	if skillLevel < 2 {
-		response.SendUserMessage(userId, "At level 1, peep is a passive skill.")
-		response.SendUserMessage(userId, "Type `help peep` for more information on the peep skill.")
+		user.SendText("At level 1, peep is a passive skill.")
+		user.SendText("Type `help peep` for more information on the peep skill.")
 		response.Handled = true
 		return response, errors.New(`at level 1, peep is a passive skill`)
 	}
 
 	if !user.Character.TryCooldown(skills.Peep.String(), 1) {
-		response.SendUserMessage(userId,
+		user.SendText(
 			`You're using that skill just a little too fast.`,
 		)
 		response.Handled = true
@@ -128,12 +128,15 @@ func Peep(rest string, userId int) (util.MessageQueue, error) {
 				dropTxt = fmt.Sprintf(` <ansi fg="username">%s</ansi> has a 100%% chance of dropping their equipment if killed.%s%s`, targetName, term.CRLFStr, term.CRLFStr)
 			}
 
-			response.SendUserMessage(playerId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> is peeping at you.`, user.Character.Name),
-			)
+			if targetUser := users.GetByUserId(playerId); targetUser != nil {
+				targetUser.SendText(
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> is peeping at you.`, user.Character.Name),
+				)
+			}
 
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is peeping at <ansi fg="username">%s</ansi>.`, user.Character.Name, u.Character.Name),
+				userId,
 				u.UserId)
 
 		} else if mobId > 0 {
@@ -190,20 +193,21 @@ func Peep(rest string, userId int) (util.MessageQueue, error) {
 				dropTxt = fmt.Sprintf(`<ansi fg="mobname">%s</ansi> has a %d%% chance of dropping their equipment if killed.%s%s`, targetName, m.ItemDropChance, term.CRLFStr, term.CRLFStr)
 			}
 
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is peeping at %s.`, user.Character.Name, targetName),
+				userId,
 			)
 
 		}
 
 		if statusTxt != `` {
-			response.SendUserMessage(userId, statusTxt)
+			user.SendText(statusTxt)
 		}
 		if invTxt != `` {
-			response.SendUserMessage(userId, invTxt)
+			user.SendText(invTxt)
 		}
 		if dropTxt != `` {
-			response.SendUserMessage(userId, dropTxt)
+			user.SendText(dropTxt)
 		}
 
 		response.Handled = true
@@ -211,7 +215,7 @@ func Peep(rest string, userId int) (util.MessageQueue, error) {
 
 	}
 
-	response.SendUserMessage(userId, "You don't see that here.")
+	user.SendText("You don't see that here.")
 	response.Handled = true
 	return response, errors.New(`you don't see that here`)
 

@@ -28,7 +28,7 @@ func Trash(rest string, mobId int) (util.MessageQueue, error) {
 		/*
 			isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 			if !isSneaking {
-				response.SendRoomMessage(mob.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> destroys <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()),
 					true)
 			}

@@ -19,9 +19,9 @@ func Flee(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if user.Character.Aggro == nil {
-		response.SendUserMessage(userId, `You aren't in combat!`)
+		user.SendText(`You aren't in combat!`)
 	} else {
-		response.SendUserMessage(userId, `You attempt to flee...`)
+		user.SendText(`You attempt to flee...`)
 		user.Character.Aggro.Type = characters.Flee
 	}
 

@@ -30,7 +30,7 @@ func Skillset(rest string, userId int) (util.MessageQueue, error) {
 	if len(args) < 2 {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.skillset", nil)
-		response.SendUserMessage(userId, infoOutput)
+		user.SendText(infoOutput)
 		response.Handled = true
 		return response, nil
 	}
@@ -43,7 +43,7 @@ func Skillset(rest string, userId int) (util.MessageQueue, error) {
 	if found {
 		user.Character.SetSkill(skillName, skillValueInt)
 	} else {
-		response.SendUserMessage(userId, fmt.Sprintf(`Skill "%s" not found.`, skillName))
+		user.SendText(fmt.Sprintf(`Skill "%s" not found.`, skillName))
 	}
 
 	response.Handled = true

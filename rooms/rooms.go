@@ -12,6 +12,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
@@ -224,6 +225,16 @@ func ParseExit(exitStr string) (roomId int, zone string) {
 		roomId, _ = strconv.Atoi(exitStr)
 	}
 	return roomId, zone
+}
+
+func (r *Room) SendText(txt string, excludeUserIds ...int) {
+
+	events.AddToQueue(events.Message{
+		RoomId:         r.RoomId,
+		Text:           txt + "\n",
+		ExcludeUserIds: excludeUserIds,
+	})
+
 }
 
 func (r *Room) SetLongTermData(key string, value any) {

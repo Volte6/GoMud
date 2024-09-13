@@ -29,7 +29,7 @@ func Sell(rest string, userId int) (util.MessageQueue, error) {
 
 	item, found := user.Character.FindInBackpack(rest)
 	if !found {
-		response.SendUserMessage(user.UserId, "You don't have that item.")
+		user.SendText("You don't have that item.")
 		response.Handled = true
 		return response, nil
 	}
@@ -41,7 +41,7 @@ func Sell(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	if itemSpec.QuestToken != `` {
-		response.SendUserMessage(user.UserId, "Quest items cannot be sold!")
+		user.SendText("Quest items cannot be sold!")
 		response.Handled = true
 		return response, nil
 	}
@@ -88,11 +88,12 @@ func Sell(rest string, userId int) (util.MessageQueue, error) {
 			mob.ShopStock[item.ItemId]++
 		}
 
-		response.SendUserMessage(user.UserId,
+		user.SendText(
 			fmt.Sprintf(`You sell a <ansi fg="itemname">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, item.DisplayName(), sellValue),
 		)
-		response.SendRoomMessage(room.RoomId,
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> sells a <ansi fg="itemname">%s</ansi>.`, user.Character.Name, item.DisplayName()),
+			userId,
 		)
 
 		// Trigger lost event

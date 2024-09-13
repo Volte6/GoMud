@@ -250,7 +250,7 @@ func TryCommand(cmd string, rest string, userId int) (util.MessageQueue, error) 
 	if cmdInfo, ok := userCommands[cmd]; ok {
 
 		if userDisabled && !cmdInfo.AllowedWhenDowned && !cmdInfo.AdminOnly {
-			finalResponse.SendUserMessage(userId, "You are unable to do that while downed.")
+			user.SendText("You are unable to do that while downed.")
 			finalResponse.Handled = true
 			return finalResponse, nil
 		}

@@ -20,7 +20,11 @@ func SendRoomMessage(roomId int, message string, excludeIds ...int) {
 		return
 	}
 
-	messageQueue.SendRoomMessage(roomId, message, excludeIds...)
+	events.AddToQueue(events.Message{
+		RoomId:         roomId,
+		Text:           message,
+		ExcludeUserIds: excludeIds,
+	})
 }
 
 func SendBroadcast(message string) {

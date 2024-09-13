@@ -185,7 +185,7 @@ func Experience(rest string, userId int) (util.MessageQueue, error) {
 		raceInfo := races.GetRace(mockChar.RaceId)
 		searchResultsTable := templates.GetTable(fmt.Sprintf(`Experience Chart for %s`, raceInfo.Name), headers, rows, formatting)
 		tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
-		response.SendUserMessage(userId, tplTxt)
+		user.SendText(tplTxt)
 
 		response.Handled = true
 		return response, nil
@@ -201,7 +201,7 @@ func Experience(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	tplTxt, _ := templates.Process("character/experience", xpInfo)
-	response.SendUserMessage(userId, tplTxt)
+	user.SendText(tplTxt)
 
 	response.Handled = true
 	return response, nil
