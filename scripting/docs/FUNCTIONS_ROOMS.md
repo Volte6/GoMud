@@ -3,6 +3,7 @@
 - [Room Specific Functions](#room-specific-functions)
   - [GetRoom(roomId int) RoomObject ](#getroomroomid-int-roomobject-)
   - [RoomObject.RoomId() int](#roomobjectroomid-int)
+  - [RoomObject.SendText(msg string)](#roomobjectsettempdatakey-string-value-any)
   - [RoomObject.SetTempData(key string, value any)](#roomobjectsettempdatakey-string-value-any)
   - [RoomObject.GetTempData(key string) any](#roomobjectgettempdatakey-string-any)
   - [RoomObject.SetPermData(key string, value any)](#roomobjectsetpermdatakey-string-value-any)
@@ -26,6 +27,14 @@ Retrieves a RoomObject for a given roomId.
 
 ## [RoomObject.RoomId() int](/scripting/room_func.go)
 Returns the roomId of the room.
+
+## [RoomObject.SendText(msg string[, excludeUserIds int])](/scripting/room_func.go)
+Sends a message to everyone in the room.
+
+|  Argument | Explanation |
+| --- | --- |
+| msg | the message to send |
+| excludeUserIds | One or more comma separated userIds to exclude from receiving the message. |
 
 ## [RoomObject.SetTempData(key string, value any)](/scripting/room_func.go)
 Sets temporary data for the room (Lasts until the room is unloaded from memory).

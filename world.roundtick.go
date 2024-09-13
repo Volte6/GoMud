@@ -508,7 +508,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			exitName, exitRoomId := uRoom.GetRandomExit()
 
 			if exitRoomId == 0 {
-				messageQueue.SendUserMessage(userId, `You can't find an exit!`)
+				user.SendText(`You can't find an exit!`)
 				continue
 			}
 
@@ -622,7 +622,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			}
 
 			if !targetFound {
-				messageQueue.SendUserMessage(user.UserId, "Your target can't be found.")
+				user.SendText(`Your target can't be found.`)
 				user.Character.Aggro = nil
 				continue
 			}
@@ -630,7 +630,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			defUser.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
 			if defUser.Character.Health < 1 {
-				messageQueue.SendUserMessage(user.UserId, "Your rage subsides.")
+				user.SendText(`Your rage subsides.`)
 				user.Character.Aggro = nil
 				continue
 			}
@@ -801,7 +801,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			}
 
 			if !targetFound {
-				messageQueue.SendUserMessage(user.UserId, "Your target can't be found.")
+				user.SendText("Your target can't be found.")
 				user.Character.Aggro = nil
 				continue
 			}
@@ -809,7 +809,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
 			if defMob.Character.Health < 1 {
-				messageQueue.SendUserMessage(user.UserId, "Your rage subsides.")
+				user.SendText("Your rage subsides.")
 				user.Character.Aggro = nil
 				continue
 			}
@@ -1588,9 +1588,7 @@ func (w *World) HandleDroppedPlayers(droppedPlayers []int) util.MessageQueue {
 	for _, userId := range droppedPlayers {
 		if user := users.GetByUserId(userId); user != nil {
 
-			messageQueue.SendUserMessage(userId,
-				`<ansi fg="red">you drop to the ground!</ansi>`,
-			)
+			user.SendText(`<ansi fg="red">you drop to the ground!</ansi>`)
 
 			if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
 				room.SendText(
@@ -1624,7 +1622,7 @@ func (w *World) CheckForLevelUps() util.MessageQueue {
 				}
 				levelUpStr, _ := templates.Process("character/levelup", levelUpData)
 
-				messageQueue.SendUserMessage(user.UserId, levelUpStr)
+				user.SendText(levelUpStr)
 
 				events.AddToQueue(events.Broadcast{
 					Text: templates.AnsiParse(fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has leveled up to level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, user.Character.Level, term.CRLFStr)),

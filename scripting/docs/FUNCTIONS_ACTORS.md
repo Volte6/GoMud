@@ -9,6 +9,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.UserId() int](#actorobjectuserid-int)
   - [ActorObject.InstanceId() int](#actorobjectinstanceid-int)
   - [ActorObject.MobTypeId() int](#actorobjectmobtypeid-int)
+  - [ActorObject.SendText(msg string)](#actorobjectsendtext)
   - [ActorObject.GetRace() string](#actorobjectgetrace-string)
   - [ActorObject.GetSize() string](#actorobjectgetsize-string)
   - [ActorObject.GetLevel() int](#actorobjectgetlevel-int)
@@ -103,6 +104,21 @@ _Note: Only useful for Mob ActorObjects - Returns zero otherwise._
 Returns the base mobId used to spawn new instances.
 
 _Note: Only useful for Mob ActorObjects - Returns zero otherwise._
+
+
+## [ActorObject.SendText(msg string)](/scripting/actor_func.go)
+Sends a message to the actor.
+
+|  Argument | Explanation |
+| --- | --- |
+| msg | the message to send |
+
+## [RoomObject.SendText(msg string)](/scripting/room_func.go)
+Sends a message to everyone in the room.
+
+|  Argument | Explanation |
+| --- | --- |
+| msg | the message to send |
 
 ## [ActorObject.GetRace() string](/scripting/actor_func.go)
 Gets the race name of the actor, such as Human, Elf, Rodent, etc.

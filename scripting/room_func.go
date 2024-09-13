@@ -205,6 +205,10 @@ func (r ScriptRoom) SpawnMob(mobId int) *ScriptActor {
 	return nil
 }
 
+func (r ScriptRoom) SendText(msg string, excludeIds ...int) {
+	r.roomRecord.SendText(msg, excludeIds...)
+}
+
 func (r ScriptRoom) RepeatSpawnItem(itemId int, roundFrequency int, containerName ...string) bool {
 	return r.roomRecord.RepeatSpawnItem(itemId, roundFrequency, containerName...)
 }

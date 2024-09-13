@@ -1423,138 +1423,141 @@ func (w *World) TurnTick() {
 			quest.QuestToken = quest.QuestToken[1:]
 		}
 
-		if questInfo := quests.GetQuest(quest.QuestToken); questInfo != nil {
+		questInfo := quests.GetQuest(quest.QuestToken)
+		if questInfo == nil {
+			continue
+		}
 
-			if questUser := users.GetByUserId(quest.UserId); questUser != nil {
+		questUser := users.GetByUserId(quest.UserId)
+		if questUser == nil {
+			continue
+		}
 
-				if remove {
-					questUser.Character.ClearQuestToken(quest.QuestToken)
-					continue
+		if remove {
+			questUser.Character.ClearQuestToken(quest.QuestToken)
+			continue
+		}
+		// This only succees if the user doesn't have the quest yet or the quest is a later step of one they've started
+		if !questUser.Character.GiveQuestToken(quest.QuestToken) {
+			continue
+		}
+
+		_, stepName := quests.TokenToParts(quest.QuestToken)
+		if stepName == `start` {
+			if !questInfo.Secret {
+				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have been given a new quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
+				questUser.SendText(questUpTxt)
+			}
+		} else if stepName == `end` {
+
+			if !questInfo.Secret {
+				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have completed the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
+				questUser.SendText(questUpTxt)
+			}
+
+			// Message to player?
+			if len(questInfo.Rewards.PlayerMessage) > 0 {
+				questUser.SendText(questInfo.Rewards.PlayerMessage)
+			}
+			// Message to room?
+			if len(questInfo.Rewards.RoomMessage) > 0 {
+				if room := rooms.LoadRoom(questUser.Character.RoomId); room != nil {
+					room.SendText(questInfo.Rewards.RoomMessage, questUser.UserId)
 				}
-				// This only succees if the user doesn't have the quest yet or the quest is a later step of one they've started
-				if questUser.Character.GiveQuestToken(quest.QuestToken) {
+			}
+			// New quest to start?
+			if len(questInfo.Rewards.QuestId) > 0 {
 
-					_, stepName := quests.TokenToParts(quest.QuestToken)
-					if stepName == `start` {
-						if !questInfo.Secret {
-							questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have been given a new quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-							messageQueue.SendUserMessage(questUser.UserId, questUpTxt)
+				events.AddToQueue(events.Quest{
+					UserId:     questUser.UserId,
+					QuestToken: questInfo.Rewards.QuestId,
+				})
+
+			}
+			// Gold reward?
+			if questInfo.Rewards.Gold > 0 {
+				questUser.SendText(fmt.Sprintf(`You receive <ansi fg="gold">%d gold</ansi>!`, questInfo.Rewards.Gold))
+				questUser.Character.Gold += questInfo.Rewards.Gold
+			}
+			// Item reward?
+			if questInfo.Rewards.ItemId > 0 {
+				newItm := items.New(questInfo.Rewards.ItemId)
+				questUser.SendText(fmt.Sprintf(`You receive <ansi fg="itemname">%s</ansi>!`, newItm.NameSimple()))
+				questUser.Character.StoreItem(newItm)
+
+				iSpec := newItm.GetSpec()
+				if iSpec.QuestToken != `` {
+
+					events.AddToQueue(events.Quest{
+						UserId:     questUser.UserId,
+						QuestToken: iSpec.QuestToken,
+					})
+
+				}
+			}
+			// Buff reward?
+			if questInfo.Rewards.BuffId > 0 {
+
+				events.AddToQueue(events.Buff{
+					UserId:        questUser.UserId,
+					MobInstanceId: 0,
+					BuffId:        questInfo.Rewards.BuffId,
+				})
+
+			}
+			// Experience reward?
+			if questInfo.Rewards.Experience > 0 {
+
+				grantXP, xpScale := questUser.Character.GrantXP(questInfo.Rewards.Experience)
+
+				xpMsgExtra := ``
+				if xpScale != 100 {
+					xpMsgExtra = fmt.Sprintf(` <ansi fg="yellow">(%d%% scale)</ansi>`, xpScale)
+				}
+
+				questUser.SendText(fmt.Sprintf(`You receive <ansi fg="experience">%d experience points</ansi>%s!`, grantXP, xpMsgExtra))
+			}
+			// Skill reward?
+			if questInfo.Rewards.SkillInfo != `` {
+				details := strings.Split(questInfo.Rewards.SkillInfo, `:`)
+				if len(details) > 1 {
+					skillName := strings.ToLower(details[0])
+					skillLevel, _ := strconv.Atoi(details[1])
+					currentLevel := questUser.Character.GetSkillLevel(skills.SkillTag(skillName))
+
+					if currentLevel < skillLevel {
+						newLevel := questUser.Character.TrainSkill(skillName, skillLevel)
+
+						skillData := struct {
+							SkillName  string
+							SkillLevel int
+						}{
+							SkillName:  skillName,
+							SkillLevel: newLevel,
 						}
-					} else if stepName == `end` {
-
-						if !questInfo.Secret {
-							questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have completed the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-							messageQueue.SendUserMessage(questUser.UserId, questUpTxt)
-						}
-
-						// Message to player?
-						if len(questInfo.Rewards.PlayerMessage) > 0 {
-							messageQueue.SendUserMessage(questUser.UserId, questInfo.Rewards.PlayerMessage)
-						}
-						// Message to room?
-						if len(questInfo.Rewards.RoomMessage) > 0 {
-							if room := rooms.LoadRoom(questUser.Character.RoomId); room != nil {
-								room.SendText(questInfo.Rewards.RoomMessage, questUser.UserId)
-							}
-						}
-						// New quest to start?
-						if len(questInfo.Rewards.QuestId) > 0 {
-
-							events.AddToQueue(events.Quest{
-								UserId:     questUser.UserId,
-								QuestToken: questInfo.Rewards.QuestId,
-							})
-
-						}
-						// Gold reward?
-						if questInfo.Rewards.Gold > 0 {
-							messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="gold">%d gold</ansi>!`, questInfo.Rewards.Gold))
-							questUser.Character.Gold += questInfo.Rewards.Gold
-						}
-						// Item reward?
-						if questInfo.Rewards.ItemId > 0 {
-							newItm := items.New(questInfo.Rewards.ItemId)
-							messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="itemname">%s</ansi>!`, newItm.NameSimple()))
-							questUser.Character.StoreItem(newItm)
-
-							iSpec := newItm.GetSpec()
-							if iSpec.QuestToken != `` {
-
-								events.AddToQueue(events.Quest{
-									UserId:     questUser.UserId,
-									QuestToken: iSpec.QuestToken,
-								})
-
-							}
-						}
-						// Buff reward?
-						if questInfo.Rewards.BuffId > 0 {
-
-							events.AddToQueue(events.Buff{
-								UserId:        questUser.UserId,
-								MobInstanceId: 0,
-								BuffId:        questInfo.Rewards.BuffId,
-							})
-
-						}
-						// Experience reward?
-						if questInfo.Rewards.Experience > 0 {
-
-							grantXP, xpScale := questUser.Character.GrantXP(questInfo.Rewards.Experience)
-
-							xpMsgExtra := ``
-							if xpScale != 100 {
-								xpMsgExtra = fmt.Sprintf(` <ansi fg="yellow">(%d%% scale)</ansi>`, xpScale)
-							}
-
-							messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="experience">%d experience points</ansi>%s!`, grantXP, xpMsgExtra))
-						}
-						// Skill reward?
-						if questInfo.Rewards.SkillInfo != `` {
-							details := strings.Split(questInfo.Rewards.SkillInfo, `:`)
-							if len(details) > 1 {
-								skillName := strings.ToLower(details[0])
-								skillLevel, _ := strconv.Atoi(details[1])
-								currentLevel := questUser.Character.GetSkillLevel(skills.SkillTag(skillName))
-
-								if currentLevel < skillLevel {
-									newLevel := questUser.Character.TrainSkill(skillName, skillLevel)
-
-									skillData := struct {
-										SkillName  string
-										SkillLevel int
-									}{
-										SkillName:  skillName,
-										SkillLevel: newLevel,
-									}
-									skillUpTxt, _ := templates.Process("character/skillup", skillData)
-									messageQueue.SendUserMessage(questUser.UserId, skillUpTxt)
-								}
-
-							}
-						}
-						// Move them to another room/area?
-						if questInfo.Rewards.RoomId > 0 {
-							messageQueue.SendUserMessage(questUser.UserId, `You are suddenly moved to a new place!`)
-
-							if room := rooms.LoadRoom(questUser.Character.RoomId); room != nil {
-								room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is suddenly moved to a new place!`, questUser.Character.Name), questUser.UserId)
-							}
-
-							rooms.MoveToRoom(questUser.UserId, questInfo.Rewards.RoomId)
-						}
-					} else {
-						if !questInfo.Secret {
-							questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You've made progress on the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-							messageQueue.SendUserMessage(questUser.UserId, questUpTxt)
-						}
+						skillUpTxt, _ := templates.Process("character/skillup", skillData)
+						questUser.SendText(skillUpTxt)
 					}
 
 				}
-
 			}
+			// Move them to another room/area?
+			if questInfo.Rewards.RoomId > 0 {
+				questUser.SendText(`You are suddenly moved to a new place!`)
 
+				if room := rooms.LoadRoom(questUser.Character.RoomId); room != nil {
+					room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is suddenly moved to a new place!`, questUser.Character.Name), questUser.UserId)
+				}
+
+				rooms.MoveToRoom(questUser.UserId, questInfo.Rewards.RoomId)
+			}
+		} else {
+			if !questInfo.Secret {
+				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You've made progress on the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
+				questUser.SendText(questUpTxt)
+			}
 		}
+
 	}
 
 	//

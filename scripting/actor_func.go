@@ -57,6 +57,13 @@ func (a ScriptActor) GetSize() string {
 	return string(races.Medium)
 }
 
+func (a ScriptActor) SendText(msg string) {
+	if a.userRecord == nil {
+		return
+	}
+	a.userRecord.SendText(msg)
+}
+
 func (a ScriptActor) GetLevel() int {
 	return a.characterRecord.Level
 }
@@ -299,7 +306,7 @@ func (a ScriptActor) TrainSkill(skillName string, skillLevel int) bool {
 			SkillLevel: newLevel,
 		}
 		skillUpTxt, _ := templates.Process("character/skillup", skillData)
-		messageQueue.SendUserMessage(a.userId, skillUpTxt)
+		a.SendText(skillUpTxt)
 
 		return true
 
