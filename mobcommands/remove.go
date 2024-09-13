@@ -26,8 +26,7 @@ func Remove(rest string, mobId int) (util.MessageQueue, error) {
 
 	if rest == "all" {
 		for _, item := range mob.Character.Equipment.GetAllItems() {
-			r, _ := Remove(item.Name(), mobId)
-			response.AbsorbMessages(r)
+			Remove(item.Name(), mobId)
 		}
 		response.Handled = true
 		return response, nil

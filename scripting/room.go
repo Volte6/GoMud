@@ -163,7 +163,7 @@ func TryRoomCommand(cmd string, rest string, userId int) (util.MessageQueue, err
 
 			for _, buffInfo := range user.Character.GetBuffs() {
 				if mq, err := TryBuffCommand(cmd, rest, userId, 0, buffInfo.BuffId); err == nil {
-					messageQueue.AbsorbMessages(mq)
+
 
 					messageQueue.Handled = messageQueue.Handled || mq.Handled
 					if messageQueue.Handled {
@@ -175,7 +175,6 @@ func TryRoomCommand(cmd string, rest string, userId int) (util.MessageQueue, err
 
 		for _, mobInstanceId := range room.GetMobs() {
 			if mq, err := TryMobCommand(cmd, rest, mobInstanceId, userId, `user`); err == nil {
-				messageQueue.AbsorbMessages(mq)
 
 				messageQueue.Handled = messageQueue.Handled || mq.Handled
 				if messageQueue.Handled {

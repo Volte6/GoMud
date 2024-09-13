@@ -48,9 +48,7 @@ func Stash(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		// Trigger lost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId); err == nil {
-			response.AbsorbMessages(scriptResponse)
-		}
+		scripting.TryItemScriptEvent(`onLost`, matchItem, userId)
 	}
 
 	response.Handled = true

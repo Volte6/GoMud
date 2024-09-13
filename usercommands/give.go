@@ -115,13 +115,9 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 				targetUser.UserId)
 
 			// Trigger onLost event
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, giveItem, userId); err == nil {
-				response.AbsorbMessages(scriptResponse)
-			}
+			scripting.TryItemScriptEvent(`onLost`, giveItem, userId)
 
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, giveItem, targetUser.UserId); err == nil {
-				response.AbsorbMessages(scriptResponse)
-			}
+			scripting.TryItemScriptEvent(`onFound`, giveItem, targetUser.UserId)
 
 		} else if giveGoldAmount > 0 {
 
@@ -197,14 +193,12 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 					)
 
 					// Trigger onLost event
-					if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, giveItem, userId); err == nil {
-						response.AbsorbMessages(scriptResponse)
-					}
+					scripting.TryItemScriptEvent(`onLost`, giveItem, userId)
 
 				}
 
 				if res, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}); err == nil {
-					response.AbsorbMessages(res)
+
 					if res.Handled {
 						response.Handled = true
 						return response, nil

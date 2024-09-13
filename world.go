@@ -735,10 +735,6 @@ func (w *World) processInput(userId int, inputText string) {
 			}
 		}
 
-		if commandResponse.Pending() {
-			w.DispatchMessages(commandResponse)
-		}
-
 		if len(commandResponse.CommandQueue) > 0 {
 			for _, cmd := range commandResponse.CommandQueue {
 
@@ -813,10 +809,6 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 			}
 		}
 
-		if commandResponse.Pending() {
-			w.DispatchMessages(commandResponse)
-		}
-
 		if len(commandResponse.CommandQueue) > 0 {
 			for _, cmd := range commandResponse.CommandQueue {
 
@@ -846,31 +838,6 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 		}
 
 		break
-	}
-
-}
-
-// Optionally capture any user output and return it.
-func (w *World) DispatchMessages(u util.MessageQueue) {
-
-	for {
-
-		message, err := u.GetNextMessage()
-		if err != nil {
-			break
-		}
-
-		if u.UserId > 0 {
-			message.ExcludeUserIds = append(message.ExcludeUserIds, u.UserId)
-		}
-
-		events.AddToQueue(events.Message{
-			UserId:         message.UserId,
-			ExcludeUserIds: message.ExcludeUserIds,
-			RoomId:         message.RoomId,
-			Text:           message.Msg,
-		})
-
 	}
 
 }
@@ -1117,11 +1084,6 @@ func (w *World) TurnTick() {
 		}
 
 	}
-
-	//
-	// The follow section handles queued up buffs
-	// They get processed in "TICK" time which is much faster than "ROUND" time
-	messageQueue := util.NewMessageQueue(0, 0)
 
 	//
 	// Handle RoomAction Queue
@@ -1376,8 +1338,7 @@ func (w *World) TurnTick() {
 		//
 		// Fire onStart for buff script
 		//
-		if response, err := scripting.TryBuffScriptEvent(`onStart`, buff.UserId, buff.MobInstanceId, buff.BuffId); err == nil {
-			messageQueue.AbsorbMessages(response)
+		if _, err := scripting.TryBuffScriptEvent(`onStart`, buff.UserId, buff.MobInstanceId, buff.BuffId); err == nil {
 			targetChar.TrackBuffStarted(buff.BuffId)
 		}
 
@@ -1385,9 +1346,7 @@ func (w *World) TurnTick() {
 		// If the buff calls for an immediate triggering
 		//
 		if buffInfo.TriggerNow {
-			if response, err := scripting.TryBuffScriptEvent(`onTrigger`, buff.UserId, buff.MobInstanceId, buff.BuffId); err == nil {
-				messageQueue.AbsorbMessages(response)
-			}
+			scripting.TryBuffScriptEvent(`onTrigger`, buff.UserId, buff.MobInstanceId, buff.BuffId)
 
 			if buff.MobInstanceId > 0 && targetChar.Health <= 0 {
 				// Mob died
@@ -1563,7 +1522,7 @@ func (w *World) TurnTick() {
 	//
 	// Prune all buffs that have expired.
 	//
-	messageQueue.AbsorbMessages(w.PruneBuffs())
+	w.PruneBuffs()
 
 	//
 	// Update movement points for each player
@@ -1579,12 +1538,9 @@ func (w *World) TurnTick() {
 	}
 
 	if turnCt%uint64(c.TurnsPerSecond()) == 0 {
-		messageQueue.AbsorbMessages(w.CheckForLevelUps())
+		w.CheckForLevelUps()
 	}
 
-	if messageQueue.Pending() {
-		w.DispatchMessages(messageQueue)
-	}
 	//
 	// End processing of buffs
 	//

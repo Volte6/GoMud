@@ -82,7 +82,7 @@ func Aid(rest string, userId int) (util.MessageQueue, error) {
 
 			continueCasting := true
 			if res, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro); err == nil {
-				response.AbsorbMessages(res)
+
 				continueCasting = res.Handled
 			}
 

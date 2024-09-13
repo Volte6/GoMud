@@ -77,68 +77,51 @@ func (w *World) roundTick() {
 	//
 	mobs.ReduceHostility()
 
-	messageQueue := util.NewMessageQueue(0, 0)
-
 	//
 	// Player round ticks
 	//
-	messageQueue.AbsorbMessages(w.HandlePlayerRoundTicks())
+	w.HandlePlayerRoundTicks()
 	//
 	// Player round ticks
 	//
-	messageQueue.AbsorbMessages(w.HandleMobRoundTicks())
+	w.HandleMobRoundTicks()
 
 	//
 	// Respawn any enemies that have been missing for too long
 	//
-	messageQueue.AbsorbMessages(w.HandleRespawns())
+	w.HandleRespawns()
 
 	//
 	// Combat rounds
 	//
-	msgQ, affectedPlayers1, affectedMobs1 := w.HandlePlayerCombat()
-	messageQueue.AbsorbMessages(msgQ)
+	affectedPlayers1, affectedMobs1 := w.HandlePlayerCombat()
 
-	msgQ, affectedPlayers2, affectedMobs2 := w.HandleMobCombat()
-	messageQueue.AbsorbMessages(msgQ)
+	affectedPlayers2, affectedMobs2 := w.HandleMobCombat()
 
 	// Do any resolution or extra checks based on everyone that has been involved in combat this round.
-	msgQ = w.HandleAffected(append(affectedPlayers1, affectedPlayers2...), append(affectedMobs1, affectedMobs2...))
-	messageQueue.AbsorbMessages(msgQ)
+	w.HandleAffected(append(affectedPlayers1, affectedPlayers2...), append(affectedMobs1, affectedMobs2...))
 
 	//
 	// Healing
 	//
-	msgQ = w.HandleAutoHealing(roundNumber)
-	messageQueue.AbsorbMessages(msgQ)
-
-	//
-	// Prune buffs - happens at the end of the round
-	//
-	// This is now handled in the tick loop
-	// messageQueue.AbsorbMessages(w.PruneBuffs())
+	w.HandleAutoHealing(roundNumber)
 
 	//
 	// Idle mobs
 	//
-	messageQueue.AbsorbMessages(w.HandleIdleMobs())
+	w.HandleIdleMobs()
 
 	//
 	// Shadow/death realm
 	//
-	messageQueue.AbsorbMessages(w.HandleShadowRealm(roundNumber))
-
-	if messageQueue.Pending() {
-		w.DispatchMessages(messageQueue)
-	}
+	w.HandleShadowRealm(roundNumber)
 
 	util.TrackTime(`World::RoundTick()`, time.Since(tStart).Seconds())
 }
 
 // Round ticks for players
-func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
+func (w *World) HandlePlayerRoundTicks() {
 
-	messageQueue := util.NewMessageQueue(0, 0)
 	roomsWithPlayers := rooms.GetRoomsWithPlayers()
 	for _, roomId := range roomsWithPlayers {
 		// Get rooom
@@ -147,7 +130,6 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 
 			allowIdleMessages := true
 			if scriptResponse, err := scripting.TryRoomIdleEvent(roomId); err == nil {
-				messageQueue.AbsorbMessages(scriptResponse)
 				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
 					allowIdleMessages = false
 				}
@@ -210,9 +192,7 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 					//
 					for _, buff := range triggeredBuffs {
 						if !buff.Expired() {
-							if response, err := scripting.TryBuffScriptEvent(`onTrigger`, uId, 0, buff.BuffId); err == nil {
-								messageQueue.AbsorbMessages(response)
-							}
+							scripting.TryBuffScriptEvent(`onTrigger`, uId, 0, buff.BuffId)
 						}
 					}
 
@@ -225,13 +205,10 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 		}
 	}
 
-	return messageQueue
 }
 
 // Round ticks for players
-func (w *World) HandleMobRoundTicks() util.MessageQueue {
-
-	messageQueue := util.NewMessageQueue(0, 0)
+func (w *World) HandleMobRoundTicks() {
 
 	for _, mobInstanceId := range mobs.GetAllMobInstanceIds() {
 
@@ -254,9 +231,7 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 			// Fire onTrigger for buff script
 			//
 			for _, buff := range triggeredBuffs {
-				if response, err := scripting.TryBuffScriptEvent(`onTrigger`, 0, mobInstanceId, buff.BuffId); err == nil {
-					messageQueue.AbsorbMessages(response)
-				}
+				scripting.TryBuffScriptEvent(`onTrigger`, 0, mobInstanceId, buff.BuffId)
 			}
 
 		}
@@ -290,7 +265,6 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 
 	}
 
-	return messageQueue
 }
 
 func (w *World) LogOff(userId int) {
@@ -314,9 +288,7 @@ func (w *World) LogOff(userId int) {
 
 }
 
-func (w *World) PruneBuffs() util.MessageQueue {
-
-	messageQueue := util.NewMessageQueue(0, 0)
+func (w *World) PruneBuffs() {
 
 	roomsWithPlayers := rooms.GetRoomsWithPlayers()
 	for _, roomId := range roomsWithPlayers {
@@ -332,9 +304,8 @@ func (w *World) PruneBuffs() util.MessageQueue {
 				logOff = false
 				if buffsToPrune := user.Character.Buffs.Prune(); len(buffsToPrune) > 0 {
 					for _, buffInfo := range buffsToPrune {
-						if response, err := scripting.TryBuffScriptEvent(`onEnd`, uId, 0, buffInfo.BuffId); err == nil {
-							messageQueue.AbsorbMessages(response)
-						}
+						scripting.TryBuffScriptEvent(`onEnd`, uId, 0, buffInfo.BuffId)
+
 						if buffInfo.BuffId == 0 {
 							logOff = true
 						}
@@ -358,9 +329,7 @@ func (w *World) PruneBuffs() util.MessageQueue {
 
 		if buffsToPrune := mob.Character.Buffs.Prune(); len(buffsToPrune) > 0 {
 			for _, buffInfo := range buffsToPrune {
-				if response, err := scripting.TryBuffScriptEvent(`onEnd`, 0, mobInstanceId, buffInfo.BuffId); err == nil {
-					messageQueue.AbsorbMessages(response)
-				}
+				scripting.TryBuffScriptEvent(`onEnd`, 0, mobInstanceId, buffInfo.BuffId)
 			}
 
 			mob.Character.Validate()
@@ -368,12 +337,9 @@ func (w *World) PruneBuffs() util.MessageQueue {
 
 	}
 
-	return messageQueue
 }
 
-func (w *World) HandleRespawns() (messageQueue util.MessageQueue) {
-
-	messageQueue = util.NewMessageQueue(0, 0)
+func (w *World) HandleRespawns() {
 
 	//
 	// Handle any respawns pending
@@ -410,17 +376,14 @@ func (w *World) HandleRespawns() (messageQueue util.MessageQueue) {
 		}
 	}
 
-	return messageQueue
 }
 
 // WHere combat happens
-func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPlayerIds []int, affectedMobInstanceIds []int) {
+func (w *World) HandlePlayerCombat() (affectedPlayerIds []int, affectedMobInstanceIds []int) {
 
 	tStart := time.Now()
 
 	c := configs.GetConfig()
-
-	messageQueue = util.NewMessageQueue(0, 0)
 
 	for _, userId := range users.GetOnlineUserIds() {
 
@@ -534,9 +497,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			if user.Character.Aggro.RoundsWaiting > 0 {
 				user.Character.Aggro.RoundsWaiting--
 
-				if res, err := scripting.TrySpellScriptEvent(`onWait`, user.UserId, 0, user.Character.Aggro.SpellInfo); err == nil {
-					messageQueue.AbsorbMessages(res)
-				}
+				scripting.TrySpellScriptEvent(`onWait`, user.UserId, 0, user.Character.Aggro.SpellInfo)
 
 				continue
 			}
@@ -556,8 +517,6 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			allowRetaliation := true
 			if res, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo); err == nil {
-				messageQueue.AbsorbMessages(res)
-
 				if res.Handled {
 					allowRetaliation = false
 				}
@@ -882,9 +841,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			// Handle any scripted behavior now.
 			if roundResult.Hit {
-				if res, err := scripting.TryMobScriptEvent(`onHurt`, defMob.InstanceId, user.UserId, `user`, map[string]any{`damage`: roundResult.DamageToTarget, `crit`: roundResult.Crit}); err == nil {
-					messageQueue.AbsorbMessages(res)
-				}
+				scripting.TryMobScriptEvent(`onHurt`, defMob.InstanceId, user.UserId, `user`, map[string]any{`damage`: roundResult.DamageToTarget, `crit`: roundResult.Crit})
 			}
 
 			//
@@ -930,17 +887,15 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 	util.TrackTime(`World::HandlePlayerCombat()`, time.Since(tStart).Seconds())
 
-	return messageQueue, affectedPlayerIds, affectedMobInstanceIds
+	return affectedPlayerIds, affectedMobInstanceIds
 }
 
 // Mob combat operations may happen when players are not present.
-func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlayerIds []int, affectedMobInstanceIds []int) {
+func (w *World) HandleMobCombat() (affectedPlayerIds []int, affectedMobInstanceIds []int) {
 
 	c := configs.GetConfig()
 
 	tStart := time.Now()
-
-	messageQueue = util.NewMessageQueue(0, 0)
 
 	// Handle mob round of combat
 	for _, mobId := range mobs.GetAllMobInstanceIds() {
@@ -972,9 +927,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 			if mob.Character.Aggro.RoundsWaiting > 0 {
 				mob.Character.Aggro.RoundsWaiting--
 
-				if res, err := scripting.TrySpellScriptEvent(`onWait`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo); err == nil {
-					messageQueue.AbsorbMessages(res)
-				}
+				scripting.TrySpellScriptEvent(`onWait`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo)
 
 				continue
 			}
@@ -992,7 +945,6 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 			allowRetaliation := true
 			if res, err := scripting.TrySpellScriptEvent(`onMagic`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo); err == nil {
-				messageQueue.AbsorbMessages(res)
 
 				if res.Handled {
 					allowRetaliation = false
@@ -1294,9 +1246,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 			// Handle any scripted behavior now.
 			if roundResult.Hit {
-				if res, err := scripting.TryMobScriptEvent(`onHurt`, defMob.InstanceId, mob.InstanceId, `mob`, map[string]any{`damage`: roundResult.DamageToTarget, `crit`: roundResult.Crit}); err == nil {
-					messageQueue.AbsorbMessages(res)
-				}
+				scripting.TryMobScriptEvent(`onHurt`, defMob.InstanceId, mob.InstanceId, `mob`, map[string]any{`damage`: roundResult.DamageToTarget, `crit`: roundResult.Crit})
 			}
 
 			// Mobs get aggro when attacked
@@ -1348,11 +1298,10 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 	util.TrackTime(`World::HandleMobCombat()`, time.Since(tStart).Seconds())
 
-	return messageQueue, affectedPlayerIds, affectedMobInstanceIds
+	return affectedPlayerIds, affectedMobInstanceIds
 }
 
-func (w *World) HandleAffected(affectedPlayerIds []int, affectedMobInstanceIds []int) (messageQueue util.MessageQueue) {
-	messageQueue = util.NewMessageQueue(0, 0)
+func (w *World) HandleAffected(affectedPlayerIds []int, affectedMobInstanceIds []int) {
 
 	playersHandled := map[int]struct{}{}
 	for _, userId := range affectedPlayerIds {
@@ -1398,17 +1347,14 @@ func (w *World) HandleAffected(affectedPlayerIds []int, affectedMobInstanceIds [
 
 	}
 
-	return messageQueue
 }
 
 // Idle Mobs
-func (w *World) HandleIdleMobs() util.MessageQueue {
+func (w *World) HandleIdleMobs() {
 
 	// c := configs.GetConfig()
 
 	maxBoredom := uint8(configs.GetConfig().MaxMobBoredom)
-
-	messageQueue := util.NewMessageQueue(0, 0)
 
 	// Handle idle mob behavior
 	tStart := time.Now()
@@ -1449,8 +1395,6 @@ func (w *World) HandleIdleMobs() util.MessageQueue {
 
 		// If they have idle commands, maybe do one of them?
 		result, _ := scripting.TryMobScriptEvent("onIdle", mob.InstanceId, 0, ``, nil)
-		messageQueue.AbsorbMessages(result)
-
 		if !result.Handled {
 			if !mob.Character.IsCharmed() { // Won't do this stuff if befriended
 
@@ -1483,17 +1427,14 @@ func (w *World) HandleIdleMobs() util.MessageQueue {
 
 	util.TrackTime(`HandleIdleMobs()`, time.Since(tStart).Seconds())
 
-	return messageQueue
 }
 
 // Healing
-func (w *World) HandleAutoHealing(roundNumber uint64) util.MessageQueue {
-
-	messageQueue := util.NewMessageQueue(0, 0)
+func (w *World) HandleAutoHealing(roundNumber uint64) {
 
 	// Every 3 rounds.
 	if roundNumber%3 != 0 {
-		return messageQueue
+		return
 	}
 
 	onlineIds := users.GetOnlineUserIds()
@@ -1538,13 +1479,10 @@ func (w *World) HandleAutoHealing(roundNumber uint64) util.MessageQueue {
 		w.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), user.ConnectionId())
 	}
 
-	return messageQueue
 }
 
 // Special shadow realm stuff
-func (w *World) HandleShadowRealm(roundNumber uint64) util.MessageQueue {
-
-	messageQueue := util.NewMessageQueue(0, 0)
+func (w *World) HandleShadowRealm(roundNumber uint64) {
 
 	if roundNumber%uint64(configs.GetConfig().MinutesToRounds(1)) == 0 {
 
@@ -1573,16 +1511,13 @@ func (w *World) HandleShadowRealm(roundNumber uint64) util.MessageQueue {
 		}
 	}
 
-	return messageQueue
 }
 
 // Handle dropped players
-func (w *World) HandleDroppedPlayers(droppedPlayers []int) util.MessageQueue {
-
-	messageQueue := util.NewMessageQueue(0, 0)
+func (w *World) HandleDroppedPlayers(droppedPlayers []int) {
 
 	if len(droppedPlayers) == 0 {
-		return messageQueue
+		return
 	}
 
 	for _, userId := range droppedPlayers {
@@ -1598,13 +1533,11 @@ func (w *World) HandleDroppedPlayers(droppedPlayers []int) util.MessageQueue {
 		}
 	}
 
-	return messageQueue
+	return
 }
 
 // Levelups
-func (w *World) CheckForLevelUps() util.MessageQueue {
-
-	messageQueue := util.NewMessageQueue(0, 0)
+func (w *World) CheckForLevelUps() {
 
 	onlineIds := users.GetOnlineUserIds()
 	for _, userId := range onlineIds {
@@ -1639,7 +1572,6 @@ func (w *World) CheckForLevelUps() util.MessageQueue {
 
 	}
 
-	return messageQueue
 }
 
 // Checks for current auction and handles updates/communication

@@ -195,7 +195,6 @@ func TryCommand(cmd string, rest string, userId int) (util.MessageQueue, error) 
 	if cmd != `server` {
 
 		response, err := scripting.TryRoomCommand(keywords.TryCommandAlias(cmd), rest, userId)
-		finalResponse.AbsorbMessages(response)
 		if response.Handled {
 			finalResponse.Handled = true
 			return finalResponse, err
@@ -239,7 +238,6 @@ func TryCommand(cmd string, rest string, userId int) (util.MessageQueue, error) 
 			// If the item has a script, run it
 			if scriptResponse, err := scripting.TryItemCommand(cmd, matchingItem, user.UserId); err == nil {
 				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
-					finalResponse.AbsorbMessages(scriptResponse)
 					finalResponse.Handled = true
 					return finalResponse, err
 				}
@@ -263,7 +261,6 @@ func TryCommand(cmd string, rest string, userId int) (util.MessageQueue, error) 
 			}()
 
 			response, err := cmdInfo.Func(rest, userId)
-			finalResponse.AbsorbMessages(response)
 			if response.NextCommand != `` {
 				finalResponse.NextCommand = response.NextCommand
 			}
@@ -288,13 +285,11 @@ func TryCommand(cmd string, rest string, userId int) (util.MessageQueue, error) 
 			if response.NextCommand != `` {
 				finalResponse.NextCommand = response.NextCommand
 			}
-			finalResponse.AbsorbMessages(response)
 			return finalResponse, err
 		} else if response.Handled {
 			if response.NextCommand != `` {
 				finalResponse.NextCommand = response.NextCommand
 			}
-			finalResponse.AbsorbMessages(response)
 			finalResponse.Handled = true
 			return finalResponse, err
 		}
@@ -306,7 +301,6 @@ func TryCommand(cmd string, rest string, userId int) (util.MessageQueue, error) 
 		if response.NextCommand != `` {
 			finalResponse.NextCommand = response.NextCommand
 		}
-		finalResponse.AbsorbMessages(response)
 		finalResponse.Handled = finalResponse.Handled || response.Handled
 		return finalResponse, err
 	}
@@ -320,7 +314,6 @@ func TryCommand(cmd string, rest string, userId int) (util.MessageQueue, error) 
 		if response.NextCommand != `` {
 			finalResponse.NextCommand = response.NextCommand
 		}
-		finalResponse.AbsorbMessages(response)
 		finalResponse.Handled = finalResponse.Handled || response.Handled
 		return finalResponse, err
 	}

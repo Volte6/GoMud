@@ -31,8 +31,8 @@ func Alchemy(rest string, mobId int) (util.MessageQueue, error) {
 		// select a random item
 		if len(mob.Character.Items) > 0 {
 			matchItem := mob.Character.Items[util.Rand(len(mob.Character.Items))]
-			r, _ := Alchemy(matchItem.Name(), mobId)
-			response.AbsorbMessages(r)
+			Alchemy(matchItem.Name(), mobId)
+
 		}
 		response.Handled = true
 		return response, nil
@@ -46,8 +46,7 @@ func Alchemy(rest string, mobId int) (util.MessageQueue, error) {
 		}
 
 		for _, item := range iCopies {
-			r, _ := Alchemy(item.Name(), mobId)
-			response.AbsorbMessages(r)
+			Alchemy(item.Name(), mobId)
 		}
 
 		response.Handled = true

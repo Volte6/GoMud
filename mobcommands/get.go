@@ -36,8 +36,7 @@ func Get(rest string, mobId int) (util.MessageQueue, error) {
 
 	if args[0] == "all" {
 		if room.Gold > 0 {
-			r, _ := Get("gold", mobId)
-			response.AbsorbMessages(r)
+			Get("gold", mobId)
 		}
 
 		if len(room.Items) > 0 {
@@ -47,8 +46,7 @@ func Get(rest string, mobId int) (util.MessageQueue, error) {
 			}
 
 			for _, item := range iCopies {
-				r, _ := Get(item.Name(), mobId)
-				response.AbsorbMessages(r)
+				Get(item.Name(), mobId)
 			}
 		}
 
@@ -66,8 +64,7 @@ func Get(rest string, mobId int) (util.MessageQueue, error) {
 			mob.Character.Gold += goldAmt
 			room.Gold -= goldAmt
 
-			room.SendText(
-				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> picks up <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, goldAmt))
+			room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> picks up <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, goldAmt))
 		}
 
 		response.Handled = true

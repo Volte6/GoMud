@@ -61,7 +61,6 @@ func Converse(rest string, mobId int) (util.MessageQueue, error) {
 		}
 
 		if result, err := scripting.TryMobConverse(rest, roomMobInstId, mobId); err == nil {
-			response.AbsorbMessages(result)
 			if result.Handled {
 				response.Handled = true
 				return response, nil

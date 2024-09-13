@@ -162,7 +162,7 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 		}
 
 		if scriptResponse, err := scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId); err == nil {
-			response.AbsorbMessages(scriptResponse)
+
 			if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
 				return response, nil
 			}
@@ -173,7 +173,7 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 		} else {
 
 			if scriptResponse, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId); err == nil {
-				response.AbsorbMessages(scriptResponse)
+
 				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
 					rooms.MoveToRoom(user.UserId, originRoomId)
 					return response, nil

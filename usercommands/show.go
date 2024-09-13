@@ -113,9 +113,7 @@ func Show(rest string, userId int) (util.MessageQueue, error) {
 				)
 
 				// Do trigger of onShow
-				if res, err := scripting.TryMobScriptEvent(`onShow`, targetMob.InstanceId, userId, `user`, map[string]any{`gold`: 0, `item`: showItem}); err == nil {
-					response.AbsorbMessages(res)
-				}
+				scripting.TryMobScriptEvent(`onShow`, targetMob.InstanceId, userId, `user`, map[string]any{`gold`: 0, `item`: showItem})
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, showItem.DisplayName(), targetMob.Character.Name),

@@ -223,7 +223,6 @@ func Cast(rest string, mobId int) (util.MessageQueue, error) {
 
 		continueCasting := true
 		if res, err := scripting.TrySpellScriptEvent(`onCast`, 0, mobId, spellAggro); err == nil {
-			response.AbsorbMessages(res)
 			continueCasting = res.Handled
 		}
 

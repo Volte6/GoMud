@@ -33,8 +33,7 @@ func Equip(rest string, userId int) (util.MessageQueue, error) {
 		for _, item := range itemCopies {
 			iSpec := item.GetSpec()
 			if iSpec.Subtype == items.Wearable || iSpec.Type == items.Weapon {
-				r, _ := Equip(item.Name(), userId)
-				response.AbsorbMessages(r)
+				Equip(item.Name(), userId)
 			}
 		}
 		response.Handled = true
@@ -102,8 +101,7 @@ func Equip(rest string, userId int) (util.MessageQueue, error) {
 			if len(matchItem.GetSpec().WornBuffIds) > 0 {
 				for _, buff := range user.Character.Buffs.List {
 					if !buff.OnStartEvent {
-						if scriptResponse, err := scripting.TryBuffScriptEvent(`onStart`, user.UserId, 0, buff.BuffId); err == nil {
-							response.AbsorbMessages(scriptResponse)
+						if _, err := scripting.TryBuffScriptEvent(`onStart`, user.UserId, 0, buff.BuffId); err == nil {
 							user.Character.TrackBuffStarted(buff.BuffId)
 						}
 					}

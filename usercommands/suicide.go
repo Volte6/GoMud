@@ -40,32 +40,25 @@ func Suicide(rest string, userId int) (util.MessageQueue, error) {
 		for _, itm := range user.Character.GetAllWornItems() {
 			if util.Rand(100) < chanceInt {
 
-				resp, _ := Remove(itm.Name(), userId)
-				response.AbsorbMessages(resp)
+				Remove(itm.Name(), userId)
 
-				resp, _ = Drop(itm.Name(), userId)
-				response.AbsorbMessages(resp)
+				Drop(itm.Name(), userId)
 
 			}
 		}
 	}
 
 	if user.Character.Gold > 0 {
-		resp, _ := Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), userId)
-		response.AbsorbMessages(resp)
+		Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), userId)
 	}
 
 	if config.OnDeathAlwaysDropBackpack {
-		resp, _ := Drop("all", userId)
-		response.AbsorbMessages(resp)
+		Drop("all", userId)
 	} else if config.OnDeathEquipmentDropChance >= 0 {
 		chanceInt := int(config.OnDeathEquipmentDropChance * 100)
 		for _, itm := range user.Character.GetAllBackpackItems() {
 			if util.Rand(100) < chanceInt {
-
-				resp, _ := Drop(itm.Name(), userId)
-				response.AbsorbMessages(resp)
-
+				Drop(itm.Name(), userId)
 			}
 		}
 	}

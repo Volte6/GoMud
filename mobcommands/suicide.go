@@ -90,9 +90,7 @@ func Suicide(rest string, mobId int) (util.MessageQueue, error) {
 		for uId, _ := range mob.DamageTaken {
 			if user := users.GetByUserId(uId); user != nil {
 
-				if res, err := scripting.TryMobScriptEvent(`onDie`, mob.InstanceId, uId, `user`, map[string]any{`attackerCount`: attackerCt}); err == nil {
-					response.AbsorbMessages(res)
-				}
+				scripting.TryMobScriptEvent(`onDie`, mob.InstanceId, uId, `user`, map[string]any{`attackerCount`: attackerCt})
 
 				p := parties.Get(user.UserId)
 

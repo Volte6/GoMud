@@ -146,7 +146,7 @@ func Ask(rest string, userId int) (util.MessageQueue, error) {
 
 		rest = strings.Join(args, ` `)
 		if res, err := scripting.TryMobScriptEvent(`onAsk`, mobId, userId, `user`, map[string]any{"askText": rest}); err == nil {
-			response.AbsorbMessages(res)
+
 			if !res.Handled {
 
 				mob.Command(`emote shakes their head.`)

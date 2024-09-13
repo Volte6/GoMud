@@ -82,8 +82,8 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 		if itemName == `all` {
 
 			for _, itm := range user.Character.GetAllBackpackItems() {
-				r, _ := Storage(fmt.Sprintf(`add !%d`, itm.ItemId), userId)
-				response.AbsorbMessages(r)
+				Storage(fmt.Sprintf(`add !%d`, itm.ItemId), userId)
+
 				spaceLeft--
 				if spaceLeft < 0 {
 					break
@@ -108,17 +108,14 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 		user.SendText(fmt.Sprintf(`You placed the <ansi fg="itemname">%s</ansi> into storage.`, itm.DisplayName()))
 
 		// Trigger lost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itm, userId); err == nil {
-			response.AbsorbMessages(scriptResponse)
-		}
+		scripting.TryItemScriptEvent(`onLost`, itm, userId)
 
 	} else if action == `remove` {
 
 		if itemName == `all` {
 
 			for _, itm := range user.ItemStorage.GetItems() {
-				r, _ := Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), userId)
-				response.AbsorbMessages(r)
+				Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), userId)
 			}
 
 			response.Handled = true
@@ -155,9 +152,7 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 
 			user.SendText(fmt.Sprintf(`You removed the <ansi fg="itemname">%s</ansi> from storage.`, itm.DisplayName()))
 
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, itm, userId); err == nil {
-				response.AbsorbMessages(scriptResponse)
-			}
+			scripting.TryItemScriptEvent(`onFound`, itm, userId)
 
 		} else {
 			user.SendText(`You can't carry that!`)

@@ -97,9 +97,7 @@ func Sell(rest string, userId int) (util.MessageQueue, error) {
 		)
 
 		// Trigger lost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, item, userId); err == nil {
-			response.AbsorbMessages(scriptResponse)
-		}
+		scripting.TryItemScriptEvent(`onLost`, item, userId)
 
 		break
 	}

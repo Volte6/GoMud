@@ -7,7 +7,6 @@ import (
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -17,7 +16,7 @@ Scribe Skill
 Level 1 - Scribe to a scrap of paper
 Level 2 - Scribe to a sign
 Level 3 - Scribe a hidden rune
-Level 4 - Scribe a map
+Level 4 - TODO
 */
 func Scribe(rest string, userId int) (util.MessageQueue, error) {
 
@@ -48,7 +47,7 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 	// note a bunch of text that follows - write a note and create an item of it
 	// sign a bunch of text that follows - scratch a message on a sign in the room
 	// rune some secret text that only the user should see - scratch a private rune message
-	// map - draw a map of the room and write it to an item
+	//
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) == 0 {
@@ -133,39 +132,6 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 
 		}
 
-	} else if scribeType == "map" {
-
-		if skillLevel < 4 {
-
-			user.SendText("You don't know how to scribe maps yet.")
-
-		} else if !user.Character.TryCooldown(skills.Scribe.String(), 30) {
-
-			// There's a cooldown on this skill
-			user.SendText(
-				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Scribe.String())),
-			)
-			response.Handled = true
-			return response, fmt.Errorf("you're doing that too often")
-
-		} else {
-			// Draw a map of the room and write it to an item
-			resp, err := Map("", userId)
-			if err != nil {
-				user.SendText(err.Error())
-				return response, err
-			}
-
-			mapContents := resp.GetUserMessagesAsString(userId)
-			mapContents = strings.Replace(mapContents, "@", "X", -1)
-			mapContents = strings.Replace(mapContents, "You", "Here", -1)
-
-			mapItem := items.New(2)
-			mapItem.SetBlob(templates.AnsiParse(mapContents))
-			user.Character.StoreItem(mapItem)
-
-			user.SendText("You draw a map of the area, as much as you can remember it.")
-		}
 	}
 
 	response.Handled = true

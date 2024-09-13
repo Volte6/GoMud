@@ -32,8 +32,7 @@ func Equip(rest string, mobId int) (util.MessageQueue, error) {
 		for _, item := range itemCopies {
 			iSpec := item.GetSpec()
 			if iSpec.Subtype == items.Wearable || iSpec.Type == items.Weapon {
-				r, _ := Equip(item.Name(), mobId)
-				response.AbsorbMessages(r)
+				Equip(item.Name(), mobId)
 			}
 		}
 		response.Handled = true

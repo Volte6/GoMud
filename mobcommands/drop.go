@@ -34,8 +34,7 @@ func Drop(rest string, mobId int) (util.MessageQueue, error) {
 		iCopies := []items.Item{}
 
 		if mob.Character.Gold > 0 {
-			r, _ := Drop(fmt.Sprintf("%d gold", mob.Character.Gold), mobId)
-			response.AbsorbMessages(r)
+			Drop(fmt.Sprintf("%d gold", mob.Character.Gold), mobId)
 		}
 
 		for _, item := range mob.Character.Items {
@@ -43,8 +42,7 @@ func Drop(rest string, mobId int) (util.MessageQueue, error) {
 		}
 
 		for _, item := range iCopies {
-			r, _ := Drop(item.Name(), mobId)
-			response.AbsorbMessages(r)
+			Drop(item.Name(), mobId)
 		}
 
 		response.Handled = true

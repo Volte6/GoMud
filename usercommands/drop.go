@@ -45,15 +45,13 @@ func Drop(rest string, userId int) (util.MessageQueue, error) {
 		iCopies := []items.Item{}
 
 		if user.Character.Gold > 0 {
-			r, _ := Drop(fmt.Sprintf("%d gold", user.Character.Gold), userId)
-			response.AbsorbMessages(r)
+			Drop(fmt.Sprintf("%d gold", user.Character.Gold), userId)
 		}
 
 		iCopies = append(iCopies, user.Character.Items...)
 
 		for _, item := range iCopies {
-			r, _ := Drop(item.Name(), userId)
-			response.AbsorbMessages(r)
+			Drop(item.Name(), userId)
 		}
 
 		response.Handled = true
@@ -131,9 +129,7 @@ func Drop(rest string, userId int) (util.MessageQueue, error) {
 		room.AddItem(matchItem, false)
 
 		// Trigger onLost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId); err == nil {
-			response.AbsorbMessages(scriptResponse)
-		}
+		scripting.TryItemScriptEvent(`onLost`, matchItem, userId)
 	}
 
 	response.Handled = true

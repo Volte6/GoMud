@@ -39,16 +39,14 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 
 	if args[0] == "all" {
 		if room.Gold > 0 {
-			r, _ := Get(`gold`, userId)
-			response.AbsorbMessages(r)
+			Get(`gold`, userId)
 		}
 
 		if len(room.Items) > 0 {
 			iCopies := append([]items.Item{}, room.Items...)
 
 			for _, item := range iCopies {
-				r, _ := Get(item.Name(), userId)
-				response.AbsorbMessages(r)
+				Get(item.Name(), userId)
 			}
 		}
 
@@ -154,9 +152,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 					userId,
 				)
 
-				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId); err == nil {
-					response.AbsorbMessages(scriptResponse)
-				}
+				scripting.TryItemScriptEvent(`onFound`, matchItem, userId)
 
 			} else {
 				user.SendText(
@@ -232,9 +228,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 					userId,
 				)
 
-				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId); err == nil {
-					response.AbsorbMessages(scriptResponse)
-				}
+				scripting.TryItemScriptEvent(`onFound`, matchItem, userId)
 
 			} else {
 				user.SendText(

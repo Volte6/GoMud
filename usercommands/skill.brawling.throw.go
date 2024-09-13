@@ -76,9 +76,7 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 		if user.Character.RemoveItem(itemMatch) {
 
 			// Trigger onLost event
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itemMatch, userId); err == nil {
-				response.AbsorbMessages(scriptResponse)
-			}
+			scripting.TryItemScriptEvent(`onLost`, itemMatch, userId)
 
 			// Tell the player they are throwing the item
 			user.SendText(

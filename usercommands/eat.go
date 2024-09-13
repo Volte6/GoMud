@@ -52,9 +52,7 @@ func Eat(rest string, userId int) (util.MessageQueue, error) {
 
 		// If no more uses, will be lost, so trigger event
 		if usesLeft := user.Character.UseItem(matchItem); usesLeft < 1 {
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId); err == nil {
-				response.AbsorbMessages(scriptResponse)
-			}
+			scripting.TryItemScriptEvent(`onLost`, matchItem, userId)
 		}
 
 		for _, buffId := range itemSpec.BuffIds {
