@@ -25,10 +25,19 @@ Sends a message to the userId specified
 ## [SendRoomMessage(roomId int, message string, [, excludeUserIds int])](/scripting/messaging_func.go)
 Sends a message to all users in the roomId specified
 
-Note: If this is in a function for an event a user triggered, they will automatically be excluded.
+|  Argument | Explanation |
+| --- | --- |
+| roomId | The roomId to transmit the message to. |
+| message | The message to send. |
+| excludeUserIds | One or more comma separated userIds to exclude from receiving the message. |
+
+## [SendRoomExitsMessage(roomId int, message string, [, excludeUserIds int])](/scripting/messaging_func.go)
+Sends a message to all rooms with an exit leading to this room
 
 |  Argument | Explanation |
 | --- | --- |
 | roomId | The roomId to transmit the message to. |
 | message | The message to send. |
 | excludeUserIds | One or more comma separated userIds to exclude from receiving the message. |
+
+

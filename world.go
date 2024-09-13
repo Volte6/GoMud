@@ -1070,7 +1070,6 @@ func (w *World) TurnTick() {
 
 	tStart := time.Now()
 	var eq *events.Queue
-	requeueList := []events.Input{}
 
 	//
 	// Handle Input Queue
@@ -1094,7 +1093,7 @@ func (w *World) TurnTick() {
 				w.processMobInput(input.MobInstanceId, input.InputText)
 			} else {
 				input.WaitTurns--
-				requeueList = append(requeueList, input)
+				events.Requeue(input)
 			}
 			continue
 		}
@@ -1105,7 +1104,7 @@ func (w *World) TurnTick() {
 		}
 
 		if _, ok := alreadyProcessed[input.UserId]; ok {
-			requeueList = append(requeueList, input)
+			events.Requeue(input)
 			continue
 		}
 
@@ -1114,20 +1113,10 @@ func (w *World) TurnTick() {
 			alreadyProcessed[input.UserId] = struct{}{}
 		} else {
 			input.WaitTurns--
-			requeueList = append(requeueList, input)
+			events.Requeue(input)
 		}
 
 	}
-
-	if len(requeueList) > 0 {
-		slog.Debug(`Requeuing`, `count`, len(requeueList), "inputs", requeueList)
-		//fmt.Println(`Requeueing`, len(requeueList), `inputs`, requeueList)
-		for _, input := range requeueList {
-			events.AddToQueue(input, true)
-		}
-	}
-
-	requeueList = requeueList[:0] // Empty the list
 
 	//
 	// The follow section handles queued up buffs
@@ -1148,138 +1137,195 @@ func (w *World) TurnTick() {
 			continue
 		}
 
-		//slog.Debug(`Event`, `type`, action.Type(), `RoomId`, action.RoomId, `SourceUserId`, action.SourceUserId, `SourceMobId`, action.SourceMobId, `Action`, action.Action)
+		//slog.Debug(`Event`, `type`, action.Type(), `RoomId`, action.RoomId, `SourceUserId`, action.SourceUserId, `SourceMobId`, action.SourceMobId, `WaitTurns`, action.WaitTurns, `Action`, action.Action)
 
-		if room := rooms.LoadRoom(action.RoomId); room != nil {
+		if action.WaitTurns > 0 {
 
-			// Get the parts of the command
-			parts := strings.SplitN(action.Action, ` `, 3)
+			if action.WaitTurns%c.TurnsPerRound() == 0 {
+				// Get the parts of the command
+				parts := strings.SplitN(action.Action, ` `, 3)
+				if parts[0] == `detonate` {
+					// Make sure the room exists
+					room := rooms.LoadRoom(action.RoomId)
+					if room == nil {
+						continue
+					}
 
-			// Is it a detonation?
-			// Possible formats:
-			// donate [#mobId|@userId] !itemId:uid
-			if parts[0] == `detonate` {
+					var itemName string
 
-				if len(parts) == 1 {
+					if len(parts) > 2 {
+						itemName = parts[2]
+					} else {
+						itemName = parts[1]
+					}
+
+					itm, found := room.FindOnFloor(itemName, false)
+					if !found {
+						continue
+					}
+
+					room.SendText(fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> looks like it's about to explode...`, itm.DisplayName()))
+				}
+
+			}
+
+			action.WaitTurns--
+			events.Requeue(action)
+			continue
+		}
+
+		// Make sure the room exists
+		room := rooms.LoadRoom(action.RoomId)
+		if room == nil {
+			continue
+		}
+
+		// Get the parts of the command
+		parts := strings.SplitN(action.Action, ` `, 3)
+
+		// Is it a detonation?
+		// Possible formats:
+		// donate [#mobId|@userId] !itemId:uid
+		// TODO: Refactor this into a scripted event/function
+		if parts[0] == `detonate` {
+
+			// Detonate can't be the only information
+			if len(parts) < 2 {
+				continue
+			}
+
+			var itemName string
+			var targetName string
+
+			if len(parts) > 2 {
+				targetName = parts[1]
+				itemName = parts[2]
+			} else {
+				itemName = parts[1]
+			}
+
+			itm, found := room.FindOnFloor(itemName, false)
+			if !found {
+				continue
+			}
+
+			iSpec := itm.GetSpec()
+			if iSpec.Type != items.Grenade {
+				continue
+			}
+
+			room.RemoveItem(itm, false)
+
+			room.SendText(`<ansi fg="red">--- --- --- --- --- --- --- --- --- --- --- ---</ansi>`)
+			room.SendText(fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> <ansi fg="red">EXPLODES</ansi>!`, itm.DisplayName()))
+			room.SendText(`<ansi fg="red">--- --- --- --- --- --- --- --- --- --- --- ---</ansi>`)
+
+			room.SendTextToExits(`A large explosion is heard in a nearby area!`)
+
+			if len(iSpec.BuffIds) == 0 {
+				continue
+			}
+
+			hitMobs := true
+			hitPlayers := true
+
+			targetPlayerId, targetMobId := room.FindByName(targetName)
+
+			if targetPlayerId > 0 {
+				hitMobs = false
+			}
+
+			if targetMobId > 0 {
+				hitPlayers = false
+			}
+
+			if hitPlayers {
+				for _, uid := range room.GetPlayers() {
+					for _, buffId := range iSpec.BuffIds {
+						events.AddToQueue(events.Buff{
+							UserId:        uid,
+							MobInstanceId: 0,
+							BuffId:        buffId,
+						})
+					}
+				}
+			}
+
+			if !hitMobs {
+				continue
+			}
+
+			for _, mid := range room.GetMobs() {
+
+				for _, buffId := range iSpec.BuffIds {
+					events.AddToQueue(events.Buff{
+						UserId:        0,
+						MobInstanceId: mid,
+						BuffId:        buffId,
+					})
+				}
+
+				if action.SourceUserId == 0 {
 					continue
 				}
 
-				var itemName string
-				var targetName string
-
-				if len(parts) == 2 {
-					itemName = parts[1]
-				} else if len(parts) == 3 {
-					targetName = parts[1]
-					itemName = parts[2]
+				sourceUser := users.GetByUserId(action.SourceUserId)
+				if sourceUser == nil {
+					continue
 				}
 
-				if itm, found := room.FindOnFloor(itemName, false); found {
+				mob := mobs.GetInstance(mid)
+				if mob == nil {
+					continue
+				}
 
-					iSpec := itm.GetSpec()
-					if iSpec.Type == items.Grenade {
+				mob.DamageTaken[sourceUser.UserId] = 0 // Take note that the player did damage this mob.
 
-						room.RemoveItem(itm, false)
+				if sourceUser.Character.RoomId == mob.Character.RoomId {
+					// Mobs get aggro when attacked
+					if mob.Character.Aggro == nil {
+						mob.PreventIdle = true
 
-						room.SendText(fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> <ansi fg="red">EXPLODES</ansi>!`, itm.DisplayName()))
-
-						hitMobs := true
-						hitPlayers := true
-
-						targetPlayerId, targetMobId := room.FindByName(targetName)
-
-						if targetPlayerId > 0 {
-							hitMobs = false
-						}
-
-						if targetMobId > 0 {
-							hitPlayers = false
-						}
-
-						if hitPlayers {
-							for _, uid := range room.GetPlayers() {
-								for _, buffId := range iSpec.BuffIds {
-									events.AddToQueue(events.Buff{
-										UserId:        uid,
-										MobInstanceId: 0,
-										BuffId:        buffId,
-									})
-								}
-							}
-						}
-
-						if hitMobs {
-							for _, mid := range room.GetMobs() {
-
-								for _, buffId := range iSpec.BuffIds {
-									events.AddToQueue(events.Buff{
-										UserId:        0,
-										MobInstanceId: mid,
-										BuffId:        buffId,
-									})
-								}
-
-								if action.SourceUserId > 0 {
-
-									if sourceUser := users.GetByUserId(action.SourceUserId); sourceUser != nil {
-
-										if mob := mobs.GetInstance(mid); mob != nil {
-											mob.DamageTaken[sourceUser.UserId] = 0 // Take note that the player did damage this mob.
-
-											if sourceUser.Character.RoomId == mob.Character.RoomId {
-												// Mobs get aggro when attacked
-												if mob.Character.Aggro == nil {
-													mob.PreventIdle = true
-
-													mob.Command(fmt.Sprintf("attack @%d", sourceUser.UserId)) // @ means player
-
-												}
-											} else {
-
-												var foundExitName string
-
-												// Look for them nearby and go to them
-												for exitName, exitInfo := range room.Exits {
-													if exitInfo.RoomId == sourceUser.Character.RoomId {
-														foundExitName = exitName
-														break
-													}
-												}
-
-												if foundExitName == `` {
-													// Look for them nearby and go to them
-													for exitName, exitInfo := range room.ExitsTemp {
-														if exitInfo.RoomId == sourceUser.Character.RoomId {
-
-															mob.Command(fmt.Sprintf("go %s", exitName))
-															mob.Command(fmt.Sprintf("attack @%d", sourceUser.UserId)) // @ means player
-
-															break
-														}
-													}
-												}
-
-												if foundExitName != `` {
-
-													mob.Command(fmt.Sprintf("go %s", foundExitName))
-													mob.Command(fmt.Sprintf("attack @%d", sourceUser.UserId)) // @ means player
-
-												}
-											}
-										}
-
-									}
-
-								}
-
-							}
-						}
+						mob.Command(fmt.Sprintf("attack %s", sourceUser.ShorthandId()))
 
 					}
+				} else {
 
+					var foundExitName string
+
+					// Look for them nearby and go to them
+					for exitName, exitInfo := range room.Exits {
+						if exitInfo.RoomId == sourceUser.Character.RoomId {
+							foundExitName = exitName
+							break
+						}
+					}
+
+					if foundExitName == `` {
+						// Look for them nearby and go to them
+						for exitName, exitInfo := range room.ExitsTemp {
+							if exitInfo.RoomId == sourceUser.Character.RoomId {
+
+								mob.Command(fmt.Sprintf("go %s", exitName))
+								mob.Command(fmt.Sprintf("attack %s", sourceUser.ShorthandId()))
+
+								break
+							}
+						}
+					}
+
+					if foundExitName != `` {
+
+						mob.Command(fmt.Sprintf("go %s", foundExitName))
+						mob.Command(fmt.Sprintf("attack %s", sourceUser.ShorthandId()))
+
+					}
 				}
+
 			}
+
 		}
+
 	}
 
 	//

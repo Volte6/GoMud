@@ -2,7 +2,6 @@ package items
 
 import (
 	"fmt"
-	"log/slog"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -20,6 +19,13 @@ import (
 var (
 	ItemDisabledSlot = Item{ItemId: -1}
 	uniqueIdCounter  uint64
+
+	// -short suffix should also be defined in case shorthand symbols are preferred
+	adjectiveSwaps = map[string]string{
+		// Is the item exploding?
+		`exploding`:       `<ansi fg="red">!!!Exploding!!!</ansi>`,
+		`exploding-short`: `<ansi fg="red">!!!/ansi>`,
+	}
 )
 
 // A simple "generator" to uniquely identify items
@@ -38,6 +44,7 @@ type Item struct {
 	Spec          *ItemSpec      `yaml:"overrides,omitempty"`
 	Uncursed      bool           `yaml:"uncursed,omitempty"`     // Is this item uncursed?
 	Enchantments  uint8          `yaml:"enchantments,omitempty"` // Is this item enchanted?
+	Adjectives    []string       `yaml:"adjectives,omitempty"`   // Decorative text for the name of the item (e.g. "exploding")
 	tempDataStore map[string]any // Temporary data store for this item. Not saved to disk.
 }
 
@@ -59,6 +66,39 @@ func New(itemId int) Item {
 
 func (i *Item) GetScript() string {
 	return i.GetSpec().GetScript()
+}
+
+func (i *Item) HasAdjective(adj string) bool {
+	if i.Adjectives == nil {
+		return false
+	}
+
+	for _, a := range i.Adjectives {
+		if a == adj {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (i *Item) SetAdjective(adj string, addToList bool) {
+	if i.Adjectives == nil {
+		i.Adjectives = []string{}
+	}
+	for idx, a := range i.Adjectives {
+		if a == adj {
+			if addToList {
+				return
+			} else {
+				i.Adjectives = append(i.Adjectives[:idx], i.Adjectives[idx+1:]...)
+				return
+			}
+		}
+	}
+	if addToList {
+		i.Adjectives = append(i.Adjectives, adj)
+	}
 }
 
 // performs a break test and returns true if the item breaks
@@ -404,11 +444,27 @@ func (i *Item) DisplayName() string {
 		prefix = `<ansi fg="questflag">★</ansi>`
 	}
 
+	suffix := ``
+	if adjLen := len(i.Adjectives); adjLen > 0 {
+		suffix += ` <ansi fg="black-bold">(`
+		for i, adj := range i.Adjectives {
+			if newAdj, ok := adjectiveSwaps[adj]; ok {
+				suffix += newAdj
+			} else {
+				suffix += adj
+			}
+			if i < adjLen-1 {
+				suffix += `|`
+			}
+		}
+		suffix += `)</ansi>`
+	}
+
 	spec := i.GetSpec()
 	if spec.DisplayName != `` {
-		return prefix + spec.DisplayName
+		return prefix + spec.DisplayName + suffix
 	}
-	return prefix + spec.Name
+	return prefix + spec.Name + suffix
 }
 
 func (i *Item) Name() string {
@@ -545,8 +601,6 @@ func FindMatchIn(itemName string, items ...Item) (pMatch Item, fMatch Item) {
 			}
 
 			for _, itm := range items {
-
-				slog.Debug("ItemSearch", "itemId", itm.ItemId, "uid", itm.uid, "itemIdMatch", itemIdMatch, "itemUidMatch", itemUidMatch)
 
 				// If a uid was included, it takes priority over qualifying/disqualifying
 				if itemUidMatch > 0 {

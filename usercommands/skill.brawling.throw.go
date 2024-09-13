@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/keywords"
@@ -79,8 +80,6 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 				response.AbsorbMessages(scriptResponse)
 			}
 
-			room.AddItem(itemMatch, false)
-
 			// Tell the player they are throwing the item
 			user.SendText(
 				fmt.Sprintf(`You hurl the <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, itemMatch.DisplayName(), targetMob.Character.Name),
@@ -96,14 +95,20 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 			iSpec := itemMatch.GetSpec()
 			if iSpec.Type == items.Grenade {
 
+				itemMatch.SetAdjective(`exploding`, true)
+
 				events.AddToQueue(events.RoomAction{
 					RoomId:       user.Character.RoomId,
 					SourceUserId: user.UserId,
 					SourceMobId:  0,
 					Action:       fmt.Sprintf("detonate #%d %s", targetMob.InstanceId, itemMatch.ShorthandId()),
+					WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
 				})
 
 			}
+
+			room.AddItem(itemMatch, false)
+
 		} else {
 			user.SendText(`You can't do that right now.`)
 		}
@@ -114,8 +119,6 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 		targetUser := users.GetByUserId(targetPlayerId)
 
 		user.Character.RemoveItem(itemMatch)
-
-		room.AddItem(itemMatch, false)
 
 		// Tell the player they are throwing the item
 		user.SendText(
@@ -136,14 +139,19 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 		iSpec := itemMatch.GetSpec()
 		if iSpec.Type == items.Grenade {
 
+			itemMatch.SetAdjective(`exploding`, true)
+
 			events.AddToQueue(events.RoomAction{
 				RoomId:       user.Character.RoomId,
 				SourceUserId: user.UserId,
 				SourceMobId:  0,
 				Action:       fmt.Sprintf("detonate @%d %s", targetUser.UserId, itemMatch.ShorthandId()),
+				WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
 			})
 
 		}
+
+		room.AddItem(itemMatch, false)
 
 		response.Handled = true
 
@@ -183,7 +191,6 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 			}
 
 			user.Character.RemoveItem(itemMatch)
-			throwToRoom.AddItem(itemMatch, false)
 
 			// Tell the player they are throwing the item
 			user.SendText(
@@ -206,14 +213,19 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 			iSpec := itemMatch.GetSpec()
 			if iSpec.Type == items.Grenade {
 
+				itemMatch.SetAdjective(`exploding`, true)
+
 				events.AddToQueue(events.RoomAction{
 					RoomId:       throwToRoom.RoomId,
 					SourceUserId: user.UserId,
 					SourceMobId:  0,
 					Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
+					WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
 				})
 
 			}
+
+			throwToRoom.AddItem(itemMatch, false)
 
 			response.Handled = true
 		}
@@ -254,7 +266,6 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 					}
 
 					user.Character.RemoveItem(itemMatch)
-					throwToRoom.AddItem(itemMatch, false)
 
 					// Tell the player they are throwing the item
 					user.SendText(
@@ -277,14 +288,19 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 					iSpec := itemMatch.GetSpec()
 					if iSpec.Type == items.Grenade {
 
+						itemMatch.SetAdjective(`exploding`, true)
+
 						events.AddToQueue(events.RoomAction{
 							RoomId:       throwToRoom.RoomId,
 							SourceUserId: user.UserId,
 							SourceMobId:  0,
 							Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
+							WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
 						})
 
 					}
+
+					throwToRoom.AddItem(itemMatch, false)
 
 					response.Handled = true
 

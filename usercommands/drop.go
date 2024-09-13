@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
@@ -104,8 +105,6 @@ func Drop(rest string, userId int) (util.MessageQueue, error) {
 		// Swap the item location
 		user.Character.RemoveItem(matchItem)
 
-		room.AddItem(matchItem, false)
-
 		user.SendText(
 			fmt.Sprintf(`You drop the <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),
 		)
@@ -117,14 +116,19 @@ func Drop(rest string, userId int) (util.MessageQueue, error) {
 		// If grenades are dropped, they explode and affect everyone in the room!
 		if iSpec.Type == items.Grenade {
 
+			matchItem.SetAdjective(`exploding`, true)
+
 			events.AddToQueue(events.RoomAction{
 				RoomId:       user.Character.RoomId,
 				SourceUserId: user.UserId,
 				SourceMobId:  0,
 				Action:       fmt.Sprintf("detonate %s", matchItem.ShorthandId()),
+				WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
 			})
 
 		}
+
+		room.AddItem(matchItem, false)
 
 		// Trigger onLost event
 		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId); err == nil {

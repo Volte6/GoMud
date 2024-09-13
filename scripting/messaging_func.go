@@ -1,6 +1,10 @@
 package scripting
 
-import "github.com/volte6/mud/events"
+import (
+	"github.com/volte6/mud/events"
+	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/users"
+)
 
 // ////////////////////////////////////////////////////////
 //
@@ -12,7 +16,13 @@ func SendUserMessage(userId int, message string) {
 	if disableMessageQueue || userId == 0 {
 		return
 	}
-	messageQueue.SendUserMessage(userId, message)
+
+	u := users.GetByUserId(userId)
+	if u == nil {
+		return
+	}
+
+	u.SendText(message)
 }
 
 func SendRoomMessage(roomId int, message string, excludeIds ...int) {
@@ -20,11 +30,26 @@ func SendRoomMessage(roomId int, message string, excludeIds ...int) {
 		return
 	}
 
-	events.AddToQueue(events.Message{
-		RoomId:         roomId,
-		Text:           message,
-		ExcludeUserIds: excludeIds,
-	})
+	r := rooms.LoadRoom(roomId)
+	if r == nil {
+		return
+	}
+
+	r.SendText(message, excludeIds...)
+}
+
+func SendRoomExitsMessage(roomId int, message string, excludeIds ...int) {
+	if disableMessageQueue {
+		return
+	}
+
+	r := rooms.LoadRoom(roomId)
+	if r == nil {
+		return
+	}
+
+	r.SendTextToExits(message, excludeIds...)
+
 }
 
 func SendBroadcast(message string) {

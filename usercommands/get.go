@@ -201,6 +201,12 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText(fmt.Sprintf("You don't see a %s around.", rest))
 		} else {
 
+			if matchItem.HasAdjective(`exploding`) {
+				user.SendText(`You can't pick that up, it's about to explode!`)
+				response.Handled = true
+				return response, nil
+			}
+
 			user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
 
 			if user.Character.StoreItem(matchItem) {

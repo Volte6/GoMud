@@ -237,6 +237,39 @@ func (r *Room) SendText(txt string, excludeUserIds ...int) {
 
 }
 
+func (r *Room) SendTextToExits(txt string, excludeUserIds ...int) {
+
+	testExitIds := []int{}
+	for _, rExit := range r.Exits {
+		testExitIds = append(testExitIds, rExit.RoomId)
+	}
+	for _, tExit := range r.ExitsTemp {
+		testExitIds = append(testExitIds, tExit.RoomId)
+	}
+
+	for _, roomId := range testExitIds {
+
+		tgtRoom := LoadRoom(roomId)
+		if tgtRoom == nil {
+			continue
+		}
+
+		for _, tExit := range tgtRoom.Exits {
+			if tExit.RoomId != r.RoomId {
+				continue
+			}
+
+			events.AddToQueue(events.Message{
+				RoomId:         tgtRoom.RoomId,
+				Text:           txt + "\n",
+				ExcludeUserIds: excludeUserIds,
+			})
+		}
+
+	}
+
+}
+
 func (r *Room) SetLongTermData(key string, value any) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()

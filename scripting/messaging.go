@@ -15,6 +15,7 @@ func setMessagingFunctions(vm *goja.Runtime) {
 	vm.Set(`console`, newConsole(vm))
 	vm.Set(`SendUserMessage`, SendUserMessage)
 	vm.Set(`SendRoomMessage`, SendRoomMessage)
+	vm.Set(`SendRoomExitsMessage`, SendRoomExitsMessage)
 	vm.Set(`SendBroadcast`, SendBroadcast)
 
 }
