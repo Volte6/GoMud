@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Equip(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Equip(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -26,7 +26,7 @@ func Equip(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		for _, item := range itemCopies {
 			iSpec := item.GetSpec()
 			if iSpec.Subtype == items.Wearable || iSpec.Type == items.Weapon {
-				r, _ := Equip(item.Name(), mobId, cmdQueue)
+				r, _ := Equip(item.Name(), mobId)
 				response.AbsorbMessages(r)
 			}
 		}

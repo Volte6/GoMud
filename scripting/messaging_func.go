@@ -1,5 +1,7 @@
 package scripting
 
+import "github.com/volte6/mud/events"
+
 // ////////////////////////////////////////////////////////
 //
 // # These functions get exported to the scripting engine
@@ -22,5 +24,7 @@ func SendRoomMessage(roomId int, message string, excludeIds ...int) {
 }
 
 func SendBroadcast(message string) {
-	commandQueue.Broadcast(message + "\n")
+
+	events.AddToQueue(events.Broadcast{Text: message + "\n"})
+
 }

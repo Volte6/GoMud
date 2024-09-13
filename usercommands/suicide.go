@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Suicide(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Suicide(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -37,10 +37,10 @@ func Suicide(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		for _, itm := range user.Character.GetAllWornItems() {
 			if util.Rand(100) < chanceInt {
 
-				resp, _ := Remove(itm.Name(), userId, cmdQueue)
+				resp, _ := Remove(itm.Name(), userId)
 				response.AbsorbMessages(resp)
 
-				resp, _ = Drop(itm.Name(), userId, cmdQueue)
+				resp, _ = Drop(itm.Name(), userId)
 				response.AbsorbMessages(resp)
 
 			}
@@ -48,19 +48,19 @@ func Suicide(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 	}
 
 	if user.Character.Gold > 0 {
-		resp, _ := Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), userId, cmdQueue)
+		resp, _ := Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), userId)
 		response.AbsorbMessages(resp)
 	}
 
 	if config.OnDeathAlwaysDropBackpack {
-		resp, _ := Drop("all", userId, cmdQueue)
+		resp, _ := Drop("all", userId)
 		response.AbsorbMessages(resp)
 	} else if config.OnDeathEquipmentDropChance >= 0 {
 		chanceInt := int(config.OnDeathEquipmentDropChance * 100)
 		for _, itm := range user.Character.GetAllBackpackItems() {
 			if util.Rand(100) < chanceInt {
 
-				resp, _ := Drop(itm.Name(), userId, cmdQueue)
+				resp, _ := Drop(itm.Name(), userId)
 				response.AbsorbMessages(resp)
 
 			}

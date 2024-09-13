@@ -8,7 +8,6 @@ import (
 var (
 	disableMessageQueue = false
 	messageQueue        util.MessageQueue
-	commandQueue        util.CommandQueue
 )
 
 func setMessagingFunctions(vm *goja.Runtime) {

@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Attack(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -143,7 +143,9 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 						}
 						if partyUser := users.GetByUserId(id); partyUser != nil {
 							if partyUser.Character.RoomId == user.Character.RoomId {
-								cmdQueue.QueueCommand(partyUser.UserId, 0, fmt.Sprintf(`attack #%d`, attackMobInstanceId)) // # denotes a specific mob instanceId
+
+								partyUser.Command(fmt.Sprintf(`attack #%d`, attackMobInstanceId)) // # denotes a specific mob instanceId
+
 							}
 						}
 
@@ -166,7 +168,9 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			for _, instId := range room.GetMobs(rooms.FindCharmed) {
 				if m := mobs.GetInstance(instId); m != nil {
 					if m.Character.Aggro == nil && m.Character.IsCharmed(userId) { // Charmed mobs help the player
-						cmdQueue.QueueCommand(0, instId, fmt.Sprintf(`attack #%d`, attackMobInstanceId)) // # denotes a specific mob instanceId
+
+						m.Command(fmt.Sprintf(`attack #%d`, attackMobInstanceId)) // # denotes a specific mob instanceId
+
 					}
 				}
 			}
@@ -201,7 +205,7 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 						}
 						if partyUser := users.GetByUserId(id); partyUser != nil {
 							if partyUser.Character.RoomId == user.Character.RoomId {
-								cmdQueue.QueueCommand(partyUser.UserId, 0, fmt.Sprintf(`attack @%d`, attackPlayerId)) // # denotes a specific mob instanceId
+								partyUser.Command(fmt.Sprintf(`attack @%d`, attackPlayerId)) // # denotes a specific mob instanceId
 							}
 						}
 					}
@@ -229,7 +233,9 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			for _, instId := range room.GetMobs(rooms.FindCharmed) {
 				if m := mobs.GetInstance(instId); m != nil {
 					if m.Character.Aggro == nil && m.Character.IsCharmed(userId) { // Charmed mobs help the player
-						cmdQueue.QueueCommand(0, instId, fmt.Sprintf(`attack @%d`, attackPlayerId)) // @ denotes a specific user id
+
+						m.Command(fmt.Sprintf(`attack @%d`, attackPlayerId)) // @ denotes a specific user id
+
 					}
 				}
 			}

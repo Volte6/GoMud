@@ -23,7 +23,7 @@ Level 2 - Become proficient in a spell at 125% rate
 Level 3 - Become proficient in a spell at 175% rate
 Level 4 - Become proficient in a spell at 250% rate
 */
-func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Cast(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -229,7 +229,7 @@ func Cast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	if len(spellAggro.TargetUserIds) > 0 || len(spellAggro.TargetMobInstanceIds) > 0 || len(spellAggro.SpellRest) > 0 {
 
 		continueCasting := true
-		if res, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro, cmdQueue); err == nil {
+		if res, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro); err == nil {
 			response.AbsorbMessages(res)
 			continueCasting = res.Handled
 		}

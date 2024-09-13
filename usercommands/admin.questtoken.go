@@ -3,13 +3,14 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func QuestToken(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func QuestToken(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -80,7 +81,10 @@ func QuestToken(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 
 	} else {
 
-		cmdQueue.QueueQuest(userId, args[0])
+		events.AddToQueue(events.Quest{
+			UserId:     userId,
+			QuestToken: args[0],
+		})
 
 	}
 

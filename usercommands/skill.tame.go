@@ -23,7 +23,7 @@ Level 2 - Tame up to 3 creatures
 Level 3 - Tame up to 4 creatures
 Level 4 - Tame up to 5 creatures
 */
-func Tame(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Tame(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -101,7 +101,7 @@ func Tame(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			}
 
 			continueCasting := true
-			if res, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro, cmdQueue); err == nil {
+			if res, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro); err == nil {
 				response.AbsorbMessages(res)
 				continueCasting = res.Handled
 			}

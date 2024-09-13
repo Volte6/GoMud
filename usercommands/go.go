@@ -14,7 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Go(rest string, userId int) (util.MessageQueue, error) {
 	response := NewUserCommandResponse(userId)
 
 	// Load user details
@@ -164,7 +164,7 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 			enterFromExit = fmt.Sprintf(`the <ansi fg="exit">%s</ansi>`, enterFromExit)
 		}
 
-		if scriptResponse, err := scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId, cmdQueue); err == nil {
+		if scriptResponse, err := scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId); err == nil {
 			response.AbsorbMessages(scriptResponse)
 			if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
 				return response, nil
@@ -175,7 +175,7 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 			response.SendUserMessage(userId, "Oops, couldn't move there!", true)
 		} else {
 
-			if scriptResponse, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId, cmdQueue); err == nil {
+			if scriptResponse, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId); err == nil {
 				response.AbsorbMessages(scriptResponse)
 				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
 					rooms.MoveToRoom(user.UserId, originRoomId)
@@ -220,7 +220,7 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 						if partyUser := users.GetByUserId(partyMemberId); partyUser != nil {
 							if partyUser.Character.RoomId == room.RoomId {
 								response.SendUserMessage(partyMemberId, `    You follow the party leader.`, true)
-								cmdQueue.QueueCommand(partyMemberId, 0, rest)
+								partyUser.Command(rest)
 							}
 						}
 					}
@@ -234,7 +234,9 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 					continue
 				}
 				if mob.Character.IsCharmed(userId) { // Charmed mobs follow
-					cmdQueue.QueueCommand(0, instId, rest)
+
+					mob.Command(rest)
+
 				}
 			}
 
@@ -269,7 +271,8 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 						continue
 					}
 
-					cmdQueue.QueueCommand(0, mob.InstanceId, rest)
+					mob.Command(rest)
+
 				}
 
 				//
@@ -302,7 +305,9 @@ func Go(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 					}
 
 					response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> notices you as you enter!`, mob.Character.Name), true)
-					cmdQueue.QueueCommand(0, mob.InstanceId, `lookfortrouble`, 4)
+
+					mob.Command(`lookfortrouble`, 4)
+
 				}
 
 			}

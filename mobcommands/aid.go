@@ -14,7 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Aid(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Aid(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -32,7 +32,9 @@ func Aid(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 
 	raceInfo := races.GetRace(mob.Character.RaceId)
 	if !raceInfo.KnowsFirstAid {
-		cmdQueue.QueueCommand(0, mobId, `emote doesn't know first aid.`)
+
+		mob.Command(`emote doesn't know first aid.`)
+
 		response.Handled = true
 		return response, nil
 	}
@@ -71,7 +73,7 @@ func Aid(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 			}
 
 			continueCasting := true
-			if res, err := scripting.TrySpellScriptEvent(`onCast`, 0, mobId, spellAggro, cmdQueue); err == nil {
+			if res, err := scripting.TrySpellScriptEvent(`onCast`, 0, mobId, spellAggro); err == nil {
 				response.AbsorbMessages(res)
 				continueCasting = res.Handled
 			}

@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Locate(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Locate(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 

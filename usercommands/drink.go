@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Drink(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Drink(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -51,7 +52,13 @@ func Drink(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> drinks <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()), true)
 
 		for _, buffId := range itemSpec.BuffIds {
-			cmdQueue.QueueBuff(user.UserId, 0, buffId)
+
+			events.AddToQueue(events.Buff{
+				UserId:        user.UserId,
+				MobInstanceId: 0,
+				BuffId:        buffId,
+			})
+
 		}
 	}
 

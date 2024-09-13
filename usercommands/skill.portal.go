@@ -21,7 +21,7 @@ Level 2 - Teleport back to the root of the area you are in
 Level 3 - Set a new destination for your portal teleportation
 Level 4 - Create a physical portal that you can share with players, or return through.
 */
-func Portal(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Portal(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -33,7 +33,7 @@ func Portal(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
-		if response, err := Go(`portal`, userId, cmdQueue); response.Handled {
+		if response, err := Go(`portal`, userId); response.Handled {
 			return response, err
 		}
 	}

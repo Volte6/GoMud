@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Say(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Say(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 

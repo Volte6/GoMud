@@ -14,7 +14,7 @@ type SkillsOptions struct {
 	SkillCooldowns map[string]int
 }
 
-func Skills(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Skills(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 

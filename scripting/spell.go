@@ -21,10 +21,9 @@ func PruneSpellVMs(instanceIds ...int) {
 
 }
 
-func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId int, spellAggro characters.SpellAggroInfo, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId int, spellAggro characters.SpellAggroInfo) (util.MessageQueue, error) {
 
 	messageQueue = util.NewMessageQueue(sourceUserId, sourceMobInstanceId)
-	commandQueue = cmdQueue
 
 	spellInfo := spells.GetSpell(spellAggro.SpellId)
 	if spellInfo == nil {

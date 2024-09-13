@@ -3,12 +3,13 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Quit(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Quit(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -30,7 +31,11 @@ func Quit(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		return response, nil
 	}
 
-	cmdQueue.QueueBuff(userId, 0, 0)
+	events.AddToQueue(events.Buff{
+		UserId:        userId,
+		MobInstanceId: 0,
+		BuffId:        0,
+	})
 
 	response.Handled = true
 	return response, nil

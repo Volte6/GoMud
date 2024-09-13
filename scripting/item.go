@@ -21,10 +21,9 @@ func PruneItemVMs(instanceIds ...int) {
 
 }
 
-func TryItemScriptEvent(eventName string, item items.Item, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryItemScriptEvent(eventName string, item items.Item, userId int) (util.MessageQueue, error) {
 
 	messageQueue = util.NewMessageQueue(userId, 0)
-	commandQueue = cmdQueue
 
 	sItem := GetItem(item)
 
@@ -84,10 +83,9 @@ func TryItemScriptEvent(eventName string, item items.Item, userId int, cmdQueue 
 	return messageQueue, nil
 }
 
-func TryItemCommand(cmd string, item items.Item, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryItemCommand(cmd string, item items.Item, userId int) (util.MessageQueue, error) {
 
 	messageQueue = util.NewMessageQueue(userId, 0)
-	commandQueue = cmdQueue
 
 	sItem := GetItem(item)
 

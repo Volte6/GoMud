@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
@@ -11,7 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Use(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Use(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -51,13 +52,19 @@ func Use(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 		// If no more uses, will be lost, so trigger event
 		if usesLeft := user.Character.UseItem(matchItem); usesLeft < 1 {
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId, cmdQueue); err == nil {
+			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId); err == nil {
 				response.AbsorbMessages(scriptResponse)
 			}
 		}
 
 		for _, buffId := range itemSpec.BuffIds {
-			cmdQueue.QueueBuff(user.UserId, 0, buffId)
+
+			events.AddToQueue(events.Buff{
+				UserId:        user.UserId,
+				MobInstanceId: 0,
+				BuffId:        buffId,
+			})
+
 		}
 	}
 

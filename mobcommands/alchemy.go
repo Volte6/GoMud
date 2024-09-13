@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Alchemy(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Alchemy(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -25,7 +25,7 @@ func Alchemy(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 		// select a random item
 		if len(mob.Character.Items) > 0 {
 			matchItem := mob.Character.Items[util.Rand(len(mob.Character.Items))]
-			r, _ := Alchemy(matchItem.Name(), mobId, cmdQueue)
+			r, _ := Alchemy(matchItem.Name(), mobId)
 			response.AbsorbMessages(r)
 		}
 		response.Handled = true
@@ -40,7 +40,7 @@ func Alchemy(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 		}
 
 		for _, item := range iCopies {
-			r, _ := Alchemy(item.Name(), mobId, cmdQueue)
+			r, _ := Alchemy(item.Name(), mobId)
 			response.AbsorbMessages(r)
 		}
 

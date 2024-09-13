@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func LookForAid(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func LookForAid(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -34,7 +34,7 @@ func LookForAid(rest string, mobId int, cmdQueue util.CommandQueue) (util.Messag
 		}
 
 		if mob.Character.IsCharmed(playerId) {
-			cmdQueue.QueueCommand(0, mob.InstanceId, fmt.Sprintf("aid @%d", playerId)) // @ denotes a specific player id
+			mob.Command(fmt.Sprintf("aid @%d", playerId)) // @ denotes a specific player id
 			continue
 		}
 

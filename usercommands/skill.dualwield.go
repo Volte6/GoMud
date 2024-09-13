@@ -16,7 +16,7 @@ Level 2 - Occasionaly you will attack with both weapons in one round.
 Level 3 - You will always attack with both weapons when Dual wielding.
 Level 4 - Dual wielding incurs fewer penalties
 */
-func DualWield(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func DualWield(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -34,6 +34,6 @@ func DualWield(rest string, userId int, cmdQueue util.CommandQueue) (util.Messag
 		return response, errors.New(`you haven't learned how to dual wield`)
 	}
 
-	return Help(`dual-wield`, userId, cmdQueue)
+	return Help(`dual-wield`, userId)
 
 }

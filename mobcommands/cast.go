@@ -14,7 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Cast(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Cast(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -222,7 +222,7 @@ func Cast(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	if len(spellAggro.TargetUserIds) > 0 || len(spellAggro.TargetMobInstanceIds) > 0 || len(spellAggro.SpellRest) > 0 {
 
 		continueCasting := true
-		if res, err := scripting.TrySpellScriptEvent(`onCast`, 0, mobId, spellAggro, cmdQueue); err == nil {
+		if res, err := scripting.TrySpellScriptEvent(`onCast`, 0, mobId, spellAggro); err == nil {
 			response.AbsorbMessages(res)
 			continueCasting = res.Handled
 		}

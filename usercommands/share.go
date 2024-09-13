@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Share(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Share(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -73,12 +73,17 @@ func Share(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		leftOver := giveGoldAmount - split*len(partyMembersInRoom)
 
 		for _, uid := range partyMembersInRoom {
-			cmdQueue.QueueCommand(userId, 0, fmt.Sprintf("give %d gold to @%d", split, uid))
+
+			user.Command(fmt.Sprintf("give %d gold to @%d", split, uid))
+
 		}
 
 		if leftOver > 0 {
+
 			randomMember := partyMembersInRoom[util.Rand(len(partyMembersInRoom))]
-			cmdQueue.QueueCommand(userId, 0, fmt.Sprintf("give %d gold to @%d", leftOver, randomMember))
+
+			user.Command(fmt.Sprintf("give %d gold to @%d", leftOver, randomMember))
+
 		}
 
 	} else {

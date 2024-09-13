@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Restock(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Restock(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 

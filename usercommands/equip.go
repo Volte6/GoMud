@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Equip(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Equip(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -21,12 +21,12 @@ func Equip(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	}
 
 	if rest == "all" {
-		return Gearup(``, userId, cmdQueue)
+		return Gearup(``, userId)
 		itemCopies := append([]items.Item{}, user.Character.Items...)
 		for _, item := range itemCopies {
 			iSpec := item.GetSpec()
 			if iSpec.Subtype == items.Wearable || iSpec.Type == items.Weapon {
-				r, _ := Equip(item.Name(), userId, cmdQueue)
+				r, _ := Equip(item.Name(), userId)
 				response.AbsorbMessages(r)
 			}
 		}
@@ -92,7 +92,7 @@ func Equip(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			if len(matchItem.GetSpec().WornBuffIds) > 0 {
 				for _, buff := range user.Character.Buffs.List {
 					if !buff.OnStartEvent {
-						if scriptResponse, err := scripting.TryBuffScriptEvent(`onStart`, user.UserId, 0, buff.BuffId, cmdQueue); err == nil {
+						if scriptResponse, err := scripting.TryBuffScriptEvent(`onStart`, user.UserId, 0, buff.BuffId); err == nil {
 							response.AbsorbMessages(scriptResponse)
 							user.Character.TrackBuffStarted(buff.BuffId)
 						}

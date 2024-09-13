@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
@@ -14,7 +15,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Give(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -94,7 +95,12 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			iSpec := giveItem.GetSpec()
 			if iSpec.QuestToken != `` {
-				cmdQueue.QueueQuest(targetUser.UserId, iSpec.QuestToken)
+
+				events.AddToQueue(events.Quest{
+					UserId:     targetUser.UserId,
+					QuestToken: iSpec.QuestToken,
+				})
+
 			}
 
 			response.SendUserMessage(userId,
@@ -110,11 +116,11 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				targetUser.UserId)
 
 			// Trigger onLost event
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, giveItem, userId, cmdQueue); err == nil {
+			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, giveItem, userId); err == nil {
 				response.AbsorbMessages(scriptResponse)
 			}
 
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, giveItem, targetUser.UserId, cmdQueue); err == nil {
+			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, giveItem, targetUser.UserId); err == nil {
 				response.AbsorbMessages(scriptResponse)
 			}
 
@@ -192,13 +198,13 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 						true)
 
 					// Trigger onLost event
-					if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, giveItem, userId, cmdQueue); err == nil {
+					if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, giveItem, userId); err == nil {
 						response.AbsorbMessages(scriptResponse)
 					}
 
 				}
 
-				if res, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}, cmdQueue); err == nil {
+				if res, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}); err == nil {
 					response.AbsorbMessages(res)
 					if res.Handled {
 						response.Handled = true
@@ -206,8 +212,9 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					}
 				}
 
-				cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`emote considers the <ansi fg="itemname">%s</ansi> for a moment.`, giveItem.DisplayName()))
-				cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`gearup !%d`, giveItem.ItemId))
+				m.Command(fmt.Sprintf(`emote considers the <ansi fg="itemname">%s</ansi> for a moment.`, giveItem.DisplayName()))
+
+				m.Command(fmt.Sprintf(`gearup !%d`, giveItem.ItemId))
 
 			} else {
 				response.SendUserMessage(userId, "Something went wrong.", true)

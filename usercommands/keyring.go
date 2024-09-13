@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func KeyRing(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func KeyRing(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 

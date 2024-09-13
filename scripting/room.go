@@ -32,10 +32,9 @@ func PruneRoomVMs(roomIds ...int) {
 	}
 }
 
-func TryRoomScriptEvent(eventName string, userId int, roomId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryRoomScriptEvent(eventName string, userId int, roomId int) (util.MessageQueue, error) {
 
 	messageQueue = util.NewMessageQueue(userId, 0)
-	commandQueue = cmdQueue
 
 	vmw, err := getRoomVM(roomId)
 	if err != nil {
@@ -89,10 +88,9 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int, cmdQueue util.
 	return messageQueue, nil
 }
 
-func TryRoomIdleEvent(roomId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryRoomIdleEvent(roomId int) (util.MessageQueue, error) {
 
 	messageQueue = util.NewMessageQueue(0, 0)
-	commandQueue = cmdQueue
 
 	vmw, err := getRoomVM(roomId)
 	if err != nil {
@@ -144,10 +142,9 @@ func TryRoomIdleEvent(roomId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	return messageQueue, nil
 }
 
-func TryRoomCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryRoomCommand(cmd string, rest string, userId int) (util.MessageQueue, error) {
 
 	messageQueue = util.NewMessageQueue(userId, 0)
-	commandQueue = cmdQueue
 
 	user := users.GetByUserId(userId)
 	if user == nil {
@@ -165,7 +162,7 @@ func TryRoomCommand(cmd string, rest string, userId int, cmdQueue util.CommandQu
 			// This would allow buffs to capture commands
 
 			for _, buffInfo := range user.Character.GetBuffs() {
-				if mq, err := TryBuffCommand(cmd, rest, userId, 0, buffInfo.BuffId, cmdQueue); err == nil {
+				if mq, err := TryBuffCommand(cmd, rest, userId, 0, buffInfo.BuffId); err == nil {
 					messageQueue.AbsorbMessages(mq)
 
 					messageQueue.Handled = messageQueue.Handled || mq.Handled
@@ -177,7 +174,7 @@ func TryRoomCommand(cmd string, rest string, userId int, cmdQueue util.CommandQu
 		*/
 
 		for _, mobInstanceId := range room.GetMobs() {
-			if mq, err := TryMobCommand(cmd, rest, mobInstanceId, userId, `user`, cmdQueue); err == nil {
+			if mq, err := TryMobCommand(cmd, rest, mobInstanceId, userId, `user`); err == nil {
 				messageQueue.AbsorbMessages(mq)
 
 				messageQueue.Handled = messageQueue.Handled || mq.Handled

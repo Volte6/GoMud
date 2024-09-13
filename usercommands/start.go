@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Start(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Start(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -52,7 +52,7 @@ func Start(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		if question.Response == `?` {
 
 			question.RejectResponse()
-			return Help(`races`, userId, cmdQueue)
+			return Help(`races`, userId)
 
 		}
 

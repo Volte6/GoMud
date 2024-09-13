@@ -6,6 +6,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
@@ -29,7 +30,7 @@ Level 2 - Display all players and mobs to recently walk through here
 Level 3 - Shows exit information for all tracked players or mobs
 Level 4 - Specify a mob or username and every room you enter will tell you what exit they took.
 */
-func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Track(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -254,7 +255,12 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 				user.Character.SetMiscData("tracking-user", match)
 				user.Character.SetMiscData("tracking-mob", nil)
-				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
+
+				events.AddToQueue(events.Buff{
+					UserId:        user.UserId,
+					MobInstanceId: 0,
+					BuffId:        26, // 26 is the buff for active tracking
+				})
 
 				response.Handled = true
 				return response, nil
@@ -263,7 +269,12 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 				user.Character.SetMiscData("tracking-user", closeMatch)
 				user.Character.SetMiscData("tracking-mob", nil)
-				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
+
+				events.AddToQueue(events.Buff{
+					UserId:        user.UserId,
+					MobInstanceId: 0,
+					BuffId:        26, // 26 is the buff for active tracking
+				})
 
 				response.Handled = true
 				return response, nil
@@ -283,7 +294,12 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 				user.Character.SetMiscData("tracking-user", nil)
 				user.Character.SetMiscData("tracking-mob", match)
-				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
+
+				events.AddToQueue(events.Buff{
+					UserId:        user.UserId,
+					MobInstanceId: 0,
+					BuffId:        26, // 26 is the buff for active tracking
+				})
 
 				response.Handled = true
 				return response, nil
@@ -292,7 +308,12 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 				user.Character.SetMiscData("tracking-user", nil)
 				user.Character.SetMiscData("tracking-mob", closeMatch)
-				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
+
+				events.AddToQueue(events.Buff{
+					UserId:        user.UserId,
+					MobInstanceId: 0,
+					BuffId:        26, // 26 is the buff for active tracking
+				})
 
 				response.Handled = true
 				return response, nil

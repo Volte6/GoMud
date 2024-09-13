@@ -19,7 +19,7 @@ import (
 SkullDuggery Skill
 Level 2 - Backstab
 */
-func Backstab(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Backstab(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 

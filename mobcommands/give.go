@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
@@ -13,7 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Give(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Give(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -84,7 +85,12 @@ func Give(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			iSpec := giveItem.GetSpec()
 			if iSpec.QuestToken != `` {
-				cmdQueue.QueueQuest(targetUser.UserId, iSpec.QuestToken)
+
+				events.AddToQueue(events.Quest{
+					UserId:     targetUser.UserId,
+					QuestToken: iSpec.QuestToken,
+				})
+
 			}
 
 			response.SendUserMessage(targetUser.UserId,

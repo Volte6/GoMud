@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func IBuild(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func IBuild(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -128,7 +128,7 @@ func IBuild(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 	return response, nil
 }
 
-func Build(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Build(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 

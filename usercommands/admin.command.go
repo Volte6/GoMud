@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobcommands"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
@@ -12,7 +13,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Command(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Command(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -54,9 +55,21 @@ func Command(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 	// Use the index for how many turns to defer the extra commands
 	for waitTurns, oneCmd := range strings.Split(cmd, `;`) {
 		if mobId > 0 {
-			cmdQueue.QueueCommand(0, mobId, oneCmd, waitTurns)
+
+			events.AddToQueue(events.Input{
+				MobInstanceId: mobId,
+				InputText:     oneCmd,
+				WaitTurns:     waitTurns,
+			})
+
 		} else if playerId > 0 {
-			cmdQueue.QueueCommand(playerId, 0, oneCmd, waitTurns)
+
+			events.AddToQueue(events.Input{
+				UserId:    playerId,
+				InputText: oneCmd,
+				WaitTurns: waitTurns,
+			})
+
 		}
 	}
 

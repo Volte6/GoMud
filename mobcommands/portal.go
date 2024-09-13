@@ -13,7 +13,7 @@ import (
 
 // Mob portaling is different than player portaling.
 // Mob portals are open for shorter periods, and go to specific locations.
-func Portal(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Portal(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -25,7 +25,7 @@ func Portal(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
-		if response, err := Go(`portal`, mobId, cmdQueue); response.Handled {
+		if response, err := Go(`portal`, mobId); response.Handled {
 			return response, err
 		}
 	}
@@ -59,7 +59,8 @@ func Portal(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 		mostItemRoomId, qty := rooms.GetRoomWithMostItems(bool(config.LootGoblinIncludeRecentRooms), int(config.LootGoblinMinimumItems), int(config.LootGoblinMinimumGold))
 		if portalTargetRoomId == 0 && qty == 0 { // could't find any
 			// No more rooms with items? Our job is done i guess.
-			cmdQueue.QueueCommand(0, mobId, `portal home;drop all`)
+
+			mob.Command(`portal home;drop all`)
 
 			response.Handled = true
 			return response, fmt.Errorf("failed to find temporary exit to room")

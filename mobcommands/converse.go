@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Converse(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Converse(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -60,7 +60,7 @@ func Converse(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQ
 			continue
 		}
 
-		if result, err := scripting.TryMobConverse(rest, roomMobInstId, mobId, cmdQueue); err == nil {
+		if result, err := scripting.TryMobConverse(rest, roomMobInstId, mobId); err == nil {
 			response.AbsorbMessages(result)
 			if result.Handled {
 				response.Handled = true

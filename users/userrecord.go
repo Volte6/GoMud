@@ -12,8 +12,8 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
-	"github.com/volte6/mud/progressbar"
 	"github.com/volte6/mud/prompt"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/util"
@@ -31,6 +31,11 @@ var (
 	promptColorRegex      = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
 	promptFindTagsRegex   = regexp.MustCompile(`\{[a-zA-Z%:\-]+\}`)
 )
+
+type RenderSettings struct {
+	ScreenWidth  uint32
+	ScreenHeight uint32
+}
 
 type UserRecord struct {
 	connectionId   uint64
@@ -50,8 +55,8 @@ type UserRecord struct {
 	lock           sync.RWMutex
 	tempDataStore  map[string]any
 	activePrompt   *prompt.Prompt
-	progress       *progressbar.ProgressBar
-	isZombie       bool // are they a zombie currently?
+	isZombie       bool           // are they a zombie currently?
+	RenderSettings RenderSettings `yaml:"-"`
 }
 
 func NewUserRecord(userId int, connectionId uint64) *UserRecord {
@@ -89,17 +94,19 @@ func (u *UserRecord) ShorthandId() string {
 	return fmt.Sprintf(`@%d`, u.UserId)
 }
 
-func (u *UserRecord) SetProgressBar(pb *progressbar.ProgressBar) {
-	u.progress = pb
-}
+func (u *UserRecord) Command(inputTxt string, waitTurns ...int) {
 
-func (u *UserRecord) GetProgressBar() *progressbar.ProgressBar {
-	return u.progress
-}
+	wt := 0
+	if len(waitTurns) > 0 {
+		wt = waitTurns[0]
+	}
 
-func (u *UserRecord) RemoveProgressBar() {
-	u.progress.OnComplete()
-	u.progress = nil
+	events.AddToQueue(events.Input{
+		UserId:    u.UserId,
+		InputText: inputTxt,
+		WaitTurns: wt,
+	})
+
 }
 
 func (u *UserRecord) SetTempData(key string, value any) {
@@ -184,20 +191,6 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 		if activeQuestion := u.activePrompt.GetNextQuestion(); activeQuestion != nil {
 			promptOut.WriteString(activeQuestion.String())
 		}
-	}
-
-	if u.progress != nil {
-
-		rStyle := u.progress.RenderStyle()
-
-		if rStyle == progressbar.PromptReplace {
-			promptOut.WriteString(u.progress.String())
-		} else if rStyle == progressbar.PromptPrefix {
-			promptPrefix = u.progress.String()
-		} else if rStyle == progressbar.PromptSuffix {
-			promptSuffix = u.progress.String()
-		}
-
 	}
 
 	if promptOut.Len() == 0 {

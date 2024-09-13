@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
@@ -15,7 +16,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Buff(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Buff(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -116,7 +117,12 @@ func Buff(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					if buffSpec := buffs.GetBuffSpec(buffId); buffSpec != nil {
 
 						// Apply the buff
-						cmdQueue.QueueBuff(targetUserId, 0, buffId)
+						events.AddToQueue(events.Buff{
+							UserId:        targetUserId,
+							MobInstanceId: 0,
+							BuffId:        buffId,
+						})
+
 						response.SendUserMessage(userId, fmt.Sprintf("Buff %d (%s) applied to %s.", buffId, buffSpec.Name, targetUser.Character.Name), true)
 
 					} else {
@@ -135,7 +141,11 @@ func Buff(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					if buffSpec := buffs.GetBuffSpec(buffId); buffSpec != nil {
 
 						// Apply the buff
-						cmdQueue.QueueBuff(0, targetMobInstanceId, buffSpec.BuffId)
+						events.AddToQueue(events.Buff{
+							UserId:        0,
+							MobInstanceId: targetMobInstanceId,
+							BuffId:        buffId,
+						})
 
 						response.SendUserMessage(userId, fmt.Sprintf("Buff %d (%s) applied to %s.", buffSpec.BuffId, buffSpec.Name, targetMob.Character.Name), true)
 

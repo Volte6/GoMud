@@ -20,7 +20,7 @@ func PruneBuffVMs(instanceIds ...int) {
 	// Do not prune, they dont' get a VM per buff instance.
 }
 
-func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId int) (util.MessageQueue, error) {
 
 	slog.Info("TryBuffScriptEvent()", "eventName", eventName, "buffId", buffId)
 	vmw, err := getBuffVM(buffId)
@@ -29,7 +29,6 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 	}
 
 	messageQueue = util.NewMessageQueue(0, 0)
-	commandQueue = cmdQueue
 
 	actorInfo := GetActor(userId, mobInstanceId)
 	buffTriggersLeft := actorInfo.characterRecord.Buffs.TriggersLeft(buffId)
@@ -76,7 +75,7 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 	return messageQueue, nil
 }
 
-func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buffId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buffId int) (util.MessageQueue, error) {
 
 	vmw, err := getBuffVM(buffId)
 	if err != nil {
@@ -84,7 +83,6 @@ func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buff
 	}
 
 	messageQueue = util.NewMessageQueue(0, 0)
-	commandQueue = cmdQueue
 
 	sActor := GetActor(userId, mobInstanceId)
 	sRoom := GetRoom(sActor.GetRoomId())

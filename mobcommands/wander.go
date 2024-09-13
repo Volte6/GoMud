@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Wander(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Wander(rest string, mobId int) (util.MessageQueue, error) {
 	response := NewMobCommandResponse(mobId)
 
 	// Load user details
@@ -33,7 +33,8 @@ func Wander(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 	if mob.Character.RoomId != mob.HomeRoomId {
 		if mob.MaxWander > -1 { // -1 means they can wander forever and never go home. 0 means they never wander.
 			if len(mob.RoomStack) > mob.MaxWander {
-				cmdQueue.QueueCommand(0, mobId, `go home`)
+
+				mob.Command(`go home`)
 
 				response.Handled = true
 				return response, nil
@@ -73,7 +74,9 @@ func Wander(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 	if exitName, roomId := room.GetRandomExit(); roomId > 0 {
 		if r := rooms.LoadRoom(roomId); r != nil {
 			if !restrictZone || r.Zone == mob.Character.Zone {
-				cmdQueue.QueueCommand(0, mobId, fmt.Sprintf("go %s", exitName))
+
+				mob.Command(fmt.Sprintf("go %s", exitName))
+
 			}
 		}
 

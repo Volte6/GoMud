@@ -16,7 +16,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func List(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func List(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -55,7 +55,9 @@ func List(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				for itemId, itemQty := range mob.ShopStock {
 					item := items.New(itemId)
 					if item.ItemId < 1 {
-						cmdQueue.QueueCommand(0, mobId, fmt.Sprintf("Please alert an admin that item %d is missing from the database.", itemId))
+
+						mob.Command(fmt.Sprintf("say Please alert an admin that item %d is missing from the database.", itemId))
+
 						continue
 					}
 					rows = append(rows, []string{strconv.Itoa(itemQty),
@@ -114,7 +116,9 @@ func List(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		}
 
 		if !listedSomething {
-			cmdQueue.QueueCommand(0, mob.InstanceId, `say I have nothing to sell right  now, but check again later.`)
+
+			mob.Command(`say I have nothing to sell right  now, but check again later.`)
+
 		}
 
 		response.Handled = true

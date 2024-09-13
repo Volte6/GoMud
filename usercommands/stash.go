@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Stash(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Stash(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -49,7 +49,7 @@ func Stash(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		}
 
 		// Trigger lost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId, cmdQueue); err == nil {
+		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId); err == nil {
 			response.AbsorbMessages(scriptResponse)
 		}
 	}

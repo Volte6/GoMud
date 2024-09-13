@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
@@ -14,7 +15,7 @@ import (
 // or
 // givequest 1-start Say has anyone seen my locket?
 // The second message will only be executed if the quest is successfully given.
-func GiveQuest(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func GiveQuest(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -47,11 +48,21 @@ func GiveQuest(rest string, mobId int, cmdQueue util.CommandQueue) (util.Message
 
 	if targetUser != `` {
 		if uid, _ := room.FindByName(targetUser); uid > 0 {
-			cmdQueue.QueueQuest(uid, questToken)
+
+			events.AddToQueue(events.Quest{
+				UserId:     uid,
+				QuestToken: questToken,
+			})
+
 		}
 	} else {
 		for _, pId := range room.GetPlayers() {
-			cmdQueue.QueueQuest(pId, questToken)
+
+			events.AddToQueue(events.Quest{
+				UserId:     pId,
+				QuestToken: questToken,
+			})
+
 		}
 	}
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
@@ -16,7 +17,7 @@ import (
 Protection Skill
 Level 4 - Pray to gods for a blessing
 */
-func Pray(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Pray(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -83,7 +84,13 @@ func Pray(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		for i := 0; i < totalBuffCount; i++ {
 			randBuffIndex := util.Rand(len(possibleBuffIds))
-			cmdQueue.QueueBuff(prayPlayerId, 0, possibleBuffIds[randBuffIndex])
+
+			events.AddToQueue(events.Buff{
+				UserId:        prayPlayerId,
+				MobInstanceId: 0,
+				BuffId:        possibleBuffIds[randBuffIndex],
+			})
+
 			possibleBuffIds = append(possibleBuffIds[:randBuffIndex], possibleBuffIds[randBuffIndex+1:]...)
 			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> glows for a moment.`, user.Character.Name), true)
 		}
@@ -95,7 +102,13 @@ func Pray(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			for i := 0; i < totalBuffCount; i++ {
 				randBuffIndex := util.Rand(len(possibleBuffIds))
-				cmdQueue.QueueBuff(0, prayMobId, possibleBuffIds[randBuffIndex])
+
+				events.AddToQueue(events.Buff{
+					UserId:        0,
+					MobInstanceId: prayMobId,
+					BuffId:        possibleBuffIds[randBuffIndex],
+				})
+
 				possibleBuffIds = append(possibleBuffIds[:randBuffIndex], possibleBuffIds[randBuffIndex+1:]...)
 				response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> glows for a moment.`, mob.Character.Name), true)
 			}

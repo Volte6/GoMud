@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Offer(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Offer(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -49,18 +49,22 @@ func Offer(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
 
 		if item.IsSpecial() {
-			cmdQueue.QueueCommand(0, mobId, "say I'm afraid I don't buy those.")
+
+			mob.Command(`say I'm afraid I don't buy those.`)
+
 			continue
 		}
 
 		sellValue := mob.GetSellPrice(item)
 
 		if sellValue <= 0 {
-			cmdQueue.QueueCommand(0, mobId, "say I'm not interested in that.")
+
+			mob.Command(`say I'm not interested in that.`)
+
 			continue
 		}
 
-		cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`say I can give you <ansi fg="gold">%d gold</ansi> for that <ansi fg="itemname">%s</ansi>.`, sellValue, item.DisplayName()))
+		mob.Command(fmt.Sprintf(`say I can give you <ansi fg="gold">%d gold</ansi> for that <ansi fg="itemname">%s</ansi>.`, sellValue, item.DisplayName()))
 
 		break
 	}

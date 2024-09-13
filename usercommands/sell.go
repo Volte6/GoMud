@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Sell(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Sell(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -56,19 +56,25 @@ func Sell(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
 
 		if item.IsSpecial() {
-			cmdQueue.QueueCommand(0, mobId, "say I'm afraid I don't buy those.")
+
+			mob.Command(`say I'm afraid I don't buy those.`)
+
 			continue
 		}
 
 		sellValue := mob.GetSellPrice(item)
 
 		if sellValue <= 0 {
-			cmdQueue.QueueCommand(0, mobId, "say I'm not interested in that.")
+
+			mob.Command(`say I'm not interested in that.`)
+
 			continue
 		}
 
 		if sellValue > mob.Character.Gold {
-			cmdQueue.QueueCommand(0, mobId, "say I'm low on funds right now. Maybe later.")
+
+			mob.Command(`say I'm low on funds right now. Maybe later.`)
+
 			continue
 		}
 
@@ -90,7 +96,7 @@ func Sell(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			true)
 
 		// Trigger lost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, item, userId, cmdQueue); err == nil {
+		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, item, userId); err == nil {
 			response.AbsorbMessages(scriptResponse)
 		}
 

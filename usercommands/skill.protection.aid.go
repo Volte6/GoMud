@@ -18,7 +18,7 @@ Protection Skill
 Level 1 - Aid (revive) a player
 Level 3 - Aid (revive) a player, even during combat
 */
-func Aid(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Aid(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -81,7 +81,7 @@ func Aid(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			}
 
 			continueCasting := true
-			if res, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro, cmdQueue); err == nil {
+			if res, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro); err == nil {
 				response.AbsorbMessages(res)
 				continueCasting = res.Handled
 			}

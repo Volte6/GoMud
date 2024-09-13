@@ -14,7 +14,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Ask(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -65,12 +65,11 @@ func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			}
 			if mob.Character.IsCharmed(userId) {
 
-				cmdQueue.QueueCommand(0, mId, fmt.Sprintf(`say I can do a few useful things, such as %s`,
-					fmt.Sprintf(`<ansi fg="command">%s</ansi>`, strings.Join(usefulCommands, `</ansi>, <ansi fg="command">`)),
-				))
-				cmdQueue.QueueCommand(0, mId, fmt.Sprintf(`say I can do some other stuff, like %s`,
-					fmt.Sprintf(`<ansi fg="command">%s</ansi>`, strings.Join(allowedCommands, `</ansi>, <ansi fg="command">`)),
-				))
+				mob.Command(fmt.Sprintf(`say I can do a few useful things, such as %s`,
+					fmt.Sprintf(`<ansi fg="command">%s</ansi>`, strings.Join(usefulCommands, `</ansi>, <ansi fg="command">`))))
+
+				mob.Command(fmt.Sprintf(`say I can do some other stuff, like %s`,
+					fmt.Sprintf(`<ansi fg="command">%s</ansi>`, strings.Join(allowedCommands, `</ansi>, <ansi fg="command">`))))
 
 				response.Handled = true
 				return response, nil
@@ -123,8 +122,10 @@ func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			if mobCmd == `attack` {
 				if pid, _ := room.FindByName(askRest); pid > 0 {
 					if !configs.GetConfig().PVPEnabled {
-						cmdQueue.QueueCommand(0, mobId, `emote shakes their head.`)
-						cmdQueue.QueueCommand(0, mobId, `say PVP is currently disabled.`)
+
+						mob.Command(`emote shakes their head.`)
+						mob.Command(`say PVP is currently disabled.`)
+
 						response.Handled = true
 						return response, nil
 					}
@@ -134,7 +135,8 @@ func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			// Check if actual command is allowed
 			for _, allowedCmd := range allowedCommands {
 				if mobCmd == allowedCmd {
-					cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`%s %s`, mobCmd, askRest))
+
+					mob.Command(fmt.Sprintf(`%s %s`, mobCmd, askRest))
 
 					response.Handled = true
 					return response, nil
@@ -143,10 +145,12 @@ func Ask(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		}
 
 		rest = strings.Join(args, ` `)
-		if res, err := scripting.TryMobScriptEvent(`onAsk`, mobId, userId, `user`, map[string]any{"askText": rest}, cmdQueue); err == nil {
+		if res, err := scripting.TryMobScriptEvent(`onAsk`, mobId, userId, `user`, map[string]any{"askText": rest}); err == nil {
 			response.AbsorbMessages(res)
 			if !res.Handled {
-				cmdQueue.QueueCommand(0, mobId, `emote shakes their head.`)
+
+				mob.Command(`emote shakes their head.`)
+
 			}
 		}
 

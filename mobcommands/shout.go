@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Shout(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Shout(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 

@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Gearup(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Gearup(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -60,7 +60,7 @@ func Gearup(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 	}
 
 	for _, itm := range wearNewItems {
-		cmdQueue.QueueCommand(userId, 0, fmt.Sprintf(`wear !%d`, itm.ItemId))
+		user.Command(fmt.Sprintf(`wear !%d`, itm.ItemId), -1)
 	}
 
 	response.Handled = true

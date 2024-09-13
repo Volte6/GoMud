@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
@@ -19,7 +20,7 @@ import (
 Brawling Skill
 Level 2 - You can throw objects at NPCs or other rooms.
 */
-func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Throw(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -74,7 +75,7 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		if user.Character.RemoveItem(itemMatch) {
 
 			// Trigger onLost event
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itemMatch, userId, cmdQueue); err == nil {
+			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itemMatch, userId); err == nil {
 				response.AbsorbMessages(scriptResponse)
 			}
 
@@ -93,7 +94,14 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			// If grenades are dropped, they explode and affect everyone in the room!
 			iSpec := itemMatch.GetSpec()
 			if iSpec.Type == items.Grenade {
-				cmdQueue.QueueRoomAction(user.Character.RoomId, user.UserId, 0, fmt.Sprintf("detonate #%d !%d", targetMob.InstanceId, itemMatch.ItemId))
+
+				events.AddToQueue(events.RoomAction{
+					RoomId:       user.Character.RoomId,
+					SourceUserId: user.UserId,
+					SourceMobId:  0,
+					Action:       fmt.Sprintf("detonate #%d !%d", targetMob.InstanceId, itemMatch.ItemId),
+				})
+
 			}
 		} else {
 			response.SendUserMessage(userId, `You can't do that right now.`, true)
@@ -126,7 +134,14 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		// If grenades are dropped, they explode and affect everyone in the room!
 		iSpec := itemMatch.GetSpec()
 		if iSpec.Type == items.Grenade {
-			cmdQueue.QueueRoomAction(user.Character.RoomId, user.UserId, 0, fmt.Sprintf("detonate @%d !%d", targetUser.UserId, itemMatch.ItemId))
+
+			events.AddToQueue(events.RoomAction{
+				RoomId:       user.Character.RoomId,
+				SourceUserId: user.UserId,
+				SourceMobId:  0,
+				Action:       fmt.Sprintf("detonate @%d !%d", targetUser.UserId, itemMatch.ItemId),
+			})
+
 		}
 
 		response.Handled = true
@@ -187,7 +202,14 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			// If grenades are dropped, they explode and affect everyone in the room!
 			iSpec := itemMatch.GetSpec()
 			if iSpec.Type == items.Grenade {
-				cmdQueue.QueueRoomAction(throwToRoom.RoomId, user.UserId, 0, fmt.Sprintf("detonate !%d", itemMatch.ItemId))
+
+				events.AddToQueue(events.RoomAction{
+					RoomId:       throwToRoom.RoomId,
+					SourceUserId: user.UserId,
+					SourceMobId:  0,
+					Action:       fmt.Sprintf("detonate !%d", itemMatch.ItemId),
+				})
+
 			}
 
 			response.Handled = true
@@ -249,7 +271,14 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 					// If grenades are dropped, they explode and affect everyone in the room!
 					iSpec := itemMatch.GetSpec()
 					if iSpec.Type == items.Grenade {
-						cmdQueue.QueueRoomAction(throwToRoom.RoomId, user.UserId, 0, fmt.Sprintf("detonate !%d", itemMatch.ItemId))
+
+						events.AddToQueue(events.RoomAction{
+							RoomId:       throwToRoom.RoomId,
+							SourceUserId: user.UserId,
+							SourceMobId:  0,
+							Action:       fmt.Sprintf("detonate !%d", itemMatch.ItemId),
+						})
+
 					}
 
 					response.Handled = true

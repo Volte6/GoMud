@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Get(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Get(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -36,7 +36,7 @@ func Get(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 
 	if args[0] == "all" {
 		if room.Gold > 0 {
-			r, _ := Get("gold", mobId, cmdQueue)
+			r, _ := Get("gold", mobId)
 			response.AbsorbMessages(r)
 		}
 
@@ -47,7 +47,7 @@ func Get(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 			}
 
 			for _, item := range iCopies {
-				r, _ := Get(item.Name(), mobId, cmdQueue)
+				r, _ := Get(item.Name(), mobId)
 				response.AbsorbMessages(r)
 			}
 		}

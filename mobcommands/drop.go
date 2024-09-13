@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Drop(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Drop(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -34,7 +34,7 @@ func Drop(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		iCopies := []items.Item{}
 
 		if mob.Character.Gold > 0 {
-			r, _ := Drop(fmt.Sprintf("%d gold", mob.Character.Gold), mobId, cmdQueue)
+			r, _ := Drop(fmt.Sprintf("%d gold", mob.Character.Gold), mobId)
 			response.AbsorbMessages(r)
 		}
 
@@ -43,7 +43,7 @@ func Drop(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		}
 
 		for _, item := range iCopies {
-			r, _ := Drop(item.Name(), mobId, cmdQueue)
+			r, _ := Drop(item.Name(), mobId)
 			response.AbsorbMessages(r)
 		}
 

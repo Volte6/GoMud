@@ -23,6 +23,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/inputhandlers"
 	"github.com/volte6/mud/items"
@@ -175,7 +176,10 @@ func main() {
 	if err != nil {
 		slog.Error("Template Error", "error", err)
 	}
-	worldManager.GetConnectionPool().Broadcast([]byte(tplTxt))
+
+	events.AddToQueue(events.Broadcast{
+		Text: tplTxt,
+	})
 
 	serverAlive.Store(false) // immediately stop processing incoming connections
 

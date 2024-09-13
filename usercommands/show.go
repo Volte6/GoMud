@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Show(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Show(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -113,7 +113,7 @@ func Show(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					true)
 
 				// Do trigger of onShow
-				if res, err := scripting.TryMobScriptEvent(`onShow`, targetMob.InstanceId, userId, `user`, map[string]any{`gold`: 0, `item`: showItem}, cmdQueue); err == nil {
+				if res, err := scripting.TryMobScriptEvent(`onShow`, targetMob.InstanceId, userId, `user`, map[string]any{`gold`: 0, `item`: showItem}); err == nil {
 					response.AbsorbMessages(res)
 				}
 

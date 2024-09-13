@@ -11,12 +11,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Hire(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
 	if rest == "" {
-		return List(rest, userId, cmdQueue)
+		return List(rest, userId)
 	}
 
 	// Load user details
@@ -63,7 +63,9 @@ func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			if len(mercNames) > 0 {
 				extraSay = fmt.Sprintf(` Any interest in a <ansi fg="itemname">%s</ansi>?`, mercNames[util.Rand(len(mercNames))])
 			}
-			cmdQueue.QueueCommand(0, mobId, "say Sorry, I don't have that for hire right now."+extraSay)
+
+			mob.Command(`say Sorry, I don't have that for hire right now.` + extraSay)
+
 			response.Handled = true
 			return response, nil
 		}
@@ -78,7 +80,9 @@ func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			}
 
 			if user.Character.Gold < hireInfo.Price {
-				cmdQueue.QueueCommand(0, mobId, "say You don't have enough gold.")
+
+				mob.Command(`say You don't have enough gold.`)
+
 				response.Handled = true
 				return response, nil
 			}
@@ -108,7 +112,7 @@ func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, hireInfo.Price, mob.Character.Name),
 				true)
 
-			cmdQueue.QueueCommand(0, newMob.InstanceId, `emote is ready to serve.`)
+			newMob.Command(`emote is ready to serve.`)
 
 			break
 

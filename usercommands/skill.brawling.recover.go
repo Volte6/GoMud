@@ -3,6 +3,7 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -12,7 +13,7 @@ import (
 Brawling Skill
 Level 1 - Enter a state of rest where health is recovered more quickly
 */
-func Recover(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Recover(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -43,13 +44,18 @@ func Recover(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		return response, nil
 	}
 
+	applyBuffId := 23
 	if skillLevel >= 3 {
-		cmdQueue.QueueBuff(userId, 0, 25)
+		applyBuffId = 25
 	} else if skillLevel >= 2 {
-		cmdQueue.QueueBuff(userId, 0, 24)
-	} else {
-		cmdQueue.QueueBuff(userId, 0, 23)
+		applyBuffId = 24
 	}
+
+	events.AddToQueue(events.Buff{
+		UserId:        userId,
+		MobInstanceId: 0,
+		BuffId:        applyBuffId,
+	})
 
 	response.Handled = true
 	return response, nil

@@ -3,6 +3,7 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
@@ -10,12 +11,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Buy(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Buy(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
 	if rest == "" {
-		return List(rest, userId, cmdQueue)
+		return List(rest, userId)
 	}
 
 	// Load user details
@@ -55,7 +56,9 @@ func Buy(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			if len(itemNames) > 0 {
 				extraSay = fmt.Sprintf(` Any interest in a <ansi fg="itemname">%s</ansi>?`, itemNames[util.Rand(len(itemNames))])
 			}
-			cmdQueue.QueueCommand(0, mobId, "say Sorry, I don't have that item right now."+extraSay)
+
+			mob.Command(`say Sorry, I don't have that item right now.` + extraSay)
+
 			response.Handled = true
 			return response, nil
 		}
@@ -70,7 +73,9 @@ func Buy(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			}
 
 			if user.Character.Gold < item.GetSpec().Value {
-				cmdQueue.QueueCommand(0, mobId, "say You don't have enough gold for that.")
+
+				mob.Command(`say You don't have enough gold for that.`)
+
 				response.Handled = true
 				return response, nil
 			}
@@ -88,7 +93,12 @@ func Buy(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			iSpec := newItm.GetSpec()
 			if iSpec.QuestToken != `` {
-				cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+
+				events.AddToQueue(events.Quest{
+					UserId:     user.UserId,
+					QuestToken: iSpec.QuestToken,
+				})
+
 			}
 
 			response.SendUserMessage(user.UserId,

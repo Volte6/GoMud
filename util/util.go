@@ -20,8 +20,6 @@ import (
 
 	"crypto/md5"
 
-	"github.com/volte6/mud/connection"
-	"github.com/volte6/mud/progressbar"
 	"github.com/volte6/mud/term"
 )
 
@@ -52,17 +50,10 @@ var (
 	colorShortTagRegex = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
 )
 
-const ()
-
+/*
 type CommandQueue interface {
-	QueueCommand(userId int, mobId int, cmd string, waitTurns ...int)
-	QueueBuff(userId int, mobId int, buffId int)
-	QueueQuest(userId int, questToken string)
-	QueueRoomAction(roomId int, sourceUserId int, sourceMobId int, action string)
-	Broadcast(msg string, skipLineRefresh ...bool)
-	GetSettings(userId int) (connection.ClientSettings, error)
-	StartProgressBar(userId int, name string, turnLength int, onCompleteFunc func(), displayFlags ...progressbar.BarDisplay)
 }
+*/
 
 func SetServerAddress(addr string) {
 	serverAddr = addr

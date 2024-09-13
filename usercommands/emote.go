@@ -92,7 +92,7 @@ var (
 	}
 )
 
-func Emote(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Emote(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 

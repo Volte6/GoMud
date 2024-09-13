@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Gearup(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Gearup(rest string, mobId int) (util.MessageQueue, error) {
 	response := NewMobCommandResponse(mobId)
 
 	// Load user details
@@ -34,8 +34,10 @@ func Gearup(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 			for _, itm := range mob.Character.Equipment.GetAllItems() {
 				itmSpec := itm.GetSpec()
 				if itmSpec.Type == matchSpec.Type && matchSpec.Value > itmSpec.Value {
-					cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`wear !%d`, matchItem.ItemId))
-					cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`drop !%d`, itm.ItemId))
+
+					mob.Command(fmt.Sprintf(`wear !%d`, matchItem.ItemId))
+					mob.Command(fmt.Sprintf(`drop !%d`, itm.ItemId))
+
 				}
 			}
 
@@ -78,11 +80,15 @@ func Gearup(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 		isCharmed := mob.Character.IsCharmed()
 		for _, itm := range wearNewItems {
-			cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`wear !%d`, itm.ItemId))
+
+			mob.Command(fmt.Sprintf(`wear !%d`, itm.ItemId))
+
 			// drop the old one
 			if isCharmed {
 				if oldItm, ok := wornItems[itm.GetSpec().Type]; ok {
-					cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`drop !%d`, oldItm.ItemId))
+
+					mob.Command(fmt.Sprintf(`drop !%d`, oldItm.ItemId))
+
 				}
 			}
 		}

@@ -14,7 +14,7 @@ import (
 Protection Skill
 Level 2 - Front/Backrank
 */
-func Rank(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Rank(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 

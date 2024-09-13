@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/util"
 )
 
-func Sneak(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Sneak(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -25,7 +26,11 @@ func Sneak(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		return response, nil
 	}
 
-	cmdQueue.QueueBuff(0, mobId, 9) // Buff 9 is sneak
+	events.AddToQueue(events.Buff{
+		UserId:        0,
+		MobInstanceId: mobId,
+		BuffId:        9, // Buff 9 is sneak
+	})
 
 	response.Handled = true
 	return response, nil

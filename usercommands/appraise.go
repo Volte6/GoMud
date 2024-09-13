@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Appraise(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Appraise(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -35,7 +35,9 @@ func Appraise(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 		}
 
 		if rest == "" {
-			cmdQueue.QueueCommand(0, mobId, "say I will appraise items for 20 gold.")
+
+			mob.Command(`say I will appraise items for 20 gold.`)
+
 			response.Handled = true
 			return response, nil
 		}
@@ -68,7 +70,9 @@ func Appraise(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 		appraisePrice := 20
 
 		if appraisePrice > user.Character.Gold {
-			cmdQueue.QueueCommand(0, mobId, fmt.Sprintf("say That costs %d gold to appraise, which you don't seem to have.", appraisePrice))
+
+			mob.Command(fmt.Sprintf("say That costs %d gold to appraise, which you don't seem to have.", appraisePrice))
+
 			response.Handled = true
 			return response, nil
 		}

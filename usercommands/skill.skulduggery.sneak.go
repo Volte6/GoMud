@@ -4,8 +4,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/progressbar"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
@@ -16,7 +15,7 @@ import (
 SkullDuggery Skill
 Level 1 - Sneak
 */
-func Sneak(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Sneak(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -53,11 +52,11 @@ func Sneak(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		return response, nil
 	}
 
-	// Testing for now
-	timeToWait := configs.GetConfig().TurnsPerRound() * 2
-	cmdQueue.StartProgressBar(userId, "<ansi fg=\"black\" bold=\"true\">(Sneaking)</ansi>", timeToWait, func() {
-		cmdQueue.QueueBuff(userId, 0, 9) // Buff 9 is sneak
-	}, progressbar.PromptNoBar, progressbar.PromptPrefix, progressbar.PromptTypingInterrupts)
+	events.AddToQueue(events.Buff{
+		UserId:        userId,
+		MobInstanceId: 0,
+		BuffId:        9,
+	})
 
 	response.Handled = true
 	return response, nil

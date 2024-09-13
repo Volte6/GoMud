@@ -10,7 +10,7 @@ import (
 )
 
 // Signature of user command
-type MobCommand func(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error)
+type MobCommand func(rest string, mobId int) (util.MessageQueue, error)
 
 type CommandAccess struct {
 	Func              MobCommand
@@ -71,7 +71,7 @@ func GetAllMobCommands() []string {
 	return result
 }
 
-func TryCommand(cmd string, rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryCommand(cmd string, rest string, mobId int) (util.MessageQueue, error) {
 
 	cmd = strings.ToLower(cmd)
 	rest = strings.TrimSpace(rest)
@@ -105,7 +105,7 @@ func TryCommand(cmd string, rest string, mobId int, cmdQueue util.CommandQueue) 
 			util.TrackTime(`mob-cmd[`+cmd+`]`, time.Since(start).Seconds())
 		}()
 
-		response, err := cmdInfo.Func(rest, mobId, cmdQueue)
+		response, err := cmdInfo.Func(rest, mobId)
 		return response, err
 
 	}
@@ -116,7 +116,7 @@ func TryCommand(cmd string, rest string, mobId int, cmdQueue util.CommandQueue) 
 			util.TrackTime(`mob-cmd[go]`, time.Since(start).Seconds())
 		}()
 
-		if response, err := Go(cmd, mobId, cmdQueue); err != nil {
+		if response, err := Go(cmd, mobId); err != nil {
 			return response, err
 		} else if response.Handled {
 			return response, err
@@ -124,7 +124,7 @@ func TryCommand(cmd string, rest string, mobId int, cmdQueue util.CommandQueue) 
 
 	}
 	if emoteText, ok := emoteAliases[cmd]; ok {
-		response, err := Emote(emoteText, mobId, cmdQueue)
+		response, err := Emote(emoteText, mobId)
 		return response, err
 	}
 

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
@@ -13,7 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Drop(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Drop(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -43,14 +44,14 @@ func Drop(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		iCopies := []items.Item{}
 
 		if user.Character.Gold > 0 {
-			r, _ := Drop(fmt.Sprintf("%d gold", user.Character.Gold), userId, cmdQueue)
+			r, _ := Drop(fmt.Sprintf("%d gold", user.Character.Gold), userId)
 			response.AbsorbMessages(r)
 		}
 
 		iCopies = append(iCopies, user.Character.Items...)
 
 		for _, item := range iCopies {
-			r, _ := Drop(item.Name(), userId, cmdQueue)
+			r, _ := Drop(item.Name(), userId)
 			response.AbsorbMessages(r)
 		}
 
@@ -113,11 +114,18 @@ func Drop(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		// If grenades are dropped, they explode and affect everyone in the room!
 		if iSpec.Type == items.Grenade {
-			cmdQueue.QueueRoomAction(user.Character.RoomId, user.UserId, 0, fmt.Sprintf("detonate !%d", matchItem.ItemId))
+
+			events.AddToQueue(events.RoomAction{
+				RoomId:       user.Character.RoomId,
+				SourceUserId: user.UserId,
+				SourceMobId:  0,
+				Action:       fmt.Sprintf("detonate !%d", matchItem.ItemId),
+			})
+
 		}
 
 		// Trigger onLost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId, cmdQueue); err == nil {
+		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId); err == nil {
 			response.AbsorbMessages(scriptResponse)
 		}
 	}

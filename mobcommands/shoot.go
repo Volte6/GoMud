@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Shoot(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Shoot(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 

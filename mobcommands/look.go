@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Look(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Look(rest string, mobId int) (util.MessageQueue, error) {
 	response := NewMobCommandResponse(mobId)
 
 	secretLook := false

@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
 )
 
-func Eat(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Eat(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -42,7 +43,13 @@ func Eat(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> eats some <ansi fg="itemname">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()), true)
 
 		for _, buffId := range itemSpec.BuffIds {
-			cmdQueue.QueueBuff(0, mob.InstanceId, buffId)
+
+			events.AddToQueue(events.Buff{
+				UserId:        0,
+				MobInstanceId: mob.InstanceId,
+				BuffId:        buffId,
+			})
+
 		}
 	}
 

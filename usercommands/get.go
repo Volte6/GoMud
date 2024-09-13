@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
@@ -12,7 +13,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Get(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -38,7 +39,7 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 	if args[0] == "all" {
 		if room.Gold > 0 {
-			r, _ := Get(`gold`, userId, cmdQueue)
+			r, _ := Get(`gold`, userId)
 			response.AbsorbMessages(r)
 		}
 
@@ -46,7 +47,7 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			iCopies := append([]items.Item{}, room.Items...)
 
 			for _, item := range iCopies {
-				r, _ := Get(item.Name(), userId, cmdQueue)
+				r, _ := Get(item.Name(), userId)
 				response.AbsorbMessages(r)
 			}
 		}
@@ -136,7 +137,12 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 				iSpec := matchItem.GetSpec()
 				if iSpec.QuestToken != `` {
-					cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+
+					events.AddToQueue(events.Quest{
+						UserId:     user.UserId,
+						QuestToken: iSpec.QuestToken,
+					})
+
 				}
 
 				response.SendUserMessage(userId,
@@ -146,7 +152,7 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>...`, user.Character.Name, matchItem.DisplayName(), containerName),
 					true)
 
-				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId, cmdQueue); err == nil {
+				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId); err == nil {
 					response.AbsorbMessages(scriptResponse)
 				}
 
@@ -201,7 +207,12 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 				iSpec := matchItem.GetSpec()
 				if iSpec.QuestToken != `` {
-					cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+
+					events.AddToQueue(events.Quest{
+						UserId:     user.UserId,
+						QuestToken: iSpec.QuestToken,
+					})
+
 				}
 
 				response.SendUserMessage(userId,
@@ -211,7 +222,7 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
 					true)
 
-				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId, cmdQueue); err == nil {
+				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId); err == nil {
 					response.AbsorbMessages(scriptResponse)
 				}
 

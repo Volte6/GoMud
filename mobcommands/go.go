@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Go(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Go(rest string, mobId int) (util.MessageQueue, error) {
 	response := NewMobCommandResponse(mobId)
 
 	// Load user details
@@ -56,7 +56,9 @@ func Go(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, 
 					goRoomId = mob.HomeRoomId
 					exitName = `mysterious`
 				} else {
-					cmdQueue.QueueCommand(0, mobId, `say I'm lost`)
+
+					mob.Command(`say I'm lost.`)
+
 					response.Handled = true
 					return response, nil
 				}
@@ -80,7 +82,7 @@ func Go(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, 
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
 
-			cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`emote tries to go the <ansi fg="exit">%s</ansi> exit, but it's locked.`, exitName))
+			mob.Command(fmt.Sprintf(`emote tries to go the <ansi fg="exit">%s</ansi> exit, but it's locked.`, exitName))
 
 			response.Handled = true
 			return response, nil

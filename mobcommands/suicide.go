@@ -14,7 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Suicide(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -90,7 +90,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 		for uId, _ := range mob.DamageTaken {
 			if user := users.GetByUserId(uId); user != nil {
 
-				if res, err := scripting.TryMobScriptEvent(`onDie`, mob.InstanceId, uId, `user`, map[string]any{`attackerCount`: attackerCt}, cmdQueue); err == nil {
+				if res, err := scripting.TryMobScriptEvent(`onDie`, mob.InstanceId, uId, `user`, map[string]any{`attackerCount`: attackerCt}); err == nil {
 					response.AbsorbMessages(res)
 				}
 

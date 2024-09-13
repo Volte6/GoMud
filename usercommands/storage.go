@@ -14,7 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Storage(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -82,7 +82,7 @@ func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		if itemName == `all` {
 
 			for _, itm := range user.Character.GetAllBackpackItems() {
-				r, _ := Storage(fmt.Sprintf(`add !%d`, itm.ItemId), userId, cmdQueue)
+				r, _ := Storage(fmt.Sprintf(`add !%d`, itm.ItemId), userId)
 				response.AbsorbMessages(r)
 				spaceLeft--
 				if spaceLeft < 0 {
@@ -108,7 +108,7 @@ func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		response.SendUserMessage(userId, fmt.Sprintf(`You placed the <ansi fg="itemname">%s</ansi> into storage.`, itm.DisplayName()), true)
 
 		// Trigger lost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itm, userId, cmdQueue); err == nil {
+		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itm, userId); err == nil {
 			response.AbsorbMessages(scriptResponse)
 		}
 
@@ -117,7 +117,7 @@ func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		if itemName == `all` {
 
 			for _, itm := range user.ItemStorage.GetItems() {
-				r, _ := Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), userId, cmdQueue)
+				r, _ := Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), userId)
 				response.AbsorbMessages(r)
 			}
 
@@ -155,7 +155,7 @@ func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 
 			response.SendUserMessage(userId, fmt.Sprintf(`You removed the <ansi fg="itemname">%s</ansi> from storage.`, itm.DisplayName()), true)
 
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, itm, userId, cmdQueue); err == nil {
+			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, itm, userId); err == nil {
 				response.AbsorbMessages(scriptResponse)
 			}
 

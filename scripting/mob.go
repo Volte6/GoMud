@@ -19,10 +19,9 @@ func PruneMobVMs(instanceIds ...int) {
 
 }
 
-func TryMobConverse(rest string, mobInstanceId int, sourceMobInstanceId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryMobConverse(rest string, mobInstanceId int, sourceMobInstanceId int) (util.MessageQueue, error) {
 
 	messageQueue = util.NewMessageQueue(0, mobInstanceId)
-	commandQueue = cmdQueue
 
 	sMob := GetActor(0, mobInstanceId)
 	if sMob == nil {
@@ -85,10 +84,9 @@ func TryMobConverse(rest string, mobInstanceId int, sourceMobInstanceId int, cmd
 	return messageQueue, nil
 }
 
-func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, sourceType string, details map[string]any, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, sourceType string, details map[string]any) (util.MessageQueue, error) {
 
 	messageQueue = util.NewMessageQueue(0, mobInstanceId)
-	commandQueue = cmdQueue
 
 	sMob := GetActor(0, mobInstanceId)
 	if sMob == nil {
@@ -152,10 +150,9 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, source
 	return messageQueue, nil
 }
 
-func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sourceType string, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sourceType string) (util.MessageQueue, error) {
 
 	messageQueue = util.NewMessageQueue(0, mobInstanceId)
-	commandQueue = cmdQueue
 
 	sMob := GetActor(0, mobInstanceId)
 	if sMob == nil {

@@ -12,7 +12,7 @@ import (
 // Format should be:
 // callforhelp blows his horn
 // "blows his horn" will be emoted to the room
-func CallForHelp(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func CallForHelp(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -32,7 +32,7 @@ func CallForHelp(rest string, mobId int, cmdQueue util.CommandQueue) (util.Messa
 		return response, fmt.Errorf(`mob %d has no aggro`, mobId)
 	}
 
-	foundMobs := map[int]string{} // key is mob instance id, value is exit name
+	calledForHelp := false
 
 	for _, roomInfo := range room.Exits {
 		adjRoom := rooms.LoadRoom(roomInfo.RoomId)
@@ -56,22 +56,19 @@ func CallForHelp(rest string, mobId int, cmdQueue util.CommandQueue) (util.Messa
 					continue
 				}
 
-				foundMobs[nearbyMobInstanceId] = exitIntoRoom
+				if !calledForHelp {
+					calledForHelp = true
+
+					if rest != `` {
+						mob.Command(fmt.Sprintf(`emote %s`, rest))
+					} else {
+						mob.Command(`emote calls for help`)
+					}
+				}
+
+				mobInfo.Command(fmt.Sprintf(`go %s`, exitIntoRoom))
+				mobInfo.Command(fmt.Sprintf(`attack @%d`, mob.Character.Aggro.UserId))
 			}
-		}
-	}
-
-	// Only display the call for help message if it actually did something
-	if len(foundMobs) > 0 {
-		if rest != `` {
-			cmdQueue.QueueCommand(0, mob.InstanceId, fmt.Sprintf(`emote %s`, rest))
-		} else {
-			cmdQueue.QueueCommand(0, mob.InstanceId, `emote calls for help`)
-		}
-
-		for mobInstanceId, exitName := range foundMobs {
-			cmdQueue.QueueCommand(0, mobInstanceId, fmt.Sprintf(`go %s`, exitName))
-			cmdQueue.QueueCommand(0, mobInstanceId, fmt.Sprintf(`attack @%d`, mob.Character.Aggro.UserId)) // @ denotes a playerid to attack
 		}
 	}
 

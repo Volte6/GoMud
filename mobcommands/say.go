@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Say(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Say(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 

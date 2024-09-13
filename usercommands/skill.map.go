@@ -22,7 +22,7 @@ Level 2 - Map a 9x7 area
 Level 3 - Map a 13x9 area
 Level 4 - Map a 17x9 area, and enables the "wide" version.
 */
-func Map(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Map(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -124,22 +124,25 @@ func Map(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	if mapHeight > 18 {
 		mapHeight = 18
 	}
-	if settings, err := cmdQueue.GetSettings(userId); err == nil {
 
-		if skillLevel > 4 {
-			mapWidth = int(settings.ScreenWidth) - borderWidth
-			mapHeight = int(settings.ScreenHeight) - borderHeight // extra 2 for the new lines after
-			if mapHeight%2 != 0 {
-				mapHeight--
-			}
+	if skillLevel > 4 {
 
-			if mapWidth > int(settings.ScreenWidth)-borderWidth {
-				mapWidth = int(settings.ScreenWidth) - borderWidth
-			}
-			if mapHeight > int(settings.ScreenHeight)-borderHeight {
-				mapHeight = int(settings.ScreenHeight) - borderHeight
-			}
+		if user.RenderSettings.ScreenWidth == 0 {
+			user.RenderSettings.ScreenWidth = 80
+			user.RenderSettings.ScreenHeight = 40
+		}
 
+		mapWidth = int(user.RenderSettings.ScreenWidth) - borderWidth
+		mapHeight = int(user.RenderSettings.ScreenHeight) - borderHeight // extra 2 for the new lines after
+		if mapHeight%2 != 0 {
+			mapHeight--
+		}
+
+		if mapWidth > int(user.RenderSettings.ScreenWidth)-borderWidth {
+			mapWidth = int(user.RenderSettings.ScreenWidth) - borderWidth
+		}
+		if mapHeight > int(user.RenderSettings.ScreenHeight)-borderHeight {
+			mapHeight = int(user.RenderSettings.ScreenHeight) - borderHeight
 		}
 
 	}

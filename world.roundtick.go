@@ -12,6 +12,7 @@ import (
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/combat"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
@@ -39,10 +40,18 @@ func (w *World) roundTick() {
 	if gdBefore.Night != gdNow.Night {
 		if gdNow.Night {
 			sunsetTxt, _ := templates.Process("generic/sunset", nil)
-			w.Broadcast(sunsetTxt)
+
+			events.AddToQueue(events.Broadcast{
+				Text: sunsetTxt,
+			})
+
 		} else {
 			sunriseTxt, _ := templates.Process("generic/sunrise", nil)
-			w.Broadcast(sunriseTxt)
+
+			events.AddToQueue(events.Broadcast{
+				Text: sunriseTxt,
+			})
+
 		}
 	}
 
@@ -137,7 +146,7 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 			room.RoundTick()
 
 			allowIdleMessages := true
-			if scriptResponse, err := scripting.TryRoomIdleEvent(roomId, w); err == nil {
+			if scriptResponse, err := scripting.TryRoomIdleEvent(roomId); err == nil {
 				messageQueue.AbsorbMessages(scriptResponse)
 				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
 					allowIdleMessages = false
@@ -203,7 +212,7 @@ func (w *World) HandlePlayerRoundTicks() util.MessageQueue {
 					//
 					for _, buff := range triggeredBuffs {
 						if !buff.Expired() {
-							if response, err := scripting.TryBuffScriptEvent(`onTrigger`, uId, 0, buff.BuffId, w); err == nil {
+							if response, err := scripting.TryBuffScriptEvent(`onTrigger`, uId, 0, buff.BuffId); err == nil {
 								messageQueue.AbsorbMessages(response)
 							}
 						}
@@ -247,7 +256,7 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 			// Fire onTrigger for buff script
 			//
 			for _, buff := range triggeredBuffs {
-				if response, err := scripting.TryBuffScriptEvent(`onTrigger`, 0, mobInstanceId, buff.BuffId, w); err == nil {
+				if response, err := scripting.TryBuffScriptEvent(`onTrigger`, 0, mobInstanceId, buff.BuffId); err == nil {
 					messageQueue.AbsorbMessages(response)
 				}
 			}
@@ -267,7 +276,7 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 				for _, cmd := range cmds {
 					cmd = strings.TrimSpace(cmd)
 					if len(cmd) > 0 {
-						w.QueueCommand(0, mob.InstanceId, cmd)
+						mob.Command(cmd)
 					}
 				}
 			}
@@ -278,7 +287,7 @@ func (w *World) HandleMobRoundTicks() util.MessageQueue {
 
 		if mob.Character.Health <= 0 {
 			// Mob died
-			w.QueueCommand(0, mob.InstanceId, `suicide`)
+			mob.Command(`suicide`)
 		}
 
 	}
@@ -325,7 +334,7 @@ func (w *World) PruneBuffs() util.MessageQueue {
 				logOff = false
 				if buffsToPrune := user.Character.Buffs.Prune(); len(buffsToPrune) > 0 {
 					for _, buffInfo := range buffsToPrune {
-						if response, err := scripting.TryBuffScriptEvent(`onEnd`, uId, 0, buffInfo.BuffId, w); err == nil {
+						if response, err := scripting.TryBuffScriptEvent(`onEnd`, uId, 0, buffInfo.BuffId); err == nil {
 							messageQueue.AbsorbMessages(response)
 						}
 						if buffInfo.BuffId == 0 {
@@ -351,7 +360,7 @@ func (w *World) PruneBuffs() util.MessageQueue {
 
 		if buffsToPrune := mob.Character.Buffs.Prune(); len(buffsToPrune) > 0 {
 			for _, buffInfo := range buffsToPrune {
-				if response, err := scripting.TryBuffScriptEvent(`onEnd`, 0, mobInstanceId, buffInfo.BuffId, w); err == nil {
+				if response, err := scripting.TryBuffScriptEvent(`onEnd`, 0, mobInstanceId, buffInfo.BuffId); err == nil {
 					messageQueue.AbsorbMessages(response)
 				}
 			}
@@ -513,7 +522,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 				if mob := mobs.GetInstance(instId); mob != nil {
 					// Charmed mobs assist
 					if mob.Character.IsCharmed(userId) {
-						w.QueueCommand(0, instId, exitName)
+						mob.Command(exitName)
 					}
 				}
 			}
@@ -526,7 +535,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			if user.Character.Aggro.RoundsWaiting > 0 {
 				user.Character.Aggro.RoundsWaiting--
 
-				if res, err := scripting.TrySpellScriptEvent(`onWait`, user.UserId, 0, user.Character.Aggro.SpellInfo, w); err == nil {
+				if res, err := scripting.TrySpellScriptEvent(`onWait`, user.UserId, 0, user.Character.Aggro.SpellInfo); err == nil {
 					messageQueue.AbsorbMessages(res)
 				}
 
@@ -547,7 +556,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			}
 
 			allowRetaliation := true
-			if res, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo, w); err == nil {
+			if res, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo); err == nil {
 				messageQueue.AbsorbMessages(res)
 
 				if res.Handled {
@@ -569,7 +578,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 								if defMob.Character.Aggro == nil {
 									defMob.PreventIdle = true
-									w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack @%d", user.UserId)) // @ means player
+									defMob.Command(fmt.Sprintf("attack @%d", user.UserId)) // @ means player
 								}
 							}
 						}
@@ -672,17 +681,30 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 							Type: characters.DefaultAttack,
 						}
 
-						w.QueueCommand(0, instanceId, fmt.Sprintf("attack @%d", user.UserId)) // # denotes a specific user id
+						charmedMob.Command(fmt.Sprintf("attack @%d", user.UserId))
+
 					}
 				}
 			}
 
 			for _, buffId := range roundResult.BuffSource {
-				w.QueueBuff(user.UserId, 0, buffId)
+
+				events.AddToQueue(events.Buff{
+					UserId:        user.UserId,
+					MobInstanceId: 0,
+					BuffId:        buffId,
+				})
+
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-				w.QueueBuff(defUser.UserId, 0, buffId)
+
+				events.AddToQueue(events.Buff{
+					UserId:        defUser.UserId,
+					MobInstanceId: 0,
+					BuffId:        buffId,
+				})
+
 			}
 
 			messageQueue.SendUserMessages(user.UserId, roundResult.MessagesToSource, true)
@@ -812,11 +834,23 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 			roundResult = combat.AttackPlayerVsMob(user, defMob)
 
 			for _, buffId := range roundResult.BuffSource {
-				w.QueueBuff(user.UserId, 0, buffId)
+
+				events.AddToQueue(events.Buff{
+					UserId:        user.UserId,
+					MobInstanceId: 0,
+					BuffId:        buffId,
+				})
+
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-				w.QueueBuff(0, defMob.InstanceId, buffId)
+
+				events.AddToQueue(events.Buff{
+					UserId:        0,
+					MobInstanceId: defMob.InstanceId,
+					BuffId:        buffId,
+				})
+
 			}
 
 			messageQueue.SendUserMessages(user.UserId, roundResult.MessagesToSource, true)
@@ -832,7 +866,7 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 
 			// Handle any scripted behavior now.
 			if roundResult.Hit {
-				if res, err := scripting.TryMobScriptEvent(`onHurt`, defMob.InstanceId, user.UserId, `user`, map[string]any{`damage`: roundResult.DamageToTarget, `crit`: roundResult.Crit}, w); err == nil {
+				if res, err := scripting.TryMobScriptEvent(`onHurt`, defMob.InstanceId, user.UserId, `user`, map[string]any{`damage`: roundResult.DamageToTarget, `crit`: roundResult.Crit}); err == nil {
 					messageQueue.AbsorbMessages(res)
 				}
 			}
@@ -854,17 +888,17 @@ func (w *World) HandlePlayerCombat() (messageQueue util.MessageQueue, affectedPl
 					if mobRoom := rooms.LoadRoom(defMob.Character.RoomId); mobRoom != nil {
 						for exitName, exitInfo := range mobRoom.Exits {
 							if exitInfo.RoomId == user.Character.RoomId {
-								w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf(`go %s`, exitName))
-
+								defMob.Command(fmt.Sprintf(`go %s`, exitName))
 								if actionStr := defMob.GetAngryCommand(); actionStr != `` {
-									w.QueueCommand(0, defMob.InstanceId, actionStr)
+									defMob.Command(actionStr)
 								}
 								break
 							}
 						}
 					}
 				}
-				w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack @%d", user.UserId)) // @ means player
+
+				defMob.Command(fmt.Sprintf("attack @%d", user.UserId)) // @ means player
 			}
 
 			if user.Character.Health <= 0 || defMob.Character.Health <= 0 {
@@ -915,7 +949,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 			if mob.Character.Aggro.RoundsWaiting > 0 {
 				mob.Character.Aggro.RoundsWaiting--
 
-				if res, err := scripting.TrySpellScriptEvent(`onWait`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo, w); err == nil {
+				if res, err := scripting.TrySpellScriptEvent(`onWait`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo); err == nil {
 					messageQueue.AbsorbMessages(res)
 				}
 
@@ -934,7 +968,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 			}
 
 			allowRetaliation := true
-			if res, err := scripting.TrySpellScriptEvent(`onMagic`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo, w); err == nil {
+			if res, err := scripting.TrySpellScriptEvent(`onMagic`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo); err == nil {
 				messageQueue.AbsorbMessages(res)
 
 				if res.Handled {
@@ -954,7 +988,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 								if defMob.Character.Aggro == nil {
 									defMob.PreventIdle = true
-									w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack #%d", mob.InstanceId)) // # means mob
+									defMob.Command(fmt.Sprintf("attack #%d", mob.InstanceId)) // # means mob
 								}
 							}
 						}
@@ -987,10 +1021,10 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 					allCmds := strings.Split(combatAction, `;`)
 					if len(allCmds) >= c.TurnsPerRound() {
-						w.QueueCommand(0, mob.InstanceId, `say I have a CombatAction that is too long. Please notify an admin.`)
+						mob.Command(`say I have a CombatAction that is too long. Please notify an admin.`)
 					} else {
 						for turnDelay, action := range strings.Split(combatAction, `;`) {
-							w.QueueCommand(0, mob.InstanceId, action, turnDelay)
+							mob.Command(action, turnDelay)
 						}
 					}
 					continue
@@ -1044,7 +1078,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 					}
 
 					if len(possibleWeapons) > 0 {
-						w.QueueCommand(0, mob.InstanceId, fmt.Sprintf("equip %s", possibleWeapons[util.Rand(len(possibleWeapons))]))
+						mob.Command(fmt.Sprintf("equip %s", possibleWeapons[util.Rand(len(possibleWeapons))]))
 					}
 
 				}
@@ -1083,17 +1117,31 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 						charmedMob.Character.Aggro = &characters.Aggro{
 							Type: characters.DefaultAttack,
 						}
-						w.QueueCommand(0, instanceId, fmt.Sprintf("attack #%d", mob.InstanceId)) // # denotes a specific mob id
+
+						charmedMob.Command(fmt.Sprintf("attack #%d", mob.InstanceId))
+
 					}
 				}
 			}
 
 			for _, buffId := range roundResult.BuffSource {
-				w.QueueBuff(0, mob.InstanceId, buffId)
+
+				events.AddToQueue(events.Buff{
+					UserId:        0,
+					MobInstanceId: mob.InstanceId,
+					BuffId:        buffId,
+				})
+
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-				w.QueueBuff(defUser.UserId, 0, buffId)
+
+				events.AddToQueue(events.Buff{
+					UserId:        defUser.UserId,
+					MobInstanceId: 0,
+					BuffId:        buffId,
+				})
+
 			}
 
 			messageQueue.SendUserMessages(defUser.UserId, roundResult.MessagesToTarget, true)
@@ -1189,11 +1237,22 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 			roundResult = combat.AttackMobVsMob(mob, defMob)
 
 			for _, buffId := range roundResult.BuffSource {
-				w.QueueBuff(0, mob.InstanceId, buffId)
+
+				events.AddToQueue(events.Buff{
+					UserId:        0,
+					MobInstanceId: mob.InstanceId,
+					BuffId:        buffId,
+				})
+
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-				w.QueueBuff(0, defMob.InstanceId, buffId)
+
+				events.AddToQueue(events.Buff{
+					UserId:        0,
+					MobInstanceId: defMob.InstanceId,
+					BuffId:        buffId,
+				})
 			}
 
 			if len(roundResult.MessagesToSourceRoom) > 0 {
@@ -1206,7 +1265,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 
 			// Handle any scripted behavior now.
 			if roundResult.Hit {
-				if res, err := scripting.TryMobScriptEvent(`onHurt`, defMob.InstanceId, mob.InstanceId, `mob`, map[string]any{`damage`: roundResult.DamageToTarget, `crit`: roundResult.Crit}, w); err == nil {
+				if res, err := scripting.TryMobScriptEvent(`onHurt`, defMob.InstanceId, mob.InstanceId, `mob`, map[string]any{`damage`: roundResult.DamageToTarget, `crit`: roundResult.Crit}); err == nil {
 					messageQueue.AbsorbMessages(res)
 				}
 			}
@@ -1217,7 +1276,7 @@ func (w *World) HandleMobCombat() (messageQueue util.MessageQueue, affectedPlaye
 				defMob.Character.Aggro = &characters.Aggro{
 					Type: characters.DefaultAttack,
 				}
-				w.QueueCommand(0, defMob.InstanceId, fmt.Sprintf("attack #%d", mob.InstanceId)) // # means mob
+				defMob.Command(fmt.Sprintf("attack #%d", mob.InstanceId)) // # means mob
 			}
 
 			// If the attack connected, check for damage to equipment.
@@ -1277,7 +1336,7 @@ func (w *World) HandleAffected(affectedPlayerIds []int, affectedMobInstanceIds [
 
 			if user.Character.Health <= -10 {
 
-				w.QueueCommand(userId, 0, "suicide") // suicide drops all money/items and transports to land of the dead.
+				user.Command(`suicide`) // suicide drops all money/items and transports to land of the dead.
 
 			} else if user.Character.Health < 1 {
 
@@ -1303,7 +1362,9 @@ func (w *World) HandleAffected(affectedPlayerIds []int, affectedMobInstanceIds [
 
 		if mob := mobs.GetInstance(mobId); mob != nil {
 			if mob.Character.Health < 1 {
-				w.QueueCommand(0, mobId, "suicide") // suicide drops all money/items and transports to land of the dead.
+
+				mob.Command(`suicide`)
+
 			}
 		}
 
@@ -1332,7 +1393,7 @@ func (w *World) HandleIdleMobs() util.MessageQueue {
 
 		if mob.BoredomCounter >= maxBoredom {
 			if mob.Despawns() {
-				w.QueueCommand(0, mob.InstanceId, `despawn`+fmt.Sprintf(` depression %d/%d`, mob.BoredomCounter, maxBoredom))
+				mob.Command(`despawn` + fmt.Sprintf(` depression %d/%d`, mob.BoredomCounter, maxBoredom))
 			} else {
 				mob.BoredomCounter = 0
 			}
@@ -1351,7 +1412,7 @@ func (w *World) HandleIdleMobs() util.MessageQueue {
 			if mob.Character.Aggro.UserId > 0 {
 				user := users.GetByUserId(mob.Character.Aggro.UserId)
 				if user == nil || user.Character.RoomId != mob.Character.RoomId {
-					w.QueueCommand(0, mob.InstanceId, `emote mumbles about losing their quarry.`)
+					mob.Command(`emote mumbles about losing their quarry.`)
 					mob.Character.Aggro = nil
 				}
 			}
@@ -1359,7 +1420,7 @@ func (w *World) HandleIdleMobs() util.MessageQueue {
 		}
 
 		// If they have idle commands, maybe do one of them?
-		result, _ := scripting.TryMobScriptEvent("onIdle", mob.InstanceId, 0, ``, nil, w)
+		result, _ := scripting.TryMobScriptEvent("onIdle", mob.InstanceId, 0, ``, nil)
 		messageQueue.AbsorbMessages(result)
 
 		if !result.Handled {
@@ -1369,7 +1430,7 @@ func (w *World) HandleIdleMobs() util.MessageQueue {
 					mob.GoingHome = true
 				}
 				if mob.GoingHome {
-					w.QueueCommand(0, mob.InstanceId, `go home`)
+					mob.Command(`go home`)
 					continue
 				}
 
@@ -1383,10 +1444,10 @@ func (w *World) HandleIdleMobs() util.MessageQueue {
 			if mob.Character.IsCharmed() {
 				// Only some mobs can apply first aid
 				if mob.Character.KnowsFirstAid() {
-					w.QueueCommand(0, mob.InstanceId, `lookforaid`)
+					mob.Command(`lookforaid`)
 				}
 			} else {
-				w.QueueCommand(0, mob.InstanceId, `lookfortrouble`)
+				mob.Command(`lookfortrouble`)
 			}
 		}
 
@@ -1533,9 +1594,9 @@ func (w *World) CheckForLevelUps() util.MessageQueue {
 
 				messageQueue.SendUserMessage(user.UserId, levelUpStr, true)
 
-				w.Broadcast(
-					templates.AnsiParse(fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has leveled up to level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, user.Character.Level, term.CRLFStr)),
-				)
+				events.AddToQueue(events.Broadcast{
+					Text: templates.AnsiParse(fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has leveled up to level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, user.Character.Level, term.CRLFStr)),
+				})
 
 				go users.SaveUser(*user)
 

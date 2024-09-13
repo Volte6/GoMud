@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Trash(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Trash(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -54,7 +54,7 @@ func Trash(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			true)
 
 		// Trigger lost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId, cmdQueue); err == nil {
+		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId); err == nil {
 			response.AbsorbMessages(scriptResponse)
 		}
 

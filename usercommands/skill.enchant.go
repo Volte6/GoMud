@@ -13,12 +13,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Uncurse(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-	return Enchant("uncurse "+rest, userId, cmdQueue)
+func Uncurse(rest string, userId int) (util.MessageQueue, error) {
+	return Enchant("uncurse "+rest, userId)
 }
 
-func Unenchant(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-	return Enchant("remove "+rest, userId, cmdQueue)
+func Unenchant(rest string, userId int) (util.MessageQueue, error) {
+	return Enchant("remove "+rest, userId)
 }
 
 /*
@@ -28,7 +28,7 @@ Level 2 - Enchant equipment with a defensive bonus.
 Level 3 - Add a stat bonus to a weapon or equipment in addition to the above.
 Level 4 - Remove the enchantment or curse from any object.
 */
-func Enchant(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Enchant(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 

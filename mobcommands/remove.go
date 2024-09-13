@@ -8,7 +8,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Remove(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Remove(rest string, mobId int) (util.MessageQueue, error) {
 
 	response := NewMobCommandResponse(mobId)
 
@@ -20,7 +20,7 @@ func Remove(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 	if rest == "all" {
 		for _, item := range mob.Character.Equipment.GetAllItems() {
-			r, _ := Remove(item.Name(), mobId, cmdQueue)
+			r, _ := Remove(item.Name(), mobId)
 			response.AbsorbMessages(r)
 		}
 		response.Handled = true

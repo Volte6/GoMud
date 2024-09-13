@@ -14,7 +14,7 @@ import (
 Brawling Skill
 Level 4 - Attempt to disarm an opponent.
 */
-func Disarm(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Disarm(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 

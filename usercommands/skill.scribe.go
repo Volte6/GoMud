@@ -19,7 +19,7 @@ Level 2 - Scribe to a sign
 Level 3 - Scribe a hidden rune
 Level 4 - Scribe a map
 */
-func Scribe(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Scribe(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -148,7 +148,7 @@ func Scribe(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		} else {
 			// Draw a map of the room and write it to an item
-			resp, err := Map("", userId, cmdQueue)
+			resp, err := Map("", userId)
 			if err != nil {
 				response.SendUserMessage(userId, err.Error(), true)
 				return response, err

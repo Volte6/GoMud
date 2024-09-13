@@ -17,7 +17,7 @@ import (
 SkullDuggery Skill
 Level 3 - Backstab
 */
-func Bump(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Bump(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 

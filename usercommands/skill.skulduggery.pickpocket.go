@@ -6,6 +6,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
@@ -17,7 +18,7 @@ import (
 SkullDuggery Skill
 Level 4 - Pickpocket
 */
-func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Pickpocket(rest string, userId int) (util.MessageQueue, error) {
 
 	response := NewUserCommandResponse(userId)
 
@@ -144,7 +145,7 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 
 				user.Character.CancelBuffsWithFlag(buffs.Hidden)
 
-				cmdQueue.QueueCommand(0, pickMobInstanceId, fmt.Sprintf(`attack @%d`, user.UserId))
+				m.Command(fmt.Sprintf(`attack @%d`, user.UserId))
 
 			}
 
@@ -202,7 +203,12 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 
 					iSpec := itemStolen.GetSpec()
 					if iSpec.QuestToken != `` {
-						cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+
+						events.AddToQueue(events.Quest{
+							UserId:     user.UserId,
+							QuestToken: iSpec.QuestToken,
+						})
+
 					}
 
 					stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, itemStolen.DisplayName()))
