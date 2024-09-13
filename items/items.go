@@ -2,8 +2,10 @@ package items
 
 import (
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"unicode"
 
 	"github.com/volte6/mud/util"
@@ -17,11 +19,19 @@ import (
 
 var (
 	ItemDisabledSlot = Item{ItemId: -1}
+	uniqueIdCounter  uint64
 )
+
+// A simple "generator" to uniquely identify items
+func getUniqueId() uint64 {
+	atomic.AddUint64(&uniqueIdCounter, 1)
+	return atomic.LoadUint64(&uniqueIdCounter)
+}
 
 // Instance properties that may change
 type Item struct {
 	ItemId        int            `yaml:"itemid,omitempty"`
+	uid           uint64         `yaml:"-"`
 	Blob          string         `yaml:"blob,omitempty"`          // Does this item have a blob? Should be base64 encoded.
 	Uses          int            `yaml:"uses,omitempty"`          // How many uses it has left
 	LastUsedRound uint64         `yaml:"lastusedround,omitempty"` // Last round this item was used
@@ -41,6 +51,8 @@ func New(itemId int) Item {
 			newItm.Uses = itemSpec.Uses
 		}
 	}
+
+	newItm.Validate()
 
 	return newItm
 }
@@ -96,10 +108,22 @@ func (i Item) IsDisabled() bool {
 	return i.ItemId < 0
 }
 
+func (i *Item) UniqueId() uint64 {
+
+	if i.uid == 0 {
+		i.uid = getUniqueId()
+	}
+
+	return i.uid
+}
+
 func (i *Item) Validate() {
 	if i.ItemId < 1 {
 		return
 	}
+
+	// Make sure has a uid
+	i.UniqueId()
 
 	iSpec := i.GetSpec()
 	if iSpec.ItemId > 0 {
@@ -298,6 +322,10 @@ func (i *Item) GetDefense() int {
 
 func (i *Item) Equals(b Item) bool {
 
+	if i.UniqueId() == b.UniqueId() {
+		return true
+	}
+
 	if i.ItemId != b.ItemId {
 		return false
 	}
@@ -400,7 +428,8 @@ func (i *Item) ShorthandId() string {
 	if i.ItemId < 1 { // Used to represent item slots that are disabled
 		return ``
 	}
-	return fmt.Sprintf(`!%d`, i.ItemId)
+
+	return fmt.Sprintf(`!%d:%d`, i.ItemId, i.UniqueId())
 }
 
 func (i *Item) NameSimple() string {
@@ -504,9 +533,28 @@ func FindMatchIn(itemName string, items ...Item) (pMatch Item, fMatch Item) {
 
 	if len(itemName) > 1 {
 		if itemName[0] == '!' { // Special meaning to specify an item
-			itemIdMatch, _ := strconv.Atoi(itemName[1:])
+
+			var itemIdMatch int = 0
+			var itemUidMatch uint64 = 0
+
+			parts := strings.Split(itemName[1:], `:`)
+			itemIdMatch, _ = strconv.Atoi(parts[0])
+
+			if len(parts) > 1 {
+				itemUidMatch, _ = strconv.ParseUint(parts[1], 10, 64)
+			}
 
 			for _, itm := range items {
+
+				slog.Debug("ItemSearch", "itemId", itm.ItemId, "uid", itm.uid, "itemIdMatch", itemIdMatch, "itemUidMatch", itemUidMatch)
+
+				// If a uid was included, it takes priority over qualifying/disqualifying
+				if itemUidMatch > 0 {
+					if itm.UniqueId() != itemUidMatch {
+						continue
+					}
+					return itm, itm
+				}
 
 				if itemIdMatch > 0 {
 					if itm.ItemId != itemIdMatch {

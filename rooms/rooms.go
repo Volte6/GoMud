@@ -634,6 +634,8 @@ func (r *Room) AddItem(item items.Item, stash bool) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
+	item.Validate()
+
 	if stash {
 		r.Stash = append(r.Stash, item)
 	} else {
@@ -1925,6 +1927,22 @@ func (r *Room) Validate() error {
 		if _, found := GetBiome(r.Biome); !found {
 			return fmt.Errorf("invalid biome: %s", r.Biome)
 		}
+	}
+
+	// Make sure all items are validated (and have uids)
+	for i := range r.Items {
+		r.Items[i].Validate()
+	}
+
+	for i := range r.Stash {
+		r.Stash[i].Validate()
+	}
+
+	for cName, c := range r.Containers {
+		for i := range c.Items {
+			c.Items[i].Validate()
+		}
+		r.Containers[cName] = c
 	}
 
 	return nil

@@ -1148,7 +1148,7 @@ func (w *World) TurnTick() {
 			continue
 		}
 
-		slog.Debug(`Event`, `type`, action.Type(), `RoomId`, action.RoomId, `SourceUserId`, action.SourceUserId, `SourceMobId`, action.SourceMobId, `Action`, action.Action)
+		//slog.Debug(`Event`, `type`, action.Type(), `RoomId`, action.RoomId, `SourceUserId`, action.SourceUserId, `SourceMobId`, action.SourceMobId, `Action`, action.Action)
 
 		if room := rooms.LoadRoom(action.RoomId); room != nil {
 
@@ -1157,7 +1157,7 @@ func (w *World) TurnTick() {
 
 			// Is it a detonation?
 			// Possible formats:
-			// donate [#mobId|@userId] !itemId
+			// donate [#mobId|@userId] !itemId:uid
 			if parts[0] == `detonate` {
 
 				if len(parts) == 1 {

@@ -704,6 +704,9 @@ func (c *Character) StoreItem(i items.Item) bool {
 	if i.ItemId < 1 {
 		return false
 	}
+
+	i.Validate()
+
 	c.Items = append(c.Items, i)
 
 	return true
@@ -1449,6 +1452,23 @@ func (c *Character) Validate(recalculateItemBuffs ...bool) error {
 		c.Alignment = AlignmentMaximum
 	}
 
+	// Validate possessed/worn items
+	// This helps ensure all in-play items have a uid
+	for i := range c.Items {
+		c.Items[i].Validate()
+	}
+	c.Equipment.Weapon.Validate()
+	c.Equipment.Offhand.Validate()
+	c.Equipment.Head.Validate()
+	c.Equipment.Neck.Validate()
+	c.Equipment.Body.Validate()
+	c.Equipment.Belt.Validate()
+	c.Equipment.Gloves.Validate()
+	c.Equipment.Ring.Validate()
+	c.Equipment.Legs.Validate()
+	c.Equipment.Feet.Validate()
+	// Done with validation
+
 	if raceInfo := races.GetRace(c.RaceId); raceInfo != nil {
 
 		c.Equipment.EnableAll()
@@ -1622,6 +1642,8 @@ func (c *Character) GetAllWornItems() []items.Item {
 }
 
 func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bool, failureReason string) {
+
+	i.Validate()
 
 	spec := i.GetSpec()
 

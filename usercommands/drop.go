@@ -121,7 +121,7 @@ func Drop(rest string, userId int) (util.MessageQueue, error) {
 				RoomId:       user.Character.RoomId,
 				SourceUserId: user.UserId,
 				SourceMobId:  0,
-				Action:       fmt.Sprintf("detonate !%d", matchItem.ItemId),
+				Action:       fmt.Sprintf("detonate %s", matchItem.ShorthandId()),
 			})
 
 		}

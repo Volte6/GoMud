@@ -100,7 +100,7 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 					RoomId:       user.Character.RoomId,
 					SourceUserId: user.UserId,
 					SourceMobId:  0,
-					Action:       fmt.Sprintf("detonate #%d !%d", targetMob.InstanceId, itemMatch.ItemId),
+					Action:       fmt.Sprintf("detonate #%d %s", targetMob.InstanceId, itemMatch.ShorthandId()),
 				})
 
 			}
@@ -140,7 +140,7 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 				RoomId:       user.Character.RoomId,
 				SourceUserId: user.UserId,
 				SourceMobId:  0,
-				Action:       fmt.Sprintf("detonate @%d !%d", targetUser.UserId, itemMatch.ItemId),
+				Action:       fmt.Sprintf("detonate @%d %s", targetUser.UserId, itemMatch.ShorthandId()),
 			})
 
 		}
@@ -210,7 +210,7 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 					RoomId:       throwToRoom.RoomId,
 					SourceUserId: user.UserId,
 					SourceMobId:  0,
-					Action:       fmt.Sprintf("detonate !%d", itemMatch.ItemId),
+					Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
 				})
 
 			}
@@ -281,7 +281,7 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 							RoomId:       throwToRoom.RoomId,
 							SourceUserId: user.UserId,
 							SourceMobId:  0,
-							Action:       fmt.Sprintf("detonate !%d", itemMatch.ItemId),
+							Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
 						})
 
 					}
