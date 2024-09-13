@@ -5,7 +5,6 @@ import (
 
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 type SkillsOptions struct {
@@ -14,14 +13,12 @@ type SkillsOptions struct {
 	SkillCooldowns map[string]int
 }
 
-func Skills(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Skills(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf(`user %d not found`, userId)
+		return false, ``, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	allSkills := user.Character.GetSkills()
@@ -46,6 +43,5 @@ func Skills(rest string, userId int) (util.MessageQueue, error) {
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

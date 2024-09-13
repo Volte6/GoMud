@@ -7,7 +7,6 @@ import (
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/util"
 )
 
 // Expected format is:
@@ -15,26 +14,23 @@ import (
 // or
 // givequest 1-start Say has anyone seen my locket?
 // The second message will only be executed if the quest is successfully given.
-func GiveQuest(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func GiveQuest(rest string, mobId int) (bool, string, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	// Don't bother if no players are present
 	if room.PlayerCt() < 1 {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	parts := strings.SplitN(rest, " ", 2)
@@ -66,6 +62,5 @@ func GiveQuest(rest string, mobId int) (util.MessageQueue, error) {
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

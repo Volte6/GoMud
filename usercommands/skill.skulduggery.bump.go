@@ -17,39 +17,35 @@ import (
 SkullDuggery Skill
 Level 3 - Backstab
 */
-func Bump(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Bump(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 2 {
-		return response, nil
+		return false, ``, nil
 	}
 
 	if user.Character.Aggro != nil {
 		user.SendText("You can't do that while in combat!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if room.AreMobsAttacking(userId) {
 		user.SendText("You can't do that while you are under attack!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -60,8 +56,7 @@ func Bump(rest string, userId int) (util.MessageQueue, error) {
 
 		if !user.Character.TryCooldown(skills.Brawling.String(`bump`), configs.GetConfig().MinutesToRounds(1)) {
 			user.SendText(fmt.Sprintf("You need to wait %d rounds before you can do that again!", user.Character.GetCooldown(skills.Brawling.String(`bump`))))
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -173,6 +168,5 @@ func Bump(rest string, userId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

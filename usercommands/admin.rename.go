@@ -10,20 +10,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Rename(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Rename(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(rest)
@@ -32,8 +30,7 @@ func Rename(rest string, userId int) (util.MessageQueue, error) {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.rename", nil)
 		user.SendText(infoOutput)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -59,6 +56,5 @@ func Rename(rest string, userId int) (util.MessageQueue, error) {
 		)
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

@@ -11,27 +11,24 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Get(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Get(rest string, mobId int) (bool, string, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) == 0 {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if args[0] == "all" {
@@ -50,8 +47,7 @@ func Get(rest string, mobId int) (util.MessageQueue, error) {
 			}
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if args[0] == "gold" {
@@ -67,8 +63,7 @@ func Get(rest string, mobId int) (util.MessageQueue, error) {
 			room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> picks up <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, goldAmt))
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	getFromStash := false
@@ -110,6 +105,5 @@ func Get(rest string, mobId int) (util.MessageQueue, error) {
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

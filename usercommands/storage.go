@@ -14,27 +14,24 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Storage(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Storage(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if !room.IsStorage {
 		user.SendText(`You are not at a storage location.` + term.CRLFStr)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	itemsInStorage := user.ItemStorage.GetItems()
@@ -49,22 +46,19 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 		storageTxt, _ := templates.Process("character/storage", itemNames)
 		user.SendText(storageTxt)
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if rest == `add` || rest == `remove` {
 		user.SendText(fmt.Sprintf(`%s what?%s`, rest, term.CRLFStr))
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 || (args[0] != `add` && args[0] != `remove`) {
 		user.SendText(`Try <ansi fg="command">help storage</ansi> for more information about storage.` + term.CRLFStr)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	action := args[0]
@@ -75,8 +69,7 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 		spaceLeft := 20 - len(itemsInStorage)
 		if spaceLeft < 1 {
 			user.SendText(`You can have 20 objects in storage`)
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if itemName == `all` {
@@ -90,16 +83,14 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 				}
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		itm, found := user.Character.FindInBackpack(itemName)
 
 		if !found {
 			user.SendText(fmt.Sprintf(`You don't have a %s to add to storage.%s`, itemName, term.CRLFStr))
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		user.Character.RemoveItem(itm)
@@ -118,8 +109,7 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 				Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), userId)
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		var itm items.Item
@@ -142,8 +132,7 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 
 		if !found {
 			user.SendText(fmt.Sprintf(`You don't have a %s in storage.`, itemName))
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if user.Character.StoreItem(itm) {
@@ -160,6 +149,5 @@ func Storage(rest string, userId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

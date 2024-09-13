@@ -15,20 +15,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Give(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Give(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	rest = util.StripPrepositions(rest)
@@ -37,8 +35,7 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 
 	if len(args) < 2 {
 		user.SendText("Give what? To whom?")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	var giveWho string = args[len(args)-1]
@@ -55,14 +52,12 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 
 		if giveGoldAmount < 0 {
 			user.SendText("You can't give a negative amount of gold.")
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if giveGoldAmount > user.Character.Gold {
 			user.SendText("You don't have that much gold to give.")
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 	} else {
@@ -74,8 +69,7 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 
 		if !found {
 			user.SendText(fmt.Sprintf("You don't have a %s to give.", giveWhat))
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 	}
@@ -149,8 +143,7 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText("Something went wrong.")
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 
 	}
 
@@ -197,11 +190,9 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 
 				}
 
-				if res, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}); err == nil {
-
-					if res.Handled {
-						response.Handled = true
-						return response, nil
+				if handled, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}); err == nil {
+					if handled {
+						return true, ``, nil
 					}
 				}
 
@@ -215,12 +206,10 @@ func Give(rest string, userId int) (util.MessageQueue, error) {
 
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	user.SendText("Who???")
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

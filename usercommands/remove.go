@@ -7,31 +7,27 @@ import (
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Remove(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Remove(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if rest == "all" {
 		for _, item := range user.Character.Equipment.GetAllItems() {
 			Remove(item.Name(), userId)
 		}
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -47,8 +43,7 @@ func Remove(rest string, userId int) (util.MessageQueue, error) {
 					fmt.Sprintf(`You can't seem to remove your <ansi fg="item">%s</ansi>... It's <ansi fg="red-bold">CURSED!</ansi>`, matchItem.DisplayName()),
 				)
 
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			} else {
 				user.SendText(
 					`It's <ansi fg="red-bold">CURSED</ansi> but luckily your <ansi fg="skillname">enchant</ansi> skill level allows you to remove it.`,
@@ -78,6 +73,5 @@ func Remove(rest string, userId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

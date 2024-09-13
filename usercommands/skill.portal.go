@@ -11,7 +11,6 @@ import (
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 /*
@@ -21,20 +20,18 @@ Level 2 - Teleport back to the root of the area you are in
 Level 3 - Set a new destination for your portal teleportation
 Level 4 - Create a physical portal that you can share with players, or return through.
 */
-func Portal(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Portal(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
-		if response, err := Go(`portal`, userId); response.Handled {
-			return response, err
+		if handled, nextCommand, err := Go(`portal`, userId); handled {
+			return handled, nextCommand, err
 		}
 	}
 
@@ -42,14 +39,13 @@ func Portal(rest string, userId int) (util.MessageQueue, error) {
 
 	if skillLevel == 0 {
 		user.SendText("You don't know how to portal.")
-		response.Handled = true
-		return response, errors.New(`you don't know how to portal`)
+		return true, ``, errors.New(`you don't know how to portal`)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// Establish the default portal location
@@ -83,21 +79,17 @@ func Portal(rest string, userId int) (util.MessageQueue, error) {
 
 		if user.Character.Aggro != nil {
 			user.SendText("You can't do that! You are in combat!")
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if !user.Character.TryCooldown(skills.Portal.String(), 10) {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Portal.String())),
 			)
-			response.Handled = true
-			return response, errors.New(`you're doing that too often`)
+			return true, ``, errors.New(`you're doing that too often`)
 		}
 
 		// move to portalTargetRoomId
-		response.Handled = true
-
 		if err := rooms.MoveToRoom(user.UserId, portalTargetRoomId); err == nil {
 			user.SendText("You draw a quick symbol in the air with your finger, and the world warps around you. You seem to have moved.")
 			room.SendText(
@@ -112,8 +104,7 @@ func Portal(rest string, userId int) (util.MessageQueue, error) {
 		} else {
 			user.SendText("Oops, portal sad!")
 		}
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if skillLevel >= 3 {
@@ -146,21 +137,20 @@ func Portal(rest string, userId int) (util.MessageQueue, error) {
 			// Load current room details
 			targetRoom := rooms.LoadRoom(portalTargetRoomId)
 			if targetRoom == nil {
-				return response, fmt.Errorf(`room %d not found`, portalTargetRoomId)
+				return false, ``, fmt.Errorf(`room %d not found`, portalTargetRoomId)
 			}
 
 			if portalTargetRoomId == user.Character.RoomId {
 				user.SendText("You can't open a portal to the room you're already in!")
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 
 			if !user.Character.TryCooldown(skills.Portal.String(), 10) {
 				user.SendText(
 					fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Portal.String())),
 				)
-				response.Handled = true
-				return response, errors.New(`you're doing that too often`)
+
+				return true, ``, errors.New(`you're doing that too often`)
 			}
 
 			// Check whether they already have a portal open, and if so, shut it down.
@@ -218,8 +208,7 @@ func Portal(rest string, userId int) (util.MessageQueue, error) {
 			// Spawn a portal in the room that leads to the portal location
 			if !room.AddTemporaryExit(newPortalExitName, newPortal) {
 				user.SendText("Something went wrong. That's the problem with portal!")
-				response.Handled = true
-				return response, fmt.Errorf("failed to add temporary exit to room")
+				return true, ``, fmt.Errorf("failed to add temporary exit to room")
 			}
 			user.SendText(
 				fmt.Sprintf("You trace the shape of a doorway in front of you with your finger, which becomes a %s to another area.", templates.GlowingPortal),
@@ -234,8 +223,7 @@ func Portal(rest string, userId int) (util.MessageQueue, error) {
 
 			if !targetRoom.AddTemporaryExit(newPortalExitName, newPortal) {
 				user.SendText("Something went wrong. That's the problem with portal!")
-				response.Handled = true
-				return response, fmt.Errorf("failed to add temporary exit to room")
+				return true, ``, fmt.Errorf("failed to add temporary exit to room")
 			}
 
 			targetRoom.SendText(
@@ -246,6 +234,5 @@ func Portal(rest string, userId int) (util.MessageQueue, error) {
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

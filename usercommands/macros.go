@@ -4,23 +4,19 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Macros(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Macros(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	if len(user.Macros) == 0 {
 		user.SendText("You have no macros set.")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	user.SendText(`<ansi fg="yellow">Your macros:</ansi>`)
@@ -31,6 +27,5 @@ func Macros(rest string, userId int) (util.MessageQueue, error) {
 	}
 	user.SendText(``)
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

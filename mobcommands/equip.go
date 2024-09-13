@@ -10,19 +10,17 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Equip(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Equip(rest string, mobId int) (bool, string, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if rest == "all" {
@@ -35,8 +33,7 @@ func Equip(rest string, mobId int) (util.MessageQueue, error) {
 				Equip(item.Name(), mobId)
 			}
 		}
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	var matchItem items.Item = items.Item{}
@@ -58,8 +55,7 @@ func Equip(rest string, mobId int) (util.MessageQueue, error) {
 
 		iSpec := matchItem.GetSpec()
 		if iSpec.Type != items.Weapon && iSpec.Subtype != items.Wearable {
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		// Swap the item location
@@ -104,6 +100,5 @@ func Equip(rest string, mobId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

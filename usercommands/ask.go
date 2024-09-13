@@ -14,20 +14,18 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Ask(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Ask(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// Core "useful" commands
@@ -71,14 +69,12 @@ func Ask(rest string, userId int) (util.MessageQueue, error) {
 				mob.Command(fmt.Sprintf(`say I can do some other stuff, like %s`,
 					fmt.Sprintf(`<ansi fg="command">%s</ansi>`, strings.Join(allowedCommands, `</ansi>, <ansi fg="command">`))))
 
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 		}
 
 		user.SendText(`You must <ansi fg="command">ask</ansi> <ansi fg="mobname">someone</ansi> <ansi fg="yellow">something</ansi>`)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	allowedCommands = append(allowedCommands, usefulCommands...)
@@ -93,8 +89,7 @@ func Ask(rest string, userId int) (util.MessageQueue, error) {
 		mob := mobs.GetInstance(mobId)
 		if mob == nil {
 			user.SendText(`Nobody found by that name`)
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		args = args[1:]
@@ -126,8 +121,7 @@ func Ask(rest string, userId int) (util.MessageQueue, error) {
 						mob.Command(`emote shakes their head.`)
 						mob.Command(`say PVP is currently disabled.`)
 
-						response.Handled = true
-						return response, nil
+						return true, ``, nil
 					}
 				}
 			}
@@ -138,19 +132,16 @@ func Ask(rest string, userId int) (util.MessageQueue, error) {
 
 					mob.Command(fmt.Sprintf(`%s %s`, mobCmd, askRest))
 
-					response.Handled = true
-					return response, nil
+					return true, ``, nil
 				}
 			}
 		}
 
 		rest = strings.Join(args, ` `)
-		if res, err := scripting.TryMobScriptEvent(`onAsk`, mobId, userId, `user`, map[string]any{"askText": rest}); err == nil {
+		if handled, err := scripting.TryMobScriptEvent(`onAsk`, mobId, userId, `user`, map[string]any{"askText": rest}); err == nil {
 
-			if !res.Handled {
-
+			if !handled {
 				mob.Command(`emote shakes their head.`)
-
 			}
 		}
 
@@ -160,6 +151,5 @@ func Ask(rest string, userId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

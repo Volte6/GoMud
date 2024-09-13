@@ -7,17 +7,14 @@ import (
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Alias(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Alias(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// biuld array and look up table for sorting purposes
@@ -52,6 +49,5 @@ func Alias(rest string, userId int) (util.MessageQueue, error) {
 	aliasTxt, _ := templates.Process("tables/generic", aliasTableData)
 	user.SendText(aliasTxt)
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
-	"github.com/volte6/mud/util"
 )
 
 var (
@@ -19,18 +18,16 @@ func PruneMobVMs(instanceIds ...int) {
 
 }
 
-func TryMobConverse(rest string, mobInstanceId int, sourceMobInstanceId int) (util.MessageQueue, error) {
-
-	messageQueue = util.NewMessageQueue(0, mobInstanceId)
+func TryMobConverse(rest string, mobInstanceId int, sourceMobInstanceId int) (bool, error) {
 
 	sMob := GetActor(0, mobInstanceId)
 	if sMob == nil {
-		return messageQueue, errors.New("mob not found")
+		return false, errors.New("mob not found")
 	}
 
 	vmw, err := getMobVM(sMob)
 	if err != nil {
-		return util.NewMessageQueue(0, mobInstanceId), err
+		return false, err
 	}
 
 	timestart := time.Now()
@@ -45,7 +42,7 @@ func TryMobConverse(rest string, mobInstanceId int, sourceMobInstanceId int) (ut
 
 		sourceMob := GetActor(0, sourceMobInstanceId)
 		if sourceMob == nil {
-			return messageQueue, errors.New("mob not found")
+			return false, errors.New("mob not found")
 		}
 
 		sRoom := GetRoom(sMob.GetRoomId())
@@ -66,36 +63,34 @@ func TryMobConverse(rest string, mobInstanceId int, sourceMobInstanceId int) (ut
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 	}
 
-	return messageQueue, nil
+	return false, nil
 }
 
-func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, sourceType string, details map[string]any) (util.MessageQueue, error) {
-
-	messageQueue = util.NewMessageQueue(0, mobInstanceId)
+func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, sourceType string, details map[string]any) (bool, error) {
 
 	sMob := GetActor(0, mobInstanceId)
 	if sMob == nil {
-		return messageQueue, errors.New("mob not found")
+		return false, errors.New("mob not found")
 	}
 
 	vmw, err := getMobVM(sMob)
 	if err != nil {
-		return util.NewMessageQueue(0, mobInstanceId), err
+		return false, err
 	}
 
 	timestart := time.Now()
@@ -132,37 +127,35 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, source
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 	}
 
-	return messageQueue, nil
+	return false, nil
 }
 
-func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sourceType string) (util.MessageQueue, error) {
-
-	messageQueue = util.NewMessageQueue(0, mobInstanceId)
+func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sourceType string) (bool, error) {
 
 	sMob := GetActor(0, mobInstanceId)
 	if sMob == nil {
 		PruneMobVMs(mobInstanceId)
-		return messageQueue, errors.New("mob not found")
+		return false, errors.New("mob not found")
 	}
 
 	vmw, err := getMobVM(sMob)
 	if err != nil {
-		return util.NewMessageQueue(0, mobInstanceId), err
+		return false, err
 	}
 
 	timestart := time.Now()
@@ -198,18 +191,18 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 
 	} else if onCommandFunc, ok := vmw.GetFunction(`onCommand`); ok {
@@ -241,22 +234,22 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 	}
 
-	return messageQueue, nil
+	return false, nil
 }
 
 func getMobVM(mobActor *ScriptActor) (*VMWrapper, error) {

@@ -10,28 +10,25 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Unlock(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Unlock(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 1 {
 		user.SendText("Unlock what?")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	containerName := room.FindContainerByName(args[0])
@@ -43,8 +40,7 @@ func Unlock(rest string, userId int) (util.MessageQueue, error) {
 
 		if !container.Lock.IsLocked() {
 			user.SendText("That's not locked.")
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		lockId := fmt.Sprintf(`%d-%s`, room.RoomId, containerName)
@@ -82,8 +78,7 @@ func Unlock(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText(`You do not have the key for that. Maybe you could <ansi fg="command">picklock</ansi> the lock.`)
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 
 	} else if exitRoomId > 0 {
 
@@ -91,8 +86,7 @@ func Unlock(rest string, userId int) (util.MessageQueue, error) {
 
 		if !exitInfo.Lock.IsLocked() {
 			user.SendText("That's not locked.")
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		lockId := fmt.Sprintf(`%d-%s`, room.RoomId, exitName)
@@ -130,13 +124,11 @@ func Unlock(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText(`You do not have the key for that. Maybe you could <ansi fg="command">picklock</ansi> the lock.`)
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 
 	}
 
 	user.SendText("There is no such exit or container.")
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 
 }

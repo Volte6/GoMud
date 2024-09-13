@@ -8,23 +8,20 @@ import (
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/util"
 )
 
-func Drink(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Drink(rest string, mobId int) (bool, string, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -33,8 +30,7 @@ func Drink(rest string, mobId int) (util.MessageQueue, error) {
 		itemSpec := matchItem.GetSpec()
 
 		if itemSpec.Subtype != items.Drinkable {
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		mob.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -54,6 +50,5 @@ func Drink(rest string, mobId int) (util.MessageQueue, error) {
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

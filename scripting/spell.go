@@ -9,7 +9,6 @@ import (
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/spells"
-	"github.com/volte6/mud/util"
 )
 
 var (
@@ -21,13 +20,11 @@ func PruneSpellVMs(instanceIds ...int) {
 
 }
 
-func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId int, spellAggro characters.SpellAggroInfo) (util.MessageQueue, error) {
-
-	messageQueue = util.NewMessageQueue(sourceUserId, sourceMobInstanceId)
+func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId int, spellAggro characters.SpellAggroInfo) (bool, error) {
 
 	spellInfo := spells.GetSpell(spellAggro.SpellId)
 	if spellInfo == nil {
-		return messageQueue, fmt.Errorf("spell %s not found", spellAggro.SpellId)
+		return false, fmt.Errorf("spell %s not found", spellAggro.SpellId)
 	}
 
 	timestart := time.Now()
@@ -38,13 +35,13 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 	vmw, err := getSpellVM(spellAggro.SpellId)
 	if err != nil {
 		slog.Debug("TrySpellScriptEvent()", "error", err)
-		return messageQueue, err
+		return false, err
 	}
 
 	sourceActor := GetActor(sourceUserId, sourceMobInstanceId)
 
 	if eventName != `onCast` && eventName != `onWait` && eventName != `onMagic` && eventName != `onFail` {
-		return messageQueue, err
+		return false, err
 	}
 
 	var stringArg string = ""
@@ -68,8 +65,7 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 		// If no longer in the same room, notify the user
 		if singleTargetArg == nil || (sourceActor.GetRoomId() != singleTargetArg.GetRoomId()) {
 			sourceActor.SendText(`Your target cannot be found.`)
-			messageQueue.Handled = true
-			return messageQueue, nil
+			return true, nil
 		}
 
 	} else if spellInfo.Type == spells.HelpMulti || spellInfo.Type == spells.HarmMulti {
@@ -93,8 +89,7 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 
 		if len(multiTargetArg) == 0 {
 			sourceActor.SendText(`Your target cannot be found.`)
-			messageQueue.Handled = true
-			return messageQueue, nil
+			return true, nil
 		}
 
 	}
@@ -127,23 +122,23 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 
 	}
 
-	return messageQueue, nil
+	return false, nil
 
 }
 

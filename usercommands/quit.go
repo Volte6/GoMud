@@ -6,29 +6,25 @@ import (
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Quit(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Quit(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if user.Character.Aggro != nil {
 		user.SendText("You're too busy to quit right now!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	events.AddToQueue(events.Buff{
@@ -37,6 +33,5 @@ func Quit(rest string, userId int) (util.MessageQueue, error) {
 		BuffId:        0,
 	})
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

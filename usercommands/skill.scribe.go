@@ -18,29 +18,26 @@ Level 2 - Scribe to a sign
 Level 3 - Scribe a hidden rune
 Level 4 - TODO
 */
-func Scribe(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Scribe(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Scribe)
 
 	if skillLevel == 0 {
 		user.SendText("You don't know how to scribe.")
-		response.Handled = true
-		return response, fmt.Errorf("you don't know how to scribe")
+		return true, ``, fmt.Errorf("you don't know how to scribe")
 	}
 
 	// Load current room details
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// args should look like one of the following:
@@ -52,8 +49,7 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 
 	if len(args) == 0 {
 		user.SendText("Type `help scribe` for more information on the scribe skill.")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	scribeType := args[0]
@@ -79,8 +75,7 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Scribe.String())),
 			)
-			response.Handled = true
-			return response, fmt.Errorf("you're doing that too often")
+			return true, ``, fmt.Errorf("you're doing that too often")
 
 		} else {
 			// Write a sign in the room
@@ -114,8 +109,7 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Scribe.String())),
 			)
-			response.Handled = true
-			return response, fmt.Errorf("you're doing that too often")
+			return true, ``, fmt.Errorf("you're doing that too often")
 
 		} else {
 
@@ -134,6 +128,5 @@ func Scribe(rest string, userId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

@@ -14,26 +14,23 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Go(rest string, userId int) (util.MessageQueue, error) {
-	response := NewUserCommandResponse(userId)
+func Go(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	if user.Character.Aggro != nil {
 		user.SendText("You can't do that! You are in combat!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// If has a buff that prevents combat, skip the player
 	if user.Character.HasBuffFlag(buffs.NoMovement) {
 		user.SendText("You can't do that!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
@@ -41,8 +38,11 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
+
+	handled := true
+	nextCommand := ``
 
 	exitName, goRoomId := room.FindExitByName(rest)
 
@@ -63,8 +63,7 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 				user.SendText("You're too encumbered to move!")
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		exitInfo := room.Exits[exitName]
@@ -127,21 +126,18 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 
 				if exitInfo.Lock.IsLocked() {
 					user.SendText(`There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.`)
-					response.Handled = true
-					return response, nil
+					return true, ``, nil
 				}
 			}
 
 		}
 
-		// It does so we won't need to continue down the logic after this chunk
-		response.Handled = true
 		originRoomId := user.Character.RoomId
 
 		// Load current room details
 		destRoom := rooms.LoadRoom(goRoomId)
 		if destRoom == nil {
-			return response, fmt.Errorf(`room %d not found`, goRoomId)
+			return false, ``, fmt.Errorf(`room %d not found`, goRoomId)
 		}
 
 		// Grab the exit in the target room that leads to this room (if any)
@@ -161,10 +157,9 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 			enterFromExit = fmt.Sprintf(`the <ansi fg="exit">%s</ansi>`, enterFromExit)
 		}
 
-		if scriptResponse, err := scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId); err == nil {
-
-			if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
-				return response, nil
+		if handled, err := scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId); err == nil {
+			if handled { // For this event, handled represents whether to reject the move.
+				return true, ``, nil
 			}
 		}
 
@@ -172,11 +167,11 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText("Oops, couldn't move there!")
 		} else {
 
-			if scriptResponse, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId); err == nil {
+			if handled, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId); err == nil {
 
-				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
+				if handled { // For this event, handled represents whether to reject the move.
 					rooms.MoveToRoom(user.UserId, originRoomId)
-					return response, nil
+					return true, ``, nil
 				}
 			}
 
@@ -311,12 +306,12 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 
 			}
 
-			response.NextCommand = "look secretly" // Force them to look at the new room they are in.
+			nextCommand = "look secretly" // Force them to look at the new room they are in.
 		}
 
 	}
 
-	if !response.Handled {
+	if !handled {
 
 		if rest == "north" || rest == "south" || rest == "east" || rest == "west" || rest == "up" || rest == "down" || rest == "northwest" || rest == "northeast" || rest == "southwest" || rest == "southeast" {
 			user.SendText("You're bumping into walls.")
@@ -330,10 +325,10 @@ func Go(rest string, userId int) (util.MessageQueue, error) {
 					),
 					userId)
 			}
-			response.Handled = true
+			handled = true
 		}
 
 	}
 
-	return response, nil
+	return handled, nextCommand, nil
 }

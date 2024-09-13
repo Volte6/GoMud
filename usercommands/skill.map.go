@@ -12,7 +12,6 @@ import (
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 /*
@@ -22,47 +21,40 @@ Level 2 - Map a 9x7 area
 Level 3 - Map a 13x9 area
 Level 4 - Map a 17x9 area, and enables the "wide" version.
 */
-func Map(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Map(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Map)
 
 	if skillLevel == 0 {
 		user.SendText("You don't know how to map.")
-		response.Handled = true
-		return response, errors.New(`you don't know how to map`)
+		return true, ``, errors.New(`you don't know how to map`)
 	}
 
 	if rest == "memory" {
 		user.SendText(fmt.Sprintf("You currently remember %d of %d possible rooms.", len(user.Character.GetRoomMemory()), user.Character.GetMemoryCapacity()))
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 	if rest == "sprawl" {
 		user.SendText(fmt.Sprintf("The reach of your maps is %d rooms.", user.Character.GetMapSprawlCapacity()))
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if rest == "wide" && skillLevel < 4 {
 		user.SendText("You don't know how to create a wide map.")
-		response.Handled = true
-		return response, errors.New(`you don't know how to create a wide map`)
+		return true, ``, errors.New(`you don't know how to create a wide map`)
 	}
 
 	if !user.Character.TryCooldown(skills.Map.String(), 1) {
 		user.SendText(
 			`You can only create 1 map per round.`,
 		)
-		response.Handled = true
-		return response, errors.New(`you're doing that too often`)
+		return true, ``, errors.New(`you're doing that too often`)
 	}
 
 	// replace any non alpha/numeric characters in "rest"
@@ -83,8 +75,7 @@ func Map(rest string, userId int) (util.MessageQueue, error) {
 	// First check for a premade map.
 	if mapTxt, err := templates.Process("maps/"+rooms.ZoneNameSanitize(zone), zone); err == nil {
 		user.SendText(mapTxt)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	var mapData rooms.MapData
@@ -205,19 +196,17 @@ func Map(rest string, userId int) (util.MessageQueue, error) {
 
 	//mapData, err := rooms.GenerateZoneMapZoomedOut(zone, roomId, 0, 65, 18)
 	if err != nil {
-		return response, err
+		return false, ``, err
 	}
 
 	mapTxt, err := templates.Process("maps/map", mapData)
 	if err != nil {
 		slog.Error("Map", "error", err.Error())
 		user.SendText(`No map found (or an error occured)"`)
-		response.Handled = true
-		return response, err
+		return true, ``, err
 	}
 
 	user.SendText(mapTxt)
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

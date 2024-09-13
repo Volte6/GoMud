@@ -2,18 +2,14 @@ package usercommands
 
 import (
 	"github.com/volte6/mud/events"
-	"github.com/volte6/mud/util"
 )
 
-func Print(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Print(rest string, userId int) (bool, string, error) {
 
 	events.AddToQueue(events.Message{
 		UserId: userId,
 		Text:   rest,
 	})
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

@@ -11,14 +11,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Auction(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Auction(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	if on := user.GetConfigOption(`auction`); on != nil && !on.(bool) {
@@ -27,8 +25,7 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 			`Auctions are disabled. See <ansi fg="command">help set</ansi> for learn how to change this.`,
 		)
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	currentAuction := auctions.GetCurrentAuction()
@@ -43,8 +40,7 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 		} else {
 			user.SendText(`No current auctions. You can auction something, though!`)
 		}
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if args[0] == `history` {
@@ -85,34 +81,29 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 		tplTxt, _ := templates.Process("tables/generic", historyTableData)
 		user.SendText(tplTxt)
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if args[0] == `bid` {
 
 		if currentAuction == nil {
 			user.SendText(`There is not an auction to bid on.`)
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if currentAuction.SellerUserId == userId {
 			user.SendText(`You cannot bid on your own auction.`)
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if currentAuction.HighestBidUserId == userId {
 			user.SendText(`You are already the highest bidder.`)
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if len(args) < 2 {
 			user.SendText(`Bid how much?`)
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		minBid := currentAuction.HighestBid + 1
@@ -123,20 +114,17 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 		amt, _ := strconv.Atoi(args[1])
 		if amt < minBid {
 			user.SendText(fmt.Sprintf(`You must bid at least <ansi fg="gold">%d gold</ansi>.`, minBid))
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if amt > user.Character.Gold {
 			user.SendText(`You don't have that much gold.`)
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if err := auctions.Bid(userId, amt); err != nil {
 			user.SendText(err.Error())
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		user.Character.Gold -= amt
@@ -152,15 +140,13 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 			}
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// If there is already an auction happening, abort this attempt.
 	if currentAuction != nil {
 		user.SendText(`There is already an auction in progress.`)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -168,36 +154,31 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 
 	if !found {
 		user.SendText(fmt.Sprintf("You don't have a %s to auction.", rest))
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	cmdPrompt, _ := user.StartPrompt(`auction`, rest)
 	questionConfirm := cmdPrompt.Ask(`Auction your `+matchItem.NameComplex()+`?`, []string{`Yes`, `No`})
 	if !questionConfirm.Done {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if questionConfirm.Response != `Yes` {
 		user.SendText(`Aborting auction`)
 		user.ClearPrompt()
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	questionAmount := cmdPrompt.Ask(`Auction for how much gold?`, []string{})
 	if !questionAmount.Done {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	amt, _ := strconv.Atoi(questionAmount.Response)
 	if amt < 1 {
 		user.SendText(`Aborting auction`)
 		user.ClearPrompt()
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	user.ClearPrompt()
@@ -208,6 +189,5 @@ func Auction(rest string, userId int) (util.MessageQueue, error) {
 		user.Character.RemoveItem(matchItem)
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

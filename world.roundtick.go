@@ -129,8 +129,8 @@ func (w *World) HandlePlayerRoundTicks() {
 			room.RoundTick()
 
 			allowIdleMessages := true
-			if scriptResponse, err := scripting.TryRoomIdleEvent(roomId); err == nil {
-				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
+			if handled, err := scripting.TryRoomIdleEvent(roomId); err == nil {
+				if handled { // For this event, handled represents whether to reject the move.
 					allowIdleMessages = false
 				}
 			}
@@ -516,8 +516,8 @@ func (w *World) HandlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 			}
 
 			allowRetaliation := true
-			if res, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo); err == nil {
-				if res.Handled {
+			if handled, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo); err == nil {
+				if handled {
 					allowRetaliation = false
 				}
 			}
@@ -944,9 +944,8 @@ func (w *World) HandleMobCombat() (affectedPlayerIds []int, affectedMobInstanceI
 			}
 
 			allowRetaliation := true
-			if res, err := scripting.TrySpellScriptEvent(`onMagic`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo); err == nil {
-
-				if res.Handled {
+			if handled, err := scripting.TrySpellScriptEvent(`onMagic`, 0, mob.InstanceId, mob.Character.Aggro.SpellInfo); err == nil {
+				if handled {
 					allowRetaliation = false
 				}
 			}
@@ -1394,8 +1393,8 @@ func (w *World) HandleIdleMobs() {
 		}
 
 		// If they have idle commands, maybe do one of them?
-		result, _ := scripting.TryMobScriptEvent("onIdle", mob.InstanceId, 0, ``, nil)
-		if !result.Handled {
+		handled, _ := scripting.TryMobScriptEvent("onIdle", mob.InstanceId, 0, ``, nil)
+		if !handled {
 			if !mob.Character.IsCharmed() { // Won't do this stuff if befriended
 
 				if mob.MaxWander > -1 && len(mob.RoomStack) > mob.MaxWander {
@@ -1412,7 +1411,7 @@ func (w *World) HandleIdleMobs() {
 		//
 		// Look for trouble
 		//
-		if !result.Handled {
+		if !handled {
 			if mob.Character.IsCharmed() {
 				// Only some mobs can apply first aid
 				if mob.Character.KnowsFirstAid() {

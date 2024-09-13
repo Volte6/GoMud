@@ -6,17 +6,14 @@ import (
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Killstats(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Killstats(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	tableTitle := `Kill Stats`
@@ -100,6 +97,5 @@ func Killstats(rest string, userId int) (util.MessageQueue, error) {
 	tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
 	user.SendText(tplTxt)
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

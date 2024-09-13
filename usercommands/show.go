@@ -13,20 +13,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Show(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Show(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	rest = util.StripPrepositions(rest)
@@ -35,8 +33,7 @@ func Show(rest string, userId int) (util.MessageQueue, error) {
 
 	if len(args) < 2 {
 		user.SendText("Show what? To whom?")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	var showItem items.Item = items.Item{}
@@ -51,8 +48,7 @@ func Show(rest string, userId int) (util.MessageQueue, error) {
 
 	if !found {
 		user.SendText(fmt.Sprintf("You don't have a %s to show.", objectName))
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	playerId, mobId := room.FindByName(targetName)
@@ -90,8 +86,7 @@ func Show(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText("Something went wrong.")
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 
 	}
 
@@ -126,12 +121,10 @@ func Show(rest string, userId int) (util.MessageQueue, error) {
 
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	user.SendText("Who???")
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

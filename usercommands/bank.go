@@ -11,50 +11,44 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Bank(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Bank(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	user.SendText(``)
 
 	if !room.IsBank {
 		user.SendText(`You are not at a bank.` + term.CRLFStr)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if rest == `` {
 		user.SendText(fmt.Sprintf(`You have <ansi fg="gold">%d gold</ansi> on hand and <ansi fg="gold">%d gold</ansi> in the bank.`, user.Character.Gold, user.Character.Bank))
 		user.SendText(`You can <ansi fg="command">deposit</ansi> to or <ansi fg="command">withdraw</ansi> from the bank.` + term.CRLFStr)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if rest == `deposit` || rest == `withdraw` {
 		user.SendText(fmt.Sprintf(`%s how much? Make sure to include the amount of gold or "all".%s`, rest, term.CRLFStr))
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 || (args[0] != `deposit` && args[0] != `withdraw`) {
 		user.SendText(`Try <ansi fg="command">help bank</ansi> for more information about banking.` + term.CRLFStr)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	action := args[0]
@@ -64,8 +58,7 @@ func Bank(rest string, userId int) (util.MessageQueue, error) {
 	if amount < 1 && amountStr != `all` {
 
 		user.SendText(fmt.Sprintf(`You must specify an amount greater than zero to %s.%s`, action, term.CRLFStr))
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 
 	} else if action == `deposit` {
 		if amountStr == `all` {
@@ -101,6 +94,5 @@ func Bank(rest string, userId int) (util.MessageQueue, error) {
 	}
 
 	user.SendText(``)
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

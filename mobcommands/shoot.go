@@ -13,25 +13,22 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Shoot(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Shoot(rest string, mobId int) (bool, string, error) {
 
 	// Load mob details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if mob.Character.Equipment.Weapon.GetSpec().Subtype != items.Shooting {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	attackPlayerId := 0
@@ -42,8 +39,7 @@ func Shoot(rest string, mobId int) (util.MessageQueue, error) {
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 2 {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	direction := args[len(args)-1]
@@ -56,8 +52,7 @@ func Shoot(rest string, mobId int) (util.MessageQueue, error) {
 
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if adjacentRoom := rooms.LoadRoom(attackRoomId); adjacentRoom != nil {
@@ -66,13 +61,11 @@ func Shoot(rest string, mobId int) (util.MessageQueue, error) {
 	}
 
 	if attackRoomId == 0 {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if attackPlayerId == 0 && attackMobInstanceId == 0 {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
@@ -92,8 +85,7 @@ func Shoot(rest string, mobId int) (util.MessageQueue, error) {
 		if m != nil {
 
 			if m.Character.IsCharmed(mobId) {
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 
 			mob.Character.SetAggroRemote(exitName, 0, attackMobInstanceId, characters.Shooting)
@@ -126,6 +118,5 @@ func Shoot(rest string, mobId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

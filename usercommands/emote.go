@@ -5,7 +5,6 @@ import (
 
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 var (
@@ -93,20 +92,18 @@ var (
 	}
 )
 
-func Emote(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Emote(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if len(rest) == 0 {
@@ -115,8 +112,7 @@ func Emote(rest string, userId int) (util.MessageQueue, error) {
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> emotes.`, user.Character.Name),
 			userId,
 		)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if rest[0] == '@' && len(rest) > 1 {
@@ -132,6 +128,5 @@ func Emote(rest string, userId int) (util.MessageQueue, error) {
 		userId,
 	)
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

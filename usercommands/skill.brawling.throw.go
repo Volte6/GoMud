@@ -21,34 +21,33 @@ import (
 Brawling Skill
 Level 2 - You can throw objects at NPCs or other rooms.
 */
-func Throw(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Throw(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf(`user %d not found`, userId)
+		return false, ``, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
+	handled := false
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 2 {
-		return response, nil
+		return false, ``, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 2 {
 		user.SendText("Throw what? Where??")
-		return response, nil
+		return false, ``, nil
 	}
 
 	throwWhat := args[0]
@@ -59,13 +58,12 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 	itemMatch, ok := user.Character.FindInBackpack(throwWhat)
 	if !ok {
 		user.SendText(fmt.Sprintf(`You don't have a "%s" to throw.`, throwWhat))
-		return response, nil
+		return false, ``, nil
 	}
 
 	if !user.Character.TryCooldown(skills.Brawling.String(`throw`), 4) {
 		user.SendText("You are too tired to throw objects again so soon!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	targetPlayerId, targetMobId := room.FindByName(throwWhere)
@@ -110,7 +108,7 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 		} else {
 			user.SendText(`You can't do that right now.`)
 		}
-		response.Handled = true
+		handled = true
 
 	} else if targetPlayerId > 0 {
 
@@ -151,7 +149,7 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 
 		room.AddItem(itemMatch, false)
 
-		response.Handled = true
+		handled = true
 
 	} else {
 
@@ -173,8 +171,7 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 			exitInfo := room.Exits[exitName]
 			if exitInfo.Lock.IsLocked() {
 				user.SendText(fmt.Sprintf(`The %s exit is locked.`, exitName))
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 
 			user.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -225,11 +222,11 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 
 			throwToRoom.AddItem(itemMatch, false)
 
-			response.Handled = true
+			handled = true
 		}
 
 		// Still looking for an exit... try the temp ones
-		if !response.Handled {
+		if !handled {
 			if len(room.ExitsTemp) > 0 {
 				// See if there's a close match
 				exitNames := make([]string, 0, len(room.ExitsTemp))
@@ -300,17 +297,16 @@ func Throw(rest string, userId int) (util.MessageQueue, error) {
 
 					throwToRoom.AddItem(itemMatch, false)
 
-					response.Handled = true
+					handled = true
 
 				}
 			}
 		}
 	}
 
-	if !response.Handled {
-		response.Handled = true
+	if !handled {
 		user.SendText(fmt.Sprintf(`You don't see a "%s" to throw it to.`, throwWhere))
 	}
 
-	return response, nil
+	return true, ``, nil
 }

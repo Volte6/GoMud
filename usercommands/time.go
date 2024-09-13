@@ -3,12 +3,9 @@ package usercommands
 import (
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
-	"github.com/volte6/mud/util"
 )
 
-func Time(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Time(rest string, userId int) (bool, string, error) {
 
 	gd := gametime.GetDate()
 
@@ -22,6 +19,5 @@ func Time(rest string, userId int) (util.MessageQueue, error) {
 		Text:   `It is now ` + gd.String() + `. It is ` + dayNight + `.`,
 	})
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

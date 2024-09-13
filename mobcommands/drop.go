@@ -11,20 +11,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Drop(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Drop(rest string, mobId int) (bool, string, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -45,8 +43,7 @@ func Drop(rest string, mobId int) (util.MessageQueue, error) {
 			Drop(item.Name(), mobId)
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// Drop 10 gold
@@ -54,8 +51,7 @@ func Drop(rest string, mobId int) (util.MessageQueue, error) {
 		g, _ := strconv.ParseInt(args[0], 10, 32)
 		dropAmt := int(g)
 		if dropAmt < 1 {
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if dropAmt <= mob.Character.Gold {
@@ -66,8 +62,7 @@ func Drop(rest string, mobId int) (util.MessageQueue, error) {
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> drops <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, dropAmt))
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 	}
 
@@ -84,6 +79,5 @@ func Drop(rest string, mobId int) (util.MessageQueue, error) {
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

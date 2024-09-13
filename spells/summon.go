@@ -1,12 +1,8 @@
 package spells
 
-import "github.com/volte6/mud/util"
-
-func Summon(sourceUserId int, sourceMobId int, details any) (util.MessageQueue, error) {
-
-	response := util.NewMessageQueue(sourceUserId, sourceMobId)
+func Summon(sourceUserId int, sourceMobId int, details any) (bool, string, error) {
 
 	// rest contains any special details of the spellcast, such as what creature to summon
 
-	return response, nil
+	return false, ``, nil
 }

@@ -2,12 +2,10 @@ package scripting
 
 import (
 	"github.com/dop251/goja"
-	"github.com/volte6/mud/util"
 )
 
 var (
 	disableMessageQueue = false
-	messageQueue        util.MessageQueue
 )
 
 func setMessagingFunctions(vm *goja.Runtime) {

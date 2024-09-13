@@ -680,8 +680,9 @@ func (w *World) processInput(userId int, inputText string) {
 		command := ``
 		remains := ``
 
-		commandResponse := usercommands.NewUserCommandResponse(userId)
 		var err error
+		handled := false
+		nextCommand := ``
 
 		inputText = strings.TrimSpace(inputText)
 
@@ -690,7 +691,7 @@ func (w *World) processInput(userId int, inputText string) {
 			// Check for macros
 			if user.Macros != nil && len(inputText) == 2 {
 				if macro, ok := user.Macros[inputText]; ok {
-					commandResponse.Handled = true
+					handled = true
 					for _, newCmd := range strings.Split(macro, `;`) {
 						if newCmd == `` {
 							continue
@@ -705,7 +706,7 @@ func (w *World) processInput(userId int, inputText string) {
 				}
 			}
 
-			if !commandResponse.Handled {
+			if !handled {
 
 				// Lets users use gossip/say shortcuts without a space
 				if len(inputText) > 1 {
@@ -720,7 +721,7 @@ func (w *World) processInput(userId int, inputText string) {
 					command = inputText
 				}
 
-				commandResponse, err = usercommands.TryCommand(command, remains, userId)
+				handled, nextCommand, err = usercommands.TryCommand(command, remains, userId)
 				if err != nil {
 					slog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
 				}
@@ -728,7 +729,7 @@ func (w *World) processInput(userId int, inputText string) {
 
 		}
 
-		if !commandResponse.Handled {
+		if !handled {
 			if len(command) > 0 {
 				user.SendText(fmt.Sprintf(`<ansi fg="command">%s</ansi> not recognized. Type <ansi fg="command">help</ansi> for commands.`, command))
 				user.Command(`emote looks a little confused`)
@@ -736,8 +737,8 @@ func (w *World) processInput(userId int, inputText string) {
 		}
 
 		// Load up any forced commands
-		if len(commandResponse.NextCommand) > 0 {
-			inputText = commandResponse.NextCommand
+		if len(nextCommand) > 0 {
+			inputText = nextCommand
 			continue
 		}
 
@@ -761,7 +762,8 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 		command := ""
 		remains := ""
 
-		commandResponse := mobcommands.NewMobCommandResponse(mobInstanceId)
+		handled := false
+		nextCommand := ``
 		var err error
 
 		if len(inputText) > 0 {
@@ -774,22 +776,22 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 			//slog.Info("World received mob input", "InputText", (inputText))
 
-			commandResponse, err = mobcommands.TryCommand(command, remains, mobInstanceId)
+			handled, nextCommand, err = mobcommands.TryCommand(command, remains, mobInstanceId)
 			if err != nil {
 				slog.Error("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
 			}
 
 		}
 
-		if !commandResponse.Handled {
+		if !handled {
 			if len(command) > 0 {
 				mob.Command(fmt.Sprintf(`emote looks a little confused (%s %s).`, mob.Character.Name, command, remains))
 			}
 		}
 
 		// Load up any forced commands
-		if len(commandResponse.NextCommand) > 0 {
-			inputText = commandResponse.NextCommand
+		if len(nextCommand) > 0 {
+			inputText = nextCommand
 			continue
 		}
 

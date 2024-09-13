@@ -6,30 +6,26 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/util"
 )
 
-func Remove(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Remove(rest string, mobId int) (bool, string, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if rest == "all" {
 		for _, item := range mob.Character.Equipment.GetAllItems() {
 			Remove(item.Name(), mobId)
 		}
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -52,6 +48,5 @@ func Remove(rest string, mobId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

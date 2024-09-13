@@ -7,17 +7,14 @@ import (
 	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Spells(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Spells(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf(`user %d not found`, userId)
+		return false, ``, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `MPs`, `Wait`, `Casts`, `% Chance`}
@@ -141,6 +138,5 @@ func Spells(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText( tplTxt)
 		}
 	*/
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

@@ -15,39 +15,35 @@ import (
 Brawling Skill
 Level 3 - Attempt to tackle an opponent, making them miss a round.
 */
-func Tackle(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Tackle(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 3 {
-		return response, nil
+		return false, ``, nil
 	}
 
 	if user.Character.Aggro == nil {
 		user.SendText("Tackle is only used while in combat!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if !user.Character.TryCooldown(skills.Brawling.String(`tackle`), 5) {
 		user.SendText("You are too tired to tackle again so soon!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	attackMobInstanceId := user.Character.Aggro.MobInstanceId
@@ -157,6 +153,5 @@ func Tackle(rest string, userId int) (util.MessageQueue, error) {
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

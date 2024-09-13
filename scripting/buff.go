@@ -8,7 +8,6 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/util"
 )
 
 var (
@@ -20,15 +19,13 @@ func PruneBuffVMs(instanceIds ...int) {
 	// Do not prune, they dont' get a VM per buff instance.
 }
 
-func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId int) (util.MessageQueue, error) {
+func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId int) (bool, error) {
 
 	slog.Info("TryBuffScriptEvent()", "eventName", eventName, "buffId", buffId)
 	vmw, err := getBuffVM(buffId)
 	if err != nil {
-		return util.NewMessageQueue(0, 0), err
+		return false, err
 	}
-
-	messageQueue = util.NewMessageQueue(0, 0)
 
 	actorInfo := GetActor(userId, mobInstanceId)
 	buffTriggersLeft := actorInfo.characterRecord.Buffs.TriggersLeft(buffId)
@@ -57,32 +54,30 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 	}
 
-	return messageQueue, nil
+	return false, nil
 }
 
-func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buffId int) (util.MessageQueue, error) {
+func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buffId int) (bool, error) {
 
 	vmw, err := getBuffVM(buffId)
 	if err != nil {
-		return util.NewMessageQueue(0, 0), err
+		return false, err
 	}
-
-	messageQueue = util.NewMessageQueue(0, 0)
 
 	sActor := GetActor(userId, mobInstanceId)
 	sRoom := GetRoom(sActor.GetRoomId())
@@ -112,18 +107,18 @@ func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buff
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 
 	} else if onCommandFunc, ok := vmw.GetFunction(`onCommand`); ok {
@@ -150,22 +145,22 @@ func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buff
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 	}
 
-	return messageQueue, nil
+	return false, nil
 }
 
 func getBuffVM(buffId int) (*VMWrapper, error) {

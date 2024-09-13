@@ -18,27 +18,25 @@ import (
 SkullDuggery Skill
 Level 4 - Pickpocket
 */
-func Pickpocket(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Pickpocket(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 4 {
-		return response, nil
+		return false, ``, nil
 	}
 
 	// Must be sneaking
@@ -46,14 +44,12 @@ func Pickpocket(rest string, userId int) (util.MessageQueue, error) {
 
 	if user.Character.Aggro != nil {
 		user.SendText("You can't do that while in combat!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if room.AreMobsAttacking(userId) {
 		user.SendText("You can't do that while you are under attack!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -64,8 +60,7 @@ func Pickpocket(rest string, userId int) (util.MessageQueue, error) {
 
 		if !user.Character.TryCooldown(skills.Skulduggery.String(`pickpocket`), 15) {
 			user.SendText(fmt.Sprintf("You need to wait %d rounds before you can do that again!", user.Character.GetCooldown(skills.Skulduggery.String(`pickpocket`))))
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 	}
@@ -151,8 +146,7 @@ func Pickpocket(rest string, userId int) (util.MessageQueue, error) {
 
 		if !configs.GetConfig().PVPEnabled {
 			user.SendText(`PVP is currently disabled.`)
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		p := users.GetByUserId(pickPlayerId)
@@ -245,6 +239,5 @@ func Pickpocket(rest string, userId int) (util.MessageQueue, error) {
 		user.SendText("Pickpocket who?")
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

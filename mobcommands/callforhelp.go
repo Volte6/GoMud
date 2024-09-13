@@ -5,31 +5,28 @@ import (
 
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/util"
 )
 
 // Should check adjacent rooms for mobs and call them into the room to help if of the same group
 // Format should be:
 // callforhelp blows his horn
 // "blows his horn" will be emoted to the room
-func CallForHelp(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func CallForHelp(rest string, mobId int) (bool, string, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if mob.Character.Aggro == nil || mob.Character.Aggro.UserId == 0 {
-		return response, fmt.Errorf(`mob %d has no aggro`, mobId)
+		return false, ``, fmt.Errorf(`mob %d has no aggro`, mobId)
 	}
 
 	calledForHelp := false
@@ -72,6 +69,5 @@ func CallForHelp(rest string, mobId int) (util.MessageQueue, error) {
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

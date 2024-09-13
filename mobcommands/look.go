@@ -11,8 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Look(rest string, mobId int) (util.MessageQueue, error) {
-	response := NewMobCommandResponse(mobId)
+func Look(rest string, mobId int) (bool, string, error) {
 
 	secretLook := false
 	if strings.HasPrefix(rest, "secretly") {
@@ -23,13 +22,13 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
@@ -48,8 +47,7 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 
 			exitInfo := room.Exits[exitName]
 			if exitInfo.Lock.IsLocked() {
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 
 			if !isSneaking {
@@ -58,10 +56,9 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 
 			if lookRoomId > 0 {
 
-				lookRoom(mobId, lookRoomId, &response, secretLook || isSneaking)
+				lookRoom(mobId, lookRoomId, secretLook || isSneaking)
 
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 		}
 
@@ -76,8 +73,7 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 				)
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		//
@@ -115,8 +111,7 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 
 		}
 
@@ -131,12 +126,10 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 				)
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 
 	} else {
 
@@ -148,14 +141,13 @@ func Look(rest string, mobId int) (util.MessageQueue, error) {
 			// Make it a "secret looks" now because we don't want another look message sent out by the lookRoom() func
 			secretLook = true
 		}
-		lookRoom(mobId, room.RoomId, &response, secretLook || isSneaking)
+		lookRoom(mobId, room.RoomId, secretLook || isSneaking)
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }
 
-func lookRoom(mobId int, roomId int, response *util.MessageQueue, secretLook bool) {
+func lookRoom(mobId int, roomId int, secretLook bool) {
 
 	mob := mobs.GetInstance(mobId)
 	room := rooms.LoadRoom(roomId)

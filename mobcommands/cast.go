@@ -14,27 +14,24 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Cast(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Cast(rest string, mobId int) (bool, string, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 1 {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	spellName := args[0]
@@ -43,13 +40,11 @@ func Cast(rest string, mobId int) (util.MessageQueue, error) {
 	spellInfo := spells.GetSpell(spellName)
 
 	if spellInfo == nil {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 	/*
 		if mob.Character.Mana < spellInfo.Cost {
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 	*/
 	targetPlayerId := 0
@@ -222,8 +217,8 @@ func Cast(rest string, mobId int) (util.MessageQueue, error) {
 	if len(spellAggro.TargetUserIds) > 0 || len(spellAggro.TargetMobInstanceIds) > 0 || len(spellAggro.SpellRest) > 0 {
 
 		continueCasting := true
-		if res, err := scripting.TrySpellScriptEvent(`onCast`, 0, mobId, spellAggro); err == nil {
-			continueCasting = res.Handled
+		if allowContinueCasting, err := scripting.TrySpellScriptEvent(`onCast`, 0, mobId, spellAggro); err == nil {
+			continueCasting = allowContinueCasting
 		}
 
 		if continueCasting {
@@ -233,6 +228,5 @@ func Cast(rest string, mobId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

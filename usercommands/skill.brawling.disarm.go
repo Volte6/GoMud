@@ -14,33 +14,30 @@ import (
 Brawling Skill
 Level 4 - Attempt to disarm an opponent.
 */
-func Disarm(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Disarm(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 4 {
-		return response, nil
+		return false, ``, nil
 	}
 
 	if user.Character.Aggro == nil {
 		user.SendText("Disarm is only used while in combat!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	attackMobInstanceId := user.Character.Aggro.MobInstanceId
@@ -49,8 +46,7 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 	if attackMobInstanceId > 0 || attackPlayerId > 0 {
 		if !user.Character.TryCooldown(skills.Brawling.String(`disarm`), 15) {
 			user.SendText(fmt.Sprintf("You can try disarming again in %d rounds.", user.Character.GetCooldown(skills.Brawling.String(`disarm`))))
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 	}
 
@@ -62,8 +58,7 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 
 			if m.Character.Equipment.Weapon.ItemId == 0 {
 				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> has no weapon to disarm!`, m.Character.Name))
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 
 			chanceIn100 := (user.Character.Stats.Speed.ValueAdj + user.Character.Stats.Smarts.ValueAdj) - (m.Character.Stats.Strength.ValueAdj + m.Character.Stats.Perception.ValueAdj)
@@ -160,6 +155,5 @@ func Disarm(rest string, userId int) (util.MessageQueue, error) {
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

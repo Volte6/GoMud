@@ -12,12 +12,9 @@ import (
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Look(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Look(rest string, userId int) (bool, string, error) {
 
 	secretLook := false
 	if strings.HasPrefix(rest, "secretly") {
@@ -28,13 +25,13 @@ func Look(rest string, userId int) (util.MessageQueue, error) {
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// 0 = none. 1 = can see this room. 2 = can see this room and all exits
@@ -70,8 +67,7 @@ func Look(rest string, userId int) (util.MessageQueue, error) {
 		raceInfo := races.GetRace(user.Character.RaceId)
 		if !raceInfo.NightVision {
 			user.SendText(`You can't see anything!`)
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 	}
 
@@ -90,8 +86,7 @@ func Look(rest string, userId int) (util.MessageQueue, error) {
 				user.SendText(``)
 				user.SendText(`The chest is locked.`)
 				user.SendText(``)
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 
 			chestStuff := []string{}
@@ -113,8 +108,7 @@ func Look(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText(``)
 			user.SendText(textOut)
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		//
@@ -143,8 +137,7 @@ func Look(rest string, userId int) (util.MessageQueue, error) {
 					biome := room.GetBiome()
 					if !biome.IsLit() {
 						user.SendText(`It's too dark to see anything in that direction.`)
-						response.Handled = true
-						return response, nil
+						return true, ``, nil
 					}
 
 				}
@@ -154,8 +147,7 @@ func Look(rest string, userId int) (util.MessageQueue, error) {
 			exitInfo := room.Exits[exitName]
 			if exitInfo.Lock.IsLocked() {
 				user.SendText(fmt.Sprintf("The %s exit is locked.", exitName))
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 
 			user.SendText(fmt.Sprintf("You peer toward the %s.", exitName))
@@ -165,10 +157,9 @@ func Look(rest string, userId int) (util.MessageQueue, error) {
 
 			if lookRoomId > 0 {
 
-				lookRoom(user.UserId, lookRoomId, &response, secretLook || isSneaking)
+				lookRoom(user.UserId, lookRoomId, secretLook || isSneaking)
 
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 		}
 
@@ -206,8 +197,7 @@ func Look(rest string, userId int) (util.MessageQueue, error) {
 
 			user.SendText(``)
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		//
@@ -283,15 +273,13 @@ func Look(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText(statusTxt)
 			user.SendText(invTxt)
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 
 		}
 
 		user.SendText("Look at what???")
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 
 	} else {
 
@@ -304,14 +292,13 @@ func Look(rest string, userId int) (util.MessageQueue, error) {
 			// Make it a "secret looks" now because we don't want another look message sent out by the lookRoom() func
 			secretLook = true
 		}
-		lookRoom(user.UserId, room.RoomId, &response, secretLook || isSneaking)
+		lookRoom(user.UserId, room.RoomId, secretLook || isSneaking)
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }
 
-func lookRoom(userId int, roomId int, response *util.MessageQueue, secretLook bool) {
+func lookRoom(userId int, roomId int, secretLook bool) {
 
 	user := users.GetByUserId(userId)
 	room := rooms.LoadRoom(roomId)

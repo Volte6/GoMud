@@ -10,23 +10,20 @@ import (
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Attack(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Attack(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	attackPlayerId := 0
@@ -110,8 +107,7 @@ func Attack(rest string, userId int) (util.MessageQueue, error) {
 
 	if attackMobInstanceId == 0 && attackPlayerId == 0 {
 		user.SendText("You attack the darkness!")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
@@ -131,8 +127,7 @@ func Attack(rest string, userId int) (util.MessageQueue, error) {
 		if m != nil {
 			if m.Character.IsCharmed(userId) {
 				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 
 			if party := parties.Get(user.UserId); party != nil {
@@ -182,8 +177,7 @@ func Attack(rest string, userId int) (util.MessageQueue, error) {
 
 		if !configs.GetConfig().PVPEnabled {
 			user.SendText(`PVP is currently disabled.`)
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		p := users.GetByUserId(attackPlayerId)
@@ -193,8 +187,7 @@ func Attack(rest string, userId int) (util.MessageQueue, error) {
 			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
 				if partyInfo.IsMember(attackPlayerId) {
 					user.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name))
-					response.Handled = true
-					return response, nil
+					return true, ``, nil
 				}
 			}
 
@@ -244,6 +237,5 @@ func Attack(rest string, userId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

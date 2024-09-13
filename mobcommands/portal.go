@@ -8,32 +8,29 @@ import (
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/util"
 )
 
 // Mob portaling is different than player portaling.
 // Mob portals are open for shorter periods, and go to specific locations.
-func Portal(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Portal(rest string, mobId int) (bool, string, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
-		if response, err := Go(`portal`, mobId); response.Handled {
-			return response, err
+		if handled, nextCommand, err := Go(`portal`, mobId); handled {
+			return handled, nextCommand, err
 		}
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	var err error
@@ -62,8 +59,7 @@ func Portal(rest string, mobId int) (util.MessageQueue, error) {
 
 			mob.Command(`portal home;drop all`)
 
-			response.Handled = true
-			return response, fmt.Errorf("failed to find temporary exit to room")
+			return true, ``, fmt.Errorf("failed to find temporary exit to room")
 		}
 		portalTargetRoomId = mostItemRoomId
 	}
@@ -74,13 +70,13 @@ func Portal(rest string, mobId int) (util.MessageQueue, error) {
 	}
 
 	if portalTargetRoomId == mob.Character.RoomId {
-		return response, err
+		return false, ``, err
 	}
 
 	// Load current room details
 	targetRoom := rooms.LoadRoom(portalTargetRoomId)
 	if targetRoom == nil {
-		return response, fmt.Errorf(`room %d not found`, portalTargetRoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, portalTargetRoomId)
 	}
 
 	// Target = portalTargetRoomId
@@ -96,8 +92,7 @@ func Portal(rest string, mobId int) (util.MessageQueue, error) {
 
 	// Spawn a portal in the room that leads to the portal location
 	if !room.AddTemporaryExit(newPortalExitName, newPortal) {
-		response.Handled = true
-		return response, fmt.Errorf("failed to add temporary exit to room")
+		return true, ``, fmt.Errorf("failed to add temporary exit to room")
 	}
 
 	room.SendText(
@@ -112,6 +107,5 @@ func Portal(rest string, mobId int) (util.MessageQueue, error) {
 		fmt.Sprintf(`A %s appears!`, newPortal.Title),
 	)
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

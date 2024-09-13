@@ -10,19 +10,17 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Alchemy(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Alchemy(rest string, mobId int) (bool, string, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -34,8 +32,7 @@ func Alchemy(rest string, mobId int) (util.MessageQueue, error) {
 			Alchemy(matchItem.Name(), mobId)
 
 		}
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if args[0] == "all" {
@@ -49,8 +46,7 @@ func Alchemy(rest string, mobId int) (util.MessageQueue, error) {
 			Alchemy(item.Name(), mobId)
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -64,6 +60,5 @@ func Alchemy(rest string, mobId int) (util.MessageQueue, error) {
 			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> chants softly. Their <ansi fg="item">%s</ansi> slowly levitates in the air, trembles briefly and then in a flash of light becomes a gold coin!`, mob.Character.Name, matchItem.DisplayName()))
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

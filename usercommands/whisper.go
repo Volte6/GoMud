@@ -8,29 +8,25 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Whisper(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Whisper(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 1 {
 		user.SendText("Whisper to who?")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	whisperName := args[0]
 	if len(rest) < len(whisperName)+1 {
 		user.SendText("You need to specify a message.")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	rest = strings.TrimSpace(rest[len(whisperName)+1:])
@@ -38,12 +34,10 @@ func Whisper(rest string, userId int) (util.MessageQueue, error) {
 	toUser := users.GetByCharacterName(whisperName)
 	if toUser == nil {
 		user.SendText("You can't find anyone by that name.")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	toUser.SendText(fmt.Sprintf(`<ansi fg="white">***</ansi> <ansi fg="black-bold"><ansi fg="username">%s</ansi> whispers, "%s"</ansi> <ansi fg="white">***</ansi>`, user.Character.Name, rest))
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

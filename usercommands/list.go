@@ -13,25 +13,23 @@ import (
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func List(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func List(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
+	handled := false
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
 
 		mob := mobs.GetInstance(mobId)
@@ -121,15 +119,12 @@ func List(rest string, userId int) (util.MessageQueue, error) {
 
 		}
 
-		response.Handled = true
+		handled = true
 	}
 
-	if response.Handled {
-		return response, nil
+	if !handled {
+		user.SendText("Visit a merchant to list and buy objects.")
 	}
 
-	user.SendText("Visit a merchant to list and buy objects.")
-
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

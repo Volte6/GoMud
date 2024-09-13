@@ -11,25 +11,23 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Throw(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Throw(rest string, mobId int) (bool, string, error) {
 
 	// Load mob details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. mob not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 2 {
-		return response, nil
+		return false, ``, nil
 	}
 
 	throwWhat := args[0]
@@ -39,7 +37,7 @@ func Throw(rest string, mobId int) (util.MessageQueue, error) {
 
 	itemMatch, ok := mob.Character.FindInBackpack(throwWhat)
 	if !ok {
-		return response, nil
+		return false, ``, nil
 	}
 
 	// check Exits and SecretExits for a string match. If found, move the player to that room.
@@ -60,8 +58,7 @@ func Throw(rest string, mobId int) (util.MessageQueue, error) {
 
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		mob.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -88,63 +85,61 @@ func Throw(rest string, mobId int) (util.MessageQueue, error) {
 			fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
 		)
 
-		response.Handled = true
+		return true, ``, nil
 	}
 
 	// Still looking for an exit... try the temp ones
-	if !response.Handled {
-		if len(room.ExitsTemp) > 0 {
-			// See if there's a close match
-			exitNames := make([]string, 0, len(room.ExitsTemp))
-			for exitName := range room.ExitsTemp {
-				exitNames = append(exitNames, exitName)
+
+	if len(room.ExitsTemp) > 0 {
+		// See if there's a close match
+		exitNames := make([]string, 0, len(room.ExitsTemp))
+		for exitName := range room.ExitsTemp {
+			exitNames = append(exitNames, exitName)
+		}
+
+		exactMatch, closeMatch := util.FindMatchIn(throwWhere, exitNames...)
+
+		var tempExit rooms.TemporaryRoomExit
+		var tempExitFound bool = false
+		if len(exactMatch) > 0 {
+			tempExit = room.ExitsTemp[exactMatch]
+			tempExitFound = true
+		} else if len(closeMatch) > 0 && len(rest) >= 3 {
+			tempExit = room.ExitsTemp[closeMatch]
+			tempExitFound = true
+		}
+
+		if tempExitFound {
+
+			mob.Character.CancelBuffsWithFlag(buffs.Hidden)
+
+			// do something with tempExit
+			throwToRoom := rooms.LoadRoom(tempExit.RoomId)
+			returnExitName := throwToRoom.FindExitTo(mob.Character.RoomId)
+
+			if len(returnExitName) < 1 {
+				returnExitName = "somewhere"
+			} else {
+				returnExitName = fmt.Sprintf("the %s exit", returnExitName)
 			}
 
-			exactMatch, closeMatch := util.FindMatchIn(throwWhere, exitNames...)
+			mob.Character.RemoveItem(itemMatch)
+			throwToRoom.AddItem(itemMatch, false)
 
-			var tempExit rooms.TemporaryRoomExit
-			var tempExitFound bool = false
-			if len(exactMatch) > 0 {
-				tempExit = room.ExitsTemp[exactMatch]
-				tempExitFound = true
-			} else if len(closeMatch) > 0 && len(rest) >= 3 {
-				tempExit = room.ExitsTemp[closeMatch]
-				tempExitFound = true
-			}
+			room.SendText(
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, mob.Character.Name, itemMatch.DisplayName(), tempExit.Title),
+			)
 
-			if tempExitFound {
+			// Tell the new room the item arrived
+			exitRoom := rooms.LoadRoom(tempExit.RoomId)
+			exitRoom.SendText(
+				fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
+			)
 
-				mob.Character.CancelBuffsWithFlag(buffs.Hidden)
+			return true, ``, nil
 
-				// do something with tempExit
-				throwToRoom := rooms.LoadRoom(tempExit.RoomId)
-				returnExitName := throwToRoom.FindExitTo(mob.Character.RoomId)
-
-				if len(returnExitName) < 1 {
-					returnExitName = "somewhere"
-				} else {
-					returnExitName = fmt.Sprintf("the %s exit", returnExitName)
-				}
-
-				mob.Character.RemoveItem(itemMatch)
-				throwToRoom.AddItem(itemMatch, false)
-
-				room.SendText(
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, mob.Character.Name, itemMatch.DisplayName(), tempExit.Title),
-				)
-
-				// Tell the new room the item arrived
-				exitRoom := rooms.LoadRoom(tempExit.RoomId)
-				exitRoom.SendText(
-					fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
-				)
-
-				response.Handled = true
-
-			}
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return false, ``, nil
 }

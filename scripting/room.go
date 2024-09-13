@@ -9,7 +9,6 @@ import (
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 var (
@@ -32,13 +31,11 @@ func PruneRoomVMs(roomIds ...int) {
 	}
 }
 
-func TryRoomScriptEvent(eventName string, userId int, roomId int) (util.MessageQueue, error) {
-
-	messageQueue = util.NewMessageQueue(userId, 0)
+func TryRoomScriptEvent(eventName string, userId int, roomId int) (bool, error) {
 
 	vmw, err := getRoomVM(roomId)
 	if err != nil {
-		return messageQueue, err
+		return false, err
 	}
 
 	timestart := time.Now()
@@ -70,31 +67,29 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int) (util.MessageQ
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 	}
 
-	return messageQueue, nil
+	return false, nil
 }
 
-func TryRoomIdleEvent(roomId int) (util.MessageQueue, error) {
-
-	messageQueue = util.NewMessageQueue(0, 0)
+func TryRoomIdleEvent(roomId int) (bool, error) {
 
 	vmw, err := getRoomVM(roomId)
 	if err != nil {
-		return messageQueue, err
+		return false, err
 	}
 
 	timestart := time.Now()
@@ -124,31 +119,29 @@ func TryRoomIdleEvent(roomId int) (util.MessageQueue, error) {
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 	}
 
-	return messageQueue, nil
+	return false, nil
 }
 
-func TryRoomCommand(cmd string, rest string, userId int) (util.MessageQueue, error) {
-
-	messageQueue = util.NewMessageQueue(userId, 0)
+func TryRoomCommand(cmd string, rest string, userId int) (bool, error) {
 
 	user := users.GetByUserId(userId)
 	if user == nil {
-		return messageQueue, errors.New("user not found")
+		return false, errors.New("user not found")
 	}
 
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -157,28 +150,10 @@ func TryRoomCommand(cmd string, rest string, userId int) (util.MessageQueue, err
 
 	if room != nil {
 
-		/*
-			// NOT SURE if I want to do this yet...
-			// This would allow buffs to capture commands
-
-			for _, buffInfo := range user.Character.GetBuffs() {
-				if mq, err := TryBuffCommand(cmd, rest, userId, 0, buffInfo.BuffId); err == nil {
-
-
-					messageQueue.Handled = messageQueue.Handled || mq.Handled
-					if messageQueue.Handled {
-						return messageQueue, nil
-					}
-				}
-			}
-		*/
-
 		for _, mobInstanceId := range room.GetMobs() {
-			if mq, err := TryMobCommand(cmd, rest, mobInstanceId, userId, `user`); err == nil {
-
-				messageQueue.Handled = messageQueue.Handled || mq.Handled
-				if messageQueue.Handled {
-					return messageQueue, nil
+			if handled, err := TryMobCommand(cmd, rest, mobInstanceId, userId, `user`); err == nil {
+				if handled {
+					return true, nil
 				}
 			}
 
@@ -187,7 +162,7 @@ func TryRoomCommand(cmd string, rest string, userId int) (util.MessageQueue, err
 
 	vmw, err := getRoomVM(user.Character.RoomId)
 	if err != nil {
-		return messageQueue, err
+		return false, err
 	}
 
 	timestart := time.Now()
@@ -223,18 +198,18 @@ func TryRoomCommand(cmd string, rest string, userId int) (util.MessageQueue, err
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 
 	} else if onCommandFunc, ok := vmw.GetFunction(`onCommand`); ok {
@@ -261,22 +236,22 @@ func TryRoomCommand(cmd string, rest string, userId int) (util.MessageQueue, err
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 	}
 
-	return messageQueue, nil
+	return false, nil
 }
 
 func getRoomVM(roomId int) (*VMWrapper, error) {

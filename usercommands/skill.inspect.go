@@ -9,7 +9,6 @@ import (
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 /*
@@ -19,32 +18,28 @@ Level 2 - Reveals weapon damage or uses an item has left.
 Level 3 - Reveals any stat modifiers an item has.
 Level 4 - Reveals special magical properties like elemental effects.
 */
-func Inspect(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Inspect(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if user.Character.GetSkillLevel(skills.Inspect) == 0 {
 		user.SendText("You don't know how to inspect.")
-		response.Handled = true
-		return response, fmt.Errorf("you don't know how to inspect")
+		return true, ``, fmt.Errorf("you don't know how to inspect")
 	}
 
 	if len(rest) == 0 {
 		user.SendText("Type `help inspect` for more information on the inspect skill.")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Inspect)
@@ -60,8 +55,7 @@ func Inspect(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Inspect.String())),
 			)
-			response.Handled = true
-			return response, errors.New(`you're doing that too often`)
+			return true, ``, errors.New(`you're doing that too often`)
 		}
 
 		user.SendText(
@@ -91,6 +85,5 @@ func Inspect(rest string, userId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

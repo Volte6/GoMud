@@ -10,7 +10,7 @@ import (
 )
 
 // Signature of user command
-type MobCommand func(rest string, mobId int) (util.MessageQueue, error)
+type MobCommand func(rest string, mobId int) (bool, string, error)
 
 type CommandAccess struct {
 	Func              MobCommand
@@ -71,7 +71,7 @@ func GetAllMobCommands() []string {
 	return result
 }
 
-func TryCommand(cmd string, rest string, mobId int) (util.MessageQueue, error) {
+func TryCommand(cmd string, rest string, mobId int) (bool, string, error) {
 
 	cmd = strings.ToLower(cmd)
 	rest = strings.TrimSpace(rest)
@@ -86,7 +86,7 @@ func TryCommand(cmd string, rest string, mobId int) (util.MessageQueue, error) {
 	// Try any room props, only return if the response indicates it was handled
 	/*
 		if !mobDisabled {
-			if response, err := RoomProps(cmd, rest, userId); err != nil {
+			if handled, nextCommand, err := RoomProps(cmd, rest, userId); err != nil {
 				return response, err
 			} else if response.Handled {
 				return response, err
@@ -95,9 +95,8 @@ func TryCommand(cmd string, rest string, mobId int) (util.MessageQueue, error) {
 	*/
 	if cmdInfo, ok := mobCommands[cmd]; ok {
 		if mobDisabled && !cmdInfo.AllowedWhenDowned {
-			response := NewMobCommandResponse(mobId)
-			response.Handled = true
-			return response, nil
+
+			return true, ``, nil
 		}
 
 		start := time.Now()
@@ -105,8 +104,8 @@ func TryCommand(cmd string, rest string, mobId int) (util.MessageQueue, error) {
 			util.TrackTime(`mob-cmd[`+cmd+`]`, time.Since(start).Seconds())
 		}()
 
-		response, err := cmdInfo.Func(rest, mobId)
-		return response, err
+		handled, nextCommand, err := cmdInfo.Func(rest, mobId)
+		return handled, nextCommand, err
 
 	}
 	// Try moving if they aren't disabled
@@ -116,17 +115,17 @@ func TryCommand(cmd string, rest string, mobId int) (util.MessageQueue, error) {
 			util.TrackTime(`mob-cmd[go]`, time.Since(start).Seconds())
 		}()
 
-		if response, err := Go(cmd, mobId); err != nil {
-			return response, err
-		} else if response.Handled {
-			return response, err
+		if handled, nextCommand, err := Go(cmd, mobId); err != nil {
+			return handled, nextCommand, err
+		} else if handled {
+			return true, ``, nil
 		}
 
 	}
 	if emoteText, ok := emoteAliases[cmd]; ok {
-		response, err := Emote(emoteText, mobId)
-		return response, err
+		handled, nextCommand, err := Emote(emoteText, mobId)
+		return handled, nextCommand, err
 	}
 
-	return NewMobCommandResponse(mobId), nil
+	return false, ``, nil
 }

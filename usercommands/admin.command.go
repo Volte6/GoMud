@@ -13,20 +13,18 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Command(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Command(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// args should look like one of the following:
@@ -40,9 +38,8 @@ func Command(rest string, userId int) (util.MessageQueue, error) {
 		mobCommands := mobcommands.GetAllMobCommands()
 
 		infoOutput, _ := templates.Process("admincommands/help/command.command", mobCommands)
-		response.Handled = true
 		user.SendText(infoOutput)
-		return response, nil
+		return true, ``, nil
 	}
 
 	searchName := args[0]
@@ -73,6 +70,5 @@ func Command(rest string, userId int) (util.MessageQueue, error) {
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

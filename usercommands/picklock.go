@@ -12,14 +12,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Picklock(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Picklock(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	lockpickItm := items.Item{}
@@ -32,22 +30,20 @@ func Picklock(rest string, userId int) (util.MessageQueue, error) {
 
 	if lockpickItm.ItemId < 1 {
 		user.SendText(`You need <ansi fg="item">lockpicks</ansi> to pick a lock.`)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 1 {
 		user.SendText("You wanna pock a lock? Specify where it is.")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	lockId := ``
@@ -62,14 +58,12 @@ func Picklock(rest string, userId int) (util.MessageQueue, error) {
 
 		if !container.HasLock() {
 			user.SendText("There is no lock there.")
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if !container.Lock.IsLocked() {
 			user.SendText("It's already unlocked.")
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		args = args[1:]
@@ -85,14 +79,12 @@ func Picklock(rest string, userId int) (util.MessageQueue, error) {
 
 		if !exitInfo.HasLock() {
 			user.SendText("There is no lock there.")
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		if !exitInfo.Lock.IsLocked() {
 			user.SendText("It's already unlocked.")
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		lockStrength = int(exitInfo.Lock.Difficulty)
@@ -101,8 +93,7 @@ func Picklock(rest string, userId int) (util.MessageQueue, error) {
 	} else {
 
 		user.SendText("There is no such exit or container.")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	//
@@ -138,8 +129,7 @@ func Picklock(rest string, userId int) (util.MessageQueue, error) {
 			exitInfo.Lock.SetUnlocked()
 			room.Exits[exitName] = exitInfo
 		}
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// Get if already exists, otherwise create new
@@ -156,15 +146,13 @@ func Picklock(rest string, userId int) (util.MessageQueue, error) {
 
 	question := cmdPrompt.Ask(`Move your lockpick?`, []string{`UP`, `DOWN`, `quit`})
 	if !question.Done {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if question.Response == `quit` {
 		user.ClearPrompt()
 		user.SendText(`Type '<ansi fg="command">help picklock</ansi>' for more information on picking locks.`)
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	direction := question.Response
@@ -175,8 +163,7 @@ func Picklock(rest string, userId int) (util.MessageQueue, error) {
 	r = string(r[0])
 
 	if r != "U" && r != "D" {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	entered += r
@@ -200,8 +187,7 @@ func Picklock(rest string, userId int) (util.MessageQueue, error) {
 		user.SendText(`<ansi fg="green-bold">A satisfying *click* tells you that you're making progress...</ansi>`)
 	} else {
 		user.ClearPrompt()
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	user.SendText(GetLockRender(sequence, entered))
@@ -231,8 +217,7 @@ func Picklock(rest string, userId int) (util.MessageQueue, error) {
 
 		user.ClearPrompt()
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 
 	} else {
 		if containerName != `` {
@@ -242,8 +227,7 @@ func Picklock(rest string, userId int) (util.MessageQueue, error) {
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }
 
 func GetLockRender(sequence string, entered string) string {

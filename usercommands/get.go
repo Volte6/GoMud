@@ -13,28 +13,25 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Get(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Get(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf(`user %d not found`, userId)
+		return false, ``, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) == 0 {
 		user.SendText("Get what?")
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if args[0] == "all" {
@@ -50,8 +47,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 			}
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	getFromStash := false
@@ -115,8 +111,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 				)
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		matchItem, found := container.FindItem(rest)
@@ -186,8 +181,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 				)
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, ``, nil
 		}
 
 		// Check whether the user has an item in their inventory that matches
@@ -199,8 +193,7 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 
 			if matchItem.HasAdjective(`exploding`) {
 				user.SendText(`You can't pick that up, it's about to explode!`)
-				response.Handled = true
-				return response, nil
+				return true, ``, nil
 			}
 
 			user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
@@ -239,6 +232,5 @@ func Get(rest string, userId int) (util.MessageQueue, error) {
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

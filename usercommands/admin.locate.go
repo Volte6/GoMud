@@ -10,24 +10,20 @@ import (
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Locate(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Locate(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.locate", nil)
-		response.Handled = true
 		user.SendText(infoOutput)
-		return response, nil
+		return true, ``, nil
 	}
 
 	locateUser := users.GetByCharacterName(rest)
@@ -35,7 +31,7 @@ func Locate(rest string, userId int) (util.MessageQueue, error) {
 
 		room := rooms.LoadRoom(locateUser.Character.RoomId)
 		if room == nil {
-			return response, fmt.Errorf(`room %d not found`, locateUser.Character.RoomId)
+			return false, ``, fmt.Errorf(`room %d not found`, locateUser.Character.RoomId)
 		}
 
 		user.SendText(
@@ -165,14 +161,12 @@ func Locate(rest string, userId int) (util.MessageQueue, error) {
 			user.SendText(tplTxt)
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	user.SendText(
 		fmt.Sprintf("No user or mob found with the name %s", rest),
 	)
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

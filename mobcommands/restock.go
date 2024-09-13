@@ -7,34 +7,29 @@ import (
 
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/util"
 )
 
-func Restock(rest string, mobId int) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Restock(rest string, mobId int) (bool, string, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, ``, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	// Nothing to restock...
 	if !mob.IsMerchant {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	if rest == "gold" {
 		mob.Character.Gold++
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// If nothing specified, just restock whatever is already there.
@@ -42,8 +37,7 @@ func Restock(rest string, mobId int) (util.MessageQueue, error) {
 		for itemId, _ := range mob.ShopStock {
 			mob.ShopStock[itemId]++
 		}
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	// Restock a specific item?
@@ -59,8 +53,7 @@ func Restock(rest string, mobId int) (util.MessageQueue, error) {
 	}
 
 	if restockId == 0 {
-		response.Handled = true
-		return response, nil
+		return true, ``, nil
 	}
 
 	var restocked = false
@@ -77,6 +70,5 @@ func Restock(rest string, mobId int) (util.MessageQueue, error) {
 		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> restocks some wares`, mob.Character.Name))
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

@@ -9,7 +9,6 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/util"
 )
 
 var (
@@ -21,9 +20,7 @@ func PruneItemVMs(instanceIds ...int) {
 
 }
 
-func TryItemScriptEvent(eventName string, item items.Item, userId int) (util.MessageQueue, error) {
-
-	messageQueue = util.NewMessageQueue(userId, 0)
+func TryItemScriptEvent(eventName string, item items.Item, userId int) (bool, error) {
 
 	sItem := GetItem(item)
 
@@ -34,7 +31,7 @@ func TryItemScriptEvent(eventName string, item items.Item, userId int) (util.Mes
 
 	vmw, err := getItemVM(sItem)
 	if err != nil {
-		return util.NewMessageQueue(userId, 0), err
+		return false, err
 	}
 
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
@@ -60,18 +57,18 @@ func TryItemScriptEvent(eventName string, item items.Item, userId int) (util.Mes
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 
 		if eventName != `onLost` {
@@ -80,12 +77,10 @@ func TryItemScriptEvent(eventName string, item items.Item, userId int) (util.Mes
 		}
 	}
 
-	return messageQueue, nil
+	return false, nil
 }
 
-func TryItemCommand(cmd string, item items.Item, userId int) (util.MessageQueue, error) {
-
-	messageQueue = util.NewMessageQueue(userId, 0)
+func TryItemCommand(cmd string, item items.Item, userId int) (bool, error) {
 
 	sItem := GetItem(item)
 
@@ -96,7 +91,7 @@ func TryItemCommand(cmd string, item items.Item, userId int) (util.MessageQueue,
 
 	vmw, err := getItemVM(sItem)
 	if err != nil {
-		return util.NewMessageQueue(userId, 0), err
+		return false, err
 	}
 
 	if onCommandFunc, ok := vmw.GetFunction(`onCommand_` + cmd); ok {
@@ -122,18 +117,18 @@ func TryItemCommand(cmd string, item items.Item, userId int) (util.MessageQueue,
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 
 		// Save any changed that might have happened to the item
@@ -163,25 +158,25 @@ func TryItemCommand(cmd string, item items.Item, userId int) (util.MessageQueue,
 
 			if _, ok := finalErr.(*goja.Exception); ok {
 				slog.Error("JSVM", "exception", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
 				slog.Error("JSVM", "interrupted", finalErr)
-				return messageQueue, finalErr
+				return false, finalErr
 			}
 
 			slog.Error("JSVM", "error", finalErr)
-			return messageQueue, finalErr
+			return false, finalErr
 		}
 
 		if boolVal, ok := res.Export().(bool); ok {
-			messageQueue.Handled = messageQueue.Handled || boolVal
+			return boolVal, nil
 		}
 
 		// Save any changed that might have happened to the item
 		sUser.characterRecord.UpdateItem(item, *sItem.itemRecord)
 	}
 
-	return messageQueue, nil
+	return false, nil
 }
 
 func getItemVM(sItem *ScriptItem) (*VMWrapper, error) {

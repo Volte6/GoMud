@@ -13,22 +13,19 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Suicide(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Suicide(rest string, userId int) (bool, string, error) {
 
 	config := configs.GetConfig()
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	if user.Character.Zone == `Shadow Realm` {
 		user.SendText(`You're already dead!`)
-		response.Handled = true
-		return response, errors.New(`already dead`)
+		return true, ``, errors.New(`already dead`)
 	}
 
 	events.AddToQueue(events.Broadcast{
@@ -94,6 +91,5 @@ func Suicide(rest string, userId int) (util.MessageQueue, error) {
 
 	rooms.MoveToRoom(userId, 75)
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }

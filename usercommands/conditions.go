@@ -7,17 +7,14 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Conditions(rest string, userId int) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Conditions(rest string, userId int) (bool, string, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, ``, fmt.Errorf("user %d not found", userId)
 	}
 
 	type buffInfo struct {
@@ -51,6 +48,5 @@ func Conditions(rest string, userId int) (util.MessageQueue, error) {
 	tplTxt, _ := templates.Process("character/conditions", afflictions)
 	user.SendText(tplTxt)
 
-	response.Handled = true
-	return response, nil
+	return true, ``, nil
 }
