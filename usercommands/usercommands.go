@@ -187,6 +187,8 @@ func GetHelpSuggestions(text string, includeAdmin bool) []string {
 // Signature of user command
 type UserCommand func(rest string, userId int) (util.MessageQueue, error)
 
+//type UserCommand func(rest string, userId int) (bool, string, error)
+
 func TryCommand(cmd string, rest string, userId int) (util.MessageQueue, error) {
 
 	finalResponse := NewUserCommandResponse(userId)

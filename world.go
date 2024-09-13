@@ -735,28 +735,6 @@ func (w *World) processInput(userId int, inputText string) {
 			}
 		}
 
-		if len(commandResponse.CommandQueue) > 0 {
-			for _, cmd := range commandResponse.CommandQueue {
-
-				if cmd.UserId > 0 {
-
-					events.AddToQueue(events.Input{
-						UserId:    cmd.UserId,
-						InputText: cmd.Command,
-					})
-
-				} else if cmd.MobInstanceId > 0 {
-
-					events.AddToQueue(events.Input{
-						MobInstanceId: cmd.MobInstanceId,
-						InputText:     cmd.Command,
-					})
-
-				}
-			}
-			commandResponse.CommandQueue = commandResponse.CommandQueue[:0]
-		}
-
 		// Load up any forced commands
 		if len(commandResponse.NextCommand) > 0 {
 			inputText = commandResponse.NextCommand
@@ -807,28 +785,6 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 			if len(command) > 0 {
 				mob.Command(fmt.Sprintf(`emote looks a little confused (%s %s).`, mob.Character.Name, command, remains))
 			}
-		}
-
-		if len(commandResponse.CommandQueue) > 0 {
-			for _, cmd := range commandResponse.CommandQueue {
-
-				if cmd.UserId > 0 {
-
-					events.AddToQueue(events.Input{
-						UserId:    cmd.UserId,
-						InputText: cmd.Command,
-					})
-
-				} else if cmd.MobInstanceId > 0 {
-
-					events.AddToQueue(events.Input{
-						MobInstanceId: cmd.MobInstanceId,
-						InputText:     cmd.Command,
-					})
-
-				}
-			}
-			commandResponse.CommandQueue = commandResponse.CommandQueue[:0]
 		}
 
 		// Load up any forced commands
