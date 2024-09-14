@@ -18,28 +18,28 @@ Level 2 - Reveals weapon damage or uses an item has left.
 Level 3 - Reveals any stat modifiers an item has.
 Level 4 - Reveals special magical properties like elemental effects.
 */
-func Inspect(rest string, userId int) (bool, string, error) {
+func Inspect(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if user.Character.GetSkillLevel(skills.Inspect) == 0 {
 		user.SendText("You don't know how to inspect.")
-		return true, ``, fmt.Errorf("you don't know how to inspect")
+		return true, fmt.Errorf("you don't know how to inspect")
 	}
 
 	if len(rest) == 0 {
 		user.SendText("Type `help inspect` for more information on the inspect skill.")
-		return true, ``, nil
+		return true, nil
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Inspect)
@@ -55,7 +55,7 @@ func Inspect(rest string, userId int) (bool, string, error) {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Inspect.String())),
 			)
-			return true, ``, errors.New(`you're doing that too often`)
+			return true, errors.New(`you're doing that too often`)
 		}
 
 		user.SendText(
@@ -85,5 +85,5 @@ func Inspect(rest string, userId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

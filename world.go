@@ -719,7 +719,7 @@ func (w *World) processInput(userId int, inputText string) {
 				command = inputText
 			}
 
-			handled, _, err = usercommands.TryCommand(command, remains, userId)
+			handled, err = usercommands.TryCommand(command, remains, userId)
 			if err != nil {
 				slog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
 			}
@@ -763,7 +763,7 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 		//slog.Info("World received mob input", "InputText", (inputText))
 
-		handled, _, err = mobcommands.TryCommand(command, remains, mobInstanceId)
+		handled, err = mobcommands.TryCommand(command, remains, mobInstanceId)
 		if err != nil {
 			slog.Error("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
 		}

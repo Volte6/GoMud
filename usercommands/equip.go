@@ -10,18 +10,18 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Equip(rest string, userId int) (bool, string, error) {
+func Equip(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if rest == "all" {
@@ -33,7 +33,7 @@ func Equip(rest string, userId int) (bool, string, error) {
 				Equip(item.Name(), userId)
 			}
 		}
-		return true, ``, nil
+		return true, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -48,7 +48,7 @@ func Equip(rest string, userId int) (bool, string, error) {
 			user.SendText(
 				fmt.Sprintf(`Your <ansi fg="item">%s</ansi> doesn't look very fashionable.`, matchItem.DisplayName()),
 			)
-			return true, ``, nil
+			return true, nil
 		}
 
 		// Swap the item location
@@ -115,5 +115,5 @@ func Equip(rest string, userId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

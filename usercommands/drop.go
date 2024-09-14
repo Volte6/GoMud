@@ -15,18 +15,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Drop(rest string, userId int) (bool, string, error) {
+func Drop(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -34,7 +34,7 @@ func Drop(rest string, userId int) (bool, string, error) {
 	if len(args) == 0 {
 		user.SendText(`Drop what?`)
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	if args[0] == "all" {
@@ -51,7 +51,7 @@ func Drop(rest string, userId int) (bool, string, error) {
 			Drop(item.Name(), userId)
 		}
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	// Drop 10 gold
@@ -60,7 +60,7 @@ func Drop(rest string, userId int) (bool, string, error) {
 		dropAmt := int(g)
 		if dropAmt < 1 {
 			user.SendText("Oops!")
-			return true, ``, nil
+			return true, nil
 		}
 
 		if dropAmt > user.Character.Gold {
@@ -80,7 +80,7 @@ func Drop(rest string, userId int) (bool, string, error) {
 			userId,
 		)
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -126,5 +126,5 @@ func Drop(rest string, userId int) (bool, string, error) {
 		scripting.TryItemScriptEvent(`onLost`, matchItem, userId)
 	}
 
-	return true, ``, nil
+	return true, nil
 }

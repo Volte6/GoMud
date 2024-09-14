@@ -9,18 +9,18 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Stash(rest string, userId int) (bool, string, error) {
+func Stash(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -48,5 +48,5 @@ func Stash(rest string, userId int) (bool, string, error) {
 		scripting.TryItemScriptEvent(`onLost`, matchItem, userId)
 	}
 
-	return true, ``, nil
+	return true, nil
 }

@@ -12,12 +12,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Jobs(rest string, userId int) (bool, string, error) {
+func Jobs(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	type JobDisplay struct {
@@ -53,5 +53,5 @@ func Jobs(rest string, userId int) (bool, string, error) {
 	jobsTxt, _ := templates.Process("character/jobs", jobProgress)
 	user.SendText(jobsTxt)
 
-	return true, ``, nil
+	return true, nil
 }

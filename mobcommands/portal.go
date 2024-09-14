@@ -12,25 +12,25 @@ import (
 
 // Mob portaling is different than player portaling.
 // Mob portals are open for shorter periods, and go to specific locations.
-func Portal(rest string, mobId int) (bool, string, error) {
+func Portal(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
-		if handled, nextCommand, err := Go(`portal`, mobId); handled {
-			return handled, nextCommand, err
+		if handled, err := Go(`portal`, mobId); handled {
+			return handled, err
 		}
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	var err error
@@ -59,7 +59,7 @@ func Portal(rest string, mobId int) (bool, string, error) {
 
 			mob.Command(`portal home;drop all`)
 
-			return true, ``, fmt.Errorf("failed to find temporary exit to room")
+			return true, fmt.Errorf("failed to find temporary exit to room")
 		}
 		portalTargetRoomId = mostItemRoomId
 	}
@@ -70,13 +70,13 @@ func Portal(rest string, mobId int) (bool, string, error) {
 	}
 
 	if portalTargetRoomId == mob.Character.RoomId {
-		return false, ``, err
+		return false, err
 	}
 
 	// Load current room details
 	targetRoom := rooms.LoadRoom(portalTargetRoomId)
 	if targetRoom == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, portalTargetRoomId)
+		return false, fmt.Errorf(`room %d not found`, portalTargetRoomId)
 	}
 
 	// Target = portalTargetRoomId
@@ -92,7 +92,7 @@ func Portal(rest string, mobId int) (bool, string, error) {
 
 	// Spawn a portal in the room that leads to the portal location
 	if !room.AddTemporaryExit(newPortalExitName, newPortal) {
-		return true, ``, fmt.Errorf("failed to add temporary exit to room")
+		return true, fmt.Errorf("failed to add temporary exit to room")
 	}
 
 	room.SendText(
@@ -107,5 +107,5 @@ func Portal(rest string, mobId int) (bool, string, error) {
 		fmt.Sprintf(`A %s appears!`, newPortal.Title),
 	)
 
-	return true, ``, nil
+	return true, nil
 }

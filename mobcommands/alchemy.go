@@ -10,17 +10,17 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Alchemy(rest string, mobId int) (bool, string, error) {
+func Alchemy(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -32,7 +32,7 @@ func Alchemy(rest string, mobId int) (bool, string, error) {
 			Alchemy(matchItem.Name(), mobId)
 
 		}
-		return true, ``, nil
+		return true, nil
 	}
 
 	if args[0] == "all" {
@@ -46,7 +46,7 @@ func Alchemy(rest string, mobId int) (bool, string, error) {
 			Alchemy(item.Name(), mobId)
 		}
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -60,5 +60,5 @@ func Alchemy(rest string, mobId int) (bool, string, error) {
 			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> chants softly. Their <ansi fg="item">%s</ansi> slowly levitates in the air, trembles briefly and then in a flash of light becomes a gold coin!`, mob.Character.Name, matchItem.DisplayName()))
 	}
 
-	return true, ``, nil
+	return true, nil
 }

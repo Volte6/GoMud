@@ -10,18 +10,18 @@ import (
 	"github.com/volte6/mud/rooms"
 )
 
-func Drink(rest string, mobId int) (bool, string, error) {
+func Drink(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -30,7 +30,7 @@ func Drink(rest string, mobId int) (bool, string, error) {
 		itemSpec := matchItem.GetSpec()
 
 		if itemSpec.Subtype != items.Drinkable {
-			return true, ``, nil
+			return true, nil
 		}
 
 		mob.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -50,5 +50,5 @@ func Drink(rest string, mobId int) (bool, string, error) {
 		}
 	}
 
-	return true, ``, nil
+	return true, nil
 }

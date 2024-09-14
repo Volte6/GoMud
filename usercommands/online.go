@@ -11,12 +11,12 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Online(rest string, userId int) (bool, string, error) {
+func Online(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	headers := []string{`Name`, `Level`, `Alignment`, `Profession`, `Online`, `Role`}
@@ -102,5 +102,5 @@ func Online(rest string, userId int) (bool, string, error) {
 	tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
 	user.SendText(tplTxt)
 
-	return true, ``, nil
+	return true, nil
 }

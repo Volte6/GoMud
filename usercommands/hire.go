@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Hire(rest string, userId int) (bool, string, error) {
+func Hire(rest string, userId int) (bool, error) {
 
 	if rest == "" {
 		return List(rest, userId)
@@ -20,20 +20,20 @@ func Hire(rest string, userId int) (bool, string, error) {
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	maxCharmed := user.Character.GetSkillLevel(skills.Tame) + 1
 
 	if len(user.Character.GetCharmIds()) >= maxCharmed {
 		user.SendText(fmt.Sprintf(`You can only have %d creatures following you at a time.`, maxCharmed))
-		return true, ``, nil
+		return true, nil
 	}
 
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
@@ -63,7 +63,7 @@ func Hire(rest string, userId int) (bool, string, error) {
 
 			mob.Command(`say Sorry, I don't have that for hire right now.` + extraSay)
 
-			return true, ``, nil
+			return true, nil
 		}
 
 		for idx, hireInfo := range mob.ShopServants {
@@ -79,7 +79,7 @@ func Hire(rest string, userId int) (bool, string, error) {
 
 				mob.Command(`say You don't have enough gold.`)
 
-				return true, ``, nil
+				return true, nil
 			}
 
 			user.Character.Gold -= hireInfo.Price
@@ -115,5 +115,5 @@ func Hire(rest string, userId int) (bool, string, error) {
 		}
 	}
 
-	return true, ``, nil
+	return true, nil
 }

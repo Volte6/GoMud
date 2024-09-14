@@ -14,18 +14,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Give(rest string, mobId int) (bool, string, error) {
+func Give(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	rest = util.StripPrepositions(rest)
@@ -33,7 +33,7 @@ func Give(rest string, mobId int) (bool, string, error) {
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 {
-		return true, ``, nil
+		return true, nil
 	}
 
 	var giveWho string = args[len(args)-1]
@@ -49,7 +49,7 @@ func Give(rest string, mobId int) (bool, string, error) {
 		giveGoldAmount = int(g)
 
 		if giveGoldAmount > mob.Character.Gold {
-			return true, ``, nil
+			return true, nil
 		}
 
 	} else {
@@ -60,7 +60,7 @@ func Give(rest string, mobId int) (bool, string, error) {
 		giveItem, found = mob.Character.FindInBackpack(giveWhat)
 
 		if !found {
-			return true, ``, nil
+			return true, nil
 		}
 
 	}
@@ -103,7 +103,7 @@ func Give(rest string, mobId int) (bool, string, error) {
 
 		}
 
-		return true, ``, nil
+		return true, nil
 
 	}
 
@@ -140,5 +140,5 @@ func Give(rest string, mobId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

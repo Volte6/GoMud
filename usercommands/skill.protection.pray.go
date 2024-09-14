@@ -17,32 +17,32 @@ import (
 Protection Skill
 Level 4 - Pray to gods for a blessing
 */
-func Pray(rest string, userId int) (bool, string, error) {
+func Pray(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Protection)
 
 	if skillLevel < 4 {
 		user.SendText("You don't know how to pray.")
-		return true, ``, fmt.Errorf("you don't know how to pray")
+		return true, fmt.Errorf("you don't know how to pray")
 	}
 
 	if !user.Character.TryCooldown(skills.Protection.String(), configs.GetConfig().MinutesToRounds(5)) {
 		user.SendText(
 			`You can only pray once every 5 minutes.`,
 		)
-		return true, ``, errors.New(`you can only pray once every 5 minutes`)
+		return true, errors.New(`you can only pray once every 5 minutes`)
 	}
 
 	prayPlayerId, prayMobId := 0, 0
@@ -55,7 +55,7 @@ func Pray(rest string, userId int) (bool, string, error) {
 
 	if prayPlayerId == 0 && prayMobId == 0 {
 		user.SendText("Aid whom?")
-		return true, ``, nil
+		return true, nil
 	}
 
 	possibleBuffIds := []int{4, 11, 14, 16, 17, 18}
@@ -113,5 +113,5 @@ func Pray(rest string, userId int) (bool, string, error) {
 		user.SendText("Pray for whom?")
 	}
 
-	return true, ``, nil
+	return true, nil
 }

@@ -12,24 +12,24 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Share(rest string, userId int) (bool, string, error) {
+func Share(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	party := parties.Get(userId)
 	if party == nil {
 		user.SendText("You can only share in a party.")
-		return true, ``, nil
+		return true, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -46,12 +46,12 @@ func Share(rest string, userId int) (bool, string, error) {
 
 		if giveGoldAmount < 0 {
 			user.SendText("You can't share a negative amount of gold.")
-			return true, ``, nil
+			return true, nil
 		}
 
 		if giveGoldAmount > user.Character.Gold {
 			user.SendText("You don't have that much gold to share.")
-			return true, ``, nil
+			return true, nil
 		}
 
 		partyMembersInRoom := []int{userId} // make sure party leader gets first share
@@ -86,5 +86,5 @@ func Share(rest string, userId int) (bool, string, error) {
 		user.SendText(`You can share gold by typing <ansi fg="command">share [amt] gold</ansi>?`)
 	}
 
-	return true, ``, nil
+	return true, nil
 }

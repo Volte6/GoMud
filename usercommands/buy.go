@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Buy(rest string, userId int) (bool, string, error) {
+func Buy(rest string, userId int) (bool, error) {
 
 	if rest == "" {
 		return List(rest, userId)
@@ -20,13 +20,13 @@ func Buy(rest string, userId int) (bool, string, error) {
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
@@ -57,7 +57,7 @@ func Buy(rest string, userId int) (bool, string, error) {
 
 			mob.Command(`say Sorry, I don't have that item right now.` + extraSay)
 
-			return true, ``, nil
+			return true, nil
 		}
 
 		for itemId := range mob.ShopStock {
@@ -73,7 +73,7 @@ func Buy(rest string, userId int) (bool, string, error) {
 
 				mob.Command(`say You don't have enough gold for that.`)
 
-				return true, ``, nil
+				return true, nil
 			}
 
 			user.Character.Gold -= item.GetSpec().Value
@@ -110,5 +110,5 @@ func Buy(rest string, userId int) (bool, string, error) {
 		}
 	}
 
-	return true, ``, nil
+	return true, nil
 }

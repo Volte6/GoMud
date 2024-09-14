@@ -11,23 +11,23 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Throw(rest string, mobId int) (bool, string, error) {
+func Throw(rest string, mobId int) (bool, error) {
 
 	// Load mob details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. mob not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 2 {
-		return false, ``, nil
+		return false, nil
 	}
 
 	throwWhat := args[0]
@@ -37,7 +37,7 @@ func Throw(rest string, mobId int) (bool, string, error) {
 
 	itemMatch, ok := mob.Character.FindInBackpack(throwWhat)
 	if !ok {
-		return false, ``, nil
+		return false, nil
 	}
 
 	// check Exits and SecretExits for a string match. If found, move the player to that room.
@@ -58,7 +58,7 @@ func Throw(rest string, mobId int) (bool, string, error) {
 
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
-			return true, ``, nil
+			return true, nil
 		}
 
 		mob.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -85,7 +85,7 @@ func Throw(rest string, mobId int) (bool, string, error) {
 			fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
 		)
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	// Still looking for an exit... try the temp ones
@@ -136,10 +136,10 @@ func Throw(rest string, mobId int) (bool, string, error) {
 				fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
 			)
 
-			return true, ``, nil
+			return true, nil
 
 		}
 	}
 
-	return false, ``, nil
+	return false, nil
 }

@@ -185,16 +185,16 @@ func GetHelpSuggestions(text string, includeAdmin bool) []string {
 }
 
 // Signature of user command
-type UserCommand func(rest string, userId int) (bool, string, error)
+type UserCommand func(rest string, userId int) (bool, error)
 
-func TryCommand(cmd string, rest string, userId int) (bool, string, error) {
+func TryCommand(cmd string, rest string, userId int) (bool, error) {
 
 	// Do not allow scripts to intercept server commands
 	if cmd != `server` {
 
 		handled, err := scripting.TryRoomCommand(keywords.TryCommandAlias(cmd), rest, userId)
 		if handled {
-			return true, ``, err
+			return true, err
 		}
 
 	}
@@ -235,7 +235,7 @@ func TryCommand(cmd string, rest string, userId int) (bool, string, error) {
 			// If the item has a script, run it
 			if handled, err := scripting.TryItemCommand(cmd, matchingItem, user.UserId); err == nil {
 				if handled { // For this event, handled represents whether to reject the move.
-					return handled, ``, err
+					return handled, err
 				}
 			}
 		}
@@ -245,7 +245,7 @@ func TryCommand(cmd string, rest string, userId int) (bool, string, error) {
 
 		if userDisabled && !cmdInfo.AllowedWhenDowned && !cmdInfo.AdminOnly {
 			user.SendText("You are unable to do that while downed.")
-			return true, ``, nil
+			return true, nil
 		}
 
 		if isAdmin || !cmdInfo.AdminOnly {
@@ -255,8 +255,8 @@ func TryCommand(cmd string, rest string, userId int) (bool, string, error) {
 				util.TrackTime(`usr-cmd[`+cmd+`]`, time.Since(start).Seconds())
 			}()
 
-			handled, nextCommand, err := cmdInfo.Func(rest, userId)
-			return handled, nextCommand, err
+			handled, err := cmdInfo.Func(rest, userId)
+			return handled, err
 
 		}
 	}
@@ -270,15 +270,15 @@ func TryCommand(cmd string, rest string, userId int) (bool, string, error) {
 			util.TrackTime(`usr-cmd[go]`, time.Since(start).Seconds())
 		}()
 
-		if handled, nextCommand, err := Go(cmd, userId); handled {
-			return handled, nextCommand, err
+		if handled, err := Go(cmd, userId); handled {
+			return handled, err
 		}
 
 	}
 
 	if emoteText, ok := emoteAliases[cmd]; ok {
-		handled, nextCommand, err := Emote(emoteText, userId)
-		return handled, nextCommand, err
+		handled, err := Emote(emoteText, userId)
+		return handled, err
 	}
 
 	if user.Character.HasSpell(cmd) {
@@ -289,5 +289,5 @@ func TryCommand(cmd string, rest string, userId int) (bool, string, error) {
 		return Cast(castCmd, userId)
 	}
 
-	return false, ``, nil
+	return false, nil
 }

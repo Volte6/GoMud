@@ -16,12 +16,12 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Buff(rest string, userId int) (bool, string, error) {
+func Buff(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// args should look like one of the following:
@@ -75,7 +75,7 @@ func Buff(rest string, userId int) (bool, string, error) {
 
 				room := rooms.LoadRoom(user.Character.RoomId)
 				if room == nil {
-					return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+					return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 				}
 
 				targetUserId, targetMobInstanceId = room.FindByName(args[0])
@@ -103,7 +103,7 @@ func Buff(rest string, userId int) (bool, string, error) {
 
 			if buffId == 0 {
 				user.SendText("buffId must be an integer > 0.")
-				return true, ``, nil
+				return true, nil
 
 			}
 
@@ -126,7 +126,7 @@ func Buff(rest string, userId int) (bool, string, error) {
 						user.SendText(fmt.Sprintf("Buff Id %d not found.", buffId))
 					}
 
-					return true, ``, nil
+					return true, nil
 				}
 			}
 
@@ -149,7 +149,7 @@ func Buff(rest string, userId int) (bool, string, error) {
 						user.SendText(fmt.Sprintf("Buff Id %d not found.", buffId))
 					}
 
-					return true, ``, nil
+					return true, nil
 				}
 			}
 
@@ -162,5 +162,5 @@ func Buff(rest string, userId int) (bool, string, error) {
 	infoOutput, _ := templates.Process("admincommands/help/command.buff", nil)
 	user.SendText(infoOutput)
 
-	return true, ``, nil
+	return true, nil
 }

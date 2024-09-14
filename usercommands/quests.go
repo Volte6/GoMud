@@ -11,12 +11,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Quests(rest string, userId int) (bool, string, error) {
+func Quests(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	type QuestRecord struct {
@@ -113,5 +113,5 @@ func Quests(rest string, userId int) (bool, string, error) {
 	questTxt, _ := templates.Process("character/quests", qInfo)
 	user.SendText(questTxt)
 
-	return true, ``, nil
+	return true, nil
 }

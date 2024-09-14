@@ -8,24 +8,24 @@ import (
 	"github.com/volte6/mud/rooms"
 )
 
-func Remove(rest string, mobId int) (bool, string, error) {
+func Remove(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if rest == "all" {
 		for _, item := range mob.Character.Equipment.GetAllItems() {
 			Remove(item.Name(), mobId)
 		}
-		return true, ``, nil
+		return true, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -48,5 +48,5 @@ func Remove(rest string, mobId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

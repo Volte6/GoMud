@@ -13,18 +13,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Spawn(rest string, userId int) (bool, string, error) {
+func Spawn(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -33,7 +33,7 @@ func Spawn(rest string, userId int) (bool, string, error) {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.spawn", nil)
 		user.SendText(infoOutput)
-		return true, ``, nil
+		return true, nil
 	}
 
 	spawnType := args[0]
@@ -73,7 +73,7 @@ func Spawn(rest string, userId int) (bool, string, error) {
 						userId,
 					)
 
-					return true, ``, nil
+					return true, nil
 				}
 
 			}
@@ -102,7 +102,7 @@ func Spawn(rest string, userId int) (bool, string, error) {
 				userId,
 			)
 
-			return true, ``, nil
+			return true, nil
 		}
 
 		if spawnType == `mob` {
@@ -126,7 +126,7 @@ func Spawn(rest string, userId int) (bool, string, error) {
 						userId,
 					)
 
-					return true, ``, nil
+					return true, nil
 				}
 			}
 
@@ -142,5 +142,5 @@ func Spawn(rest string, userId int) (bool, string, error) {
 		userId,
 	)
 
-	return true, ``, nil
+	return true, nil
 }

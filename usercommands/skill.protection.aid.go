@@ -17,30 +17,30 @@ Protection Skill
 Level 1 - Aid (revive) a player
 Level 3 - Aid (revive) a player, even during combat
 */
-func Aid(rest string, userId int) (bool, string, error) {
+func Aid(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Protection)
 
 	if skillLevel == 0 {
 		user.SendText("You don't know how to provide aid.")
-		return true, ``, fmt.Errorf("you don't know how to provide aid")
+		return true, fmt.Errorf("you don't know how to provide aid")
 	}
 
 	if skillLevel < 3 && !room.IsCalm() {
 		user.SendText("You can only do that in calm rooms!")
-		return true, ``, nil
+		return true, nil
 	}
 
 	aidPlayerId, _ := room.FindByName(rest, rooms.FindDowned)
@@ -57,12 +57,12 @@ func Aid(rest string, userId int) (bool, string, error) {
 
 			if p.Character.Health > 0 {
 				user.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is not in need of aid!`, p.Character.Name))
-				return true, ``, nil
+				return true, nil
 			}
 
 			if user.Character.Aggro != nil {
 				user.SendText("You are too busy to aid anyone!")
-				return true, ``, nil
+				return true, nil
 			}
 
 			// Set spell Aid
@@ -86,9 +86,9 @@ func Aid(rest string, userId int) (bool, string, error) {
 
 		}
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	user.SendText("Aid whom?")
-	return true, ``, nil
+	return true, nil
 }

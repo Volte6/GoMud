@@ -10,12 +10,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func QuestToken(rest string, userId int) (bool, string, error) {
+func QuestToken(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// args should look like one of the following:
@@ -86,5 +86,5 @@ func QuestToken(rest string, userId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

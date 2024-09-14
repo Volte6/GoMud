@@ -12,12 +12,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func IBuild(rest string, userId int) (bool, string, error) {
+func IBuild(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// args should look like one of the following:
@@ -39,13 +39,13 @@ func IBuild(rest string, userId int) (bool, string, error) {
 
 		zoneQ := cmdPrompt.Ask(`New zone name?`, []string{``})
 		if !zoneQ.Done {
-			return true, ``, nil
+			return true, nil
 		}
 
 		if zoneQ.Response == `` {
 			user.SendText(`Aborting zone build`)
 			user.ClearPrompt()
-			return true, ``, nil
+			return true, nil
 		}
 
 		zoneName := zoneQ.Response
@@ -68,7 +68,7 @@ func IBuild(rest string, userId int) (bool, string, error) {
 		}
 
 		user.ClearPrompt()
-		return true, ``, nil
+		return true, nil
 
 	}
 
@@ -77,26 +77,26 @@ func IBuild(rest string, userId int) (bool, string, error) {
 
 		exitNameQ := cmdPrompt.Ask(`Room exit name?`, []string{})
 		if !exitNameQ.Done {
-			return true, ``, nil
+			return true, nil
 		}
 
 		if exitNameQ.Response == `` {
 			user.SendText(`Aborting room build`)
 			user.ClearPrompt()
-			return true, ``, nil
+			return true, nil
 		}
 
 		exitName := exitNameQ.Response
 
 		dirNameQ := cmdPrompt.Ask(`Map direction?`, []string{})
 		if !dirNameQ.Done {
-			return true, ``, nil
+			return true, nil
 		}
 
 		if _, ok := rooms.DirectionDeltas[dirNameQ.Response]; !ok {
 			dirNameQ.RejectResponse()
 			user.SendText(`Invalid map direction.`)
-			return true, ``, nil
+			return true, nil
 
 		}
 
@@ -104,7 +104,7 @@ func IBuild(rest string, userId int) (bool, string, error) {
 
 		retDirNameQ := cmdPrompt.Ask(`Return exit name (opt)?`, []string{}, ``)
 		if !retDirNameQ.Done {
-			return true, ``, nil
+			return true, nil
 		}
 
 		returnName := retDirNameQ.Response
@@ -112,21 +112,21 @@ func IBuild(rest string, userId int) (bool, string, error) {
 		user.SendText(fmt.Sprintf(`exitName: %s - mapDirection: %s - returnName: %s.`, exitName, mapDirection, returnName))
 
 		user.ClearPrompt()
-		return true, ``, nil
+		return true, nil
 
 	}
 
 	// TODO: WIP
 
-	return true, ``, nil
+	return true, nil
 }
 
-func Build(rest string, userId int) (bool, string, error) {
+func Build(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// args should look like one of the following:
@@ -183,14 +183,14 @@ func Build(rest string, userId int) (bool, string, error) {
 				err := rGraph.Build(user.Character.RoomId, nil)
 				if err != nil {
 					user.SendText(err.Error())
-					return true, ``, err
+					return true, err
 				}
 
 				map2D, cX, cY := rGraph.Generate2DMap(11, 11, user.Character.RoomId)
 
 				if len(map2D) < 1 {
 					user.SendText("Error generating a 2d map")
-					return true, ``, nil
+					return true, nil
 				}
 
 				// extra large exits get translated to their correct exit name, and the "mapdirection" updated to the specified one
@@ -224,7 +224,7 @@ func Build(rest string, userId int) (bool, string, error) {
 
 				if destinationRoom == nil {
 					user.SendText(fmt.Sprintf("Error building room %s.", exitName))
-					return false, ``, nil
+					return false, nil
 				}
 			}
 
@@ -256,5 +256,5 @@ func Build(rest string, userId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

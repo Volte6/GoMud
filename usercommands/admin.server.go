@@ -19,18 +19,18 @@ var (
 	memoryReportCache = map[string]util.MemoryResult{}
 )
 
-func Server(rest string, userId int) (bool, string, error) {
+func Server(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.server", nil)
 		user.SendText(infoOutput)
-		return true, ``, nil
+		return true, nil
 	}
 
 	args := util.SplitButRespectQuotes(rest)
@@ -63,19 +63,19 @@ func Server(rest string, userId int) (bool, string, error) {
 			tplTxt, _ := templates.Process("tables/generic", settingsTable)
 			user.SendText(tplTxt)
 
-			return true, ``, nil
+			return true, nil
 		}
 
 		if args[0] == "day" {
 			gametime.SetToDay(-1)
 			gd := gametime.GetDate()
 			user.SendText(`Time set to ` + gd.String())
-			return true, ``, nil
+			return true, nil
 		} else if args[0] == "night" {
 			gametime.SetToNight(-1)
 			gd := gametime.GetDate()
 			user.SendText(`Time set to ` + gd.String())
-			return true, ``, nil
+			return true, nil
 		} else if args[0] == "time" && len(args) > 1 {
 
 			timeStr := strings.Join(args[1:], ` `)
@@ -98,7 +98,7 @@ func Server(rest string, userId int) (bool, string, error) {
 			gametime.SetTime(hour, minutes)
 			gd := gametime.GetDate()
 			user.SendText(`Time set to ` + gd.String())
-			return true, ``, nil
+			return true, nil
 		}
 
 		configName := strings.ToLower(args[0])
@@ -106,18 +106,18 @@ func Server(rest string, userId int) (bool, string, error) {
 
 		if err := configs.SetVal(configName, configValue); err != nil {
 			user.SendText(fmt.Sprintf(`config change error: %s=%s (%s)`, configName, configValue, err))
-			return true, ``, nil
+			return true, nil
 		}
 
 		user.SendText(fmt.Sprintf(`config changed: %s=%s`, configName, configValue))
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	if rest == "reload-ansi" {
 		templates.LoadAliases()
 		user.SendText(`ansi aliases reloaded`)
-		return true, ``, nil
+		return true, nil
 	}
 
 	if rest == "ansi-passthrough" {
@@ -298,5 +298,5 @@ func Server(rest string, userId int) (bool, string, error) {
 		user.SendText(memRepTxt)
 	}
 
-	return true, ``, nil
+	return true, nil
 }

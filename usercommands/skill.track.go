@@ -30,25 +30,25 @@ Level 2 - Display all players and mobs to recently walk through here
 Level 3 - Shows exit information for all tracked players or mobs
 Level 4 - Specify a mob or username and every room you enter will tell you what exit they took.
 */
-func Track(rest string, userId int) (bool, string, error) {
+func Track(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Track)
 
 	if skillLevel == 0 {
 		user.SendText("You don't know how to track.")
-		return true, ``, errors.New(`you don't know how to track`)
+		return true, errors.New(`you don't know how to track`)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	currentMobs := room.GetMobs()
@@ -63,7 +63,7 @@ func Track(rest string, userId int) (bool, string, error) {
 		if !user.Character.TryCooldown(skills.Track.String(), 1) {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())))
-			return true, ``, errors.New(`you're doing that too often`)
+			return true, errors.New(`you're doing that too often`)
 		}
 
 		visitorData := make([]trackingInfo, 0)
@@ -170,7 +170,7 @@ func Track(rest string, userId int) (bool, string, error) {
 			user.SendText("You don't see any tracks.")
 		}
 
-		return true, ``, nil
+		return true, nil
 
 	}
 
@@ -178,7 +178,7 @@ func Track(rest string, userId int) (bool, string, error) {
 	if skillLevel < 3 {
 
 		user.SendText("You can't track a specific person or mob... yet.")
-		return true, ``, errors.New(`you can't track a specific person or mob yet`)
+		return true, errors.New(`you can't track a specific person or mob yet`)
 
 	}
 
@@ -187,7 +187,7 @@ func Track(rest string, userId int) (bool, string, error) {
 		user.SendText(
 			fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())))
 
-		return true, ``, errors.New(`you're doing that too often`)
+		return true, errors.New(`you're doing that too often`)
 
 	}
 
@@ -203,7 +203,7 @@ func Track(rest string, userId int) (bool, string, error) {
 			if foundUser != nil {
 				user.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> is in the room with you!`, foundUser.Character.Name))
-				return true, ``, nil
+				return true, nil
 
 			}
 
@@ -214,7 +214,7 @@ func Track(rest string, userId int) (bool, string, error) {
 			if foundMob != nil {
 				user.SendText(
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is in the room with you!`, foundMob.Character.Name))
-				return true, ``, nil
+				return true, nil
 
 			}
 		}
@@ -248,7 +248,7 @@ func Track(rest string, userId int) (bool, string, error) {
 					BuffId:        26, // 26 is the buff for active tracking
 				})
 
-				return true, ``, nil
+				return true, nil
 
 			} else if closeMatch != `` {
 
@@ -261,7 +261,7 @@ func Track(rest string, userId int) (bool, string, error) {
 					BuffId:        26, // 26 is the buff for active tracking
 				})
 
-				return true, ``, nil
+				return true, nil
 
 			}
 
@@ -285,7 +285,7 @@ func Track(rest string, userId int) (bool, string, error) {
 					BuffId:        26, // 26 is the buff for active tracking
 				})
 
-				return true, ``, nil
+				return true, nil
 
 			} else if closeMatch != `` {
 
@@ -298,13 +298,13 @@ func Track(rest string, userId int) (bool, string, error) {
 					BuffId:        26, // 26 is the buff for active tracking
 				})
 
-				return true, ``, nil
+				return true, nil
 
 			}
 
 			user.SendText("You don't see any tracks.")
 
-			return true, ``, nil
+			return true, nil
 		}
 
 		/*
@@ -425,10 +425,10 @@ func Track(rest string, userId int) (bool, string, error) {
 			user.SendText("You don't see any tracks.")
 		}
 
-		return true, ``, nil
+		return true, nil
 	}
 
-	return true, ``, nil
+	return true, nil
 }
 
 func trailStrengthToString(trailStrength float64) string {

@@ -14,23 +14,23 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Shoot(rest string, userId int) (bool, string, error) {
+func Shoot(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if user.Character.Equipment.Weapon.GetSpec().Subtype != items.Shooting {
 		user.SendText(`You don't have a shooting weapon.`)
-		return true, ``, nil
+		return true, nil
 	}
 
 	attackPlayerId := 0
@@ -42,7 +42,7 @@ func Shoot(rest string, userId int) (bool, string, error) {
 
 	if len(args) < 2 {
 		user.SendText(`Syntax: <ansi fg="command">shoot [target] [exit]</ansi>`)
-		return true, ``, nil
+		return true, nil
 	}
 
 	direction := args[len(args)-1]
@@ -56,7 +56,7 @@ func Shoot(rest string, userId int) (bool, string, error) {
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
 			user.SendText(fmt.Sprintf("The %s exit is locked.", exitName))
-			return true, ``, nil
+			return true, nil
 		}
 
 		if adjacentRoom := rooms.LoadRoom(attackRoomId); adjacentRoom != nil {
@@ -66,12 +66,12 @@ func Shoot(rest string, userId int) (bool, string, error) {
 
 	if attackRoomId == 0 {
 		user.SendText(`Could not find where you wanted to shoot`)
-		return true, ``, nil
+		return true, nil
 	}
 
 	if attackPlayerId == 0 && attackMobInstanceId == 0 {
 		user.SendText(`Could not find your target.`)
-		return true, ``, nil
+		return true, nil
 	}
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
@@ -92,7 +92,7 @@ func Shoot(rest string, userId int) (bool, string, error) {
 
 			if m.Character.IsCharmed(userId) {
 				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
-				return true, ``, nil
+				return true, nil
 			}
 
 			user.Character.SetAggroRemote(exitName, 0, attackMobInstanceId, characters.Shooting)
@@ -119,7 +119,7 @@ func Shoot(rest string, userId int) (bool, string, error) {
 			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
 				if partyInfo.IsMember(attackPlayerId) {
 					user.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name))
-					return true, ``, nil
+					return true, nil
 				}
 			}
 
@@ -142,5 +142,5 @@ func Shoot(rest string, userId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

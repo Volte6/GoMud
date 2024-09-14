@@ -18,25 +18,25 @@ import (
 SkullDuggery Skill
 Level 4 - Pickpocket
 */
-func Pickpocket(rest string, userId int) (bool, string, error) {
+func Pickpocket(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 4 {
-		return false, ``, nil
+		return false, nil
 	}
 
 	// Must be sneaking
@@ -44,12 +44,12 @@ func Pickpocket(rest string, userId int) (bool, string, error) {
 
 	if user.Character.Aggro != nil {
 		user.SendText("You can't do that while in combat!")
-		return true, ``, nil
+		return true, nil
 	}
 
 	if room.AreMobsAttacking(userId) {
 		user.SendText("You can't do that while you are under attack!")
-		return true, ``, nil
+		return true, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -60,7 +60,7 @@ func Pickpocket(rest string, userId int) (bool, string, error) {
 
 		if !user.Character.TryCooldown(skills.Skulduggery.String(`pickpocket`), 15) {
 			user.SendText(fmt.Sprintf("You need to wait %d rounds before you can do that again!", user.Character.GetCooldown(skills.Skulduggery.String(`pickpocket`))))
-			return true, ``, nil
+			return true, nil
 		}
 
 	}
@@ -146,7 +146,7 @@ func Pickpocket(rest string, userId int) (bool, string, error) {
 
 		if !configs.GetConfig().PVPEnabled {
 			user.SendText(`PVP is currently disabled.`)
-			return true, ``, nil
+			return true, nil
 		}
 
 		p := users.GetByUserId(pickPlayerId)
@@ -239,5 +239,5 @@ func Pickpocket(rest string, userId int) (bool, string, error) {
 		user.SendText("Pickpocket who?")
 	}
 
-	return true, ``, nil
+	return true, nil
 }

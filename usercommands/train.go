@@ -23,24 +23,24 @@ type TrainingOptions struct {
 	Options        []TrainingOption
 }
 
-func Train(rest string, userId int) (bool, string, error) {
+func Train(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if len(room.SkillTraining) == 0 {
 		user.SendText(`You must find a trainer to perform training.`)
-		return false, ``, nil
+		return false, nil
 	}
 
 	trainingData := TrainingOptions{
@@ -188,5 +188,5 @@ func Train(rest string, userId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

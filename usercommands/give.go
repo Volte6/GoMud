@@ -15,18 +15,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Give(rest string, userId int) (bool, string, error) {
+func Give(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	rest = util.StripPrepositions(rest)
@@ -35,7 +35,7 @@ func Give(rest string, userId int) (bool, string, error) {
 
 	if len(args) < 2 {
 		user.SendText("Give what? To whom?")
-		return true, ``, nil
+		return true, nil
 	}
 
 	var giveWho string = args[len(args)-1]
@@ -52,12 +52,12 @@ func Give(rest string, userId int) (bool, string, error) {
 
 		if giveGoldAmount < 0 {
 			user.SendText("You can't give a negative amount of gold.")
-			return true, ``, nil
+			return true, nil
 		}
 
 		if giveGoldAmount > user.Character.Gold {
 			user.SendText("You don't have that much gold to give.")
-			return true, ``, nil
+			return true, nil
 		}
 
 	} else {
@@ -69,7 +69,7 @@ func Give(rest string, userId int) (bool, string, error) {
 
 		if !found {
 			user.SendText(fmt.Sprintf("You don't have a %s to give.", giveWhat))
-			return true, ``, nil
+			return true, nil
 		}
 
 	}
@@ -143,7 +143,7 @@ func Give(rest string, userId int) (bool, string, error) {
 			user.SendText("Something went wrong.")
 		}
 
-		return true, ``, nil
+		return true, nil
 
 	}
 
@@ -192,7 +192,7 @@ func Give(rest string, userId int) (bool, string, error) {
 
 				if handled, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}); err == nil {
 					if handled {
-						return true, ``, nil
+						return true, nil
 					}
 				}
 
@@ -206,10 +206,10 @@ func Give(rest string, userId int) (bool, string, error) {
 
 		}
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	user.SendText("Who???")
 
-	return true, ``, nil
+	return true, nil
 }

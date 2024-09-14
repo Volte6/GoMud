@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Look(rest string, mobId int) (bool, string, error) {
+func Look(rest string, mobId int) (bool, error) {
 
 	secretLook := false
 	if strings.HasPrefix(rest, "secretly") {
@@ -22,13 +22,13 @@ func Look(rest string, mobId int) (bool, string, error) {
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
@@ -47,7 +47,7 @@ func Look(rest string, mobId int) (bool, string, error) {
 
 			exitInfo := room.Exits[exitName]
 			if exitInfo.Lock.IsLocked() {
-				return true, ``, nil
+				return true, nil
 			}
 
 			if !isSneaking {
@@ -58,7 +58,7 @@ func Look(rest string, mobId int) (bool, string, error) {
 
 				lookRoom(mobId, lookRoomId, secretLook || isSneaking)
 
-				return true, ``, nil
+				return true, nil
 			}
 		}
 
@@ -73,7 +73,7 @@ func Look(rest string, mobId int) (bool, string, error) {
 				)
 			}
 
-			return true, ``, nil
+			return true, nil
 		}
 
 		//
@@ -111,7 +111,7 @@ func Look(rest string, mobId int) (bool, string, error) {
 
 			}
 
-			return true, ``, nil
+			return true, nil
 
 		}
 
@@ -126,10 +126,10 @@ func Look(rest string, mobId int) (bool, string, error) {
 				)
 			}
 
-			return true, ``, nil
+			return true, nil
 		}
 
-		return true, ``, nil
+		return true, nil
 
 	} else {
 
@@ -144,7 +144,7 @@ func Look(rest string, mobId int) (bool, string, error) {
 		lookRoom(mobId, room.RoomId, secretLook || isSneaking)
 	}
 
-	return true, ``, nil
+	return true, nil
 }
 
 func lookRoom(mobId int, roomId int, secretLook bool) {

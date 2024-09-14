@@ -18,32 +18,32 @@ import (
 SkullDuggery Skill
 Level 2 - Backstab
 */
-func Backstab(rest string, userId int) (bool, string, error) {
+func Backstab(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 2 {
-		return false, ``, nil
+		return false, nil
 	}
 
 	// Must be sneaking
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 	if !isSneaking {
 		user.SendText("You can't backstab unless you're hidden!")
-		return true, ``, nil
+		return true, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// Do a check for whether these can backstab
@@ -64,7 +64,7 @@ func Backstab(rest string, userId int) (bool, string, error) {
 	for _, wpnSubType := range wpnSubtypeChecks {
 		if !items.CanBackstab(wpnSubType) {
 			user.SendText(fmt.Sprintf(`%s weapons can't be used to backstab.`, wpnSubType))
-			return true, ``, nil
+			return true, nil
 		}
 	}
 
@@ -100,7 +100,7 @@ func Backstab(rest string, userId int) (bool, string, error) {
 
 	if attackMobInstanceId == 0 && attackPlayerId == 0 {
 		user.SendText("You attack the darkness!")
-		return true, ``, nil
+		return true, nil
 	}
 
 	if attackMobInstanceId > 0 {
@@ -109,7 +109,7 @@ func Backstab(rest string, userId int) (bool, string, error) {
 
 		if m.Character.IsCharmed(userId) {
 			user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
-			return true, ``, nil
+			return true, nil
 		}
 
 		if m != nil {
@@ -126,7 +126,7 @@ func Backstab(rest string, userId int) (bool, string, error) {
 
 		if !configs.GetConfig().PVPEnabled {
 			user.SendText(`PVP is currently disabled.`)
-			return true, ``, nil
+			return true, nil
 		}
 
 		p := users.GetByUserId(attackPlayerId)
@@ -136,7 +136,7 @@ func Backstab(rest string, userId int) (bool, string, error) {
 			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
 				if partyInfo.IsMember(attackPlayerId) {
 					user.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name))
-					return true, ``, nil
+					return true, nil
 				}
 			}
 
@@ -149,5 +149,5 @@ func Backstab(rest string, userId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

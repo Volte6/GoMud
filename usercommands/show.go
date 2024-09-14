@@ -13,18 +13,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Show(rest string, userId int) (bool, string, error) {
+func Show(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	rest = util.StripPrepositions(rest)
@@ -33,7 +33,7 @@ func Show(rest string, userId int) (bool, string, error) {
 
 	if len(args) < 2 {
 		user.SendText("Show what? To whom?")
-		return true, ``, nil
+		return true, nil
 	}
 
 	var showItem items.Item = items.Item{}
@@ -48,7 +48,7 @@ func Show(rest string, userId int) (bool, string, error) {
 
 	if !found {
 		user.SendText(fmt.Sprintf("You don't have a %s to show.", objectName))
-		return true, ``, nil
+		return true, nil
 	}
 
 	playerId, mobId := room.FindByName(targetName)
@@ -86,7 +86,7 @@ func Show(rest string, userId int) (bool, string, error) {
 			user.SendText("Something went wrong.")
 		}
 
-		return true, ``, nil
+		return true, nil
 
 	}
 
@@ -121,10 +121,10 @@ func Show(rest string, userId int) (bool, string, error) {
 
 		}
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	user.SendText("Who???")
 
-	return true, ``, nil
+	return true, nil
 }

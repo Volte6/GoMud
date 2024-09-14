@@ -25,32 +25,32 @@ Level 4 - You are always aware of hidden players/mobs in the area
 (Lvl 3) <ansi fg="skill">search</ansi> Finds special/unknown "things of interest" in the area.
 (Lvl 4) <ansi fg="skill">search</ansi> Doubles your chance of success when searching.
 */
-func Search(rest string, userId int) (bool, string, error) {
+func Search(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Search)
 
 	if skillLevel == 0 {
 		user.SendText("You don't know how to search.")
-		return true, ``, fmt.Errorf("you don't know how to search")
+		return true, fmt.Errorf("you don't know how to search")
 	}
 
 	if !user.Character.TryCooldown(skills.Search.String(), 2) {
 		user.SendText(
 			fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Search.String())),
 		)
-		return true, ``, fmt.Errorf("you're doing that too often")
+		return true, fmt.Errorf("you're doing that too often")
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// 10% + 1% for every 2 smarts
@@ -175,5 +175,5 @@ func Search(rest string, userId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

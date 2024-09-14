@@ -14,12 +14,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Help(rest string, userId int) (bool, string, error) {
+func Help(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	var helpTxt string
@@ -122,13 +122,13 @@ func Help(rest string, userId int) (bool, string, error) {
 		helpTxt, err = templates.Process("help/"+helpName, helpVars)
 		if err != nil {
 			user.SendText(fmt.Sprintf(`No help found for "%s"`, helpName))
-			return true, ``, err
+			return true, err
 		}
 	}
 
 	user.SendText(helpTxt)
 
-	return true, ``, nil
+	return true, nil
 }
 
 func getRaceOptions(raceRequest string) []races.Race {

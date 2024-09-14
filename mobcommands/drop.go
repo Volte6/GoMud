@@ -11,18 +11,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Drop(rest string, mobId int) (bool, string, error) {
+func Drop(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -43,7 +43,7 @@ func Drop(rest string, mobId int) (bool, string, error) {
 			Drop(item.Name(), mobId)
 		}
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	// Drop 10 gold
@@ -51,7 +51,7 @@ func Drop(rest string, mobId int) (bool, string, error) {
 		g, _ := strconv.ParseInt(args[0], 10, 32)
 		dropAmt := int(g)
 		if dropAmt < 1 {
-			return true, ``, nil
+			return true, nil
 		}
 
 		if dropAmt <= mob.Character.Gold {
@@ -62,7 +62,7 @@ func Drop(rest string, mobId int) (bool, string, error) {
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> drops <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, dropAmt))
 
-			return true, ``, nil
+			return true, nil
 		}
 	}
 
@@ -79,5 +79,5 @@ func Drop(rest string, mobId int) (bool, string, error) {
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))
 	}
 
-	return true, ``, nil
+	return true, nil
 }

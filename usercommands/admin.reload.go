@@ -9,18 +9,18 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Reload(rest string, userId int) (bool, string, error) {
+func Reload(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.reload", nil)
 		user.SendText(infoOutput)
-		return true, ``, nil
+		return true, nil
 	}
 
 	switch strings.ToLower(rest) {
@@ -30,5 +30,5 @@ func Reload(rest string, userId int) (bool, string, error) {
 	default:
 		user.SendText(`Unknown reload command.`)
 	}
-	return true, ``, nil
+	return true, nil
 }

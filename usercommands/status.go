@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Status(rest string, userId int) (bool, string, error) {
+func Status(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	possibleStatuses := []string{`strength`, `speed`, `smarts`, `vitality`, `mysticism`, `perception`}
@@ -25,7 +26,7 @@ func Status(rest string, userId int) (bool, string, error) {
 
 		if len(args) < 2 || args[0] != `train` {
 			user.SendText("stat WHAT???")
-			return true, ``, nil
+			return true, nil
 		}
 
 		match, partial := util.FindMatchIn(args[1], possibleStatuses...)
@@ -43,12 +44,12 @@ func Status(rest string, userId int) (bool, string, error) {
 
 		if user.Character.StatPoints < trainQty {
 			user.SendText("You don't have enough stat points to do that.")
-			return true, ``, nil
+			return true, nil
 		}
 
 		if len(match) == 0 {
 			user.SendText("It's not clear which stat you want to improve.")
-			return true, ``, nil
+			return true, nil
 		}
 
 		before := 0
@@ -82,11 +83,17 @@ func Status(rest string, userId int) (bool, string, error) {
 
 		user.SendText(
 			fmt.Sprintf(`Your base <ansi fg="yellow">%s</ansi> improves from <ansi fg="cyan">%d</ansi> to <ansi fg="cyan-bold">%d</ansi>!`, match, before, after))
-		return true, ``, nil
+		return true, nil
 	}
 
 	tplTxt, _ := templates.Process("character/status", user)
 	user.SendText(tplTxt)
 
-	return true, `inventory`, nil
+	// Immediately do a secret look
+	events.AddToQueue(events.Input{
+		UserId:    userId,
+		InputText: `inventory`,
+	}, true)
+
+	return true, nil
 }

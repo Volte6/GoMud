@@ -9,12 +9,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Set(rest string, userId int) (bool, string, error) {
+func Set(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -70,7 +70,7 @@ func Set(rest string, userId int) (bool, string, error) {
 
 		user.SendText(`See: <ansi fg="command">help set</ansi>`)
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	setTarget := args[0]
@@ -85,7 +85,7 @@ func Set(rest string, userId int) (bool, string, error) {
 		user.Character.Description = rest
 
 		user.SendText("Description set. Look at yourself to confirm.")
-		return true, ``, nil
+		return true, nil
 	}
 
 	if setTarget == `auction` {
@@ -103,7 +103,7 @@ func Set(rest string, userId int) (bool, string, error) {
 
 		user.SetConfigOption(`auction`, on)
 
-		return true, ``, nil
+		return true, nil
 
 	}
 
@@ -119,7 +119,7 @@ func Set(rest string, userId int) (bool, string, error) {
 
 		user.SetConfigOption(`shortadjectives`, on)
 
-		return true, ``, nil
+		return true, nil
 
 	}
 
@@ -135,7 +135,7 @@ func Set(rest string, userId int) (bool, string, error) {
 
 		user.SetConfigOption(`tinymap`, on)
 
-		return true, ``, nil
+		return true, nil
 
 	}
 
@@ -149,7 +149,7 @@ func Set(rest string, userId int) (bool, string, error) {
 			user.SendText("Your current prompt:\n")
 			user.SendText(currentPrompt.(string))
 			user.SendText("\n" + `Type <ansi fg="command">help set-prompt</ansi> for more info on customizing prompts.` + "\n")
-			return true, ``, nil
+			return true, nil
 		}
 
 		promptStr := rest[len(setTarget)+1:]
@@ -168,7 +168,7 @@ func Set(rest string, userId int) (bool, string, error) {
 		}
 
 		user.SendText("Prompt set.")
-		return true, ``, nil
+		return true, nil
 
 	}
 
@@ -182,7 +182,7 @@ func Set(rest string, userId int) (bool, string, error) {
 			user.SendText("Your current fprompt:\n")
 			user.SendText(currentPrompt.(string))
 			user.SendText("\n" + `Type <ansi fg="command">help set-prompt</ansi> for more info on customizing prompts.` + "\n")
-			return true, ``, nil
+			return true, nil
 		}
 
 		promptStr := rest[len(setTarget)+1:]
@@ -199,7 +199,7 @@ func Set(rest string, userId int) (bool, string, error) {
 		}
 
 		user.SendText("fprompt set.")
-		return true, ``, nil
+		return true, nil
 
 	}
 
@@ -208,7 +208,7 @@ func Set(rest string, userId int) (bool, string, error) {
 		macroNum, _ := strconv.Atoi(string(args[0][1]))
 		if macroNum == 0 {
 			user.SendText("Invalid macro number supplied.")
-			return true, ``, nil
+			return true, nil
 		}
 		if user.Macros == nil {
 			user.Macros = make(map[string]string)
@@ -233,7 +233,7 @@ func Set(rest string, userId int) (bool, string, error) {
 						user.SendText(
 							`You cannot reference macros inside of a macro`,
 						)
-						return true, ``, nil
+						return true, nil
 					}
 				}
 			}
@@ -245,10 +245,10 @@ func Set(rest string, userId int) (bool, string, error) {
 			)
 		}
 
-		return true, ``, nil
+		return true, nil
 	}
 	// Setting macros:
 	// set =1 "say hello"
 
-	return true, ``, nil
+	return true, nil
 }

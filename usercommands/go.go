@@ -15,23 +15,23 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Go(rest string, userId int) (bool, string, error) {
+func Go(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	if user.Character.Aggro != nil {
 		user.SendText("You can't do that! You are in combat!")
-		return true, ``, nil
+		return true, nil
 	}
 
 	// If has a buff that prevents combat, skip the player
 	if user.Character.HasBuffFlag(buffs.NoMovement) {
 		user.SendText("You can't do that!")
-		return true, ``, nil
+		return true, nil
 	}
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
@@ -39,7 +39,7 @@ func Go(rest string, userId int) (bool, string, error) {
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	handled := true
@@ -63,7 +63,7 @@ func Go(rest string, userId int) (bool, string, error) {
 				user.SendText("You're too encumbered to move!")
 			}
 
-			return true, ``, nil
+			return true, nil
 		}
 
 		exitInfo := room.Exits[exitName]
@@ -126,7 +126,7 @@ func Go(rest string, userId int) (bool, string, error) {
 
 				if exitInfo.Lock.IsLocked() {
 					user.SendText(`There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.`)
-					return true, ``, nil
+					return true, nil
 				}
 			}
 
@@ -137,7 +137,7 @@ func Go(rest string, userId int) (bool, string, error) {
 		// Load current room details
 		destRoom := rooms.LoadRoom(goRoomId)
 		if destRoom == nil {
-			return false, ``, fmt.Errorf(`room %d not found`, goRoomId)
+			return false, fmt.Errorf(`room %d not found`, goRoomId)
 		}
 
 		// Grab the exit in the target room that leads to this room (if any)
@@ -159,7 +159,7 @@ func Go(rest string, userId int) (bool, string, error) {
 
 		if handled, err := scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId); err == nil {
 			if handled { // For this event, handled represents whether to reject the move.
-				return true, ``, nil
+				return true, nil
 			}
 		}
 
@@ -171,7 +171,7 @@ func Go(rest string, userId int) (bool, string, error) {
 
 				if handled { // For this event, handled represents whether to reject the move.
 					rooms.MoveToRoom(user.UserId, originRoomId)
-					return true, ``, nil
+					return true, nil
 				}
 			}
 
@@ -334,5 +334,5 @@ func Go(rest string, userId int) (bool, string, error) {
 
 	}
 
-	return handled, ``, nil
+	return handled, nil
 }

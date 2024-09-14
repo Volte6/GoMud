@@ -8,17 +8,17 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func LookForAid(rest string, mobId int) (bool, string, error) {
+func LookForAid(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	isCharmed := mob.Character.IsCharmed()
 	if !isCharmed {
-		return true, ``, nil
+		return true, nil
 	}
 
 	room := rooms.LoadRoom(mob.Character.RoomId)
@@ -36,5 +36,5 @@ func LookForAid(rest string, mobId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

@@ -13,18 +13,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Party(rest string, userId int) (bool, string, error) {
+func Party(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(rest)
@@ -49,7 +49,7 @@ func Party(rest string, userId int) (bool, string, error) {
 			} else {
 				user.SendText(`You are already party of a party.`)
 			}
-			return true, ``, nil
+			return true, nil
 		}
 
 		if currentParty = parties.New(userId); currentParty != nil {
@@ -58,7 +58,7 @@ func Party(rest string, userId int) (bool, string, error) {
 			user.SendText(`Something went wrong.`)
 		}
 
-		return true, ``, nil
+		return true, nil
 	}
 	// Done with create
 
@@ -70,7 +70,7 @@ func Party(rest string, userId int) (bool, string, error) {
 
 		if rest == `` {
 			user.SendText(`Invite who?`)
-			return true, ``, nil
+			return true, nil
 		}
 
 		// Not in a party? Create one.
@@ -80,19 +80,19 @@ func Party(rest string, userId int) (bool, string, error) {
 
 		if !currentParty.IsLeader(userId) {
 			user.SendText(`You are not the leader of your party.`)
-			return true, ``, nil
+			return true, nil
 		}
 
 		invitePlayerId, mobInstId := room.FindByName(rest)
 
 		if invitePlayerId == 0 && mobInstId == 0 {
 			user.SendText(fmt.Sprintf(`%s not found.`, rest))
-			return true, ``, nil
+			return true, nil
 		}
 
 		if invitedParty := parties.Get(invitePlayerId); invitedParty != nil {
 			user.SendText(`That player is already in a party.`)
-			return true, ``, nil
+			return true, nil
 		}
 
 		invitedUser := users.GetByUserId(invitePlayerId)
@@ -104,7 +104,7 @@ func Party(rest string, userId int) (bool, string, error) {
 			user.SendText(`Something went wrong.`)
 		}
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	//
@@ -113,7 +113,7 @@ func Party(rest string, userId int) (bool, string, error) {
 
 	if currentParty == nil {
 		user.SendText(`You are not attached to a party.`)
-		return true, ``, nil
+		return true, nil
 	}
 
 	if partyCommand == `accept` || partyCommand == `join` {
@@ -133,7 +133,7 @@ func Party(rest string, userId int) (bool, string, error) {
 		} else {
 			user.SendText(`Something went wrong.`)
 		}
-		return true, ``, nil
+		return true, nil
 	}
 
 	if partyCommand == `decline` {
@@ -147,7 +147,7 @@ func Party(rest string, userId int) (bool, string, error) {
 		} else {
 			user.SendText(`Something went wrong.`)
 		}
-		return true, ``, nil
+		return true, nil
 	}
 
 	if partyCommand == `list` {
@@ -273,7 +273,7 @@ func Party(rest string, userId int) (bool, string, error) {
 
 	if currentParty.Invited(userId) {
 		user.SendText(`You haven't accepted an invitation to the party.`)
-		return true, ``, nil
+		return true, nil
 	}
 
 	//
@@ -287,7 +287,7 @@ func Party(rest string, userId int) (bool, string, error) {
 			autoAttackOn = false
 		} else {
 			user.SendText(`Usage: <ansi fg="command">party autoattack [on/off]</ansi>`)
-			return true, ``, nil
+			return true, nil
 		}
 
 		wasOnBefore := currentParty.SetAutoAttack(userId, autoAttackOn)
@@ -314,7 +314,7 @@ func Party(rest string, userId int) (bool, string, error) {
 			if len(currentParty.UserIds) <= 1 {
 				user.SendText(`You disbanded the party.`)
 				currentParty.Disband()
-				return true, ``, nil
+				return true, nil
 			}
 
 			currentParty.LeaderUserId = 0
@@ -369,7 +369,7 @@ func Party(rest string, userId int) (bool, string, error) {
 
 		if !currentParty.IsLeader(userId) {
 			user.SendText(`You are not the leader of your party.`)
-			return true, ``, nil
+			return true, nil
 		}
 
 		for _, uid := range currentParty.UserIds {
@@ -390,14 +390,14 @@ func Party(rest string, userId int) (bool, string, error) {
 
 		user.SendText(`You disbanded the party.`)
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	if partyCommand == `kick` {
 
 		if !currentParty.IsLeader(userId) {
 			user.SendText(`You are not the leader of your party.`)
-			return true, ``, nil
+			return true, nil
 		}
 
 		allMembers := []string{}
@@ -418,7 +418,7 @@ func Party(rest string, userId int) (bool, string, error) {
 
 		if matchUser == `` {
 			user.SendText(fmt.Sprintf(`%s not found.`, rest))
-			return true, ``, nil
+			return true, nil
 		}
 
 		kickUserId := memberIds[matchUser]
@@ -440,7 +440,7 @@ func Party(rest string, userId int) (bool, string, error) {
 
 		if !currentParty.IsLeader(userId) {
 			user.SendText(`You are not the leader of your party.`)
-			return true, ``, nil
+			return true, nil
 		}
 
 		allMembers := []string{}
@@ -461,7 +461,7 @@ func Party(rest string, userId int) (bool, string, error) {
 
 		if matchUser == `` {
 			user.SendText(fmt.Sprintf(`%s not found.`, rest))
-			return true, ``, nil
+			return true, nil
 		}
 
 		promoteUserId := memberIds[matchUser]
@@ -486,7 +486,7 @@ func Party(rest string, userId int) (bool, string, error) {
 
 		if len(rest) == 0 {
 			user.SendText(`What do you want to say?`)
-			return true, ``, nil
+			return true, nil
 		}
 
 		for _, uId := range currentParty.GetMembers() {
@@ -501,5 +501,5 @@ func Party(rest string, userId int) (bool, string, error) {
 		user.SendText(fmt.Sprintf(`<ansi fg="magenta">(party)</ansi> You say, "<ansi fg="yellow">%s</ansi>"`, rest))
 	}
 
-	return true, ``, nil
+	return true, nil
 }

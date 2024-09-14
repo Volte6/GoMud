@@ -9,12 +9,12 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Alias(rest string, userId int) (bool, string, error) {
+func Alias(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// biuld array and look up table for sorting purposes
@@ -49,5 +49,5 @@ func Alias(rest string, userId int) (bool, string, error) {
 	aliasTxt, _ := templates.Process("tables/generic", aliasTableData)
 	user.SendText(aliasTxt)
 
-	return true, ``, nil
+	return true, nil
 }

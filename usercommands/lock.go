@@ -10,25 +10,25 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Lock(rest string, userId int) (bool, string, error) {
+func Lock(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 1 {
 		user.SendText("Unlock what?")
-		return true, ``, nil
+		return true, nil
 	}
 
 	containerName := room.FindContainerByName(args[0])
@@ -40,7 +40,7 @@ func Lock(rest string, userId int) (bool, string, error) {
 
 		if container.Lock.IsLocked() {
 			user.SendText("That's already locked.")
-			return true, ``, nil
+			return true, nil
 		}
 
 		lockId := fmt.Sprintf(`%d-%s`, room.RoomId, containerName)
@@ -78,7 +78,7 @@ func Lock(rest string, userId int) (bool, string, error) {
 			user.SendText(`You do not have the key for that.`)
 		}
 
-		return true, ``, nil
+		return true, nil
 
 	} else if exitRoomId > 0 {
 
@@ -86,7 +86,7 @@ func Lock(rest string, userId int) (bool, string, error) {
 
 		if exitInfo.Lock.IsLocked() {
 			user.SendText("That's already locked.")
-			return true, ``, nil
+			return true, nil
 		}
 
 		lockId := fmt.Sprintf(`%d-%s`, room.RoomId, exitName)
@@ -124,11 +124,11 @@ func Lock(rest string, userId int) (bool, string, error) {
 			user.SendText(`You do not have the key for that.`)
 		}
 
-		return true, ``, nil
+		return true, nil
 
 	}
 
 	user.SendText("There is no such exit or container.")
-	return true, ``, nil
+	return true, nil
 
 }

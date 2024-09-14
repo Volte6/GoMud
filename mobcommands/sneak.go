@@ -8,18 +8,18 @@ import (
 	"github.com/volte6/mud/mobs"
 )
 
-func Sneak(rest string, mobId int) (bool, string, error) {
+func Sneak(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Must be sneaking
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 	if isSneaking {
-		return true, ``, nil
+		return true, nil
 	}
 
 	events.AddToQueue(events.Buff{
@@ -28,5 +28,5 @@ func Sneak(rest string, mobId int) (bool, string, error) {
 		BuffId:        9, // Buff 9 is sneak
 	})
 
-	return true, ``, nil
+	return true, nil
 }

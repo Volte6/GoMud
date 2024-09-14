@@ -14,7 +14,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Look(rest string, userId int) (bool, string, error) {
+func Look(rest string, userId int) (bool, error) {
 
 	secretLook := false
 	if strings.HasPrefix(rest, "secretly") {
@@ -25,13 +25,13 @@ func Look(rest string, userId int) (bool, string, error) {
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// 0 = none. 1 = can see this room. 2 = can see this room and all exits
@@ -67,7 +67,7 @@ func Look(rest string, userId int) (bool, string, error) {
 		raceInfo := races.GetRace(user.Character.RaceId)
 		if !raceInfo.NightVision {
 			user.SendText(`You can't see anything!`)
-			return true, ``, nil
+			return true, nil
 		}
 	}
 
@@ -86,7 +86,7 @@ func Look(rest string, userId int) (bool, string, error) {
 				user.SendText(``)
 				user.SendText(`The chest is locked.`)
 				user.SendText(``)
-				return true, ``, nil
+				return true, nil
 			}
 
 			chestStuff := []string{}
@@ -108,7 +108,7 @@ func Look(rest string, userId int) (bool, string, error) {
 			user.SendText(``)
 			user.SendText(textOut)
 
-			return true, ``, nil
+			return true, nil
 		}
 
 		//
@@ -137,7 +137,7 @@ func Look(rest string, userId int) (bool, string, error) {
 					biome := room.GetBiome()
 					if !biome.IsLit() {
 						user.SendText(`It's too dark to see anything in that direction.`)
-						return true, ``, nil
+						return true, nil
 					}
 
 				}
@@ -147,7 +147,7 @@ func Look(rest string, userId int) (bool, string, error) {
 			exitInfo := room.Exits[exitName]
 			if exitInfo.Lock.IsLocked() {
 				user.SendText(fmt.Sprintf("The %s exit is locked.", exitName))
-				return true, ``, nil
+				return true, nil
 			}
 
 			user.SendText(fmt.Sprintf("You peer toward the %s.", exitName))
@@ -159,7 +159,7 @@ func Look(rest string, userId int) (bool, string, error) {
 
 				lookRoom(user.UserId, lookRoomId, secretLook || isSneaking)
 
-				return true, ``, nil
+				return true, nil
 			}
 		}
 
@@ -197,7 +197,7 @@ func Look(rest string, userId int) (bool, string, error) {
 
 			user.SendText(``)
 
-			return true, ``, nil
+			return true, nil
 		}
 
 		//
@@ -273,13 +273,13 @@ func Look(rest string, userId int) (bool, string, error) {
 			user.SendText(statusTxt)
 			user.SendText(invTxt)
 
-			return true, ``, nil
+			return true, nil
 
 		}
 
 		user.SendText("Look at what???")
 
-		return true, ``, nil
+		return true, nil
 
 	} else {
 
@@ -295,7 +295,7 @@ func Look(rest string, userId int) (bool, string, error) {
 		lookRoom(user.UserId, room.RoomId, secretLook || isSneaking)
 	}
 
-	return true, ``, nil
+	return true, nil
 }
 
 func lookRoom(userId int, roomId int, secretLook bool) {

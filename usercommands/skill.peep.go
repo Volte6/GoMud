@@ -21,42 +21,42 @@ Level 2 - Reveals detailed stats of a player or mob.
 Level 3 - Reveals detailed stats of the player or mob, plus equipment and items
 Level 4 - eveals detailed stats of the player or mob, plus equipment and items, and tells you the % chance of dropping items.
 */
-func Peep(rest string, userId int) (bool, string, error) {
+func Peep(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Peep)
 
 	if skillLevel == 0 {
 		user.SendText("You don't know how to peep.")
-		return true, ``, errors.New(`you don't know how to peep`)
+		return true, errors.New(`you don't know how to peep`)
 	}
 
 	if len(rest) == 0 {
 		user.SendText("Type `help peep` for more information on the peep skill.")
-		return true, ``, nil
+		return true, nil
 	}
 
 	if skillLevel < 2 {
 		user.SendText("At level 1, peep is a passive skill.")
 		user.SendText("Type `help peep` for more information on the peep skill.")
-		return true, ``, errors.New(`at level 1, peep is a passive skill`)
+		return true, errors.New(`at level 1, peep is a passive skill`)
 	}
 
 	if !user.Character.TryCooldown(skills.Peep.String(), 1) {
 		user.SendText(
 			`You're using that skill just a little too fast.`,
 		)
-		return true, ``, errors.New(`you're doing that too often`)
+		return true, errors.New(`you're doing that too often`)
 	}
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// valid peep targets are: mobs, players
@@ -203,12 +203,12 @@ func Peep(rest string, userId int) (bool, string, error) {
 			user.SendText(dropTxt)
 		}
 
-		return true, ``, nil
+		return true, nil
 
 	}
 
 	user.SendText("You don't see that here.")
 
-	return true, ``, errors.New(`you don't see that here`)
+	return true, errors.New(`you don't see that here`)
 
 }

@@ -14,17 +14,17 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Suicide(rest string, mobId int) (bool, string, error) {
+func Suicide(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	slog.Info(`Mob Death`, `name`, mob.Character.Name, `rest`, rest)
@@ -50,7 +50,7 @@ func Suicide(rest string, mobId int) (bool, string, error) {
 		// Remove from current room
 		room.RemoveMob(mob.InstanceId)
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	// Send a death msg to everyone in the room.
@@ -269,5 +269,5 @@ func Suicide(rest string, mobId int) (bool, string, error) {
 	// Remove from current room
 	room.RemoveMob(mob.InstanceId)
 
-	return true, ``, nil
+	return true, nil
 }

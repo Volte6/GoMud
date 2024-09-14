@@ -14,11 +14,11 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Uncurse(rest string, userId int) (bool, string, error) {
+func Uncurse(rest string, userId int) (bool, error) {
 	return Enchant("uncurse "+rest, userId)
 }
 
-func Unenchant(rest string, userId int) (bool, string, error) {
+func Unenchant(rest string, userId int) (bool, error) {
 	return Enchant("remove "+rest, userId)
 }
 
@@ -29,30 +29,30 @@ Level 2 - Enchant equipment with a defensive bonus.
 Level 3 - Add a stat bonus to a weapon or equipment in addition to the above.
 Level 4 - Remove the enchantment or curse from any object.
 */
-func Enchant(rest string, userId int) (bool, string, error) {
+func Enchant(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Enchant)
 
 	if skillLevel == 0 {
 		user.SendText("You don't know how to enchant.")
-		return true, ``, fmt.Errorf("you don't know how to enchant")
+		return true, fmt.Errorf("you don't know how to enchant")
 	}
 
 	if len(rest) == 0 {
 		user.SendText(`Type <ansi fg="command">help enchant</ansi> for more information on the enchant skill.`)
-		return true, ``, nil
+		return true, nil
 	}
 
 	removeEnchantment := false
@@ -71,7 +71,7 @@ func Enchant(rest string, userId int) (bool, string, error) {
 
 	if len(args) < 1 {
 		user.SendText(`You must be more specific.`)
-		return true, ``, nil
+		return true, nil
 	}
 
 	onlyConsider := false
@@ -90,13 +90,13 @@ func Enchant(rest string, userId int) (bool, string, error) {
 
 		if (matchItem.GetSpec().Type != items.Weapon && matchItem.GetSpec().Subtype != items.Wearable) || matchItem.GetSpec().Type == items.Holdable {
 			user.SendText(`Enchant only works on weapons and armor.`)
-			return true, ``, nil
+			return true, nil
 		}
 
 		if removeCurse || removeEnchantment {
 			if skillLevel < 4 {
 				user.SendText(`Your skills are not good enough. Type <ansi fg="command">help enchant</ansi> for more information on the enchant skill.`)
-				return true, ``, nil
+				return true, nil
 			}
 		}
 
@@ -104,7 +104,7 @@ func Enchant(rest string, userId int) (bool, string, error) {
 
 			if !matchItem.IsCursed() {
 				user.SendText(`That's not cursed.`)
-				return true, ``, nil
+				return true, nil
 			}
 
 			user.Character.RemoveItem(matchItem)
@@ -120,14 +120,14 @@ func Enchant(rest string, userId int) (bool, string, error) {
 				fmt.Sprintf(`You remove the curse from the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 			)
 
-			return true, ``, nil
+			return true, nil
 		}
 
 		if removeEnchantment {
 
 			if skillLevel < 4 {
 				user.SendText(`Type <ansi fg="command">help enchant</ansi> for more information on the enchant skill.`)
-				return true, ``, nil
+				return true, nil
 			}
 
 			room.SendText(
@@ -143,14 +143,14 @@ func Enchant(rest string, userId int) (bool, string, error) {
 			matchItem.UnEnchant()
 			user.Character.StoreItem(matchItem)
 
-			return true, ``, nil
+			return true, nil
 
 		}
 
 		/*
 			if matchItem.IsEnchanted() {
 				user.SendText( fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> is already enchanted.`, matchItem.DisplayName()))
-				return true, ``, nil
+				return true, nil
 			}
 		*/
 
@@ -163,14 +163,14 @@ func Enchant(rest string, userId int) (bool, string, error) {
 			user.SendText(
 				fmt.Sprintf(`Your <ansi fg="itemname">%s</ansi> has been enchanted %d times. There is a %d%% chance it would be destroyed.`, matchItem.DisplayName(), matchItem.Enchantments, chanceToDestroy),
 			)
-			return true, ``, nil
+			return true, nil
 		}
 
 		if !user.Character.TryCooldown(skills.Enchant.String(), configs.GetConfig().MinutesToRounds(15)) {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Enchant.String())),
 			)
-			return true, ``, errors.New(`you're doing that too often`)
+			return true, errors.New(`you're doing that too often`)
 		}
 
 		damageBonus := 0
@@ -217,7 +217,7 @@ func Enchant(rest string, userId int) (bool, string, error) {
 		if roll < chanceToDestroy {
 			user.SendText(fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> explodes in a shower of sparks!`, matchItem.DisplayName()))
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their <ansi fg="itemname">%s</ansi> and slowly waves their hand over it. The <ansi fg="itemname">%s</ansi> explodes in a shower of sparks!`, user.Character.Name, matchItem.DisplayName(), matchItem.DisplayName()), userId)
-			return true, ``, nil
+			return true, nil
 		}
 
 		matchItem.Enchant(damageBonus, defenseBonus, statBonus, cursed)
@@ -251,5 +251,5 @@ func Enchant(rest string, userId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

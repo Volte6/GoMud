@@ -13,12 +13,12 @@ type SkillsOptions struct {
 	SkillCooldowns map[string]int
 }
 
-func Skills(rest string, userId int) (bool, string, error) {
+func Skills(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	allSkills := user.Character.GetSkills()
@@ -43,5 +43,5 @@ func Skills(rest string, userId int) (bool, string, error) {
 		}
 	}
 
-	return true, ``, nil
+	return true, nil
 }

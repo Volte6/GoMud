@@ -12,24 +12,24 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Attack(rest string, mobId int) (bool, string, error) {
+func Attack(rest string, mobId int) (bool, error) {
 
 	// Load mob details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 1 {
-		return true, ``, nil
+		return true, nil
 	}
 
 	attackPlayerId := 0
@@ -91,7 +91,7 @@ func Attack(rest string, mobId int) (bool, string, error) {
 			}
 		}
 
-		return true, ``, nil
+		return true, nil
 
 	} else if attackMobInstanceId > 0 {
 
@@ -110,7 +110,7 @@ func Attack(rest string, mobId int) (bool, string, error) {
 
 		}
 
-		return true, ``, nil
+		return true, nil
 	}
 
 	if !isSneaking {
@@ -118,5 +118,5 @@ func Attack(rest string, mobId int) (bool, string, error) {
 			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks confused and upset.`, mob.Character.Name))
 	}
 
-	return true, ``, nil
+	return true, nil
 }

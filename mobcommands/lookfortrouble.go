@@ -12,17 +12,17 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func LookForTrouble(rest string, mobId int) (bool, string, error) {
+func LookForTrouble(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Already aggroed, skip.
 	if mob.Character.Aggro != nil {
-		return true, ``, nil
+		return true, nil
 	}
 
 	// Make a list of all players this gorup is hostile to in this room.
@@ -163,5 +163,5 @@ func LookForTrouble(rest string, mobId int) (bool, string, error) {
 		}
 	}
 
-	return true, ``, nil
+	return true, nil
 }

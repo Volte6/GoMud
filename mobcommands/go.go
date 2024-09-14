@@ -10,23 +10,23 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Go(rest string, mobId int) (bool, string, error) {
+func Go(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// If has a buff that prevents combat, skip the player
 	if mob.Character.HasBuffFlag(buffs.NoMovement) {
-		return true, ``, nil
+		return true, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	exitName := ``
@@ -41,7 +41,7 @@ func Go(rest string, mobId int) (bool, string, error) {
 			}
 			mob.GoingHome = false
 
-			return true, ``, nil
+			return true, nil
 
 		} else {
 
@@ -56,7 +56,7 @@ func Go(rest string, mobId int) (bool, string, error) {
 
 					mob.Command(`say I'm lost.`)
 
-					return true, ``, nil
+					return true, nil
 				}
 			} else {
 
@@ -80,7 +80,7 @@ func Go(rest string, mobId int) (bool, string, error) {
 
 			mob.Command(fmt.Sprintf(`emote tries to go the <ansi fg="exit">%s</ansi> exit, but it's locked.`, exitName))
 
-			return true, ``, nil
+			return true, nil
 		}
 
 	}
@@ -90,7 +90,7 @@ func Go(rest string, mobId int) (bool, string, error) {
 		// Load current room details
 		destRoom := rooms.LoadRoom(goRoomId)
 		if destRoom == nil {
-			return false, ``, fmt.Errorf(`room %d not found`, goRoomId)
+			return false, fmt.Errorf(`room %d not found`, goRoomId)
 		}
 
 		// Grab the exit in the target room that leads to this room (if any)
@@ -106,7 +106,7 @@ func Go(rest string, mobId int) (bool, string, error) {
 			if exitInfo.Lock.IsLocked() {
 
 				// For now, mobs won't go through doors if it unlocks them.
-				return true, ``, nil
+				return true, nil
 				//exitInfo.Unlock()
 				//destRoom.Exits[enterFromExit] = exitInfo
 			}
@@ -146,8 +146,8 @@ func Go(rest string, mobId int) (bool, string, error) {
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> enters from %s.`, mob.Character.Name, enterFromExit),
 			))
 
-		return true, ``, nil
+		return true, nil
 	}
 
-	return false, ``, nil
+	return false, nil
 }

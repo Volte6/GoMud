@@ -14,18 +14,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Room(rest string, userId int) (bool, string, error) {
+func Room(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	handled := true
@@ -40,7 +40,7 @@ func Room(rest string, userId int) (bool, string, error) {
 		infoOutput, _ := templates.Process("admincommands/help/command.room", nil)
 		user.SendText(infoOutput)
 
-		return handled, ``, nil
+		return handled, nil
 	}
 
 	var roomId int = 0
@@ -84,7 +84,7 @@ func Room(rest string, userId int) (bool, string, error) {
 		targetRoom := rooms.LoadRoom(roomId)
 		if targetRoom == nil {
 			user.SendText(fmt.Sprintf("Room %d not found.", roomId))
-			return false, ``, fmt.Errorf("room %d not found", roomId)
+			return false, fmt.Errorf("room %d not found", roomId)
 		}
 
 		infoOutput, _ := templates.Process("admincommands/ingame/roominfo", targetRoom)
@@ -103,10 +103,10 @@ func Room(rest string, userId int) (bool, string, error) {
 		if roomId == 0 {
 			if _, ok := room.Exits[direction]; !ok {
 				user.SendText(fmt.Sprintf("Exit %s does not exist.", direction))
-				return handled, ``, nil
+				return handled, nil
 			}
 			delete(room.Exits, direction)
-			return handled, ``, nil
+			return handled, nil
 		}
 
 		if _, ok := room.Exits[direction]; ok {
@@ -117,7 +117,7 @@ func Room(rest string, userId int) (bool, string, error) {
 		if targetRoom == nil {
 			err := fmt.Errorf(`room %d not found`, roomId)
 			user.SendText(err.Error())
-			return handled, ``, nil
+			return handled, nil
 		}
 
 		rooms.ConnectRoom(room.RoomId, targetRoom.RoomId, direction)
@@ -190,7 +190,7 @@ func Room(rest string, userId int) (bool, string, error) {
 			// Try moving it to the new zone.
 			if err := rooms.MoveToZone(room.RoomId, propertyValue); err != nil {
 				user.SendText(err.Error())
-				return handled, ``, nil
+				return handled, nil
 			}
 
 		} else if propertyName == "biome" {
@@ -199,7 +199,7 @@ func Room(rest string, userId int) (bool, string, error) {
 			user.SendText(
 				`Invalid property provided to <ansi fg="command">room set</ansi>.`,
 			)
-			return false, ``, fmt.Errorf("room %d not found", roomId)
+			return false, fmt.Errorf("room %d not found", roomId)
 		}
 
 	} else {
@@ -212,13 +212,13 @@ func Room(rest string, userId int) (bool, string, error) {
 			err := rGraph.Build(user.Character.RoomId, nil)
 			if err != nil {
 				user.SendText(err.Error())
-				return true, ``, nil
+				return true, nil
 			}
 
 			map2D, cX, cY := rGraph.Generate2DMap(61, 61, user.Character.RoomId)
 			if len(map2D) < 1 {
 				user.SendText("Error generating a 2d map")
-				return true, ``, nil
+				return true, nil
 			}
 
 			for i := 1; i <= 30; i++ {
@@ -292,5 +292,5 @@ func Room(rest string, userId int) (bool, string, error) {
 		}
 	}
 
-	return handled, ``, nil
+	return handled, nil
 }

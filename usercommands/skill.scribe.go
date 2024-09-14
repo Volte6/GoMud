@@ -18,26 +18,26 @@ Level 2 - Scribe to a sign
 Level 3 - Scribe a hidden rune
 Level 4 - TODO
 */
-func Scribe(rest string, userId int) (bool, string, error) {
+func Scribe(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Scribe)
 
 	if skillLevel == 0 {
 		user.SendText("You don't know how to scribe.")
-		return true, ``, fmt.Errorf("you don't know how to scribe")
+		return true, fmt.Errorf("you don't know how to scribe")
 	}
 
 	// Load current room details
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// args should look like one of the following:
@@ -49,7 +49,7 @@ func Scribe(rest string, userId int) (bool, string, error) {
 
 	if len(args) == 0 {
 		user.SendText("Type `help scribe` for more information on the scribe skill.")
-		return true, ``, nil
+		return true, nil
 	}
 
 	scribeType := args[0]
@@ -75,7 +75,7 @@ func Scribe(rest string, userId int) (bool, string, error) {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Scribe.String())),
 			)
-			return true, ``, fmt.Errorf("you're doing that too often")
+			return true, fmt.Errorf("you're doing that too often")
 
 		} else {
 			// Write a sign in the room
@@ -109,7 +109,7 @@ func Scribe(rest string, userId int) (bool, string, error) {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Scribe.String())),
 			)
-			return true, ``, fmt.Errorf("you're doing that too often")
+			return true, fmt.Errorf("you're doing that too often")
 
 		} else {
 
@@ -128,5 +128,5 @@ func Scribe(rest string, userId int) (bool, string, error) {
 
 	}
 
-	return true, ``, nil
+	return true, nil
 }

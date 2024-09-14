@@ -21,12 +21,12 @@ import (
 Brawling Skill
 Level 2 - You can throw objects at NPCs or other rooms.
 */
-func Throw(rest string, userId int) (bool, string, error) {
+func Throw(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
@@ -34,20 +34,20 @@ func Throw(rest string, userId int) (bool, string, error) {
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 2 {
-		return false, ``, nil
+		return false, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return false, ``, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 2 {
 		user.SendText("Throw what? Where??")
-		return false, ``, nil
+		return false, nil
 	}
 
 	throwWhat := args[0]
@@ -58,12 +58,12 @@ func Throw(rest string, userId int) (bool, string, error) {
 	itemMatch, ok := user.Character.FindInBackpack(throwWhat)
 	if !ok {
 		user.SendText(fmt.Sprintf(`You don't have a "%s" to throw.`, throwWhat))
-		return false, ``, nil
+		return false, nil
 	}
 
 	if !user.Character.TryCooldown(skills.Brawling.String(`throw`), 4) {
 		user.SendText("You are too tired to throw objects again so soon!")
-		return true, ``, nil
+		return true, nil
 	}
 
 	targetPlayerId, targetMobId := room.FindByName(throwWhere)
@@ -171,7 +171,7 @@ func Throw(rest string, userId int) (bool, string, error) {
 			exitInfo := room.Exits[exitName]
 			if exitInfo.Lock.IsLocked() {
 				user.SendText(fmt.Sprintf(`The %s exit is locked.`, exitName))
-				return true, ``, nil
+				return true, nil
 			}
 
 			user.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -308,5 +308,5 @@ func Throw(rest string, userId int) (bool, string, error) {
 		user.SendText(fmt.Sprintf(`You don't see a "%s" to throw it to.`, throwWhere))
 	}
 
-	return true, ``, nil
+	return true, nil
 }

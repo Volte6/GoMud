@@ -11,12 +11,12 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Skillset(rest string, userId int) (bool, string, error) {
+func Skillset(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// args should look like one of the following:
@@ -29,7 +29,7 @@ func Skillset(rest string, userId int) (bool, string, error) {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.skillset", nil)
 		user.SendText(infoOutput)
-		return true, ``, nil
+		return true, nil
 	}
 
 	skillName := strings.ToLower(args[0])
@@ -43,5 +43,5 @@ func Skillset(rest string, userId int) (bool, string, error) {
 		user.SendText(fmt.Sprintf(`Skill "%s" not found.`, skillName))
 	}
 
-	return true, ``, nil
+	return true, nil
 }

@@ -11,16 +11,16 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Start(rest string, userId int) (bool, string, error) {
+func Start(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return false, ``, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	if user.Character.RoomId != -1 {
-		return false, ``, errors.New(`only allowed in the void`)
+		return false, errors.New(`only allowed in the void`)
 	}
 
 	// Get if already exists, otherwise create new
@@ -42,7 +42,7 @@ func Start(rest string, userId int) (bool, string, error) {
 
 		question := cmdPrompt.Ask(`Which race will you be?`, raceOptions, `?`)
 		if !question.Done {
-			return true, ``, nil
+			return true, nil
 		}
 
 		if question.Response == `?` {
@@ -71,19 +71,19 @@ func Start(rest string, userId int) (bool, string, error) {
 
 		question := cmdPrompt.Ask(`What will you be known as (name)?`, []string{})
 		if !question.Done {
-			return true, ``, nil
+			return true, nil
 		}
 
 		if strings.EqualFold(question.Response, user.Username) {
 			user.SendText(`Your username cannot match your character name!`)
 			question.RejectResponse()
-			return true, ``, nil
+			return true, nil
 		}
 
 		if err := user.SetCharacterName(question.Response); err != nil {
 			user.SendText(err.Error())
 			question.RejectResponse()
-			return true, ``, nil
+			return true, nil
 		}
 
 		user.ClearPrompt()
@@ -96,5 +96,5 @@ func Start(rest string, userId int) (bool, string, error) {
 	rooms.MoveToRoom(user.UserId, 1)
 	user.SendText(`Welcome to Frostfang. You can <ansi fg="command">look</ansi> at the <ansi fg="itemname">sign</ansi> here!`)
 
-	return true, ``, nil
+	return true, nil
 }
