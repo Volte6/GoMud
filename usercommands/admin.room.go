@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
@@ -28,7 +29,6 @@ func Room(rest string, userId int) (bool, string, error) {
 	}
 
 	handled := true
-	nextCommand := ``
 
 	// args should look like one of the following:
 	// info <optional room id>
@@ -40,7 +40,7 @@ func Room(rest string, userId int) (bool, string, error) {
 		infoOutput, _ := templates.Process("admincommands/help/command.room", nil)
 		user.SendText(infoOutput)
 
-		return handled, nextCommand, nil
+		return handled, ``, nil
 	}
 
 	var roomId int = 0
@@ -103,10 +103,10 @@ func Room(rest string, userId int) (bool, string, error) {
 		if roomId == 0 {
 			if _, ok := room.Exits[direction]; !ok {
 				user.SendText(fmt.Sprintf("Exit %s does not exist.", direction))
-				return handled, nextCommand, nil
+				return handled, ``, nil
 			}
 			delete(room.Exits, direction)
-			return handled, nextCommand, nil
+			return handled, ``, nil
 		}
 
 		if _, ok := room.Exits[direction]; ok {
@@ -117,7 +117,7 @@ func Room(rest string, userId int) (bool, string, error) {
 		if targetRoom == nil {
 			err := fmt.Errorf(`room %d not found`, roomId)
 			user.SendText(err.Error())
-			return handled, nextCommand, nil
+			return handled, ``, nil
 		}
 
 		rooms.ConnectRoom(room.RoomId, targetRoom.RoomId, direction)
@@ -190,7 +190,7 @@ func Room(rest string, userId int) (bool, string, error) {
 			// Try moving it to the new zone.
 			if err := rooms.MoveToZone(room.RoomId, propertyValue); err != nil {
 				user.SendText(err.Error())
-				return handled, nextCommand, nil
+				return handled, ``, nil
 			}
 
 		} else if propertyName == "biome" {
@@ -212,7 +212,7 @@ func Room(rest string, userId int) (bool, string, error) {
 			err := rGraph.Build(user.Character.RoomId, nil)
 			if err != nil {
 				user.SendText(err.Error())
-				return true, nextCommand, nil
+				return true, ``, nil
 			}
 
 			map2D, cX, cY := rGraph.Generate2DMap(61, 61, user.Character.RoomId)
@@ -281,12 +281,16 @@ func Room(rest string, userId int) (bool, string, error) {
 					}
 				}
 
-				nextCommand = "look" // Force them to look at the new room they are in.
+				events.AddToQueue(events.Input{
+					UserId:    userId,
+					InputText: `look`,
+				}, true)
+
 			}
 		} else {
 			user.SendText(fmt.Sprintf("Invalid room comand: %s", args[0]))
 		}
 	}
 
-	return handled, nextCommand, nil
+	return handled, ``, nil
 }

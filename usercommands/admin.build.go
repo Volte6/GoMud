@@ -5,6 +5,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
@@ -48,7 +49,6 @@ func IBuild(rest string, userId int) (bool, string, error) {
 		}
 
 		zoneName := zoneQ.Response
-		nextCommand := ``
 		if roomId, err := rooms.CreateZone(zoneName); err != nil {
 			user.SendText(err.Error())
 		} else {
@@ -58,12 +58,17 @@ func IBuild(rest string, userId int) (bool, string, error) {
 				user.SendText(err.Error())
 			} else {
 				user.SendText(fmt.Sprintf(`Moved to room %d.`, roomId))
-				nextCommand = `look`
+
+				events.AddToQueue(events.Input{
+					UserId:    userId,
+					InputText: `look`,
+				}, true)
+
 			}
 		}
 
 		user.ClearPrompt()
-		return true, nextCommand, nil
+		return true, ``, nil
 
 	}
 
@@ -128,7 +133,6 @@ func Build(rest string, userId int) (bool, string, error) {
 	// info <optional room id>
 	// <move to room id>
 	args := util.SplitButRespectQuotes(rest)
-	nextCommand := ``
 
 	if len(args) < 2 {
 		// send some sort of help info?
@@ -150,7 +154,10 @@ func Build(rest string, userId int) (bool, string, error) {
 					user.SendText(err.Error())
 				} else {
 					user.SendText(fmt.Sprintf("Moved to room %d.", roomId))
-					nextCommand = "look"
+					events.AddToQueue(events.Input{
+						UserId:    userId,
+						InputText: `look`,
+					}, true)
 				}
 			}
 		}
@@ -176,7 +183,7 @@ func Build(rest string, userId int) (bool, string, error) {
 				err := rGraph.Build(user.Character.RoomId, nil)
 				if err != nil {
 					user.SendText(err.Error())
-					return true, nextCommand, err
+					return true, ``, err
 				}
 
 				map2D, cX, cY := rGraph.Generate2DMap(11, 11, user.Character.RoomId)
@@ -217,7 +224,7 @@ func Build(rest string, userId int) (bool, string, error) {
 
 				if destinationRoom == nil {
 					user.SendText(fmt.Sprintf("Error building room %s.", exitName))
-					return false, nextCommand, nil
+					return false, ``, nil
 				}
 			}
 
@@ -238,12 +245,16 @@ func Build(rest string, userId int) (bool, string, error) {
 				user.SendText(err.Error())
 			} else {
 				user.SendText(fmt.Sprintf("Moved to room %d.", destinationRoom.RoomId))
-				nextCommand = "look"
+
+				events.AddToQueue(events.Input{
+					UserId:    userId,
+					InputText: `look`,
+				}, true)
 			}
 
 		}
 
 	}
 
-	return true, nextCommand, nil
+	return true, ``, nil
 }

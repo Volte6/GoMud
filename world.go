@@ -676,73 +676,62 @@ func (w *World) processInput(userId int, inputText string) {
 
 	}
 
-	for {
-		command := ``
-		remains := ``
+	command := ``
+	remains := ``
 
-		var err error
-		handled := false
-		nextCommand := ``
+	var err error
+	handled := false
 
-		inputText = strings.TrimSpace(inputText)
+	inputText = strings.TrimSpace(inputText)
 
-		if len(inputText) > 0 {
+	if len(inputText) > 0 {
 
-			// Check for macros
-			if user.Macros != nil && len(inputText) == 2 {
-				if macro, ok := user.Macros[inputText]; ok {
-					handled = true
-					for _, newCmd := range strings.Split(macro, `;`) {
-						if newCmd == `` {
-							continue
-						}
-
-						events.AddToQueue(events.Input{
-							UserId:    userId,
-							InputText: newCmd,
-						})
-
+		// Check for macros
+		if user.Macros != nil && len(inputText) == 2 {
+			if macro, ok := user.Macros[inputText]; ok {
+				handled = true
+				for _, newCmd := range strings.Split(macro, `;`) {
+					if newCmd == `` {
+						continue
 					}
+
+					events.AddToQueue(events.Input{
+						UserId:    userId,
+						InputText: newCmd,
+					})
+
 				}
 			}
-
-			if !handled {
-
-				// Lets users use gossip/say shortcuts without a space
-				if len(inputText) > 1 {
-					if inputText[0] == '`' || inputText[0] == '.' {
-						inputText = fmt.Sprintf(`%s %s`, string(inputText[0]), string(inputText[1:]))
-					}
-				}
-
-				if index := strings.Index(inputText, " "); index != -1 {
-					command, remains = strings.ToLower(inputText[0:index]), inputText[index+1:]
-				} else {
-					command = inputText
-				}
-
-				handled, nextCommand, err = usercommands.TryCommand(command, remains, userId)
-				if err != nil {
-					slog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
-				}
-			}
-
 		}
 
 		if !handled {
-			if len(command) > 0 {
-				user.SendText(fmt.Sprintf(`<ansi fg="command">%s</ansi> not recognized. Type <ansi fg="command">help</ansi> for commands.`, command))
-				user.Command(`emote looks a little confused`)
+
+			// Lets users use gossip/say shortcuts without a space
+			if len(inputText) > 1 {
+				if inputText[0] == '`' || inputText[0] == '.' {
+					inputText = fmt.Sprintf(`%s %s`, string(inputText[0]), string(inputText[1:]))
+				}
+			}
+
+			if index := strings.Index(inputText, " "); index != -1 {
+				command, remains = strings.ToLower(inputText[0:index]), inputText[index+1:]
+			} else {
+				command = inputText
+			}
+
+			handled, _, err = usercommands.TryCommand(command, remains, userId)
+			if err != nil {
+				slog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
 			}
 		}
 
-		// Load up any forced commands
-		if len(nextCommand) > 0 {
-			inputText = nextCommand
-			continue
-		}
+	}
 
-		break
+	if !handled {
+		if len(command) > 0 {
+			user.SendText(fmt.Sprintf(`<ansi fg="command">%s</ansi> not recognized. Type <ansi fg="command">help</ansi> for commands.`, command))
+			user.Command(`emote looks a little confused`)
+		}
 	}
 
 	worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
@@ -758,44 +747,33 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 		return
 	}
 
-	for {
-		command := ""
-		remains := ""
+	command := ""
+	remains := ""
 
-		handled := false
-		nextCommand := ``
-		var err error
+	handled := false
+	var err error
 
-		if len(inputText) > 0 {
+	if len(inputText) > 0 {
 
-			if index := strings.Index(inputText, " "); index != -1 {
-				command, remains = strings.ToLower(inputText[0:index]), inputText[index+1:]
-			} else {
-				command = inputText
-			}
-
-			//slog.Info("World received mob input", "InputText", (inputText))
-
-			handled, nextCommand, err = mobcommands.TryCommand(command, remains, mobInstanceId)
-			if err != nil {
-				slog.Error("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
-			}
-
+		if index := strings.Index(inputText, " "); index != -1 {
+			command, remains = strings.ToLower(inputText[0:index]), inputText[index+1:]
+		} else {
+			command = inputText
 		}
 
-		if !handled {
-			if len(command) > 0 {
-				mob.Command(fmt.Sprintf(`emote looks a little confused (%s %s).`, mob.Character.Name, command, remains))
-			}
+		//slog.Info("World received mob input", "InputText", (inputText))
+
+		handled, _, err = mobcommands.TryCommand(command, remains, mobInstanceId)
+		if err != nil {
+			slog.Error("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
 		}
 
-		// Load up any forced commands
-		if len(nextCommand) > 0 {
-			inputText = nextCommand
-			continue
-		}
+	}
 
-		break
+	if !handled {
+		if len(command) > 0 {
+			mob.Command(fmt.Sprintf(`emote looks a little confused (%s %s).`, mob.Character.Name, command, remains))
+		}
 	}
 
 }
