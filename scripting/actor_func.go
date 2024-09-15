@@ -409,7 +409,7 @@ func (a ScriptActor) RemoveBuff(buffId int) bool {
 	if !configs.GetConfig().AllowItemBuffRemoval {
 		buffList := a.characterRecord.GetBuffs(buffId)
 		if len(buffList) > 0 {
-			if buffList[0].ItemBuff {
+			if buffList[0].PermaBuff {
 				return false
 			}
 		}

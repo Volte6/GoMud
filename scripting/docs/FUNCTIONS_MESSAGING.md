@@ -22,7 +22,7 @@ Sends a message to the userId specified
 | userId | The userId who should receive the message. |
 | message | The message to send. |
 
-## [SendRoomMessage(roomId int, message string, [, excludeUserIds int])](/scripting/messaging_func.go)
+## [SendRoomMessage(roomId int, message string [, excludeUserIds int])](/scripting/messaging_func.go)
 Sends a message to all users in the roomId specified
 
 |  Argument | Explanation |
@@ -31,13 +31,14 @@ Sends a message to all users in the roomId specified
 | message | The message to send. |
 | excludeUserIds | One or more comma separated userIds to exclude from receiving the message. |
 
-## [SendRoomExitsMessage(roomId int, message string, [, excludeUserIds int])](/scripting/messaging_func.go)
+## [SendRoomExitsMessage(roomId int, message string, isQuiet bool  [, excludeUserIds int])](/scripting/messaging_func.go)
 Sends a message to all rooms with an exit leading to this room
 
 |  Argument | Explanation |
 | --- | --- |
 | roomId | The roomId to transmit the message to. |
 | message | The message to send. |
+| isQuiet | If true, only those with superior "hearing" will see it. |
 | excludeUserIds | One or more comma separated userIds to exclude from receiving the message. |
 
 

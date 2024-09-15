@@ -201,6 +201,8 @@ func Go(rest string, userId int) (bool, error) {
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> enters from %s.`, user.Character.Name, enterFromExit),
 					),
 					userId)
+
+				destRoom.SendTextToExits(`You hear someone moving around.`, true, room.GetPlayers(rooms.FindAll)...)
 			}
 
 			if currentParty := parties.Get(userId); currentParty != nil {

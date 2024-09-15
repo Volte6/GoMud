@@ -1,0 +1,8 @@
+buffid: 29
+name: Night Vision
+description: You can see in the dark.
+secret: false
+roundinterval: 45
+triggercount: 1
+flags:
+  - nightvision

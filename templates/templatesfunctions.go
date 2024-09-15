@@ -422,5 +422,9 @@ func formatDuration(seconds int) string {
 		}
 	}
 
+	if result == `` {
+		result = `0 seconds`
+	}
+
 	return strings.TrimSpace(result)
 }

@@ -233,11 +233,12 @@ func (r *Room) SendText(txt string, excludeUserIds ...int) {
 		RoomId:         r.RoomId,
 		Text:           txt + "\n",
 		ExcludeUserIds: excludeUserIds,
+		IsQuiet:        false,
 	})
 
 }
 
-func (r *Room) SendTextToExits(txt string, excludeUserIds ...int) {
+func (r *Room) SendTextToExits(txt string, isQuiet bool, excludeUserIds ...int) {
 
 	testExitIds := []int{}
 	for _, rExit := range r.Exits {
@@ -254,14 +255,15 @@ func (r *Room) SendTextToExits(txt string, excludeUserIds ...int) {
 			continue
 		}
 
-		for _, tExit := range tgtRoom.Exits {
+		for exitName, tExit := range tgtRoom.Exits {
 			if tExit.RoomId != r.RoomId {
 				continue
 			}
 
 			events.AddToQueue(events.Message{
 				RoomId:         tgtRoom.RoomId,
-				Text:           txt + "\n",
+				Text:           fmt.Sprintf(`(From <ansi fg="exit">%s</ansi>) `, exitName) + txt + "\n",
+				IsQuiet:        isQuiet,
 				ExcludeUserIds: excludeUserIds,
 			})
 		}

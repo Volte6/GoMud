@@ -8,7 +8,6 @@ import (
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
@@ -64,8 +63,7 @@ func Look(rest string, userId int) (bool, error) {
 	}
 
 	if visibility < 1 {
-		raceInfo := races.GetRace(user.Character.RaceId)
-		if !raceInfo.NightVision {
+		if !user.Character.HasBuffFlag(buffs.NightVision) {
 			user.SendText(`You can't see anything!`)
 			return true, nil
 		}
@@ -131,15 +129,12 @@ func Look(rest string, userId int) (bool, error) {
 
 			if visibility < 2 {
 
-				raceInfo := races.GetRace(user.Character.RaceId)
-				if !raceInfo.NightVision {
-
+				if !user.Character.HasBuffFlag(buffs.NightVision) {
 					biome := room.GetBiome()
 					if !biome.IsLit() {
 						user.SendText(`It's too dark to see anything in that direction.`)
 						return true, nil
 					}
-
 				}
 
 			}

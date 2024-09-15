@@ -51,6 +51,7 @@ type Message struct {
 	ExcludeUserIds []int
 	RoomId         int
 	Text           string
+	IsQuiet        bool // whether it can only be heard by superior "hearing"
 }
 
 func (m Message) Type() string { return `Message` }

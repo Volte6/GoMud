@@ -8,7 +8,7 @@ const (
 type Buff struct {
 	BuffId       int  // Which buff template does it refer to?
 	OnStartEvent bool // Has the onStart event been triggered?
-	ItemBuff     bool // Is this buff from a worn item
+	PermaBuff    bool // Is this buff from a worn item or race?
 	// Need to instance track the following:
 	RoundCounter int `yaml:"roundcounter,omitempty"` // How many rounds have passed. Triggers on (RoundCounter%RoundInterval == 0)
 	TriggersLeft int `yaml:"triggersleft,omitempty"` // How many times it triggers
@@ -164,24 +164,24 @@ func (bs *Buffs) Started(buffId int) {
 	}
 }
 
-func (bs *Buffs) AddBuff(buffId int, fromItem ...bool) bool {
+func (bs *Buffs) AddBuff(buffId int, fromItemOrRace ...bool) bool {
 	if buffInfo := GetBuffSpec(buffId); buffInfo != nil {
 
 		newBuff := Buff{
 			BuffId:       buffInfo.BuffId,
 			RoundCounter: 0,
-			ItemBuff:     false,
+			PermaBuff:    false,
 			TriggersLeft: buffInfo.TriggerCount,
 		}
 
-		if len(fromItem) > 0 && fromItem[0] {
+		if len(fromItemOrRace) > 0 && fromItemOrRace[0] {
 			newBuff.TriggersLeft = TriggersLeftUnlimited
-			newBuff.ItemBuff = true
+			newBuff.PermaBuff = true
 		}
 
 		if idx, ok := bs.buffIds[buffId]; ok {
 			bs.List[idx].TriggersLeft = newBuff.TriggersLeft
-			bs.List[idx].ItemBuff = newBuff.ItemBuff
+			bs.List[idx].PermaBuff = newBuff.PermaBuff
 			return true
 		}
 

@@ -38,7 +38,7 @@ func SendRoomMessage(roomId int, message string, excludeIds ...int) {
 	r.SendText(message, excludeIds...)
 }
 
-func SendRoomExitsMessage(roomId int, message string, excludeIds ...int) {
+func SendRoomExitsMessage(roomId int, message string, isQuiet bool, excludeUserIds ...int) {
 	if disableMessageQueue {
 		return
 	}
@@ -48,7 +48,7 @@ func SendRoomExitsMessage(roomId int, message string, excludeIds ...int) {
 		return
 	}
 
-	r.SendTextToExits(message, excludeIds...)
+	r.SendTextToExits(message, isQuiet, excludeUserIds...)
 
 }
 

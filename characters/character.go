@@ -1544,7 +1544,7 @@ func (c *Character) Validate(recalculateItemBuffs ...bool) error {
 	}
 
 	if len(recalculateItemBuffs) > 0 && recalculateItemBuffs[0] {
-		c.reapplyWornItemBuffs()
+		c.reapplyPermabuffs()
 	}
 
 	return nil
@@ -1679,7 +1679,7 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 					//returnItems = append(returnItems, c.Equipment.Offhand)
 					c.Equipment.Offhand = i
 
-					c.reapplyWornItemBuffs()
+					c.reapplyPermabuffs()
 
 					return returnItems, true, ``
 				}
@@ -1780,7 +1780,7 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 		return returnItems, false, `Unrecognized object.`
 	}
 
-	c.reapplyWornItemBuffs(returnItems...)
+	c.reapplyPermabuffs(returnItems...)
 
 	return returnItems, true, ``
 }
@@ -1811,21 +1811,30 @@ func (c *Character) RemoveFromBody(i items.Item) bool {
 		return false
 	}
 
-	c.reapplyWornItemBuffs(i)
+	c.reapplyPermabuffs(i)
 
 	return true
 }
 
-func (c *Character) reapplyWornItemBuffs(removedItems ...items.Item) {
+func (c *Character) reapplyPermabuffs(removedItems ...items.Item) {
 
 	buffIdCount := map[int]int{}
+
+	// Apply any buffs that come from a race
+	if rInfo := races.GetRace(c.RaceId); rInfo != nil {
+		for _, buffId := range rInfo.BuffIds {
+			buffIdCount[buffId] = 100 // Don't allow racial buffs to be removed, keep this number high
+		}
+	}
 
 	// Track any buffs that come from an item
 	// If these don't show up as still being required by an item (such as a yaml file was changed)
 	// This will cause them to be removed.
 	for _, b := range c.Buffs.List {
-		if b.ItemBuff {
-			buffIdCount[b.BuffId] = 0
+		if b.PermaBuff {
+			if _, ok := buffIdCount[b.BuffId]; !ok {
+				buffIdCount[b.BuffId] = 0
+			}
 		}
 	}
 

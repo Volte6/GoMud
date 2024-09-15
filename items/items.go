@@ -261,13 +261,23 @@ func (i *Item) GetSpec() ItemSpec {
 	return *iSpec
 }
 
+func (i *Item) AddWornBuff(buffId int) {
+	if i.Spec == nil {
+		specCopy := *GetItemSpec(i.ItemId)
+		i.Spec = &specCopy
+	}
+
+	i.Spec.WornBuffIds = append(i.Spec.WornBuffIds, buffId)
+}
+
 func (i *Item) Rename(newName string) {
 	if i.Spec == nil {
 		specCopy := *GetItemSpec(i.ItemId)
-		specCopy.Name = newName
-		specCopy.DisplayName = ``
 		i.Spec = &specCopy
 	}
+
+	i.Spec.Name = newName
+	i.Spec.DisplayName = ``
 }
 
 func (i *Item) IsEnchanted() bool {

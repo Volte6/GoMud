@@ -39,6 +39,8 @@ func Say(rest string, userId int) (bool, error) {
 
 	user.SendText(fmt.Sprintf(`You say, "<ansi fg="yellow">%s</ansi>"`, rest))
 
+	room.SendTextToExits(`You hear someone talking.`, true)
+
 	return true, nil
 }
 

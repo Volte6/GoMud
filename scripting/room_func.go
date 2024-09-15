@@ -209,6 +209,10 @@ func (r ScriptRoom) SendText(msg string, excludeIds ...int) {
 	r.roomRecord.SendText(msg, excludeIds...)
 }
 
+func (r ScriptRoom) SendTextToExits(msg string, isQuiet bool, excludeUserIds ...int) {
+	r.roomRecord.SendTextToExits(msg, isQuiet, excludeUserIds...)
+}
+
 func (r ScriptRoom) RepeatSpawnItem(itemId int, roundFrequency int, containerName ...string) bool {
 	return r.roomRecord.RepeatSpawnItem(itemId, roundFrequency, containerName...)
 }

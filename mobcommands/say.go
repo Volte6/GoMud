@@ -35,5 +35,7 @@ func Say(rest string, mobId int) (bool, error) {
 		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest), mobId)
 	}
 
+	room.SendTextToExits(`You hear someone talking.`, true)
+
 	return true, nil
 }

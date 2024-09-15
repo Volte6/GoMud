@@ -1,0 +1,8 @@
+buffid: 28
+name: Superior Hearing
+description: You hear even quiet sounds.
+secret: false
+roundinterval: 30
+triggercount: 1
+flags:
+  - superhearing

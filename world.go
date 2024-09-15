@@ -890,6 +890,14 @@ func (w *World) MessageTick() {
 				}
 
 				if user := users.GetByUserId(userId); user != nil {
+
+					// If this is a quiet message, make sure the player can hear it
+					if message.IsQuiet {
+						if !user.Character.HasBuffFlag(buffs.SuperHearing) {
+							continue
+						}
+					}
+
 					message.Text = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Text
 					w.connectionPool.SendTo([]byte(message.Text), user.ConnectionId())
 					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
@@ -1118,7 +1126,7 @@ func (w *World) TurnTick() {
 			room.SendText(fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> <ansi fg="red">EXPLODES</ansi>!`, itm.DisplayName()))
 			room.SendText(`<ansi fg="red">--- --- --- --- --- --- --- --- --- --- --- ---</ansi>`)
 
-			room.SendTextToExits(`A large explosion is heard in a nearby area!`)
+			room.SendTextToExits(`You hear a large <ansi fg="red">!!!EXPLOSION!!!</ansi>`, false)
 
 			if len(iSpec.BuffIds) == 0 {
 				continue
