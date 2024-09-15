@@ -145,6 +145,8 @@ func Ask(rest string, userId int) (bool, error) {
 			}
 		}
 
+		room.SendTextToExits(`You hear someone talking.`, true)
+
 	} else {
 
 		user.SendText(`ask who what?`)
