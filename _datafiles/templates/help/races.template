@@ -27,5 +27,6 @@ Here is a list of available races and some basic information about them:
                                         <ansi fg="{{ if gt $raceInfo.Stats.Vitality.Base 0   }}cyan{{ else}}black{{end}}-bold">Vit: {{ $raceInfo.Stats.Vitality.Base   }}</ansi>{{- ` ` -}}
                                         <ansi fg="{{ if gt $raceInfo.Stats.Mysticism.Base 0  }}cyan{{ else}}black{{end}}-bold">Mys: {{ $raceInfo.Stats.Mysticism.Base  }}</ansi>{{- ` ` -}}
                                         <ansi fg="{{ if gt $raceInfo.Stats.Perception.Base 0 }}cyan{{ else}}black{{end}}-bold">Per: {{ $raceInfo.Stats.Perception.Base }}</ansi>
+  <ansi fg="yellow">Buffs:</ansi>       {{ range $slotIndex, $buffId := $raceInfo.BuffIds }}{{if gt $slotIndex 0 }}{{ printf "\n               " }}{{ end }}<ansi fg="green">{{ buffname $buffId }}</ansi>{{ end }}
 {{ end }}
 

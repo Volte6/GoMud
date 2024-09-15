@@ -138,16 +138,30 @@ func getRaceOptions(raceRequest string) []races.Race {
 		return allRaces[i].RaceId < allRaces[j].RaceId
 	})
 
+	raceNames := strings.Split(raceRequest, ` `)
+
+	getAllRaces := false
+	if raceRequest == `all` {
+		getAllRaces = true
+	}
+
 	raceOptions := []races.Race{}
 	for _, race := range allRaces {
 
 		if len(raceRequest) == 0 {
-			if !race.Selectable && raceRequest != `all` {
+			if !race.Selectable && !getAllRaces {
 				continue
 			}
-		} else if len(raceRequest) > 0 {
+		} else if len(raceNames) > 0 {
 			lowerName := strings.ToLower(race.Name)
-			if raceRequest != `all` && !strings.Contains(lowerName, raceRequest) {
+			found := false
+			for _, rName := range raceNames {
+				if strings.Contains(lowerName, strings.ToLower(rName)) {
+					found = true
+					break
+				}
+			}
+			if !getAllRaces && !found {
 				continue
 			}
 		}
