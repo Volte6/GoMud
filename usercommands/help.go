@@ -14,14 +14,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Help(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Help(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	var helpTxt string
@@ -81,8 +79,7 @@ func Help(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		helpTxt, err = templates.Process("help/help", helpCommandList)
 		if err != nil {
-			response.SendUserMessage(userId, err.Error(), true)
-			response.Handled = true
+			helpTxt = err.Error()
 		}
 	} else {
 
@@ -124,16 +121,14 @@ func Help(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		helpTxt, err = templates.Process("help/"+helpName, helpVars)
 		if err != nil {
-			response.SendUserMessage(userId, fmt.Sprintf(`No help found for "%s"`, helpName), true)
-			response.Handled = true
-			return response, err
+			user.SendText(fmt.Sprintf(`No help found for "%s"`, helpName))
+			return true, err
 		}
 	}
 
-	response.SendUserMessage(userId, helpTxt, false)
+	user.SendText(helpTxt)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }
 
 func getRaceOptions(raceRequest string) []races.Race {
@@ -143,16 +138,30 @@ func getRaceOptions(raceRequest string) []races.Race {
 		return allRaces[i].RaceId < allRaces[j].RaceId
 	})
 
+	raceNames := strings.Split(raceRequest, ` `)
+
+	getAllRaces := false
+	if raceRequest == `all` {
+		getAllRaces = true
+	}
+
 	raceOptions := []races.Race{}
 	for _, race := range allRaces {
 
 		if len(raceRequest) == 0 {
-			if !race.Selectable && raceRequest != `all` {
+			if !race.Selectable && !getAllRaces {
 				continue
 			}
-		} else if len(raceRequest) > 0 {
+		} else if len(raceNames) > 0 {
 			lowerName := strings.ToLower(race.Name)
-			if raceRequest != `all` && !strings.Contains(lowerName, raceRequest) {
+			found := false
+			for _, rName := range raceNames {
+				if strings.Contains(lowerName, strings.ToLower(rName)) {
+					found = true
+					break
+				}
+			}
+			if !getAllRaces && !found {
 				continue
 			}
 		}

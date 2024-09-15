@@ -8,42 +8,36 @@ import (
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Sell(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Sell(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	item, found := user.Character.FindInBackpack(rest)
 	if !found {
-		response.SendUserMessage(user.UserId, "You don't have that item.", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You don't have that item.")
+		return true, nil
 	}
 
 	itemSpec := item.GetSpec()
 	if itemSpec.ItemId < 1 {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if itemSpec.QuestToken != `` {
-		response.SendUserMessage(user.UserId, "Quest items cannot be sold!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("Quest items cannot be sold!")
+		return true, nil
 	}
 
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
@@ -56,19 +50,25 @@ func Sell(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
 
 		if item.IsSpecial() {
-			cmdQueue.QueueCommand(0, mobId, "say I'm afraid I don't buy those.")
+
+			mob.Command(`say I'm afraid I don't buy those.`)
+
 			continue
 		}
 
 		sellValue := mob.GetSellPrice(item)
 
 		if sellValue <= 0 {
-			cmdQueue.QueueCommand(0, mobId, "say I'm not interested in that.")
+
+			mob.Command(`say I'm not interested in that.`)
+
 			continue
 		}
 
 		if sellValue > mob.Character.Gold {
-			cmdQueue.QueueCommand(0, mobId, "say I'm low on funds right now. Maybe later.")
+
+			mob.Command(`say I'm low on funds right now. Maybe later.`)
+
 			continue
 		}
 
@@ -82,21 +82,19 @@ func Sell(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			mob.ShopStock[item.ItemId]++
 		}
 
-		response.SendUserMessage(user.UserId,
+		user.SendText(
 			fmt.Sprintf(`You sell a <ansi fg="itemname">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, item.DisplayName(), sellValue),
-			true)
-		response.SendRoomMessage(room.RoomId,
+		)
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> sells a <ansi fg="itemname">%s</ansi>.`, user.Character.Name, item.DisplayName()),
-			true)
+			userId,
+		)
 
 		// Trigger lost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, item, userId, cmdQueue); err == nil {
-			response.AbsorbMessages(scriptResponse)
-		}
+		scripting.TryItemScriptEvent(`onLost`, item, userId)
 
 		break
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

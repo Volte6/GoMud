@@ -14,19 +14,17 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Suicide(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	slog.Info(`Mob Death`, `name`, mob.Character.Name, `rest`, rest)
@@ -52,14 +50,13 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 		// Remove from current room
 		room.RemoveMob(mob.InstanceId)
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	// Send a death msg to everyone in the room.
-	response.SendRoomMessage(mob.Character.RoomId,
+	room.SendText(
 		fmt.Sprintf(`<ansi fg="mobname">%s</ansi> has died.`, mob.Character.Name),
-		true)
+	)
 
 	mobXP := mob.Character.XPTL(mob.Character.Level - 1)
 
@@ -90,9 +87,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 		for uId, _ := range mob.DamageTaken {
 			if user := users.GetByUserId(uId); user != nil {
 
-				if res, err := scripting.TryMobScriptEvent(`onDie`, mob.InstanceId, uId, `user`, map[string]any{`attackerCount`: attackerCt}, cmdQueue); err == nil {
-					response.AbsorbMessages(res)
-				}
+				scripting.TryMobScriptEvent(`onDie`, mob.InstanceId, uId, `user`, map[string]any{`attackerCount`: attackerCt})
 
 				p := parties.Get(user.UserId)
 
@@ -114,9 +109,9 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 						xpMsgExtra = fmt.Sprintf(` <ansi fg="yellow">(%d%% scale)</ansi>`, xpScale)
 					}
 
-					response.SendUserMessage(user.UserId,
+					user.SendText(
 						fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
-						true)
+					)
 
 					// Chance to learn to tame the creature.
 					levelDelta := user.Character.Level - mob.Character.Level
@@ -141,9 +136,9 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 							if currentSkill < 50 {
 								user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
 								if currentSkill == -1 {
-									response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+									user.SendText(fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name))
 								} else {
-									response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+									user.SendText(fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name))
 								}
 							}
 
@@ -188,9 +183,9 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 							xpMsgExtra = fmt.Sprintf(` <ansi fg="yellow">(%d%% scale)</ansi>`, xpScale)
 						}
 
-						response.SendUserMessage(user.UserId,
+						user.SendText(
 							fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
-							true)
+						)
 
 						// Chance to learn to tame the creature.
 						levelDelta := user.Character.Level - mob.Character.Level
@@ -216,9 +211,9 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 									user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
 
 									if currentSkill == -1 {
-										response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+										user.SendText(fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name))
 									} else {
-										response.SendUserMessage(user.UserId, fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name), true)
+										user.SendText(fmt.Sprintf(`<ansi fg="magenta">***</ansi> Your <ansi fg="mobname">%s</ansi> taming skills get a little better! <ansi fg="magenta">***</ansi>`, mob.Character.Name))
 									}
 								}
 
@@ -236,7 +231,7 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 	// Check for any dropped loot...
 	for _, item := range mob.Character.Items {
 		msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.DisplayName())
-		response.SendRoomMessage(mob.Character.RoomId, msg, true)
+		room.SendText(msg)
 		room.AddItem(item, false)
 	}
 
@@ -253,13 +248,13 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 		}
 
 		msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.DisplayName())
-		response.SendRoomMessage(mob.Character.RoomId, msg, true)
+		room.SendText(msg)
 		room.AddItem(item, false)
 	}
 
 	if mob.Character.Gold > 0 {
 		msg := fmt.Sprintf(`<ansi fg="yellow-bold">%d gold</ansi> drops to the ground.`, mob.Character.Gold)
-		response.SendRoomMessage(mob.Character.RoomId, msg, true)
+		room.SendText(msg)
 		room.Gold += mob.Character.Gold
 	}
 
@@ -274,6 +269,5 @@ func Suicide(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 	// Remove from current room
 	room.RemoveMob(mob.InstanceId)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

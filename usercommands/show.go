@@ -13,20 +13,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Show(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Show(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	rest = util.StripPrepositions(rest)
@@ -34,9 +32,8 @@ func Show(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 {
-		response.SendUserMessage(userId, "Show what? To whom?", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("Show what? To whom?")
+		return true, nil
 	}
 
 	var showItem items.Item = items.Item{}
@@ -50,9 +47,8 @@ func Show(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	showItem, found = user.Character.FindInBackpack(objectName)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to show.", objectName), true)
-		response.Handled = true
-		return response, nil
+		user.SendText(fmt.Sprintf("You don't have a %s to show.", objectName))
+		return true, nil
 	}
 
 	playerId, mobId := room.FindByName(targetName)
@@ -67,31 +63,30 @@ func Show(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		if showItem.ItemId > 0 {
 
 			// Tell the shower
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You show the <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, showItem.DisplayName(), targetUser.Character.Name),
-				true)
+			)
 
 			// Tell the Showee
-			response.SendUserMessage(targetUser.UserId,
+			targetUser.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> shows you their <ansi fg="item">%s</ansi>.`, user.Character.Name, showItem.DisplayName()),
-				true)
+			)
 
-			response.SendUserMessage(targetUser.UserId,
-				"\n"+showItem.GetLongDescription()+"\n",
-				true)
+			targetUser.SendText(
+				"\n" + showItem.GetLongDescription() + "\n",
+			)
 
 			// Tell the rest of the room
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, user.Character.Name, showItem.DisplayName(), targetUser.Character.Name),
-				true,
-				targetUser.UserId)
+				targetUser.UserId,
+				userId)
 
 		} else {
-			response.SendUserMessage(userId, "Something went wrong.", true)
+			user.SendText("Something went wrong.")
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 
 	}
 
@@ -108,31 +103,28 @@ func Show(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			if showItem.ItemId > 0 {
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You show the <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, showItem.DisplayName(), targetMob.Character.Name),
-					true)
+				)
 
 				// Do trigger of onShow
-				if res, err := scripting.TryMobScriptEvent(`onShow`, targetMob.InstanceId, userId, `user`, map[string]any{`gold`: 0, `item`: showItem}, cmdQueue); err == nil {
-					response.AbsorbMessages(res)
-				}
+				scripting.TryMobScriptEvent(`onShow`, targetMob.InstanceId, userId, `user`, map[string]any{`gold`: 0, `item`: showItem})
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, showItem.DisplayName(), targetMob.Character.Name),
-					true)
+					userId,
+				)
 
 			} else {
-				response.SendUserMessage(userId, "Something went wrong.", true)
+				user.SendText("Something went wrong.")
 			}
 
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
-	response.SendUserMessage(userId, "Who???", true)
+	user.SendText("Who???")
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

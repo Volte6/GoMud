@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
@@ -16,36 +17,32 @@ import (
 Protection Skill
 Level 4 - Pray to gods for a blessing
 */
-func Pray(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Pray(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Protection)
 
 	if skillLevel < 4 {
-		response.SendUserMessage(userId, "You don't know how to pray.", true)
-		response.Handled = true
-		return response, fmt.Errorf("you don't know how to pray")
+		user.SendText("You don't know how to pray.")
+		return true, fmt.Errorf("you don't know how to pray")
 	}
 
 	if !user.Character.TryCooldown(skills.Protection.String(), configs.GetConfig().MinutesToRounds(5)) {
-		response.SendUserMessage(userId,
+		user.SendText(
 			`You can only pray once every 5 minutes.`,
-			true)
-		response.Handled = true
-		return response, errors.New(`you can only pray once every 5 minutes`)
+		)
+		return true, errors.New(`you can only pray once every 5 minutes`)
 	}
 
 	prayPlayerId, prayMobId := 0, 0
@@ -57,9 +54,8 @@ func Pray(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	}
 
 	if prayPlayerId == 0 && prayMobId == 0 {
-		response.SendUserMessage(userId, "Aid whom?", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("Aid whom?")
+		return true, nil
 	}
 
 	possibleBuffIds := []int{4, 11, 14, 16, 17, 18}
@@ -72,39 +68,50 @@ func Pray(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	if prayPlayerId > 0 {
 
 		if prayPlayerId == userId {
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> begins to pray.`, user.Character.Name), true, user.UserId)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> begins to pray.`, user.Character.Name), user.UserId)
 		} else {
 			targetUser := users.GetByUserId(prayPlayerId)
 			if targetUser != nil {
-				response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over <ansi fg="username">%s</ansi> and begins to pray.`, user.Character.Name, targetUser.Character.Name), true, user.UserId, targetUser.UserId)
-				response.SendUserMessage(targetUser.UserId, fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over you and begins to pray.`, user.Character.Name), true)
+				room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over <ansi fg="username">%s</ansi> and begins to pray.`, user.Character.Name, targetUser.Character.Name), user.UserId, targetUser.UserId)
+				targetUser.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over you and begins to pray.`, user.Character.Name))
 			}
 		}
 
 		for i := 0; i < totalBuffCount; i++ {
 			randBuffIndex := util.Rand(len(possibleBuffIds))
-			cmdQueue.QueueBuff(prayPlayerId, 0, possibleBuffIds[randBuffIndex])
+
+			events.AddToQueue(events.Buff{
+				UserId:        prayPlayerId,
+				MobInstanceId: 0,
+				BuffId:        possibleBuffIds[randBuffIndex],
+			})
+
 			possibleBuffIds = append(possibleBuffIds[:randBuffIndex], possibleBuffIds[randBuffIndex+1:]...)
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> glows for a moment.`, user.Character.Name), true)
+			room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> glows for a moment.`, user.Character.Name))
 		}
 
 	} else if prayMobId > 0 {
 
 		if mob := mobs.GetInstance(prayMobId); mob != nil {
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over <ansi fg="mobname">%s</ansi> and begins to pray.`, user.Character.Name, mob.Character.Name), true, user.UserId)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> puts his hand over <ansi fg="mobname">%s</ansi> and begins to pray.`, user.Character.Name, mob.Character.Name), user.UserId)
 
 			for i := 0; i < totalBuffCount; i++ {
 				randBuffIndex := util.Rand(len(possibleBuffIds))
-				cmdQueue.QueueBuff(0, prayMobId, possibleBuffIds[randBuffIndex])
+
+				events.AddToQueue(events.Buff{
+					UserId:        0,
+					MobInstanceId: prayMobId,
+					BuffId:        possibleBuffIds[randBuffIndex],
+				})
+
 				possibleBuffIds = append(possibleBuffIds[:randBuffIndex], possibleBuffIds[randBuffIndex+1:]...)
-				response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> glows for a moment.`, mob.Character.Name), true)
+				room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> glows for a moment.`, mob.Character.Name))
 			}
 		}
 
 	} else {
-		response.SendUserMessage(userId, "Pray for whom?", true)
+		user.SendText("Pray for whom?")
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

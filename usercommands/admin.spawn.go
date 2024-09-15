@@ -13,20 +13,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Spawn(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Spawn(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -34,9 +32,8 @@ func Spawn(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	if len(args) == 0 {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.spawn", nil)
-		response.SendUserMessage(userId, infoOutput, false)
-		response.Handled = true
-		return response, nil
+		user.SendText(infoOutput)
+		return true, nil
 	}
 
 	spawnType := args[0]
@@ -68,15 +65,15 @@ func Spawn(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 				if itm.ItemId > 0 {
 					room.AddItem(itm, false)
 
-					response.SendUserMessage(userId,
+					user.SendText(
 						fmt.Sprintf(`You wave your hands around and <ansi fg="item">%s</ansi> appears from thin air and falls to the ground.`, itm.DisplayName()),
-						true)
-					response.SendRoomMessage(user.Character.RoomId,
+					)
+					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> waves their hands around and <ansi fg="item">%s</ansi> appears from thin air and falls to the ground.`, user.Character.Name, itm.DisplayName()),
-						true)
+						userId,
+					)
 
-					response.Handled = true
-					return response, nil
+					return true, nil
 				}
 
 			}
@@ -97,15 +94,15 @@ func Spawn(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 			room.Gold += goldAmt
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You wave your hands around and <ansi fg="gold">%d gold</ansi> appears from thin air and falls to the ground.`, goldAmt),
-				true)
-			response.SendRoomMessage(user.Character.RoomId,
+			)
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> waves their hands around and <ansi fg="gold">%d gold</ansi> appears from thin air and falls to the ground.`, user.Character.Name, goldAmt),
-				true)
+				userId,
+			)
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		if spawnType == `mob` {
@@ -121,15 +118,15 @@ func Spawn(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 				if mob := mobs.NewMobById(mobId, room.RoomId); mob != nil {
 					room.AddMob(mob.InstanceId)
 
-					response.SendUserMessage(userId,
+					user.SendText(
 						fmt.Sprintf(`You wave your hands around and <ansi fg="mobname">%s</ansi> appears in the air and falls to the ground.`, mob.Character.Name),
-						true)
-					response.SendRoomMessage(user.Character.RoomId,
+					)
+					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> waves their hands around and <ansi fg="mobname">%s</ansi> appears in the air and falls to the ground.`, user.Character.Name, mob.Character.Name),
-						true)
+						userId,
+					)
 
-					response.Handled = true
-					return response, nil
+					return true, nil
 				}
 			}
 
@@ -137,13 +134,13 @@ func Spawn(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 	}
 
-	response.SendUserMessage(userId,
+	user.SendText(
 		"You wave your hands around pathetically.",
-		true)
-	response.SendRoomMessage(user.Character.RoomId,
+	)
+	room.SendText(
 		fmt.Sprintf(`<ansi fg="username">%s</ansi> waves their hands around pathetically.`, user.Character.Name),
-		true)
+		userId,
+	)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

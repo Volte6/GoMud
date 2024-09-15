@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
@@ -12,47 +13,41 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Get(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) == 0 {
-		response.SendUserMessage(userId, "Get what?", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("Get what?")
+		return true, nil
 	}
 
 	if args[0] == "all" {
 		if room.Gold > 0 {
-			r, _ := Get(`gold`, userId, cmdQueue)
-			response.AbsorbMessages(r)
+			Get(`gold`, userId)
 		}
 
 		if len(room.Items) > 0 {
 			iCopies := append([]items.Item{}, room.Items...)
 
 			for _, item := range iCopies {
-				r, _ := Get(item.Name(), userId, cmdQueue)
-				response.AbsorbMessages(r)
+				Get(item.Name(), userId)
 			}
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	getFromStash := false
@@ -97,7 +92,7 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		if args[0] == goldName || (len(args[0]) < 5 && goldName[0:len(args[0])-1] == args[0]) {
 
 			if container.Gold < 1 {
-				response.SendUserMessage(userId, "There's no gold to grab.", true)
+				user.SendText("There's no gold to grab.")
 			} else {
 
 				user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
@@ -107,22 +102,22 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 				container.Gold -= goldAmt
 				room.Containers[containerName] = container
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi> from the <ansi fg="container">%s</ansi>.`, goldAmt, containerName),
-					true)
-				response.SendRoomMessage(room.RoomId,
+				)
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up some <ansi fg="gold">gold</ansi> from the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName),
-					true)
+					userId,
+				)
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		matchItem, found := container.FindItem(rest)
 
 		if !found {
-			response.SendUserMessage(userId, fmt.Sprintf(`You don't see a %s in the <ansi fg="container">%s</ansi>.`, rest, containerName), true)
+			user.SendText(fmt.Sprintf(`You don't see a %s in the <ansi fg="container">%s</ansi>.`, rest, containerName))
 		} else {
 
 			user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
@@ -136,24 +131,28 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 				iSpec := matchItem.GetSpec()
 				if iSpec.QuestToken != `` {
-					cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+
+					events.AddToQueue(events.Quest{
+						UserId:     user.UserId,
+						QuestToken: iSpec.QuestToken,
+					})
+
 				}
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You take the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>.`, matchItem.DisplayName(), containerName),
-					true)
-				response.SendRoomMessage(user.Character.RoomId,
+				)
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>...`, user.Character.Name, matchItem.DisplayName(), containerName),
-					true)
+					userId,
+				)
 
-				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId, cmdQueue); err == nil {
-					response.AbsorbMessages(scriptResponse)
-				}
+				scripting.TryItemScriptEvent(`onFound`, matchItem, userId)
 
 			} else {
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
-					true)
+				)
 			}
 
 		}
@@ -164,7 +163,7 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		if args[0] == goldName || (len(args[0]) < 5 && goldName[0:len(args[0])-1] == args[0]) {
 
 			if room.Gold < 1 {
-				response.SendUserMessage(userId, "There's no gold to grab.", true)
+				user.SendText("There's no gold to grab.")
 			} else {
 
 				user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
@@ -173,24 +172,29 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 				user.Character.Gold += goldAmt
 				room.Gold -= goldAmt
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi>.`, goldAmt),
-					true)
-				response.SendRoomMessage(room.RoomId,
+				)
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up some <ansi fg="gold">gold</ansi>.`, user.Character.Name),
-					true)
+					userId,
+				)
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		// Check whether the user has an item in their inventory that matches
 		matchItem, found := room.FindOnFloor(rest, getFromStash)
 
 		if !found {
-			response.SendUserMessage(userId, fmt.Sprintf("You don't see a %s around.", rest), true)
+			user.SendText(fmt.Sprintf("You don't see a %s around.", rest))
 		} else {
+
+			if matchItem.HasAdjective(`exploding`) {
+				user.SendText(`You can't pick that up, it's about to explode!`)
+				return true, nil
+			}
 
 			user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
 
@@ -201,29 +205,32 @@ func Get(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 				iSpec := matchItem.GetSpec()
 				if iSpec.QuestToken != `` {
-					cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+
+					events.AddToQueue(events.Quest{
+						UserId:     user.UserId,
+						QuestToken: iSpec.QuestToken,
+					})
+
 				}
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You pick up the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
-					true)
-				response.SendRoomMessage(user.Character.RoomId,
+				)
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
-					true)
+					userId,
+				)
 
-				if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, matchItem, userId, cmdQueue); err == nil {
-					response.AbsorbMessages(scriptResponse)
-				}
+				scripting.TryItemScriptEvent(`onFound`, matchItem, userId)
 
 			} else {
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
-					true)
+				)
 			}
 		}
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

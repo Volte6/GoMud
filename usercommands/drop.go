@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
@@ -13,29 +15,26 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Drop(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Drop(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) == 0 {
-		response.SendUserMessage(userId, `Drop what?`, true)
+		user.SendText(`Drop what?`)
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if args[0] == "all" {
@@ -43,19 +42,16 @@ func Drop(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		iCopies := []items.Item{}
 
 		if user.Character.Gold > 0 {
-			r, _ := Drop(fmt.Sprintf("%d gold", user.Character.Gold), userId, cmdQueue)
-			response.AbsorbMessages(r)
+			Drop(fmt.Sprintf("%d gold", user.Character.Gold), userId)
 		}
 
 		iCopies = append(iCopies, user.Character.Items...)
 
 		for _, item := range iCopies {
-			r, _ := Drop(item.Name(), userId, cmdQueue)
-			response.AbsorbMessages(r)
+			Drop(item.Name(), userId)
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	// Drop 10 gold
@@ -63,13 +59,12 @@ func Drop(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		g, _ := strconv.ParseInt(args[0], 10, 32)
 		dropAmt := int(g)
 		if dropAmt < 1 {
-			response.SendUserMessage(userId, "Oops!", true)
-			response.Handled = true
-			return response, nil
+			user.SendText("Oops!")
+			return true, nil
 		}
 
 		if dropAmt > user.Character.Gold {
-			response.SendUserMessage(userId, fmt.Sprintf("You don't have a %d gold to drop.", dropAmt), true)
+			user.SendText(fmt.Sprintf("You don't have a %d gold to drop.", dropAmt))
 		}
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -77,22 +72,22 @@ func Drop(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		room.Gold += dropAmt
 		user.Character.Gold -= dropAmt
 
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`You drop <ansi fg="gold">%d gold</ansi> on the floor.`, dropAmt),
-			true)
-		response.SendRoomMessage(room.RoomId,
+		)
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, dropAmt),
-			true)
+			userId,
+		)
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
 	matchItem, found := user.Character.FindInBackpack(rest)
 
 	if !found {
-		response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to drop.", rest), true)
+		user.SendText(fmt.Sprintf("You don't have a %s to drop.", rest))
 	} else {
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -102,26 +97,34 @@ func Drop(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		// Swap the item location
 		user.Character.RemoveItem(matchItem)
 
-		room.AddItem(matchItem, false)
-
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`You drop the <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),
-			true)
-		response.SendRoomMessage(user.Character.RoomId,
+		)
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
-			true)
+			userId,
+		)
 
 		// If grenades are dropped, they explode and affect everyone in the room!
 		if iSpec.Type == items.Grenade {
-			cmdQueue.QueueRoomAction(user.Character.RoomId, user.UserId, 0, fmt.Sprintf("detonate !%d", matchItem.ItemId))
+
+			matchItem.SetAdjective(`exploding`, true)
+
+			events.AddToQueue(events.RoomAction{
+				RoomId:       user.Character.RoomId,
+				SourceUserId: user.UserId,
+				SourceMobId:  0,
+				Action:       fmt.Sprintf("detonate %s", matchItem.ShorthandId()),
+				WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+			})
+
 		}
+
+		room.AddItem(matchItem, false)
 
 		// Trigger onLost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, matchItem, userId, cmdQueue); err == nil {
-			response.AbsorbMessages(scriptResponse)
-		}
+		scripting.TryItemScriptEvent(`onLost`, matchItem, userId)
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

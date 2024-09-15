@@ -5,20 +5,19 @@ import (
 	"math"
 	"strings"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func IBuild(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func IBuild(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// args should look like one of the following:
@@ -30,7 +29,7 @@ func IBuild(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.build", nil)
-		response.SendUserMessage(userId, infoOutput, false)
+		user.SendText(infoOutput)
 	}
 
 	cmdPrompt, _ := user.StartPrompt(`ibuild`, rest)
@@ -40,35 +39,36 @@ func IBuild(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		zoneQ := cmdPrompt.Ask(`New zone name?`, []string{``})
 		if !zoneQ.Done {
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		if zoneQ.Response == `` {
-			response.SendUserMessage(userId, `Aborting zone build`, true)
+			user.SendText(`Aborting zone build`)
 			user.ClearPrompt()
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		zoneName := zoneQ.Response
-
 		if roomId, err := rooms.CreateZone(zoneName); err != nil {
-			response.SendUserMessage(userId, err.Error(), true)
+			user.SendText(err.Error())
 		} else {
-			response.SendUserMessage(userId, fmt.Sprintf(`Zone %s created.`, zoneName), true)
+			user.SendText(fmt.Sprintf(`Zone %s created.`, zoneName))
 
 			if err := rooms.MoveToRoom(user.UserId, roomId); err != nil {
-				response.SendUserMessage(userId, err.Error(), true)
+				user.SendText(err.Error())
 			} else {
-				response.SendUserMessage(userId, fmt.Sprintf(`Moved to room %d.`, roomId), true)
-				response.NextCommand = `look`
+				user.SendText(fmt.Sprintf(`Moved to room %d.`, roomId))
+
+				events.AddToQueue(events.Input{
+					UserId:    userId,
+					InputText: `look`,
+				}, true)
+
 			}
 		}
 
 		user.ClearPrompt()
-		response.Handled = true
-		return response, nil
+		return true, nil
 
 	}
 
@@ -77,30 +77,26 @@ func IBuild(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		exitNameQ := cmdPrompt.Ask(`Room exit name?`, []string{})
 		if !exitNameQ.Done {
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		if exitNameQ.Response == `` {
-			response.SendUserMessage(userId, `Aborting room build`, true)
+			user.SendText(`Aborting room build`)
 			user.ClearPrompt()
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		exitName := exitNameQ.Response
 
 		dirNameQ := cmdPrompt.Ask(`Map direction?`, []string{})
 		if !dirNameQ.Done {
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		if _, ok := rooms.DirectionDeltas[dirNameQ.Response]; !ok {
 			dirNameQ.RejectResponse()
-			response.SendUserMessage(userId, `Invalid map direction.`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`Invalid map direction.`)
+			return true, nil
 
 		}
 
@@ -108,34 +104,29 @@ func IBuild(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		retDirNameQ := cmdPrompt.Ask(`Return exit name (opt)?`, []string{}, ``)
 		if !retDirNameQ.Done {
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		returnName := retDirNameQ.Response
 
-		response.SendUserMessage(userId, fmt.Sprintf(`exitName: %s - mapDirection: %s - returnName: %s.`, exitName, mapDirection, returnName), true)
+		user.SendText(fmt.Sprintf(`exitName: %s - mapDirection: %s - returnName: %s.`, exitName, mapDirection, returnName))
 
 		user.ClearPrompt()
-		response.Handled = true
-		return response, nil
+		return true, nil
 
 	}
 
 	// TODO: WIP
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }
 
-func Build(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Build(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// args should look like one of the following:
@@ -146,7 +137,7 @@ func Build(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	if len(args) < 2 {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.build", nil)
-		response.SendUserMessage(userId, infoOutput, false)
+		user.SendText(infoOutput)
 	} else {
 
 		// #build zone "The Arctic"
@@ -155,15 +146,18 @@ func Build(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			zoneName := strings.Join(args[1:], ` `)
 
 			if roomId, err := rooms.CreateZone(zoneName); err != nil {
-				response.SendUserMessage(userId, err.Error(), true)
+				user.SendText(err.Error())
 			} else {
-				response.SendUserMessage(userId, fmt.Sprintf("Zone %s created.", zoneName), true)
+				user.SendText(fmt.Sprintf("Zone %s created.", zoneName))
 
 				if err := rooms.MoveToRoom(user.UserId, roomId); err != nil {
-					response.SendUserMessage(userId, err.Error(), true)
+					user.SendText(err.Error())
 				} else {
-					response.SendUserMessage(userId, fmt.Sprintf("Moved to room %d.", roomId), true)
-					response.NextCommand = "look"
+					user.SendText(fmt.Sprintf("Moved to room %d.", roomId))
+					events.AddToQueue(events.Input{
+						UserId:    userId,
+						InputText: `look`,
+					}, true)
 				}
 			}
 		}
@@ -188,17 +182,15 @@ func Build(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 				rGraph := rooms.NewRoomGraph(100, 100, 0, rooms.MapModeAll)
 				err := rGraph.Build(user.Character.RoomId, nil)
 				if err != nil {
-					response.SendUserMessage(userId, err.Error(), true)
-					response.Handled = true
-					return response, err
+					user.SendText(err.Error())
+					return true, err
 				}
 
 				map2D, cX, cY := rGraph.Generate2DMap(11, 11, user.Character.RoomId)
 
 				if len(map2D) < 1 {
-					response.SendUserMessage(userId, "Error generating a 2d map", true)
-					response.Handled = true
-					return response, nil
+					user.SendText("Error generating a 2d map")
+					return true, nil
 				}
 
 				// extra large exits get translated to their correct exit name, and the "mapdirection" updated to the specified one
@@ -214,7 +206,7 @@ func Build(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 					if cY+deltaD.Dy >= 0 && cX+deltaD.Dx >= 0 {
 						if map2D[cY+deltaD.Dy][cX+deltaD.Dx] != nil {
 							destinationRoom = rooms.LoadRoom(map2D[cY+deltaD.Dy][cX+deltaD.Dx].RoomId)
-							response.SendUserMessage(userId, fmt.Sprintf("Exiting room found at the %s direction. Connecting them.", exitName), true)
+							user.SendText(fmt.Sprintf("Exiting room found at the %s direction. Connecting them.", exitName))
 							rooms.ConnectRoom(user.Character.RoomId, destinationRoom.RoomId, exitName, mapDirection) // north/north-x2
 						}
 					}
@@ -225,14 +217,14 @@ func Build(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			// Only build a new room if we don't already have a destination room from the above code tryin gto find/connect
 			if destinationRoom == nil {
 				if newRoom, err := rooms.BuildRoom(user.Character.RoomId, exitName, mapDirection); err != nil {
-					response.SendUserMessage(userId, err.Error(), true)
+					user.SendText(err.Error())
 				} else {
 					destinationRoom = newRoom
 				}
 
 				if destinationRoom == nil {
-					response.SendUserMessage(userId, fmt.Sprintf("Error building room %s.", exitName), true)
-					return response, nil
+					user.SendText(fmt.Sprintf("Error building room %s.", exitName))
+					return false, nil
 				}
 			}
 
@@ -250,16 +242,19 @@ func Build(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			}
 
 			if err := rooms.MoveToRoom(user.UserId, destinationRoom.RoomId); err != nil {
-				response.SendUserMessage(userId, err.Error(), true)
+				user.SendText(err.Error())
 			} else {
-				response.SendUserMessage(userId, fmt.Sprintf("Moved to room %d.", destinationRoom.RoomId), true)
-				response.NextCommand = "look"
+				user.SendText(fmt.Sprintf("Moved to room %d.", destinationRoom.RoomId))
+
+				events.AddToQueue(events.Input{
+					UserId:    userId,
+					InputText: `look`,
+				}, true)
 			}
 
 		}
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

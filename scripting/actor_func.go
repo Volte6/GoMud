@@ -7,6 +7,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/races"
@@ -54,6 +55,13 @@ func (a ScriptActor) GetSize() string {
 		return string(r.Size)
 	}
 	return string(races.Medium)
+}
+
+func (a ScriptActor) SendText(msg string) {
+	if a.userRecord == nil {
+		return
+	}
+	a.userRecord.SendText(msg)
 }
 
 func (a ScriptActor) GetLevel() int {
@@ -164,6 +172,10 @@ func (a ScriptActor) GetCharacterName(wrapInTags bool) string {
 	return a.characterRecord.Name
 }
 
+func (a ScriptActor) SetCharacterName(newName string) {
+	a.characterRecord.Name = newName
+}
+
 func (a ScriptActor) GetRoomId() int {
 	return a.characterRecord.RoomId
 }
@@ -178,11 +190,21 @@ func (a ScriptActor) GiveQuest(questId string) {
 		// If in a party, give to all party members.
 		if party := parties.Get(a.userId); party != nil {
 			for _, userId := range party.GetMembers() {
-				commandQueue.QueueQuest(userId, questId)
+
+				events.AddToQueue(events.Quest{
+					UserId:     userId,
+					QuestToken: questId,
+				})
+
 			}
 			return
 		} else {
-			commandQueue.QueueQuest(a.userId, questId)
+
+			events.AddToQueue(events.Quest{
+				UserId:     a.userId,
+				QuestToken: questId,
+			})
+
 		}
 	}
 	//a.characterRecord.GiveQuestToken(questId)
@@ -257,7 +279,11 @@ func (a ScriptActor) Command(cmd string, waitTurns ...int) {
 	if len(waitTurns) < 1 {
 		waitTurns = append(waitTurns, 0)
 	}
-	commandQueue.QueueCommand(a.userId, a.mobInstanceId, cmd, waitTurns[0])
+	if a.userId > 0 {
+		a.userRecord.Command(cmd, waitTurns[0])
+	} else {
+		a.mobRecord.Command(cmd, waitTurns[0])
+	}
 }
 
 func (a ScriptActor) TrainSkill(skillName string, skillLevel int) bool {
@@ -280,7 +306,7 @@ func (a ScriptActor) TrainSkill(skillName string, skillLevel int) bool {
 			SkillLevel: newLevel,
 		}
 		skillUpTxt, _ := templates.Process("character/skillup", skillData)
-		messageQueue.SendUserMessage(a.userId, skillUpTxt, true)
+		a.SendText(skillUpTxt)
 
 		return true
 
@@ -328,7 +354,7 @@ func (a ScriptActor) UpdateItem(itm ScriptItem) {
 func (a ScriptActor) GiveItem(itm ScriptItem) {
 	if a.characterRecord.StoreItem(*itm.itemRecord) {
 		if a.userId > 0 {
-			TryItemScriptEvent(`onGive`, *itm.itemRecord, a.userId, commandQueue)
+			TryItemScriptEvent(`onGive`, *itm.itemRecord, a.userId)
 		}
 	}
 }
@@ -336,7 +362,7 @@ func (a ScriptActor) GiveItem(itm ScriptItem) {
 func (a ScriptActor) TakeItem(itm ScriptItem) {
 	if a.characterRecord.RemoveItem(*itm.itemRecord) {
 		if a.userId > 0 {
-			TryItemScriptEvent(`onLost`, *itm.itemRecord, a.userId, commandQueue)
+			TryItemScriptEvent(`onLost`, *itm.itemRecord, a.userId)
 		}
 	}
 }
@@ -353,7 +379,13 @@ func (a ScriptActor) HasBuff(buffId int) bool {
 }
 
 func (a ScriptActor) GiveBuff(buffId int) {
-	commandQueue.QueueBuff(a.userId, a.mobInstanceId, buffId)
+
+	events.AddToQueue(events.Buff{
+		UserId:        a.userId,
+		MobInstanceId: a.mobInstanceId,
+		BuffId:        buffId,
+	})
+
 }
 
 func (a ScriptActor) HasBuffFlag(buffFlag string) bool {
@@ -377,7 +409,7 @@ func (a ScriptActor) RemoveBuff(buffId int) bool {
 	if !configs.GetConfig().AllowItemBuffRemoval {
 		buffList := a.characterRecord.GetBuffs(buffId)
 		if len(buffList) > 0 {
-			if buffList[0].ItemBuff {
+			if buffList[0].PermaBuff {
 				return false
 			}
 		}

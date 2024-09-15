@@ -17,39 +17,35 @@ import (
 SkullDuggery Skill
 Level 3 - Backstab
 */
-func Bump(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Bump(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 2 {
-		return response, nil
+		return false, nil
 	}
 
 	if user.Character.Aggro != nil {
-		response.SendUserMessage(userId, "You can't do that while in combat!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You can't do that while in combat!")
+		return true, nil
 	}
 
 	if room.AreMobsAttacking(userId) {
-		response.SendUserMessage(userId, "You can't do that while you are under attack!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You can't do that while you are under attack!")
+		return true, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -59,9 +55,8 @@ func Bump(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	if pickPlayerId > 0 || pickMobInstanceId > 0 {
 
 		if !user.Character.TryCooldown(skills.Brawling.String(`bump`), configs.GetConfig().MinutesToRounds(1)) {
-			response.SendUserMessage(userId, fmt.Sprintf("You need to wait %d rounds before you can do that again!", user.Character.GetCooldown(skills.Brawling.String(`bump`))), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf("You need to wait %d rounds before you can do that again!", user.Character.GetCooldown(skills.Brawling.String(`bump`))))
+			return true, nil
 		}
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -101,13 +96,13 @@ func Bump(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			}
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You "accidentally" bump into <ansi fg="mobname">%s</ansi>.`, m.Character.Name),
-				true)
+			)
 
-			response.SendRoomMessage(user.Character.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> accidentally bumps into <ansi fg="mobname">%s</ansi>!`, user.Character.Name, m.Character.Name),
-				true,
+				userId,
 			)
 
 		}
@@ -142,17 +137,17 @@ func Bump(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				}
 			}
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You "accidentally" bump into <ansi fg="username">%s</ansi>.`, p.Character.Name),
-				true)
+			)
 
-			response.SendUserMessage(pickPlayerId,
+			p.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> accidentally bumps into you.`, user.Character.Name),
-				true)
+			)
 
-			response.SendRoomMessage(user.Character.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> accidentally bumps into <ansi fg="username">%s</ansi>!`, user.Character.Name, p.Character.Name),
-				true,
+				userId,
 				pickPlayerId,
 			)
 
@@ -160,25 +155,18 @@ func Bump(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 	} else {
 
-		response.SendUserMessage(userId, "Pickpocket who?", true)
+		user.SendText("Pickpocket who?")
 	}
 
 	if goldDropped > 0 {
 
-		response.SendUserMessage(user.UserId,
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="gold">%d gold</ansi> jingles as it drops into the floor!`, goldDropped),
-			true,
-		)
-
-		response.SendRoomMessage(user.Character.RoomId,
-			fmt.Sprintf(`<ansi fg="gold">%d gold</ansi> jingles as it drops into the floor!`, goldDropped),
-			true,
 		)
 
 		room.Gold += goldDropped
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

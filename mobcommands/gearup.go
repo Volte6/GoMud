@@ -6,22 +6,20 @@ import (
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/util"
 )
 
-func Gearup(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-	response := NewMobCommandResponse(mobId)
+func Gearup(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if rest != `` {
@@ -34,8 +32,10 @@ func Gearup(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 			for _, itm := range mob.Character.Equipment.GetAllItems() {
 				itmSpec := itm.GetSpec()
 				if itmSpec.Type == matchSpec.Type && matchSpec.Value > itmSpec.Value {
-					cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`wear !%d`, matchItem.ItemId))
-					cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`drop !%d`, itm.ItemId))
+
+					mob.Command(fmt.Sprintf(`wear !%d`, matchItem.ItemId))
+					mob.Command(fmt.Sprintf(`drop !%d`, itm.ItemId))
+
 				}
 			}
 
@@ -78,17 +78,20 @@ func Gearup(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 		isCharmed := mob.Character.IsCharmed()
 		for _, itm := range wearNewItems {
-			cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`wear !%d`, itm.ItemId))
+
+			mob.Command(fmt.Sprintf(`wear !%d`, itm.ItemId))
+
 			// drop the old one
 			if isCharmed {
 				if oldItm, ok := wornItems[itm.GetSpec().Type]; ok {
-					cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`drop !%d`, oldItm.ItemId))
+
+					mob.Command(fmt.Sprintf(`drop !%d`, oldItm.ItemId))
+
 				}
 			}
 		}
 		fmt.Println()
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

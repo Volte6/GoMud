@@ -5,26 +5,27 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/mud/rooms"
 )
 
-func Remove(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Remove(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
+	}
+
+	room := rooms.LoadRoom(mob.Character.RoomId)
+	if room == nil {
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if rest == "all" {
 		for _, item := range mob.Character.Equipment.GetAllItems() {
-			r, _ := Remove(item.Name(), mobId, cmdQueue)
-			response.AbsorbMessages(r)
+			Remove(item.Name(), mobId)
 		}
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -36,9 +37,9 @@ func Remove(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 			mob.Character.CancelBuffsWithFlag(buffs.Hidden)
 
-			response.SendRoomMessage(mob.Character.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, matchItem.DisplayName()),
-				true)
+			)
 
 			mob.Character.StoreItem(matchItem)
 		}
@@ -47,6 +48,5 @@ func Remove(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

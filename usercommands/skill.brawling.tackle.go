@@ -3,6 +3,7 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
@@ -14,39 +15,35 @@ import (
 Brawling Skill
 Level 3 - Attempt to tackle an opponent, making them miss a round.
 */
-func Tackle(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Tackle(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 3 {
-		return response, nil
+		return false, nil
 	}
 
 	if user.Character.Aggro == nil {
-		response.SendUserMessage(userId, "Tackle is only used while in combat!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("Tackle is only used while in combat!")
+		return true, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if !user.Character.TryCooldown(skills.Brawling.String(`tackle`), 5) {
-		response.SendUserMessage(userId, "You are too tired to tackle again so soon!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You are too tired to tackle again so soon!")
+		return true, nil
 	}
 
 	attackMobInstanceId := user.Character.Aggro.MobInstanceId
@@ -69,26 +66,28 @@ func Tackle(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 			if roll < chanceIn100 {
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You lunge and tackle <ansi fg="mobname">%s</ansi>!`, m.Character.Name),
-					true)
+				)
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges and tackles <ansi fg="mobname">%s</ansi>!`, user.Character.Name, m.Character.Name),
-					true,
 					userId,
 				)
 
-				cmdQueue.QueueBuff(0, attackMobInstanceId, 12) // buff 12 is tackled
+				events.AddToQueue(events.Buff{
+					UserId:        0,
+					MobInstanceId: attackMobInstanceId,
+					BuffId:        12, // buff 12 is tackled
+				})
 
 			} else {
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You try to tackle <ansi fg="mobname">%s</ansi> and miss!`, m.Character.Name),
-					true)
+				)
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to tackle <ansi fg="mobname">%s</ansi> and misses!`, user.Character.Name, m.Character.Name),
-					true,
 					userId,
 				)
 
@@ -111,35 +110,41 @@ func Tackle(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 			if roll < chanceIn100 {
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You lunge and tackle <ansi fg="username">%s</ansi>!`, u.Character.Name),
-					true)
+				)
 
-				response.SendUserMessage(attackPlayerId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges and tackles you!`, user.Character.Name),
-					true)
+				if atkUser := users.GetByUserId(attackPlayerId); atkUser != nil {
+					atkUser.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges and tackles you!`, user.Character.Name),
+					)
+				}
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges and tackles <ansi fg="username">%s</ansi>!`, user.Character.Name, u.Character.Name),
-					true,
 					userId,
 					attackPlayerId,
 				)
 
-				cmdQueue.QueueBuff(attackPlayerId, 0, 12) // buff 12 is tackled
+				events.AddToQueue(events.Buff{
+					UserId:        attackPlayerId,
+					MobInstanceId: 0,
+					BuffId:        12, // buff 12 is tackled
+				})
 
 			} else {
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You lunge to tackle <ansi fg="username">%s</ansi> and miss!`, u.Character.Name),
-					true)
+				)
 
-				response.SendUserMessage(attackPlayerId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges to tackles you and misses!`, user.Character.Name),
-					true)
+				if atkUser := users.GetByUserId(attackPlayerId); atkUser != nil {
+					atkUser.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges to tackles you and misses!`, user.Character.Name),
+					)
+				}
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges to tackle <ansi fg="username">%s</ansi> and misses!`, user.Character.Name, u.Character.Name),
-					true,
 					userId,
 					attackPlayerId,
 				)
@@ -148,6 +153,5 @@ func Tackle(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

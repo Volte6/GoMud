@@ -1,7 +1,8 @@
 raceid: 6
 name: Undead
 description: A dead creature animated by magical means.
-nightvision: true
+buffids:
+  - 29 # Night Vision
 size: medium
 unarmedname: claws
 tnlscale: 1.0

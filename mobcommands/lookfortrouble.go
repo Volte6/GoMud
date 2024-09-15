@@ -12,20 +12,17 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func LookForTrouble(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func LookForTrouble(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Already aggroed, skip.
 	if mob.Character.Aggro != nil {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	// Make a list of all players this gorup is hostile to in this room.
@@ -154,9 +151,9 @@ func LookForTrouble(rest string, mobId int, cmdQueue util.CommandQueue) (util.Me
 	}
 
 	if targetUserId > 0 {
-		cmdQueue.QueueCommand(0, mob.InstanceId, fmt.Sprintf("attack @%d", targetUserId)) // @ denotes a specific player id
+		mob.Command(fmt.Sprintf("attack @%d", targetUserId)) // @ denotes a specific player id
 	} else if targetMobInstanceId > 0 {
-		cmdQueue.QueueCommand(0, mob.InstanceId, fmt.Sprintf("attack #%d", targetMobInstanceId)) // # denotes a specific mob id
+		mob.Command(fmt.Sprintf("attack #%d", targetMobInstanceId)) // # denotes a specific mob id
 	} else {
 
 		if mob.Despawns() {
@@ -166,6 +163,5 @@ func LookForTrouble(rest string, mobId int, cmdQueue util.CommandQueue) (util.Me
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

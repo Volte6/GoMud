@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/term"
 )
 
@@ -46,9 +47,14 @@ func TelnetIACHandler(clientInput *connection.ClientInput, connectionPool *conne
 			} else {
 				slog.Info("Received", "type", "IAC (Screensize)", "width", w, "height", h)
 
-				conn, err := connectionPool.Get(clientInput.ConnectionId)
 				if err == nil {
-					conn.SetScreenSize(uint32(w), uint32(h))
+
+					events.AddToQueue(events.ClientSettings{
+						ConnectionId: clientInput.ConnectionId,
+						ScreenWidth:  uint32(w),
+						ScreenHeight: uint32(h),
+					})
+
 				}
 
 			}

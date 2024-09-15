@@ -11,20 +11,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Drop(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Drop(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -34,8 +32,7 @@ func Drop(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		iCopies := []items.Item{}
 
 		if mob.Character.Gold > 0 {
-			r, _ := Drop(fmt.Sprintf("%d gold", mob.Character.Gold), mobId, cmdQueue)
-			response.AbsorbMessages(r)
+			Drop(fmt.Sprintf("%d gold", mob.Character.Gold), mobId)
 		}
 
 		for _, item := range mob.Character.Items {
@@ -43,12 +40,10 @@ func Drop(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		}
 
 		for _, item := range iCopies {
-			r, _ := Drop(item.Name(), mobId, cmdQueue)
-			response.AbsorbMessages(r)
+			Drop(item.Name(), mobId)
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	// Drop 10 gold
@@ -56,8 +51,7 @@ func Drop(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		g, _ := strconv.ParseInt(args[0], 10, 32)
 		dropAmt := int(g)
 		if dropAmt < 1 {
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		if dropAmt <= mob.Character.Gold {
@@ -65,12 +59,10 @@ func Drop(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			room.Gold += dropAmt
 			mob.Character.Gold -= dropAmt
 
-			response.SendRoomMessage(room.RoomId,
-				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> drops <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, dropAmt),
-				true)
+			room.SendText(
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> drops <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, dropAmt))
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 	}
 
@@ -83,11 +75,9 @@ func Drop(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		room.AddItem(matchItem, false)
 		mob.Character.RemoveItem(matchItem)
 
-		response.SendRoomMessage(mob.Character.RoomId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()),
-			true)
+		room.SendText(
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

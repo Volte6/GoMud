@@ -3,6 +3,7 @@
 - [Room Specific Functions](#room-specific-functions)
   - [GetRoom(roomId int) RoomObject ](#getroomroomid-int-roomobject-)
   - [RoomObject.RoomId() int](#roomobjectroomid-int)
+  - [RoomObject.SendText(msg string\[, excludeUserIds int\])](#roomobjectsendtextmsg-string-excludeuserids-int)
   - [RoomObject.SetTempData(key string, value any)](#roomobjectsettempdatakey-string-value-any)
   - [RoomObject.GetTempData(key string) any](#roomobjectgettempdatakey-string-any)
   - [RoomObject.SetPermData(key string, value any)](#roomobjectsetpermdatakey-string-value-any)
@@ -16,7 +17,7 @@
   - [GetMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool \[,mapMarker string, mapMarker string\]) string](#getmapmaproomid-int-mapsize-string-mapheight-int-mapwidth-int-mapname-string-showsecrets-bool-mapmarker-string-mapmarker-string-string)
   - [RoomObject.HasQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjecthasquestquestid-string-partyuserid-int-int)
   - [RoomObject.MissingQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjectmissingquestquestid-string-partyuserid-int-int)
-  - [RoomObject.SpawnMob(mobId int) int](#roomobjectspawnmobmobid-int-int)
+  - [RoomObject.SpawnMob(mobId int) Actor](#roomobjectspawnmobmobid-int-actor)
   - [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](#roomobjectaddtemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int-roundttl-int)
   - [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](#roomobjectremovetemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int)
   - [RoomObject.RepeatSpawnItem(itemId int, roundInterval int \[, containerName\]](#roomobjectrepeatspawnitemitemid-int-roundinterval-int--containername)
@@ -26,6 +27,14 @@ Retrieves a RoomObject for a given roomId.
 
 ## [RoomObject.RoomId() int](/scripting/room_func.go)
 Returns the roomId of the room.
+
+## [RoomObject.SendText(msg string[, excludeUserIds int])](/scripting/room_func.go)
+Sends a message to everyone in the room.
+
+|  Argument | Explanation |
+| --- | --- |
+| msg | the message to send |
+| excludeUserIds | One or more comma separated userIds to exclude from receiving the message. |
 
 ## [RoomObject.SetTempData(key string, value any)](/scripting/room_func.go)
 Sets temporary data for the room (Lasts until the room is unloaded from memory).
@@ -139,8 +148,8 @@ _Note: This could be useful for situations where you want to disallow a whole pa
 | questId | The identifier of the quest such as `3-start`. |
 | partyUserId (optional) | Only check the specified user and their party |
 
-## [RoomObject.SpawnMob(mobId int) int](/scripting/room_func.go)
-Creates a new instance of MobId,and returns the `mobInstanceId` of the mob.
+## [RoomObject.SpawnMob(mobId int) Actor](/scripting/room_func.go)
+Creates a new instance of MobId,and returns the `Actor` of the mob.
 
 |  Argument | Explanation |
 | --- | --- |

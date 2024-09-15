@@ -25,45 +25,42 @@ Level 4 - You are always aware of hidden players/mobs in the area
 (Lvl 3) <ansi fg="skill">search</ansi> Finds special/unknown "things of interest" in the area.
 (Lvl 4) <ansi fg="skill">search</ansi> Doubles your chance of success when searching.
 */
-func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Search(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Search)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to search.", true)
-		response.Handled = true
-		return response, fmt.Errorf("you don't know how to search")
+		user.SendText("You don't know how to search.")
+		return true, fmt.Errorf("you don't know how to search")
 	}
 
 	if !user.Character.TryCooldown(skills.Search.String(), 2) {
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Search.String())),
-			true)
-		response.Handled = true
-		return response, fmt.Errorf("you're doing that too often")
+		)
+		return true, fmt.Errorf("you're doing that too often")
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// 10% + 1% for every 2 smarts
 	searchOddsIn100 := 10 + int(math.Ceil(float64(user.Character.Stats.Perception.ValueAdj)/2))
 
-	response.SendUserMessage(userId, "You snoop around for a bit...\n", true)
-	response.SendRoomMessage(user.Character.RoomId,
+	user.SendText("You snoop around for a bit...\n")
+	room.SendText(
 		fmt.Sprintf(`<ansi fg="username">%s</ansi> is snooping around.`, user.Character.Name),
-		true)
+		userId,
+	)
 
 	// Check room exists
 	for exit, exitInfo := range room.Exits {
@@ -74,7 +71,7 @@ func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			util.LogRoll(`Secret Exit`, roll, searchOddsIn100)
 
 			if roll < searchOddsIn100 {
-				response.SendUserMessage(userId, fmt.Sprintf(`You found a secret exit: <ansi fg="secret-exit">%s</ansi>`, exit), true)
+				user.SendText(fmt.Sprintf(`You found a secret exit: <ansi fg="secret-exit">%s</ansi>`, exit))
 			}
 		}
 	}
@@ -126,7 +123,7 @@ func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			}
 
 			whoTxt, _ := templates.Process("descriptions/who", details)
-			response.SendUserMessage(userId, whoTxt, false)
+			user.SendText(whoTxt)
 
 		}
 
@@ -163,14 +160,14 @@ func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			}
 
 			whoTxt, _ := templates.Process("descriptions/who", details)
-			response.SendUserMessage(userId, whoTxt, false)
+			user.SendText(whoTxt)
 
 		}
 
 		//stashedItems := map[string][]string{}
 		//stashedItems["Stashed here:"] = room.Stash
 		textOut, _ := templates.Process("descriptions/ontheground", stashedItems)
-		response.SendUserMessage(userId, textOut, false)
+		user.SendText(textOut)
 	}
 
 	if skillLevel >= 3 {
@@ -178,6 +175,5 @@ func Search(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

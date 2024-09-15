@@ -14,26 +14,23 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Shoot(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Shoot(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if user.Character.Equipment.Weapon.GetSpec().Subtype != items.Shooting {
-		response.SendUserMessage(userId, `You don't have a shooting weapon.`, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`You don't have a shooting weapon.`)
+		return true, nil
 	}
 
 	attackPlayerId := 0
@@ -44,9 +41,8 @@ func Shoot(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 2 {
-		response.SendUserMessage(userId, `Syntax: <ansi fg="command">shoot [target] [exit]</ansi>`, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`Syntax: <ansi fg="command">shoot [target] [exit]</ansi>`)
+		return true, nil
 	}
 
 	direction := args[len(args)-1]
@@ -59,9 +55,8 @@ func Shoot(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
-			response.SendUserMessage(userId, fmt.Sprintf("The %s exit is locked.", exitName), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf("The %s exit is locked.", exitName))
+			return true, nil
 		}
 
 		if adjacentRoom := rooms.LoadRoom(attackRoomId); adjacentRoom != nil {
@@ -70,15 +65,13 @@ func Shoot(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	}
 
 	if attackRoomId == 0 {
-		response.SendUserMessage(userId, `Could not find where you wanted to shoot`, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`Could not find where you wanted to shoot`)
+		return true, nil
 	}
 
 	if attackPlayerId == 0 && attackMobInstanceId == 0 {
-		response.SendUserMessage(userId, `Could not find your target.`, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`Could not find your target.`)
+		return true, nil
 	}
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
@@ -98,21 +91,21 @@ func Shoot(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		if m != nil {
 
 			if m.Character.IsCharmed(userId) {
-				response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name), true)
-				response.Handled = true
-				return response, nil
+				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
+				return true, nil
 			}
 
 			user.Character.SetAggroRemote(exitName, 0, attackMobInstanceId, characters.Shooting)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You prepare to shoot at <ansi fg="mobname">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, m.Character.Name, exitName),
-				true)
+			)
 
 			if !isSneaking {
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to shoot at <ansi fg="mobname">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, m.Character.Name, exitName),
-					true)
+					userId,
+				)
 			}
 
 		}
@@ -125,23 +118,23 @@ func Shoot(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
 				if partyInfo.IsMember(attackPlayerId) {
-					response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name), true)
-					response.Handled = true
-					return response, nil
+					user.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name))
+					return true, nil
 				}
 			}
 
 			user.Character.SetAggroRemote(exitName, attackPlayerId, 0, characters.Shooting)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You prepare to shoot at <ansi fg="username">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, p.Character.Name, exitName),
-				true)
+			)
 
 			if !isSneaking {
 
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to shoot at <ansi fg="username">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, p.Character.Name, exitName),
-					true)
+					userId,
+				)
 
 			}
 
@@ -149,6 +142,5 @@ func Shoot(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

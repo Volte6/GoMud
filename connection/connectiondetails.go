@@ -20,12 +20,6 @@ const (
 	MaxHistory = 10
 )
 
-type ClientSettings struct {
-	ScreenWidth  uint32
-	ScreenHeight uint32
-	Monochrome   bool
-}
-
 type InputHistory struct {
 	inhistory bool
 	position  int
@@ -119,21 +113,12 @@ type ConnectionDetails struct {
 	connectionId      ConnectionId
 	state             ConnectState
 	lastInputTime     time.Time
-	settings          ClientSettings
-	settingsMutex     sync.Mutex
 	conn              net.Conn
 	wsConn            *websocket.Conn
 	handlerMutex      sync.Mutex
 	inputHandlerNames []string
 	inputHandlers     []InputHandler
 	inputDisabled     bool
-}
-
-// bool is true if they have changed since last time they were gotten
-func (cd *ConnectionDetails) GetSettings() ClientSettings {
-	cd.settingsMutex.Lock()
-	defer cd.settingsMutex.Unlock()
-	return cd.settings
 }
 
 // If HandleInput receives an error, we shouldn't pass input to the game logic
@@ -258,31 +243,11 @@ func (cd *ConnectionDetails) InputDisabled(setTo ...bool) bool {
 	return cd.inputDisabled
 }
 
-func (cd *ConnectionDetails) SetScreenSize(w uint32, h uint32) {
-
-	cd.settingsMutex.Lock()
-	defer cd.settingsMutex.Unlock()
-
-	cd.settings.ScreenWidth = w
-	cd.settings.ScreenHeight = h
-}
-
-func (cd *ConnectionDetails) SetMonochrome(mono bool) {
-	cd.settingsMutex.Lock()
-	defer cd.settingsMutex.Unlock()
-
-	cd.settings.Monochrome = mono
-}
-
 func NewConnectionDetails(connId ConnectionId, c net.Conn, wsC *websocket.Conn) *ConnectionDetails {
 	return &ConnectionDetails{
 		state:        Login,
 		connectionId: connId,
-		settings: ClientSettings{
-			ScreenWidth:  80,
-			ScreenHeight: 24,
-			Monochrome:   false,
-		},
+
 		inputDisabled: false,
 		conn:          c,
 		wsConn:        wsC,

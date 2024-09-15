@@ -23,26 +23,24 @@ type TrainingOptions struct {
 	Options        []TrainingOption
 }
 
-func Train(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Train(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if len(room.SkillTraining) == 0 {
-		response.SendUserMessage(userId, `You must find a trainer to perform training.`, true)
-		return response, nil
+		user.SendText(`You must find a trainer to perform training.`)
+		return false, nil
 	}
 
 	trainingData := TrainingOptions{
@@ -113,7 +111,7 @@ func Train(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 	if rest == "" {
 		exitTxt, _ := templates.Process("descriptions/train", trainingData)
-		response.SendUserMessage(userId, exitTxt, false)
+		user.SendText(exitTxt)
 	} else {
 
 		user.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -133,26 +131,26 @@ func Train(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		currentLevel := user.Character.GetSkillLevel(skills.SkillTag(match))
 
 		if !ok { // If it's not something that can be learned here
-			response.SendUserMessage(userId, `The trainer pokes you on your chest, "I think you're in the wrong place, pal."`, true)
-			response.SendRoomMessage(user.Character.RoomId,
+			user.SendText(`The trainer pokes you on your chest, "I think you're in the wrong place, pal."`)
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> looks a little confused.`, user.Character.Name),
-				true)
+				userId)
 		} else if currentLevel == 4 { // Max level
-			response.SendUserMessage(userId, `The trainer chuckles, "I admire your ambition, but you have already mastered that skill!"`, true)
-			response.SendRoomMessage(user.Character.RoomId,
+			user.SendText(`The trainer chuckles, "I admire your ambition, but you have already mastered that skill!"`)
+			room.SendText(
 				fmt.Sprintf(`The trainer chuckles and says something you can't quite make out to <ansi fg="username">%s</ansi>`, user.Character.Name),
-				true)
+				userId)
 		} else if currentLevel < trainingRange.Min-1 { // Not high enough level
-			response.SendUserMessage(userId, `The trainer shakes his head, "You aren't ready to train here."`, true)
+			user.SendText(`The trainer shakes his head, "You aren't ready to train here."`)
 		} else {
 
 			requiredTrainingPoints := user.Character.GetSkillLevelCost(currentLevel + 1)
 
 			if user.Character.TrainingPoints < requiredTrainingPoints {
-				response.SendUserMessage(userId, `The trainer pulls you close and says quietly, "You aren't ready yet. Return when you have more experience."`, true)
-				response.SendRoomMessage(user.Character.RoomId,
+				user.SendText(`The trainer pulls you close and says quietly, "You aren't ready yet. Return when you have more experience."`)
+				room.SendText(
 					fmt.Sprintf(`The trainer pulls <ansi fg="username">%s</ansi> close and mumbles something in their ear.`, user.Character.Name),
-					true)
+					userId)
 			} else {
 
 				// Take away the cost
@@ -171,17 +169,17 @@ func Train(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 				skillUpTxt, _ := templates.Process("character/skillup", skillData)
 
-				response.SendUserMessage(userId, "The trainer grimly considers you for a moment, and then his demeanor changes dramatically.", true)
-				response.SendUserMessage(user.UserId, skillUpTxt, true)
-				response.SendUserMessage(userId, `"Congratulations!", the trainer exclaims. You are now a little more prepared for the world.`, true)
-				response.SendRoomMessage(user.Character.RoomId,
+				user.SendText("The trainer grimly considers you for a moment, and then his demeanor changes dramatically.")
+				user.SendText(skillUpTxt)
+				user.SendText(`"Congratulations!", the trainer exclaims. You are now a little more prepared for the world.`)
+				room.SendText(
 					fmt.Sprintf(`The trainer shakes <ansi fg="username">%ss</ansi> hand while congratulating them. Must be nice.`, user.Character.Name),
-					true)
+					userId)
 
 				if match == string(skills.Tame) {
 					if newLevel == 1 {
 						user.Character.SetTameCreatureSkill(userId, `rat`, 0)
-						response.SendUserMessage(user.UserId, `You've learned how to tame a <ansi fg="mobname">rat</ansi>!`, true)
+						user.SendText(`You've learned how to tame a <ansi fg="mobname">rat</ansi>!`)
 					}
 				}
 			}
@@ -190,6 +188,5 @@ func Train(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

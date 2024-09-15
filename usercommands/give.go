@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
@@ -14,20 +15,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Give(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	rest = util.StripPrepositions(rest)
@@ -35,9 +34,8 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 {
-		response.SendUserMessage(userId, "Give what? To whom?", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("Give what? To whom?")
+		return true, nil
 	}
 
 	var giveWho string = args[len(args)-1]
@@ -53,15 +51,13 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		giveGoldAmount = int(g)
 
 		if giveGoldAmount < 0 {
-			response.SendUserMessage(userId, "You can't give a negative amount of gold.", true)
-			response.Handled = true
-			return response, nil
+			user.SendText("You can't give a negative amount of gold.")
+			return true, nil
 		}
 
 		if giveGoldAmount > user.Character.Gold {
-			response.SendUserMessage(userId, "You don't have that much gold to give.", true)
-			response.Handled = true
-			return response, nil
+			user.SendText("You don't have that much gold to give.")
+			return true, nil
 		}
 
 	} else {
@@ -72,9 +68,8 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		giveItem, found = user.Character.FindInBackpack(giveWhat)
 
 		if !found {
-			response.SendUserMessage(userId, fmt.Sprintf("You don't have a %s to give.", giveWhat), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf("You don't have a %s to give.", giveWhat))
+			return true, nil
 		}
 
 	}
@@ -94,64 +89,61 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			iSpec := giveItem.GetSpec()
 			if iSpec.QuestToken != `` {
-				cmdQueue.QueueQuest(targetUser.UserId, iSpec.QuestToken)
+
+				events.AddToQueue(events.Quest{
+					UserId:     targetUser.UserId,
+					QuestToken: iSpec.QuestToken,
+				})
+
 			}
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You give the <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, giveItem.DisplayName(), targetUser.Character.Name),
-				true)
-			response.SendUserMessage(targetUser.UserId,
+			)
+			targetUser.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> gives you their <ansi fg="item">%s</ansi>.`, user.Character.Name, giveItem.DisplayName()),
-				true)
-			response.SendRoomMessage(user.Character.RoomId,
+			)
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> gives <ansi fg="username">%s</ansi> a <ansi fg="itemname">%s</ansi>.`, user.Character.Name, targetUser.Character.Name, giveItem.NameSimple()),
-				true,
 				user.UserId,
 				targetUser.UserId)
 
 			// Trigger onLost event
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, giveItem, userId, cmdQueue); err == nil {
-				response.AbsorbMessages(scriptResponse)
-			}
+			scripting.TryItemScriptEvent(`onLost`, giveItem, userId)
 
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, giveItem, targetUser.UserId, cmdQueue); err == nil {
-				response.AbsorbMessages(scriptResponse)
-			}
+			scripting.TryItemScriptEvent(`onFound`, giveItem, targetUser.UserId)
 
 		} else if giveGoldAmount > 0 {
 
 			if targetUser.UserId == user.UserId {
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You count out <ansi fg="gold">%d gold</ansi> and put it back in your pocket.`, giveGoldAmount),
-					true)
-				response.SendRoomMessage(user.Character.RoomId,
+				)
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> counts out some <ansi fg="gold">gold</ansi> and put it back in their pocket.`, user.Character.Name),
-					true,
 					user.UserId)
 
 			} else {
 				targetUser.Character.Gold += giveGoldAmount
 				user.Character.Gold -= giveGoldAmount
 
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf(`You give <ansi fg="gold">%d gold</ansi> to <ansi fg="username">%s</ansi>.`, giveGoldAmount, targetUser.Character.Name),
-					true)
-				response.SendUserMessage(targetUser.UserId,
+				)
+				targetUser.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> gives you <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, giveGoldAmount),
-					true)
-				response.SendRoomMessage(user.Character.RoomId,
+				)
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> gives <ansi fg="username">%s</ansi> some <ansi fg="gold">gold</ansi>.`, user.Character.Name, targetUser.Character.Name),
-					true,
 					user.UserId,
 					targetUser.UserId)
 			}
 		} else {
-			response.SendUserMessage(userId, "Something went wrong.", true)
+			user.SendText("Something went wrong.")
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 
 	}
 
@@ -173,54 +165,51 @@ func Give(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					m.Character.Gold += giveGoldAmount
 					user.Character.Gold -= giveGoldAmount
 
-					response.SendUserMessage(userId,
+					user.SendText(
 						fmt.Sprintf(`You give <ansi fg="gold">%d gold</ansi> to <ansi fg="username">%s</ansi>.`, giveGoldAmount, m.Character.Name),
-						true)
-					response.SendRoomMessage(room.RoomId,
+					)
+					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> gave some gold to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, m.Character.Name),
-						true)
+						userId,
+					)
 				} else {
 
 					m.Character.StoreItem(giveItem)
 					user.Character.RemoveItem(giveItem)
 
-					response.SendUserMessage(userId,
+					user.SendText(
 						fmt.Sprintf(`You give the <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, giveItem.DisplayName(), m.Character.Name),
-						true)
-					response.SendRoomMessage(room.RoomId,
+					)
+					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> gave their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, giveItem.DisplayName(), m.Character.Name),
-						true)
+						userId,
+					)
 
 					// Trigger onLost event
-					if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, giveItem, userId, cmdQueue); err == nil {
-						response.AbsorbMessages(scriptResponse)
-					}
+					scripting.TryItemScriptEvent(`onLost`, giveItem, userId)
 
 				}
 
-				if res, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}, cmdQueue); err == nil {
-					response.AbsorbMessages(res)
-					if res.Handled {
-						response.Handled = true
-						return response, nil
+				if handled, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}); err == nil {
+					if handled {
+						return true, nil
 					}
 				}
 
-				cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`emote considers the <ansi fg="itemname">%s</ansi> for a moment.`, giveItem.DisplayName()))
-				cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`gearup !%d`, giveItem.ItemId))
+				m.Command(fmt.Sprintf(`emote considers the <ansi fg="itemname">%s</ansi> for a moment.`, giveItem.DisplayName()))
+
+				m.Command(fmt.Sprintf(`gearup !%d`, giveItem.ItemId))
 
 			} else {
-				response.SendUserMessage(userId, "Something went wrong.", true)
+				user.SendText("Something went wrong.")
 			}
 
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
-	response.SendUserMessage(userId, "Who???", true)
+	user.SendText("Who???")
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

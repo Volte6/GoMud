@@ -12,14 +12,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Experience(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Experience(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -185,10 +183,9 @@ func Experience(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 		raceInfo := races.GetRace(mockChar.RaceId)
 		searchResultsTable := templates.GetTable(fmt.Sprintf(`Experience Chart for %s`, raceInfo.Name), headers, rows, formatting)
 		tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
-		response.SendUserMessage(userId, tplTxt, false)
+		user.SendText(tplTxt)
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	realXPNow, realXPTNL := user.Character.XPTNLActual()
@@ -201,8 +198,7 @@ func Experience(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 	}
 
 	tplTxt, _ := templates.Process("character/experience", xpInfo)
-	response.SendUserMessage(userId, tplTxt, false)
+	user.SendText(tplTxt)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

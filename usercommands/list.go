@@ -13,25 +13,23 @@ import (
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func List(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func List(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
+	handled := false
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
 
 		mob := mobs.GetInstance(mobId)
@@ -55,7 +53,9 @@ func List(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				for itemId, itemQty := range mob.ShopStock {
 					item := items.New(itemId)
 					if item.ItemId < 1 {
-						cmdQueue.QueueCommand(0, mobId, fmt.Sprintf("Please alert an admin that item %d is missing from the database.", itemId))
+
+						mob.Command(fmt.Sprintf("say Please alert an admin that item %d is missing from the database.", itemId))
+
 						continue
 					}
 					rows = append(rows, []string{strconv.Itoa(itemQty),
@@ -73,8 +73,8 @@ func List(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			onlineTableData := templates.GetTable(fmt.Sprintf(`For Sale by %s`, mob.Character.Name), headers, rows)
 			tplTxt, _ := templates.Process("tables/shoplist", onlineTableData)
-			response.SendUserMessage(userId, tplTxt, true)
-			response.SendUserMessage(userId, fmt.Sprintf(`To buy something, type: <ansi fg="command">buy [name]</ansi>%s`, term.CRLFStr), true)
+			user.SendText(tplTxt)
+			user.SendText(fmt.Sprintf(`To buy something, type: <ansi fg="command">buy [name]</ansi>%s`, term.CRLFStr))
 
 		}
 
@@ -107,25 +107,24 @@ func List(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			onlineTableData := templates.GetTable(`Mercs for Hire`, headers, rows)
 			tplTxt, _ := templates.Process("tables/shoplist", onlineTableData)
-			response.SendUserMessage(userId, tplTxt, true)
+			user.SendText(tplTxt)
 
-			response.SendUserMessage(userId, fmt.Sprintf(`To hire a mercenary, type: <ansi fg="command">hire [name]</ansi>%s`, term.CRLFStr), true)
+			user.SendText(fmt.Sprintf(`To hire a mercenary, type: <ansi fg="command">hire [name]</ansi>%s`, term.CRLFStr))
 
 		}
 
 		if !listedSomething {
-			cmdQueue.QueueCommand(0, mob.InstanceId, `say I have nothing to sell right  now, but check again later.`)
+
+			mob.Command(`say I have nothing to sell right  now, but check again later.`)
+
 		}
 
-		response.Handled = true
+		handled = true
 	}
 
-	if response.Handled {
-		return response, nil
+	if !handled {
+		user.SendText("Visit a merchant to list and buy objects.")
 	}
 
-	response.SendUserMessage(userId, "Visit a merchant to list and buy objects.", true)
-
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

@@ -13,7 +13,6 @@ import (
 	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 /*
@@ -23,14 +22,12 @@ Level 2 - Tame up to 3 creatures
 Level 3 - Tame up to 4 creatures
 Level 4 - Tame up to 5 creatures
 */
-func Tame(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Tame(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Tame)
@@ -49,9 +46,8 @@ func Tame(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	}
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to tame.", true)
-		response.Handled = true
-		return response, errors.New(`you don't know how to tame`)
+		user.SendText("You don't know how to tame.")
+		return true, errors.New(`you don't know how to tame`)
 	}
 
 	if len(rest) == 0 {
@@ -66,17 +62,16 @@ func Tame(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		onlineTableData := templates.GetTable(`Your taming proficiency`, headers, rows)
 		tplTxt, _ := templates.Process("tables/generic", onlineTableData)
-		response.SendUserMessage(userId, tplTxt, true)
+		user.SendText(tplTxt)
 
-		response.SendUserMessage(userId, `<ansi fg="command">help tame</ansi> to find out more.`, true)
+		user.SendText(`<ansi fg="command">help tame</ansi> to find out more.`)
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// valid peep targets are: mobs, players
@@ -87,9 +82,8 @@ func Tame(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		if mob := mobs.GetInstance(mobId); mob != nil {
 
 			if mob.Character.IsCharmed(userId) {
-				response.SendUserMessage(userId, "They are already charmed.", true)
-				response.Handled = true
-				return response, errors.New(`they are already charmed`)
+				user.SendText("They are already charmed.")
+				return true, errors.New(`they are already charmed`)
 			}
 
 			// Set spell Aid
@@ -101,9 +95,8 @@ func Tame(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			}
 
 			continueCasting := true
-			if res, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro, cmdQueue); err == nil {
-				response.AbsorbMessages(res)
-				continueCasting = res.Handled
+			if handled, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro); err == nil {
+				continueCasting = handled
 			}
 
 			if continueCasting {
@@ -112,15 +105,14 @@ func Tame(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				user.Character.SetCast(spellInfo.WaitRounds, spellAggro)
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 
 		}
 
 	}
 
-	response.SendUserMessage(userId, "You don't see that here.", true)
-	response.Handled = true
-	return response, errors.New(`you don't see that here`)
+	user.SendText("You don't see that here.")
+
+	return true, errors.New(`you don't see that here`)
 
 }

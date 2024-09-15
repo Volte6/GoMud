@@ -11,32 +11,29 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Hire(rest string, userId int) (bool, error) {
 
 	if rest == "" {
-		return List(rest, userId, cmdQueue)
+		return List(rest, userId)
 	}
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	maxCharmed := user.Character.GetSkillLevel(skills.Tame) + 1
 
 	if len(user.Character.GetCharmIds()) >= maxCharmed {
-		response.SendUserMessage(userId, fmt.Sprintf(`You can only have %d creatures following you at a time.`, maxCharmed), true)
-		response.Handled = true
-		return response, nil
+		user.SendText(fmt.Sprintf(`You can only have %d creatures following you at a time.`, maxCharmed))
+		return true, nil
 	}
 
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
@@ -63,9 +60,10 @@ func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			if len(mercNames) > 0 {
 				extraSay = fmt.Sprintf(` Any interest in a <ansi fg="itemname">%s</ansi>?`, mercNames[util.Rand(len(mercNames))])
 			}
-			cmdQueue.QueueCommand(0, mobId, "say Sorry, I don't have that for hire right now."+extraSay)
-			response.Handled = true
-			return response, nil
+
+			mob.Command(`say Sorry, I don't have that for hire right now.` + extraSay)
+
+			return true, nil
 		}
 
 		for idx, hireInfo := range mob.ShopServants {
@@ -78,9 +76,10 @@ func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			}
 
 			if user.Character.Gold < hireInfo.Price {
-				cmdQueue.QueueCommand(0, mobId, "say You don't have enough gold.")
-				response.Handled = true
-				return response, nil
+
+				mob.Command(`say You don't have enough gold.`)
+
+				return true, nil
 			}
 
 			user.Character.Gold -= hireInfo.Price
@@ -101,20 +100,20 @@ func Hire(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			room.AddMob(newMob.InstanceId)
 
-			response.SendUserMessage(user.UserId,
+			user.SendText(
 				fmt.Sprintf(`You pay <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, hireInfo.Price, mob.Character.Name),
-				true)
-			response.SendRoomMessage(room.RoomId,
+			)
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, hireInfo.Price, mob.Character.Name),
-				true)
+				userId,
+			)
 
-			cmdQueue.QueueCommand(0, newMob.InstanceId, `emote is ready to serve.`)
+			newMob.Command(`emote is ready to serve.`)
 
 			break
 
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

@@ -8,32 +8,29 @@ import (
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/util"
 )
 
 // Mob portaling is different than player portaling.
 // Mob portals are open for shorter periods, and go to specific locations.
-func Portal(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Portal(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
-		if response, err := Go(`portal`, mobId, cmdQueue); response.Handled {
-			return response, err
+		if handled, err := Go(`portal`, mobId); handled {
+			return handled, err
 		}
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	var err error
@@ -59,10 +56,10 @@ func Portal(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 		mostItemRoomId, qty := rooms.GetRoomWithMostItems(bool(config.LootGoblinIncludeRecentRooms), int(config.LootGoblinMinimumItems), int(config.LootGoblinMinimumGold))
 		if portalTargetRoomId == 0 && qty == 0 { // could't find any
 			// No more rooms with items? Our job is done i guess.
-			cmdQueue.QueueCommand(0, mobId, `portal home;drop all`)
 
-			response.Handled = true
-			return response, fmt.Errorf("failed to find temporary exit to room")
+			mob.Command(`portal home;drop all`)
+
+			return true, fmt.Errorf("failed to find temporary exit to room")
 		}
 		portalTargetRoomId = mostItemRoomId
 	}
@@ -73,13 +70,13 @@ func Portal(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 	}
 
 	if portalTargetRoomId == mob.Character.RoomId {
-		return response, err
+		return false, err
 	}
 
 	// Load current room details
 	targetRoom := rooms.LoadRoom(portalTargetRoomId)
 	if targetRoom == nil {
-		return response, fmt.Errorf(`room %d not found`, portalTargetRoomId)
+		return false, fmt.Errorf(`room %d not found`, portalTargetRoomId)
 	}
 
 	// Target = portalTargetRoomId
@@ -95,22 +92,20 @@ func Portal(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 	// Spawn a portal in the room that leads to the portal location
 	if !room.AddTemporaryExit(newPortalExitName, newPortal) {
-		response.Handled = true
-		return response, fmt.Errorf("failed to add temporary exit to room")
+		return true, fmt.Errorf("failed to add temporary exit to room")
 	}
 
-	response.SendRoomMessage(room.RoomId,
+	room.SendText(
 		fmt.Sprintf(`<ansi fg="mobname">%s</ansi> squints really hard, and a %s appears!`, mob.Character.Name, newPortal.Title),
-		true)
+	)
 
 	// Modify it for this room
 	newPortal.RoomId = mob.Character.RoomId
 	targetRoom.AddTemporaryExit(newPortalExitName, newPortal)
 
-	response.SendRoomMessage(targetRoom.RoomId,
+	room.SendText(
 		fmt.Sprintf(`A %s appears!`, newPortal.Title),
-		true)
+	)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

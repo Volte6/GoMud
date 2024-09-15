@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -12,14 +11,15 @@ import (
 	"time"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobcommands"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
-	"github.com/volte6/mud/progressbar"
 	"github.com/volte6/mud/prompt"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/rooms"
@@ -42,48 +42,10 @@ func (wi WorldInput) Id() int {
 	return wi.FromId
 }
 
-type BuffApply struct {
-	ToId   int
-	BuffId int
-}
-
-func (ba BuffApply) Id() int {
-	return ba.ToId
-}
-
-type QuestApply struct {
-	ToId       int
-	QuestToken string
-}
-
-func (qa QuestApply) Id() int {
-	return qa.ToId
-}
-
-type RoomAction struct {
-	RoomId       int
-	SourceUserId int
-	SourceMobId  int
-	Action       string
-}
-
-func (ra RoomAction) Id() int {
-	return ra.RoomId
-}
-
 type World struct {
 	connectionPool *connection.ConnectionTracker
 	users          *users.ActiveUsers
 	worldInput     chan WorldInput
-	userInputQueue util.LimitQueue[WorldInput]
-	mobInputQueue  util.LimitQueue[WorldInput]
-
-	userBuffQueue util.LimitQueue[BuffApply]
-	mobBuffQueue  util.LimitQueue[BuffApply]
-
-	userQuestQueue util.LimitQueue[QuestApply]
-
-	roomActionQueue util.LimitQueue[RoomAction]
 }
 
 func (w *World) GetUsers() *users.ActiveUsers {
@@ -121,7 +83,12 @@ func (w *World) EnterWorld(roomId int, zone string, userId int) {
 	if len(loginCmds) > 0 {
 
 		for _, cmd := range loginCmds {
-			w.QueueCommand(userId, 0, cmd)
+
+			events.AddToQueue(events.Input{
+				UserId:    userId,
+				InputText: cmd,
+			})
+
 		}
 
 	}
@@ -579,6 +546,8 @@ func (w *World) GameTickWorker(shutdown chan bool, wg *sync.WaitGroup) {
 
 	c := configs.GetConfig()
 
+	configTimer := time.NewTimer(30 * time.Millisecond)
+	messageTimer := time.NewTimer(time.Millisecond)
 	turnTimer := time.NewTimer(time.Duration(c.TurnMs) * time.Millisecond)
 
 loop:
@@ -588,9 +557,17 @@ loop:
 			slog.Error(`GameTickWorker`, `action`, `shutdown received`)
 			break loop
 
+		case <-messageTimer.C:
+			messageTimer.Reset(time.Millisecond)
+			w.MessageTick()
+
 		case <-turnTimer.C:
 			turnTimer.Reset(time.Duration(c.TurnMs) * time.Millisecond)
 			w.TurnTick()
+
+		case <-configTimer.C:
+			configTimer.Reset(30 * time.Millisecond)
+			w.ConfigTick()
 		}
 		c = configs.GetConfig()
 	}
@@ -658,18 +635,22 @@ loop:
 			slog.Error(`InputWorker`, `action`, `shutdown received`)
 			break loop
 		case wi := <-w.worldInput:
-			w.userInputQueue.Push(wi)
+
+			events.AddToQueue(events.Input{
+				UserId:    wi.FromId,
+				InputText: wi.InputText,
+				WaitTurns: wi.WaitTurns,
+			})
+
 		}
 	}
 }
 
-func (w *World) processInput(wi WorldInput) {
-	// No need to select the channel this way
-	//for wi := range w.worldInput {
+func (w *World) processInput(userId int, inputText string) {
 
-	user := users.GetByUserId(wi.FromId)
+	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		slog.Error("User not found", "userId", wi.FromId)
+		slog.Error("User not found", "userId", userId)
 		return
 	}
 
@@ -681,12 +662,12 @@ func (w *World) processInput(wi WorldInput) {
 
 		if activeQuestion = cmdPrompt.GetNextQuestion(); activeQuestion != nil {
 
-			activeQuestion.Answer(string(wi.InputText))
-			wi.InputText = ``
+			activeQuestion.Answer(string(inputText))
+			inputText = ``
 
 			// set the input buffer to invoke the command prompt it was relevant to
 			if cmdPrompt.Command != `` {
-				wi.InputText = cmdPrompt.Command + " " + cmdPrompt.Rest
+				inputText = cmdPrompt.Command + " " + cmdPrompt.Rest
 			}
 		} else {
 			// If a prompt was found, but no pending questions, clear it.
@@ -695,318 +676,236 @@ func (w *World) processInput(wi WorldInput) {
 
 	}
 
-	for {
-		command := ``
-		remains := ``
+	command := ``
+	remains := ``
 
-		commandResponse := usercommands.NewUserCommandResponse(wi.FromId)
-		var err error
+	var err error
+	handled := false
 
-		wi.InputText = strings.TrimSpace(wi.InputText)
+	inputText = strings.TrimSpace(inputText)
 
-		if len(wi.InputText) > 0 {
+	if len(inputText) > 0 {
 
-			// Check for macros
-			if user.Macros != nil && len(wi.InputText) == 2 {
-				if macro, ok := user.Macros[wi.InputText]; ok {
-					commandResponse.Handled = true
-					for _, newCmd := range strings.Split(macro, `;`) {
-						if newCmd == `` {
-							continue
-						}
-						w.userInputQueue.Push(WorldInput{
-							FromId:    wi.FromId,
-							InputText: newCmd,
-						})
+		// Check for macros
+		if user.Macros != nil && len(inputText) == 2 {
+			if macro, ok := user.Macros[inputText]; ok {
+				handled = true
+				for _, newCmd := range strings.Split(macro, `;`) {
+					if newCmd == `` {
+						continue
 					}
-				}
-			}
 
-			if !commandResponse.Handled {
-
-				// Lets users use gossip/say shortcuts without a space
-				if len(wi.InputText) > 1 {
-					if wi.InputText[0] == '`' || wi.InputText[0] == '.' {
-						wi.InputText = fmt.Sprintf(`%s %s`, string(wi.InputText[0]), string(wi.InputText[1:]))
-					}
-				}
-
-				if index := strings.Index(wi.InputText, " "); index != -1 {
-					command, remains = strings.ToLower(wi.InputText[0:index]), wi.InputText[index+1:]
-				} else {
-					command = wi.InputText
-				}
-
-				//slog.Info("World received input", "InputText", (wi.InputText))
-				commandResponse, err = usercommands.TryCommand(command, remains, wi.FromId, w)
-				if err != nil {
-					slog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
-				}
-			}
-
-		}
-
-		if !commandResponse.Handled {
-			if len(command) > 0 {
-				commandResponse.SendUserMessage(wi.FromId,
-					fmt.Sprintf(`<ansi fg="command">%s</ansi> not recognized. Type <ansi fg="command">help</ansi> for commands.`, command),
-					true)
-				commandResponse.SendRoomMessage(user.Character.RoomId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> looks a little confused.`, user.Character.Name),
-					true,
-					wi.FromId)
-			}
-		}
-
-		if commandResponse.Pending() {
-			w.DispatchMessages(commandResponse)
-		}
-
-		if len(commandResponse.CommandQueue) > 0 {
-			for _, cmd := range commandResponse.CommandQueue {
-
-				if cmd.UserId > 0 {
-					w.userInputQueue.Push(WorldInput{
-						FromId:    cmd.UserId,
-						InputText: cmd.Command,
+					events.AddToQueue(events.Input{
+						UserId:    userId,
+						InputText: newCmd,
 					})
-				} else if cmd.MobInstanceId > 0 {
-					w.mobInputQueue.Push(WorldInput{
-						FromId:    cmd.MobInstanceId,
-						InputText: cmd.Command,
-					})
+
 				}
 			}
-			commandResponse.CommandQueue = commandResponse.CommandQueue[:0]
 		}
 
-		// Load up any forced commands
-		if len(commandResponse.NextCommand) > 0 {
-			wi.InputText = commandResponse.NextCommand
-			continue
+		if !handled {
+
+			// Lets users use gossip/say shortcuts without a space
+			if len(inputText) > 1 {
+				if inputText[0] == '`' || inputText[0] == '.' {
+					inputText = fmt.Sprintf(`%s %s`, string(inputText[0]), string(inputText[1:]))
+				}
+			}
+
+			if index := strings.Index(inputText, " "); index != -1 {
+				command, remains = strings.ToLower(inputText[0:index]), inputText[index+1:]
+			} else {
+				command = inputText
+			}
+
+			handled, err = usercommands.TryCommand(command, remains, userId)
+			if err != nil {
+				slog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
+			}
 		}
 
-		break
+	}
+
+	if !handled {
+		if len(command) > 0 {
+			user.SendText(fmt.Sprintf(`<ansi fg="command">%s</ansi> not recognized. Type <ansi fg="command">help</ansi> for commands.`, command))
+			user.Command(`emote looks a little confused`)
+		}
 	}
 
 	worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
 
 }
 
-func (w *World) processMobInput(wi WorldInput) {
+func (w *World) processMobInput(mobInstanceId int, inputText string) {
 	// No need to select the channel this way
 
-	mob := mobs.GetInstance(wi.FromId)
+	mob := mobs.GetInstance(mobInstanceId)
 	if mob == nil { // Something went wrong. User not found.
-		slog.Error("Mob not found", "mobId", wi.FromId, "where", "processMobInput()")
+		slog.Error("Mob not found", "mobId", mobInstanceId, "where", "processMobInput()")
 		return
 	}
 
-	for {
-		command := ""
-		remains := ""
+	command := ""
+	remains := ""
 
-		commandResponse := mobcommands.NewMobCommandResponse(wi.FromId)
-		var err error
+	handled := false
+	var err error
 
-		if len(wi.InputText) > 0 {
+	if len(inputText) > 0 {
 
-			if index := strings.Index(wi.InputText, " "); index != -1 {
-				command, remains = strings.ToLower(wi.InputText[0:index]), wi.InputText[index+1:]
-			} else {
-				command = wi.InputText
-			}
-
-			//slog.Info("World received mob input", "InputText", (wi.InputText))
-
-			commandResponse, err = mobcommands.TryCommand(command, remains, wi.FromId, w)
-			if err != nil {
-				slog.Error("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
-			}
-
+		if index := strings.Index(inputText, " "); index != -1 {
+			command, remains = strings.ToLower(inputText[0:index]), inputText[index+1:]
+		} else {
+			command = inputText
 		}
 
-		if !commandResponse.Handled {
-			if len(command) > 0 {
-				commandResponse.SendRoomMessage(mob.Character.RoomId,
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks a little confused (%s %s).`, mob.Character.Name, command, remains),
-					true)
-			}
+		//slog.Info("World received mob input", "InputText", (inputText))
+
+		handled, err = mobcommands.TryCommand(command, remains, mobInstanceId)
+		if err != nil {
+			slog.Error("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
 		}
 
-		if commandResponse.Pending() {
-			w.DispatchMessages(commandResponse)
+	}
+
+	if !handled {
+		if len(command) > 0 {
+			mob.Command(fmt.Sprintf(`emote looks a little confused (%s %s).`, mob.Character.Name, command, remains))
 		}
+	}
 
-		if len(commandResponse.CommandQueue) > 0 {
-			for _, cmd := range commandResponse.CommandQueue {
+}
 
-				if cmd.UserId > 0 {
-					w.userInputQueue.Push(WorldInput{
-						FromId:    cmd.UserId,
-						InputText: cmd.Command,
-					})
-				} else if cmd.MobInstanceId > 0 {
-					w.mobInputQueue.Push(WorldInput{
-						FromId:    cmd.MobInstanceId,
-						InputText: cmd.Command,
-					})
-				}
-			}
-			commandResponse.CommandQueue = commandResponse.CommandQueue[:0]
-		}
+// Handles system/config events
+func (w *World) ConfigTick() {
 
-		// Load up any forced commands
-		if len(commandResponse.NextCommand) > 0 {
-			wi.InputText = commandResponse.NextCommand
+	eq := events.GetQueue(events.ClientSettings{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		config, typeOk := e.(events.ClientSettings)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "ClientSettings", "Actual Type", e.Type())
 			continue
 		}
 
-		break
+		if u := users.GetByConnectionId(config.ConnectionId); u != nil {
+
+			if config.ScreenWidth != 0 {
+				u.RenderSettings.ScreenWidth = config.ScreenWidth
+			}
+
+			if config.ScreenWidth != 0 {
+				u.RenderSettings.ScreenHeight = config.ScreenHeight
+			}
+
+		}
+
 	}
 
 }
 
-func (w *World) QueueBuff(userId int, mobId int, buffId int) {
+// Handles sending out queued up messaged to users
+func (w *World) MessageTick() {
 
-	newInput := BuffApply{
-		BuffId: buffId,
+	eq := events.GetQueue(events.Broadcast{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		broadcast, typeOk := e.(events.Broadcast)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "Broadcast", "Actual Type", e.Type())
+			continue
+		}
+
+		if broadcast.SkipLineRefresh {
+			w.connectionPool.Broadcast([]byte(broadcast.Text))
+			return
+		}
+
+		w.connectionPool.Broadcast([]byte(term.AnsiMoveCursorColumn.String() +
+			term.AnsiEraseLine.String() +
+			broadcast.Text))
 	}
-
-	if userId > 0 {
-		newInput.ToId = userId
-		w.userBuffQueue.Push(newInput)
-	}
-	if mobId > 0 {
-		newInput.ToId = mobId
-		w.mobBuffQueue.Push(newInput)
-	}
-
-}
-
-func (w *World) QueueRoomAction(roomId int, sourceUserId int, sourceMobId int, action string) {
-
-	newInput := RoomAction{
-		RoomId:       roomId,
-		SourceUserId: sourceUserId,
-		SourceMobId:  sourceMobId,
-		Action:       action,
-	}
-
-	w.roomActionQueue.Push(newInput)
-
-}
-
-func (w *World) QueueQuest(userId int, questToken string) {
-
-	newInput := QuestApply{
-		ToId:       userId,
-		QuestToken: questToken,
-	}
-
-	w.userQuestQueue.Push(newInput)
-}
-
-func (w *World) QueueCommand(userId int, mobId int, cmd string, waitTurns ...int) {
-
-	turnsToWait := 0
-	if len(waitTurns) > 0 {
-		turnsToWait = waitTurns[0]
-	}
-
-	newInput := WorldInput{
-		InputText: cmd,
-		WaitTurns: turnsToWait,
-	}
-
-	if userId > 0 {
-		newInput.FromId = userId
-		w.userInputQueue.Push(newInput)
-	}
-	if mobId > 0 {
-		newInput.FromId = mobId
-		w.mobInputQueue.Push(newInput)
-	}
-
-}
-
-func (w *World) Broadcast(msg string, skipLineRefresh ...bool) {
-
-	if len(skipLineRefresh) > 0 && skipLineRefresh[0] {
-		w.connectionPool.Broadcast([]byte(msg))
-		return
-	}
-
-	msg = term.AnsiMoveCursorColumn.String() +
-		term.AnsiEraseLine.String() +
-		msg
-
-	w.connectionPool.Broadcast([]byte(msg))
-}
-
-// Optionally capture any user output and return it.
-func (w *World) DispatchMessages(u util.MessageQueue) {
 
 	redrawPrompts := make(map[uint64]string)
 
-	for {
+	eq = events.GetQueue(events.Message{})
+	for eq.Len() > 0 {
 
-		message, err := u.GetNextMessage()
-		if err != nil {
-			break
+		e := eq.Poll().(events.Event)
+
+		message, typeOk := e.(events.Message)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
+			continue
 		}
 
-		message.Msg = templates.AnsiParse(message.Msg)
+		slog.Debug("Message", "userId", message.UserId, "length", len(message.Text))
 
-		switch message.MsgType {
+		message.Text = templates.AnsiParse(message.Text)
 
-		case util.MsgUser:
+		if message.UserId > 0 {
+
 			if user := users.GetByUserId(message.UserId); user != nil {
-				message.Msg = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Msg
-				w.connectionPool.SendTo([]byte(message.Msg), user.ConnectionId())
+
+				w.connectionPool.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+message.Text), user.ConnectionId())
 				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
 					redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
 				}
+
+			}
+		}
+
+		if message.RoomId > 0 {
+
+			room := rooms.LoadRoom(message.RoomId)
+			if room == nil {
+				continue
 			}
 
-		case util.MsgRoom:
+			for _, userId := range room.GetPlayers() {
+				skip := false
 
-			if message.RoomId == 0 {
-				w.connectionPool.Broadcast([]byte(message.Msg))
-				break
-			}
+				if message.UserId == userId {
+					continue
+				}
 
-			if room := rooms.LoadRoom(message.RoomId); err == nil {
-				for _, userId := range room.GetPlayers() {
-					skip := false
-
-					if u.UserId > 0 && u.UserId == userId {
-						continue
-					}
-
-					exLen := len(message.ExcludeUserIds)
-					if exLen > 0 {
-						for _, excludeId := range message.ExcludeUserIds {
-							if excludeId == userId {
-								skip = true
-								break
-							}
-						}
-					}
-
-					if skip {
-						continue
-					}
-
-					if user := users.GetByUserId(userId); user != nil {
-						message.Msg = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Msg
-						w.connectionPool.SendTo([]byte(message.Msg), user.ConnectionId())
-						if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-							redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
+				exLen := len(message.ExcludeUserIds)
+				if exLen > 0 {
+					for _, excludeId := range message.ExcludeUserIds {
+						if excludeId == userId {
+							skip = true
+							break
 						}
 					}
 				}
+
+				if skip {
+					continue
+				}
+
+				if user := users.GetByUserId(userId); user != nil {
+
+					// If this is a quiet message, make sure the player can hear it
+					if message.IsQuiet {
+						if !user.Character.HasBuffFlag(buffs.SuperHearing) {
+							continue
+						}
+					}
+
+					message.Text = term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + message.Text
+					w.connectionPool.SendTo([]byte(message.Text), user.ConnectionId())
+					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
+						redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
+					}
+				}
 			}
+
 		}
 
 	}
@@ -1015,18 +914,6 @@ func (w *World) DispatchMessages(u util.MessageQueue) {
 		prompt = templates.AnsiParse(prompt)
 		w.connectionPool.SendTo([]byte(prompt), connectionId)
 	}
-
-}
-
-func (w *World) GetSettings(userId int) (connection.ClientSettings, error) {
-
-	for _, cid := range users.GetConnectionIds([]int{userId}) {
-		if cd, err := w.connectionPool.Get(cid); err == nil {
-			return cd.GetSettings(), nil
-		}
-	}
-
-	return connection.ClientSettings{}, errors.New(`user settings not found`)
 }
 
 // Turns are much finer resolution than rounds...
@@ -1067,410 +954,519 @@ func (w *World) TurnTick() {
 	if turnCt%uint64(c.TurnsPerAutoSave()) == 0 {
 		tStart := time.Now()
 
-		w.Broadcast(`Saving users...`)
-		users.SaveAllUsers()
-		w.Broadcast(`Done.`+term.CRLFStr, true)
+		events.AddToQueue(events.Broadcast{
+			Text: `Saving users...`,
+		})
 
-		w.Broadcast(`Saving rooms...`)
+		users.SaveAllUsers()
+
+		events.AddToQueue(events.Broadcast{
+			Text:            `Done.` + term.CRLFStr,
+			SkipLineRefresh: true,
+		})
+
+		events.AddToQueue(events.Broadcast{
+			Text: `Saving rooms...`,
+		})
+
 		rooms.SaveAllRooms()
-		w.Broadcast(`Done.`+term.CRLFStr, true)
+
+		events.AddToQueue(events.Broadcast{
+			Text:            `Done.` + term.CRLFStr,
+			SkipLineRefresh: true,
+		})
 
 		util.TrackTime(`Save Game State`, time.Since(tStart).Seconds())
 	}
 
 	tStart := time.Now()
+	var eq *events.Queue
 
-	requeueList := []WorldInput{}
-
-	// Process any pending inputs by mobs
-	for w.mobInputQueue.Len(0) > 0 {
-		if wi, ok := w.mobInputQueue.Pop(); ok {
-			if wi.WaitTurns < 1 {
-				w.processMobInput(wi)
-			} else {
-				wi.WaitTurns--
-				requeueList = append(requeueList, wi)
-			}
-		}
-	}
-
-	if len(requeueList) > 0 {
-		slog.Debug(`Mob Requeuing`, `count`, len(requeueList), "inputs", requeueList)
-		//fmt.Println(`Requeueing`, len(requeueList), `inputs`, requeueList)
-		for _, wi := range requeueList {
-			w.mobInputQueue.Push(wi)
-		}
-	}
-
-	requeueList = requeueList[:0] // Empty the list
-
+	//
+	// Handle Input Queue
+	//
 	alreadyProcessed := make(map[int]struct{}) // Keep track of players who already had a command this turn
-	// Process any pending inputs by players
-	for w.userInputQueue.Len(0) > 0 {
-		if wi, ok := w.userInputQueue.Pop(); ok {
+	eq = events.GetQueue(events.Input{})
+	for eq.Len() > 0 {
 
-			if _, ok := alreadyProcessed[wi.FromId]; ok {
-				requeueList = append(requeueList, wi)
-				continue
-			}
-			if wi.WaitTurns < 1 {
-				w.processInput(wi)
-				alreadyProcessed[wi.FromId] = struct{}{}
+		e := eq.Poll().(events.Event)
+
+		input, typeOk := e.(events.Input)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "Input", "Actual Type", e.Type())
+			continue
+		}
+
+		slog.Debug(`Event`, `type`, input.Type(), `UserId`, input.UserId, `MobInstanceId`, input.MobInstanceId, `WaitTurns`, input.WaitTurns, `InputText`, input.InputText)
+
+		if input.MobInstanceId > 0 {
+			if input.WaitTurns < 1 {
+				w.processMobInput(input.MobInstanceId, input.InputText)
 			} else {
-				wi.WaitTurns--
-				requeueList = append(requeueList, wi)
+				input.WaitTurns--
+				events.Requeue(input)
 			}
+			continue
 		}
-	}
 
-	if len(requeueList) > 0 {
-		slog.Info(`Usr Requeuing`, `count`, len(requeueList))
-		//fmt.Println(`Requeueing`, len(requeueList), `inputs`, requeueList)
-		for _, wi := range requeueList {
-			w.userInputQueue.Push(wi)
+		if input.WaitTurns < 0 { // -1 and below, process immediately and don't count towards limit
+			w.processInput(input.UserId, input.InputText)
+			continue
 		}
+
+		if _, ok := alreadyProcessed[input.UserId]; ok {
+			events.Requeue(input)
+			continue
+		}
+
+		if input.WaitTurns == 0 { // 0 means process immediately but wait another turn before processing another from this user
+			w.processInput(input.UserId, input.InputText)
+			alreadyProcessed[input.UserId] = struct{}{}
+		} else {
+			input.WaitTurns--
+			events.Requeue(input)
+		}
+
 	}
 
 	//
-	// The follow section handles queued up buffs
-	// They get processed in "TICK" time which is much faster than "ROUND" time
-	messageQueue := util.NewMessageQueue(0, 0)
+	// Handle RoomAction Queue
+	//
+	eq = events.GetQueue(events.RoomAction{})
+	for eq.Len() > 0 {
 
-	// Process any pending buffs on mobs
-	for w.roomActionQueue.Len(0) > 0 {
-		if actionRequest, ok := w.roomActionQueue.Pop(); ok {
-			if room := rooms.LoadRoom(actionRequest.RoomId); room != nil {
+		e := eq.Poll().(events.Event)
 
+		action, typeOk := e.(events.RoomAction)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "RoomAction", "Actual Type", e.Type())
+			continue
+		}
+
+		//slog.Debug(`Event`, `type`, action.Type(), `RoomId`, action.RoomId, `SourceUserId`, action.SourceUserId, `SourceMobId`, action.SourceMobId, `WaitTurns`, action.WaitTurns, `Action`, action.Action)
+
+		if action.WaitTurns > 0 {
+
+			if action.WaitTurns%c.TurnsPerRound() == 0 {
 				// Get the parts of the command
-				parts := strings.SplitN(actionRequest.Action, ` `, 3)
-
-				// Is it a detonation?
-				// Possible formats:
-				// donate [#mobId|@userId] !itemId
+				parts := strings.SplitN(action.Action, ` `, 3)
 				if parts[0] == `detonate` {
-
-					if len(parts) == 1 {
+					// Make sure the room exists
+					room := rooms.LoadRoom(action.RoomId)
+					if room == nil {
 						continue
 					}
 
 					var itemName string
-					var targetName string
 
-					if len(parts) == 2 {
-						itemName = parts[1]
-					} else if len(parts) == 3 {
-						targetName = parts[1]
+					if len(parts) > 2 {
 						itemName = parts[2]
-					}
-
-					if itm, found := room.FindOnFloor(itemName, false); found {
-
-						iSpec := itm.GetSpec()
-						if iSpec.Type == items.Grenade {
-
-							room.RemoveItem(itm, false)
-
-							messageQueue.SendRoomMessage(actionRequest.RoomId, fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> <ansi fg="red">EXPLODES</ansi>!`, itm.DisplayName()), true)
-
-							hitMobs := true
-							hitPlayers := true
-
-							targetPlayerId, targetMobId := room.FindByName(targetName)
-
-							if targetPlayerId > 0 {
-								hitMobs = false
-							}
-
-							if targetMobId > 0 {
-								hitPlayers = false
-							}
-
-							if hitPlayers {
-								for _, uid := range room.GetPlayers() {
-									for _, buffId := range iSpec.BuffIds {
-										w.QueueBuff(uid, 0, buffId)
-									}
-								}
-							}
-
-							if hitMobs {
-								for _, mid := range room.GetMobs() {
-
-									for _, buffId := range iSpec.BuffIds {
-										w.QueueBuff(0, mid, buffId)
-									}
-
-									if actionRequest.SourceUserId > 0 {
-
-										if sourceUser := users.GetByUserId(actionRequest.SourceUserId); sourceUser != nil {
-
-											if mob := mobs.GetInstance(mid); mob != nil {
-												mob.DamageTaken[sourceUser.UserId] = 0 // Take note that the player did damage this mob.
-
-												if sourceUser.Character.RoomId == mob.Character.RoomId {
-													// Mobs get aggro when attacked
-													if mob.Character.Aggro == nil {
-														mob.PreventIdle = true
-														w.QueueCommand(0, mid, fmt.Sprintf("attack @%d", sourceUser.UserId)) // @ means player
-													}
-												} else {
-
-													var foundExitName string
-
-													// Look for them nearby and go to them
-													for exitName, exitInfo := range room.Exits {
-														if exitInfo.RoomId == sourceUser.Character.RoomId {
-															foundExitName = exitName
-															break
-														}
-													}
-
-													if foundExitName == `` {
-														// Look for them nearby and go to them
-														for exitName, exitInfo := range room.ExitsTemp {
-															if exitInfo.RoomId == sourceUser.Character.RoomId {
-																w.QueueCommand(0, mid, fmt.Sprintf("go %s", exitName))
-																w.QueueCommand(0, mid, fmt.Sprintf("attack @%d", sourceUser.UserId)) // @ means player
-																break
-															}
-														}
-													}
-
-													if foundExitName != `` {
-														w.QueueCommand(0, mid, fmt.Sprintf("go %s", foundExitName))
-														w.QueueCommand(0, mid, fmt.Sprintf("attack @%d", sourceUser.UserId)) // @ means player
-													}
-												}
-											}
-
-										}
-
-									}
-
-								}
-							}
-
-						}
-
-					}
-				}
-			}
-
-		}
-	}
-
-	// Process any pending buffs on mobs
-	for w.mobBuffQueue.Len(0) > 0 {
-		if buffRequest, ok := w.mobBuffQueue.Pop(); ok {
-			// Apply the buff
-			if buffInfo := buffs.GetBuffSpec(buffRequest.BuffId); buffInfo != nil {
-
-				if buffMob := mobs.GetInstance(buffRequest.ToId); buffMob != nil {
-
-					buffMob.Character.AddBuff(buffRequest.BuffId)
-
-					//
-					// Fire onStart for buff script
-					//
-					if response, err := scripting.TryBuffScriptEvent(`onStart`, 0, buffMob.InstanceId, buffRequest.BuffId, w); err == nil {
-						messageQueue.AbsorbMessages(response)
-						buffMob.Character.TrackBuffStarted(buffRequest.BuffId)
-					}
-
-					//
-					// If the buff calls for an immediate triggering
-					//
-					if buffInfo.TriggerNow {
-						if response, err := scripting.TryBuffScriptEvent(`onTrigger`, 0, buffMob.InstanceId, buffRequest.BuffId, w); err == nil {
-							messageQueue.AbsorbMessages(response)
-						}
-
-						if buffMob.Character.Health <= 0 {
-							// Mob died
-							w.QueueCommand(0, buffMob.InstanceId, `suicide`)
-						}
-					}
-
-				}
-			}
-		}
-	}
-
-	// Process any pending buffs on users
-	for w.userBuffQueue.Len(0) > 0 {
-		if buffRequest, ok := w.userBuffQueue.Pop(); ok {
-			// Apply the buff
-
-			if buffInfo := buffs.GetBuffSpec(buffRequest.BuffId); buffInfo != nil {
-
-				if buffUser := users.GetByUserId(buffRequest.ToId); buffUser != nil {
-
-					//
-					// Buff removal
-					//
-					if buffRequest.BuffId < 0 {
-
-						buffUser.Character.RemoveBuff(buffInfo.BuffId * -1)
-
 					} else {
-
-						//
-						// Add buff
-						//
-						buffUser.Character.AddBuff(buffRequest.BuffId)
-
-						//
-						// Fire onStart for buff script
-						//
-						if response, err := scripting.TryBuffScriptEvent(`onStart`, buffUser.UserId, 0, buffRequest.BuffId, w); err == nil {
-							messageQueue.AbsorbMessages(response)
-							buffUser.Character.TrackBuffStarted(buffRequest.BuffId)
-						}
-
-						//
-						// If the buff calls for an immediate triggering
-						//
-						if buffInfo.TriggerNow {
-							if response, err := scripting.TryBuffScriptEvent(`onTrigger`, buffUser.UserId, 0, buffRequest.BuffId, w); err == nil {
-								messageQueue.AbsorbMessages(response)
-							}
-						}
+						itemName = parts[1]
 					}
 
-				}
-			}
-		}
-	}
-
-	// handle queued quest toke handouts
-	for w.userQuestQueue.Len(0) > 0 {
-
-		if questRequest, ok := w.userQuestQueue.Pop(); ok {
-
-			// Give them a token
-			remove := false
-			if questRequest.QuestToken[0:1] == `-` {
-				remove = true
-				questRequest.QuestToken = questRequest.QuestToken[1:]
-			}
-
-			if questInfo := quests.GetQuest(questRequest.QuestToken); questInfo != nil {
-
-				if questUser := users.GetByUserId(questRequest.ToId); questUser != nil {
-
-					if remove {
-						questUser.Character.ClearQuestToken(questRequest.QuestToken)
+					itm, found := room.FindOnFloor(itemName, false)
+					if !found {
 						continue
 					}
-					// This only succees if the user doesn't have the quest yet or the quest is a later step of one they've started
-					if questUser.Character.GiveQuestToken(questRequest.QuestToken) {
 
-						_, stepName := quests.TokenToParts(questRequest.QuestToken)
-						if stepName == `start` {
-							if !questInfo.Secret {
-								questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have been given a new quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-								messageQueue.SendUserMessage(questUser.UserId, questUpTxt, true)
-							}
-						} else if stepName == `end` {
-
-							if !questInfo.Secret {
-								questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have completed the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-								messageQueue.SendUserMessage(questUser.UserId, questUpTxt, true)
-							}
-
-							// Message to player?
-							if len(questInfo.Rewards.PlayerMessage) > 0 {
-								messageQueue.SendUserMessage(questUser.UserId, questInfo.Rewards.PlayerMessage, true)
-							}
-							// Message to room?
-							if len(questInfo.Rewards.RoomMessage) > 0 {
-								messageQueue.SendRoomMessage(questUser.Character.RoomId, questInfo.Rewards.RoomMessage, true, questUser.UserId)
-							}
-							// New quest to start?
-							if len(questInfo.Rewards.QuestId) > 0 {
-								w.QueueQuest(questUser.UserId, questInfo.Rewards.QuestId)
-							}
-							// Gold reward?
-							if questInfo.Rewards.Gold > 0 {
-								messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="gold">%d gold</ansi>!`, questInfo.Rewards.Gold), true)
-								questUser.Character.Gold += questInfo.Rewards.Gold
-							}
-							// Item reward?
-							if questInfo.Rewards.ItemId > 0 {
-								newItm := items.New(questInfo.Rewards.ItemId)
-								messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="itemname">%s</ansi>!`, newItm.NameSimple()), true)
-								questUser.Character.StoreItem(newItm)
-
-								iSpec := newItm.GetSpec()
-								if iSpec.QuestToken != `` {
-									w.QueueQuest(questUser.UserId, iSpec.QuestToken)
-								}
-							}
-							// Buff reward?
-							if questInfo.Rewards.BuffId > 0 {
-								w.QueueBuff(questUser.UserId, 0, questInfo.Rewards.BuffId)
-							}
-							// Experience reward?
-							if questInfo.Rewards.Experience > 0 {
-
-								grantXP, xpScale := questUser.Character.GrantXP(questInfo.Rewards.Experience)
-
-								xpMsgExtra := ``
-								if xpScale != 100 {
-									xpMsgExtra = fmt.Sprintf(` <ansi fg="yellow">(%d%% scale)</ansi>`, xpScale)
-								}
-
-								messageQueue.SendUserMessage(questUser.UserId, fmt.Sprintf(`You receive <ansi fg="experience">%d experience points</ansi>%s!`, grantXP, xpMsgExtra), true)
-							}
-							// Skill reward?
-							if questInfo.Rewards.SkillInfo != `` {
-								details := strings.Split(questInfo.Rewards.SkillInfo, `:`)
-								if len(details) > 1 {
-									skillName := strings.ToLower(details[0])
-									skillLevel, _ := strconv.Atoi(details[1])
-									currentLevel := questUser.Character.GetSkillLevel(skills.SkillTag(skillName))
-
-									if currentLevel < skillLevel {
-										newLevel := questUser.Character.TrainSkill(skillName, skillLevel)
-
-										skillData := struct {
-											SkillName  string
-											SkillLevel int
-										}{
-											SkillName:  skillName,
-											SkillLevel: newLevel,
-										}
-										skillUpTxt, _ := templates.Process("character/skillup", skillData)
-										messageQueue.SendUserMessage(questUser.UserId, skillUpTxt, true)
-									}
-
-								}
-							}
-							// Move them to another room/area?
-							if questInfo.Rewards.RoomId > 0 {
-								messageQueue.SendUserMessage(questUser.UserId, `You are suddenly moved to a new place!`, true)
-								messageQueue.SendRoomMessage(questUser.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is suddenly moved to a new place!`, questUser.Character.Name), true, questUser.UserId)
-								rooms.MoveToRoom(questUser.UserId, questInfo.Rewards.RoomId)
-							}
-						} else {
-							if !questInfo.Secret {
-								questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You've made progress on the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-								messageQueue.SendUserMessage(questUser.UserId, questUpTxt, true)
-							}
-						}
-
-					}
-
+					room.SendText(fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> looks like it's about to explode...`, itm.DisplayName()))
 				}
 
 			}
+
+			action.WaitTurns--
+			events.Requeue(action)
+			continue
 		}
+
+		// Make sure the room exists
+		room := rooms.LoadRoom(action.RoomId)
+		if room == nil {
+			continue
+		}
+
+		// Get the parts of the command
+		parts := strings.SplitN(action.Action, ` `, 3)
+
+		// Is it a detonation?
+		// Possible formats:
+		// donate [#mobId|@userId] !itemId:uid
+		// TODO: Refactor this into a scripted event/function
+		if parts[0] == `detonate` {
+
+			// Detonate can't be the only information
+			if len(parts) < 2 {
+				continue
+			}
+
+			var itemName string
+			var targetName string
+
+			if len(parts) > 2 {
+				targetName = parts[1]
+				itemName = parts[2]
+			} else {
+				itemName = parts[1]
+			}
+
+			itm, found := room.FindOnFloor(itemName, false)
+			if !found {
+				continue
+			}
+
+			iSpec := itm.GetSpec()
+			if iSpec.Type != items.Grenade {
+				continue
+			}
+
+			room.RemoveItem(itm, false)
+
+			room.SendText(`<ansi fg="red">--- --- --- --- --- --- --- --- --- --- --- ---</ansi>`)
+			room.SendText(fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> <ansi fg="red">EXPLODES</ansi>!`, itm.DisplayName()))
+			room.SendText(`<ansi fg="red">--- --- --- --- --- --- --- --- --- --- --- ---</ansi>`)
+
+			room.SendTextToExits(`You hear a large <ansi fg="red">!!!EXPLOSION!!!</ansi>`, false)
+
+			if len(iSpec.BuffIds) == 0 {
+				continue
+			}
+
+			hitMobs := true
+			hitPlayers := true
+
+			targetPlayerId, targetMobId := room.FindByName(targetName)
+
+			if targetPlayerId > 0 {
+				hitMobs = false
+			}
+
+			if targetMobId > 0 {
+				hitPlayers = false
+			}
+
+			if hitPlayers {
+				for _, uid := range room.GetPlayers() {
+					for _, buffId := range iSpec.BuffIds {
+						events.AddToQueue(events.Buff{
+							UserId:        uid,
+							MobInstanceId: 0,
+							BuffId:        buffId,
+						})
+					}
+				}
+			}
+
+			if !hitMobs {
+				continue
+			}
+
+			for _, mid := range room.GetMobs() {
+
+				for _, buffId := range iSpec.BuffIds {
+					events.AddToQueue(events.Buff{
+						UserId:        0,
+						MobInstanceId: mid,
+						BuffId:        buffId,
+					})
+				}
+
+				if action.SourceUserId == 0 {
+					continue
+				}
+
+				sourceUser := users.GetByUserId(action.SourceUserId)
+				if sourceUser == nil {
+					continue
+				}
+
+				mob := mobs.GetInstance(mid)
+				if mob == nil {
+					continue
+				}
+
+				mob.DamageTaken[sourceUser.UserId] = 0 // Take note that the player did damage this mob.
+
+				if sourceUser.Character.RoomId == mob.Character.RoomId {
+					// Mobs get aggro when attacked
+					if mob.Character.Aggro == nil {
+						mob.PreventIdle = true
+
+						mob.Command(fmt.Sprintf("attack %s", sourceUser.ShorthandId()))
+
+					}
+				} else {
+
+					var foundExitName string
+
+					// Look for them nearby and go to them
+					for exitName, exitInfo := range room.Exits {
+						if exitInfo.RoomId == sourceUser.Character.RoomId {
+							foundExitName = exitName
+							break
+						}
+					}
+
+					if foundExitName == `` {
+						// Look for them nearby and go to them
+						for exitName, exitInfo := range room.ExitsTemp {
+							if exitInfo.RoomId == sourceUser.Character.RoomId {
+
+								mob.Command(fmt.Sprintf("go %s", exitName))
+								mob.Command(fmt.Sprintf("attack %s", sourceUser.ShorthandId()))
+
+								break
+							}
+						}
+					}
+
+					if foundExitName != `` {
+
+						mob.Command(fmt.Sprintf("go %s", foundExitName))
+						mob.Command(fmt.Sprintf("attack %s", sourceUser.ShorthandId()))
+
+					}
+				}
+
+			}
+
+		}
+
+	}
+
+	//
+	// Handle Buff Queue
+	//
+	eq = events.GetQueue(events.Buff{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		buff, typeOk := e.(events.Buff)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "Buff", "Actual Type", e.Type())
+			continue
+		}
+
+		slog.Debug(`Event`, `type`, buff.Type(), `UserId`, buff.UserId, `MobInstanceId`, buff.MobInstanceId, `BuffId`, buff.BuffId)
+
+		buffInfo := buffs.GetBuffSpec(buff.BuffId)
+		if buffInfo == nil {
+			continue
+		}
+
+		var targetChar *characters.Character
+
+		if buff.MobInstanceId > 0 {
+			buffMob := mobs.GetInstance(buff.MobInstanceId)
+			if buffMob == nil {
+				continue
+			}
+			targetChar = &buffMob.Character
+		} else {
+			buffUser := users.GetByUserId(buff.UserId)
+			if buffUser == nil {
+				continue
+			}
+			targetChar = buffUser.Character
+		}
+
+		if buff.BuffId < 0 {
+			targetChar.RemoveBuff(buffInfo.BuffId * -1)
+			continue
+		}
+
+		// Apply the buff
+		targetChar.AddBuff(buff.BuffId)
+
+		//
+		// Fire onStart for buff script
+		//
+		if _, err := scripting.TryBuffScriptEvent(`onStart`, buff.UserId, buff.MobInstanceId, buff.BuffId); err == nil {
+			targetChar.TrackBuffStarted(buff.BuffId)
+		}
+
+		//
+		// If the buff calls for an immediate triggering
+		//
+		if buffInfo.TriggerNow {
+			scripting.TryBuffScriptEvent(`onTrigger`, buff.UserId, buff.MobInstanceId, buff.BuffId)
+
+			if buff.MobInstanceId > 0 && targetChar.Health <= 0 {
+				// Mob died
+				events.AddToQueue(events.Input{
+					MobInstanceId: buff.MobInstanceId,
+					InputText:     `suicide`,
+				})
+			}
+		}
+
+	}
+
+	//
+	// Handle Quest Queue
+	//
+	eq = events.GetQueue(events.Quest{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		quest, typeOk := e.(events.Quest)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "Quest", "Actual Type", e.Type())
+			continue
+		}
+
+		slog.Debug(`Event`, `type`, quest.Type(), `UserId`, quest.UserId, `QuestToken`, quest.QuestToken)
+
+		// Give them a token
+		remove := false
+		if quest.QuestToken[0:1] == `-` {
+			remove = true
+			quest.QuestToken = quest.QuestToken[1:]
+		}
+
+		questInfo := quests.GetQuest(quest.QuestToken)
+		if questInfo == nil {
+			continue
+		}
+
+		questUser := users.GetByUserId(quest.UserId)
+		if questUser == nil {
+			continue
+		}
+
+		if remove {
+			questUser.Character.ClearQuestToken(quest.QuestToken)
+			continue
+		}
+		// This only succees if the user doesn't have the quest yet or the quest is a later step of one they've started
+		if !questUser.Character.GiveQuestToken(quest.QuestToken) {
+			continue
+		}
+
+		_, stepName := quests.TokenToParts(quest.QuestToken)
+		if stepName == `start` {
+			if !questInfo.Secret {
+				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have been given a new quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
+				questUser.SendText(questUpTxt)
+			}
+		} else if stepName == `end` {
+
+			if !questInfo.Secret {
+				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have completed the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
+				questUser.SendText(questUpTxt)
+			}
+
+			// Message to player?
+			if len(questInfo.Rewards.PlayerMessage) > 0 {
+				questUser.SendText(questInfo.Rewards.PlayerMessage)
+			}
+			// Message to room?
+			if len(questInfo.Rewards.RoomMessage) > 0 {
+				if room := rooms.LoadRoom(questUser.Character.RoomId); room != nil {
+					room.SendText(questInfo.Rewards.RoomMessage, questUser.UserId)
+				}
+			}
+			// New quest to start?
+			if len(questInfo.Rewards.QuestId) > 0 {
+
+				events.AddToQueue(events.Quest{
+					UserId:     questUser.UserId,
+					QuestToken: questInfo.Rewards.QuestId,
+				})
+
+			}
+			// Gold reward?
+			if questInfo.Rewards.Gold > 0 {
+				questUser.SendText(fmt.Sprintf(`You receive <ansi fg="gold">%d gold</ansi>!`, questInfo.Rewards.Gold))
+				questUser.Character.Gold += questInfo.Rewards.Gold
+			}
+			// Item reward?
+			if questInfo.Rewards.ItemId > 0 {
+				newItm := items.New(questInfo.Rewards.ItemId)
+				questUser.SendText(fmt.Sprintf(`You receive <ansi fg="itemname">%s</ansi>!`, newItm.NameSimple()))
+				questUser.Character.StoreItem(newItm)
+
+				iSpec := newItm.GetSpec()
+				if iSpec.QuestToken != `` {
+
+					events.AddToQueue(events.Quest{
+						UserId:     questUser.UserId,
+						QuestToken: iSpec.QuestToken,
+					})
+
+				}
+			}
+			// Buff reward?
+			if questInfo.Rewards.BuffId > 0 {
+
+				events.AddToQueue(events.Buff{
+					UserId:        questUser.UserId,
+					MobInstanceId: 0,
+					BuffId:        questInfo.Rewards.BuffId,
+				})
+
+			}
+			// Experience reward?
+			if questInfo.Rewards.Experience > 0 {
+
+				grantXP, xpScale := questUser.Character.GrantXP(questInfo.Rewards.Experience)
+
+				xpMsgExtra := ``
+				if xpScale != 100 {
+					xpMsgExtra = fmt.Sprintf(` <ansi fg="yellow">(%d%% scale)</ansi>`, xpScale)
+				}
+
+				questUser.SendText(fmt.Sprintf(`You receive <ansi fg="experience">%d experience points</ansi>%s!`, grantXP, xpMsgExtra))
+			}
+			// Skill reward?
+			if questInfo.Rewards.SkillInfo != `` {
+				details := strings.Split(questInfo.Rewards.SkillInfo, `:`)
+				if len(details) > 1 {
+					skillName := strings.ToLower(details[0])
+					skillLevel, _ := strconv.Atoi(details[1])
+					currentLevel := questUser.Character.GetSkillLevel(skills.SkillTag(skillName))
+
+					if currentLevel < skillLevel {
+						newLevel := questUser.Character.TrainSkill(skillName, skillLevel)
+
+						skillData := struct {
+							SkillName  string
+							SkillLevel int
+						}{
+							SkillName:  skillName,
+							SkillLevel: newLevel,
+						}
+						skillUpTxt, _ := templates.Process("character/skillup", skillData)
+						questUser.SendText(skillUpTxt)
+					}
+
+				}
+			}
+			// Move them to another room/area?
+			if questInfo.Rewards.RoomId > 0 {
+				questUser.SendText(`You are suddenly moved to a new place!`)
+
+				if room := rooms.LoadRoom(questUser.Character.RoomId); room != nil {
+					room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is suddenly moved to a new place!`, questUser.Character.Name), questUser.UserId)
+				}
+
+				rooms.MoveToRoom(questUser.UserId, questInfo.Rewards.RoomId)
+			}
+		} else {
+			if !questInfo.Secret {
+				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You've made progress on the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
+				questUser.SendText(questUpTxt)
+			}
+		}
+
 	}
 
 	//
 	// Prune all buffs that have expired.
 	//
-	messageQueue.AbsorbMessages(w.PruneBuffs())
+	w.PruneBuffs()
 
 	//
 	// Update movement points for each player
@@ -1486,12 +1482,9 @@ func (w *World) TurnTick() {
 	}
 
 	if turnCt%uint64(c.TurnsPerSecond()) == 0 {
-		messageQueue.AbsorbMessages(w.CheckForLevelUps())
+		w.CheckForLevelUps()
 	}
 
-	if messageQueue.Pending() {
-		w.DispatchMessages(messageQueue)
-	}
 	//
 	// End processing of buffs
 	//
@@ -1503,53 +1496,6 @@ func (w *World) TurnTick() {
 		w.roundTick()
 	}
 
-	// only visually update 4x a second.
-	renderInterval := uint64(float64(c.TurnsPerSecond()) / 4)
-	if turnCt%renderInterval == 0 {
-		for _, uId := range users.GetOnlineUserIds() {
-
-			if user := users.GetByUserId(uId); user != nil {
-
-				if meter := user.GetProgressBar(); meter != nil {
-
-					meter.Update(turnCt)
-
-					if meter.Done() {
-						user.RemoveProgressBar()
-						if cd, err := w.connectionPool.Get(user.ConnectionId()); err == nil {
-							cd.InputDisabled(false)
-						}
-					}
-
-					w.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), user.ConnectionId())
-
-				}
-
-			}
-		}
-	}
-
-}
-
-func (w *World) StartProgressBar(userId int, name string, turnLength int, onComplete func(), displayFlags ...progressbar.BarDisplay) {
-
-	if user := users.GetByUserId(userId); user != nil {
-
-		pb := progressbar.New(name, turnLength, onComplete, displayFlags...)
-
-		user.SetProgressBar(pb)
-
-		for _, flag := range displayFlags {
-			if flag == progressbar.PromptDisableInput {
-				if cd, err := w.connectionPool.Get(user.ConnectionId()); err == nil {
-					cd.InputDisabled(true)
-				}
-				break
-			}
-		}
-
-	}
-
 }
 
 func NewWorld(osSignalChan chan os.Signal) *World {
@@ -1558,13 +1504,7 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 		connectionPool: connection.New(osSignalChan),
 		users:          users.NewUserManager(),
 		worldInput:     make(chan WorldInput),
-		userInputQueue: util.LimitQueue[WorldInput]{},
-		mobInputQueue:  util.LimitQueue[WorldInput]{},
-		userBuffQueue:  util.LimitQueue[BuffApply]{},
-		mobBuffQueue:   util.LimitQueue[BuffApply]{},
 	}
-
-	w.userInputQueue.SetLimit(10)
 
 	return w
 }

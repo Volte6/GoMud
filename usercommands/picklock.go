@@ -12,14 +12,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Picklock(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	lockpickItm := items.Item{}
@@ -31,23 +29,21 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 	}
 
 	if lockpickItm.ItemId < 1 {
-		response.SendUserMessage(userId, `You need <ansi fg="item">lockpicks</ansi> to pick a lock.`, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`You need <ansi fg="item">lockpicks</ansi> to pick a lock.`)
+		return true, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 1 {
-		response.SendUserMessage(userId, "You wanna pock a lock? Specify where it is.", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You wanna pock a lock? Specify where it is.")
+		return true, nil
 	}
 
 	lockId := ``
@@ -61,15 +57,13 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 		container := room.Containers[containerName]
 
 		if !container.HasLock() {
-			response.SendUserMessage(userId, "There is no lock there.", true)
-			response.Handled = true
-			return response, nil
+			user.SendText("There is no lock there.")
+			return true, nil
 		}
 
 		if !container.Lock.IsLocked() {
-			response.SendUserMessage(userId, "It's already unlocked.", true)
-			response.Handled = true
-			return response, nil
+			user.SendText("It's already unlocked.")
+			return true, nil
 		}
 
 		args = args[1:]
@@ -84,15 +78,13 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 		exitInfo := room.Exits[exitName]
 
 		if !exitInfo.HasLock() {
-			response.SendUserMessage(userId, "There is no lock there.", true)
-			response.Handled = true
-			return response, nil
+			user.SendText("There is no lock there.")
+			return true, nil
 		}
 
 		if !exitInfo.Lock.IsLocked() {
-			response.SendUserMessage(userId, "It's already unlocked.", true)
-			response.Handled = true
-			return response, nil
+			user.SendText("It's already unlocked.")
+			return true, nil
 		}
 
 		lockStrength = int(exitInfo.Lock.Difficulty)
@@ -100,9 +92,8 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 
 	} else {
 
-		response.SendUserMessage(userId, "There is no such exit or container.", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("There is no such exit or container.")
+		return true, nil
 	}
 
 	//
@@ -113,40 +104,39 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 	sequence := util.GetLockSequence(lockId, lockStrength, string(configs.GetConfig().Seed))
 
 	if keyring_sequence == sequence {
-		response.SendUserMessage(userId, "", true)
-		response.SendUserMessage(userId, "Your keyring already has this lock on it.", true)
+		user.SendText("")
+		user.SendText("Your keyring already has this lock on it.")
 
 		user.ClearPrompt()
 
-		response.SendUserMessage(userId, ``, true)
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You Successfully picked the lock!</ansi> <ansi fg="yellow-bold">***</ansi>`, true)
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You can automatically pick this lock any time as long as you carry <ansi fg="item">lockpicks</ansi>!</ansi> <ansi fg="yellow-bold">***</ansi>`, true)
-		response.SendUserMessage(userId, ``, true)
+		user.SendText(``)
+		user.SendText(`<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You Successfully picked the lock!</ansi> <ansi fg="yellow-bold">***</ansi>`)
+		user.SendText(`<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You can automatically pick this lock any time as long as you carry <ansi fg="item">lockpicks</ansi>!</ansi> <ansi fg="yellow-bold">***</ansi>`)
+		user.SendText(``)
 
 		if containerName != `` {
 
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), true)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), userId)
 
 			container := room.Containers[containerName]
 			container.Lock.SetUnlocked()
 			room.Containers[containerName] = container
 		} else {
 
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), true)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), userId)
 
 			exitInfo := room.Exits[exitName]
 			exitInfo.Lock.SetUnlocked()
 			room.Exits[exitName] = exitInfo
 		}
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	// Get if already exists, otherwise create new
 	cmdPrompt, isNew := user.StartPrompt(`picklock`, rest)
 
 	if isNew {
-		response.SendUserMessage(userId, GetLockRender(sequence, keyring_sequence), true)
+		user.SendText(GetLockRender(sequence, keyring_sequence))
 	}
 
 	entered := ``
@@ -156,15 +146,13 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 
 	question := cmdPrompt.Ask(`Move your lockpick?`, []string{`UP`, `DOWN`, `quit`})
 	if !question.Done {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if question.Response == `quit` {
 		user.ClearPrompt()
-		response.SendUserMessage(userId, `Type '<ansi fg="command">help picklock</ansi>' for more information on picking locks.`, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`Type '<ansi fg="command">help picklock</ansi>' for more information on picking locks.`)
+		return true, nil
 	}
 
 	direction := question.Response
@@ -175,8 +163,7 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 	r = string(r[0])
 
 	if r != "U" && r != "D" {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	entered += r
@@ -187,42 +174,41 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 			entered = ``
 			user.Character.UseItem(lockpickItm)
 
-			response.SendUserMessage(userId, ``, true)
-			response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="yellow-bold">***</ansi> <ansi fg="red-bold">Oops! Your <ansi fg="item">%s</ansi> break off in the lock, resetting the lock. You'll have to start all over.</ansi> <ansi fg="yellow-bold">***</ansi>`, lockpickItm.GetSpec().NameSimple), true)
-			response.SendUserMessage(userId, ``, true)
+			user.SendText(``)
+			user.SendText(fmt.Sprintf(`<ansi fg="yellow-bold">***</ansi> <ansi fg="red-bold">Oops! Your <ansi fg="item">%s</ansi> break off in the lock, resetting the lock. You'll have to start all over.</ansi> <ansi fg="yellow-bold">***</ansi>`, lockpickItm.GetSpec().NameSimple))
+			user.SendText(``)
 		}
 	}
 
 	user.Character.SetKey(lockId, entered)
 
 	if len(entered) > 0 {
-		response.SendUserMessage(userId, ``, true)
-		response.SendUserMessage(userId, `<ansi fg="green-bold">A satisfying *click* tells you that you're making progress...</ansi>`, true)
+		user.SendText(``)
+		user.SendText(`<ansi fg="green-bold">A satisfying *click* tells you that you're making progress...</ansi>`)
 	} else {
 		user.ClearPrompt()
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
-	response.SendUserMessage(userId, GetLockRender(sequence, entered), false)
+	user.SendText(GetLockRender(sequence, entered))
 
 	if sequence == entered {
 
-		response.SendUserMessage(userId, ``, true)
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You Successfully picked the lock!</ansi> <ansi fg="yellow-bold">***</ansi>`, true)
-		response.SendUserMessage(userId, `<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You can automatically pick this lock any time as long as you carry <ansi fg="item">lockpicks</ansi>!</ansi> <ansi fg="yellow-bold">***</ansi>`, true)
-		response.SendUserMessage(userId, ``, true)
+		user.SendText(``)
+		user.SendText(`<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You Successfully picked the lock!</ansi> <ansi fg="yellow-bold">***</ansi>`)
+		user.SendText(`<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You can automatically pick this lock any time as long as you carry <ansi fg="item">lockpicks</ansi>!</ansi> <ansi fg="yellow-bold">***</ansi>`)
+		user.SendText(``)
 
 		if containerName != `` {
 
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), true)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), userId)
 
 			container := room.Containers[containerName]
 			container.Lock.SetUnlocked()
 			room.Containers[containerName] = container
 		} else {
 
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), true)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), userId)
 
 			exitInfo := room.Exits[exitName]
 			exitInfo.Lock.SetUnlocked()
@@ -231,19 +217,17 @@ func Picklock(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 
 		user.ClearPrompt()
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 
 	} else {
 		if containerName != `` {
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to pick the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), true)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to pick the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), userId)
 		} else {
-			response.SendRoomMessage(user.Character.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to pick the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), true)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to pick the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), userId)
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }
 
 func GetLockRender(sequence string, entered string) string {

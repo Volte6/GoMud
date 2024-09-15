@@ -1,0 +1,9 @@
+itemid: 20039
+name: students amulet
+namesimple: amulet
+description: A simple iron amulet signifying that you are in training.
+type: neck
+subtype: wearable
+damagereduction: 0
+statmods:
+  perception: 1

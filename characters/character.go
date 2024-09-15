@@ -189,7 +189,7 @@ func (c *Character) GetBaseCastSuccessChance(spellId string) int {
 }
 
 func (c *Character) CarryCapacity() int {
-	return 10 + int(c.Stats.Strength.ValueAdj/10)
+	return 5 + int(math.Floor(float64(c.Stats.Strength.ValueAdj/3)))
 }
 
 func (c *Character) DeductActionPoints(amount int) bool {
@@ -523,10 +523,6 @@ func (c *Character) GetHealthAppearance() string {
 	return fmt.Sprintf(`<ansi fg="username">%s</ansi> is in <ansi fg="%s">perfect health.</ansi>`, c.Name, className)
 }
 
-func (c *Character) GetBackpackCapacity() int {
-	return int(math.Ceil(float64(c.Stats.Strength.ValueAdj)/3)) + 3
-}
-
 func (c *Character) GetFollowers() []int {
 	return append([]int{}, c.followers...)
 }
@@ -708,6 +704,9 @@ func (c *Character) StoreItem(i items.Item) bool {
 	if i.ItemId < 1 {
 		return false
 	}
+
+	i.Validate()
+
 	c.Items = append(c.Items, i)
 
 	return true
@@ -1453,6 +1452,23 @@ func (c *Character) Validate(recalculateItemBuffs ...bool) error {
 		c.Alignment = AlignmentMaximum
 	}
 
+	// Validate possessed/worn items
+	// This helps ensure all in-play items have a uid
+	for i := range c.Items {
+		c.Items[i].Validate()
+	}
+	c.Equipment.Weapon.Validate()
+	c.Equipment.Offhand.Validate()
+	c.Equipment.Head.Validate()
+	c.Equipment.Neck.Validate()
+	c.Equipment.Body.Validate()
+	c.Equipment.Belt.Validate()
+	c.Equipment.Gloves.Validate()
+	c.Equipment.Ring.Validate()
+	c.Equipment.Legs.Validate()
+	c.Equipment.Feet.Validate()
+	// Done with validation
+
 	if raceInfo := races.GetRace(c.RaceId); raceInfo != nil {
 
 		c.Equipment.EnableAll()
@@ -1528,7 +1544,7 @@ func (c *Character) Validate(recalculateItemBuffs ...bool) error {
 	}
 
 	if len(recalculateItemBuffs) > 0 && recalculateItemBuffs[0] {
-		c.reapplyWornItemBuffs()
+		c.reapplyPermabuffs()
 	}
 
 	return nil
@@ -1627,6 +1643,8 @@ func (c *Character) GetAllWornItems() []items.Item {
 
 func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bool, failureReason string) {
 
+	i.Validate()
+
 	spec := i.GetSpec()
 
 	if spec.Type != items.Weapon && spec.Subtype != items.Wearable {
@@ -1661,7 +1679,7 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 					//returnItems = append(returnItems, c.Equipment.Offhand)
 					c.Equipment.Offhand = i
 
-					c.reapplyWornItemBuffs()
+					c.reapplyPermabuffs()
 
 					return returnItems, true, ``
 				}
@@ -1762,7 +1780,7 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 		return returnItems, false, `Unrecognized object.`
 	}
 
-	c.reapplyWornItemBuffs(returnItems...)
+	c.reapplyPermabuffs(returnItems...)
 
 	return returnItems, true, ``
 }
@@ -1793,21 +1811,30 @@ func (c *Character) RemoveFromBody(i items.Item) bool {
 		return false
 	}
 
-	c.reapplyWornItemBuffs(i)
+	c.reapplyPermabuffs(i)
 
 	return true
 }
 
-func (c *Character) reapplyWornItemBuffs(removedItems ...items.Item) {
+func (c *Character) reapplyPermabuffs(removedItems ...items.Item) {
 
 	buffIdCount := map[int]int{}
+
+	// Apply any buffs that come from a race
+	if rInfo := races.GetRace(c.RaceId); rInfo != nil {
+		for _, buffId := range rInfo.BuffIds {
+			buffIdCount[buffId] = 100 // Don't allow racial buffs to be removed, keep this number high
+		}
+	}
 
 	// Track any buffs that come from an item
 	// If these don't show up as still being required by an item (such as a yaml file was changed)
 	// This will cause them to be removed.
 	for _, b := range c.Buffs.List {
-		if b.ItemBuff {
-			buffIdCount[b.BuffId] = 0
+		if b.PermaBuff {
+			if _, ok := buffIdCount[b.BuffId]; !ok {
+				buffIdCount[b.BuffId] = 0
+			}
 		}
 	}
 

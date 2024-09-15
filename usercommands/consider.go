@@ -10,20 +10,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Consider(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Consider(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(rest)
@@ -87,15 +85,14 @@ func Consider(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 				prediction = `<ansi fg="red-bold">YOU WILL DIE</ansi>`
 			}
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You consider <ansi fg="%sname">%s</ansi>...`, considerType, considerName),
-				true)
-			response.SendUserMessage(userId,
+			)
+			user.SendText(
 				fmt.Sprintf(`It is estimated that your chances to kill <ansi fg="%sname">%s</ansi> are %s (%f)`, considerType, considerName, prediction, ratio),
-				true)
+			)
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

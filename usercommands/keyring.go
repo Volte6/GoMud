@@ -12,14 +12,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func KeyRing(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func KeyRing(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	headers := []string{`Type`, `Location`, `Where`, `Sequence`}
@@ -169,8 +167,7 @@ func KeyRing(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 
 	keyRingTable := templates.GetTable(`Your Keyring:`, headers, rows, allFormatting...)
 	tplTxt, _ := templates.Process("tables/generic", keyRingTable)
-	response.SendUserMessage(userId, tplTxt, false)
+	user.SendText(tplTxt)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

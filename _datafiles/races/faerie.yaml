@@ -1,7 +1,8 @@
 raceid: 15
 name: Faerie
 description: A small magical being.
-nightvision: true
+buffids:
+  - 29 # Night Vision
 size: small
 unarmedname: sharp teeth
 angrycommands: 

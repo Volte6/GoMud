@@ -11,8 +11,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Look(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-	response := NewMobCommandResponse(mobId)
+func Look(rest string, mobId int) (bool, error) {
 
 	secretLook := false
 	if strings.HasPrefix(rest, "secretly") {
@@ -23,13 +22,13 @@ func Look(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
@@ -48,20 +47,18 @@ func Look(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			exitInfo := room.Exits[exitName]
 			if exitInfo.Lock.IsLocked() {
-				response.Handled = true
-				return response, nil
+				return true, nil
 			}
 
 			if !isSneaking {
-				response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> peers toward the %s.`, mob.Character.Name, exitName), true)
+				room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> peers toward the %s.`, mob.Character.Name, exitName), mobId)
 			}
 
 			if lookRoomId > 0 {
 
-				lookRoom(mobId, lookRoomId, &response, secretLook || isSneaking)
+				lookRoom(mobId, lookRoomId, secretLook || isSneaking)
 
-				response.Handled = true
-				return response, nil
+				return true, nil
 			}
 		}
 
@@ -71,13 +68,12 @@ func Look(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		if lookItem, found := mob.Character.FindInBackpack(rest); found {
 
 			if !isSneaking {
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.DisplayName()),
-					true)
+				)
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		//
@@ -93,13 +89,12 @@ func Look(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 				u := *users.GetByUserId(playerId)
 
 				if !isSneaking {
-					response.SendUserMessage(u.UserId,
+					u.SendText(
 						fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at you.`, mob.Character.Name),
-						true)
+					)
 
-					response.SendRoomMessage(room.RoomId,
+					room.SendText(
 						fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at <ansi fg="username">%s</ansi>.`, mob.Character.Name, u.Character.Name),
-						true,
 						u.UserId)
 				}
 
@@ -109,15 +104,14 @@ func Look(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 				if !isSneaking {
 					targetName := m.Character.GetMobName(0).String()
-					response.SendRoomMessage(room.RoomId,
+					room.SendText(
 						fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at %s.`, mob.Character.Name, targetName),
-						true)
+					)
 				}
 
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 
 		}
 
@@ -127,36 +121,33 @@ func Look(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		if lookItem, found := mob.Character.FindOnBody(rest); found {
 
 			if !isSneaking {
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.DisplayName()),
-					true)
+				)
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 
 	} else {
 
 		if !secretLook && !isSneaking {
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking around.`, mob.Character.Name),
-				true)
+			)
 
 			// Make it a "secret looks" now because we don't want another look message sent out by the lookRoom() func
 			secretLook = true
 		}
-		lookRoom(mobId, room.RoomId, &response, secretLook || isSneaking)
+		lookRoom(mobId, room.RoomId, secretLook || isSneaking)
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }
 
-func lookRoom(mobId int, roomId int, response *util.MessageQueue, secretLook bool) {
+func lookRoom(mobId int, roomId int, secretLook bool) {
 
 	mob := mobs.GetInstance(mobId)
 	room := rooms.LoadRoom(roomId)
@@ -174,13 +165,13 @@ func lookRoom(mobId int, roomId int, response *util.MessageQueue, secretLook boo
 		// Find the exit back
 		lookFromName := room.FindExitTo(mob.Character.RoomId)
 		if lookFromName == "" {
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking into the room from somewhere...`, mob.Character.Name),
-				true)
+			)
 		} else {
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking into the room from the <ansi fg="exit">%s</ansi> exit`, mob.Character.Name, lookFromName),
-				true)
+			)
 		}
 	}
 

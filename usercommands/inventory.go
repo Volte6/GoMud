@@ -11,14 +11,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Inventory(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Inventory(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	itemNames := []string{}
@@ -154,8 +152,7 @@ func Inventory(rest string, userId int, cmdQueue util.CommandQueue) (util.Messag
 	}
 
 	tplTxt, _ := templates.Process("character/inventory", invData)
-	response.SendUserMessage(userId, tplTxt, false)
+	user.SendText(tplTxt)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

@@ -12,27 +12,24 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Attack(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Attack(rest string, mobId int) (bool, error) {
 
 	// Load mob details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 1 {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	attackPlayerId := 0
@@ -85,18 +82,16 @@ func Attack(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 			if !isSneaking {
 
-				response.SendUserMessage(u.UserId, fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight you!`, mob.Character.Name), true)
+				u.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> prepares to fight you!`, mob.Character.Name))
 
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> prepares to fight <ansi fg="username">%s</ansi>`, mob.Character.Name, u.Character.Name),
-					true,
 					u.UserId)
 
 			}
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 
 	} else if attackMobInstanceId > 0 {
 
@@ -108,24 +103,20 @@ func Attack(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 			if !isSneaking {
 
-				response.SendRoomMessage(room.RoomId,
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, mob.Character.Name, m.Character.Name),
-					true)
+				room.SendText(
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, mob.Character.Name, m.Character.Name))
 
 			}
 
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if !isSneaking {
-		response.SendRoomMessage(room.RoomId,
-			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks confused and upset.`, mob.Character.Name),
-			true)
+		room.SendText(
+			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks confused and upset.`, mob.Character.Name))
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

@@ -1,7 +1,9 @@
 raceid: 9
 name: Eldritch Horror
 description: A strange and disgusting being that makes your skin crawl, and confuses your senses.
-nightvision: true
+buffids:
+  - 28 # Super hearing
+  - 29 # Night Vision
 size: medium
 unarmedname: tentacles
 tnlscale: 1

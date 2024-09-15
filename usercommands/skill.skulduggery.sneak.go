@@ -4,61 +4,53 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/progressbar"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 /*
 SkullDuggery Skill
 Level 1 - Sneak
 */
-func Sneak(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Sneak(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 1 {
-		return response, nil
+		return false, nil
 	}
 
 	// Must be sneaking
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 	if isSneaking {
-		response.SendUserMessage(userId, "You're already hidden!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You're already hidden!")
+		return true, nil
 	}
 
 	if user.Character.Aggro != nil {
-		response.SendUserMessage(userId, "You can't do that while in combat!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You can't do that while in combat!")
+		return true, nil
 	}
 
 	if room := rooms.LoadRoom(user.Character.RoomId); room != nil && !room.IsCalm() {
-		response.SendUserMessage(userId, "You can only do that in calm rooms!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You can only do that in calm rooms!")
+		return true, nil
 	}
 
-	// Testing for now
-	timeToWait := configs.GetConfig().TurnsPerRound() * 2
-	cmdQueue.StartProgressBar(userId, "<ansi fg=\"black\" bold=\"true\">(Sneaking)</ansi>", timeToWait, func() {
-		cmdQueue.QueueBuff(userId, 0, 9) // Buff 9 is sneak
-	}, progressbar.PromptNoBar, progressbar.PromptPrefix, progressbar.PromptTypingInterrupts)
+	events.AddToQueue(events.Buff{
+		UserId:        userId,
+		MobInstanceId: 0,
+		BuffId:        9,
+	})
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

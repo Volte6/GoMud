@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
@@ -13,20 +14,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Give(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Give(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	rest = util.StripPrepositions(rest)
@@ -34,8 +33,7 @@ func Give(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	var giveWho string = args[len(args)-1]
@@ -51,8 +49,7 @@ func Give(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		giveGoldAmount = int(g)
 
 		if giveGoldAmount > mob.Character.Gold {
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 	} else {
@@ -63,8 +60,7 @@ func Give(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		giveItem, found = mob.Character.FindInBackpack(giveWhat)
 
 		if !found {
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 	}
@@ -84,26 +80,30 @@ func Give(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			iSpec := giveItem.GetSpec()
 			if iSpec.QuestToken != `` {
-				cmdQueue.QueueQuest(targetUser.UserId, iSpec.QuestToken)
+
+				events.AddToQueue(events.Quest{
+					UserId:     targetUser.UserId,
+					QuestToken: iSpec.QuestToken,
+				})
+
 			}
 
-			response.SendUserMessage(targetUser.UserId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> gives you their <ansi fg="item">%s</ansi>.`, mob.Character.Name, giveItem.DisplayName()),
-				true)
+			targetUser.SendText(
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> gives you their <ansi fg="item">%s</ansi>.`, mob.Character.Name, giveItem.DisplayName()),
+			)
 
 		} else if giveGoldAmount > 0 {
 
 			targetUser.Character.Gold += giveGoldAmount
 			mob.Character.Gold -= giveGoldAmount
 
-			response.SendUserMessage(targetUser.UserId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> gives you <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, giveGoldAmount),
-				true)
+			targetUser.SendText(
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> gives you <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, giveGoldAmount),
+			)
 
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 
 	}
 
@@ -123,23 +123,22 @@ func Give(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 				m.Character.StoreItem(giveItem)
 				mob.Character.RemoveItem(giveItem)
 
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> gave their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, giveItem.DisplayName(), m.Character.Name),
-					true)
+				)
 			} else if giveGoldAmount > 0 {
 
 				m.Character.Gold += giveGoldAmount
 				mob.Character.Gold -= giveGoldAmount
 
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> gave some gold to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, m.Character.Name),
-					true)
+				)
 			}
 
 		}
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

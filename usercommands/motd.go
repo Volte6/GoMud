@@ -1,16 +1,21 @@
 package usercommands
 
 import (
+	"fmt"
+
 	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/mud/users"
 )
 
-func Motd(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Motd(rest string, userId int) (bool, error) {
 
-	response := NewUserCommandResponse(userId)
+	// Load user details
+	user := users.GetByUserId(userId)
+	if user == nil { // Something went wrong. User not found.
+		return false, fmt.Errorf("user %d not found", userId)
+	}
 
-	response.SendUserMessage(userId, string(configs.GetConfig().Motd), true)
+	user.SendText(string(configs.GetConfig().Motd))
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

@@ -1,31 +1,34 @@
 package usercommands
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/mud/users"
 )
 
-func Reload(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Reload(rest string, userId int) (bool, error) {
 
-	response := NewUserCommandResponse(userId)
+	// Load user details
+	user := users.GetByUserId(userId)
+	if user == nil { // Something went wrong. User not found.
+		return false, fmt.Errorf("user %d not found", userId)
+	}
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.reload", nil)
-		response.Handled = true
-		response.SendUserMessage(userId, infoOutput, false)
-		return response, nil
+		user.SendText(infoOutput)
+		return true, nil
 	}
 
 	switch strings.ToLower(rest) {
 	case `items`:
 		items.LoadDataFiles()
-		response.SendUserMessage(userId, `Items reloaded.`, true)
+		user.SendText(`Items reloaded.`)
 	default:
-		response.SendUserMessage(userId, `Unknown reload command.`, true)
+		user.SendText(`Unknown reload command.`)
 	}
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

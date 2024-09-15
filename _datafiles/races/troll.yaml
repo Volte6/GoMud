@@ -1,7 +1,9 @@
 raceid: 4
 name: Troll
 description: A massive creature .
-nightvision: true
+buffids:
+  - 29 # Night Vision
+  - 30 # Regeneration
 size: large
 unarmedname: massive fists
 tnlscale: 1

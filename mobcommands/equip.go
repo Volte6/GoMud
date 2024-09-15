@@ -6,17 +6,21 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
 )
 
-func Equip(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Equip(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
+	}
+
+	room := rooms.LoadRoom(mob.Character.RoomId)
+	if room == nil {
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if rest == "all" {
@@ -26,12 +30,10 @@ func Equip(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		for _, item := range itemCopies {
 			iSpec := item.GetSpec()
 			if iSpec.Subtype == items.Wearable || iSpec.Type == items.Weapon {
-				r, _ := Equip(item.Name(), mobId, cmdQueue)
-				response.AbsorbMessages(r)
+				Equip(item.Name(), mobId)
 			}
 		}
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	var matchItem items.Item = items.Item{}
@@ -53,8 +55,7 @@ func Equip(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		iSpec := matchItem.GetSpec()
 		if iSpec.Type != items.Weapon && iSpec.Subtype != items.Wearable {
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		// Swap the item location
@@ -77,9 +78,8 @@ func Equip(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				for _, oldItem := range oldItems {
 					if oldItem.ItemId != 0 {
 
-						response.SendRoomMessage(mob.Character.RoomId,
-							fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, oldItem.DisplayName()),
-							true)
+						room.SendText(
+							fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, oldItem.DisplayName()))
 
 						mob.Character.StoreItem(oldItem)
 					}
@@ -87,13 +87,11 @@ func Equip(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 				if iSpec.Subtype == items.Wearable {
 
-					response.SendRoomMessage(mob.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()),
-						true)
+					room.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
 				} else {
-					response.SendRoomMessage(mob.Character.RoomId,
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> wields <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()),
-						true)
+					room.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> wields <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
 				}
 
 				mob.Character.Validate()
@@ -102,6 +100,5 @@ func Equip(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

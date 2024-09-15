@@ -5,29 +5,25 @@ import (
 
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Follow(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Follow(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if rest == "" {
-		response.SendUserMessage(userId, "Follow whom?", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("Follow whom?")
+		return true, nil
 	}
 
 	playerId, _ := room.FindByName(rest)
@@ -39,18 +35,17 @@ func Follow(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		followUser := users.GetByUserId(playerId)
 
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`You follow <ansi fg="username">%s</ansi>.`, followUser.Character.Name),
-			true)
+		)
 
-		response.SendUserMessage(followUser.UserId,
+		followUser.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> is following you.`, user.Character.Name),
-			true)
+		)
 
 		followUser.Character.AddFollower(userId)
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

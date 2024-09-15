@@ -3,20 +3,19 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func QuestToken(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func QuestToken(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// args should look like one of the following:
@@ -27,7 +26,7 @@ func QuestToken(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 	if len(args) == 0 {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.questtoken", nil)
-		response.SendUserMessage(userId, infoOutput, false)
+		user.SendText(infoOutput)
 	} else if args[0] == "list" {
 
 		allTokens := user.Character.GetQuestProgress()
@@ -54,7 +53,7 @@ func QuestToken(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 
 		searchResultsTable := templates.GetTable("Quest Tokens", headers, rows)
 		tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
-		response.SendUserMessage(userId, tplTxt, false)
+		user.SendText(tplTxt)
 
 	} else if args[0] == "all" {
 
@@ -76,14 +75,16 @@ func QuestToken(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 
 		searchResultsTable := templates.GetTable("Quest Tokens", headers, rows)
 		tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
-		response.SendUserMessage(userId, tplTxt, false)
+		user.SendText(tplTxt)
 
 	} else {
 
-		cmdQueue.QueueQuest(userId, args[0])
+		events.AddToQueue(events.Quest{
+			UserId:     userId,
+			QuestToken: args[0],
+		})
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

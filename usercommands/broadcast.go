@@ -3,22 +3,21 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Broadcast(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Broadcast(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
-	response.SendRoomMessage(0, fmt.Sprintf(`<ansi fg="black" bold="true'>(broadcast)</ansi> <ansi fg="username">%s</ansi>: <ansi fg="yellow">%s</ansi>`, user.Character.Name, rest), true)
+	events.AddToQueue(events.Broadcast{
+		Text: fmt.Sprintf(`<ansi fg="black" bold="true'>(broadcast)</ansi> <ansi fg="username">%s</ansi>: <ansi fg="yellow">%s</ansi>`, user.Character.Name, rest),
+	})
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

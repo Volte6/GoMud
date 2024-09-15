@@ -14,48 +14,70 @@ character:
     them strength, wisdom, or fortune beyond their wildest dreams. Conversely, he
     can also mete out justice to those who would seek to disrupt the balance of the
     world, swiftly and decisively.
-  adjectives: []
-  roomid: 7
+  adjectives:
+  - zombie
+  roomid: 4
   zone: Frostfang
-  raceid: 1
+  raceid: 2
   stats:
-    strength:
-      base: 1
+    strength: {}
     speed:
       training: 3
+      base: 1
     smarts:
       base: 1
     vitality:
       training: 1
-      base: 1
-    mysticism: {}
-    perception:
-      base: 1
+    mysticism:
+      base: 2
+    perception: {}
   level: 28
-  experience: 550846
+  experience: 550857
   trainingpoints: 26
   statpoints: 27
-  health: 153
-  mana: 94
+  health: 127
+  mana: 148
   actionpoints: 214
   alignment: 0
   gold: 0
   bank: 0
   items:
-  - itemid: 10004
   - itemid: 8
     uses: 3
   - itemid: 10012
   - itemid: 10014
-  - itemid: 10004
   - itemid: 30002
     uses: 1
   - itemid: 30007
     uses: 1
-  - itemid: 10006
+  - itemid: 10004
+  - itemid: 20004
+  - itemid: 10004
+  buffs:
+    list:
+    - buffid: 28
+      onstartevent: true
+      permabuff: true
+      roundcounter: 2
+      triggersleft: 1000000000
+    - buffid: 29
+      onstartevent: true
+      permabuff: true
+      roundcounter: 25
+      triggersleft: 1000000000
+    - buffid: 1
+      onstartevent: true
+      permabuff: true
+      roundcounter: 26
+      triggersleft: 1000000000
+    - buffid: 6
+      onstartevent: true
+      permabuff: false
+      roundcounter: 369
+      triggersleft: 6
   equipment:
-    offhand:
-      itemid: 20004
+    weapon:
+      itemid: 10006
     belt:
       itemid: 20011
     gloves:
@@ -64,6 +86,7 @@ character:
       itemid: 20015
       uncursed: true
   skills:
+    brawling: 4
     dual-wield: 2
     inspect: 4
     map: 5
@@ -77,8 +100,15 @@ character:
   keyring:
     784-chest: DUU
     key-110-west: "3"
+  kd:
+    totalkills: 11
+    kills:
+      1: 11
+    racekills:
+      rodent: 11
+    totaldeaths: 0
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/5yQQW4FMQxCL/QWMR4b5/4XqzL9lVp12sVXCCARWCS6Ceqiis7D1ZRpvfgflO/HX0X3r3r88FfqyCPO1lCbXsiDvNEsNIFGaBLNhbbRHrQ3uRY5RY6p1bc++XfuH38SiMRubGPPS5vkpCEiiYswMajJIO/kW/PMG9fB7T7PRwAAAP//tWYCYowBAAA=
+roommemoryblob: H4sIAAAAAAAA/5yOURIDIQhDL/Q+FhFi73+xDnS3o787RMGAIb5EXEnlp35zjJhEkF53JCFyYAwcKZGEtO6cONW1gTk2MWGLkbjh3dl+lrxQFLo6olf/pcaGg3X8KtTzYQ6csev8xttwr9I9gFh8WE2U3UmQBJP5DQAA//9xmQ2LWQEAAA==
 configoptions: {}

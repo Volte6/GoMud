@@ -3,6 +3,7 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
@@ -10,24 +11,22 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Buy(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Buy(rest string, userId int) (bool, error) {
 
 	if rest == "" {
-		return List(rest, userId, cmdQueue)
+		return List(rest, userId)
 	}
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
@@ -55,9 +54,10 @@ func Buy(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			if len(itemNames) > 0 {
 				extraSay = fmt.Sprintf(` Any interest in a <ansi fg="itemname">%s</ansi>?`, itemNames[util.Rand(len(itemNames))])
 			}
-			cmdQueue.QueueCommand(0, mobId, "say Sorry, I don't have that item right now."+extraSay)
-			response.Handled = true
-			return response, nil
+
+			mob.Command(`say Sorry, I don't have that item right now.` + extraSay)
+
+			return true, nil
 		}
 
 		for itemId := range mob.ShopStock {
@@ -70,9 +70,10 @@ func Buy(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 			}
 
 			if user.Character.Gold < item.GetSpec().Value {
-				cmdQueue.QueueCommand(0, mobId, "say You don't have enough gold for that.")
-				response.Handled = true
-				return response, nil
+
+				mob.Command(`say You don't have enough gold for that.`)
+
+				return true, nil
 			}
 
 			user.Character.Gold -= item.GetSpec().Value
@@ -88,21 +89,26 @@ func Buy(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			iSpec := newItm.GetSpec()
 			if iSpec.QuestToken != `` {
-				cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+
+				events.AddToQueue(events.Quest{
+					UserId:     user.UserId,
+					QuestToken: iSpec.QuestToken,
+				})
+
 			}
 
-			response.SendUserMessage(user.UserId,
+			user.SendText(
 				fmt.Sprintf(`You buy a <ansi fg="itemname">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, item.DisplayName(), item.GetSpec().Value),
-				true)
-			response.SendRoomMessage(room.RoomId,
+			)
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> buys a <ansi fg="itemname">%s</ansi> from <ansi fg="mobname">%s</ansi>.`, user.Character.Name, item.DisplayName(), mob.Character.Name),
-				true)
+				userId,
+			)
 
 			break
 
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

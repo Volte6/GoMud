@@ -4,33 +4,28 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Macros(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Macros(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	if len(user.Macros) == 0 {
-		response.SendUserMessage(userId, "You have no macros set.", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You have no macros set.")
+		return true, nil
 	}
 
-	response.SendUserMessage(userId, `<ansi fg="yellow">Your macros:</ansi>`, true)
+	user.SendText(`<ansi fg="yellow">Your macros:</ansi>`)
 	for number, macroCommand := range user.Macros {
-		response.SendUserMessage(userId, ``, true)
-		response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="yellow">%s:</ansi>`, number), true)
-		response.SendUserMessage(userId, fmt.Sprintf(`    <ansi fg="command">%s</ansi>`, macroCommand), true)
+		user.SendText(``)
+		user.SendText(fmt.Sprintf(`<ansi fg="yellow">%s:</ansi>`, number))
+		user.SendText(fmt.Sprintf(`    <ansi fg="command">%s</ansi>`, macroCommand))
 	}
-	response.SendUserMessage(userId, ``, true)
+	user.SendText(``)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

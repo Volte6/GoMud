@@ -7,17 +7,14 @@ import (
 	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Spells(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Spells(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `MPs`, `Wait`, `Casts`, `% Chance`}
@@ -120,27 +117,26 @@ func Spells(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 	onlineResultsTable := templates.GetTable(`Spells`, headers, rows, rowFormatting...)
 	tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
-	response.SendUserMessage(userId, tplTxt, false)
+	user.SendText(tplTxt)
 
 	/*
 		if len(neutralRows) > 0 {
 			onlineResultsTable := templates.GetTable(`<ansi fg="spell-neutral">Neutral</ansi> Spells`, headers, neutralRows, neutralRowFormatting...)
 			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
-			response.SendUserMessage(userId, tplTxt, false)
+			user.SendText( tplTxt)
 		}
 
 		if len(harmfulRows) > 0 {
 			onlineResultsTable := templates.GetTable(`<ansi fg="spell-helpful">Helpful</ansi> Spells`, headers, harmfulRows, harmfulRowFormatting...)
 			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
-			response.SendUserMessage(userId, tplTxt, false)
+			user.SendText( tplTxt)
 		}
 
 		if len(helpfulRows) > 0 {
 			onlineResultsTable := templates.GetTable(`<ansi fg="spell-harmful">Harmful</ansi> Spells`, headers, helpfulRows, helpfulRowFormatting...)
 			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
-			response.SendUserMessage(userId, tplTxt, false)
+			user.SendText( tplTxt)
 		}
 	*/
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

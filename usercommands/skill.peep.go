@@ -12,7 +12,6 @@ import (
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 /*
@@ -22,48 +21,42 @@ Level 2 - Reveals detailed stats of a player or mob.
 Level 3 - Reveals detailed stats of the player or mob, plus equipment and items
 Level 4 - eveals detailed stats of the player or mob, plus equipment and items, and tells you the % chance of dropping items.
 */
-func Peep(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Peep(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Peep)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to peep.", true)
-		response.Handled = true
-		return response, errors.New(`you don't know how to peep`)
+		user.SendText("You don't know how to peep.")
+		return true, errors.New(`you don't know how to peep`)
 	}
 
 	if len(rest) == 0 {
-		response.SendUserMessage(userId, "Type `help peep` for more information on the peep skill.", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("Type `help peep` for more information on the peep skill.")
+		return true, nil
 	}
 
 	if skillLevel < 2 {
-		response.SendUserMessage(userId, "At level 1, peep is a passive skill.", true)
-		response.SendUserMessage(userId, "Type `help peep` for more information on the peep skill.", true)
-		response.Handled = true
-		return response, errors.New(`at level 1, peep is a passive skill`)
+		user.SendText("At level 1, peep is a passive skill.")
+		user.SendText("Type `help peep` for more information on the peep skill.")
+		return true, errors.New(`at level 1, peep is a passive skill`)
 	}
 
 	if !user.Character.TryCooldown(skills.Peep.String(), 1) {
-		response.SendUserMessage(userId,
+		user.SendText(
 			`You're using that skill just a little too fast.`,
-			true)
-		response.Handled = true
-		return response, errors.New(`you're doing that too often`)
+		)
+		return true, errors.New(`you're doing that too often`)
 	}
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// valid peep targets are: mobs, players
@@ -128,13 +121,15 @@ func Peep(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				dropTxt = fmt.Sprintf(` <ansi fg="username">%s</ansi> has a 100%% chance of dropping their equipment if killed.%s%s`, targetName, term.CRLFStr, term.CRLFStr)
 			}
 
-			response.SendUserMessage(playerId,
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> is peeping at you.`, user.Character.Name),
-				true)
+			if targetUser := users.GetByUserId(playerId); targetUser != nil {
+				targetUser.SendText(
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> is peeping at you.`, user.Character.Name),
+				)
+			}
 
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is peeping at <ansi fg="username">%s</ansi>.`, user.Character.Name, u.Character.Name),
-				true,
+				userId,
 				u.UserId)
 
 		} else if mobId > 0 {
@@ -191,29 +186,29 @@ func Peep(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 				dropTxt = fmt.Sprintf(`<ansi fg="mobname">%s</ansi> has a %d%% chance of dropping their equipment if killed.%s%s`, targetName, m.ItemDropChance, term.CRLFStr, term.CRLFStr)
 			}
 
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is peeping at %s.`, user.Character.Name, targetName),
-				true)
+				userId,
+			)
 
 		}
 
 		if statusTxt != `` {
-			response.SendUserMessage(userId, statusTxt, false)
+			user.SendText(statusTxt)
 		}
 		if invTxt != `` {
-			response.SendUserMessage(userId, invTxt, false)
+			user.SendText(invTxt)
 		}
 		if dropTxt != `` {
-			response.SendUserMessage(userId, dropTxt, false)
+			user.SendText(dropTxt)
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 
 	}
 
-	response.SendUserMessage(userId, "You don't see that here.", true)
-	response.Handled = true
-	return response, errors.New(`you don't see that here`)
+	user.SendText("You don't see that here.")
+
+	return true, errors.New(`you don't see that here`)
 
 }

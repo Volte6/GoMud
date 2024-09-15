@@ -9,28 +9,25 @@ import (
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Start(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Start(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	if user.Character.RoomId != -1 {
-		return response, errors.New(`only allowed in the void`)
+		return false, errors.New(`only allowed in the void`)
 	}
 
 	// Get if already exists, otherwise create new
 	cmdPrompt, isNew := user.StartPrompt(`start`, rest)
 
 	if isNew {
-		response.SendUserMessage(userId, fmt.Sprintf(`You'll need to answer some questions.%s`, term.CRLFStr), true)
+		user.SendText(fmt.Sprintf(`You'll need to answer some questions.%s`, term.CRLFStr))
 	}
 
 	if user.Character.RaceId == 0 {
@@ -45,14 +42,13 @@ func Start(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 		question := cmdPrompt.Ask(`Which race will you be?`, raceOptions, `?`)
 		if !question.Done {
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		if question.Response == `?` {
 
 			question.RejectResponse()
-			return Help(`races`, userId, cmdQueue)
+			return Help(`races`, userId)
 
 		}
 
@@ -63,7 +59,7 @@ func Start(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 					user.Character.RaceId = r.Id()
 					user.Character.Validate()
 
-					response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="magenta">Your ghostly form materializes into that of a %s!</ansi>%s`, r.Name, term.CRLFStr), true)
+					user.SendText(fmt.Sprintf(`<ansi fg="magenta">Your ghostly form materializes into that of a %s!</ansi>%s`, r.Name, term.CRLFStr))
 				}
 
 			}
@@ -75,34 +71,30 @@ func Start(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 		question := cmdPrompt.Ask(`What will you be known as (name)?`, []string{})
 		if !question.Done {
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		if strings.EqualFold(question.Response, user.Username) {
-			response.SendUserMessage(userId, `Your username cannot match your character name!`, true)
+			user.SendText(`Your username cannot match your character name!`)
 			question.RejectResponse()
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		if err := user.SetCharacterName(question.Response); err != nil {
-			response.SendUserMessage(userId, err.Error(), true)
+			user.SendText(err.Error())
 			question.RejectResponse()
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		user.ClearPrompt()
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You will be known as <ansi fg="yellow-bold">%s</ansi>!%s`, user.Character.Name, term.CRLFStr), true)
+		user.SendText(fmt.Sprintf(`You will be known as <ansi fg="yellow-bold">%s</ansi>!%s`, user.Character.Name, term.CRLFStr))
 	}
 
-	response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="magenta">Suddenly, a vortex appears before you, drawing you in before you have any chance to react!</ansi>%s`, term.CRLFStr), true)
+	user.SendText(fmt.Sprintf(`<ansi fg="magenta">Suddenly, a vortex appears before you, drawing you in before you have any chance to react!</ansi>%s`, term.CRLFStr))
 
 	rooms.MoveToRoom(user.UserId, 1)
-	response.SendUserMessage(userId, `Welcome to Frostfang. You can <ansi fg="command">look</ansi> at the <ansi fg="itemname">sign</ansi> here!`, true)
+	user.SendText(`Welcome to Frostfang. You can <ansi fg="command">look</ansi> at the <ansi fg="itemname">sign</ansi> here!`)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

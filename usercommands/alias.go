@@ -7,17 +7,14 @@ import (
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Alias(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Alias(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// biuld array and look up table for sorting purposes
@@ -37,7 +34,7 @@ func Alias(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	headers := []string{"Alias", "Command"}
 	rows := [][]string{}
 
-	response.SendUserMessage(userId, `<ansi fg="yellow">Built in Aliases:</ansi>`, true)
+	user.SendText(`<ansi fg="yellow">Built in Aliases:</ansi>`)
 
 	for _, outCmd := range allOutCmds {
 		inCmds := reverseLookup[outCmd]
@@ -50,8 +47,7 @@ func Alias(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 	aliasTableData := templates.GetTable(`Default Aliases`, headers, rows, tableFormatting)
 	aliasTxt, _ := templates.Process("tables/generic", aliasTableData)
-	response.SendUserMessage(userId, aliasTxt, true)
+	user.SendText(aliasTxt)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

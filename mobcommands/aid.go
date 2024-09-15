@@ -11,40 +11,36 @@ import (
 	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Aid(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Aid(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	raceInfo := races.GetRace(mob.Character.RaceId)
 	if !raceInfo.KnowsFirstAid {
-		cmdQueue.QueueCommand(0, mobId, `emote doesn't know first aid.`)
-		response.Handled = true
-		return response, nil
+
+		mob.Command(`emote doesn't know first aid.`)
+
+		return true, nil
 	}
 
 	if !room.IsCalm() {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if rest == `` {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	aidPlayerId, _ := room.FindByName(rest, rooms.FindDowned)
@@ -56,8 +52,7 @@ func Aid(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 		if p != nil {
 
 			if p.Character.Health > 0 {
-				response.Handled = true
-				return response, nil
+				return true, nil
 			}
 
 			mob.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -71,9 +66,8 @@ func Aid(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 			}
 
 			continueCasting := true
-			if res, err := scripting.TrySpellScriptEvent(`onCast`, 0, mobId, spellAggro, cmdQueue); err == nil {
-				response.AbsorbMessages(res)
-				continueCasting = res.Handled
+			if allowToContinue, err := scripting.TrySpellScriptEvent(`onCast`, 0, mobId, spellAggro); err == nil {
+				continueCasting = allowToContinue
 			}
 
 			if continueCasting {
@@ -87,6 +81,5 @@ func Aid(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

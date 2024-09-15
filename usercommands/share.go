@@ -12,27 +12,24 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Share(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Share(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	party := parties.Get(userId)
 	if party == nil {
-		response.SendUserMessage(userId, "You can only share in a party.", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You can only share in a party.")
+		return true, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -48,15 +45,13 @@ func Share(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		}
 
 		if giveGoldAmount < 0 {
-			response.SendUserMessage(userId, "You can't share a negative amount of gold.", true)
-			response.Handled = true
-			return response, nil
+			user.SendText("You can't share a negative amount of gold.")
+			return true, nil
 		}
 
 		if giveGoldAmount > user.Character.Gold {
-			response.SendUserMessage(userId, "You don't have that much gold to share.", true)
-			response.Handled = true
-			return response, nil
+			user.SendText("You don't have that much gold to share.")
+			return true, nil
 		}
 
 		partyMembersInRoom := []int{userId} // make sure party leader gets first share
@@ -73,19 +68,23 @@ func Share(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		leftOver := giveGoldAmount - split*len(partyMembersInRoom)
 
 		for _, uid := range partyMembersInRoom {
-			cmdQueue.QueueCommand(userId, 0, fmt.Sprintf("give %d gold to @%d", split, uid))
+
+			user.Command(fmt.Sprintf("give %d gold to @%d", split, uid))
+
 		}
 
 		if leftOver > 0 {
+
 			randomMember := partyMembersInRoom[util.Rand(len(partyMembersInRoom))]
-			cmdQueue.QueueCommand(userId, 0, fmt.Sprintf("give %d gold to @%d", leftOver, randomMember))
+
+			user.Command(fmt.Sprintf("give %d gold to @%d", leftOver, randomMember))
+
 		}
 
 	} else {
 
-		response.SendUserMessage(userId, `You can share gold by typing <ansi fg="command">share [amt] gold</ansi>?`, true)
+		user.SendText(`You can share gold by typing <ansi fg="command">share [amt] gold</ansi>?`)
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

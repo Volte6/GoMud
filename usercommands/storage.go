@@ -14,27 +14,24 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Storage(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if !room.IsStorage {
-		response.SendUserMessage(userId, `You are not at a storage location.`+term.CRLFStr, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`You are not at a storage location.` + term.CRLFStr)
+		return true, nil
 	}
 
 	itemsInStorage := user.ItemStorage.GetItems()
@@ -47,24 +44,21 @@ func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		}
 
 		storageTxt, _ := templates.Process("character/storage", itemNames)
-		response.SendUserMessage(userId, storageTxt, false)
+		user.SendText(storageTxt)
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if rest == `add` || rest == `remove` {
-		response.SendUserMessage(userId, fmt.Sprintf(`%s what?%s`, rest, term.CRLFStr), true)
-		response.Handled = true
-		return response, nil
+		user.SendText(fmt.Sprintf(`%s what?%s`, rest, term.CRLFStr))
+		return true, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 || (args[0] != `add` && args[0] != `remove`) {
-		response.SendUserMessage(userId, `Try <ansi fg="command">help storage</ansi> for more information about storage.`+term.CRLFStr, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`Try <ansi fg="command">help storage</ansi> for more information about storage.` + term.CRLFStr)
+		return true, nil
 	}
 
 	action := args[0]
@@ -74,55 +68,48 @@ func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 
 		spaceLeft := 20 - len(itemsInStorage)
 		if spaceLeft < 1 {
-			response.SendUserMessage(userId, `You can have 20 objects in storage`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`You can have 20 objects in storage`)
+			return true, nil
 		}
 
 		if itemName == `all` {
 
 			for _, itm := range user.Character.GetAllBackpackItems() {
-				r, _ := Storage(fmt.Sprintf(`add !%d`, itm.ItemId), userId, cmdQueue)
-				response.AbsorbMessages(r)
+				Storage(fmt.Sprintf(`add !%d`, itm.ItemId), userId)
+
 				spaceLeft--
 				if spaceLeft < 0 {
 					break
 				}
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		itm, found := user.Character.FindInBackpack(itemName)
 
 		if !found {
-			response.SendUserMessage(userId, fmt.Sprintf(`You don't have a %s to add to storage.%s`, itemName, term.CRLFStr), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf(`You don't have a %s to add to storage.%s`, itemName, term.CRLFStr))
+			return true, nil
 		}
 
 		user.Character.RemoveItem(itm)
 		user.ItemStorage.AddItem(itm)
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You placed the <ansi fg="itemname">%s</ansi> into storage.`, itm.DisplayName()), true)
+		user.SendText(fmt.Sprintf(`You placed the <ansi fg="itemname">%s</ansi> into storage.`, itm.DisplayName()))
 
 		// Trigger lost event
-		if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itm, userId, cmdQueue); err == nil {
-			response.AbsorbMessages(scriptResponse)
-		}
+		scripting.TryItemScriptEvent(`onLost`, itm, userId)
 
 	} else if action == `remove` {
 
 		if itemName == `all` {
 
 			for _, itm := range user.ItemStorage.GetItems() {
-				r, _ := Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), userId, cmdQueue)
-				response.AbsorbMessages(r)
+				Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), userId)
 			}
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		var itm items.Item
@@ -144,27 +131,23 @@ func Storage(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQ
 		}
 
 		if !found {
-			response.SendUserMessage(userId, fmt.Sprintf(`You don't have a %s in storage.`, itemName), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf(`You don't have a %s in storage.`, itemName))
+			return true, nil
 		}
 
 		if user.Character.StoreItem(itm) {
 
 			user.ItemStorage.RemoveItem(itm)
 
-			response.SendUserMessage(userId, fmt.Sprintf(`You removed the <ansi fg="itemname">%s</ansi> from storage.`, itm.DisplayName()), true)
+			user.SendText(fmt.Sprintf(`You removed the <ansi fg="itemname">%s</ansi> from storage.`, itm.DisplayName()))
 
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onFound`, itm, userId, cmdQueue); err == nil {
-				response.AbsorbMessages(scriptResponse)
-			}
+			scripting.TryItemScriptEvent(`onFound`, itm, userId)
 
 		} else {
-			response.SendUserMessage(userId, `You can't carry that!`, true)
+			user.SendText(`You can't carry that!`)
 		}
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

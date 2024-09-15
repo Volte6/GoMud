@@ -6,6 +6,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
@@ -17,42 +18,38 @@ import (
 SkullDuggery Skill
 Level 4 - Pickpocket
 */
-func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Pickpocket(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 4 {
-		return response, nil
+		return false, nil
 	}
 
 	// Must be sneaking
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 
 	if user.Character.Aggro != nil {
-		response.SendUserMessage(userId, "You can't do that while in combat!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You can't do that while in combat!")
+		return true, nil
 	}
 
 	if room.AreMobsAttacking(userId) {
-		response.SendUserMessage(userId, "You can't do that while you are under attack!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You can't do that while you are under attack!")
+		return true, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -62,9 +59,8 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 	if pickPlayerId > 0 || pickMobInstanceId > 0 {
 
 		if !user.Character.TryCooldown(skills.Skulduggery.String(`pickpocket`), 15) {
-			response.SendUserMessage(userId, fmt.Sprintf("You need to wait %d rounds before you can do that again!", user.Character.GetCooldown(skills.Skulduggery.String(`pickpocket`))), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf("You need to wait %d rounds before you can do that again!", user.Character.GetCooldown(skills.Skulduggery.String(`pickpocket`))))
+			return true, nil
 		}
 
 	}
@@ -118,33 +114,29 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 
 				if len(stolenStuff) < 1 {
 
-					response.SendUserMessage(userId,
-						fmt.Sprintf(`You succeed in picking the pockets of <ansi fg="mobname">%s</ansi> but find nothing!`, m.Character.Name),
-						true)
+					user.SendText(
+						fmt.Sprintf(`You succeed in picking the pockets of <ansi fg="mobname">%s</ansi> but find nothing!`, m.Character.Name))
 
 				} else {
 
-					response.SendUserMessage(userId,
-						fmt.Sprintf(`You succeed in picking the pockets of <ansi fg="mobname">%s</ansi> and steal %s`, m.Character.Name, strings.Join(stolenStuff, ` and `)),
-						true)
+					user.SendText(
+						fmt.Sprintf(`You succeed in picking the pockets of <ansi fg="mobname">%s</ansi> and steal %s`, m.Character.Name, strings.Join(stolenStuff, ` and `)))
 
 				}
 
 			} else {
 
-				response.SendUserMessage(userId,
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> catches you in the act!`, m.Character.Name),
-					true)
+				user.SendText(
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> catches you in the act!`, m.Character.Name))
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> gets caught trying to pick the pockets of <ansi fg="mobname">%s</ansi>!`, user.Character.Name, m.Character.Name),
-					true,
 					userId,
 				)
 
 				user.Character.CancelBuffsWithFlag(buffs.Hidden)
 
-				cmdQueue.QueueCommand(0, pickMobInstanceId, fmt.Sprintf(`attack @%d`, user.UserId))
+				m.Command(fmt.Sprintf(`attack @%d`, user.UserId))
 
 			}
 
@@ -153,9 +145,8 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 	} else if pickPlayerId > 0 {
 
 		if !configs.GetConfig().PVPEnabled {
-			response.SendUserMessage(userId, `PVP is currently disabled.`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`PVP is currently disabled.`)
+			return true, nil
 		}
 
 		p := users.GetByUserId(pickPlayerId)
@@ -202,7 +193,12 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 
 					iSpec := itemStolen.GetSpec()
 					if iSpec.QuestToken != `` {
-						cmdQueue.QueueQuest(user.UserId, iSpec.QuestToken)
+
+						events.AddToQueue(events.Quest{
+							UserId:     user.UserId,
+							QuestToken: iSpec.QuestToken,
+						})
+
 					}
 
 					stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, itemStolen.DisplayName()))
@@ -210,31 +206,26 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 
 				if len(stolenStuff) < 1 {
 
-					response.SendUserMessage(userId,
-						fmt.Sprintf(`You succeed in picking the pockets of <ansi fg="username">%s</ansi> but find nothing!`, p.Character.Name),
-						true)
+					user.SendText(
+						fmt.Sprintf(`You succeed in picking the pockets of <ansi fg="username">%s</ansi> but find nothing!`, p.Character.Name))
 
 				} else {
 
-					response.SendUserMessage(userId,
-						fmt.Sprintf(`You succeed in picking the pockets of <ansi fg="username">%s</ansi> and steal %s`, p.Character.Name, strings.Join(stolenStuff, ` and `)),
-						true)
+					user.SendText(
+						fmt.Sprintf(`You succeed in picking the pockets of <ansi fg="username">%s</ansi> and steal %s`, p.Character.Name, strings.Join(stolenStuff, ` and `)))
 
 				}
 
 			} else {
 
-				response.SendUserMessage(userId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> catches you in the act!`, p.Character.Name),
-					true)
+				user.SendText(
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> catches you in the act!`, p.Character.Name))
 
-				response.SendUserMessage(pickPlayerId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> is trying to pick your pockets!`, user.Character.Name),
-					true)
+				p.SendText(
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> is trying to pick your pockets!`, user.Character.Name))
 
-				response.SendRoomMessage(user.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> gets caught trying to pick the pockets of <ansi fg="username">%s</ansi>!`, user.Character.Name, p.Character.Name),
-					true,
 					userId,
 				)
 
@@ -245,9 +236,8 @@ func Pickpocket(rest string, userId int, cmdQueue util.CommandQueue) (util.Messa
 
 	} else {
 
-		response.SendUserMessage(userId, "Pickpocket who?", true)
+		user.SendText("Pickpocket who?")
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

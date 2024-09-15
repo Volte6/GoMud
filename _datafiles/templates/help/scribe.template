@@ -18,5 +18,4 @@ Beware! Sometimes scribe may need to be used in combination with another skill!
                           and place it in the area. Decays in a weeks time.
 (Lvl 3) <ansi fg="skill">scribe rune [txt]</ansi> Create/Replace a short hidden message into the area 
                           that only you can see. Decays in a months time.
-(Lvl 4) <ansi fg="skill">scribe map</ansi>        Write the result of your map skill to a scroll that 
-                          can be saved or shared.
+(Lvl 4) 

@@ -11,50 +11,44 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Bank(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Bank(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
-	response.SendUserMessage(userId, ``, true)
+	user.SendText(``)
 
 	if !room.IsBank {
-		response.SendUserMessage(userId, `You are not at a bank.`+term.CRLFStr, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`You are not at a bank.` + term.CRLFStr)
+		return true, nil
 	}
 
 	if rest == `` {
-		response.SendUserMessage(userId, fmt.Sprintf(`You have <ansi fg="gold">%d gold</ansi> on hand and <ansi fg="gold">%d gold</ansi> in the bank.`, user.Character.Gold, user.Character.Bank), true)
-		response.SendUserMessage(userId, `You can <ansi fg="command">deposit</ansi> to or <ansi fg="command">withdraw</ansi> from the bank.`+term.CRLFStr, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(fmt.Sprintf(`You have <ansi fg="gold">%d gold</ansi> on hand and <ansi fg="gold">%d gold</ansi> in the bank.`, user.Character.Gold, user.Character.Bank))
+		user.SendText(`You can <ansi fg="command">deposit</ansi> to or <ansi fg="command">withdraw</ansi> from the bank.` + term.CRLFStr)
+		return true, nil
 	}
 
 	if rest == `deposit` || rest == `withdraw` {
-		response.SendUserMessage(userId, fmt.Sprintf(`%s how much? Make sure to include the amount of gold or "all".%s`, rest, term.CRLFStr), true)
-		response.Handled = true
-		return response, nil
+		user.SendText(fmt.Sprintf(`%s how much? Make sure to include the amount of gold or "all".%s`, rest, term.CRLFStr))
+		return true, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 || (args[0] != `deposit` && args[0] != `withdraw`) {
-		response.SendUserMessage(userId, `Try <ansi fg="command">help bank</ansi> for more information about banking.`+term.CRLFStr, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`Try <ansi fg="command">help bank</ansi> for more information about banking.` + term.CRLFStr)
+		return true, nil
 	}
 
 	action := args[0]
@@ -63,9 +57,8 @@ func Bank(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 	if amount < 1 && amountStr != `all` {
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You must specify an amount greater than zero to %s.%s`, action, term.CRLFStr), true)
-		response.Handled = true
-		return response, nil
+		user.SendText(fmt.Sprintf(`You must specify an amount greater than zero to %s.%s`, action, term.CRLFStr))
+		return true, nil
 
 	} else if action == `deposit` {
 		if amountStr == `all` {
@@ -74,14 +67,14 @@ func Bank(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		if amount > user.Character.Gold {
 			amount = user.Character.Gold
-			response.SendUserMessage(userId, `You don't have that much gold on hand, but what you do have you deposit.`, true)
+			user.SendText(`You don't have that much gold on hand, but what you do have you deposit.`)
 		}
 
 		user.Character.Gold -= amount
 		user.Character.Bank += amount
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You deposit <ansi fg="gold">%d gold</ansi>.`, amount), true)
-		response.SendUserMessage(userId, fmt.Sprintf(`You now have <ansi fg="gold">%d gold</ansi> on hand and <ansi fg="gold">%d gold</ansi> in the bank.`, user.Character.Gold, user.Character.Bank), true)
+		user.SendText(fmt.Sprintf(`You deposit <ansi fg="gold">%d gold</ansi>.`, amount))
+		user.SendText(fmt.Sprintf(`You now have <ansi fg="gold">%d gold</ansi> on hand and <ansi fg="gold">%d gold</ansi> in the bank.`, user.Character.Gold, user.Character.Bank))
 
 	} else if action == `withdraw` {
 		if amountStr == `all` {
@@ -90,17 +83,16 @@ func Bank(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 		if amount > user.Character.Bank {
 			amount = user.Character.Bank
-			response.SendUserMessage(userId, `You don't have that much gold in the bank, but you withdraw what is there.`, true)
+			user.SendText(`You don't have that much gold in the bank, but you withdraw what is there.`)
 		}
 
 		user.Character.Bank -= amount
 		user.Character.Gold += amount
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You withdraw <ansi fg="gold">%d gold</ansi>.`, amount), true)
-		response.SendUserMessage(userId, fmt.Sprintf(`You now have <ansi fg="gold">%d gold</ansi> on hand and <ansi fg="gold">%d gold</ansi> in the bank.`, user.Character.Gold, user.Character.Bank), true)
+		user.SendText(fmt.Sprintf(`You withdraw <ansi fg="gold">%d gold</ansi>.`, amount))
+		user.SendText(fmt.Sprintf(`You now have <ansi fg="gold">%d gold</ansi> on hand and <ansi fg="gold">%d gold</ansi> in the bank.`, user.Character.Gold, user.Character.Bank))
 	}
 
-	response.SendUserMessage(userId, ``, true)
-	response.Handled = true
-	return response, nil
+	user.SendText(``)
+	return true, nil
 }

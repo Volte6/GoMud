@@ -6,17 +6,21 @@ import (
 
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
 )
 
-func Alchemy(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Alchemy(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
+	}
+
+	room := rooms.LoadRoom(mob.Character.RoomId)
+	if room == nil {
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
@@ -25,11 +29,10 @@ func Alchemy(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 		// select a random item
 		if len(mob.Character.Items) > 0 {
 			matchItem := mob.Character.Items[util.Rand(len(mob.Character.Items))]
-			r, _ := Alchemy(matchItem.Name(), mobId, cmdQueue)
-			response.AbsorbMessages(r)
+			Alchemy(matchItem.Name(), mobId)
+
 		}
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if args[0] == "all" {
@@ -40,12 +43,10 @@ func Alchemy(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 		}
 
 		for _, item := range iCopies {
-			r, _ := Alchemy(item.Name(), mobId, cmdQueue)
-			response.AbsorbMessages(r)
+			Alchemy(item.Name(), mobId)
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -55,11 +56,9 @@ func Alchemy(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		mob.Character.RemoveItem(matchItem)
 		mob.Character.Gold += 1
-		response.SendRoomMessage(mob.Character.RoomId,
-			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> chants softly. Their <ansi fg="item">%s</ansi> slowly levitates in the air, trembles briefly and then in a flash of light becomes a gold coin!`, mob.Character.Name, matchItem.DisplayName()),
-			true)
+		room.SendText(
+			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> chants softly. Their <ansi fg="item">%s</ansi> slowly levitates in the air, trembles briefly and then in a flash of light becomes a gold coin!`, mob.Character.Name, matchItem.DisplayName()))
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

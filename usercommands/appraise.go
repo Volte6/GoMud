@@ -8,23 +8,20 @@ import (
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Appraise(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Appraise(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
@@ -35,22 +32,21 @@ func Appraise(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 		}
 
 		if rest == "" {
-			cmdQueue.QueueCommand(0, mobId, "say I will appraise items for 20 gold.")
-			response.Handled = true
-			return response, nil
+
+			mob.Command(`say I will appraise items for 20 gold.`)
+
+			return true, nil
 		}
 
 		item, found := user.Character.FindInBackpack(rest)
 		if !found {
-			response.SendUserMessage(user.UserId, "You don't have that item.", true)
-			response.Handled = true
-			return response, nil
+			user.SendText("You don't have that item.")
+			return true, nil
 		}
 
 		itemSpec := item.GetSpec()
 		if itemSpec.ItemId < 1 {
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		type inspectDetails struct {
@@ -68,23 +64,23 @@ func Appraise(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 		appraisePrice := 20
 
 		if appraisePrice > user.Character.Gold {
-			cmdQueue.QueueCommand(0, mobId, fmt.Sprintf("say That costs %d gold to appraise, which you don't seem to have.", appraisePrice))
-			response.Handled = true
-			return response, nil
+
+			mob.Command(fmt.Sprintf("say That costs %d gold to appraise, which you don't seem to have.", appraisePrice))
+
+			return true, nil
 		}
 
 		user.Character.Gold -= appraisePrice
 		mob.Character.Gold += appraisePrice
 
-		response.SendUserMessage(userId, fmt.Sprintf(`You give <ansi fg="mobname">%s</ansi> %d gold to appraise <ansi fg="itemname">%s</ansi>.`, mob.Character.Name, appraisePrice, itemSpec.Name), true)
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> appraises <ansi fg="itemname">%s</ansi>.`, user.Character.Name, itemSpec.Name), true)
+		user.SendText(fmt.Sprintf(`You give <ansi fg="mobname">%s</ansi> %d gold to appraise <ansi fg="itemname">%s</ansi>.`, mob.Character.Name, appraisePrice, itemSpec.Name))
+		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> appraises <ansi fg="itemname">%s</ansi>.`, user.Character.Name, itemSpec.Name), userId)
 
 		inspectTxt, _ := templates.Process("descriptions/inspect", details)
-		response.SendUserMessage(userId, inspectTxt, false)
+		user.SendText(inspectTxt)
 
 		break
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

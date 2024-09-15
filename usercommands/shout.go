@@ -7,23 +7,20 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Shout(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Shout(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
@@ -37,21 +34,20 @@ func Shout(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	}
 
 	if isSneaking {
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`someone shouts, "<ansi fg="yellow">%s</ansi>"`, rest), true)
+		room.SendText(fmt.Sprintf(`someone shouts, "<ansi fg="yellow">%s</ansi>"`, rest), userId)
 	} else {
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="username">%s</ansi> shouts, "<ansi fg="yellow">%s</ansi>"`, user.Character.Name, rest), true)
+		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> shouts, "<ansi fg="yellow">%s</ansi>"`, user.Character.Name, rest), userId)
 	}
 
 	for _, roomInfo := range room.Exits {
 		if otherRoom := rooms.LoadRoom(roomInfo.RoomId); otherRoom != nil {
 			if sourceExit := otherRoom.FindExitTo(room.RoomId); sourceExit != `` {
-				response.SendRoomMessage(otherRoom.RoomId, fmt.Sprintf(`Someone shouts from the <ansi fg="exit">%s</ansi> direction, "<ansi fg="yellow">%s</ansi>"`, sourceExit, rest), true)
+				otherRoom.SendText(fmt.Sprintf(`Someone shouts from the <ansi fg="exit">%s</ansi> direction, "<ansi fg="yellow">%s</ansi>"`, sourceExit, rest), userId)
 			}
 		}
 	}
 
-	response.SendUserMessage(userId, fmt.Sprintf(`You shout, "<ansi fg="yellow">%s</ansi>"`, rest), true)
+	user.SendText(fmt.Sprintf(`You shout, "<ansi fg="yellow">%s</ansi>"`, rest))
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

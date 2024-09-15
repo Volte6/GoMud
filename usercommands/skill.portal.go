@@ -11,7 +11,6 @@ import (
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 /*
@@ -21,35 +20,32 @@ Level 2 - Teleport back to the root of the area you are in
 Level 3 - Set a new destination for your portal teleportation
 Level 4 - Create a physical portal that you can share with players, or return through.
 */
-func Portal(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Portal(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
-		if response, err := Go(`portal`, userId, cmdQueue); response.Handled {
-			return response, err
+		if handled, err := Go(`portal`, userId); handled {
+			return handled, err
 		}
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Portal)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to portal.", true)
-		response.Handled = true
-		return response, errors.New(`you don't know how to portal`)
+		user.SendText("You don't know how to portal.")
+		return true, errors.New(`you don't know how to portal`)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// Establish the default portal location
@@ -82,37 +78,33 @@ func Portal(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 	if rest == "" {
 
 		if user.Character.Aggro != nil {
-			response.SendUserMessage(userId, "You can't do that! You are in combat!", true)
-			response.Handled = true
-			return response, nil
+			user.SendText("You can't do that! You are in combat!")
+			return true, nil
 		}
 
 		if !user.Character.TryCooldown(skills.Portal.String(), 10) {
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Portal.String())),
-				true)
-			response.Handled = true
-			return response, errors.New(`you're doing that too often`)
+			)
+			return true, errors.New(`you're doing that too often`)
 		}
 
 		// move to portalTargetRoomId
-		response.Handled = true
-		oldRoomId := user.Character.RoomId
-
 		if err := rooms.MoveToRoom(user.UserId, portalTargetRoomId); err == nil {
-
-			response.SendUserMessage(userId, "You draw a quick symbol in the air with your finger, and the world warps around you. You seem to have moved.", true)
-			response.SendRoomMessage(oldRoomId,
+			user.SendText("You draw a quick symbol in the air with your finger, and the world warps around you. You seem to have moved.")
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> draws a quick symbol in the air, and is sucked into a portal!`, user.Character.Name),
-				true)
-			response.SendRoomMessage(portalTargetRoomId,
+				userId,
+			)
+			newRoom := rooms.LoadRoom(portalTargetRoomId)
+			newRoom.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> suddenly pops into existence!`, user.Character.Name),
-				true)
+				userId,
+			)
 		} else {
-			response.SendUserMessage(userId, "Oops, portal sad!", true)
+			user.SendText("Oops, portal sad!")
 		}
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if skillLevel >= 3 {
@@ -120,19 +112,21 @@ func Portal(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		if rest == "set" {
 			user.Character.SetSetting("portal", strconv.Itoa(user.Character.RoomId))
 
-			response.SendUserMessage(userId, "You enscribe a glowing pentagram on the ground with your finger, which then fades away. Your portals now lead to this area.", true)
-			response.SendRoomMessage(user.Character.RoomId,
+			user.SendText("You enscribe a glowing pentagram on the ground with your finger, which then fades away. Your portals now lead to this area.")
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> enscribes a glowing pentagram on the ground with their finger. It quickly fades away.`, user.Character.Name),
-				true)
+				userId,
+			)
 		}
 
 		if rest == "unset" || rest == "clear" {
 			user.Character.SetSetting("portal", "")
 
-			response.SendUserMessage(userId, "You draw an arcane symbol in the air with your finger. Your portals now lead to their default location.", true)
-			response.SendRoomMessage(user.Character.RoomId,
+			user.SendText("You draw an arcane symbol in the air with your finger. Your portals now lead to their default location.")
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> draws a shape in the air with their finger. The floor trembles mildly, but then returns to normal.`, user.Character.Name),
-				true)
+				userId,
+			)
 		}
 	}
 
@@ -143,21 +137,20 @@ func Portal(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			// Load current room details
 			targetRoom := rooms.LoadRoom(portalTargetRoomId)
 			if targetRoom == nil {
-				return response, fmt.Errorf(`room %d not found`, portalTargetRoomId)
+				return false, fmt.Errorf(`room %d not found`, portalTargetRoomId)
 			}
 
 			if portalTargetRoomId == user.Character.RoomId {
-				response.SendUserMessage(userId, "You can't open a portal to the room you're already in!", true)
-				response.Handled = true
-				return response, nil
+				user.SendText("You can't open a portal to the room you're already in!")
+				return true, nil
 			}
 
 			if !user.Character.TryCooldown(skills.Portal.String(), 10) {
-				response.SendUserMessage(userId,
+				user.SendText(
 					fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Portal.String())),
-					true)
-				response.Handled = true
-				return response, errors.New(`you're doing that too often`)
+				)
+
+				return true, errors.New(`you're doing that too often`)
 			}
 
 			// Check whether they already have a portal open, and if so, shut it down.
@@ -174,9 +167,9 @@ func Portal(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 					if tmpExit, found := r1.FindTemporaryExitByUserId(userId); found {
 						if r1.RemoveTemporaryExit(tmpExit) {
-							response.SendRoomMessage(r1.RoomId,
+							r1.SendText(
 								fmt.Sprintf("Suddenly, the %s before you snaps closed, leaving no evidence it ever existed.", templates.GlowingPortal),
-								true)
+							)
 							oldPortalsRemoved = true
 						}
 					}
@@ -186,16 +179,16 @@ func Portal(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 					if tmpExit, found := r2.FindTemporaryExitByUserId(userId); found {
 						if r2.RemoveTemporaryExit(tmpExit) {
-							response.SendRoomMessage(r2.RoomId,
+							r2.SendText(
 								fmt.Sprintf("Suddenly, the %s before you snaps closed, leaving no evidence it ever existed.", templates.GlowingPortal),
-								true)
+							)
 							oldPortalsRemoved = true
 						}
 					}
 				}
 
 				if oldPortalsRemoved {
-					response.SendUserMessage(userId, "Your old portals snap shut.", true)
+					user.SendText("Your old portals snap shut.")
 				}
 
 				user.Character.SetSetting("portal:open", "")
@@ -214,34 +207,32 @@ func Portal(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 			// Spawn a portal in the room that leads to the portal location
 			if !room.AddTemporaryExit(newPortalExitName, newPortal) {
-				response.SendUserMessage(userId, "Something went wrong. That's the problem with portal!", true)
-				response.Handled = true
-				return response, fmt.Errorf("failed to add temporary exit to room")
+				user.SendText("Something went wrong. That's the problem with portal!")
+				return true, fmt.Errorf("failed to add temporary exit to room")
 			}
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf("You trace the shape of a doorway in front of you with your finger, which becomes a %s to another area.", templates.GlowingPortal),
-				true)
-			response.SendRoomMessage(user.Character.RoomId,
+			)
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> traces the shape of a doorway with their finger, and a %s appears!`, user.Character.Name, templates.GlowingPortal),
-				true)
+				userId,
+			)
 
 			// Modify it for this room
 			newPortal.RoomId = user.Character.RoomId
 
 			if !targetRoom.AddTemporaryExit(newPortalExitName, newPortal) {
-				response.SendUserMessage(userId, "Something went wrong. That's the problem with portal!", true)
-				response.Handled = true
-				return response, fmt.Errorf("failed to add temporary exit to room")
+				user.SendText("Something went wrong. That's the problem with portal!")
+				return true, fmt.Errorf("failed to add temporary exit to room")
 			}
 
-			response.SendRoomMessage(portalTargetRoomId,
+			targetRoom.SendText(
 				fmt.Sprintf("A %s suddenly appears!", templates.GlowingPortal),
-				true)
+			)
 
 			user.Character.SetSetting("portal:open", fmt.Sprintf("%d:%d", user.Character.RoomId, portalTargetRoomId))
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

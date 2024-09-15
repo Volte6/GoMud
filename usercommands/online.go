@@ -9,12 +9,15 @@ import (
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Online(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
+func Online(rest string, userId int) (bool, error) {
 
-	response := NewUserCommandResponse(userId)
+	// Load user details
+	user := users.GetByUserId(userId)
+	if user == nil { // Something went wrong. User not found.
+		return false, fmt.Errorf("user %d not found", userId)
+	}
 
 	headers := []string{`Name`, `Level`, `Alignment`, `Profession`, `Online`, `Role`}
 
@@ -29,11 +32,11 @@ func Online(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 	userCt := 0
 	for _, uid := range users.GetOnlineUserIds() {
 
-		user := users.GetByUserId(uid)
+		u := users.GetByUserId(uid)
 
-		if user != nil {
+		if u != nil {
 
-			connTime := user.GetConnectTime()
+			connTime := u.GetConnectTime()
 
 			// subtract 3 hours
 			//connTime = connTime.Add(-2 * time.Hour)
@@ -56,28 +59,28 @@ func Online(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 			userCt++
 			row := []string{
-				user.Character.Name,
-				strconv.Itoa(user.Character.Level),
-				user.Character.AlignmentName(),
-				skills.GetProfession(user.Character.GetAllSkillRanks()),
+				u.Character.Name,
+				strconv.Itoa(u.Character.Level),
+				u.Character.AlignmentName(),
+				skills.GetProfession(u.Character.GetAllSkillRanks()),
 				timeStr,
-				user.Permission,
+				u.Permission,
 			}
 
 			formatting := []string{
 				`<ansi fg="username">%s</ansi>`,
 				`<ansi fg="red">%s</ansi>`,
-				`<ansi fg="` + user.Character.AlignmentName() + `">%s</ansi>`,
+				`<ansi fg="` + u.Character.AlignmentName() + `">%s</ansi>`,
 				`<ansi fg="white-bold">%s</ansi>`,
 				`<ansi fg="magenta">%s</ansi>`,
-				`<ansi fg="role-` + user.Permission + `-bold">%s</ansi>`,
+				`<ansi fg="role-` + u.Permission + `-bold">%s</ansi>`,
 			}
 
 			allFormatting = append(allFormatting, formatting)
 
-			if user.Permission == users.PermissionAdmin {
+			if u.Permission == users.PermissionAdmin {
 				rowsAdmin = append(rowsAdmin, row)
-			} else if user.Permission == users.PermissionMod {
+			} else if u.Permission == users.PermissionMod {
 				rowsMod = append(rowsMod, row)
 			} else {
 				rowsUser = append(rowsUser, row)
@@ -97,8 +100,7 @@ func Online(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 	onlineResultsTable := templates.GetTable(tableTitle, headers, rows, allFormatting...)
 	tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
-	response.SendUserMessage(userId, tplTxt, false)
+	user.SendText(tplTxt)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

@@ -33,7 +33,7 @@ type Race struct {
 	RaceId        int
 	Name          string
 	Description   string
-	NightVision   bool
+	BuffIds       []int // Permabuffs this race always has
 	Size          Size
 	TNLScale      float32
 	UnarmedName   string

@@ -3,8 +3,8 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 var (
@@ -92,37 +92,41 @@ var (
 	}
 )
 
-func Emote(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Emote(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
+	}
+
+	// Load current room details
+	room := rooms.LoadRoom(user.Character.RoomId)
+	if room == nil {
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if len(rest) == 0 {
-		response.SendUserMessage(userId, "You emote.", true)
-		response.SendRoomMessage(user.Character.RoomId,
+		user.SendText("You emote.")
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> emotes.`, user.Character.Name),
-			true)
-		response.Handled = true
-		return response, nil
+			userId,
+		)
+		return true, nil
 	}
 
 	if rest[0] == '@' && len(rest) > 1 {
 		rest = rest[1:]
 	} else {
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`You emote: <ansi fg="username">%s</ansi> <ansi fg="blue">%s</ansi>`, user.Character.Name, rest),
-			true)
+		)
 	}
 
-	response.SendRoomMessage(user.Character.RoomId,
+	room.SendText(
 		fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="blue">%s</ansi>`, user.Character.Name, rest),
-		true)
+		userId,
+	)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

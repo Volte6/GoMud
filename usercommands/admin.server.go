@@ -19,21 +19,18 @@ var (
 	memoryReportCache = map[string]util.MemoryResult{}
 )
 
-func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Server(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.server", nil)
-		response.SendUserMessage(userId, infoOutput, false)
-		response.Handled = true
-		return response, nil
+		user.SendText(infoOutput)
+		return true, nil
 	}
 
 	args := util.SplitButRespectQuotes(rest)
@@ -47,7 +44,7 @@ func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 			rows := [][]string{}
 			formatting := []string{`<ansi fg="yellow-bold">%s</ansi>`, `<ansi fg="red-bold">%s</ansi>`}
 
-			response.SendUserMessage(userId, ``, true)
+			user.SendText(``)
 
 			cfgData := configs.GetConfig().AllConfigData()
 			cfgKeys := make([]string, 0, len(cfgData))
@@ -64,24 +61,21 @@ func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 			settingsTable := templates.GetTable("Server Settings", headers, rows, formatting)
 			tplTxt, _ := templates.Process("tables/generic", settingsTable)
-			response.SendUserMessage(userId, tplTxt, true)
+			user.SendText(tplTxt)
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		if args[0] == "day" {
 			gametime.SetToDay(-1)
 			gd := gametime.GetDate()
-			response.SendUserMessage(userId, `Time set to `+gd.String(), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`Time set to ` + gd.String())
+			return true, nil
 		} else if args[0] == "night" {
 			gametime.SetToNight(-1)
 			gd := gametime.GetDate()
-			response.SendUserMessage(userId, `Time set to `+gd.String(), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`Time set to ` + gd.String())
+			return true, nil
 		} else if args[0] == "time" && len(args) > 1 {
 
 			timeStr := strings.Join(args[1:], ` `)
@@ -103,31 +97,27 @@ func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 			gametime.SetTime(hour, minutes)
 			gd := gametime.GetDate()
-			response.SendUserMessage(userId, `Time set to `+gd.String(), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`Time set to ` + gd.String())
+			return true, nil
 		}
 
 		configName := strings.ToLower(args[0])
 		configValue := strings.Join(args[1:], ` `)
 
 		if err := configs.SetVal(configName, configValue); err != nil {
-			response.SendUserMessage(userId, fmt.Sprintf(`config change error: %s=%s (%s)`, configName, configValue, err), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf(`config change error: %s=%s (%s)`, configName, configValue, err))
+			return true, nil
 		}
 
-		response.SendUserMessage(userId, fmt.Sprintf(`config changed: %s=%s`, configName, configValue), true)
+		user.SendText(fmt.Sprintf(`config changed: %s=%s`, configName, configValue))
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if rest == "reload-ansi" {
 		templates.LoadAliases()
-		response.SendUserMessage(userId, `ansi aliases reloaded`, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`ansi aliases reloaded`)
+		return true, nil
 	}
 
 	if rest == "ansi-passthrough" {
@@ -155,9 +145,9 @@ func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		//
 		// General Go stats
 		//
-		response.SendUserMessage(userId, ``, true)
-		response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="yellow-bold">IP/Port:</ansi>    <ansi fg="red">%s</ansi>`, util.GetServerAddress()), true)
-		response.SendUserMessage(userId, ``, true)
+		user.SendText(``)
+		user.SendText(fmt.Sprintf(`<ansi fg="yellow-bold">IP/Port:</ansi>    <ansi fg="red">%s</ansi>`, util.GetServerAddress()))
+		user.SendText(``)
 
 		//
 		// Special timing related stats
@@ -191,7 +181,7 @@ func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		tblData := templates.GetTable(`Timer Stats`, headers, rows, formatting)
 		tplTxt, _ := templates.Process("tables/generic", tblData)
-		response.SendUserMessage(userId, tplTxt, true)
+		user.SendText(tplTxt)
 
 		//
 		// Alternative rendering
@@ -305,9 +295,8 @@ func Server(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 		memRepRows = append(memRepRows, rowData)
 		memRepTblData := templates.GetTable(`Specific Memory`, memRepHeaders, memRepRows, memRepFormatting)
 		memRepTxt, _ := templates.Process("tables/generic", memRepTblData)
-		response.SendUserMessage(userId, memRepTxt, true)
+		user.SendText(memRepTxt)
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

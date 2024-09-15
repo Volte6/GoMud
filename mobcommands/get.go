@@ -11,33 +11,29 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Get(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Get(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) == 0 {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if args[0] == "all" {
 		if room.Gold > 0 {
-			r, _ := Get("gold", mobId, cmdQueue)
-			response.AbsorbMessages(r)
+			Get("gold", mobId)
 		}
 
 		if len(room.Items) > 0 {
@@ -47,13 +43,11 @@ func Get(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 			}
 
 			for _, item := range iCopies {
-				r, _ := Get(item.Name(), mobId, cmdQueue)
-				response.AbsorbMessages(r)
+				Get(item.Name(), mobId)
 			}
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if args[0] == "gold" {
@@ -66,13 +60,10 @@ func Get(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 			mob.Character.Gold += goldAmt
 			room.Gold -= goldAmt
 
-			response.SendRoomMessage(room.RoomId,
-				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> picks up <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, goldAmt),
-				true)
+			room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> picks up <ansi fg="gold">%d gold</ansi>.`, mob.Character.Name, goldAmt))
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	getFromStash := false
@@ -110,11 +101,9 @@ func Get(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue,
 		room.RemoveItem(matchItem, getFromStash)
 		mob.Character.StoreItem(matchItem)
 
-		response.SendRoomMessage(mob.Character.RoomId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()),
-			true)
+		room.SendText(
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

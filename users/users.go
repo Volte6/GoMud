@@ -393,6 +393,11 @@ func SaveUser(u UserRecord) error {
 		slog.Info("SaveUser()", "username", u.Username, "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
 	}()
 
+	// Don't save if they haven't entered the real game world yet.
+	if u.Character.RoomId < 0 {
+		return errors.New("Has not started game.")
+	}
+
 	memoryString := ``
 	for _, rId := range u.Character.GetRoomMemory() {
 		memoryString += strconv.Itoa(rId) + ","

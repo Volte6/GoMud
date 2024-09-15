@@ -7,23 +7,20 @@ import (
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Befriend(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Befriend(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if rest == `revert` {
@@ -38,8 +35,7 @@ func Befriend(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQ
 
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	playerId, _ := room.FindByName(rest)
@@ -52,16 +48,10 @@ func Befriend(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQ
 			charmedUser.Character.TrackCharmed(mob.InstanceId, true)
 		}
 
-		//response.SendUserMessage(playerId,
-		//	fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks at you with puppy dog eyes.`, mob.Character.Name),
-		//	true)
-
-		response.SendRoomMessage(room.RoomId,
-			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks very friendly.`, mob.Character.Name),
-			true)
+		room.SendText(
+			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> looks very friendly.`, mob.Character.Name))
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

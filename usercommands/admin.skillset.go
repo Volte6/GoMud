@@ -11,14 +11,12 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Skillset(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Skillset(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// args should look like one of the following:
@@ -30,9 +28,8 @@ func Skillset(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 	if len(args) < 2 {
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.skillset", nil)
-		response.SendUserMessage(userId, infoOutput, false)
-		response.Handled = true
-		return response, nil
+		user.SendText(infoOutput)
+		return true, nil
 	}
 
 	skillName := strings.ToLower(args[0])
@@ -43,9 +40,8 @@ func Skillset(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 	if found {
 		user.Character.SetSkill(skillName, skillValueInt)
 	} else {
-		response.SendUserMessage(userId, fmt.Sprintf(`Skill "%s" not found.`, skillName), true)
+		user.SendText(fmt.Sprintf(`Skill "%s" not found.`, skillName))
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

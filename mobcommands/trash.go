@@ -4,17 +4,14 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/util"
 )
 
-func Trash(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Trash(rest string, mobId int) (bool, error) {
 
 	// Load mob details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Check whether the user has an item in their inventory that matches
@@ -28,7 +25,7 @@ func Trash(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 		/*
 			isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 			if !isSneaking {
-				response.SendRoomMessage(mob.Character.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> destroys <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()),
 					true)
 			}
@@ -36,6 +33,5 @@ func Trash(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

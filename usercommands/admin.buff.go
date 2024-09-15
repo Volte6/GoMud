@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
@@ -15,14 +16,12 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Buff(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Buff(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// args should look like one of the following:
@@ -65,7 +64,7 @@ func Buff(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 			searchResultsTable := templates.GetTable("Search Results", headers, rows)
 			tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
-			response.SendUserMessage(userId, tplTxt, false)
+			user.SendText(tplTxt)
 		} else {
 
 			targetUserId := 0
@@ -76,7 +75,7 @@ func Buff(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 
 				room := rooms.LoadRoom(user.Character.RoomId)
 				if room == nil {
-					return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+					return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 				}
 
 				targetUserId, targetMobInstanceId = room.FindByName(args[0])
@@ -103,9 +102,8 @@ func Buff(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 			}
 
 			if buffId == 0 {
-				response.SendUserMessage(userId, "buffId must be an integer > 0.", true)
-				response.Handled = true
-				return response, nil
+				user.SendText("buffId must be an integer > 0.")
+				return true, nil
 
 			}
 
@@ -116,15 +114,19 @@ func Buff(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					if buffSpec := buffs.GetBuffSpec(buffId); buffSpec != nil {
 
 						// Apply the buff
-						cmdQueue.QueueBuff(targetUserId, 0, buffId)
-						response.SendUserMessage(userId, fmt.Sprintf("Buff %d (%s) applied to %s.", buffId, buffSpec.Name, targetUser.Character.Name), true)
+						events.AddToQueue(events.Buff{
+							UserId:        targetUserId,
+							MobInstanceId: 0,
+							BuffId:        buffId,
+						})
+
+						user.SendText(fmt.Sprintf("Buff %d (%s) applied to %s.", buffId, buffSpec.Name, targetUser.Character.Name))
 
 					} else {
-						response.SendUserMessage(userId, fmt.Sprintf("Buff Id %d not found.", buffId), true)
+						user.SendText(fmt.Sprintf("Buff Id %d not found.", buffId))
 					}
 
-					response.Handled = true
-					return response, nil
+					return true, nil
 				}
 			}
 
@@ -135,28 +137,30 @@ func Buff(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueu
 					if buffSpec := buffs.GetBuffSpec(buffId); buffSpec != nil {
 
 						// Apply the buff
-						cmdQueue.QueueBuff(0, targetMobInstanceId, buffSpec.BuffId)
+						events.AddToQueue(events.Buff{
+							UserId:        0,
+							MobInstanceId: targetMobInstanceId,
+							BuffId:        buffId,
+						})
 
-						response.SendUserMessage(userId, fmt.Sprintf("Buff %d (%s) applied to %s.", buffSpec.BuffId, buffSpec.Name, targetMob.Character.Name), true)
+						user.SendText(fmt.Sprintf("Buff %d (%s) applied to %s.", buffSpec.BuffId, buffSpec.Name, targetMob.Character.Name))
 
 					} else {
-						response.SendUserMessage(userId, fmt.Sprintf("Buff Id %d not found.", buffId), true)
+						user.SendText(fmt.Sprintf("Buff Id %d not found.", buffId))
 					}
 
-					response.Handled = true
-					return response, nil
+					return true, nil
 				}
 			}
 
 		}
 	}
 
-	response.SendUserMessage(userId, "target not found.", true)
+	user.SendText("target not found.")
 
 	// send some sort of help info?
 	infoOutput, _ := templates.Process("admincommands/help/command.buff", nil)
-	response.SendUserMessage(userId, infoOutput, false)
+	user.SendText(infoOutput)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

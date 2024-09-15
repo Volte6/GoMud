@@ -13,20 +13,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Party(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(rest)
@@ -45,24 +43,22 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		// check if they are already part of a party
 		if currentParty != nil {
 			if currentParty.Invited(userId) {
-				response.SendUserMessage(userId, `You already have a pending party invite. Try <ansi fg="command">party accept/decline</ansi> first`, true)
+				user.SendText(`You already have a pending party invite. Try <ansi fg="command">party accept/decline</ansi> first`)
 			} else if currentParty.IsLeader(userId) {
-				response.SendUserMessage(userId, `You already own a party Type <ansi fg="command">party list</ansi> for more info.`, true)
+				user.SendText(`You already own a party Type <ansi fg="command">party list</ansi> for more info.`)
 			} else {
-				response.SendUserMessage(userId, `You are already party of a party.`, true)
+				user.SendText(`You are already party of a party.`)
 			}
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		if currentParty = parties.New(userId); currentParty != nil {
-			response.SendUserMessage(userId, `You started a new party!`, true)
+			user.SendText(`You started a new party!`)
 		} else {
-			response.SendUserMessage(userId, `Something went wrong.`, true)
+			user.SendText(`Something went wrong.`)
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 	// Done with create
 
@@ -73,9 +69,8 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	if partyCommand == `invite` {
 
 		if rest == `` {
-			response.SendUserMessage(userId, `Invite who?`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`Invite who?`)
+			return true, nil
 		}
 
 		// Not in a party? Create one.
@@ -84,36 +79,32 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		}
 
 		if !currentParty.IsLeader(userId) {
-			response.SendUserMessage(userId, `You are not the leader of your party.`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`You are not the leader of your party.`)
+			return true, nil
 		}
 
 		invitePlayerId, mobInstId := room.FindByName(rest)
 
 		if invitePlayerId == 0 && mobInstId == 0 {
-			response.SendUserMessage(userId, fmt.Sprintf(`%s not found.`, rest), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf(`%s not found.`, rest))
+			return true, nil
 		}
 
 		if invitedParty := parties.Get(invitePlayerId); invitedParty != nil {
-			response.SendUserMessage(userId, `That player is already in a party.`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`That player is already in a party.`)
+			return true, nil
 		}
 
 		invitedUser := users.GetByUserId(invitePlayerId)
 
 		if invitedUser != nil && currentParty.InvitePlayer(invitePlayerId) {
-			response.SendUserMessage(userId, fmt.Sprintf(`You invited <ansi fg="username">%s</ansi> to your party.`, invitedUser.Character.Name), true)
-			response.SendUserMessage(invitePlayerId, fmt.Sprintf(`<ansi fg="username">%s</ansi> invited you to their party. Type <ansi fg="command">party accept</ansi> or <ansi fg="command">party decline</ansi> to respond.`, user.Character.Name), true)
+			user.SendText(fmt.Sprintf(`You invited <ansi fg="username">%s</ansi> to your party.`, invitedUser.Character.Name))
+			invitedUser.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> invited you to their party. Type <ansi fg="command">party accept</ansi> or <ansi fg="command">party decline</ansi> to respond.`, user.Character.Name))
 		} else {
-			response.SendUserMessage(userId, `Something went wrong.`, true)
+			user.SendText(`Something went wrong.`)
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	//
@@ -121,40 +112,42 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	//
 
 	if currentParty == nil {
-		response.SendUserMessage(userId, `You are not attached to a party.`, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`You are not attached to a party.`)
+		return true, nil
 	}
 
 	if partyCommand == `accept` || partyCommand == `join` {
 
 		if currentParty.AcceptInvite(userId) {
 
-			response.SendUserMessage(userId, `You joined the party!`, true)
+			user.SendText(`You joined the party!`)
 			for _, uid := range currentParty.UserIds {
 				if uid == userId {
 					continue
 				}
-				response.SendUserMessage(uid, fmt.Sprintf(`<ansi fg="username">%s</ansi> joined the party!`, user.Character.Name), true)
+				if u := users.GetByUserId(uid); u != nil {
+					u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> joined the party!`, user.Character.Name))
+				}
 			}
 
 		} else {
-			response.SendUserMessage(userId, `Something went wrong.`, true)
+			user.SendText(`Something went wrong.`)
 		}
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if partyCommand == `decline` {
 
 		if currentParty.DeclineInvite(userId) {
-			response.SendUserMessage(currentParty.LeaderUserId, fmt.Sprintf(`<ansi fg="username">%s</ansi> declined the invitation.`, user.Character.Name), true)
-			response.SendUserMessage(userId, `You decline the invitation.`, true)
+
+			if u := users.GetByUserId(currentParty.LeaderUserId); u != nil {
+				u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> declined the invitation.`, user.Character.Name))
+			}
+			user.SendText(`You decline the invitation.`)
 		} else {
-			response.SendUserMessage(userId, `Something went wrong.`, true)
+			user.SendText(`Something went wrong.`)
 		}
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if partyCommand == `list` {
@@ -270,18 +263,17 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 			partyTableData := templates.GetTable(`Party Members`, headers, rows, formatting...)
 			partyTxt, _ := templates.Process("tables/generic", partyTableData)
-			response.SendUserMessage(userId, partyTxt, true)
+			user.SendText(partyTxt)
 
 			if isInvited {
-				response.SendUserMessage(userId, `Type <ansi fg="command">party accept/decline</ansi> to finalize your party membership.`, true)
+				user.SendText(`Type <ansi fg="command">party accept/decline</ansi> to finalize your party membership.`)
 			}
 		}
 	}
 
 	if currentParty.Invited(userId) {
-		response.SendUserMessage(userId, `You haven't accepted an invitation to the party.`, true)
-		response.Handled = true
-		return response, nil
+		user.SendText(`You haven't accepted an invitation to the party.`)
+		return true, nil
 	}
 
 	//
@@ -294,24 +286,23 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		} else if rest == `off` {
 			autoAttackOn = false
 		} else {
-			response.SendUserMessage(userId, `Usage: <ansi fg="command">party autoattack [on/off]</ansi>`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`Usage: <ansi fg="command">party autoattack [on/off]</ansi>`)
+			return true, nil
 		}
 
 		wasOnBefore := currentParty.SetAutoAttack(userId, autoAttackOn)
 
 		if autoAttackOn {
 			if wasOnBefore {
-				response.SendUserMessage(userId, `You already have auto-attack enabled.`, true)
+				user.SendText(`You already have auto-attack enabled.`)
 			} else {
-				response.SendUserMessage(userId, `You are now auto-attacking with your party.`, true)
+				user.SendText(`You are now auto-attacking with your party.`)
 			}
 		} else {
 			if wasOnBefore {
-				response.SendUserMessage(userId, `You are no longer auto-attacking with your party.`, true)
+				user.SendText(`You are no longer auto-attacking with your party.`)
 			} else {
-				response.SendUserMessage(userId, `You already have auto-attacking disabled.`, true)
+				user.SendText(`You already have auto-attacking disabled.`)
 			}
 		}
 	}
@@ -321,33 +312,55 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		if currentParty.IsLeader(userId) {
 
 			if len(currentParty.UserIds) <= 1 {
-				response.SendUserMessage(userId, `You disbanded the party.`, true)
+				user.SendText(`You disbanded the party.`)
 				currentParty.Disband()
-				response.Handled = true
-				return response, nil
+				return true, nil
 			}
+
+			currentParty.LeaderUserId = 0
 
 			// promote someone else to leader
 			for _, uid := range currentParty.UserIds {
 				if uid == userId {
 					continue
 				}
-				currentParty.LeaderUserId = uid
+
 				newLeaderUser := users.GetByUserId(uid)
-				response.SendUserMessage(uid, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now the leader of the party.`, newLeaderUser.Character.Name), true)
+
+				if newLeaderUser == nil {
+					continue
+				}
+
+				currentParty.LeaderUserId = uid
+
 				break
+			}
+
+			if currentParty.LeaderUserId > 0 {
+				newLeaderUser := users.GetByUserId(currentParty.LeaderUserId)
+				for _, uid := range currentParty.UserIds {
+					if u := users.GetByUserId(uid); u != nil {
+						if currentParty.LeaderUserId == uid {
+							u.SendText(`You are now the leader of the party.`)
+						} else {
+							u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is now the leader of the party.`, newLeaderUser.Character.Name))
+						}
+					}
+				}
 			}
 		}
 
 		currentParty.Leave(userId)
 
-		response.SendUserMessage(userId, `You left the party.`, true)
+		user.SendText(`You left the party.`)
 
 		for _, uid := range currentParty.UserIds {
 			if uid == userId {
 				continue
 			}
-			response.SendUserMessage(uid, fmt.Sprintf(`<ansi fg="username">%s</ansi> left the party.`, user.Character.Name), true)
+			if u := users.GetByUserId(uid); u != nil {
+				u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> left the party.`, user.Character.Name))
+			}
 		}
 
 	}
@@ -355,35 +368,36 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	if partyCommand == `disband` || partyCommand == `stop` {
 
 		if !currentParty.IsLeader(userId) {
-			response.SendUserMessage(userId, `You are not the leader of your party.`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`You are not the leader of your party.`)
+			return true, nil
 		}
 
 		for _, uid := range currentParty.UserIds {
 			if uid == userId {
 				continue
 			}
-			response.SendUserMessage(uid, fmt.Sprintf(`<ansi fg="username">%s</ansi> disbanded the party.`, user.Character.Name), true)
+			if u := users.GetByUserId(uid); u != nil {
+				u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> disbanded the party.`, user.Character.Name))
+			}
 		}
 		for _, uid := range currentParty.InviteUserIds {
-			response.SendUserMessage(uid, fmt.Sprintf(`<ansi fg="username">%s</ansi> disbanded the party.`, user.Character.Name), true)
+			if u := users.GetByUserId(uid); u != nil {
+				u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> disbanded the party.`, user.Character.Name))
+			}
 		}
 
 		currentParty.Disband()
 
-		response.SendUserMessage(userId, `You disbanded the party.`, true)
+		user.SendText(`You disbanded the party.`)
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	if partyCommand == `kick` {
 
 		if !currentParty.IsLeader(userId) {
-			response.SendUserMessage(userId, `You are not the leader of your party.`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`You are not the leader of your party.`)
+			return true, nil
 		}
 
 		allMembers := []string{}
@@ -403,28 +417,30 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		}
 
 		if matchUser == `` {
-			response.SendUserMessage(userId, fmt.Sprintf(`%s not found.`, rest), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf(`%s not found.`, rest))
+			return true, nil
 		}
 
 		kickUserId := memberIds[matchUser]
 
 		currentParty.Leave(kickUserId)
 
-		response.SendUserMessage(kickUserId, `You were kicked from the party.`, true)
+		if u := users.GetByUserId(kickUserId); u != nil {
+			u.SendText(`You were kicked from the party.`)
+		}
 
 		for _, uid := range currentParty.UserIds {
-			response.SendUserMessage(uid, fmt.Sprintf(`<ansi fg="username">%s</ansi> was kicked from the party.`, matchUser), true)
+			if u := users.GetByUserId(uid); u != nil {
+				u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> was kicked from the party.`, matchUser))
+			}
 		}
 	}
 
 	if partyCommand == `promote` {
 
 		if !currentParty.IsLeader(userId) {
-			response.SendUserMessage(userId, `You are not the leader of your party.`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`You are not the leader of your party.`)
+			return true, nil
 		}
 
 		allMembers := []string{}
@@ -444,20 +460,23 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		}
 
 		if matchUser == `` {
-			response.SendUserMessage(userId, fmt.Sprintf(`%s not found.`, rest), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf(`%s not found.`, rest))
+			return true, nil
 		}
 
 		promoteUserId := memberIds[matchUser]
 
 		currentParty.LeaderUserId = promoteUserId
 
-		response.SendUserMessage(promoteUserId, `You have been promoted to party leader.`, true)
+		if u := users.GetByUserId(promoteUserId); u != nil {
+			u.SendText(`You have been promoted to party leader.`)
+		}
 
 		for _, uid := range currentParty.UserIds {
 			if uid != promoteUserId {
-				response.SendUserMessage(uid, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now the party leader.`, matchUser), true)
+				if u := users.GetByUserId(uid); u != nil {
+					u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is now the party leader.`, matchUser))
+				}
 			}
 		}
 
@@ -466,21 +485,21 @@ func Party(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	if partyCommand == `chat` || partyCommand == `say` {
 
 		if len(rest) == 0 {
-			response.SendUserMessage(userId, `What do you want to say?`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`What do you want to say?`)
+			return true, nil
 		}
 
 		for _, uId := range currentParty.GetMembers() {
 			if uId == userId {
 				continue
 			}
-			response.SendUserMessage(uId, fmt.Sprintf(`<ansi fg="magenta">(party)</ansi> <ansi fg="username">%s</ansi> says, "<ansi fg="yellow">%s</ansi>`, user.Character.Name, rest), true)
+			if u := users.GetByUserId(uId); u != nil {
+				u.SendText(fmt.Sprintf(`<ansi fg="magenta">(party)</ansi> <ansi fg="username">%s</ansi> says, "<ansi fg="yellow">%s</ansi>`, user.Character.Name, rest))
+			}
 		}
 
-		response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="magenta">(party)</ansi> You say, "<ansi fg="yellow">%s</ansi>"`, rest), true)
+		user.SendText(fmt.Sprintf(`<ansi fg="magenta">(party)</ansi> You say, "<ansi fg="yellow">%s</ansi>"`, rest))
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

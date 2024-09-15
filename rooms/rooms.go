@@ -12,6 +12,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
@@ -224,6 +225,51 @@ func ParseExit(exitStr string) (roomId int, zone string) {
 		roomId, _ = strconv.Atoi(exitStr)
 	}
 	return roomId, zone
+}
+
+func (r *Room) SendText(txt string, excludeUserIds ...int) {
+
+	events.AddToQueue(events.Message{
+		RoomId:         r.RoomId,
+		Text:           txt + "\n",
+		ExcludeUserIds: excludeUserIds,
+		IsQuiet:        false,
+	})
+
+}
+
+func (r *Room) SendTextToExits(txt string, isQuiet bool, excludeUserIds ...int) {
+
+	testExitIds := []int{}
+	for _, rExit := range r.Exits {
+		testExitIds = append(testExitIds, rExit.RoomId)
+	}
+	for _, tExit := range r.ExitsTemp {
+		testExitIds = append(testExitIds, tExit.RoomId)
+	}
+
+	for _, roomId := range testExitIds {
+
+		tgtRoom := LoadRoom(roomId)
+		if tgtRoom == nil {
+			continue
+		}
+
+		for exitName, tExit := range tgtRoom.Exits {
+			if tExit.RoomId != r.RoomId {
+				continue
+			}
+
+			events.AddToQueue(events.Message{
+				RoomId:         tgtRoom.RoomId,
+				Text:           fmt.Sprintf(`(From <ansi fg="exit">%s</ansi>) `, exitName) + txt + "\n",
+				IsQuiet:        isQuiet,
+				ExcludeUserIds: excludeUserIds,
+			})
+		}
+
+	}
+
 }
 
 func (r *Room) SetLongTermData(key string, value any) {
@@ -622,6 +668,8 @@ func (r *Room) RemoveMob(mobInstanceId int) {
 func (r *Room) AddItem(item items.Item, stash bool) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
+
+	item.Validate()
 
 	if stash {
 		r.Stash = append(r.Stash, item)
@@ -1914,6 +1962,22 @@ func (r *Room) Validate() error {
 		if _, found := GetBiome(r.Biome); !found {
 			return fmt.Errorf("invalid biome: %s", r.Biome)
 		}
+	}
+
+	// Make sure all items are validated (and have uids)
+	for i := range r.Items {
+		r.Items[i].Validate()
+	}
+
+	for i := range r.Stash {
+		r.Stash[i].Validate()
+	}
+
+	for cName, c := range r.Containers {
+		for i := range c.Items {
+			c.Items[i].Validate()
+		}
+		r.Containers[cName] = c
 	}
 
 	return nil

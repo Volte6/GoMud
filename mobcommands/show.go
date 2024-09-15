@@ -12,19 +12,18 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Show(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-	response := NewMobCommandResponse(mobId)
+func Show(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	rest = util.StripPrepositions(rest)
@@ -32,8 +31,7 @@ func Show(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	var showItem items.Item = items.Item{}
@@ -47,8 +45,7 @@ func Show(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	showItem, found = mob.Character.FindInBackpack(objectName)
 
 	if !found {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	playerId, mobId := room.FindByName(targetName)
@@ -63,24 +60,22 @@ func Show(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 		if showItem.ItemId > 0 {
 
 			// Tell the Showee
-			response.SendUserMessage(targetUser.UserId,
+			targetUser.SendText(
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows you their <ansi fg="item">%s</ansi>.`, mob.Character.Name, showItem.DisplayName()),
-				true)
+			)
 
-			response.SendUserMessage(targetUser.UserId,
-				"\n"+showItem.GetLongDescription()+"\n",
-				true)
+			targetUser.SendText(
+				"\n" + showItem.GetLongDescription() + "\n",
+			)
 
 			// Tell the rest of the room
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, mob.Character.Name, showItem.DisplayName(), targetUser.Character.Name),
-				true,
 				targetUser.UserId)
 
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 
 	}
 
@@ -97,18 +92,16 @@ func Show(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 			if showItem.ItemId > 0 {
 
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, showItem.DisplayName(), targetMob.Character.Name),
-					true)
+				)
 
 			}
 
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

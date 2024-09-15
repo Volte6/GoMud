@@ -10,23 +10,20 @@ import (
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
-func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Attack(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	attackPlayerId := 0
@@ -109,9 +106,8 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 	}
 
 	if attackMobInstanceId == 0 && attackPlayerId == 0 {
-		response.SendUserMessage(userId, "You attack the darkness!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You attack the darkness!")
+		return true, nil
 	}
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
@@ -130,9 +126,8 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 		if m != nil {
 			if m.Character.IsCharmed(userId) {
-				response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name), true)
-				response.Handled = true
-				return response, nil
+				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
+				return true, nil
 			}
 
 			if party := parties.Get(user.UserId); party != nil {
@@ -143,7 +138,9 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 						}
 						if partyUser := users.GetByUserId(id); partyUser != nil {
 							if partyUser.Character.RoomId == user.Character.RoomId {
-								cmdQueue.QueueCommand(partyUser.UserId, 0, fmt.Sprintf(`attack #%d`, attackMobInstanceId)) // # denotes a specific mob instanceId
+
+								partyUser.Command(fmt.Sprintf(`attack #%d`, attackMobInstanceId)) // # denotes a specific mob instanceId
+
 							}
 						}
 
@@ -153,20 +150,23 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 			user.Character.SetAggro(0, attackMobInstanceId, characters.DefaultAttack)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You prepare to enter into mortal combat with <ansi fg="mobname">%s</ansi>`, m.Character.Name),
-				true)
+			)
 
 			if !isSneaking {
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, user.Character.Name, m.Character.Name),
-					true)
+					userId,
+				)
 			}
 
 			for _, instId := range room.GetMobs(rooms.FindCharmed) {
 				if m := mobs.GetInstance(instId); m != nil {
 					if m.Character.Aggro == nil && m.Character.IsCharmed(userId) { // Charmed mobs help the player
-						cmdQueue.QueueCommand(0, instId, fmt.Sprintf(`attack #%d`, attackMobInstanceId)) // # denotes a specific mob instanceId
+
+						m.Command(fmt.Sprintf(`attack #%d`, attackMobInstanceId)) // # denotes a specific mob instanceId
+
 					}
 				}
 			}
@@ -176,9 +176,8 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 	} else if attackPlayerId > 0 {
 
 		if !configs.GetConfig().PVPEnabled {
-			response.SendUserMessage(userId, `PVP is currently disabled.`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`PVP is currently disabled.`)
+			return true, nil
 		}
 
 		p := users.GetByUserId(attackPlayerId)
@@ -187,9 +186,8 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
 				if partyInfo.IsMember(attackPlayerId) {
-					response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name), true)
-					response.Handled = true
-					return response, nil
+					user.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name))
+					return true, nil
 				}
 			}
 
@@ -201,7 +199,7 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 						}
 						if partyUser := users.GetByUserId(id); partyUser != nil {
 							if partyUser.Character.RoomId == user.Character.RoomId {
-								cmdQueue.QueueCommand(partyUser.UserId, 0, fmt.Sprintf(`attack @%d`, attackPlayerId)) // # denotes a specific mob instanceId
+								partyUser.Command(fmt.Sprintf(`attack @%d`, attackPlayerId)) // # denotes a specific mob instanceId
 							}
 						}
 					}
@@ -210,26 +208,27 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 			user.Character.SetAggro(attackPlayerId, 0, characters.DefaultAttack)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You prepare to enter into mortal combat with <ansi fg="username">%s</ansi>`, p.Character.Name),
-				true)
+			)
 
 			if !isSneaking {
 
-				response.SendUserMessage(attackPlayerId,
+				p.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight you!`, user.Character.Name),
-					true)
+				)
 
-				response.SendRoomMessage(room.RoomId,
+				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, user.Character.Name, p.Character.Name),
-					true,
 					userId, attackPlayerId)
 			}
 
 			for _, instId := range room.GetMobs(rooms.FindCharmed) {
 				if m := mobs.GetInstance(instId); m != nil {
 					if m.Character.Aggro == nil && m.Character.IsCharmed(userId) { // Charmed mobs help the player
-						cmdQueue.QueueCommand(0, instId, fmt.Sprintf(`attack @%d`, attackPlayerId)) // @ denotes a specific user id
+
+						m.Command(fmt.Sprintf(`attack @%d`, attackPlayerId)) // @ denotes a specific user id
+
 					}
 				}
 			}
@@ -238,6 +237,5 @@ func Attack(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

@@ -12,6 +12,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/events"
 
 	"github.com/volte6/mud/fileloader"
 	"github.com/volte6/mud/items"
@@ -219,6 +220,21 @@ func DestroyInstance(instanceId int) {
 
 func (m *Mob) ShorthandId() string {
 	return fmt.Sprintf(`#%d`, m.InstanceId)
+}
+
+func (m *Mob) Command(inputTxt string, waitTurns ...int) {
+
+	wt := 0
+	if len(waitTurns) > 0 {
+		wt = waitTurns[0]
+	}
+
+	events.AddToQueue(events.Input{
+		MobInstanceId: m.InstanceId,
+		InputText:     inputTxt,
+		WaitTurns:     wt,
+	})
+
 }
 
 func (m *Mob) IsTameable() bool {

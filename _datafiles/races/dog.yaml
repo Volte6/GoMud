@@ -1,6 +1,8 @@
 raceid: 11
 name: Dog
 description: A canine.
+buffids:
+  - 28 # Super hearing
 size: medium
 unarmedname: jaws
 tnlscale: 1

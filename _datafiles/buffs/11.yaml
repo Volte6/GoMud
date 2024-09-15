@@ -1,5 +1,5 @@
 buffid: 11
-name: touched
+name: Touched
 description: You've been touched by the Gods and receive a bonus to experience.
 roundinterval: 1
 triggercount: 100

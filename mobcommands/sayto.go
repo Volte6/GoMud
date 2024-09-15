@@ -11,38 +11,33 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func SayTo(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func SayTo(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	// Don't bother if no players are present
 	if room.PlayerCt() < 1 {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 	if len(args) < 2 {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	playerId, mobId := room.FindByName(args[0])
 	if playerId == 0 {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	toUser := users.GetByUserId(playerId)
@@ -51,12 +46,11 @@ func SayTo(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueu
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 
 	if isSneaking {
-		response.SendUserMessage(playerId, fmt.Sprintf(`someone says to you, "<ansi fg="yellow">%s</ansi>"`, rest), true)
+		toUser.SendText(fmt.Sprintf(`someone says to you, "<ansi fg="yellow">%s</ansi>"`, rest))
 	} else {
-		response.SendUserMessage(playerId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to you, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest), true)
-		response.SendRoomMessage(room.RoomId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to <ansi fg="username">%s</ansi>, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, toUser.Character.Name, rest), true)
+		toUser.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to you, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest))
+		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to <ansi fg="username">%s</ansi>, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, toUser.Character.Name, rest), mobId)
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

@@ -1,7 +1,8 @@
 raceid: 16
 name: golem
 description: Animated material
-nightvision: true
+buffids:
+  - 29 # Night Vision
 size: large
 unarmedname: fists
 tnlscale: 1

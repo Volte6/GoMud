@@ -5,7 +5,6 @@ import (
 
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 type SkillsOptions struct {
@@ -14,14 +13,12 @@ type SkillsOptions struct {
 	SkillCooldowns map[string]int
 }
 
-func Skills(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Skills(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	allSkills := user.Character.GetSkills()
@@ -37,15 +34,14 @@ func Skills(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQu
 	}
 
 	skillTxt, _ := templates.Process("character/skills", skillData)
-	response.SendUserMessage(userId, skillTxt, false)
+	user.SendText(skillTxt)
 
 	if rest == `extra` {
-		response.SendUserMessage(userId, `<ansi fg="yellow">Cooldown Tracking:</ansi>`, true)
+		user.SendText(`<ansi fg="yellow">Cooldown Tracking:</ansi>`)
 		for name, rnds := range user.Character.GetAllCooldowns() {
-			response.SendUserMessage(userId, fmt.Sprintf(` <ansi fg="yellow">%s</ansi>: <ansi fg="red">%d</ansi>`, name, rnds), true)
+			user.SendText(fmt.Sprintf(` <ansi fg="yellow">%s</ansi>: <ansi fg="red">%d</ansi>`, name, rnds))
 		}
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

@@ -6,6 +6,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
@@ -29,28 +30,25 @@ Level 2 - Display all players and mobs to recently walk through here
 Level 3 - Shows exit information for all tracked players or mobs
 Level 4 - Specify a mob or username and every room you enter will tell you what exit they took.
 */
-func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Track(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Track)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to track.", true)
-		response.Handled = true
-		return response, errors.New(`you don't know how to track`)
+		user.SendText("You don't know how to track.")
+		return true, errors.New(`you don't know how to track`)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	currentMobs := room.GetMobs()
@@ -63,11 +61,9 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 	if rest == `` {
 
 		if !user.Character.TryCooldown(skills.Track.String(), 1) {
-			response.SendUserMessage(userId,
-				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())),
-				true)
-			response.Handled = true
-			return response, errors.New(`you're doing that too often`)
+			user.SendText(
+				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())))
+			return true, errors.New(`you're doing that too often`)
 		}
 
 		visitorData := make([]trackingInfo, 0)
@@ -169,34 +165,29 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		//
 		if len(visitorData) > 0 {
 			trackTxt, _ := templates.Process("descriptions/track", visitorData)
-			response.SendUserMessage(userId, trackTxt, false)
+			user.SendText(trackTxt)
 		} else {
-			response.SendUserMessage(userId, "You don't see any tracks.", true)
+			user.SendText("You don't see any tracks.")
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 
 	}
 
 	// only level 3 and 4 can specify a target
 	if skillLevel < 3 {
 
-		response.SendUserMessage(userId, "You can't track a specific person or mob... yet.", true)
-
-		response.Handled = true
-		return response, errors.New(`you can't track a specific person or mob yet`)
+		user.SendText("You can't track a specific person or mob... yet.")
+		return true, errors.New(`you can't track a specific person or mob yet`)
 
 	}
 
 	if !user.Character.TryCooldown(skills.Track.String(), 1) {
 
-		response.SendUserMessage(userId,
-			fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())),
-			true)
+		user.SendText(
+			fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())))
 
-		response.Handled = true
-		return response, errors.New(`you're doing that too often`)
+		return true, errors.New(`you're doing that too often`)
 
 	}
 
@@ -210,11 +201,9 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		if foundPlayerId > 0 {
 			foundUser := users.GetByUserId(foundPlayerId)
 			if foundUser != nil {
-				response.SendUserMessage(userId,
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> is in the room with you!`, foundUser.Character.Name),
-					true)
-				response.Handled = true
-				return response, nil
+				user.SendText(
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> is in the room with you!`, foundUser.Character.Name))
+				return true, nil
 
 			}
 
@@ -223,11 +212,9 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		if foundMobId > 0 {
 			foundMob := mobs.GetInstance(foundMobId)
 			if foundMob != nil {
-				response.SendUserMessage(userId,
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is in the room with you!`, foundMob.Character.Name),
-					true)
-				response.Handled = true
-				return response, nil
+				user.SendText(
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is in the room with you!`, foundMob.Character.Name))
+				return true, nil
 
 			}
 		}
@@ -254,19 +241,27 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 				user.Character.SetMiscData("tracking-user", match)
 				user.Character.SetMiscData("tracking-mob", nil)
-				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
 
-				response.Handled = true
-				return response, nil
+				events.AddToQueue(events.Buff{
+					UserId:        user.UserId,
+					MobInstanceId: 0,
+					BuffId:        26, // 26 is the buff for active tracking
+				})
+
+				return true, nil
 
 			} else if closeMatch != `` {
 
 				user.Character.SetMiscData("tracking-user", closeMatch)
 				user.Character.SetMiscData("tracking-mob", nil)
-				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
 
-				response.Handled = true
-				return response, nil
+				events.AddToQueue(events.Buff{
+					UserId:        user.UserId,
+					MobInstanceId: 0,
+					BuffId:        26, // 26 is the buff for active tracking
+				})
+
+				return true, nil
 
 			}
 
@@ -283,26 +278,33 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 				user.Character.SetMiscData("tracking-user", nil)
 				user.Character.SetMiscData("tracking-mob", match)
-				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
 
-				response.Handled = true
-				return response, nil
+				events.AddToQueue(events.Buff{
+					UserId:        user.UserId,
+					MobInstanceId: 0,
+					BuffId:        26, // 26 is the buff for active tracking
+				})
+
+				return true, nil
 
 			} else if closeMatch != `` {
 
 				user.Character.SetMiscData("tracking-user", nil)
 				user.Character.SetMiscData("tracking-mob", closeMatch)
-				cmdQueue.QueueBuff(user.UserId, 0, 26) // 26 is the buff for active tracking
 
-				response.Handled = true
-				return response, nil
+				events.AddToQueue(events.Buff{
+					UserId:        user.UserId,
+					MobInstanceId: 0,
+					BuffId:        26, // 26 is the buff for active tracking
+				})
+
+				return true, nil
 
 			}
 
-			response.SendUserMessage(userId, "You don't see any tracks.", true)
+			user.SendText("You don't see any tracks.")
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 		/*
@@ -418,17 +420,15 @@ func Track(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		//
 		if len(visitorData) > 0 {
 			trackTxt, _ := templates.Process("descriptions/track", visitorData)
-			response.SendUserMessage(userId, trackTxt, false)
+			user.SendText(trackTxt)
 		} else {
-			response.SendUserMessage(userId, "You don't see any tracks.", true)
+			user.SendText("You don't see any tracks.")
 		}
 
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }
 
 func trailStrengthToString(trailStrength float64) string {

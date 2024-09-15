@@ -193,17 +193,24 @@ func (r ScriptRoom) MissingQuest(questId string, partyUserId ...int) []int {
 	return missingQuestUsers
 }
 
-func (r ScriptRoom) SpawnMob(mobId int) int {
+func (r ScriptRoom) SpawnMob(mobId int) *ScriptActor {
 
 	if mob := mobs.NewMobById(mobs.MobId(mobId), r.roomId); mob != nil {
 
 		r.roomRecord.AddMob(mob.InstanceId)
 
-		return mob.InstanceId
+		return GetMob(mob.InstanceId)
 	}
 
-	return 0
+	return nil
+}
 
+func (r ScriptRoom) SendText(msg string, excludeIds ...int) {
+	r.roomRecord.SendText(msg, excludeIds...)
+}
+
+func (r ScriptRoom) SendTextToExits(msg string, isQuiet bool, excludeUserIds ...int) {
+	r.roomRecord.SendTextToExits(msg, isQuiet, excludeUserIds...)
 }
 
 func (r ScriptRoom) RepeatSpawnItem(itemId int, roundFrequency int, containerName ...string) bool {

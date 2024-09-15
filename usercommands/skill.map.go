@@ -12,7 +12,6 @@ import (
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 /*
@@ -22,47 +21,40 @@ Level 2 - Map a 9x7 area
 Level 3 - Map a 13x9 area
 Level 4 - Map a 17x9 area, and enables the "wide" version.
 */
-func Map(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Map(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Map)
 
 	if skillLevel == 0 {
-		response.SendUserMessage(userId, "You don't know how to map.", true)
-		response.Handled = true
-		return response, errors.New(`you don't know how to map`)
+		user.SendText("You don't know how to map.")
+		return true, errors.New(`you don't know how to map`)
 	}
 
 	if rest == "memory" {
-		response.SendUserMessage(userId, fmt.Sprintf("You currently remember %d of %d possible rooms.", len(user.Character.GetRoomMemory()), user.Character.GetMemoryCapacity()), true)
-		response.Handled = true
-		return response, nil
+		user.SendText(fmt.Sprintf("You currently remember %d of %d possible rooms.", len(user.Character.GetRoomMemory()), user.Character.GetMemoryCapacity()))
+		return true, nil
 	}
 	if rest == "sprawl" {
-		response.SendUserMessage(userId, fmt.Sprintf("The reach of your maps is %d rooms.", user.Character.GetMapSprawlCapacity()), true)
-		response.Handled = true
-		return response, nil
+		user.SendText(fmt.Sprintf("The reach of your maps is %d rooms.", user.Character.GetMapSprawlCapacity()))
+		return true, nil
 	}
 
 	if rest == "wide" && skillLevel < 4 {
-		response.SendUserMessage(userId, "You don't know how to create a wide map.", true)
-		response.Handled = true
-		return response, errors.New(`you don't know how to create a wide map`)
+		user.SendText("You don't know how to create a wide map.")
+		return true, errors.New(`you don't know how to create a wide map`)
 	}
 
 	if !user.Character.TryCooldown(skills.Map.String(), 1) {
-		response.SendUserMessage(userId,
+		user.SendText(
 			`You can only create 1 map per round.`,
-			true)
-		response.Handled = true
-		return response, errors.New(`you're doing that too often`)
+		)
+		return true, errors.New(`you're doing that too often`)
 	}
 
 	// replace any non alpha/numeric characters in "rest"
@@ -82,9 +74,8 @@ func Map(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 	// First check for a premade map.
 	if mapTxt, err := templates.Process("maps/"+rooms.ZoneNameSanitize(zone), zone); err == nil {
-		response.SendUserMessage(userId, mapTxt, false)
-		response.Handled = true
-		return response, nil
+		user.SendText(mapTxt)
+		return true, nil
 	}
 
 	var mapData rooms.MapData
@@ -124,22 +115,25 @@ func Map(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 	if mapHeight > 18 {
 		mapHeight = 18
 	}
-	if settings, err := cmdQueue.GetSettings(userId); err == nil {
 
-		if skillLevel > 4 {
-			mapWidth = int(settings.ScreenWidth) - borderWidth
-			mapHeight = int(settings.ScreenHeight) - borderHeight // extra 2 for the new lines after
-			if mapHeight%2 != 0 {
-				mapHeight--
-			}
+	if skillLevel > 4 {
 
-			if mapWidth > int(settings.ScreenWidth)-borderWidth {
-				mapWidth = int(settings.ScreenWidth) - borderWidth
-			}
-			if mapHeight > int(settings.ScreenHeight)-borderHeight {
-				mapHeight = int(settings.ScreenHeight) - borderHeight
-			}
+		if user.RenderSettings.ScreenWidth == 0 {
+			user.RenderSettings.ScreenWidth = 80
+			user.RenderSettings.ScreenHeight = 40
+		}
 
+		mapWidth = int(user.RenderSettings.ScreenWidth) - borderWidth
+		mapHeight = int(user.RenderSettings.ScreenHeight) - borderHeight // extra 2 for the new lines after
+		if mapHeight%2 != 0 {
+			mapHeight--
+		}
+
+		if mapWidth > int(user.RenderSettings.ScreenWidth)-borderWidth {
+			mapWidth = int(user.RenderSettings.ScreenWidth) - borderWidth
+		}
+		if mapHeight > int(user.RenderSettings.ScreenHeight)-borderHeight {
+			mapHeight = int(user.RenderSettings.ScreenHeight) - borderHeight
 		}
 
 	}
@@ -202,19 +196,17 @@ func Map(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue
 
 	//mapData, err := rooms.GenerateZoneMapZoomedOut(zone, roomId, 0, 65, 18)
 	if err != nil {
-		return response, err
+		return false, err
 	}
 
 	mapTxt, err := templates.Process("maps/map", mapData)
 	if err != nil {
 		slog.Error("Map", "error", err.Error())
-		response.SendUserMessage(userId, `No map found (or an error occured)"`, true)
-		response.Handled = true
-		return response, err
+		user.SendText(`No map found (or an error occured)"`)
+		return true, err
 	}
 
-	response.SendUserMessage(userId, mapTxt, false)
+	user.SendText(mapTxt)
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

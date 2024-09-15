@@ -4,26 +4,27 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/mud/rooms"
 )
 
-func Break(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewMobCommandResponse(mobId)
+func Break(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
+	}
+
+	room := rooms.LoadRoom(mob.Character.RoomId)
+	if room == nil {
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	if mob.Character.Aggro != nil {
 		mob.Character.Aggro = nil
-		response.SendRoomMessage(mob.Character.RoomId,
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> breaks off combat.`, mob.Character.Name),
-			true)
+		room.SendText(
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> breaks off combat.`, mob.Character.Name))
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

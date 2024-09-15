@@ -12,42 +12,38 @@ import (
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 /*
 SkullDuggery Skill
-Level 1 - Sneak
+Level 2 - Backstab
 */
-func Backstab(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Backstab(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("user %d not found", userId)
+		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
 	// If they don't have a skill, act like it's not a valid command
-	if skillLevel < 1 {
-		return response, nil
+	if skillLevel < 2 {
+		return false, nil
 	}
 
 	// Must be sneaking
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 	if !isSneaking {
-		response.SendUserMessage(userId, "You can't backstab unless you're hidden!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You can't backstab unless you're hidden!")
+		return true, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// Do a check for whether these can backstab
@@ -67,9 +63,8 @@ func Backstab(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 
 	for _, wpnSubType := range wpnSubtypeChecks {
 		if !items.CanBackstab(wpnSubType) {
-			response.SendUserMessage(userId, fmt.Sprintf(`%s weapons can't be used to backstab.`, wpnSubType), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf(`%s weapons can't be used to backstab.`, wpnSubType))
+			return true, nil
 		}
 	}
 
@@ -104,9 +99,8 @@ func Backstab(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 	}
 
 	if attackMobInstanceId == 0 && attackPlayerId == 0 {
-		response.SendUserMessage(userId, "You attack the darkness!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You attack the darkness!")
+		return true, nil
 	}
 
 	if attackMobInstanceId > 0 {
@@ -114,27 +108,25 @@ func Backstab(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 		m := mobs.GetInstance(attackMobInstanceId)
 
 		if m.Character.IsCharmed(userId) {
-			response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name), true)
-			response.Handled = true
-			return response, nil
+			user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
+			return true, nil
 		}
 
 		if m != nil {
 
 			user.Character.SetAggro(0, attackMobInstanceId, characters.BackStab, 2)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You prepare to backstab <ansi fg="mobname">%s</ansi>`, m.Character.Name),
-				true)
+			)
 
 		}
 
 	} else if attackPlayerId > 0 {
 
 		if !configs.GetConfig().PVPEnabled {
-			response.SendUserMessage(userId, `PVP is currently disabled.`, true)
-			response.Handled = true
-			return response, nil
+			user.SendText(`PVP is currently disabled.`)
+			return true, nil
 		}
 
 		p := users.GetByUserId(attackPlayerId)
@@ -143,21 +135,19 @@ func Backstab(rest string, userId int, cmdQueue util.CommandQueue) (util.Message
 
 			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
 				if partyInfo.IsMember(attackPlayerId) {
-					response.SendUserMessage(userId, fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name), true)
-					response.Handled = true
-					return response, nil
+					user.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is in your party!`, p.Character.Name))
+					return true, nil
 				}
 			}
 
 			user.Character.SetAggro(attackPlayerId, 0, characters.BackStab, 2)
 
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You prepare to backstab <ansi fg="username">%s</ansi>`, p.Character.Name),
-				true)
+			)
 		}
 
 	}
 
-	response.Handled = true
-	return response, nil
+	return true, nil
 }

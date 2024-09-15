@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
@@ -19,34 +21,33 @@ import (
 Brawling Skill
 Level 2 - You can throw objects at NPCs or other rooms.
 */
-func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	response := NewUserCommandResponse(userId)
+func Throw(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf(`user %d not found`, userId)
+		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
+	handled := false
 
 	// If they don't have a skill, act like it's not a valid command
 	if skillLevel < 2 {
-		return response, nil
+		return false, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 2 {
-		response.SendUserMessage(userId, "Throw what? Where??", true)
-		return response, nil
+		user.SendText("Throw what? Where??")
+		return false, nil
 	}
 
 	throwWhat := args[0]
@@ -56,14 +57,13 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 	itemMatch, ok := user.Character.FindInBackpack(throwWhat)
 	if !ok {
-		response.SendUserMessage(userId, fmt.Sprintf(`You don't have a "%s" to throw.`, throwWhat), true)
-		return response, nil
+		user.SendText(fmt.Sprintf(`You don't have a "%s" to throw.`, throwWhat))
+		return false, nil
 	}
 
 	if !user.Character.TryCooldown(skills.Brawling.String(`throw`), 4) {
-		response.SendUserMessage(userId, "You are too tired to throw objects again so soon!", true)
-		response.Handled = true
-		return response, nil
+		user.SendText("You are too tired to throw objects again so soon!")
+		return true, nil
 	}
 
 	targetPlayerId, targetMobId := room.FindByName(throwWhere)
@@ -74,31 +74,41 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 		if user.Character.RemoveItem(itemMatch) {
 
 			// Trigger onLost event
-			if scriptResponse, err := scripting.TryItemScriptEvent(`onLost`, itemMatch, userId, cmdQueue); err == nil {
-				response.AbsorbMessages(scriptResponse)
-			}
-
-			room.AddItem(itemMatch, false)
+			scripting.TryItemScriptEvent(`onLost`, itemMatch, userId)
 
 			// Tell the player they are throwing the item
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You hurl the <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, itemMatch.DisplayName(), targetMob.Character.Name),
-				true)
+			)
 
 			// Tell the old room they are leaving
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, user.Character.Name, itemMatch.DisplayName(), targetMob.Character.Name),
-				true)
+				userId,
+			)
 
 			// If grenades are dropped, they explode and affect everyone in the room!
 			iSpec := itemMatch.GetSpec()
 			if iSpec.Type == items.Grenade {
-				cmdQueue.QueueRoomAction(user.Character.RoomId, user.UserId, 0, fmt.Sprintf("detonate #%d !%d", targetMob.InstanceId, itemMatch.ItemId))
+
+				itemMatch.SetAdjective(`exploding`, true)
+
+				events.AddToQueue(events.RoomAction{
+					RoomId:       user.Character.RoomId,
+					SourceUserId: user.UserId,
+					SourceMobId:  0,
+					Action:       fmt.Sprintf("detonate #%d %s", targetMob.InstanceId, itemMatch.ShorthandId()),
+					WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+				})
+
 			}
+
+			room.AddItem(itemMatch, false)
+
 		} else {
-			response.SendUserMessage(userId, `You can't do that right now.`, true)
+			user.SendText(`You can't do that right now.`)
 		}
-		response.Handled = true
+		handled = true
 
 	} else if targetPlayerId > 0 {
 
@@ -106,30 +116,40 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 		user.Character.RemoveItem(itemMatch)
 
-		room.AddItem(itemMatch, false)
-
 		// Tell the player they are throwing the item
-		response.SendUserMessage(userId,
+		user.SendText(
 			fmt.Sprintf(`You hurl the <ansi fg="itemname">%s</ansi> at <ansi fg="username">%s</ansi>.`, itemMatch.DisplayName(), targetUser.Character.Name),
-			true)
+		)
 
-		response.SendUserMessage(targetUser.UserId,
+		targetUser.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> hurls their <ansi fg="itemname">%s</ansi> at you.`, itemMatch.DisplayName(), user.Character.Name),
-			true)
+		)
 
 		// Tell the old room they are leaving
-		response.SendRoomMessage(room.RoomId,
+		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="itemname">%s</ansi> at <ansi fg="username">%s</ansi>.`, user.Character.Name, itemMatch.DisplayName(), targetUser.Character.Name),
-			true,
+			userId,
 			targetUser.UserId)
 
 		// If grenades are dropped, they explode and affect everyone in the room!
 		iSpec := itemMatch.GetSpec()
 		if iSpec.Type == items.Grenade {
-			cmdQueue.QueueRoomAction(user.Character.RoomId, user.UserId, 0, fmt.Sprintf("detonate @%d !%d", targetUser.UserId, itemMatch.ItemId))
+
+			itemMatch.SetAdjective(`exploding`, true)
+
+			events.AddToQueue(events.RoomAction{
+				RoomId:       user.Character.RoomId,
+				SourceUserId: user.UserId,
+				SourceMobId:  0,
+				Action:       fmt.Sprintf("detonate @%d %s", targetUser.UserId, itemMatch.ShorthandId()),
+				WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+			})
+
 		}
 
-		response.Handled = true
+		room.AddItem(itemMatch, false)
+
+		handled = true
 
 	} else {
 
@@ -150,9 +170,8 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 
 			exitInfo := room.Exits[exitName]
 			if exitInfo.Lock.IsLocked() {
-				response.SendUserMessage(userId, fmt.Sprintf(`The %s exit is locked.`, exitName), true)
-				response.Handled = true
-				return response, nil
+				user.SendText(fmt.Sprintf(`The %s exit is locked.`, exitName))
+				return true, nil
 			}
 
 			user.Character.CancelBuffsWithFlag(buffs.Hidden)
@@ -167,34 +186,47 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 			}
 
 			user.Character.RemoveItem(itemMatch)
-			throwToRoom.AddItem(itemMatch, false)
 
 			// Tell the player they are throwing the item
-			response.SendUserMessage(userId,
+			user.SendText(
 				fmt.Sprintf(`You hurl the <ansi fg="item">%s</ansi> towards the %s exit.`, itemMatch.DisplayName(), exitName),
-				true)
+			)
 
 			// Tell the old room they are leaving
-			response.SendRoomMessage(room.RoomId,
+			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, user.Character.Name, itemMatch.DisplayName(), exitName),
-				true)
+				userId,
+			)
 
 			// Tell the new room the item arrived
-			response.SendRoomMessage(throwToRoom.RoomId,
+			throwToRoom.SendText(
 				fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
-				true)
+				userId,
+			)
 
 			// If grenades are dropped, they explode and affect everyone in the room!
 			iSpec := itemMatch.GetSpec()
 			if iSpec.Type == items.Grenade {
-				cmdQueue.QueueRoomAction(throwToRoom.RoomId, user.UserId, 0, fmt.Sprintf("detonate !%d", itemMatch.ItemId))
+
+				itemMatch.SetAdjective(`exploding`, true)
+
+				events.AddToQueue(events.RoomAction{
+					RoomId:       throwToRoom.RoomId,
+					SourceUserId: user.UserId,
+					SourceMobId:  0,
+					Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
+					WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+				})
+
 			}
 
-			response.Handled = true
+			throwToRoom.AddItem(itemMatch, false)
+
+			handled = true
 		}
 
 		// Still looking for an exit... try the temp ones
-		if !response.Handled {
+		if !handled {
 			if len(room.ExitsTemp) > 0 {
 				// See if there's a close match
 				exitNames := make([]string, 0, len(room.ExitsTemp))
@@ -229,40 +261,52 @@ func Throw(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQue
 					}
 
 					user.Character.RemoveItem(itemMatch)
-					throwToRoom.AddItem(itemMatch, false)
 
 					// Tell the player they are throwing the item
-					response.SendUserMessage(userId,
+					user.SendText(
 						fmt.Sprintf(`You hurl the <ansi fg="item">%s</ansi> towards the %s exit.`, itemMatch.DisplayName(), tempExit.Title),
-						true)
+					)
 
 					// Tell the old room they are leaving
-					response.SendRoomMessage(room.RoomId,
+					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, user.Character.Name, itemMatch.DisplayName(), tempExit.Title),
-						true)
+						userId,
+					)
 
 					// Tell the new room the item arrived
-					response.SendRoomMessage(tempExit.RoomId,
+					throwToRoom.SendText(
 						fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
-						true)
+						userId,
+					)
 
 					// If grenades are dropped, they explode and affect everyone in the room!
 					iSpec := itemMatch.GetSpec()
 					if iSpec.Type == items.Grenade {
-						cmdQueue.QueueRoomAction(throwToRoom.RoomId, user.UserId, 0, fmt.Sprintf("detonate !%d", itemMatch.ItemId))
+
+						itemMatch.SetAdjective(`exploding`, true)
+
+						events.AddToQueue(events.RoomAction{
+							RoomId:       throwToRoom.RoomId,
+							SourceUserId: user.UserId,
+							SourceMobId:  0,
+							Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
+							WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+						})
+
 					}
 
-					response.Handled = true
+					throwToRoom.AddItem(itemMatch, false)
+
+					handled = true
 
 				}
 			}
 		}
 	}
 
-	if !response.Handled {
-		response.Handled = true
-		response.SendUserMessage(userId, fmt.Sprintf(`You don't see a "%s" to throw it to.`, throwWhere), true)
+	if !handled {
+		user.SendText(fmt.Sprintf(`You don't see a "%s" to throw it to.`, throwWhere))
 	}
 
-	return response, nil
+	return true, nil
 }

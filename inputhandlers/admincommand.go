@@ -10,6 +10,7 @@ import (
 	"log/slog"
 
 	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
@@ -160,7 +161,9 @@ func tryAdminCommand(cmd string, connectionPool *connection.ConnectionTracker, c
 				}
 
 				if writeOut {
-					connectionPool.Broadcast([]byte(fmt.Sprintf(tplTxt, i)))
+
+					events.AddToQueue(events.Broadcast{Text: fmt.Sprintf(tplTxt, i)})
+
 				}
 
 				time.Sleep(time.Second)

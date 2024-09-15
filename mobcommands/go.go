@@ -10,25 +10,23 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Go(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-	response := NewMobCommandResponse(mobId)
+func Go(rest string, mobId int) (bool, error) {
 
 	// Load user details
 	mob := mobs.GetInstance(mobId)
 	if mob == nil { // Something went wrong. User not found.
-		return response, fmt.Errorf("mob %d not found", mobId)
+		return false, fmt.Errorf("mob %d not found", mobId)
 	}
 
 	// If has a buff that prevents combat, skip the player
 	if mob.Character.HasBuffFlag(buffs.NoMovement) {
-		response.Handled = true
-		return response, nil
+		return true, nil
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
-		return response, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	exitName := ``
@@ -43,8 +41,7 @@ func Go(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, 
 			}
 			mob.GoingHome = false
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 
 		} else {
 
@@ -56,9 +53,10 @@ func Go(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, 
 					goRoomId = mob.HomeRoomId
 					exitName = `mysterious`
 				} else {
-					cmdQueue.QueueCommand(0, mobId, `say I'm lost`)
-					response.Handled = true
-					return response, nil
+
+					mob.Command(`say I'm lost.`)
+
+					return true, nil
 				}
 			} else {
 
@@ -80,23 +78,19 @@ func Go(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, 
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
 
-			cmdQueue.QueueCommand(0, mobId, fmt.Sprintf(`emote tries to go the <ansi fg="exit">%s</ansi> exit, but it's locked.`, exitName))
+			mob.Command(fmt.Sprintf(`emote tries to go the <ansi fg="exit">%s</ansi> exit, but it's locked.`, exitName))
 
-			response.Handled = true
-			return response, nil
+			return true, nil
 		}
 
 	}
 
 	if goRoomId > 0 {
 
-		// It does so we won't need to continue down the logic after this chunk
-		response.Handled = true
-
 		// Load current room details
 		destRoom := rooms.LoadRoom(goRoomId)
 		if destRoom == nil {
-			return response, fmt.Errorf(`room %d not found`, goRoomId)
+			return false, fmt.Errorf(`room %d not found`, goRoomId)
 		}
 
 		// Grab the exit in the target room that leads to this room (if any)
@@ -112,8 +106,7 @@ func Go(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, 
 			if exitInfo.Lock.IsLocked() {
 
 				// For now, mobs won't go through doors if it unlocks them.
-				response.Handled = true
-				return response, nil
+				return true, nil
 				//exitInfo.Unlock()
 				//destRoom.Exits[enterFromExit] = exitInfo
 			}
@@ -143,18 +136,21 @@ func Go(rest string, mobId int, cmdQueue util.CommandQueue) (util.MessageQueue, 
 		c := configs.GetConfig()
 
 		// Tell the old room they are leaving
-		response.SendRoomMessage(room.RoomId,
+		room.SendText(
 			fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> leaves towards the <ansi fg="exit">%s</ansi> exit.`, mob.Character.Name, exitName),
-			), true)
+			))
+
 		// Tell the new room they have arrived
-		response.SendRoomMessage(destRoom.RoomId,
+		destRoom.SendText(
 			fmt.Sprintf(string(c.EnterRoomMessageWrapper),
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> enters from %s.`, mob.Character.Name, enterFromExit),
-			), true)
+			))
 
-		response.Handled = true
+		destRoom.SendTextToExits(`You hear someone moving around.`, true, room.GetPlayers(rooms.FindAll)...)
+
+		return true, nil
 	}
 
-	return response, nil
+	return false, nil
 }

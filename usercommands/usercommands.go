@@ -185,20 +185,16 @@ func GetHelpSuggestions(text string, includeAdmin bool) []string {
 }
 
 // Signature of user command
-type UserCommand func(rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error)
+type UserCommand func(rest string, userId int) (bool, error)
 
-func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue) (util.MessageQueue, error) {
-
-	finalResponse := NewUserCommandResponse(userId)
+func TryCommand(cmd string, rest string, userId int) (bool, error) {
 
 	// Do not allow scripts to intercept server commands
 	if cmd != `server` {
 
-		response, err := scripting.TryRoomCommand(keywords.TryCommandAlias(cmd), rest, userId, cmdQueue)
-		finalResponse.AbsorbMessages(response)
-		if response.Handled {
-			finalResponse.Handled = true
-			return finalResponse, err
+		handled, err := scripting.TryRoomCommand(keywords.TryCommandAlias(cmd), rest, userId)
+		if handled {
+			return true, err
 		}
 
 	}
@@ -222,11 +218,6 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 	user := users.GetByUserId(userId)
 	if user != nil {
 
-		// If the user has a progressbar that is interrupted by input, cancel it
-		if user.GetProgressBar() != nil {
-			user.GetProgressBar().Cancel()
-		}
-
 		// Cancel any buffs they have that get cancelled based on them doing anything at all
 		user.Character.CancelBuffsWithFlag(buffs.CancelOnAction)
 
@@ -242,11 +233,9 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 
 		if found {
 			// If the item has a script, run it
-			if scriptResponse, err := scripting.TryItemCommand(cmd, matchingItem, user.UserId, cmdQueue); err == nil {
-				if scriptResponse.Handled { // For this event, handled represents whether to reject the move.
-					finalResponse.AbsorbMessages(scriptResponse)
-					finalResponse.Handled = true
-					return finalResponse, err
+			if handled, err := scripting.TryItemCommand(cmd, matchingItem, user.UserId); err == nil {
+				if handled { // For this event, handled represents whether to reject the move.
+					return handled, err
 				}
 			}
 		}
@@ -255,9 +244,8 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 	if cmdInfo, ok := userCommands[cmd]; ok {
 
 		if userDisabled && !cmdInfo.AllowedWhenDowned && !cmdInfo.AdminOnly {
-			finalResponse.SendUserMessage(userId, "You are unable to do that while downed.", true)
-			finalResponse.Handled = true
-			return finalResponse, nil
+			user.SendText("You are unable to do that while downed.")
+			return true, nil
 		}
 
 		if isAdmin || !cmdInfo.AdminOnly {
@@ -267,15 +255,8 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 				util.TrackTime(`usr-cmd[`+cmd+`]`, time.Since(start).Seconds())
 			}()
 
-			response, err := cmdInfo.Func(rest, userId, cmdQueue)
-			finalResponse.AbsorbMessages(response)
-			if response.NextCommand != `` {
-				finalResponse.NextCommand = response.NextCommand
-			}
-			if response.Handled {
-				finalResponse.Handled = true
-			}
-			return finalResponse, err
+			handled, err := cmdInfo.Func(rest, userId)
+			return handled, err
 
 		}
 	}
@@ -289,31 +270,15 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 			util.TrackTime(`usr-cmd[go]`, time.Since(start).Seconds())
 		}()
 
-		if response, err := Go(cmd, userId, cmdQueue); err != nil {
-			if response.NextCommand != `` {
-				finalResponse.NextCommand = response.NextCommand
-			}
-			finalResponse.AbsorbMessages(response)
-			return finalResponse, err
-		} else if response.Handled {
-			if response.NextCommand != `` {
-				finalResponse.NextCommand = response.NextCommand
-			}
-			finalResponse.AbsorbMessages(response)
-			finalResponse.Handled = true
-			return finalResponse, err
+		if handled, err := Go(cmd, userId); handled {
+			return handled, err
 		}
 
 	}
 
 	if emoteText, ok := emoteAliases[cmd]; ok {
-		response, err := Emote(emoteText, userId, cmdQueue)
-		if response.NextCommand != `` {
-			finalResponse.NextCommand = response.NextCommand
-		}
-		finalResponse.AbsorbMessages(response)
-		finalResponse.Handled = finalResponse.Handled || response.Handled
-		return finalResponse, err
+		handled, err := Emote(emoteText, userId)
+		return handled, err
 	}
 
 	if user.Character.HasSpell(cmd) {
@@ -321,14 +286,8 @@ func TryCommand(cmd string, rest string, userId int, cmdQueue util.CommandQueue)
 		if len(rest) > 0 {
 			castCmd += ` ` + rest
 		}
-		response, err := Cast(castCmd, userId, cmdQueue)
-		if response.NextCommand != `` {
-			finalResponse.NextCommand = response.NextCommand
-		}
-		finalResponse.AbsorbMessages(response)
-		finalResponse.Handled = finalResponse.Handled || response.Handled
-		return finalResponse, err
+		return Cast(castCmd, userId)
 	}
 
-	return finalResponse, nil
+	return false, nil
 }
