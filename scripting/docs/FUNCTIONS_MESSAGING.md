@@ -5,7 +5,8 @@ Globally available messaging functions.
 - [Messaging Specific Functions](#messaging-specific-functions)
   - [SendBroadcast(message string)](#sendbroadcastmessage-string)
   - [SendUserMessage(userId int, message string)](#sendusermessageuserid-int-message-string)
-  - [SendRoomMessage(roomId int, message string, \[, excludeUserIds int\])](#sendroommessageroomid-int-message-string--excludeuserids-int)
+  - [SendRoomMessage(roomId int, message string \[, excludeUserIds int\])](#sendroommessageroomid-int-message-string--excludeuserids-int)
+  - [SendRoomExitsMessage(roomId int, message string, isQuiet bool  \[, excludeUserIds int\])](#sendroomexitsmessageroomid-int-message-string-isquiet-bool---excludeuserids-int)
 
 ## [SendBroadcast(message string)](/scripting/messaging_func.go)
 Sends a message to everyone on the server

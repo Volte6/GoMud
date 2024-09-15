@@ -3,7 +3,7 @@
 - [Room Specific Functions](#room-specific-functions)
   - [GetRoom(roomId int) RoomObject ](#getroomroomid-int-roomobject-)
   - [RoomObject.RoomId() int](#roomobjectroomid-int)
-  - [RoomObject.SendText(msg string)](#roomobjectsettempdatakey-string-value-any)
+  - [RoomObject.SendText(msg string\[, excludeUserIds int\])](#roomobjectsendtextmsg-string-excludeuserids-int)
   - [RoomObject.SetTempData(key string, value any)](#roomobjectsettempdatakey-string-value-any)
   - [RoomObject.GetTempData(key string) any](#roomobjectgettempdatakey-string-any)
   - [RoomObject.SetPermData(key string, value any)](#roomobjectsetpermdatakey-string-value-any)
