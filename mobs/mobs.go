@@ -425,6 +425,16 @@ func (m *Mob) GetAngryCommand() string {
 	return ``
 }
 
+func (m *Mob) GetIdleCommand() string {
+
+	// First check if the mob has a specific action
+	if len(m.IdleCommands) > 0 {
+		return m.IdleCommands[util.Rand(len(m.IdleCommands))]
+	}
+
+	return ``
+}
+
 func (r *Mob) IsAlly(m *Mob) bool {
 
 	if m.MobId == r.MobId {

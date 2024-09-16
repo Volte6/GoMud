@@ -12,3 +12,10 @@ exits:
     roomid: 545
   west:
     roomid: 547
+spawninfo:
+- mobid: 56
+  cooldown: 40
+- mobid: 56
+  cooldown: 30
+- mobid: 56
+  cooldown: 20

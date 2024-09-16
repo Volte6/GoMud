@@ -1,0 +1,11 @@
+itemid: 20042
+name: wolf pelt
+namesimple: pelt
+description: The shiny pelt of a timber wolf.
+type: body
+subtype: wearable
+damagereduction: 18
+statmods:
+  strength: 8
+  speed: 1
+  vitality: 10

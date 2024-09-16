@@ -1,5 +1,5 @@
 raceid: 11
-name: Dog
+name: Canine
 description: A canine.
 buffids:
   - 28 # Super hearing
@@ -9,14 +9,16 @@ tnlscale: 1
 angrycommands: 
   - emote growls aggressively.
   - emote howls.
-knowsfirstaid: true
+knowsfirstaid: false
 tameable: true
 stats:
   strength:
     base: 1
-  speed:
+  smarts:
     base: 1
   vitality:
+    base: 1
+  perception:
     base: 1
 damage:
   diceroll: 2@1d4

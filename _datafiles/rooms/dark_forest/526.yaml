@@ -19,3 +19,5 @@ spawninfo:
 - mobid: 32
   cooldown: 65526
   message: A fungal growth emerges from the ground.
+- mobid: 56
+  cooldown: 40

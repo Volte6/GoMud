@@ -13,5 +13,12 @@ exits:
     roomid: 214
   southwest:
     roomid: 216
+spawninfo:
+- mobid: 55
+  cooldown: 100
+- mobid: 55
+  cooldown: 100
+- mobid: 55
+  cooldown: 100
 idlemessages:
 - The wind howls from every direction

@@ -8,7 +8,7 @@ const (
 type Buff struct {
 	BuffId       int  // Which buff template does it refer to?
 	OnStartEvent bool // Has the onStart event been triggered?
-	PermaBuff    bool // Is this buff from a worn item or race?
+	PermaBuff    bool `yaml:"roundcounter,omitempty"` // Is this buff from a worn item or race?
 	// Need to instance track the following:
 	RoundCounter int `yaml:"roundcounter,omitempty"` // How many rounds have passed. Triggers on (RoundCounter%RoundInterval == 0)
 	TriggersLeft int `yaml:"triggersleft,omitempty"` // How many times it triggers

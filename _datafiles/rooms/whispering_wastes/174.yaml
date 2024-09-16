@@ -11,5 +11,8 @@ biome: snow
 exits:
   southeast:
     roomid: 173
+spawninfo:
+- mobid: 54
+  cooldown: 60
 idlemessages:
 - The wind howls from every direction

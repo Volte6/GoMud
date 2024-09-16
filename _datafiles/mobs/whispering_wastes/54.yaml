@@ -1,0 +1,23 @@
+mobid: 54
+zone: Whispering Wastes
+itemdropchance: 2
+activitylevel: 8
+maxwander: 4
+idlecommands:
+  - 'emote stares up with its large, shiny eyes.'
+  - 'emote hops in a little circle.'
+  - 'emote hops in a little circle.'
+  - 'wander'
+  - 'wander'
+  - 'wander'
+  - 'wander'
+  - 'wander'
+character:
+  name: snow floof
+  description: The Snow Floof is a small, elusive creature that thrives in the icy tundra of the Whispering Wastes. Covered in a thick, downy coat of pure white fur, it blends seamlessly with its frosty surroundings. Its round body and large, soft ears give it an innocent appearance, but its sharp, crystal-blue eyes reveal a keen awareness of the dangers lurking in the snowdrifts. Despite its plump form, the Snow Floof moves with surprising agility, darting between snowbanks with silent, graceful leaps. Known for its remarkable ability to sense impending storms, it often serves as a harbinger of the Wastes' notorious blizzards.
+  raceid: 18
+  level: 1
+  gold: 0
+  equipment:
+    body:
+      itemid: 20040

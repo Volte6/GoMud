@@ -20,4 +20,3 @@
 {{- if not .Equipment.Feet.IsDisabled }}   <ansi fg="yellow">Feet:    </ansi><ansi fg="itemname">{{ .Equipment.Feet.NameSimple    }}</ansi>
 {{ end }} └────────────────────────────────────────────────────────────────────────────┘
  Carrying: {{ $itmCt := len .ItemNames }}{{ if eq $itmCt 0 }}no{{ else if lt $itmCt 4 }}a few{{ else if lt $itmCt 7 }}several{{ else }}lots of{{ end }} objects
-

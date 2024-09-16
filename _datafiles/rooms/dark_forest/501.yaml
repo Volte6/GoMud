@@ -15,6 +15,10 @@ exits:
   west:
     roomid: 508
 spawninfo:
-- mobid: 33
-  cooldown: 6
-  message: A branch is pushed aside as an Imp enters the area.
+- mobid: 56
+  cooldown: 12
+- mobid: 56
+  cooldown: 12
+- mobid: 56
+  cooldown: 12
+
