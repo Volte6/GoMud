@@ -222,6 +222,15 @@ func (m *Mob) ShorthandId() string {
 	return fmt.Sprintf(`#%d`, m.InstanceId)
 }
 
+func (m *Mob) AddBuff(buffId int) {
+
+	events.AddToQueue(events.Buff{
+		MobInstanceId: m.InstanceId,
+		BuffId:        buffId,
+	})
+
+}
+
 func (m *Mob) Command(inputTxt string, waitTurns ...int) {
 
 	wt := 0

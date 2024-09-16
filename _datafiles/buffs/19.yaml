@@ -6,4 +6,4 @@ roundinterval: 3
 triggercount: 12
 flags:
   - drunk
-
+  - warmed

@@ -13,4 +13,3 @@
             <ansi fg="exit">{{ $tmpExitInfo.Title }}</ansi>{{- if ne $displayed $exitCount }}, {{ end -}}
     {{- end -}}
 {{- end }}
-

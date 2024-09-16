@@ -16,7 +16,7 @@ character:
     world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 4
+  roomid: 1
   zone: Frostfang
   raceid: 2
   stats:
@@ -58,23 +58,23 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 2
+      roundcounter: 18
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 25
+      roundcounter: 26
       triggersleft: 1000000000
     - buffid: 1
       onstartevent: true
       permabuff: true
-      roundcounter: 26
+      roundcounter: 72
       triggersleft: 1000000000
     - buffid: 6
       onstartevent: true
       permabuff: false
-      roundcounter: 369
-      triggersleft: 6
+      roundcounter: 415
+      triggersleft: 3
   equipment:
     weapon:
       itemid: 10006
@@ -110,5 +110,5 @@ character:
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/5yOURIDIQhDL/Q+FhFi73+xDnS3o787RMGAIb5EXEnlp35zjJhEkF53JCFyYAwcKZGEtO6cONW1gTk2MWGLkbjh3dl+lrxQFLo6olf/pcaGg3X8KtTzYQ6csev8xttwr9I9gFh8WE2U3UmQBJP5DQAA//9xmQ2LWQEAAA==
+roommemoryblob: H4sIAAAAAAAA/5SOSxKDIQiDL/QtfkSIvf/FOlDb0WUn8RUwJJ7k32XEJIL02iMJkQNj4EiJJKS1z8Spqg3MsYkJW4zEDe/K8bPshaLYtws9+mc1Dl6q40+xnl/l4o3T59PegXuUdgNi8WK1UHEnQRLMA/YOAAD//wwrpOBPAQAA
 configoptions: {}

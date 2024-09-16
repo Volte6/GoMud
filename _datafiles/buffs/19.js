@@ -1,7 +1,7 @@
 
 // Invoked when the buff is first applied to the player.
 function onStart(actor, triggersLeft) {
-    SendUserMessage(actor.UserId(), "You're feeling a little drunk!")
+    SendUserMessage(actor.UserId(), "You're feeling a little drunk, but warm!")
     SendRoomMessage(actor.GetRoomId(), actor.GetCharacterName(true)+' is tatered.', actor.UserId())
 }
 

@@ -6,10 +6,11 @@ type BiomeInfo struct {
 	name           string
 	symbol         rune
 	description    string
-	darkArea       bool // Whether is always dark
-	litArea        bool // Whether is always lit
-	requiredItemId int  // item id required to move into any room with this biome
-	usesItem       bool // Whether it "uses" the item (i.e. consumes it or decreases its uses left) when moving into a room with this biome
+	darkArea       bool  // Whether is always dark
+	litArea        bool  // Whether is always lit
+	requiredItemId int   // item id required to move into any room with this biome
+	usesItem       bool  // Whether it "uses" the item (i.e. consumes it or decreases its uses left) when moving into a room with this biome
+	buffIds        []int // What buff id's get applied every time you enter this biome
 }
 
 func (bi BiomeInfo) Name() string {
@@ -42,6 +43,10 @@ func (bi BiomeInfo) IsLit() bool {
 
 func (bi BiomeInfo) IsDark() bool {
 	return !bi.litArea && bi.darkArea
+}
+
+func (bi BiomeInfo) BuffIds() []int {
+	return bi.buffIds
 }
 
 var (
@@ -105,6 +110,7 @@ var (
 			name:        `Snow`,
 			symbol:      '❄',
 			description: `Snow is cold and wet. It can be difficult to traverse, but is usually safe.`,
+			buffIds:     []int{31}, // Freezing
 		},
 		`spiderweb`: {
 			name:        `Spiderweb`,

@@ -49,6 +49,7 @@ const (
 	EmitsLight   Flag = `lightsource`
 	SuperHearing Flag = `superhearing`
 	NightVision  Flag = `nightvision`
+	Warmed       Flag = `warmed`
 )
 
 var (

@@ -40,7 +40,7 @@ func Train(rest string, userId int) (bool, error) {
 
 	if len(room.SkillTraining) == 0 {
 		user.SendText(`You must find a trainer to perform training.`)
-		return false, nil
+		return false, ``, nil
 	}
 
 	trainingData := TrainingOptions{
