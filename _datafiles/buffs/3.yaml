@@ -4,3 +4,6 @@ description: You are able to withstand harsh winter weather.
 secret: false
 roundinterval: 5
 triggercount: 10
+flags:
+  - warmed
+

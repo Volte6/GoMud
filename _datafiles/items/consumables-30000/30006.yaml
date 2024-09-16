@@ -6,4 +6,4 @@ type: drink
 subtype: drinkable
 uses: 2
 buffids: 
-- 19
+- 19 # drunk/warmed

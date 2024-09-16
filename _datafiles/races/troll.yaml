@@ -1,6 +1,6 @@
 raceid: 4
 name: Troll
-description: A massive creature .
+description: A massive creature.
 buffids:
   - 29 # Night Vision
   - 30 # Regeneration
@@ -13,9 +13,9 @@ angrycommands:
 tameable: true
 stats:
   strength:
-    base: 1
+    base: 2
   smarts:
-    base: 1
+    base: 0
   vitality:
     base: 1
   perception:

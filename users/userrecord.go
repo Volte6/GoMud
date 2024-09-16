@@ -109,6 +109,15 @@ func (u *UserRecord) Command(inputTxt string, waitTurns ...int) {
 
 }
 
+func (u *UserRecord) AddBuff(buffId int) {
+
+	events.AddToQueue(events.Buff{
+		UserId: u.UserId,
+		BuffId: buffId,
+	})
+
+}
+
 func (u *UserRecord) SendText(txt string) {
 
 	events.AddToQueue(events.Message{

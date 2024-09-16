@@ -246,6 +246,10 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		}
 	}
 
+	for _, buffId := range newRoom.GetBiome().BuffIds() {
+		user.AddBuff(buffId)
+	}
+
 	return nil
 }
 

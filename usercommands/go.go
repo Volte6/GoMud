@@ -5,7 +5,6 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
@@ -42,7 +41,7 @@ func Go(rest string, userId int) (bool, error) {
 		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
-	handled := true
+	handled := false
 
 	exitName, goRoomId := room.FindExitByName(rest)
 
@@ -308,11 +307,8 @@ func Go(rest string, userId int) (bool, error) {
 
 			}
 
-			// Immediately do a secret look
-			events.AddToQueue(events.Input{
-				UserId:    userId,
-				InputText: `look secretly`,
-			}, true)
+			handled = true
+			Look(`secretly`, userId)
 		}
 
 	}
