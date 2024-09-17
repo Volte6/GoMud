@@ -1,0 +1,15 @@
+itemid: 20041
+name: snow wolf mane
+namesimple: mane
+description: The Snow Wolf Mane is a rare and highly prized item found only on the alpha wolves of the Whispering Wastes. This thick ruff of fur runs from the top of the wolf’s head down along its powerful neck and shoulders, and is distinct for its silver-white strands that shimmer like frost in the moonlight. Coarser than the rest of the wolf's coat, the mane serves as both armor against the biting cold and a display of dominance, bristling when the wolf is threatened or preparing to strike. Legends among the nomads of the Wastes claim that wearing a Snow Wolf Mane grants the bearer enhanced endurance and resistance to cold, a reflection of the wolf’s mastery over the frozen wilderness.
+type: neck
+subtype: wearable
+damagereduction: 9
+statmods:
+  strength: 4
+  speed: 10
+  smarts: 2
+  vitality: 2
+  perception: 7
+wornbuffids:
+  - 3 # Cold Tolerant

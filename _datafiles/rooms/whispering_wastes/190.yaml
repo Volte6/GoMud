@@ -9,5 +9,12 @@ biome: snow
 exits:
   northwest:
     roomid: 187
+spawninfo:
+- mobid: 54
+  cooldown: 60
+- mobid: 54
+  cooldown: 50
+- mobid: 54
+  cooldown: 20
 idlemessages:
 - The wind howls from every direction

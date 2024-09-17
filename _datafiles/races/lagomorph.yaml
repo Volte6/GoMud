@@ -1,0 +1,21 @@
+raceid: 18
+name: Lagomorph
+description: Kinda like a rodent. But not.
+buffids:
+  - 3 # Cold Tolerant
+size: small
+unarmedname: teeth
+tnlscale: 1
+selectable: false
+knowsfirstaid: false
+angrycommands: 
+  - emote is afraid.
+tameable: true
+stats:
+  speed:
+    base: 3
+  perception:
+    base: 1
+damage:
+  diceroll: 1d2
+disabledslots: ['weapon', 'offhand', 'head', 'neck', 'belt', 'gloves', 'ring', 'legs', 'feet']

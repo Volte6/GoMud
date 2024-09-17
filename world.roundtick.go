@@ -1418,7 +1418,15 @@ func (w *World) HandleIdleMobs() {
 					mob.Command(`lookforaid`)
 				}
 			} else {
-				mob.Command(`lookfortrouble`)
+
+				idleCmd := `lookfortrouble`
+				if util.Rand(10) < mob.ActivityLevel {
+					idleCmd = mob.GetIdleCommand()
+					if idleCmd == `` {
+						idleCmd = `lookfortrouble`
+					}
+				}
+				mob.Command(idleCmd)
 			}
 		}
 
