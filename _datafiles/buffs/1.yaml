@@ -6,4 +6,3 @@ roundinterval: 75
 triggercount: 1
 flags:
   - lightsource
-  - warmed

@@ -96,6 +96,7 @@ func Suicide(rest string, mobId int) (bool, error) {
 
 					user.Character.KD.AddMobKill(int(mob.MobId))
 					user.Character.KD.AddRaceKill(mob.Character.Race())
+					user.Character.KD.AddZoneKill(mob.Character.Zone)
 
 					xpScaler := float64(mob.Character.Level) / float64(totalPlayerLevels)
 					//if xpScaler > 1 {

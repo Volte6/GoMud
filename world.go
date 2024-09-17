@@ -87,6 +87,7 @@ func (w *World) EnterWorld(roomId int, zone string, userId int) {
 			events.AddToQueue(events.Input{
 				UserId:    userId,
 				InputText: cmd,
+				WaitTurns: -1, // No delay between execution of commands
 			})
 
 		}
