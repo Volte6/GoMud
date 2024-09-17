@@ -2,11 +2,10 @@
 // Invoked when the buff is first applied to the player.
 function onStart(actor, triggersLeft) {
 
-    if ( actor.HasBuffFlag("warmed") || user.HasQuest("3-end") ) {
+    if ( actor.HasBuffFlag("warmed")  ) {
         actor.RemoveBuff(31)
         return
     }
-
     harmAmt = actor.AddHealth(-1 * UtilDiceRoll(1, 10));
     if (harmAmt < 1 ) {
         harmAmt *= -1;

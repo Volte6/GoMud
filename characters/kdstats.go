@@ -6,6 +6,7 @@ type KDStats struct {
 	TotalKills  int            `json:"totalkills"`  // Quick tally of kills
 	Kills       map[int]int    `json:"kills"`       // map of MobId to count
 	RaceKills   map[string]int `json:"racekills"`   // map of race to count
+	ZoneKills   map[string]int `json:"zonekills"`   // map of zone name to count
 	TotalDeaths int            `json:"totaldeaths"` // Quick tally of deaths
 }
 
@@ -65,6 +66,33 @@ func (kd *KDStats) AddRaceKill(race string) {
 	race = strings.ToLower(race)
 
 	kd.RaceKills[race] = kd.RaceKills[race] + 1
+}
+
+func (kd *KDStats) GetZoneKills(zone ...string) int {
+	if len(zone) == 0 {
+		return kd.TotalKills
+	}
+
+	if kd.ZoneKills == nil {
+		kd.ZoneKills = make(map[string]int)
+	}
+
+	total := 0
+	for _, zoneName := range zone {
+		zoneName = strings.ToLower(zoneName)
+		total += kd.ZoneKills[zoneName]
+	}
+	return total
+}
+
+func (kd *KDStats) AddZoneKill(zoneName string) {
+	if kd.ZoneKills == nil {
+		kd.ZoneKills = make(map[string]int)
+	}
+
+	zoneName = strings.ToLower(zoneName)
+
+	kd.ZoneKills[zoneName] = kd.ZoneKills[zoneName] + 1
 }
 
 func (kd *KDStats) GetDeaths() int {
