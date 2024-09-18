@@ -106,6 +106,24 @@ func (r ScriptRoom) GetExits() []map[string]any {
 	return exits
 }
 
+func (r ScriptRoom) SetLocked(exitName string, lockIt bool) {
+
+	if exitInfo, ok := r.roomRecord.Exits[exitName]; ok {
+
+		if exitInfo.HasLock() {
+
+			if lockIt {
+				exitInfo.Lock.SetLocked()
+			} else {
+				exitInfo.Lock.SetUnlocked()
+			}
+
+			r.roomRecord.Exits[exitName] = exitInfo
+		}
+
+	}
+}
+
 // Returns a list of userIds found to have the questId
 // if userIdParty is specified, will only check users in the party of the user.
 func (r ScriptRoom) HasQuest(questId string, partyUserId ...int) []int {

@@ -12,5 +12,5 @@
 {{ if gt (len .IdleMessages) 0 -}}
 <ansi fg="yellow-bold">IdleMessages:</ansi>   {{ range $i, $a := .IdleMessages }}{{ $a }}
                 {{ end -}}{{- end }}
-<ansi fg="yellow-bold">Players here:</ansi>   {{ range $i, $a := .GetPlayers -}}<ansi fg="username">{{- $char := uidToCharacter $a -}}{{ $char.Name }}</ansi>, {{- end }}
-<ansi fg="yellow-bold">Mobs here:</ansi>      {{ range $i, $a := .GetMobs -}}<ansi fg="username">{{- $mobName := idToMobCharacter $a -}}#{{ $a }}{{ $mobName }}</ansi>, {{- end }}
+<ansi fg="yellow-bold">Players here:</ansi>   {{ range $i, $a := .GetPlayers -}}<ansi fg="username">{{- $char := uidToCharacter $a -}}@{{ $a }}-{{ $char.Name }}</ansi>, {{- end }}
+<ansi fg="yellow-bold">Mobs here:</ansi>      {{ range $i, $a := .GetMobs -}}<ansi fg="mobname">{{- $mobName := idToMobCharacter $a -}}#{{ $a }}-{{ $mobName }}</ansi>, {{- end }}

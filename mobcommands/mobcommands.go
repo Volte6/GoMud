@@ -93,6 +93,7 @@ func TryCommand(cmd string, rest string, mobId int) (bool, error) {
 			}
 		}
 	*/
+
 	if cmdInfo, ok := mobCommands[cmd]; ok {
 		if mobDisabled && !cmdInfo.AllowedWhenDowned {
 

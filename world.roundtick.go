@@ -270,6 +270,7 @@ func (w *World) HandleMobRoundTicks() {
 func (w *World) LogOff(userId int) {
 
 	user := users.GetByUserId(userId)
+
 	users.SaveUser(*user)
 
 	worldManager.LeaveWorld(userId)

@@ -192,9 +192,17 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 	// Do not allow scripts to intercept server commands
 	if cmd != `server` {
 
-		handled, err := scripting.TryRoomCommand(keywords.TryCommandAlias(cmd), rest, userId)
-		if handled {
-			return true, err
+		alias := keywords.TryCommandAlias(cmd)
+		skipScript := false
+		if info, ok := userCommands[alias]; ok && info.AdminOnly {
+			skipScript = true
+		}
+
+		if !skipScript {
+			handled, err := scripting.TryRoomCommand(alias, rest, userId)
+			if handled {
+				return true, err
+			}
 		}
 
 	}

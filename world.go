@@ -823,6 +823,8 @@ func (w *World) MessageTick() {
 			continue
 		}
 
+		broadcast.Text = templates.AnsiParse(broadcast.Text)
+
 		if broadcast.SkipLineRefresh {
 			w.connectionPool.Broadcast([]byte(broadcast.Text))
 			return

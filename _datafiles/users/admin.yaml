@@ -5,7 +5,7 @@ password: password
 macros:
   =1: e;e;e;e;e;e;e;e
 character:
-  name: Admin
+  name: asdf
   description: Admin possesses the ability to manipulate the very fabric of the universe,
     bending it to his will with a mere thought. He can create and destroy, alter reality,
     and shape the world around him as he sees fit. His knowledge of the world is unparalleled,
@@ -16,8 +16,8 @@ character:
     world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 1
-  zone: Frostfang
+  roomid: -1
+  zone: Tutorial
   raceid: 2
   stats:
     strength: {}
@@ -32,7 +32,7 @@ character:
       base: 2
     perception: {}
   level: 28
-  experience: 550857
+  experience: 550862
   trainingpoints: 26
   statpoints: 27
   health: 127
@@ -53,30 +53,23 @@ character:
   - itemid: 10004
   - itemid: 20004
   - itemid: 10004
+  - itemid: 10006
+    uncursed: true
   buffs:
     list:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 21
+      roundcounter: 8
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 29
-      triggersleft: 1000000000
-    - buffid: 6
-      onstartevent: true
-      roundcounter: 418
-      triggersleft: 3
-    - buffid: 1
-      onstartevent: true
-      permabuff: true
+      roundcounter: 1
       triggersleft: 1000000000
   equipment:
     weapon:
-      itemid: 10006
-      uncursed: true
+      itemid: 10001
     belt:
       itemid: 20011
     gloves:
@@ -99,8 +92,17 @@ character:
   keyring:
     784-chest: DUU
     key-110-west: "3"
+  kd:
+    totalkills: 5
+    kills:
+      58: 5
+    racekills:
+      dummy: 5
+    zonekills:
+      tutorial: 5
+    totaldeaths: 0
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/5SOSxKDIQiDL/QtfkSIvf/FOlDb0WUn8RUwJJ7kn2XEJIL02iMJkQNj4EiJJKS1z8Spqg3MsYkJW4zEDe/K8bPshaLYtws9+mc1Dl6q40+xnl/l4o3T59PegXuUdgNi8WK1UHEnQRLMA4a9AwAA//+xhKWyTQEAAA==
+roommemoryblob: H4sIAAAAAAAA/3yOCw7DIAxDL/QqkQBrc/+LTfwZsCp+wljm4x3is7SZrt/RSaVOIgaEuxa4eTCeHCieQORDJExT7jPnOpecbEEqa/a2nvxAlhP7fnRm9C/t07YimGkmVWp8jcc2+w0AAP//1LymFI8BAAA=
 configoptions: {}

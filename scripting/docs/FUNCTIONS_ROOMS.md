@@ -21,6 +21,7 @@
   - [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](#roomobjectaddtemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int-roundttl-int)
   - [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](#roomobjectremovetemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int)
   - [RoomObject.RepeatSpawnItem(itemId int, roundInterval int \[, containerName\]](#roomobjectrepeatspawnitemitemid-int-roundinterval-int--containername)
+  - [RoomObject.SetLocked(exitName string, lockIt bool)](#roomobjectsetlockedexitname-string-lockit-bool)
 
 ## [GetRoom(roomId int) RoomObject ](/scripting/room_func.go)
 Retrieves a RoomObject for a given roomId.
@@ -186,4 +187,12 @@ _Note: all 3 parameters much match an existing temporary exit for it to be remov
 | itemId | What item? |
 | roundInterval | How many rounds until the item respawns after it is taken/removed from the room? |
 | containerName | Optional container for the item to spawn into. |
+
+## [RoomObject.SetLocked(exitName string, lockIt bool)](/scripting/room_func.go)
+Sets an exit to locked or not (If it has a lock)
+
+|  Argument | Explanation |
+| --- | --- |
+| exitName | The exitname to lock/unlock |
+| lockIt | if true, sets it to locked. Otherwise, unlocks it. |
 
