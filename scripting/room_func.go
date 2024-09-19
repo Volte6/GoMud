@@ -52,6 +52,10 @@ func (r ScriptRoom) GetItems() []ScriptItem {
 	return itms
 }
 
+func (r ScriptRoom) DestroyItem(itm ScriptItem) {
+	r.roomRecord.RemoveItem(*itm.itemRecord, false)
+}
+
 func (r ScriptRoom) SpawnItem(itemId int, inStash bool) {
 	i := items.New(itemId)
 	if i.ItemId != 0 {
@@ -83,10 +87,11 @@ func (r ScriptRoom) GetExits() []map[string]any {
 	for exitName, exitInfo := range r.roomRecord.Exits {
 
 		exitMap := map[string]any{
-			"Name":   exitName,
-			"RoomId": exitInfo.RoomId,
-			"Secret": exitInfo.Secret,
-			"Lock":   false,
+			"Name":      exitName,
+			"RoomId":    exitInfo.RoomId,
+			"Secret":    exitInfo.Secret,
+			"Lock":      false,
+			"temporary": false,
 		}
 
 		if exitInfo.HasLock() {
@@ -100,6 +105,17 @@ func (r ScriptRoom) GetExits() []map[string]any {
 			exitMap["Lock"] = nil
 		}
 
+		exits = append(exits, exitMap)
+	}
+
+	for _, exitInfo := range r.roomRecord.ExitsTemp {
+		exitMap := map[string]any{
+			"Name":      exitInfo.Title,
+			"RoomId":    exitInfo.RoomId,
+			"Secret":    false,
+			"Lock":      false,
+			"temporary": true,
+		}
 		exits = append(exits, exitMap)
 	}
 

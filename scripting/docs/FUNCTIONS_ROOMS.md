@@ -9,6 +9,7 @@
   - [RoomObject.SetPermData(key string, value any)](#roomobjectsetpermdatakey-string-value-any)
   - [RoomObject.GetPermData(key string) any](#roomobjectgetpermdatakey-string-any)
   - [RoomObject.GetItems() \[\]ItemObject](#roomobjectgetitems-itemobject)
+  - [RoomObject.DestroyItem(itm ScriptItem) ](#roomobjectdestroyitemitm-scriptitem-)
   - [RoomObject.SpawnItem(itemId int, inStash bool) \[\]ItemObject](#roomobjectspawnitemitemid-int-instash-bool-itemobject)
   - [RoomObject.GetMobs() \[\]int](#roomobjectgetmobs-int)
   - [RoomObject.GetPlayers() \[\]int](#roomobjectgetplayers-int)
@@ -80,6 +81,8 @@ Returns an array of items on the floor of the room.
 
 _Note: See [/scripting/docs/FUNCTIONS_ITEMS.md](/scripting/docs/FUNCTIONS_ITEMS.md) for details on ItemObject objects._
 
+## [RoomObject.DestroyItem(itm ScriptItem) ](/scripting/room_func.go)
+Destroy an item from the ground.
 
 ## [RoomObject.SpawnItem(itemId int, inStash bool) []ItemObject](/scripting/room_func.go)
 Spawns an item in the room.

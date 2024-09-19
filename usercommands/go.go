@@ -156,23 +156,11 @@ func Go(rest string, userId int) (bool, error) {
 			enterFromExit = fmt.Sprintf(`the <ansi fg="exit">%s</ansi>`, enterFromExit)
 		}
 
-		if handled, err := scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId); err == nil {
-			if handled { // For this event, handled represents whether to reject the move.
-				return true, nil
-			}
-		}
-
 		if err := rooms.MoveToRoom(user.UserId, destRoom.RoomId); err != nil {
 			user.SendText("Oops, couldn't move there!")
 		} else {
 
-			if handled, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId); err == nil {
-
-				if handled { // For this event, handled represents whether to reject the move.
-					rooms.MoveToRoom(user.UserId, originRoomId)
-					return true, nil
-				}
-			}
+			scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId)
 
 			c := configs.GetConfig()
 
@@ -309,6 +297,8 @@ func Go(rest string, userId int) (bool, error) {
 
 			handled = true
 			Look(`secretly`, userId)
+
+			scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId)
 		}
 
 	}

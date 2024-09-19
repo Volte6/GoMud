@@ -15,6 +15,7 @@ idlecommands:
   - 'say Type <ansi fg="command">status</ansi> to learn about yourself.'
   - 'say Type <ansi fg="command">help</ansi> to see many of the commands available to you.'
 activitylevel: 1
+buffids: [35] # Death Protection
 character:
   name: player guide
   description: 'In combat, the Guide proves to be a steadfast protector, always ready to lend a helping hand when danger looms. They are a skilled warrior, wielding their frost-forged weapon with precision and using their keen senses to anticipate threats. New players can rely on the Guide to watch their back in the heat of battle, providing both tactical advice and unwavering support to ensure their safety.'

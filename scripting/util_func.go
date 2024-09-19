@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/dop251/goja"
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/users"
@@ -26,6 +27,7 @@ func setUtilFunctions(vm *goja.Runtime) {
 	vm.Set(`UtilSetTimeNight`, UtilSetTimeNight)
 	vm.Set(`UtilIsDay`, UtilIsDay)
 	vm.Set(`UtilLocateUser`, UtilLocateUser)
+	vm.Set(`UtilApplyColorPattern`, UtilApplyColorPattern)
 }
 
 // ////////////////////////////////////////////////////////
@@ -131,4 +133,8 @@ func UtilLocateUser(idOrName any) int {
 	}
 
 	return 0
+}
+
+func UtilApplyColorPattern(input string, patternName string) string {
+	return colorpatterns.ApplyColorPattern(input, patternName)
 }

@@ -38,6 +38,9 @@ const (
 	CancelOnAction Flag = `cancel-on-action`
 	CancelOnWater  Flag = `cancel-on-water`
 
+	// Death preventing
+	ReviveOnDeath Flag = `revive-on-death`
+
 	// Harmful flags
 	Poison Flag = `poison`
 	Drunk  Flag = `drunk`
@@ -50,6 +53,8 @@ const (
 	SuperHearing Flag = `superhearing`
 	NightVision  Flag = `nightvision`
 	Warmed       Flag = `warmed`
+	Hydrated     Flag = `hydrated`
+	Thirsty      Flag = `thirsty`
 )
 
 var (

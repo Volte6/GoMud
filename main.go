@@ -21,6 +21,7 @@ import (
 	"github.com/Volte6/ansitags"
 	"github.com/gorilla/websocket"
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
 	"github.com/volte6/mud/events"
@@ -129,7 +130,7 @@ func main() {
 	keywords.LoadAliases()
 	gametime.SetToDay(-5)
 
-	for name, str := range items.GetDebugColorPatternOutput() {
+	for name, str := range colorpatterns.GetDebugColorPatternOutput() {
 		slog.Info("Color Pattern Test", name, ansitags.Parse(str))
 	}
 

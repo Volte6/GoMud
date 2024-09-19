@@ -1,4 +1,4 @@
-package items
+package colorpatterns
 
 import (
 	"strings"
@@ -6,6 +6,9 @@ import (
 	"github.com/Volte6/ansitags"
 	"github.com/volte6/mud/util"
 )
+
+// TODO: This introduces unnecessary steps by using an intermediate encoding before the ANSITAG encoding.
+// This should be optimized.
 
 var (
 	// Color patterns that repeat as they are applied

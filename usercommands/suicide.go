@@ -28,6 +28,23 @@ func Suicide(rest string, userId int) (bool, error) {
 		return true, errors.New(`already dead`)
 	}
 
+	room := rooms.LoadRoom(user.Character.RoomId)
+	if room == nil {
+		return false, fmt.Errorf("room %d not found", user.Character.RoomId)
+	}
+
+	if user.Character.HasBuffFlag(buffs.ReviveOnDeath) {
+
+		user.Character.Health = user.Character.HealthMax.Value
+
+		user.SendText(`You are revived in a shower of magical sparks!`)
+		room.SendText(`<ansi fg="username">`+user.Character.Name+`</ansi> is suddenly revived in a shower of sparks!`, user.UserId)
+
+		user.Character.CancelBuffsWithFlag(buffs.ReviveOnDeath)
+
+		return true, nil
+	}
+
 	events.AddToQueue(events.Broadcast{
 		Text: fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> has <ansi fg="red-bold">DIED!</ansi> <ansi fg="magenta-bold">***</ansi>`, user.Character.Name),
 	})

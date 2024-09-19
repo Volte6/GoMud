@@ -16,8 +16,8 @@ character:
     world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: -1
-  zone: Tutorial
+  roomid: 1
+  zone: Frostfang
   raceid: 2
   stats:
     strength: {}
@@ -31,15 +31,15 @@ character:
     mysticism:
       base: 2
     perception: {}
-  level: 28
-  experience: 550862
-  trainingpoints: 26
-  statpoints: 27
-  health: 127
-  mana: 148
-  actionpoints: 214
+  level: 4
+  experience: 15004
+  trainingpoints: 30
+  statpoints: 31
+  health: 43
+  mana: 28
+  actionpoints: 202
   alignment: 0
-  gold: 0
+  gold: 9
   bank: 0
   items:
   - itemid: 8
@@ -50,11 +50,11 @@ character:
     uses: 1
   - itemid: 30007
     uses: 1
-  - itemid: 10004
-  - itemid: 20004
-  - itemid: 10004
   - itemid: 10006
     uncursed: true
+  - itemid: 20043
+  - itemid: 20043
+  - itemid: 20043
   buffs:
     list:
     - buffid: 28
@@ -70,6 +70,8 @@ character:
   equipment:
     weapon:
       itemid: 10001
+    head:
+      itemid: 20043
     belt:
       itemid: 20011
     gloves:
@@ -82,7 +84,7 @@ character:
     dual-wield: 2
     inspect: 4
     map: 5
-    peep: 1
+    peep: 4
     protection: 4
     skulduggery: 1
   questprogress:
@@ -93,16 +95,22 @@ character:
     784-chest: DUU
     key-110-west: "3"
   kd:
-    totalkills: 5
+    totalkills: 12
     kills:
-      58: 5
+      1: 3
+      2: 3
+      58: 6
     racekills:
-      dummy: 5
+      dummy: 6
+      human: 3
+      rodent: 3
     zonekills:
-      tutorial: 5
+      frostfang: 6
+      tutorial: 6
     totaldeaths: 0
+  buffids: []
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/3yOCw7DIAxDL/QqkQBrc/+LTfwZsCp+wljm4x3is7SZrt/RSaVOIgaEuxa4eTCeHCieQORDJExT7jPnOpecbEEqa/a2nvxAlhP7fnRm9C/t07YimGkmVWp8jcc2+w0AAP//1LymFI8BAAA=
+roommemoryblob: H4sIAAAAAAAA/7I0MNKxNDDW0TUkj8IqBggAAP//E+GoYFUAAAA=
 configoptions: {}

@@ -1,9 +1,9 @@
 roomid: 991
 zone: Tutorial
-title: Newbie School
-description: You stand at the entrance of the Newbie School. Here you will learn the
-  very basics of how to navigate and interact with the world. Pay attention, because
-  once you complete this area, you will be all on your own.
+title: Learning about You
+description: In this room you will learn how to inspect your character. Your status,
+  conditions, and a few other useful bits of information are only a few keystrokes
+  away.
 exits:
   south:
     roomid: 992

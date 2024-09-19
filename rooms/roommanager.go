@@ -231,10 +231,11 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	user.Character.Zone = newRoom.Zone
 	user.Character.RememberRoom(newRoom.RoomId) // Mark this room as remembered.
 
-	if (len(isSpawn) > 0 && isSpawn[0]) || formerRoomId == -1 {
+	if (len(isSpawn) > 0 && isSpawn[0]) && (formerRoomId < 900 || formerRoomId > 999) {
 		if user.Character.Level < 5 {
 
 			if toRoomId > -1 {
+
 				room := LoadRoom(toRoomId)
 				guideMob := mobs.NewMobById(38, 1)
 				guideMob.Character.Name = fmt.Sprintf(`%s's Guide`, user.Character.Name)
@@ -242,6 +243,9 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 				guideMob.Character.Charm(userId, characters.CharmPermanent, characters.CharmExpiredDespawn)
 				// Track it
 				user.Character.TrackCharmed(guideMob.InstanceId, true)
+
+				guideMob.Command(`say Hello <ansi fg="username">` + user.Character.Name + `</ansi>! I'll be here to help protect you while you learn the ropes.`)
+				user.SendText(`Your guide will try and stick around until you reach level 5.`)
 			}
 		}
 	}

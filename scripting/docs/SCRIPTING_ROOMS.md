@@ -39,8 +39,6 @@ function onEnter(user ActorObject, room RoomObject) {
 
 `onEnter()` is called when a player enters the room.
 
-Returning `true` will reject the move, leaving them in their original room.
-
 |  Argument | Explanation |
 | --- | --- |
 | user | [ActorObject](FUNCTIONS_ACTORS.md) |
@@ -54,8 +52,6 @@ function onExit(user ActorObject, room RoomObject) {
 ```
 
 `onExit()` is called when a player exits the room.
-
-Returning `true` will reject the move, leaving them in their original room.
 
 |  Argument | Explanation |
 | --- | --- |

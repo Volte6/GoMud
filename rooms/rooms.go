@@ -48,6 +48,7 @@ type SpawnInfo struct {
 	IdleCommands []string `yaml:"idlecommands,omitempty"`    // (optional) list of commands to override the default of the mob. Useful when you need a mob to be more unique.
 	ScriptTag    string   `yaml:"scripttag,omitempty"`       // (optional) if set, will override the mob's script tag
 	QuestFlags   []string `yaml:"questflags,omitempty,flow"` // (optional) list of quest flags to set on the mob
+	BuffIds      []int    `yaml:"buffids,omitempty,flow"`    // (optional) list of buffs the mob always has active
 }
 
 type FindFlag uint16
@@ -490,6 +491,10 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 								}
 							}
 						}
+					}
+
+					if len(spawnInfo.BuffIds) > 0 {
+						mob.Character.SetPermaBuffs(spawnInfo.BuffIds)
 					}
 
 					// If there are idle commands for this spawn, overwrite.

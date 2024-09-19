@@ -7,5 +7,9 @@ activitylevel: 1
 character:
   name: Orb of Knowledge
   description: 'The orb glows with inner awareness. Although it''s only a sphere of light, you can sense wisdom and intent.'
-  raceid: 0
+  raceid: 20
   level: 1
+  equipment:
+    head:
+      itemid: 20044
+

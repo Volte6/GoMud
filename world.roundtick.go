@@ -315,6 +315,7 @@ func (w *World) PruneBuffs() {
 					user.Character.Validate()
 
 					if logOff {
+						slog.Info("DOING LOGOFF")
 						w.LogOff(uId)
 					}
 				}
@@ -558,9 +559,8 @@ func (w *World) HandlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 			defUser := users.GetByUserId(user.Character.Aggro.UserId)
 
 			uRoom := rooms.LoadRoom(roomId)
-			defRoom := rooms.LoadRoom(defUser.Character.RoomId)
 
-			if uRoom == nil || defRoom == nil {
+			if uRoom == nil {
 				user.Character.Aggro = nil
 				continue
 			}
@@ -583,6 +583,12 @@ func (w *World) HandlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 
 			if !targetFound {
 				user.SendText(`Your target can't be found.`)
+				user.Character.Aggro = nil
+				continue
+			}
+
+			defRoom := rooms.LoadRoom(defUser.Character.RoomId)
+			if defRoom == nil {
 				user.Character.Aggro = nil
 				continue
 			}
@@ -733,7 +739,6 @@ func (w *World) HandlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 			affectedMobInstanceIds = append(affectedMobInstanceIds, user.Character.Aggro.MobInstanceId)
 
 			defMob := mobs.GetInstance(user.Character.Aggro.MobInstanceId)
-			defRoom := rooms.LoadRoom(defMob.Character.RoomId)
 
 			targetFound := true
 			if defMob == nil {
@@ -765,6 +770,8 @@ func (w *World) HandlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 				user.Character.Aggro = nil
 				continue
 			}
+
+			defRoom := rooms.LoadRoom(defMob.Character.RoomId)
 
 			defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
@@ -1015,9 +1022,13 @@ func (w *World) HandleMobCombat() (affectedPlayerIds []int, affectedMobInstanceI
 		if mob.Character.Aggro != nil && mob.Character.Aggro.UserId > 0 {
 
 			defUser := users.GetByUserId(mob.Character.Aggro.UserId)
-			defRoom := rooms.LoadRoom(defUser.Character.RoomId)
+			if defUser == nil || mob.Character.RoomId != defUser.Character.RoomId {
+				mob.Character.Aggro = nil
+				continue
+			}
 
-			if defUser == nil || defRoom == nil || mob.Character.RoomId != defUser.Character.RoomId {
+			defRoom := rooms.LoadRoom(defUser.Character.RoomId)
+			if defRoom == nil {
 				mob.Character.Aggro = nil
 				continue
 			}
@@ -1176,12 +1187,13 @@ func (w *World) HandleMobCombat() (affectedPlayerIds []int, affectedMobInstanceI
 			affectedMobInstanceIds = append(affectedMobInstanceIds, mob.Character.Aggro.MobInstanceId)
 
 			defMob := mobs.GetInstance(mob.Character.Aggro.MobInstanceId)
-			defRoom := rooms.LoadRoom(defMob.Character.RoomId)
 
 			if defMob == nil || mob.Character.RoomId != defMob.Character.RoomId {
 				mob.Character.Aggro = nil
 				continue
 			}
+
+			defRoom := rooms.LoadRoom(defMob.Character.RoomId)
 
 			defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
@@ -1569,7 +1581,20 @@ func (w *World) CheckForLevelUps() {
 					Text: templates.AnsiParse(fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has leveled up to level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, user.Character.Level, term.CRLFStr)),
 				})
 
-				go users.SaveUser(*user)
+				if user.Character.Level >= 5 {
+					for _, mobInstanceId := range user.Character.CharmedMobs {
+						if mob := mobs.GetInstance(mobInstanceId); mob != nil {
+
+							if mob.MobId == 38 {
+								mob.Command(`say I see you have grown much stronger and more experienced. My assistance is now needed elsewhere. I wish you good luck!`)
+								mob.Command(`emote clicks their heels together and disappears in a cloud of smoke.`, 10)
+								mob.Command(`suicide vanish`, 10)
+							}
+						}
+					}
+				}
+
+				users.SaveUser(*user)
 
 				continue
 			}

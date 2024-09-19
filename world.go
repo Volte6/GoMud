@@ -848,7 +848,7 @@ func (w *World) MessageTick() {
 			continue
 		}
 
-		slog.Debug("Message", "userId", message.UserId, "length", len(message.Text))
+		slog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(message.Text))
 
 		message.Text = templates.AnsiParse(message.Text)
 
@@ -1000,7 +1000,7 @@ func (w *World) TurnTick() {
 			continue
 		}
 
-		slog.Debug(`Event`, `type`, input.Type(), `UserId`, input.UserId, `MobInstanceId`, input.MobInstanceId, `WaitTurns`, input.WaitTurns, `InputText`, input.InputText)
+		//slog.Debug(`Event`, `type`, input.Type(), `UserId`, input.UserId, `MobInstanceId`, input.MobInstanceId, `WaitTurns`, input.WaitTurns, `InputText`, input.InputText)
 
 		if input.MobInstanceId > 0 {
 			if input.WaitTurns < 1 {
