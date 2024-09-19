@@ -9,6 +9,9 @@ import (
 	"sync/atomic"
 
 	"github.com/gorilla/websocket"
+	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/util"
+	"gopkg.in/yaml.v2"
 )
 
 const ReadBufferSize = 1024
@@ -38,19 +41,46 @@ func (c *ConnectionTracker) Add(conn net.Conn, wsConn *websocket.Conn) *Connecti
 
 	c.netConnections.Store(connDetails.ConnectionId(), connDetails)
 
+	if wsConn != nil {
+
+		data := make(map[string]map[string]string, 100)
+		if yfile, err := os.ReadFile(util.FilePath(string(configs.GetConfig().FileAnsiAliases))); err == nil {
+			if err := yaml.Unmarshal(yfile, &data); err == nil {
+
+				for name, val := range data[`color256`] {
+					connDetails.Write([]byte("COLORALIAS " + name + "=" + val + "\n"))
+				}
+
+			} else {
+				slog.Info("ERROR 2", "msg", err)
+			}
+		} else {
+			slog.Info("ERROR 1", "msg", err)
+		}
+
+	}
+
 	// return the unique ID to find this connection later
 	return connDetails
 }
 
 // Returns the total number of connections
-func (c *ConnectionTracker) Get(id ConnectionId) (cd *ConnectionDetails, err error) {
+func (c *ConnectionTracker) Get(id ConnectionId) *ConnectionDetails {
 
 	// Try to retrieve the value
 	if cd, ok := c.netConnections.Load(id); ok {
-		return cd.(*ConnectionDetails), nil
+		return cd.(*ConnectionDetails)
 	}
 
-	return nil, errors.New("connection not found")
+	return nil
+}
+
+func (c *ConnectionTracker) IsWebsocket(id ConnectionId) bool {
+	cd := c.Get(id)
+	if cd == nil {
+		return false
+	}
+	return cd.IsWebsocket()
 }
 
 func (c *ConnectionTracker) Cleanup() {

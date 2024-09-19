@@ -421,7 +421,9 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 				}
 
 				if redrawPrompt {
-					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
+					prompt := userObject.GetCommandPrompt(true)
+					promptColorized := templates.AnsiParse(prompt)
+					worldManager.GetConnectionPool().SendTo([]byte(promptColorized), clientInput.ConnectionId)
 				}
 
 			}
@@ -484,7 +486,10 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 					clientInput.Buffer = append(clientInput.Buffer, []byte(suggested)...)
 					suggestions.Clear()
 					userObject.SetUnsentText(string(clientInput.Buffer), ``)
-					worldManager.GetConnectionPool().SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
+
+					prompt := userObject.GetCommandPrompt(true)
+					promptColorized := templates.AnsiParse(prompt)
+					worldManager.GetConnectionPool().SendTo([]byte(promptColorized), clientInput.ConnectionId)
 
 				}
 

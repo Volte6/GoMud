@@ -2,12 +2,12 @@
 # Also useful: https://www.hackitu.de/termcolor256/
 # Under 3-bit and 4-bit colors (Until 256 color support added)
 color8:
-  table-title: green
+  table-title: 2
   userid: black
   username: 93 # Bright yellow
   username-aggro: red
   username-downed: 90 # Bright black
-  mobname: cyan 
+  mobname: 6 
   mobname-aggro: 91 # Bright red
   mobname-downed: red
   spellname: magenta
@@ -17,14 +17,14 @@ color8:
   role-mod: 31
   role-user: 32
   role-guest: 90
-  command: cyan
+  command: 6
   command-admin: 9
   skill: 93
   container: 94 # Bright blue
   exit: 92 # Bright green
   secret-exit: 90 # Bright black
   zone: red
-  map-shop: green
+  map-shop: 2
   map-bank: 92
   map-you: 96
   map-secret: 90 # Bright black
@@ -32,7 +32,7 @@ color8:
   mapbg-temple: 97 # Bright black
   map-water: 94 # Bright blue
   map-shore: 94 # Bright blue
-  map-forest: green
+  map-forest: 2
   map-trainer: 94 # Bright blue
   map-player: 93 # Bright yellow
   map-friend: 93 # Bright green
@@ -46,8 +46,8 @@ color8:
   map-target: 91 # Bright red
   map-city: 97 # Bright white
   map-snow: 97 # Bright white
-  map-house: yellow
-  map-mountains:  yellow
+  map-house: 3
+  map-mountains: 3
   map-wall:  cyan # Bright black
   map-legend: 90
   trail-dead: 90
@@ -55,19 +55,19 @@ color8:
   trail-good: 32
   trail-warm: 31
   trail-hot: 91
-  item: green
-  itemname: green
-  itemdesc: green
-  questname: cyan
+  item: 2
+  itemname: 2
+  itemdesc: 2
+  questname: 6
   xp: 93 # Bright yellow
   experience: 93 # Bright yellow
   gold: 93 # Bright yellow
   stat: 35 # Magenta
   statmod: 36 # Bright cyan
   damage: 91 # Bright red
-  healing: green
+  healing: 2
   shop-qty: 97 # Bright white
-  shop-name: green
+  shop-name: 2
   shop-price: 93
   uses-left: 90 # Bright black
   holy: 96 # Bright cyan
@@ -81,9 +81,9 @@ color8:
   unholy: 31 # red
   item-nothing: 90 # Bright black
   item-flags:  90 # Bright black
-  item-enchanted: cyan
+  item-enchanted: 6
   item-cursed: red
-  item-bonus-damage: cyan-bold
+  item-bonus-damage: 6-bold
   name-flags-wrapper: black-bold
   name-flags: black-bold
   room-title: magenta
@@ -119,21 +119,21 @@ color8:
   suggested-text: 90
   night: blue
   day: 96
-  day-dusk: yellow
+  day-dusk: 3
   enters-message: 8
   leaves-message: 8
   spell-neutral: white
-  spell-helpful: green
+  spell-helpful: 2
   spell-harmful: red
-  questflag: yellow
+  questflag: 3
   highlight: 90
 color256:
-  table-title: green
+  table-title: 2
   userid: black
   username: 11 # Bright yellow
   username-aggro: red
   username-downed: 8 # Bright black
-  mobname: cyan 
+  mobname: 6 
   mobname-aggro: 9 # Bright red
   mobname-downed: red
   spellname: magenta
@@ -143,14 +143,14 @@ color256:
   role-mod: 1
   role-user: 2
   role-guest: 8
-  command: cyan
+  command: 6
   command-admin: 9
   skill: 11
   container: 12 # Bright blue
   exit: 10 # Bright green
   secret-exit: 8 # Bright black
   zone: red
-  map-shop: green
+  map-shop: 2
   map-bank: 10
   map-you: 14
   map-secret: 8 # Bright black
@@ -158,7 +158,7 @@ color256:
   mapbg-temple: 15 # Bright black
   map-water: 12 # Bright blue
   map-shore: 12 # Bright blue
-  map-forest: green
+  map-forest: 2
   map-trainer: 12 # Bright blue
   map-player: 11 # Bright yellow
   map-friend: 11 # Bright green
@@ -172,8 +172,8 @@ color256:
   map-target: 9 # Bright red
   map-city: 15 # Bright white
   map-snow: 15 # Bright white
-  map-house: yellow
-  map-mountains:  yellow
+  map-house: 3
+  map-mountains: 3
   map-wall:  cyan # Bright black
   map-legend: 8
   trail-dead: 8
@@ -181,10 +181,10 @@ color256:
   trail-good: 2
   trail-warm: 1
   trail-hot: 9
-  item: green
-  itemname: green
+  item: 2
+  itemname: 2
   itemdesc: 79
-  questname: cyan
+  questname: 6
   xp: 11 # Bright yellow
   experience: 11 # Bright yellow
   gold: 220 # light yellow
@@ -193,7 +193,7 @@ color256:
   damage: 9 # Bright red
   healing: 157
   shop-qty: 15 # Bright white
-  shop-name: green
+  shop-name: 2
   shop-price: 220
   uses-left: 8 # Bright black
   holy: 21
@@ -244,7 +244,7 @@ color256:
   enters-message: 8
   leaves-message: 8
   spell-neutral: white
-  spell-helpful: green
+  spell-helpful: 2
   spell-harmful: red
   questflag: 187
   highlight: 238

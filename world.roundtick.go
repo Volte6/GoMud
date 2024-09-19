@@ -1540,7 +1540,9 @@ func (w *World) HandleAutoHealing(roundNumber uint64) {
 			}
 		}
 
-		w.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), user.ConnectionId())
+		prompt := user.GetCommandPrompt(true)
+		promptColorized := templates.AnsiParse(prompt)
+		w.connectionPool.SendTo([]byte(promptColorized), user.ConnectionId())
 	}
 
 }
@@ -1622,7 +1624,7 @@ func (w *World) CheckForLevelUps() {
 				user.SendText(levelUpStr)
 
 				events.AddToQueue(events.Broadcast{
-					Text: templates.AnsiParse(fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has leveled up to level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, user.Character.Level, term.CRLFStr)),
+					Text: fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has leveled up to level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, user.Character.Level, term.CRLFStr),
 				})
 
 				if user.Character.Level >= 5 {
@@ -1659,20 +1661,6 @@ func (w *World) ProcessAuction(tNow time.Time) {
 		return
 	}
 
-	auctionOnConnectionIds := []uint64{}
-	for _, uid := range users.GetOnlineUserIds() {
-		if u := users.GetByUserId(uid); u != nil {
-			auctionOn := u.GetConfigOption(`auction`)
-			if auctionOn == nil || auctionOn.(bool) {
-				auctionOnConnectionIds = append(auctionOnConnectionIds, u.ConnectionId())
-			}
-		}
-	}
-
-	if len(auctionOnConnectionIds) == 0 {
-		return
-	}
-
 	c := configs.GetConfig()
 
 	if a.IsEnded() {
@@ -1681,23 +1669,31 @@ func (w *World) ProcessAuction(tNow time.Time) {
 
 		a.LastUpdate = tNow
 		auctionTxt, _ := templates.Process("auctions/auction-end", a)
-		w.GetConnectionPool().SendTo([]byte(auctionTxt), auctionOnConnectionIds...)
+
+		for _, uid := range users.GetOnlineUserIds() {
+			if u := users.GetByUserId(uid); u != nil {
+				auctionOn := u.GetConfigOption(`auction`)
+				if auctionOn == nil || auctionOn.(bool) {
+					u.SendText(auctionTxt)
+				}
+			}
+		}
 
 		// Give the item to the winner and let them know
 		if a.HighestBidUserId > 0 {
 
 			if user := users.GetByUserId(a.HighestBidUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
-					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">You have won the auction for the <ansi fg="item">%s</ansi>! It has been added to your backpack.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr))
-					w.GetConnectionPool().SendTo([]byte(msg), user.ConnectionId())
+					msg := fmt.Sprintf(`<ansi fg="yellow">You have won the auction for the <ansi fg="item">%s</ansi>! It has been added to your backpack.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr)
+					user.SendText(msg)
 				}
 			}
 
 		} else {
 			if user := users.GetByUserId(a.SellerUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
-					msg := templates.AnsiParse(fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr))
-					w.GetConnectionPool().SendTo([]byte(msg), user.ConnectionId())
+					msg := fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr)
+					user.SendText(msg)
 				}
 			}
 		}
@@ -1706,13 +1702,29 @@ func (w *World) ProcessAuction(tNow time.Time) {
 
 		a.LastUpdate = tNow
 		auctionTxt, _ := templates.Process("auctions/auction-start", a)
-		w.GetConnectionPool().SendTo([]byte(auctionTxt), auctionOnConnectionIds...)
+
+		for _, uid := range users.GetOnlineUserIds() {
+			if u := users.GetByUserId(uid); u != nil {
+				auctionOn := u.GetConfigOption(`auction`)
+				if auctionOn == nil || auctionOn.(bool) {
+					u.SendText(auctionTxt)
+				}
+			}
+		}
 
 	} else if time.Since(a.LastUpdate) > time.Second*time.Duration(c.AuctionUpdateSeconds) {
 
 		a.LastUpdate = tNow
 		auctionTxt, _ := templates.Process("auctions/auction-update", a)
-		w.GetConnectionPool().SendTo([]byte(auctionTxt), auctionOnConnectionIds...)
+
+		for _, uid := range users.GetOnlineUserIds() {
+			if u := users.GetByUserId(uid); u != nil {
+				auctionOn := u.GetConfigOption(`auction`)
+				if auctionOn == nil || auctionOn.(bool) {
+					u.SendText(auctionTxt)
+				}
+			}
+		}
 
 	}
 

@@ -121,6 +121,10 @@ type ConnectionDetails struct {
 	inputDisabled     bool
 }
 
+func (cd *ConnectionDetails) IsWebsocket() bool {
+	return cd.wsConn != nil
+}
+
 // If HandleInput receives an error, we shouldn't pass input to the game logic
 func (cd *ConnectionDetails) HandleInput(ci *ClientInput, ct *ConnectionTracker, handlerState map[string]any) (doNextHandler bool, lastHandler string, err error) {
 	cd.handlerMutex.Lock()

@@ -14,9 +14,8 @@ character:
     them strength, wisdom, or fortune beyond their wildest dreams. Conversely, he
     can also mete out justice to those who would seek to disrupt the balance of the
     world, swiftly and decisively.
-  adjectives:
-  - zombie
-  roomid: 15
+  adjectives: []
+  roomid: 21
   zone: Frostfang
   raceid: 2
   stats:
@@ -36,7 +35,7 @@ character:
     perception:
       training: 2
   level: 5
-  experience: 16247
+  experience: 16251
   trainingpoints: 31
   statpoints: 22
   health: 44
@@ -55,21 +54,27 @@ character:
   - itemid: 30007
     uses: 1
   - itemid: 10001
-  - itemid: 10006
-    uncursed: true
   buffs:
     list:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 9
+      roundcounter: 27
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 17
+      roundcounter: 35
+      triggersleft: 1000000000
+    - buffid: 1
+      onstartevent: true
+      permabuff: true
+      roundcounter: 14
       triggersleft: 1000000000
   equipment:
+    weapon:
+      itemid: 10006
+      uncursed: true
     head:
       itemid: 20043
     belt:
@@ -95,22 +100,22 @@ character:
     784-chest: DUU
     key-110-west: "3"
   kd:
-    totalkills: 13
+    totalkills: 15
     kills:
-      1: 3
+      1: 5
       2: 4
       58: 6
     racekills:
       dummy: 6
       human: 4
-      rodent: 3
+      rodent: 5
     zonekills:
-      frostfang: 7
+      frostfang: 9
       tutorial: 6
     totaldeaths: 0
   buffids: []
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/zTIUQqAYAgE4QvNQ7Mqdf+TRf4E+rGMGOT76R3FaYWNNz5r45CL+BtS6xbn3BsAAP//pUakZFEAAAA=
+roommemoryblob: H4sIAAAAAAAA/zIy0KEJMgQEAAD//8ua9dFZAAAA
 configoptions: {}

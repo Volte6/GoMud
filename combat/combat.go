@@ -13,7 +13,6 @@ import (
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -161,22 +160,22 @@ func GetWaitMessages(stepType items.Intensity, sourceChar *characters.Character,
 	}
 
 	if string(toAttackerMsg) != `` {
-		attackResult.SendToSource(templates.AnsiParse(string(toAttackerMsg)))
+		attackResult.SendToSource(string(toAttackerMsg))
 	}
 
 	if !sourceChar.HasBuffFlag(buffs.Hidden) {
 
 		if string(toDefenderMsg) != `` {
-			attackResult.SendToTarget(templates.AnsiParse(string(toDefenderMsg)))
+			attackResult.SendToTarget(string(toDefenderMsg))
 		}
 
 		if string(toAttackerRoomMsg) != `` {
-			attackResult.SendToSourceRoom(templates.AnsiParse(string(toAttackerRoomMsg)))
+			attackResult.SendToSourceRoom(string(toAttackerRoomMsg))
 		}
 
 		if sourceChar.RoomId != targetChar.RoomId {
 			if string(toDefenderRoomMsg) != `` {
-				attackResult.SendToTargetRoom(templates.AnsiParse(string(toDefenderRoomMsg)))
+				attackResult.SendToTargetRoom(string(toDefenderRoomMsg))
 			}
 		}
 
@@ -424,9 +423,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 				}
 
 				attackResult.SendToSource(
-					templates.AnsiParse(string(
-						attackerMsg,
-					)),
+					string(attackerMsg),
 				)
 
 				// Send to victim
@@ -436,26 +433,19 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 				}
 
 				attackResult.SendToTarget(
-					templates.AnsiParse(string(
-						defenderMsg,
-					)),
+					string(defenderMsg),
 				)
 
 				// Send to room
 				attackResult.SendToSourceRoom(
-					templates.AnsiParse(string(
-						toAttackerRoomMsg.SetTokenValue(items.TokenTarget, targetChar.Name).
-							SetTokenValue(items.TokenTargetType, string(targetType)),
-					)),
+					string(toAttackerRoomMsg.SetTokenValue(items.TokenTarget, targetChar.Name).
+						SetTokenValue(items.TokenTargetType, string(targetType))),
 				)
 
 				// Send to defender room if separate
 				if len(string(toDefenderRoomMsg)) > 0 {
 					attackResult.SendToTargetRoom(
-						templates.AnsiParse(string(
-							toDefenderRoomMsg.SetTokenValue(items.TokenTarget, targetChar.Name).
-								SetTokenValue(items.TokenTargetType, string(targetType)),
-						)),
+						string(toDefenderRoomMsg.SetTokenValue(items.TokenTarget, targetChar.Name).SetTokenValue(items.TokenTargetType, string(targetType))),
 					)
 				}
 

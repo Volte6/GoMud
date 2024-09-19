@@ -129,11 +129,11 @@ func RoomMaintenance(out *connection.ConnectionTracker) bool {
 					for _, sign := range prunedSigns {
 						if sign.VisibleUserId == 0 {
 							if u := users.GetByUserId(userId); u != nil {
-								out.SendTo([]byte("A sign crumbles to dust.\n"), u.ConnectionId())
+								u.SendText("A sign crumbles to dust.\n")
 							}
 						} else if sign.VisibleUserId == userId {
 							if u := users.GetByUserId(userId); u != nil {
-								out.SendTo([]byte("The rune you had enscribed here has faded away.\n"), u.ConnectionId())
+								u.SendText("The rune you had enscribed here has faded away.\n")
 							}
 						}
 					}
@@ -149,8 +149,7 @@ func RoomMaintenance(out *connection.ConnectionTracker) bool {
 				for _, exit := range prunedExits {
 					for _, userId := range roomPlayers {
 						if u := users.GetByUserId(userId); u != nil {
-							out.SendTo([]byte(
-								templates.AnsiParse(fmt.Sprintf("The %s vanishes.\n", exit.Title))), u.ConnectionId())
+							u.SendText(fmt.Sprintf("The %s vanishes.\n", exit.Title))
 						}
 					}
 				}

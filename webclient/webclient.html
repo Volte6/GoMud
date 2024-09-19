@@ -44,6 +44,24 @@
     <script>
         let socket;
 
+        colorAliases = {		
+        "black":        0,
+		"red":          1,
+		"green":        2,
+		"yellow":       3,
+		"blue":         4,
+		"magenta":      5,
+		"cyan":         6,
+		"white":        7,
+		"black-bold":   8,
+		"red-bold":     9,
+		"green-bold":   10,
+		"yellow-bold":  11,
+		"blue-bold":    12,
+		"magenta-bold": 13,
+		"cyan-bold":    14,
+		"white-bold":   15,};
+
         document.getElementById('connectBtn').addEventListener('click', function() {
             // Connect to the WebSocket
             socket = new WebSocket('ws://localhost:80/ws');
@@ -94,14 +112,132 @@
         }
 
         function processServerText(message) {
+
+
+            if ( message.substring(0, 11) == "COLORALIAS " ) {
+
+                console.log(message);
+
+                parts = message.substring(11).split('=');
+
+                if ( parts.length > 1 ) {
+                    colorAliases[parts[0].trim()] = parts[1].trim();
+                }
+
+                return;
+            }
+
             message = processOutput(message);
+
             appendToOutput(message);
         }
 
         function appendToOutput(message) {
             const output = document.getElementById('output');
-            output.innerHTML += ansiToHtml(message);
+            
+            //output.innerHTML += ansiToHtml(message);
+            message = ansiTagsToHtml(message);
+            message = message.replaceAll("\r", "");
+            console.log(message);
+
+            output.innerHTML += message;
+
             output.scrollTop = output.scrollHeight;
+        }
+
+        function ansiTagsToHtml(message) {
+            message = message.replaceAll('<ansi', '<span')
+            message = message.replaceAll('</ansi>', '</span>')
+
+            while ( true ) {
+
+
+                let fgMatch = message.match(/fg="([A-Za-z0-9_-]+)"/);
+                let bgMatch = message.match(/bg="([A-Za-z0-9_-]+)"/);
+
+                css = []
+
+                if ( !fgMatch ) {
+                    return message;
+                }
+
+                if (fgMatch) {
+                    css.push('color:'+ansi256Color(fgMatch[1]));
+                }
+                
+                if (bgMatch) {
+                    css.push('background-color:'+ansi256Color(bgMatch[1]));
+                }
+
+                if ( css.length ) {
+                    message = message.replaceAll(fgMatch[0], 'style="' + css.join(";") + '"')
+                }
+            }
+
+            return message;
+        }
+
+        const ansi16Colors = {
+                '30': 'black', '31': 'red', '32': 'green', '33': 'yellow',
+                '34': 'blue', '35': 'magenta', '36': 'cyan', '37': 'white',
+                '90': 'gray', '91': 'lightcoral', '92': 'lightgreen', '93': 'lightyellow',
+                '94': 'lightblue', '95': 'lightpink', '96': 'lightcyan', '97': 'white'
+            };
+
+        function ansi256Color(inputColor) {
+
+            ansiColor = inputColor;
+
+            if ( colorAliases[inputColor] ) {
+                ansiColor = colorAliases[inputColor];
+            }
+
+            ansiColor = Number(ansiColor);
+
+            if (!Number.isInteger(ansiColor) || ansiColor < 0 || ansiColor > 255) {
+                return 'unknown-'+inputColor+'-'+colorAliases[inputColor];
+            }
+
+            let r, g, b;
+
+            if (ansiColor < 16) {
+                // Standard and high-intensity colors
+                const ansi16Colors = [
+                    [0, 0, 0],       // 0: Black
+                    [128, 0, 0],     // 1: Maroon
+                    [0, 128, 0],     // 2: Green
+                    [128, 128, 0],   // 3: Olive
+                    [0, 0, 128],     // 4: Navy
+                    [128, 0, 128],   // 5: Purple
+                    [0, 128, 128],   // 6: Teal
+                    [192, 192, 192], // 7: Silver
+                    [128, 128, 128], // 8: Grey
+                    [255, 0, 0],     // 9: Red
+                    [0, 255, 0],     // 10: Lime
+                    [255, 255, 0],   // 11: Yellow
+                    [0, 0, 255],     // 12: Blue
+                    [255, 0, 255],   // 13: Fuchsia
+                    [0, 255, 255],   // 14: Aqua
+                    [255, 255, 255]  // 15: White
+                ];
+                [r, g, b] = ansi16Colors[ansiColor];
+            } else if (ansiColor >= 16 && ansiColor <= 231) {
+                // 6x6x6 color cube
+                let colorIndex = ansiColor - 16;
+                const rIndex = Math.floor(colorIndex / 36) % 6;
+                const gIndex = Math.floor(colorIndex / 6) % 6;
+                const bIndex = colorIndex % 6;
+
+                r = rIndex === 0 ? 0 : rIndex * 51;
+                g = gIndex === 0 ? 0 : gIndex * 51;
+                b = bIndex === 0 ? 0 : bIndex * 51;
+            } else {
+                // Grayscale from 232 to 255
+                const gray = 8 + (ansiColor - 232) * 10;
+                r = g = b = gray;
+            }
+
+            return `rgb(${r}, ${g}, ${b})`;
         }
 
         function ansiToHtml(ansiString) {
@@ -114,31 +250,7 @@
             */
 
             // Map ANSI 16-color codes to CSS color names
-            const ansi16Colors = {
-                '30': 'black', '31': 'red', '32': 'green', '33': 'yellow',
-                '34': 'blue', '35': 'magenta', '36': 'cyan', '37': 'white',
-                '90': 'gray', '91': 'lightcoral', '92': 'lightgreen', '93': 'lightyellow',
-                '94': 'lightblue', '95': 'lightpink', '96': 'lightcyan', '97': 'white'
-            };
 
-            // Generate 256-color palette (only the most common shades)
-            function ansi256Color(n) {
-                if (n >= 0 && n <= 7) { // Standard colors
-                    return ansi16Colors['3' + n];
-                } else if (n >= 8 && n <= 15) { // High-intensity colors
-                    return ansi16Colors['9' + (n - 8)];
-                } else if (n >= 16 && n <= 231) { // 6x6x6 color cube
-                    n -= 16;
-                    const r = Math.floor(n / 36) % 6 * 51,
-                        g = Math.floor(n / 6) % 6 * 51,
-                        b = n % 6 * 51;
-                    return `rgb(${r},${g},${b})`;
-                } else if (n >= 232 && n <= 255) { // Grayscale from black to white
-                    const gray = (n - 232) * 10 + 8;
-                    return `rgb(${gray},${gray},${gray})`;
-                }
-                return ''; // Invalid color code
-            }
 
             // Regular expression to match ANSI escape codes
             const ansiRegex = /\x1b\[(\d+);?(\d*);?(\d*)?m/g;
