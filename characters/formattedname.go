@@ -2,6 +2,7 @@ package characters
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/volte6/mud/colorpatterns"
 )
@@ -92,4 +93,22 @@ func GetFormattedAdjective(adjName string) string {
 		return newAdj
 	}
 	return adjName
+}
+
+func GetFormattedAdjectives(excludeShort bool) []string {
+
+	ret := []string{}
+
+	for name := range adjectiveSwaps {
+		if excludeShort {
+			if len(name) > 6 && name[len(name)-6:] == `-short` {
+				continue
+			}
+		}
+		ret = append(ret, name)
+	}
+
+	sort.Slice(ret, func(i, j int) bool { return ret[i] < ret[j] })
+
+	return ret
 }

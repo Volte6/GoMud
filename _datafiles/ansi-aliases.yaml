@@ -62,6 +62,7 @@ color8:
   xp: 93 # Bright yellow
   experience: 93 # Bright yellow
   gold: 93 # Bright yellow
+  stat: 35 # Magenta
   statmod: 36 # Bright cyan
   damage: 91 # Bright red
   healing: green
@@ -125,6 +126,7 @@ color8:
   spell-helpful: green
   spell-harmful: red
   questflag: yellow
+  highlight: 90
 color256:
   table-title: green
   userid: black
@@ -186,6 +188,7 @@ color256:
   xp: 11 # Bright yellow
   experience: 11 # Bright yellow
   gold: 220 # light yellow
+  stat: 201 # Magenta
   statmod: 6 # Bright cyan
   damage: 9 # Bright red
   healing: 157
@@ -244,3 +247,4 @@ color256:
   spell-helpful: green
   spell-harmful: red
   questflag: 187
+  highlight: 238

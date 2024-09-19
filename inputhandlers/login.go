@@ -21,6 +21,10 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 	passwordPrompt, _ := templates.Process("login/password.prompt", nil)
 	passwordMask, _ := templates.Process("login/password.mask", nil)
 
+	usernamePrompt = templates.AnsiParse(usernamePrompt)
+	passwordPrompt = templates.AnsiParse(passwordPrompt)
+	passwordMask = templates.AnsiParse(passwordMask)
+
 	var state *LoginState
 
 	if val, ok := sharedState["LoginInputHandler"]; !ok {
@@ -37,6 +41,7 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 	if !state.SentWelcome {
 		state.SentWelcome = true
 		splashTxt, _ := templates.Process("login/connect-splash", nil)
+		splashTxt = templates.AnsiParse(splashTxt)
 		connectionPool.SendTo([]byte(splashTxt), clientInput.ConnectionId)
 		connectionPool.SendTo([]byte(usernamePrompt), clientInput.ConnectionId)
 	}
@@ -132,6 +137,7 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 				"options": []string{"y", "n"},
 				"default": "n",
 			})
+			newUserPromptPrompt = templates.AnsiParse(newUserPromptPrompt)
 			connectionPool.SendTo([]byte(newUserPromptPrompt), clientInput.ConnectionId)
 		}
 

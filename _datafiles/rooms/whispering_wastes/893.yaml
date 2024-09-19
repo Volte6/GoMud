@@ -1,7 +1,10 @@
 roomid: 893
 zone: Whispering Wastes
 title: Hall of Tempests
-description: In the center of the Hall of Tempests lies an expansive, circular platform made of polished stone and ice, where rituals and gatherings take place. The walls are adorned with detailed frescoes depicting the history of Frostfang and the Whispering Wastes, as well as the legendary deeds of past Stormwatchers.
+description: In the center of the Hall of Tempests lies an expansive, circular platform
+  made of polished stone and ice, where rituals and gatherings take place. The walls
+  are adorned with detailed frescoes depicting the history of Frostfang and the Whispering
+  Wastes, as well as the legendary deeds of past Stormwatchers.
 biome: fort
 exits:
   south:

@@ -5,6 +5,7 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"unicode/utf8"
 )
 
 // TODO: Load patterns from a config file.
@@ -74,8 +75,6 @@ func ApplyColorPattern(input string, pattern string, method ...ColorizeStyle) st
 func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) string {
 
 	patternValueLength := len(patternValues)
-	patternText := []rune(input)
-	textLen := len(patternText)
 
 	newString := strings.Builder{}
 
@@ -84,9 +83,9 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 
 	if len(method) == 0 {
 		// Color change on a per character basis (not spaces), reverses at the end
-		for i := 0; i < textLen; i++ {
-			newString.WriteString(fmt.Sprintf(`<ansi fg="%d">%s</ansi>`, patternValues[patternPosition], string(patternText[i])))
-			if patternText[i] != 32 { // space
+		for _, runeChar := range input {
+			newString.WriteString(fmt.Sprintf(`<ansi fg="%d">%s</ansi>`, patternValues[patternPosition], string(runeChar)))
+			if runeChar != 32 { // space
 				if patternPosition == patternValueLength-1 {
 					patternDir = -1
 				} else if patternPosition == 0 {
@@ -98,21 +97,20 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 	} else if method[0] == Words {
 		// Color change on a per word basis
 		newString.WriteString(`<ansi>`)
-		for i := 0; i < textLen; i++ {
-
-			if i == 0 || patternText[i] == 32 { // space
+		for i, runeChar := range input {
+			if i == 0 || runeChar == 32 { // space
 				newString.WriteString(fmt.Sprintf(`</ansi><ansi fg="%d">`, patternValues[patternPosition%patternValueLength]))
 				patternPosition++ // advance the color token position
 			}
-			newString.WriteRune(patternText[i]) // Write whatever the next character is
+			newString.WriteRune(runeChar) // Write whatever the next character is
 		}
 		newString.WriteString(`</ansi>`)
 	} else if method[0] == Once {
 		// Color stops changing and stays on the final color
 		newString.WriteString(`<ansi>`)
-		for i := 0; i < textLen; i++ {
-			newString.WriteString(fmt.Sprintf(`<ansi fg="%d">%s</ansi>`, patternValues[patternPosition], string(patternText[i])))
-			if patternPosition < patternValueLength-1 && patternText[i] != 32 { // space
+		for _, runeChar := range input {
+			newString.WriteString(fmt.Sprintf(`<ansi fg="%d">%s</ansi>`, patternValues[patternPosition], string(runeChar)))
+			if patternPosition < patternValueLength-1 && runeChar != 32 { // space
 				patternPosition += 1 // advance the color token position
 			}
 		}
@@ -120,15 +118,15 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 	} else if method[0] == Stretch {
 		// Spread the whole pattern to fit the string
 		subCounter := 0
-		stretchAmount := int(math.Floor(float64(len(patternText)) / float64(len(patternValues))))
+		stretchAmount := int(math.Floor(float64(utf8.RuneCountInString(input)) / float64(len(patternValues))))
 		if stretchAmount < 1 {
 			stretchAmount = 1
 		}
 		newString.WriteString(`<ansi>`)
-		for i := 0; i < textLen; i++ {
-			newString.WriteString(fmt.Sprintf(`<ansi fg="%d">%s</ansi>`, patternValues[patternPosition], string(patternText[i])))
+		for _, runeChar := range input {
+			newString.WriteString(fmt.Sprintf(`<ansi fg="%d">%s</ansi>`, patternValues[patternPosition], string(runeChar)))
 			subCounter++
-			if patternPosition < patternValueLength-1 && patternText[i] != 32 { // space
+			if patternPosition < patternValueLength-1 && runeChar != 32 { // space
 				if subCounter%stretchAmount == 0 {
 					patternPosition += 1 // advance the color token position
 				}

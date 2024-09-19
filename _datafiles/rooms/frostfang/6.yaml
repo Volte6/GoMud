@@ -13,7 +13,7 @@ exits:
     roomid: 36
   south:
     roomid: 5
-gold: 3
+gold: 6
 spawninfo:
 - mobid: 2
   cooldown: 85

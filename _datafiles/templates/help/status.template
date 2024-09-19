@@ -9,9 +9,7 @@ stats base value.
 
   <ansi fg="command">status</ansi> - Show your character status
 
-  <ansi fg="command">status train strength</ansi> - Spend a stat point on upgrading your strength.
-
-  <ansi fg="command">status train strength 5</ansi> - Spend 5 stat points on upgrading your strength.
+  <ansi fg="command">status train</ansi> - Spend stat points on upgrades to base stats.
 
 <ansi fg="yellow">Related Help: </ansi>
 

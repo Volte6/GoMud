@@ -20,8 +20,8 @@ import (
 type AnsiFlag uint8
 
 const (
-	AnsiTagsDefault  AnsiFlag = iota // Parse ansi tags, and use default color information
-	AnsiTagsIgnore                   // Do nothing, even if tags exist
+	AnsiTagsDefault  AnsiFlag = iota // Do not parse tags
+	AnsiTagsParse                    // Parse ansi tags before returning contents of template
 	AnsiTagsStrip                    // strip out all ansi tags and leave text plain
 	AnsiTagsMono                     // Parse ansi tags, but strip out all color information
 	AnsiTagsPreParse                 // Parse tags before executing the template
@@ -40,7 +40,7 @@ func (t *cacheEntry) older(compareTime time.Time) bool {
 var (
 	cacheLock            sync.Mutex
 	templateCache        = make(map[string]cacheEntry)
-	forceAnsiFlags       = AnsiTagsDefault
+	forceAnsiFlags       = AnsiTagsParse
 	ansiLock             sync.RWMutex
 	ansiAliasFileModTime time.Time
 )
@@ -62,13 +62,13 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 	ansiLock.RLock()
 	defer ansiLock.RUnlock()
 
-	var ignoreAnsiTags bool = false
+	var parseAnsiTags bool = false
 	var preParseAnsiTags bool = false
 
 	var ansitagsParseBehavior []ansitags.ParseBehavior = make([]ansitags.ParseBehavior, 0, 5)
 
 	if forceAnsiFlags != AnsiTagsDefault {
-		ansiFlags = append(ansiFlags, forceAnsiFlags)
+		//	ansiFlags = append(ansiFlags, forceAnsiFlags)
 	}
 
 	for _, flag := range ansiFlags {
@@ -77,8 +77,8 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 			ansitagsParseBehavior = append(ansitagsParseBehavior, ansitags.StripTags)
 		case AnsiTagsMono:
 			ansitagsParseBehavior = append(ansitagsParseBehavior, ansitags.Monochrome)
-		case AnsiTagsIgnore:
-			ignoreAnsiTags = true
+		case AnsiTagsParse:
+			parseAnsiTags = true
 		case AnsiTagsPreParse:
 			preParseAnsiTags = true
 		}
@@ -109,7 +109,7 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 			return "[TEMPLATE READ ERROR]", err
 		}
 
-		if !ignoreAnsiTags && preParseAnsiTags {
+		if parseAnsiTags && preParseAnsiTags {
 			fileContents = []byte(ansitags.Parse(string(fileContents), ansitagsParseBehavior...))
 		}
 
@@ -133,7 +133,7 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 	}
 
 	// return the final data as a string, parse ansi tags if needed (No need to parse if it was preparsed)
-	if !ignoreAnsiTags && !cache.ansiPreparsed {
+	if parseAnsiTags && !cache.ansiPreparsed {
 		return ansitags.Parse(buf.String(), ansitagsParseBehavior...), nil
 	}
 
@@ -237,11 +237,11 @@ func AnsiParse(input string) string {
 	defer ansiLock.RUnlock()
 
 	if forceAnsiFlags == AnsiTagsDefault {
-		return ansitags.Parse(input)
+		return input
 	}
 
-	if forceAnsiFlags == AnsiTagsIgnore {
-		return input
+	if forceAnsiFlags == AnsiTagsParse {
+		return ansitags.Parse(input)
 	}
 
 	if forceAnsiFlags == AnsiTagsStrip {

@@ -23,6 +23,6 @@ exits:
     roomid: 877
 spawninfo:
 - container: ornate chest
-  gold: 1
   itemid: 25
+  gold: 1
   cooldown: 21600
