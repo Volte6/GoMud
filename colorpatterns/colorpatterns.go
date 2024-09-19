@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// TODO: Load patterns from a config file
+// TODO: Load patterns from a config file.
 type ColorizeStyle uint8
 
 var (
