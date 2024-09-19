@@ -135,6 +135,10 @@ func UtilLocateUser(idOrName any) int {
 	return 0
 }
 
-func UtilApplyColorPattern(input string, patternName string) string {
+func UtilApplyColorPattern(input string, patternName string, wordsOnly ...bool) string {
+
+	if len(wordsOnly) > 0 && wordsOnly[0] {
+		return colorpatterns.ApplyColorPattern(input, patternName, colorpatterns.Words)
+	}
 	return colorpatterns.ApplyColorPattern(input, patternName)
 }

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
 
@@ -153,8 +153,11 @@ func Portal(rest string, userId int) (bool, error) {
 				return true, errors.New(`you're doing that too often`)
 			}
 
+			glowingPortalColorized := colorpatterns.ApplyColorPattern(`glowing portal`, `glowing`)
+
 			// Check whether they already have a portal open, and if so, shut it down.
 			if currentPortal := user.Character.GetSetting("portal:open"); len(currentPortal) > 0 {
+
 				// Data looks like {roomId1}:{roomId2}
 				// Extract the two room id's
 				portalRooms := strings.Split(currentPortal, ":")
@@ -168,7 +171,7 @@ func Portal(rest string, userId int) (bool, error) {
 					if tmpExit, found := r1.FindTemporaryExitByUserId(userId); found {
 						if r1.RemoveTemporaryExit(tmpExit) {
 							r1.SendText(
-								fmt.Sprintf("Suddenly, the %s before you snaps closed, leaving no evidence it ever existed.", templates.GlowingPortal),
+								fmt.Sprintf("Suddenly, the %s before you snaps closed, leaving no evidence it ever existed.", glowingPortalColorized),
 							)
 							oldPortalsRemoved = true
 						}
@@ -180,7 +183,7 @@ func Portal(rest string, userId int) (bool, error) {
 					if tmpExit, found := r2.FindTemporaryExitByUserId(userId); found {
 						if r2.RemoveTemporaryExit(tmpExit) {
 							r2.SendText(
-								fmt.Sprintf("Suddenly, the %s before you snaps closed, leaving no evidence it ever existed.", templates.GlowingPortal),
+								fmt.Sprintf("Suddenly, the %s before you snaps closed, leaving no evidence it ever existed.", glowingPortalColorized),
 							)
 							oldPortalsRemoved = true
 						}
@@ -197,10 +200,11 @@ func Portal(rest string, userId int) (bool, error) {
 			// Target = portalTargetRoomId
 			// Current = user.Character.RoomId
 			// At this point we have no open portals, we can create a new one.
+
 			newPortalExitName := fmt.Sprintf("glowing portal from %s", user.Character.Name)
 			newPortal := rooms.TemporaryRoomExit{
 				RoomId:  portalTargetRoomId,
-				Title:   fmt.Sprintf(`%s from <ansi fg="username">%s</ansi>`, templates.GlowingPortal, user.Character.Name),
+				Title:   fmt.Sprintf(`%s from <ansi fg="username">%s</ansi>`, glowingPortalColorized, user.Character.Name),
 				UserId:  userId,
 				Expires: time.Now().Add(time.Duration(portalLifeInSeconds) * time.Second),
 			}
@@ -211,10 +215,10 @@ func Portal(rest string, userId int) (bool, error) {
 				return true, fmt.Errorf("failed to add temporary exit to room")
 			}
 			user.SendText(
-				fmt.Sprintf("You trace the shape of a doorway in front of you with your finger, which becomes a %s to another area.", templates.GlowingPortal),
+				fmt.Sprintf("You trace the shape of a doorway in front of you with your finger, which becomes a %s to another area.", glowingPortalColorized),
 			)
 			room.SendText(
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> traces the shape of a doorway with their finger, and a %s appears!`, user.Character.Name, templates.GlowingPortal),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> traces the shape of a doorway with their finger, and a %s appears!`, user.Character.Name, glowingPortalColorized),
 				userId,
 			)
 
@@ -227,7 +231,7 @@ func Portal(rest string, userId int) (bool, error) {
 			}
 
 			targetRoom.SendText(
-				fmt.Sprintf("A %s suddenly appears!", templates.GlowingPortal),
+				fmt.Sprintf("A %s suddenly appears!", glowingPortalColorized),
 			)
 
 			user.Character.SetSetting("portal:open", fmt.Sprintf("%d:%d", user.Character.RoomId, portalTargetRoomId))

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
@@ -252,6 +253,11 @@ func (r ScriptRoom) RepeatSpawnItem(itemId int, roundFrequency int, containerNam
 }
 
 func (r ScriptRoom) AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int) bool {
+
+	if exitNameFancy[0:1] == `:` {
+		exitNameFancy = colorpatterns.ApplyColorPattern(exitNameSimple, exitNameFancy[1:])
+	}
+
 	tmpExit := rooms.TemporaryRoomExit{
 		RoomId:  exitRoomId,
 		Title:   exitNameFancy,

@@ -12,6 +12,7 @@ import (
 	"log/slog"
 
 	"github.com/Volte6/ansitags"
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/util"
 )
@@ -160,6 +161,10 @@ func (t TemplateTable) GetCell(row int, column int) string {
 	}
 
 	if t.formatRowCount > 0 {
+		cellFormat := t.Formatting[row%t.formatRowCount][column]
+		if cellFormat[0:1] == `:` {
+			return colorpatterns.ApplyColorPattern(cellStr, cellFormat[1:])
+		}
 		return fmt.Sprintf(t.Formatting[row%t.formatRowCount][column], cellStr)
 	}
 	return cellStr
