@@ -83,7 +83,7 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 	patternPosition := 0
 
 	if len(method) == 0 {
-		// Color change on a per character basis (not spaces)
+		// Color change on a per character basis (not spaces), reverses at the end
 		for i := 0; i < textLen; i++ {
 			newString.WriteString(fmt.Sprintf(`<ansi fg="%d">%s</ansi>`, patternValues[patternPosition], string(patternText[i])))
 			if patternText[i] != 32 { // space
@@ -96,7 +96,7 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 			}
 		}
 	} else if method[0] == Words {
-		// Color change on a per character basis (not spaces)
+		// Color change on a per word basis
 		newString.WriteString(`<ansi>`)
 		for i := 0; i < textLen; i++ {
 
@@ -108,7 +108,7 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 		}
 		newString.WriteString(`</ansi>`)
 	} else if method[0] == Once {
-		// Color stops changing on the final color
+		// Color stops changing and stays on the final color
 		newString.WriteString(`<ansi>`)
 		for i := 0; i < textLen; i++ {
 			newString.WriteString(fmt.Sprintf(`<ansi fg="%d">%s</ansi>`, patternValues[patternPosition], string(patternText[i])))

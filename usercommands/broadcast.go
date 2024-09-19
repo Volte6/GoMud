@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/events"
+	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
 )
 
@@ -17,7 +18,7 @@ func Broadcast(rest string, userId int) (bool, error) {
 	}
 
 	events.AddToQueue(events.Broadcast{
-		Text: fmt.Sprintf(`<ansi fg="black" bold="true'>(broadcast)</ansi> <ansi fg="username">%s</ansi>: <ansi fg="yellow">%s</ansi>`, user.Character.Name, rest),
+		Text: fmt.Sprintf(`<ansi fg="black" bold="true'>(broadcast)</ansi> <ansi fg="username">%s</ansi>: <ansi fg="yellow">%s</ansi>%s`, user.Character.Name, rest, term.CRLFStr),
 	})
 
 	return true, nil

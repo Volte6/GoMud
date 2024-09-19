@@ -687,6 +687,10 @@ func (w *World) processInput(userId int, inputText string) {
 
 	if len(inputText) > 0 {
 
+		// Update their last input
+		// Must be actual text, blank space doesn't count.
+		user.SetLastInputRound(util.GetRoundCount())
+
 		// Check for macros
 		if user.Macros != nil && len(inputText) == 2 {
 			if macro, ok := user.Macros[inputText]; ok {
@@ -1499,6 +1503,17 @@ func (w *World) TurnTick() {
 		w.roundTick()
 	}
 
+}
+
+// Force disconnect a user (Makes them a zombie)
+func (w *World) Kick(userId int) {
+
+	user := users.GetByUserId(userId)
+	if user == nil {
+		return
+	}
+	users.SetZombieUser(userId)
+	w.connectionPool.Kick(user.ConnectionId())
 }
 
 func NewWorld(osSignalChan chan os.Signal) *World {

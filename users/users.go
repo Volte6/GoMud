@@ -83,7 +83,6 @@ func GetExpiredZombies(expirationTurn uint64) []int {
 
 	for connectionId, zombieTurn := range userManager.ZombieConnections {
 		if zombieTurn < expirationTurn {
-			slog.Info("TEST", "expiration", expirationTurn, "zombieTurn", zombieTurn)
 			expiredUsers = append(expiredUsers, userManager.Connections[connectionId])
 		}
 	}
@@ -103,6 +102,21 @@ func GetConnectionIds(userIds []int) []connection.ConnectionId {
 	}
 
 	return connectionIds
+}
+
+func GetAllActiveUsers() []*UserRecord {
+	ret := []*UserRecord{}
+
+	userManager.RLock()
+	defer userManager.RUnlock()
+
+	for _, userPtr := range userManager.Users {
+		if !userPtr.isZombie {
+			ret = append(ret, userPtr)
+		}
+	}
+
+	return ret
 }
 
 func GetOnlineUserIds() []int {
@@ -188,6 +202,9 @@ func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, err
 	defer userManager.Unlock()
 
 	u.Character.SetAdjective(`zombie`, false)
+
+	// Set their input round to current to track idle time fresh
+	u.SetLastInputRound(util.GetRoundCount())
 
 	if userId, ok := userManager.Usernames[u.Username]; ok {
 

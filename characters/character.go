@@ -1139,9 +1139,9 @@ func (c *Character) HasBuff(buffId int) bool {
 	return c.Buffs.HasBuff(buffId)
 }
 
-func (c *Character) AddBuff(buffId int, fromItem ...bool) error {
+func (c *Character) AddBuff(buffId int, isPermanent ...bool) error {
 	buffId = int(math.Abs(float64(buffId)))
-	if !c.Buffs.AddBuff(buffId, fromItem...) {
+	if !c.Buffs.AddBuff(buffId, isPermanent...) {
 		return fmt.Errorf(`failed to add buff. target: "%s" buffId: %d`, c.Name, buffId)
 	}
 	c.Validate()

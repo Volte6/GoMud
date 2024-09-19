@@ -127,6 +127,10 @@ EnterRoomMessageWrapper: "   <ansi fg=\"enters-message\"> >>> </ansi>%s"
 # - ExitRoomMessageWrapper -
 #   Decorate exit text with this. Put a %s where the message should be.
 ExitRoomMessageWrapper: "   <ansi fg=\"leaves-message\"> >>> </ansi>%s"
+# - MaxIdleSeconds -
+#   How long players can go without any input, before being kicked.
+#   900 seconds = 15 minutes
+MaxIdleSeconds: 900
 # - ZombieSeconds -
 #   How many seconds a character stays active/in game after a network connection
 #   is lost. Set to 0 to instantly log out characters (exploitable).

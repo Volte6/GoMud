@@ -56,6 +56,14 @@ func (w *World) roundTick() {
 		}
 	}
 
+	//
+	// Disconnect players that have been inactive too long
+	//
+	w.HandleInactivePlayers(c.SecondsToRounds(int(c.MaxIdleSeconds)))
+
+	//
+	// Do auction maintenance
+	//
 	w.ProcessAuction(tStart)
 
 	if roundNumber%100 == 0 {
@@ -118,6 +126,37 @@ func (w *World) roundTick() {
 	w.HandleShadowRealm(roundNumber)
 
 	util.TrackTime(`World::RoundTick()`, time.Since(tStart).Seconds())
+}
+
+func (w *World) HandleInactivePlayers(maxIdleRounds int) {
+
+	roundNumber := util.GetRoundCount()
+	if roundNumber < uint64(maxIdleRounds) {
+		return
+	}
+
+	cutoffRound := roundNumber - uint64(maxIdleRounds)
+
+	for _, user := range users.GetAllActiveUsers() {
+		li := user.GetLastInputRound()
+
+		//slog.Info("HandleInactivePlayers", "roundNumber", roundNumber, "maxIdleRounds", maxIdleRounds, "cutoffRound", cutoffRound, "GetLastInputRound", li)
+
+		if li == 0 {
+			continue
+		}
+
+		if li-cutoffRound == 5 {
+			user.SendText(`<ansi fg="203">WARNING:</ansi> <ansi fg="208">You are about to be kicked for inactivity!</ansi>`)
+		}
+
+		if li < cutoffRound {
+			slog.Info(`Inactive Kick`, `userId`, user.UserId)
+			w.Kick(user.UserId)
+		}
+
+	}
+
 }
 
 // Round ticks for players
