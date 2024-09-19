@@ -120,10 +120,6 @@ func Server(rest string, userId int) (bool, error) {
 		return true, nil
 	}
 
-	if rest == "ansi-passthrough" {
-		templates.SetAnsiFlag(templates.AnsiTagsIgnore)
-	}
-
 	if rest == "ansi-strip" {
 		templates.SetAnsiFlag(templates.AnsiTagsStrip)
 	}

@@ -21,6 +21,7 @@ import (
 	"github.com/Volte6/ansitags"
 	"github.com/gorilla/websocket"
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
@@ -131,10 +132,14 @@ func main() {
 	gametime.SetToDay(-5)
 
 	for _, name := range colorpatterns.GetColorPatternNames() {
-		slog.Info("Color Pattern Test", "name", name, "(default)", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name)))
-		slog.Info("Color Pattern Test", "name", name, "  Stretch", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Stretch)))
-		slog.Info("Color Pattern Test", "name", name, "    Words", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Words)))
-		slog.Info("Color Pattern Test", "name", name, "     Once", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Once)))
+		slog.Info("Color Test (Patterns)", "name", name, "(default)", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name)))
+		slog.Info("Color Test (Patterns)", "name", name, "  Stretch", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Stretch)))
+		slog.Info("Color Test (Patterns)", "name", name, "    Words", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Words)))
+		slog.Info("Color Test (Patterns)", "name", name, "     Once", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Once)))
+	}
+
+	for _, name := range characters.GetFormattedAdjectives(true) {
+		slog.Info("Color Test (Adjectives)", "name", name, "short", ansitags.Parse(characters.GetFormattedAdjective(name+`-short`)), "full", ansitags.Parse(characters.GetFormattedAdjective(name)))
 	}
 
 	scripting.Setup(int(c.ScriptLoadTimeoutMs), int(c.ScriptRoomTimeoutMs))

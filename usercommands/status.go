@@ -2,9 +2,10 @@ package usercommands
 
 import (
 	"fmt"
-	"strconv"
+	"strings"
 
 	"github.com/volte6/mud/templates"
+	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -17,71 +18,95 @@ func Status(rest string, userId int) (bool, error) {
 		return false, fmt.Errorf("user %d not found", userId)
 	}
 
-	possibleStatuses := []string{`strength`, `speed`, `smarts`, `vitality`, `mysticism`, `perception`}
+	//possibleStatuses := []string{`strength`, `speed`, `smarts`, `vitality`, `mysticism`, `perception`}
 
 	if rest != `` {
 
-		args := util.SplitButRespectQuotes(rest)
-
-		if len(args) < 2 || args[0] != `train` {
-			user.SendText("stat WHAT???")
+		if rest != `train` {
+			user.SendText("status WHAT???")
 			return true, nil
 		}
 
-		match, partial := util.FindMatchIn(args[1], possibleStatuses...)
-		if len(match) == 0 {
-			match = partial
+		cmdPrompt, isNew := user.StartPrompt(`status`, rest)
+
+		if isNew {
+			tplTxt, _ := templates.Process("character/status-train", user)
+			user.SendText(tplTxt)
 		}
 
-		trainQty := 0
-		if len(args) > 2 {
-			trainQty, _ = strconv.Atoi(args[2])
-		}
-		if trainQty < 1 {
-			trainQty = 1
-		}
-
-		if user.Character.StatPoints < trainQty {
-			user.SendText("You don't have enough stat points to do that.")
+		question := cmdPrompt.Ask(`Increase which?`, []string{`strength`, `speed`, `smarts`, `vitality`, `mysticism`, `perception`, `quit`}, `quit`)
+		if !question.Done {
 			return true, nil
 		}
 
-		if len(match) == 0 {
-			user.SendText("It's not clear which stat you want to improve.")
+		if question.Response == `quit` {
+			user.ClearPrompt()
 			return true, nil
+		}
+
+		match, closeMatch := util.FindMatchIn(question.Response, []string{`strength`, `speed`, `smarts`, `vitality`, `mysticism`, `perception`}...)
+
+		question.RejectResponse() // Always reset this question, since we want to keep reusing it.
+
+		if user.Character.StatPoints < 1 {
+			user.SendText(`Oops! You have no stat points to spend!`)
+			user.ClearPrompt()
+			return true, nil
+		}
+		selection := match
+		if match == `` {
+			selection = closeMatch
 		}
 
 		before := 0
 		after := 0
+		spent := 0
 
-		switch match {
+		switch selection {
 		case `strength`:
 			before = user.Character.Stats.Strength.Training
-			user.Character.Stats.Strength.Training += trainQty
+			user.Character.Stats.Strength.Training += 1
+			spent = 1
 		case `speed`:
 			before = user.Character.Stats.Speed.Training
-			user.Character.Stats.Speed.Training += trainQty
+			user.Character.Stats.Speed.Training += 1
+			spent = 1
 		case `smarts`:
 			before = user.Character.Stats.Smarts.Training
-			user.Character.Stats.Smarts.Training += trainQty
+			user.Character.Stats.Smarts.Training += 1
+			spent = 1
 		case `vitality`:
 			before = user.Character.Stats.Vitality.Training
-			user.Character.Stats.Vitality.Training += trainQty
+			user.Character.Stats.Vitality.Training += 1
+			spent = 1
 		case `mysticism`:
 			before = user.Character.Stats.Mysticism.Training
-			user.Character.Stats.Mysticism.Training += trainQty
+			user.Character.Stats.Mysticism.Training += 1
+			spent = 1
 		case `perception`:
 			before = user.Character.Stats.Perception.Training
-			user.Character.Stats.Perception.Training += trainQty
+			user.Character.Stats.Perception.Training += 1
+			spent = 1
 		}
 
-		after = before + trainQty
-		user.Character.StatPoints -= trainQty
+		if spent > 0 {
+			after = before + 1
+			user.Character.StatPoints -= 1
 
-		user.Character.Validate()
+			user.Character.Validate()
 
-		user.SendText(
-			fmt.Sprintf(`Your base <ansi fg="yellow">%s</ansi> improves from <ansi fg="cyan">%d</ansi> to <ansi fg="cyan-bold">%d</ansi>!`, match, before, after))
+			user.SendText(
+				fmt.Sprintf(term.CRLFStr+`<ansi fg="210">Your <ansi fg="yellow">%s</ansi> training improves from <ansi fg="201">%d</ansi> to <ansi fg="201">%d</ansi>!</ansi>`, selection, before, after))
+		}
+
+		tplTxt, _ := templates.Process("character/status-train", user)
+
+		if spent > 0 {
+			tplTxt = strings.Replace(tplTxt, `fakeprop="`+selection+`"`, `bg="highlight"`, 1)
+		}
+
+		user.SendText(tplTxt)
+
 		return true, nil
 	}
 

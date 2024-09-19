@@ -172,6 +172,24 @@ var (
 			}
 			return totalLen
 		},
+		"healthStr": func(h int, hMax int, padTo ...int) string {
+			padding := ``
+			if len(padTo) > 0 {
+				padding = strings.Repeat(" ", padTo[0]-(len(strconv.Itoa(h))+len(strconv.Itoa(hMax))+1))
+			}
+			hLevel := util.QuantizeTens(h, hMax)
+			return fmt.Sprintf(`<ansi fg="health-%d">%d</ansi>/<ansi fg="health-%d">%d</ansi>%s`, hLevel, h, hLevel, hMax, padding)
+		},
+		"manaStr": func(m int, mMax int, padTo ...int) string {
+
+			padding := ``
+			if len(padTo) > 0 {
+				padding = strings.Repeat(" ", padTo[0]-(len(strconv.Itoa(m))+len(strconv.Itoa(mMax))+1))
+			}
+
+			mLevel := util.QuantizeTens(m, mMax)
+			return fmt.Sprintf(`<ansi fg="mana-%d">%d</ansi>/<ansi fg="mana-%d">%d</ansi>%s`, mLevel, m, mLevel, mMax, padding)
+		},
 	}
 )
 

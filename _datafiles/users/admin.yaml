@@ -16,27 +16,31 @@ character:
     world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 74
+  roomid: 15
   zone: Frostfang
   raceid: 2
   stats:
-    strength: {}
+    strength:
+      training: 6
     speed:
       training: 3
       base: 1
     smarts:
+      training: 1
       base: 1
     vitality:
       training: 1
     mysticism:
+      training: 1
       base: 2
-    perception: {}
-  level: 4
-  experience: 15004
-  trainingpoints: 30
-  statpoints: 31
-  health: 43
-  mana: 28
+    perception:
+      training: 2
+  level: 5
+  experience: 16247
+  trainingpoints: 31
+  statpoints: 22
+  health: 44
+  mana: 32
   actionpoints: 202
   alignment: 0
   gold: 9
@@ -50,28 +54,22 @@ character:
     uses: 1
   - itemid: 30007
     uses: 1
+  - itemid: 10001
   - itemid: 10006
     uncursed: true
-  - itemid: 20043
-  - itemid: 20043
-  - itemid: 20043
-  - itemid: 20043
-  - itemid: 20043
-  - itemid: 20043
   buffs:
     list:
     - buffid: 28
       onstartevent: true
       permabuff: true
+      roundcounter: 27
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 8
+      roundcounter: 5
       triggersleft: 1000000000
   equipment:
-    weapon:
-      itemid: 10001
     head:
       itemid: 20043
     belt:
@@ -97,22 +95,22 @@ character:
     784-chest: DUU
     key-110-west: "3"
   kd:
-    totalkills: 12
+    totalkills: 13
     kills:
       1: 3
-      2: 3
+      2: 4
       58: 6
     racekills:
       dummy: 6
-      human: 3
+      human: 4
       rodent: 3
     zonekills:
-      frostfang: 6
+      frostfang: 7
       tutorial: 6
     totaldeaths: 0
   buffids: []
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/zLUsTQw1tGFUIY6CBoCjXSMdczNzXSMdUx0zLEjQAAAAP//MST+FEIAAAA=
+roommemoryblob: H4sIAAAAAAAA/zTI0Q2AYAgD4YXuwRZQ95/M0PiH8KW5utGeEfvTGfW3Qo0e9MZGgy+so3HFFM0XAAD//+jQCaRQAAAA
 configoptions: {}

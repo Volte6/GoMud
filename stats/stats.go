@@ -22,6 +22,7 @@ type StatInfo struct {
 	Training int `yaml:"training,omitempty"` // How much it's been trained with Training Points spending
 	Value    int `yaml:"-"`                  // Final calculated value
 	ValueAdj int `yaml:"-"`                  // Final calculated value (Adjusted)
+	Racial   int `yaml:"-"`                  // Value provided by racial benefits
 	Base     int `yaml:"base,omitempty"`     // Base stat value
 	Mods     int `yaml:"-"`                  // How much it's modded by equipment, spells, etc.
 }
@@ -51,7 +52,8 @@ func (si *StatInfo) GainsForLevel(level int) int {
 }
 
 func (si *StatInfo) Recalculate(level int) {
-	si.Value = si.GainsForLevel(level) + si.Training + si.Mods
+	si.Racial = si.GainsForLevel(level)
+	si.Value = si.Racial + si.Training + si.Mods
 	si.ValueAdj = si.Value
 	if si.ValueAdj >= 105 {
 		overage := si.ValueAdj - 100
