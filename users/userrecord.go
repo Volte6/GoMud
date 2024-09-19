@@ -52,6 +52,7 @@ type UserRecord struct {
 	RoomMemoryBlob string   `yaml:"roommemoryblob,omitempty"`
 	ConfigOptions  map[string]any
 	connectionTime time.Time
+	lastInputRound uint64
 	lock           sync.RWMutex
 	tempDataStore  map[string]any
 	activePrompt   *prompt.Prompt
@@ -92,6 +93,14 @@ func (u *UserRecord) PasswordMatches(input string) bool {
 
 func (u *UserRecord) ShorthandId() string {
 	return fmt.Sprintf(`@%d`, u.UserId)
+}
+
+func (u *UserRecord) SetLastInputRound(rdNum uint64) {
+	u.lastInputRound = rdNum
+}
+
+func (u *UserRecord) GetLastInputRound() uint64 {
+	return u.lastInputRound
 }
 
 func (u *UserRecord) Command(inputTxt string, waitTurns ...int) {

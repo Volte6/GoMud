@@ -164,7 +164,7 @@ func (bs *Buffs) Started(buffId int) {
 	}
 }
 
-func (bs *Buffs) AddBuff(buffId int, fromItemOrRace ...bool) bool {
+func (bs *Buffs) AddBuff(buffId int, isPermanent ...bool) bool {
 	if buffInfo := GetBuffSpec(buffId); buffInfo != nil {
 
 		newBuff := Buff{
@@ -174,7 +174,7 @@ func (bs *Buffs) AddBuff(buffId int, fromItemOrRace ...bool) bool {
 			TriggersLeft: buffInfo.TriggerCount,
 		}
 
-		if len(fromItemOrRace) > 0 && fromItemOrRace[0] {
+		if len(isPermanent) > 0 && isPermanent[0] {
 			newBuff.TriggersLeft = TriggersLeftUnlimited
 			newBuff.PermaBuff = true
 		}

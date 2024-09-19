@@ -25,7 +25,7 @@ import (
 
 var (
 	turnCount     uint64 = 0
-	roundCount    uint64 = 0
+	roundCount    uint64 = 1000 // start at 1000 to avoid complexities of delta comparisons
 	timeTrackers         = map[string]*Accumulator{}
 	serverAddr    string = `Unknown`
 	serverSeed    string = ``
