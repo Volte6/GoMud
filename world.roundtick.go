@@ -130,6 +130,10 @@ func (w *World) roundTick() {
 
 func (w *World) HandleInactivePlayers(maxIdleRounds int) {
 
+	if maxIdleRounds == 0 {
+		return
+	}
+
 	roundNumber := util.GetRoundCount()
 	if roundNumber < uint64(maxIdleRounds) {
 		return

@@ -129,6 +129,7 @@ EnterRoomMessageWrapper: "   <ansi fg=\"enters-message\"> >>> </ansi>%s"
 ExitRoomMessageWrapper: "   <ansi fg=\"leaves-message\"> >>> </ansi>%s"
 # - MaxIdleSeconds -
 #   How long players can go without any input, before being kicked.
+#   A value of 0 (zero) means never kick inactive players.
 #   900 seconds = 15 minutes
 MaxIdleSeconds: 900
 # - ZombieSeconds -
