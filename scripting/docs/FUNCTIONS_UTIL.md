@@ -16,7 +16,7 @@ General purpose global functions
   - [UtilSetTime(hour int, minutes int)](#utilsettimehour-int-minutes-int)
   - [UtilIsDay() bool](#utilisday-bool)
   - [UtilLocateUser(search int|string) int](#utillocateusersearch-intstring-int)
-  - [UtilApplyColorPattern(input string, patternName string) string ](#utilapplycolorpatterninput-string-patternname-string-string-)
+  - [UtilApplyColorPattern(input string, patternName string \[, wordsOnly bool\]) string ](#utilapplycolorpatterninput-string-patternname-string--wordsonly-bool-string-)
 
 ## [UtilGetRoundNumber() int](/scripting/util_func.go) 
 _Gets the current Round number, which always counts up_
@@ -117,12 +117,13 @@ Returns the roomId of the user, or 0 (zero) if not found.
 | --- | --- |
 | search | username or userId to find |
 
-## [UtilApplyColorPattern(input string, patternName string) string ](/scripting/util_func.go)
+## [UtilApplyColorPattern(input string, patternName string [, wordsOnly bool]) string ](/scripting/util_func.go)
 Applies a color pattern to a string, and returns the colorized string
 
 |  Argument | Explanation |
 | --- | --- |
 | input | plain text string you want to colorize |
 | patternName | the name of the color pattern you want to apply, such as "rainbow" - [see colorpatterns/colorpatterns.go](../../colorpatterns/colorpatterns.go) |
+| wordsOnly | If true, colors only change on a per-word basis. |
 
 

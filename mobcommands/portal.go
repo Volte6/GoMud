@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
@@ -85,7 +86,7 @@ func Portal(rest string, mobId int) (bool, error) {
 	newPortalExitName := `dark portal`
 	newPortal := rooms.TemporaryRoomExit{
 		RoomId:  portalTargetRoomId,
-		Title:   fmt.Sprintf(`<ansi fg="black-bold">%s</ansi>`, newPortalExitName),
+		Title:   colorpatterns.ApplyColorPattern(newPortalExitName, `gray`),
 		UserId:  0,
 		Expires: time.Now().Add(time.Duration(configs.GetConfig().RoundSeconds*2) * time.Second), // lasts for 2 rounds
 	}

@@ -2,6 +2,8 @@ package characters
 
 import (
 	"fmt"
+
+	"github.com/volte6/mud/colorpatterns"
 )
 
 var (
@@ -9,33 +11,32 @@ var (
 	adjectiveSwaps = map[string]string{
 
 		// Are they charmed/friendly?
-		//`charmed`: `<ansi fg="225">♥</ansi><ansi fg="219">c</ansi><ansi fg="213">h</ansi><ansi fg="207">a</ansi><ansi fg="201">r</ansi><ansi fg="164">m</ansi><ansi fg="127">e</ansi><ansi fg="90">d</ansi>`,
-		`charmed`:       `<ansi fg="225">♥</ansi><ansi fg="219">f</ansi><ansi fg="213">r</ansi><ansi fg="207">i</ansi><ansi fg="201">e</ansi><ansi fg="164">n</ansi><ansi fg="127">d</ansi>`,
-		`charmed-short`: `<ansi fg="127">♥</ansi>`,
+		`charmed`:       colorpatterns.ApplyColorPattern(`♥friend`, `pink`),
+		`charmed-short`: colorpatterns.ApplyColorPattern(`♥`, `pink`),
 
 		// Are they downed?
-		`downed`:       `<ansi fg="red">☠downed</ansi>`,
-		`downed-short`: `<ansi fg="red">☠</ansi>`,
+		`downed`:       colorpatterns.ApplyColorPattern(`☠downed`, `red`),
+		`downed-short`: colorpatterns.ApplyColorPattern(`☠`, `red`),
 
 		// Are they hiding?
-		`hidden`:       `<ansi fg="black-bold">hidden</ansi>`,
-		`hidden-short`: `<ansi fg="black-bold">?</ansi>`,
+		`hidden`:       colorpatterns.ApplyColorPattern(`hidden`, `gray`),
+		`hidden-short`: colorpatterns.ApplyColorPattern(`?`, `gray`),
 
 		// Does light come from this character?
-		`lit`:       `<ansi fg="187">⚙</ansi><ansi fg="229">L</ansi><ansi fg="228">i</ansi><ansi fg="227">t</ansi>`,
-		`lit-short`: `<ansi fg="187">⚙</ansi>`,
+		`lit`:       colorpatterns.ApplyColors(`⚙Lit`, []int{187, 229, 228, 227}),
+		`lit-short`: colorpatterns.ApplyColors(`⚙`, []int{187, 229, 228, 227}),
 
 		// Are they hiding?
-		`sleeping`:       `<ansi fg="black-bold">asleep</ansi>`,
-		`sleeping-short`: `<ansi fg="black-bold">zZz</ansi>`,
+		`sleeping`:       colorpatterns.ApplyColorPattern(`asleep`, `gray`),
+		`sleeping-short`: colorpatterns.ApplyColorPattern(`zZz`, `gray`),
 
 		// Have they disconnected and are zombie status?
-		`zombie`:       `<ansi fg="77">z</ansi><ansi fg="77">O</ansi><ansi fg="113">m</ansi><ansi fg="72">B</ansi><ansi fg="65">i</ansi><ansi fg="78">e</ansi>`,
-		`zombie-short`: `<ansi fg="77">z</ansi>`,
+		`zombie`:       colorpatterns.ApplyColorPattern(`zOmBie`, `zombie`),
+		`zombie-short`: colorpatterns.ApplyColorPattern(`z`, `zombie`),
 
 		// Have they disconnected and are zombie status?
-		`poisoned`:       `<ansi fg="53">☠</ansi><ansi fg="53">p</ansi><ansi fg="54">o</ansi><ansi fg="55">i</ansi><ansi fg="56">s</ansi><ansi fg="93">o</ansi><ansi fg="135">n</ansi><ansi fg="141">e</ansi><ansi fg="183">d</ansi>`,
-		`poisoned-short`: `<ansi fg="53">☠</ansi>`,
+		`poisoned`:       colorpatterns.ApplyColorPattern(`☠poisoned`, `purple`),
+		`poisoned-short`: colorpatterns.ApplyColorPattern(`☠`, `purple`),
 	}
 )
 

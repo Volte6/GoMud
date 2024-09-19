@@ -57,8 +57,8 @@ function onCommand(cmd, rest, user, room) {
 
             exits = room.GetExits();
             if ( !exits['portal'] ) {
-                teacherMob.Command('emote glows intensely, and a swirling portal appears!');
-                room.AddTemporaryExit('portal', 'portal', 1, 9000);
+                teacherMob.Command('emote glows intensely, and a ' + UtilApplyColorPattern('swirling portal', 'pink') + ' appears!');
+                room.AddTemporaryExit('swirling portal', ':pink', 1, 9000);
             }
 
             teacherMob.Command('say Enter the portal when you are ready.');
@@ -162,7 +162,7 @@ function sendWorkingCommands(user) {
     user.SendText("");
     user.SendText("");
     user.SendText('    <ansi fg="red">NOTE:</ansi> Most commands have been <ansi fg="203">DISABLED</ansi> and <ansi fg="203">WILL NOT WORK</ansi> until you <ansi fg="51">COMPLETE THIS TUTORIAL</ansi>!');
-    user.SendText('          The commands currently available are: <ansi fg="command">'+ac.join('</ansi>, <ansi fg="command">')+'</ansi>');
+    //user.SendText('          The commands currently available are: <ansi fg="command">'+ac.join('</ansi>, <ansi fg="command">')+'</ansi>');
     user.SendText("");
     user.SendText("");
 

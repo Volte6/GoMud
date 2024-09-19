@@ -130,8 +130,11 @@ func main() {
 	keywords.LoadAliases()
 	gametime.SetToDay(-5)
 
-	for name, str := range colorpatterns.GetDebugColorPatternOutput() {
-		slog.Info("Color Pattern Test", name, ansitags.Parse(str))
+	for _, name := range colorpatterns.GetColorPatternNames() {
+		slog.Info("Color Pattern Test", "name", name, "(default)", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name)))
+		slog.Info("Color Pattern Test", "name", name, "  Stretch", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Stretch)))
+		slog.Info("Color Pattern Test", "name", name, "    Words", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Words)))
+		slog.Info("Color Pattern Test", "name", name, "     Once", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Once)))
 	}
 
 	scripting.Setup(int(c.ScriptLoadTimeoutMs), int(c.ScriptRoomTimeoutMs))

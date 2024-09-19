@@ -10,6 +10,7 @@ import (
 	"github.com/volte6/mud/auctions"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/combat"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/events"
@@ -1521,7 +1522,7 @@ func (w *World) HandleShadowRealm(roundNumber uint64) {
 
 			tmpExit := rooms.TemporaryRoomExit{
 				RoomId:  1,
-				Title:   "shimmering portal",
+				Title:   colorpatterns.ApplyColorPattern(`shimmering portal`, `cyan`),
 				UserId:  0,
 				Expires: time.Now().Add(time.Second * 10),
 			}
