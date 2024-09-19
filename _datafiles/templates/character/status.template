@@ -17,4 +17,3 @@
  └───────────────────────────────┘ └───────────────────┘ └────────────────────┘
 {{ if gt .Character.StatPoints 0 }}{{ if lt .Character.Level 5 }}                          <ansi fg="red-bold">Type <ansi fg="command">help status</ansi> to learn about using stat points.</ansi> 
 {{ end }}{{ end -}}
-

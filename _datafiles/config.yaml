@@ -135,6 +135,10 @@ ZombieSeconds: 30
 #   How many rounds of meditation a player must complete before they are
 #   logged out. If interrupted, they must start over.
 LogoutRounds: 3
+# - TutorialStartRooms - 
+#   RoomIds players will be put in when starting the game/tutorial
+#   RoomIds 900-999 are reserved for Tutorial rooms.
+TutorialStartRooms: [900, 990]
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS
@@ -295,7 +299,7 @@ BannedNames:
 #   update this to a large number (like 100000), so that as new rooms are 
 #   created they will be far beyond the range of any room id's expected through
 #   a code update.
-NextRoomId: 894
+NextRoomId: 1001
 # - LogIntervalRoundCount - 
 #   How often to log the round count. Can help judge logs a little better.
 LogIntervalRoundCount: 1

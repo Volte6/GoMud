@@ -79,7 +79,9 @@ type Character struct {
 	KD              KDStats           `yaml:"kd,omitempty"`            // Kill/Death stats
 	MiscData        map[string]any    `yaml:"miscdata,omitempty"`      // Any random other data that needs to be stored
 	roomHistory     []int             // A stack FILO of the last X rooms the character has been in
-	followers       []int             `yaml:"-"` // everyone following this user
+	followers       []int             // everyone following this user
+	BuffIds         []int
+	permaBuffIds    []int // Buff Id's that are always present for this character
 }
 
 func New() *Character {
@@ -1127,7 +1129,7 @@ func (c *Character) HasBuffFlag(buffFlag buffs.Flag) bool {
 
 func (c *Character) CancelBuffsWithFlag(buffFlag buffs.Flag) bool {
 	if c.Buffs.HasFlag(buffFlag, true) {
-		c.Validate()
+		c.Validate(true)
 		return true
 	}
 	return false
@@ -1396,7 +1398,7 @@ func (c *Character) CanDualWield() bool {
 }
 
 // Returns whether a correction was in order
-func (c *Character) Validate(recalculateItemBuffs ...bool) error {
+func (c *Character) Validate(recalcPermaBuffs ...bool) error {
 
 	if len(c.Description) == 0 {
 		c.Description = c.Name + " seems thoroughly uninteresting."
@@ -1543,7 +1545,7 @@ func (c *Character) Validate(recalculateItemBuffs ...bool) error {
 
 	}
 
-	if len(recalculateItemBuffs) > 0 && recalculateItemBuffs[0] {
+	if len(recalcPermaBuffs) > 0 && recalcPermaBuffs[0] {
 		c.reapplyPermabuffs()
 	}
 
@@ -1816,9 +1818,18 @@ func (c *Character) RemoveFromBody(i items.Item) bool {
 	return true
 }
 
+// Used with SpawnInfo to gift spawning mobs with permabuffs
+func (c *Character) SetPermaBuffs(buffIds []int) {
+	c.permaBuffIds = buffIds
+}
+
 func (c *Character) reapplyPermabuffs(removedItems ...items.Item) {
 
 	buffIdCount := map[int]int{}
+
+	for _, buffId := range c.permaBuffIds {
+		buffIdCount[buffId] = 100 // Special case permabuffs associated with certain mobs
+	}
 
 	// Apply any buffs that come from a race
 	if rInfo := races.GetRace(c.RaceId); rInfo != nil {

@@ -1,5 +1,4 @@
-{{ if not .Searching }}
- ┌─ <ansi fg="black-bold">.:</ansi><ansi fg="blue">Equipment</ansi> ──────────────────────────────────────────────────────────────┐
+{{ if not .Searching }} ┌─ <ansi fg="black-bold">.:</ansi><ansi fg="blue">Equipment</ansi> ──────────────────────────────────────────────────────────────┐
 {{ if not .Equipment.Weapon.IsDisabled }}   <ansi fg="yellow">Weapon:  </ansi><ansi fg="itemname">{{ .Equipment.Weapon.NameComplex  }}</ansi>
 {{ end -}}
 {{- if not .Equipment.Offhand.IsDisabled }}   <ansi fg="yellow">Offhand: </ansi><ansi fg="itemname">{{ .Equipment.Offhand.NameComplex }}</ansi>

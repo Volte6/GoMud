@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -89,11 +88,7 @@ func Status(rest string, userId int) (bool, error) {
 	tplTxt, _ := templates.Process("character/status", user)
 	user.SendText(tplTxt)
 
-	// Immediately do a secret look
-	events.AddToQueue(events.Input{
-		UserId:    userId,
-		InputText: `inventory`,
-	}, true)
+	Inventory(``, userId)
 
 	return true, nil
 }

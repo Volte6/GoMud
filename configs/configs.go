@@ -65,8 +65,9 @@ type config struct {
 	EnterRoomMessageWrapper    ConfigString `yaml:"EnterRoomMessageWrapper"`
 	ExitRoomMessageWrapper     ConfigString `yaml:"ExitRoomMessageWrapper"`
 
-	ZombieSeconds ConfigInt `yaml:"ZombieSeconds"` // How many seconds a player will be a zombie allowing them to reconnect.
-	LogoutRounds  ConfigInt `yaml:"LogoutRounds"`  // How many rounds of uninterrupted meditation must be completed to log out.
+	ZombieSeconds      ConfigInt         `yaml:"ZombieSeconds"`      // How many seconds a player will be a zombie allowing them to reconnect.
+	LogoutRounds       ConfigInt         `yaml:"LogoutRounds"`       // How many rounds of uninterrupted meditation must be completed to log out.
+	TutorialStartRooms ConfigSliceString `yaml:"TutorialStartRooms"` // List of all rooms that can be used to begin the tutorial process
 
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.

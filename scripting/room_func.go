@@ -52,6 +52,10 @@ func (r ScriptRoom) GetItems() []ScriptItem {
 	return itms
 }
 
+func (r ScriptRoom) DestroyItem(itm ScriptItem) {
+	r.roomRecord.RemoveItem(*itm.itemRecord, false)
+}
+
 func (r ScriptRoom) SpawnItem(itemId int, inStash bool) {
 	i := items.New(itemId)
 	if i.ItemId != 0 {
@@ -83,10 +87,11 @@ func (r ScriptRoom) GetExits() []map[string]any {
 	for exitName, exitInfo := range r.roomRecord.Exits {
 
 		exitMap := map[string]any{
-			"Name":   exitName,
-			"RoomId": exitInfo.RoomId,
-			"Secret": exitInfo.Secret,
-			"Lock":   false,
+			"Name":      exitName,
+			"RoomId":    exitInfo.RoomId,
+			"Secret":    exitInfo.Secret,
+			"Lock":      false,
+			"temporary": false,
 		}
 
 		if exitInfo.HasLock() {
@@ -103,7 +108,36 @@ func (r ScriptRoom) GetExits() []map[string]any {
 		exits = append(exits, exitMap)
 	}
 
+	for _, exitInfo := range r.roomRecord.ExitsTemp {
+		exitMap := map[string]any{
+			"Name":      exitInfo.Title,
+			"RoomId":    exitInfo.RoomId,
+			"Secret":    false,
+			"Lock":      false,
+			"temporary": true,
+		}
+		exits = append(exits, exitMap)
+	}
+
 	return exits
+}
+
+func (r ScriptRoom) SetLocked(exitName string, lockIt bool) {
+
+	if exitInfo, ok := r.roomRecord.Exits[exitName]; ok {
+
+		if exitInfo.HasLock() {
+
+			if lockIt {
+				exitInfo.Lock.SetLocked()
+			} else {
+				exitInfo.Lock.SetUnlocked()
+			}
+
+			r.roomRecord.Exits[exitName] = exitInfo
+		}
+
+	}
 }
 
 // Returns a list of userIds found to have the questId

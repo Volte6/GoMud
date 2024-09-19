@@ -7,6 +7,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
+// Global chat room
 func Broadcast(rest string, userId int) (bool, error) {
 
 	// Load user details

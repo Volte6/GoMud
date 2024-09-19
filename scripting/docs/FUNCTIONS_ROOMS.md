@@ -9,6 +9,7 @@
   - [RoomObject.SetPermData(key string, value any)](#roomobjectsetpermdatakey-string-value-any)
   - [RoomObject.GetPermData(key string) any](#roomobjectgetpermdatakey-string-any)
   - [RoomObject.GetItems() \[\]ItemObject](#roomobjectgetitems-itemobject)
+  - [RoomObject.DestroyItem(itm ScriptItem) ](#roomobjectdestroyitemitm-scriptitem-)
   - [RoomObject.SpawnItem(itemId int, inStash bool) \[\]ItemObject](#roomobjectspawnitemitemid-int-instash-bool-itemobject)
   - [RoomObject.GetMobs() \[\]int](#roomobjectgetmobs-int)
   - [RoomObject.GetPlayers() \[\]int](#roomobjectgetplayers-int)
@@ -21,6 +22,7 @@
   - [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](#roomobjectaddtemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int-roundttl-int)
   - [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](#roomobjectremovetemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int)
   - [RoomObject.RepeatSpawnItem(itemId int, roundInterval int \[, containerName\]](#roomobjectrepeatspawnitemitemid-int-roundinterval-int--containername)
+  - [RoomObject.SetLocked(exitName string, lockIt bool)](#roomobjectsetlockedexitname-string-lockit-bool)
 
 ## [GetRoom(roomId int) RoomObject ](/scripting/room_func.go)
 Retrieves a RoomObject for a given roomId.
@@ -79,6 +81,8 @@ Returns an array of items on the floor of the room.
 
 _Note: See [/scripting/docs/FUNCTIONS_ITEMS.md](/scripting/docs/FUNCTIONS_ITEMS.md) for details on ItemObject objects._
 
+## [RoomObject.DestroyItem(itm ScriptItem) ](/scripting/room_func.go)
+Destroy an item from the ground.
 
 ## [RoomObject.SpawnItem(itemId int, inStash bool) []ItemObject](/scripting/room_func.go)
 Spawns an item in the room.
@@ -186,4 +190,12 @@ _Note: all 3 parameters much match an existing temporary exit for it to be remov
 | itemId | What item? |
 | roundInterval | How many rounds until the item respawns after it is taken/removed from the room? |
 | containerName | Optional container for the item to spawn into. |
+
+## [RoomObject.SetLocked(exitName string, lockIt bool)](/scripting/room_func.go)
+Sets an exit to locked or not (If it has a lock)
+
+|  Argument | Explanation |
+| --- | --- |
+| exitName | The exitname to lock/unlock |
+| lockIt | if true, sets it to locked. Otherwise, unlocks it. |
 

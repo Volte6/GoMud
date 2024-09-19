@@ -5,7 +5,7 @@ password: password
 macros:
   =1: e;e;e;e;e;e;e;e
 character:
-  name: Admin
+  name: asdf
   description: Admin possesses the ability to manipulate the very fabric of the universe,
     bending it to his will with a mere thought. He can create and destroy, alter reality,
     and shape the world around him as he sees fit. His knowledge of the world is unparalleled,
@@ -31,15 +31,15 @@ character:
     mysticism:
       base: 2
     perception: {}
-  level: 28
-  experience: 550857
-  trainingpoints: 26
-  statpoints: 27
-  health: 127
-  mana: 148
-  actionpoints: 214
+  level: 4
+  experience: 15004
+  trainingpoints: 30
+  statpoints: 31
+  health: 43
+  mana: 28
+  actionpoints: 202
   alignment: 0
-  gold: 0
+  gold: 9
   bank: 0
   items:
   - itemid: 8
@@ -50,33 +50,28 @@ character:
     uses: 1
   - itemid: 30007
     uses: 1
-  - itemid: 10004
-  - itemid: 20004
-  - itemid: 10004
+  - itemid: 10006
+    uncursed: true
+  - itemid: 20043
+  - itemid: 20043
+  - itemid: 20043
   buffs:
     list:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 21
+      roundcounter: 8
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 29
-      triggersleft: 1000000000
-    - buffid: 6
-      onstartevent: true
-      roundcounter: 418
-      triggersleft: 3
-    - buffid: 1
-      onstartevent: true
-      permabuff: true
+      roundcounter: 1
       triggersleft: 1000000000
   equipment:
     weapon:
-      itemid: 10006
-      uncursed: true
+      itemid: 10001
+    head:
+      itemid: 20043
     belt:
       itemid: 20011
     gloves:
@@ -89,7 +84,7 @@ character:
     dual-wield: 2
     inspect: 4
     map: 5
-    peep: 1
+    peep: 4
     protection: 4
     skulduggery: 1
   questprogress:
@@ -99,8 +94,23 @@ character:
   keyring:
     784-chest: DUU
     key-110-west: "3"
+  kd:
+    totalkills: 12
+    kills:
+      1: 3
+      2: 3
+      58: 6
+    racekills:
+      dummy: 6
+      human: 3
+      rodent: 3
+    zonekills:
+      frostfang: 6
+      tutorial: 6
+    totaldeaths: 0
+  buffids: []
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/5SOSxKDIQiDL/QtfkSIvf/FOlDb0WUn8RUwJJ7kn2XEJIL02iMJkQNj4EiJJKS1z8Spqg3MsYkJW4zEDe/K8bPshaLYtws9+mc1Dl6q40+xnl/l4o3T59PegXuUdgNi8WK1UHEnQRLMA4a9AwAA//+xhKWyTQEAAA==
+roommemoryblob: H4sIAAAAAAAA/7I0MNKxNDDW0TUkj8IqBggAAP//E+GoYFUAAAA=
 configoptions: {}

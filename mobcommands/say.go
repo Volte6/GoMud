@@ -24,6 +24,7 @@ func Say(rest string, mobId int) (bool, error) {
 
 	// Don't bother if no players are present
 	if room.PlayerCt() < 1 {
+
 		return true, nil
 	}
 
@@ -32,7 +33,7 @@ func Say(rest string, mobId int) (bool, error) {
 	if isSneaking {
 		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="yellow">%s</ansi>"`, rest), mobId)
 	} else {
-		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest), mobId)
+		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest))
 	}
 
 	room.SendTextToExits(`You hear someone talking.`, true)

@@ -398,6 +398,10 @@ func SaveUser(u UserRecord) error {
 		return errors.New("Has not started game.")
 	}
 
+	if u.Character.RoomId >= 900 && u.Character.RoomId <= 999 {
+		u.Character.RoomId = -1
+	}
+
 	memoryString := ``
 	for _, rId := range u.Character.GetRoomMemory() {
 		memoryString += strconv.Itoa(rId) + ","

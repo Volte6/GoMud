@@ -1,4 +1,4 @@
-package items
+package colorpatterns
 
 import (
 	"strings"
@@ -7,11 +7,15 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+// TODO: This introduces unnecessary steps by using an intermediate encoding before the ANSITAG encoding.
+// This should be optimized.
+
 var (
 	// Color patterns that repeat as they are applied
 	ColorPatterns = map[string][]string{
 		`glowing`: {`{184}`, `{226}`, `{227}`, `{228}`, `{229}`, `{230}`, `{231}`, `{230}`, `{229}`, `{228}`, `{227}`, `{226}`, `{184}`, `{142}`, `{100}`, `{58}`},
 		`coupon`:  {`{147}`, `{231}`},
+		`rainbow`: {`{196}`, `{214}`, `{226}`, `{118}`, `{51}`, `{21}`, `{93}`},
 	}
 )
 

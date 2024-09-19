@@ -1,0 +1,19 @@
+roomid: 1000
+zone: Sun Anvil
+zoneroot: true
+title: Desert's Edge
+description: You find yourself at the threshold of the Sun Anvil Desert, where the
+  air itself seems to shimmer under the relentless glare of a merciless sun. The ground
+  is a mosaic of cracked earth, each fissure like a vein on the anvil of a colossal
+  forge. Scant tufts of parched grasses cling stubbornly to life amidst the barren
+  sands. Jagged rock formations jut from the landscape, their shadows offering little
+  respite from the heat. The horizon wavers, distorted by heat mirages that blur the
+  line between sky and sand. A dry wind brushes against your face, carrying with it
+  the faint scent of hot stone and a distant, haunting whisper of challenges that
+  lie ahead. creatures.
+mapsymbol: D
+maplegend: Desert
+biome: desert
+exits: {}
+idlemessages:
+- You see something shimmering in the distance, and then its gone. Must be a mirage.

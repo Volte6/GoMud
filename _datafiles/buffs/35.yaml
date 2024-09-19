@@ -1,0 +1,8 @@
+buffid: 35
+name: Death Protection
+description: When you die you are revived to full health immediately.
+roundinterval: 15
+triggercount: 5
+flags:
+  - revive-on-death
+

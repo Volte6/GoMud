@@ -1,0 +1,9 @@
+raceid: 20
+name: Orb
+description: A sphere of pure energy
+size: medium
+unarmedname: energy
+tnlscale: 1
+damage:
+  diceroll: 0d0
+disabledslots: ['weapon', 'offhand', 'neck', 'body', 'belt', 'gloves', 'ring', 'legs', 'feet']

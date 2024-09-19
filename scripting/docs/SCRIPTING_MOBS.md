@@ -179,7 +179,6 @@ function onDie(mob ActorObject, room RoomObject, eventDetails object) {
 
 |  Argument | Explanation |
 | --- | --- |
-| rest | Everything entered after the command (if anything). |
 | mob | [ActorObject](FUNCTIONS_ACTORS.md) |
 | room | [RoomObject](FUNCTIONS_ROOMS.md) |
 | eventDetails.sourceId | The `userId` or `mobInstanceId` that killed the mob |

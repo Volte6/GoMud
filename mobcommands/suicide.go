@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"math"
 
+	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
@@ -25,6 +26,17 @@ func Suicide(rest string, mobId int) (bool, error) {
 	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
 		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+	}
+
+	if rest != `vanish` && mob.Character.HasBuffFlag(buffs.ReviveOnDeath) {
+
+		mob.Character.Health = mob.Character.HealthMax.Value
+
+		room.SendText(`<ansi fg="mobname">` + mob.Character.Name + `</ansi> is suddenly revived in a shower of sparks!`)
+
+		mob.Character.CancelBuffsWithFlag(buffs.ReviveOnDeath)
+
+		return true, nil
 	}
 
 	slog.Info(`Mob Death`, `name`, mob.Character.Name, `rest`, rest)

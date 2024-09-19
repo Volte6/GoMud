@@ -124,6 +124,12 @@ var (
 			darkArea:    true,
 			description: `The land is covered in caves of all sorts. You never know what you'll find in them.`,
 		},
+		`desert`: {
+			name:        `Desert`,
+			symbol:      '*',
+			description: `The harsh desert is unforgiving and dry.`,
+			buffIds:     []int{33}, // Thirsty
+		},
 	}
 )
 

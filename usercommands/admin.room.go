@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -242,10 +242,16 @@ func Room(rest string, userId int) (bool, error) {
 		}
 
 		if gotoRoomId != 0 {
+
+			previousRoomId := user.Character.RoomId
+
 			if err := rooms.MoveToRoom(user.UserId, gotoRoomId); err != nil {
 				user.SendText(err.Error())
 
 			} else {
+
+				scripting.TryRoomScriptEvent(`onExit`, user.UserId, previousRoomId)
+
 				user.SendText(fmt.Sprintf("Moved to room %d.", gotoRoomId))
 
 				gotoRoom := rooms.LoadRoom(gotoRoomId)
@@ -281,10 +287,9 @@ func Room(rest string, userId int) (bool, error) {
 					}
 				}
 
-				events.AddToQueue(events.Input{
-					UserId:    userId,
-					InputText: `look`,
-				}, true)
+				Look(`secretly`, userId)
+
+				scripting.TryRoomScriptEvent(`onEnter`, user.UserId, gotoRoomId)
 
 			}
 		} else {

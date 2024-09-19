@@ -3,10 +3,13 @@ package usercommands
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
+	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
 )
@@ -93,8 +96,37 @@ func Start(rest string, userId int) (bool, error) {
 
 	user.SendText(fmt.Sprintf(`<ansi fg="magenta">Suddenly, a vortex appears before you, drawing you in before you have any chance to react!</ansi>%s`, term.CRLFStr))
 
-	rooms.MoveToRoom(user.UserId, 1)
-	user.SendText(`Welcome to Frostfang. You can <ansi fg="command">look</ansi> at the <ansi fg="itemname">sign</ansi> here!`)
+	for _, ridStr := range configs.GetConfig().TutorialStartRooms {
+
+		rid, _ := strconv.ParseInt(ridStr, 10, 64)
+		skip := false
+
+		for _, populatedRoomId := range rooms.GetRoomsWithPlayers() {
+			roomCt := 10
+			for i := 0; i < roomCt; i++ {
+				if int(rid)+i == populatedRoomId {
+					skip = true
+					continue
+				}
+			}
+		}
+
+		if skip {
+			continue
+		}
+
+		if _, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, int(rid)); err == nil {
+
+			rooms.MoveToRoom(userId, int(rid))
+			return true, nil
+		}
+
+	}
+
+	user.SendText(`Someone else is currently utilizing the tutorial, please try again in a few minutes.`)
+
+	//rooms.MoveToRoom(user.UserId, 1)
+	//user.SendText(`Welcome to Frostfang. You can <ansi fg="command">look</ansi> at the <ansi fg="itemname">sign</ansi> here!`)
 
 	return true, nil
 }

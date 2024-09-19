@@ -81,6 +81,7 @@ type Mob struct {
 	ScriptTag       string       `yaml:"scripttag"`           // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
 	tempDataStore   map[string]any
 	QuestFlags      []string `yaml:"questflags,omitempty,flow"` // What quest flags are set on this mob?
+	BuffIds         []int    `yaml:"buffids,omitempty"`         // Buff Id's this mob always has upon spawn
 }
 
 func MobInstanceExists(instanceId int) bool {
@@ -153,6 +154,8 @@ func NewMobById(mobId MobId, homeRoomId int) *Mob {
 		mob.Character.Health = mob.Character.HealthMax.Value
 		mob.Character.Mana = mob.Character.ManaMax.Value
 
+		mob.Character.SetPermaBuffs(mob.BuffIds)
+
 		mob.Character.Buffs = buffs.New()
 
 		for idx, _ := range mob.Character.Items {
@@ -171,6 +174,7 @@ func NewMobById(mobId MobId, homeRoomId int) *Mob {
 		mob.Character.Equipment.Feet.Validate()
 
 		mob.Validate()
+		mob.Character.Validate(true)
 
 		// Save the mob instance
 		mobInstances[mob.InstanceId] = &mob
