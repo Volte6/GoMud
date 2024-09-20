@@ -1,69 +1,438 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Console Terminal Emulator</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    <title>Terminal Interface with Editable and Deletable Buttons</title>
     <style>
-        #input {
-            width: 100%;
-            padding: 5px;
+        /* CSS Styles (updated to include "Delete" button in modal) */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
         body {
-            
-            background-color: #2e2e2e;
-            padding:0px;
-            margin:0px;
-            font-family: "Source Code Pro", monospace;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            background-color: #1e1e1e;
         }
-
-        #output {
+        #main-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        #text-output {
+            flex: 1;
             background-color: black;
-            color: white;
-            padding: 10px;
-            height: 90vh;
+            color: #00ff00;
             overflow-y: auto;
-            border: 0px solid #555;
-            white-space: pre-wrap; /* To handle new lines and white spaces */
-            font-size: 2vw;
+            font-size: calc(min((100vw / 80), (100vh / 24)));
+            line-height: 1;
+            letter-spacing: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            padding: 10px;
         }
-
-        @media (min-width: 1200px) {
-            #output {
-                font-size: 1.25vw;
-            }
+        #button-column {
+            width: 220px;
+            background-color: #2d2d2d;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
         }
-
-
-        #input {
-            line-height: 4vh;
-            background-color: black;
+        .button-container {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .command-button {
+            flex: 1;
+            padding: 10px;
+            background-color: #3e3e3e;
             color: white;
-            border: 1px solid #555;
-            height: 5vh;
-            font-size:3vh;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            font-size: 16px;
         }
-
-
-        #connectBtn {
-            height: auto;
-            display:inline;
-            font-size: 3vh;
-            height:5vh
+        .edit-icon {
+            width: 24px;
+            height: 24px;
+            margin-left: 5px;
+            cursor: pointer;
+            fill: white;
+            background: none;
+            border: none;
+        }
+        .edit-icon:hover {
+            fill: #00ff00;
+        }
+        #input-area {
+            display: flex;
+            padding: 10px;
+            background-color: #1e1e1e;
+        }
+        #command-input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            background-color: #333;
+            color: white;
+        }
+        #connect-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #555;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        #command-input:focus {
+            outline: none;
+        }
+        /* Modal Styles */
+        #modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+        }
+        #modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 300px;
+        }
+        #modal-content h2 {
+            margin-top: 0;
+        }
+        #modal-content label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        #modal-content input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        #modal-buttons {
+            margin-top: 15px;
+            text-align: right;
+        }
+        #modal-buttons button {
+            padding: 8px 12px;
+            margin-left: 10px;
+        }
+        #delete-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #delete-button:hover {
+            background-color: #d32f2f;
+        }
+        /* Styles for the "+Add" button */
+        #add-button-container {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            margin-top: auto; /* Push to the bottom */
+        }
+        #add-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #add-button:hover {
+            background-color: #45a049;
         }
 
     </style>
 </head>
-<body onload="ShowButton();return false;">
-    <div id="output"></div>
-    <input type="text" id="input" placeholder="Type your command...">
-    <button id="connectBtn">Connect</button>
+<body>
+    <div id="main-container">
+        <div id="text-output">Welcome to the Terminal Interface.
+Type your commands below.
+        </div>
+        <div id="button-column">
+            <!-- Buttons with edit icons -->
+            <div class="button-container">
+                <button class="command-button" data-command="status">Status</button>
+                <button class="edit-icon" title="Edit">
+                    <!-- SVG icon for edit -->
+                    <svg viewBox="0 0 20 20">
+                        <path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="button-container">
+                <button class="command-button" data-command="inventory">Inventory</button>
+                <button class="edit-icon" title="Edit">
+                    <svg viewBox="0 0 20 20">
+                        <path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/>
+                    </svg>
+                </button>
+            </div>
+            <!-- Repeat for other buttons -->
+            <div class="button-container">
+                <button class="command-button" data-command="conditions">Conditions</button>
+                <button class="edit-icon" title="Edit">
+                    <svg viewBox="0 0 20 20">
+                        <path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="button-container">
+                <button class="command-button" data-command="jobs">Jobs</button>
+                <button class="edit-icon" title="Edit">
+                    <svg viewBox="0 0 20 20">
+                        <path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="button-container">
+                <button class="command-button" data-command="skills">Skills</button>
+                <button class="edit-icon" title="Edit">
+                    <svg viewBox="0 0 20 20">
+                        <path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="button-container">
+                <button class="command-button" data-command="spells">Spells</button>
+                <button class="edit-icon" title="Edit">
+                    <svg viewBox="0 0 20 20">
+                        <path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="button-container">
+                <button class="command-button" data-command="killstats">Kill Stats</button>
+                <button class="edit-icon" title="Edit">
+                    <svg viewBox="0 0 20 20">
+                        <path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="button-container">
+                <button class="command-button" data-command="help">Help</button>
+                <button class="edit-icon" title="Edit">
+                    <svg viewBox="0 0 20 20">
+                        <path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/>
+                    </svg>
+                </button>
+            </div>
+            <!-- "+Add" Button -->
+            <div id="add-button-container">
+                <button id="add-button">+ Add</button>
+            </div>
+        </div>
+    </div>
+    <div id="input-area">
+        <input type="text" id="command-input" placeholder="Enter command...">
+        <button id="connect-button">Connect</button>
+    </div>
+
+    <!-- Modal Dialog for Editing Button Properties -->
+    <div id="modal">
+        <div id="modal-content">
+            <h2 id="modal-title">Edit Button</h2>
+            <label for="button-text">Button Text:</label>
+            <input type="text" id="button-text">
+            <label for="button-command">Command:</label>
+            <input type="text" id="button-command">
+            <div id="modal-buttons">
+                <button id="delete-button">Delete</button>
+                <button id="cancel-button">Cancel</button>
+                <button id="save-button">Save</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        let socket;
+
+        // Get references to the modal and its elements
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const buttonTextInput = document.getElementById('button-text');
+        const buttonCommandInput = document.getElementById('button-command');
+        const saveButton = document.getElementById('save-button');
+        const cancelButton = document.getElementById('cancel-button');
+        const deleteButton = document.getElementById('delete-button');
+        const addButton = document.getElementById('add-button');
+        const buttonColumn = document.getElementById('button-column');
+
+        let currentButton = null; // The button being edited
+        let currentButtonContainer = null; // The container of the button being edited
+        let isAddingNewButton = false; // Flag to check if adding a new button
+
+        // Function to open the modal dialog
+        function openModal(button, isNew = false) {
+            isAddingNewButton = isNew;
+            if (isNew) {
+                modalTitle.textContent = 'Add New Button';
+                buttonTextInput.value = '';
+                buttonCommandInput.value = '';
+                deleteButton.style.display = 'none'; // Hide delete button when adding
+                currentButton = null;
+                currentButtonContainer = null;
+            } else {
+                modalTitle.textContent = 'Edit Button';
+                buttonTextInput.value = button.textContent;
+                buttonCommandInput.value = button.getAttribute('data-command');
+                deleteButton.style.display = 'inline-block'; // Show delete button
+                currentButton = button;
+                currentButtonContainer = button.parentElement;
+            }
+            modal.style.display = 'flex';
+        }
+
+        // Function to close the modal dialog
+        function closeModal() {
+            modal.style.display = 'none';
+            currentButton = null;
+            currentButtonContainer = null;
+            isAddingNewButton = false;
+        }
+
+        // Add event listeners to the edit icons
+        function addEditIconEventListeners() {
+            const editIcons = document.querySelectorAll('.edit-icon');
+            editIcons.forEach(icon => {
+                icon.removeEventListener('click', handleEditIconClick); // Remove previous listener if any
+                icon.addEventListener('click', handleEditIconClick);
+            });
+        }
+
+        function handleEditIconClick(event) {
+            const icon = event.currentTarget;
+            const button = icon.previousElementSibling;
+            openModal(button);
+        }
+
+        addEditIconEventListeners(); // Initialize event listeners for existing buttons
+
+        // Add event listeners to the command buttons
+        function addCommandButtonEventListeners() {
+            const commandButtons = document.querySelectorAll('.command-button');
+            commandButtons.forEach(button => {
+                button.removeEventListener('click', handleCommandButtonClick); // Remove previous listener if any
+                button.addEventListener('click', handleCommandButtonClick);
+            });
+        }
+
+        function handleCommandButtonClick(event) {
+            const button = event.currentTarget;
+            const command = button.getAttribute('data-command');
+            socket.send(command);
+            //const outputArea = document.getElementById('text-output');
+            //outputArea.textContent += `\nExecuted command: ${command}`;
+            //outputArea.scrollTop = outputArea.scrollHeight;
+        }
+
+        addCommandButtonEventListeners(); // Initialize event listeners for existing buttons
+
+        // Save button in the modal
+        saveButton.addEventListener('click', () => {
+            if (isAddingNewButton) {
+                // Create new button elements
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'button-container';
+
+                const newCommandButton = document.createElement('button');
+                newCommandButton.className = 'command-button';
+                newCommandButton.textContent = buttonTextInput.value;
+                newCommandButton.setAttribute('data-command', buttonCommandInput.value);
+
+                const newEditIcon = document.createElement('button');
+                newEditIcon.className = 'edit-icon';
+                newEditIcon.title = 'Edit';
+                newEditIcon.innerHTML = `
+                    <svg viewBox="0 0 20 20">
+                        <path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/>
+                    </svg>
+                `;
+
+                buttonContainer.appendChild(newCommandButton);
+                buttonContainer.appendChild(newEditIcon);
+
+                // Insert the new button before the "+Add" button container
+                const addButtonContainer = document.getElementById('add-button-container');
+                buttonColumn.insertBefore(buttonContainer, addButtonContainer);
+
+                // Add event listeners to the new buttons
+                newCommandButton.addEventListener('click', handleCommandButtonClick);
+                newEditIcon.addEventListener('click', handleEditIconClick);
+
+            } else if (currentButton) {
+                currentButton.textContent = buttonTextInput.value;
+                currentButton.setAttribute('data-command', buttonCommandInput.value);
+            }
+            closeModal();
+        });
+
+        // Cancel button in the modal
+        cancelButton.addEventListener('click', () => {
+            closeModal();
+        });
+
+        // Delete button in the modal
+        deleteButton.addEventListener('click', () => {
+            if (currentButtonContainer) {
+                currentButtonContainer.remove();
+                closeModal();
+            }
+        });
+
+        // Close the modal when clicking outside the modal content
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // "+Add" Button Click Event
+        addButton.addEventListener('click', () => {
+            openModal(null, true);
+        });
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+        let socket = null;
 
         colorAliases = {		
         "black":        0,
@@ -83,27 +452,22 @@
 		"cyan-bold":    14,
 		"white-bold":   15,};
 
-        function ShowButton() {
-            document.getElementById("connectBtn").style.display = "unset";
-            document.getElementById("input").style.display = "none";
-        }
 
-        function ShowInput() {
-            document.getElementById("connectBtn").style.display = "none";
-            document.getElementById("input").style.display = "unset";
-        }
-
-        document.getElementById('connectBtn').addEventListener('click', function() {
+        document.getElementById('connect-button').addEventListener('click', function() {
             
+            if ( socket != null && socket.readyState === WebSocket.OPEN ) {
+                socket.close();
+                return;
+            }
+
             console.log("Connecting to: " + 'ws://'+location.host +':80/ws');
             
             // Connect to the WebSocket
             socket = new WebSocket('ws://'+location.host +':80/ws');
-
+            console.log(socket.readyState);
             socket.onopen = function() {
                 appendToOutput("Connected to the server!");
-                ShowInput();
-                //document.getElementById('connectBtn').disabled = true;
+                document.getElementById('connect-button').textContent = 'Disconnect';
             };
 
             socket.onmessage = function(event) {
@@ -120,12 +484,12 @@
                 } else {
                     appendToOutput('Connection died');
                 }
-                ShowButton();
-                //document.getElementById('connectBtn').disabled = false;
+                
+                document.getElementById('connect-button').textContent = 'Connect';
             };
         });
 
-        document.getElementById('input').addEventListener('keydown', function(event) {
+        document.getElementById('command-input').addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
                 if (socket && socket.readyState === WebSocket.OPEN) {
                     socket.send(event.target.value);
@@ -137,12 +501,12 @@
         });
 
         function clearScreen() {
-            const output = document.getElementById('output');
+            const output = document.getElementById('text-output');
             output.innerHTML = '';
         }
 
         function eraseLastLine() {
-            const output = document.getElementById('output');
+            const output = document.getElementById('text-output');
             lastPos = output.innerHTML.lastIndexOf('\n');
             output.innerHTML = output.innerHTML.substring(0, lastPos+1);
         }
@@ -169,7 +533,7 @@
         }
 
         function appendToOutput(message) {
-            const output = document.getElementById('output');
+            const output = document.getElementById('text-output');
             
             //output.innerHTML += ansiToHtml(message);
             message = ansiTagsToHtml(message);

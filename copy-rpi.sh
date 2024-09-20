@@ -12,6 +12,3 @@ ssh ${RPI_HOST} 'sudo pkill mud-server'
 scp ./${RPI_BIN} ${RPI_HOST}:${RPI_HOST_PATH}/mud/${RPI_BIN} && \
 rm ${RPI_BIN} && \
 ssh ${RPI_HOST} 'cd ${RPI_HOST_PATH}; sudo ./startup-run-mud.sh'
-
-
-ssh mud@mud.local 'cd ${RPI_HOST_PATH}; sudo ./startup-run-mud.sh'
