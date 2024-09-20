@@ -211,7 +211,7 @@ func Look(rest string, userId int) (bool, error) {
 				u := *users.GetByUserId(playerId)
 
 				if !isSneaking {
-					user.SendText(
+					u.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at you.`, user.Character.Name),
 					)
 
