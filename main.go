@@ -542,8 +542,31 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 	for {
 		_, message, err := conn.ReadMessage()
+
+		c := configs.GetConfig()
+
 		if err != nil {
-			log.Println("Read error:", err)
+
+			// If failed to read from the connection, switch to zombie state
+			if userObject != nil {
+
+				if c.ZombieSeconds > 0 {
+
+					connDetails.SetState(connection.Zombie)
+					users.SetZombieUser(userObject.UserId)
+
+				} else {
+
+					worldManager.LeaveWorld(userObject.UserId)
+
+					if err := users.LogOutUserByConnectionId(connDetails.ConnectionId()); err != nil {
+						slog.Error("Log Out Error", "connectionId", connDetails.ConnectionId(), "error", err)
+					}
+
+				}
+			}
+
+			log.Println("WS Read error:", err)
 			break
 		}
 
@@ -583,6 +606,8 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 			connDetails.SetState(connection.LoggedIn)
 
 			worldManager.EnterWorld(userObject.Character.RoomId, userObject.Character.Zone, userObject.UserId)
+
+			continue
 		}
 
 		//c := configs.GetConfig()

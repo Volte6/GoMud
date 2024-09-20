@@ -4,37 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Console Terminal Emulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
     <style>
         #input {
             width: 100%;
             padding: 5px;
         }
         body {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #2e2e2e;
-            padding:10px;
             
+            background-color: #2e2e2e;
+            padding:0px;
+            margin:0px;
+            font-family: "Source Code Pro", monospace;
         }
 
         #output {
             background-color: black;
             color: white;
             padding: 10px;
-            height: 80vh;
+            height: 90vh;
             overflow-y: auto;
-            border: 1px solid #555;
+            border: 0px solid #555;
             white-space: pre-wrap; /* To handle new lines and white spaces */
-            font-size: 1.85vw;
-            
+            font-size: 2vw;
         }
 
+        @media (min-width: 1200px) {
+            #output {
+                font-size: 1.25vw;
+            }
+        }
+
+
         #input {
-            margin-top: 10px;
-            padding: 5px;
+            line-height: 4vh;
             background-color: black;
             color: white;
             border: 1px solid #555;
-            height: 4vh;
+            height: 5vh;
+            font-size:3vh;
         }
 
 
@@ -42,11 +52,12 @@
             height: auto;
             display:inline;
             font-size: 3vh;
+            height:5vh
         }
 
     </style>
 </head>
-<body>
+<body onload="ShowButton();return false;">
     <div id="output"></div>
     <input type="text" id="input" placeholder="Type your command...">
     <button id="connectBtn">Connect</button>
@@ -72,6 +83,16 @@
 		"cyan-bold":    14,
 		"white-bold":   15,};
 
+        function ShowButton() {
+            document.getElementById("connectBtn").style.display = "unset";
+            document.getElementById("input").style.display = "none";
+        }
+
+        function ShowInput() {
+            document.getElementById("connectBtn").style.display = "none";
+            document.getElementById("input").style.display = "unset";
+        }
+
         document.getElementById('connectBtn').addEventListener('click', function() {
             
             console.log("Connecting to: " + 'ws://'+location.host +':80/ws');
@@ -81,7 +102,8 @@
 
             socket.onopen = function() {
                 appendToOutput("Connected to the server!");
-                document.getElementById('connectBtn').disabled = true;
+                ShowInput();
+                //document.getElementById('connectBtn').disabled = true;
             };
 
             socket.onmessage = function(event) {
@@ -98,7 +120,8 @@
                 } else {
                     appendToOutput('Connection died');
                 }
-                document.getElementById('connectBtn').disabled = false;
+                ShowButton();
+                //document.getElementById('connectBtn').disabled = false;
             };
         });
 
