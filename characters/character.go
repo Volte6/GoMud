@@ -24,7 +24,7 @@ var (
 	startingRace     = 0
 	startingHealth   = 10
 	startingMana     = 10
-	startingRoomId   = -1
+	StartingRoomId   = -1
 	startingZone     = `Nowhere`
 	defaultName      = `Nameless`
 	descriptionCache = map[string]string{} // key is a hash, value is the description
@@ -88,7 +88,7 @@ func New() *Character {
 	return &Character{
 		//Name:   defaultName,
 		Adjectives: []string{},
-		RoomId:     startingRoomId,
+		RoomId:     StartingRoomId,
 		Zone:       startingZone,
 		RaceId:     startingRace,
 		Stats: stats.Statistics{

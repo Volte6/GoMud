@@ -344,9 +344,9 @@ func CreateUser(u *UserRecord) error {
 	u.UserId = GetUniqueUserId()
 	u.Permission = PermissionUser
 
-	if err := SaveUser(*u); err != nil {
-		return err
-	}
+	//if err := SaveUser(*u); err != nil {
+	//return err
+	//}
 
 	userManager.Lock()
 	defer userManager.Unlock()
