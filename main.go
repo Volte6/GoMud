@@ -615,11 +615,12 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		}
 
 		//c := configs.GetConfig()
-
-		if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
-			log.Println("Write error:", err)
-			break
-		}
+		/*
+			if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
+				log.Println("Write error:", err)
+				break
+			}
+		*/
 
 		wi := WorldInput{
 			FromId:    userObject.UserId,

@@ -69,7 +69,7 @@
         #text-output {
             flex: 1;
             background-color: black;
-            color: #00ff00;
+            color: #ccffcc;
             overflow-y: auto;
             font-size: calc(min((100vw / 80), (100vh / 24)));
             line-height: 1;
@@ -121,6 +121,7 @@
             border: none;
             background-color: #333;
             color: white;
+            border-radius: 0px 5px 5px 0px;
         }
         #connect-button {
             padding: 10px 20px;
@@ -130,11 +131,28 @@
             border: none;
             cursor: pointer;
             margin-left: 10px;
+            animation: pulse 1s infinite alternate;
+            border-radius: 5px;
         }
         #connect-button:disabled {
             color: #888;
             pointer-events: none;
+
+            animation: none;
+            background-color: #555;
+            cursor: not-allowed;
         }
+        @keyframes pulse {
+            0% {
+                background-color: #555;
+                color: white;
+            }
+            100% {
+                color:#d17a7a;
+                background-color: #9f4a4a;
+            }
+        }
+
         #command-input:focus {
             outline: none;
         }
@@ -217,7 +235,7 @@
 
         <div id="text-output">Welcome to the Terminal Interface.
 Type your commands below.
-        </div>
+</div>
         <div id="button-column" class="collapsed">
             <div id="addbtn-add-button-container">
                 <button id="addbtn-add-button">+ Add</button>
@@ -246,6 +264,15 @@ Type your commands below.
     </div>
 
     <script>
+        /////////////////////////////////////////////
+        //
+        // Misc tracking
+        //
+        /////////////////////////////////////////////
+        let payloadsReceived = 0;
+        let totalBytesReceived = 0;
+        let payloadsSent = 0;
+        let totalBytesSent = 0;
 
         /////////////////////////////////////////////
         //
@@ -381,7 +408,7 @@ Type your commands below.
         function handleCommandButtonClick(event) {
             const button = event.currentTarget;
             const command = button.getAttribute('data-command');
-            socket.send(command);
+            SendData(command)
         }
 
         // Save button in the modal
@@ -537,17 +564,8 @@ Type your commands below.
                 const gray = 8 + (ansiColor - 232) * 10;
                 r = g = b = gray;
             }
-
-            // Brighten up dark colors
             
-            extra = '';
-            /*
-            if (r <= 128 && g == 0 && b == 0) extra = ';text-shadow: 1px 1px #fff';
-            else if (g <= 128 && r == 0 && b == 0) extra = ';text-shadow: 1px 1px #fff';
-            else if (b <= 128 && g == 0 && r == 0) extra = ';text-shadow: 1px 1px #fff';
-            */
-            
-            return `rgb(${r}, ${g}, ${b})` + extra;
+            return `rgb(${r}, ${g}, ${b})`;
         }
 
         /////////////////////////////////////////////
@@ -580,6 +598,9 @@ Type your commands below.
 
         function handleServerMessage(message) {
             
+            payloadsReceived++;
+            totalBytesReceived += message.length;
+
             // First do a quick check as to whether it might be a webclient command
             if ( message.length > 9 && message.substring(8, 9) == ':' ) {
                 if ( handleWebclientCommand(message) ) {
@@ -646,7 +667,8 @@ Type your commands below.
             socket = new WebSocket('ws://'+location.host +':80/ws');
             
             socket.onopen = function() {
-                appendToOutput("Connected to the server!");
+                appendToOutput("Connected to the server!\n");
+                clearScreen();
                 connectButton.disabled = true;
             };
 
@@ -655,15 +677,15 @@ Type your commands below.
             };
 
             socket.onerror = function(error) {
-                appendToOutput("Error: " + error.message);
+                appendToOutput("Error: " + error.message + "\n");
             };
 
             // Disconnected
             socket.onclose = function(event) {
                 if (event.wasClean) {
-                    appendToOutput(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
+                    appendToOutput("Connection closed cleanly, code=${event.code}, reason=${event.reason}\n");
                 } else {
-                    appendToOutput('Connection died');
+                    appendToOutput("Connection died\n");
                 }
                 connectButton.disabled = false;
                 // Don't let it get stuck in "password" masking mode
@@ -689,21 +711,36 @@ Type your commands below.
                     listColorAliases();
                     event.target.value = '';
                     return;
-                }
-                else if (event.target.value == "clear" ) {
+                } else if (event.target.value == "clear" ) {
                     clearScreen();
+                    event.target.value = '';
+                    return;
+                } else if (event.target.value == "!net" ) {
+                    printNetStats();
                     event.target.value = '';
                     return;
                 }
 
-                if (socket && socket.readyState === WebSocket.OPEN) {
-                    socket.send(event.target.value);
+                if ( SendData(event.target.value) ) {
                     event.target.value = '';
                 } else {
                     appendToOutput("Not connected to the server. Did you click the Connect button?\n");
                 }
             }
         });
+
+        function SendData(dataToSend) {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                return false;
+            }
+
+            payloadsSent++;
+            totalBytesSent += dataToSend.length;
+
+            socket.send(dataToSend);
+
+            return true;
+        }
 
         function clearScreen() {
             textOutput.innerHTML = '';
@@ -803,10 +840,21 @@ Type your commands below.
             return 'unknown'; // If no pattern matches
         }
         
+        function printNetStats() {
+
+            appendToOutput("\n");
+            appendToOutput("Request Ct:  " + String(payloadsSent) + "\n");
+            appendToOutput("Bytes Sent:  " + String(Math.round(totalBytesSent/1024 * 100) / 100) + "kb\n");
+            appendToOutput("Response Ct: " + String(payloadsReceived) + "\n");
+            appendToOutput("Bytes Rcvd:  " + String(Math.round(totalBytesReceived/1024 * 100) / 100) + "kb\n");
+            appendToOutput("\n");
+
+        }
+
         function listColorAliases() {
             for( name in colorAliases ) {
                 colorStyle = ansi256Color(colorAliases[name]);
-                console.log("%c" + name.padStart(22) + " | " + String(colorAliases[name]).padStart(10) + " | " + colorStyle + "    ",  "font-family: monospace;background-color:#000000;color:" + colorStyle);
+                appendToOutput("<span style=\"font-family: monospace;background-color:#000000;color:" + colorStyle+"\">" + name.padStart(22) + " | " + String(colorAliases[name]).padStart(10) + " | " + colorStyle + "</span>\n")
             }
         }
 
@@ -825,7 +873,8 @@ Type your commands below.
         specialCommands = {
             "!raw": "View server messages in raw format.",
             "!debug": "See special debug messages in the console.",
-            "!colors": "List all colors / color aliases in the console.",
+            "!colors": "Print out all color aliases on screen.",
+            "!net": "Print out network traffic stats",
             "clear": "Clear the screen",
         }
 
