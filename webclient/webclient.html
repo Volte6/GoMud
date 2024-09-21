@@ -661,6 +661,7 @@ Type your commands below.
                     appendToOutput('Connection died');
                 }
                 connectButton.disabled = false;
+                // Don't let it get stuck in "password" masking mode
                 if ( textInput.type == "password" ) {
                     event.target.value = '';
                     textInput.type = "text";
