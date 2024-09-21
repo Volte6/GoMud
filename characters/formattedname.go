@@ -24,8 +24,8 @@ var (
 		`hidden-short`: colorpatterns.ApplyColorPattern(`?`, `gray`),
 
 		// Does light come from this character?
-		`lit`:       colorpatterns.ApplyColors(`⚙Lit`, []int{187, 229, 228, 227}),
-		`lit-short`: colorpatterns.ApplyColors(`⚙`, []int{187, 229, 228, 227}),
+		`lit`:       colorpatterns.ApplyColors(`☀️Lit`, []int{187, 229, 228, 227}),
+		`lit-short`: colorpatterns.ApplyColors(`☀️`, []int{187, 229, 228, 227}),
 
 		// Are they hiding?
 		`sleeping`:       colorpatterns.ApplyColorPattern(`asleep`, `gray`),
