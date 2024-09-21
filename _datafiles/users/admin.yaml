@@ -14,8 +14,7 @@ character:
     them strength, wisdom, or fortune beyond their wildest dreams. Conversely, he
     can also mete out justice to those who would seek to disrupt the balance of the
     world, swiftly and decisively.
-  adjectives:
-  - zombie
+  adjectives: []
   roomid: 1
   zone: Frostfang
   raceid: 2
@@ -70,7 +69,7 @@ character:
     - buffid: 1
       onstartevent: true
       permabuff: true
-      roundcounter: 53
+      roundcounter: 31
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -118,5 +117,4 @@ character:
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/zIy1KEmMtIxBEFAAAAA//+tVVy8VgAAAA==
 configoptions: {}
