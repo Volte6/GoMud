@@ -60,7 +60,29 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 	strB := strings.Builder{}
 
-	strB.WriteString("<html><body>\n")
+	strB.WriteString("<html><head><style>\n")
+
+	strB.WriteString(
+		"body {\n" +
+			"font-family: Verdana, sans-serif;\n" +
+			"}\n" +
+			"th {\n" +
+			"background-color:#ccc;" +
+			"}\n" +
+			"tr {\n" +
+			"\tborder-bottom: 1px solid #ddd;\n" +
+			"}\n" +
+			"tr:nth-child(even) { \n" +
+			"\tbackground-color: #D6EEEE;\n" +
+			"}\n" +
+			"td {\n" +
+			"font-family: monospace;\n" +
+			"}\n" +
+			".footer{\n" +
+			"text-align:center;\n" +
+			"}\n")
+
+	strB.WriteString("</style></head><body>\n")
 	strB.WriteString("<h1>GoMud</h1>\n")
 
 	allConfigData := configs.GetConfig().AllConfigData()
@@ -75,11 +97,12 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	sort.Strings(keys)
 
 	strB.WriteString("<p><a href=\"/client\">Log in using the web-based \"virtual terminal\"</a></p>\n")
+
 	strB.WriteString("<table border=\"1\" cellspacing=\"0\" cellpadding=\"3\">\n")
 	strB.WriteString("<tr><th>Name</th><th>Value</th></tr>\n")
 	for _, k := range keys {
 		displayName := strings.Replace(k, ` (locked)`, ``, -1)
-		if strings.HasSuffix(strings.ToLower(k), `port`) || k == "seed" {
+		if strings.HasSuffix(strings.ToLower(displayName), `port`) || strings.ToLower(displayName) == "seed" {
 			continue
 		} else {
 			strB.WriteString(fmt.Sprintf("<tr><td><b>%s</b></td><td>%v</td></tr>\n", displayName, allConfigData[k]))
@@ -87,6 +110,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	}
 	strB.WriteString("</table>\n")
 
+	strB.WriteString("<p class=\"footer\">Powered by <b>GoMud</b> - Available free at <a href=\"http://github.com/Volte6/GoMud\">github.com/Volte6/GoMud</a></p>")
 	strB.WriteString("</body></html>")
 
 	w.Write([]byte(strB.String()))
