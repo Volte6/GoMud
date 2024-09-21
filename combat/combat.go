@@ -190,7 +190,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 	attackCount := int(math.Ceil(float64(sourceChar.Stats.Speed.ValueAdj-targetChar.Stats.Speed.ValueAdj) / 25))
 	if attackCount < 1 {
-		//attackCount = 1
+		attackCount = 1
 	}
 
 	for i := 0; i < attackCount; i++ {

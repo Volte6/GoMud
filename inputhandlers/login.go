@@ -151,6 +151,12 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 			}
 
 		} else {
+
+			events.AddToQueue(events.WebClientCommand{
+				ConnectionId: clientInput.ConnectionId,
+				Text:         `TEXTMASK:false`,
+			})
+
 			newUserPromptPrompt, _ := templates.Process("generic/prompt.yn", map[string]any{
 				"prompt":  "Would you like to create a new user?",
 				"options": []string{"y", "n"},
