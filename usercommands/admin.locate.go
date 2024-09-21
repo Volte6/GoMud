@@ -42,6 +42,7 @@ func Locate(rest string, userId int) (bool, error) {
 			`You get the feeling someone is looking for you...`,
 		)
 
+		return true, nil
 	}
 
 	allMobNames := []string{}

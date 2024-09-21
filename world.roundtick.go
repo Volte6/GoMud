@@ -1540,9 +1540,12 @@ func (w *World) HandleAutoHealing(roundNumber uint64) {
 			}
 		}
 
-		prompt := user.GetCommandPrompt(true)
-		promptColorized := templates.AnsiParse(prompt)
-		w.connectionPool.SendTo([]byte(promptColorized), user.ConnectionId())
+		if w.connectionPool.IsWebsocket(user.ConnectionId()) {
+			w.connectionPool.SendTo([]byte(user.GetCommandPrompt(true)), user.ConnectionId())
+		} else {
+			w.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), user.ConnectionId())
+		}
+
 	}
 
 }

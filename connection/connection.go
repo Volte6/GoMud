@@ -48,7 +48,7 @@ func (c *ConnectionTracker) Add(conn net.Conn, wsConn *websocket.Conn) *Connecti
 			if err := yaml.Unmarshal(yfile, &data); err == nil {
 
 				for name, val := range data[`color256`] {
-					connDetails.Write([]byte("COLORALIAS " + name + "=" + val + "\n"))
+					connDetails.Write([]byte("COLORMAP:" + name + "=" + val + "\n"))
 				}
 
 			} else {
@@ -128,22 +128,23 @@ func (c *ConnectionTracker) Remove(id ConnectionId) (err error) {
 	return errors.New("connection not found")
 }
 
-func (c *ConnectionTracker) Broadcast(b []byte, excludeIds ...ConnectionId) {
-
-	excludeLen := len(excludeIds)
+func (c *ConnectionTracker) Broadcast(colorizedText []byte, rawText []byte) {
 
 	// Range over the sync.Map
 	c.netConnections.Range(func(key, cd interface{}) (processNext bool) {
 
-		// If in the exclusion list, skip it
-		if excludeLen > 0 && sliceContains(excludeIds, key.(ConnectionId)) {
-			return true
-		}
-
 		details := cd.(*ConnectionDetails)
 		if details.state != Login {
 			// Write the message to the connection
-			if _, err := details.Write(b); err != nil {
+			var err error
+
+			if details.IsWebsocket() {
+				_, err = details.Write(rawText)
+			} else {
+				_, err = details.Write(colorizedText)
+			}
+
+			if err != nil {
 				slog.Error("could not write to connection", "connectionId", key.(uint64), "remoteAddr", cd.(*ConnectionDetails).RemoteAddr().String(), "error", err)
 				// Remove from the connections
 				c.Remove(key.(ConnectionId))
