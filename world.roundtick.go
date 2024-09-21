@@ -1370,9 +1370,7 @@ func (w *World) HandleAffected(affectedPlayerIds []int, affectedMobInstanceIds [
 		if user := users.GetByUserId(userId); user != nil {
 
 			if user.Character.Health <= -10 {
-
 				user.Command(`suicide`) // suicide drops all money/items and transports to land of the dead.
-
 			} else if user.Character.Health < 1 {
 
 				user.SendText(`<ansi fg="red">you drop to the ground!</ansi>`)
@@ -1517,7 +1515,11 @@ func (w *World) HandleAutoHealing(roundNumber uint64) {
 					user.Character.Health++
 				}
 			} else {
-				if user.Character.Health > -10 {
+				if user.Character.Health <= -10 {
+
+					user.Command(`suicide`) // suicide drops all money/items and transports to land of the dead.
+
+				} else {
 					user.Character.Health--
 					user.SendText(`<ansi fg="red">you are bleeding out!</ansi>`)
 					if room := rooms.LoadRoom(user.Character.RoomId); room != nil {

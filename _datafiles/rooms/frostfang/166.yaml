@@ -22,7 +22,6 @@ exits:
       difficulty: 8
   west:
     roomid: 642
-gold: 3
 spawninfo:
 - mobid: 2
   cooldown: 120

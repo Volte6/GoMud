@@ -75,7 +75,7 @@ function onCommand(cmd, rest, user, room) {
             teacherMob.Command('say Go ahead and engage in combat by typing <ansi fg="command">attack dummy</ansi>.');
             break;
         case 2:
-            teacherMob.Command('say Head <ansi fg="exit">west</ansi> to complete your training.');
+            // teacherMob.Command('say Head <ansi fg="exit">west</ansi> to complete your training.');
             break;
         default:
             break;

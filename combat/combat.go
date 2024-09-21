@@ -190,8 +190,9 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 	attackCount := int(math.Ceil(float64(sourceChar.Stats.Speed.ValueAdj-targetChar.Stats.Speed.ValueAdj) / 25))
 	if attackCount < 1 {
-		attackCount = 1
+		//attackCount = 1
 	}
+
 	for i := 0; i < attackCount; i++ {
 
 		slog.Info(`calculateCombat`, `Atk`, fmt.Sprintf(`%d/%d`, i+1, attackCount), `Source`, fmt.Sprintf(`%s (%s)`, sourceChar.Name, sourceType), `Target`, fmt.Sprintf(`%s (%s)`, targetChar.Name, targetType))

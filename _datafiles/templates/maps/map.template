@@ -3,7 +3,7 @@
 {{- $leftBorder := .LeftBorder -}}
 {{- $midBorder := .MidBorder -}}
 {{- $rightBorder := .RightBorder -}}
-<ansi fg="black-bold">{{ $leftBorder.Top }}</ansi><ansi fg="black-bold">  .:</ansi><ansi fg="blue">{{ printf ( printf "%%-%ds" ( sub $mapWidth 4 ) ) .Title }}</ansi><ansi fg="black-bold">{{ $rightBorder.Top }}</ansi>
+<ansi fg="black-bold">{{ $leftBorder.Top }}</ansi><ansi fg="black-bold">  .:</ansi><ansi fg="20">{{ printf ( printf "%%-%ds" ( sub $mapWidth 4 ) ) .Title }}</ansi><ansi fg="black-bold">{{ $rightBorder.Top }}</ansi>
 <ansi fg="black-bold">{{ index $leftBorder.Mid 0 }}{{ padRightX "" $midBorder.Top $mapWidth }}{{ index $rightBorder.Mid 0 }}</ansi>
 {{ range $index, $line := .DisplayLines }}
 {{- $mod := mod $index 2 -}}

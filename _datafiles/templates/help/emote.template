@@ -6,11 +6,11 @@ action or reaction to the room.
 Example:
 
     [HP:10/10 MP:10/10]: emote scratches his head.
-    <ansi fg="username">Chuckles</ansi> <ansi fg="blue">scratches his head.</ansi>
+    <ansi fg="username">Chuckles</ansi> <ansi fg="20">scratches his head.</ansi>
     
 What others see:
 
-    [HP:6/6 MP:8/8]: <ansi fg="username">Chuckles</ansi> <ansi fg="blue">scratches his head.</ansi>
+    [HP:6/6 MP:8/8]: <ansi fg="username">Chuckles</ansi> <ansi fg="20">scratches his head.</ansi>
 
 Here are some shortcut emotes that can be invoked with a single word:
 

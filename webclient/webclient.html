@@ -546,9 +546,6 @@ Type your commands below.
             else if (g <= 128 && r == 0 && b == 0) extra = ';text-shadow: 1px 1px #fff';
             else if (b <= 128 && g == 0 && r == 0) extra = ';text-shadow: 1px 1px #fff';
             */
-            if (r > 0 && r <= 56 && g == 0 && b == 0) r = 96;
-            else if (g > 0 && g <= 56 && r == 0 && b == 0) g = 96;
-            else if (b > 0 && b <= 56 && g == 0 && r == 0) b = 96;
             
             return `rgb(${r}, ${g}, ${b})` + extra;
         }
