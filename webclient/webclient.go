@@ -79,7 +79,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	strB.WriteString("<tr><th>Name</th><th>Value</th></tr>\n")
 	for _, k := range keys {
 		displayName := strings.Replace(k, ` (locked)`, ``, -1)
-		if strings.HasSuffix(strings.ToLower(k), `port`) || k == "Seed" {
+		if strings.HasSuffix(strings.ToLower(k), `port`) || k == "seed" {
 			continue
 		} else {
 			strB.WriteString(fmt.Sprintf("<tr><td><b>%s</b></td><td>%v</td></tr>\n", displayName, allConfigData[k]))

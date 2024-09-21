@@ -11,4 +11,4 @@ ssh ${RPI_HOST} 'sudo pkill mud-server'
 # Copy the binary over, delete the local binary, run the server again using the script setup ont he server
 scp ./${RPI_BIN} ${RPI_HOST}:${RPI_HOST_PATH}/mud/${RPI_BIN} && \
 rm ${RPI_BIN} && \
-ssh ${RPI_HOST} 'cd ${RPI_HOST_PATH}; sudo ./startup-run-mud.sh'
+ssh ${RPI_HOST} -f 'cd ${RPI_HOST_PATH}; ./startup-run-mud.sh'
