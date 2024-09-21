@@ -1191,6 +1191,7 @@ func (w *World) HandleMobCombat() (affectedPlayerIds []int, affectedMobInstanceI
 
 			// If the attack connected, check for damage to equipment.
 			if roundResult.Hit {
+
 				// For now, only focus on offhand items.
 				if defUser.Character.Equipment.Offhand.ItemId > 0 {
 

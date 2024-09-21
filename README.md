@@ -35,6 +35,7 @@ Information on scripting in GoMud can be found in the [scripting README](scripti
 - [Kill Stats](https://www.youtube.com/watch?v=4aXs8JNj5Cc)
 - [Searchable Inventory](https://www.youtube.com/watch?v=iDUbdeR2BUg)
 - [Day/Night Cycles](https://www.youtube.com/watch?v=CiEbOp244cw)
+- [Web Socket "Virtual Terminal"](https://www.youtube.com/watch?v=L-qtybXO4aw)
 
 # Quick Start
 

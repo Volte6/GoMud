@@ -64,3 +64,11 @@ type ClientSettings struct {
 }
 
 func (c ClientSettings) Type() string { return `ClientSettings` }
+
+// Messages that are intended to reach all users on the system
+type WebClientCommand struct {
+	ConnectionId uint64
+	Text         string
+}
+
+func (b WebClientCommand) Type() string { return `WebClientCommand` }
