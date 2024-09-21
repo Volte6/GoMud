@@ -273,6 +273,10 @@ Type your commands below.
         let totalBytesReceived = 0;
         let payloadsSent = 0;
         let totalBytesSent = 0;
+        // Command history
+        let commandHistory = [];
+        let historyPosition = 0;
+        let commandHistoryMaxLength = 30;
 
         /////////////////////////////////////////////
         //
@@ -697,7 +701,31 @@ Type your commands below.
         });
 
         textInput.addEventListener('keydown', function(event) {
+            
+            if (event.key == 'ArrowUp' || event.key == 'ArrowDown') {
+                if ( event.key == 'ArrowUp' ) {
+                    historyPosition += 1;
+                } else {
+                    historyPosition -= 1;
+                }
+                if ( historyPosition < 1 ) historyPosition = 1;
+                if ( historyPosition > commandHistory.length ) historyPosition = commandHistory.length;
+
+                event.target.value = commandHistory[ commandHistory.length - historyPosition ];
+            }
+
             if (event.key === 'Enter') {
+
+                if ( event.target.value != '' ) {
+                    if ( textInput.type != "password" ) { // ignore password entry
+                        commandHistory.push(event.target.value);
+                        historyPosition = 0;
+
+                        if ( commandHistory.length > commandHistoryMaxLength ) {
+                            commandHistory = commandHistory.slice( commandHistory.length - commandHistoryMaxLength)
+                        }
+                    }
+                }
 
                 if (event.target.value == "!raw") {
                     rawOutput = !rawOutput;
