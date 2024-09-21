@@ -573,6 +573,8 @@ Type your commands below.
 
         function handleServerMessage(message) {
 
+            debugLog(message);
+
             // First do a quick check as to whether it might be a webclient command
             if ( message.length > 9 && message.substring(8, 9) == ':' ) {
                 if ( handleWebclientCommand(message) ) {
@@ -607,6 +609,21 @@ Type your commands below.
                 return true;
             }
 
+            if ( cmdString.substring(0, 9) == "TEXTMASK:" ) {
+
+                debugLog(cmdString);
+
+                if ( cmdString.substring(9) == "true" ) {
+                    textInput.type = "password"; // Change back to password to hide the input
+                } else {
+                    textInput.type = "text"; // Change back to password to hide the input
+                }
+
+                return true;
+            }
+
+            input.type = "password"; // Change back to password to hide the input
+
             return false;
         }
 
@@ -636,6 +653,7 @@ Type your commands below.
                 appendToOutput("Error: " + error.message);
             };
 
+            // Disconnected
             socket.onclose = function(event) {
                 if (event.wasClean) {
                     appendToOutput(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
@@ -643,6 +661,10 @@ Type your commands below.
                     appendToOutput('Connection died');
                 }
                 connectButton.disabled = false;
+                if ( textInput.type == "password" ) {
+                    event.target.value = '';
+                    textInput.type = "text";
+                }
             };
         });
 

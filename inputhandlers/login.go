@@ -97,6 +97,12 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 
 		// Setting username was a success, send the password prompt
 		connectionPool.SendTo([]byte(passwordPrompt), clientInput.ConnectionId)
+
+		// Tell the webclient to hide input
+		if connectionPool.IsWebsocket(clientInput.ConnectionId) {
+			connectionPool.SendTo([]byte(`TEXTMASK:true`), clientInput.ConnectionId)
+		}
+
 		return false
 	}
 
@@ -119,6 +125,12 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 				connectionPool.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
 				connectionPool.Remove(clientInput.ConnectionId)
 			} else {
+
+				// Tell webclient to switch back to regular text input
+				if connectionPool.IsWebsocket(clientInput.ConnectionId) {
+					connectionPool.SendTo([]byte(`TEXTMASK:false`), clientInput.ConnectionId)
+				}
+
 				// Password matched, assign the loaded data
 				state.UserObject = tmpUser
 
