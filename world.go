@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/volte6/mud/badinputtracker"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/configs"
@@ -734,6 +735,9 @@ func (w *World) processInput(userId int, inputText string) {
 
 	if !handled {
 		if len(command) > 0 {
+
+			badinputtracker.TrackBadCommand(command, remains)
+
 			user.SendText(fmt.Sprintf(`<ansi fg="command">%s</ansi> not recognized. Type <ansi fg="command">help</ansi> for commands.`, command))
 			user.Command(`emote looks a little confused`)
 		}
