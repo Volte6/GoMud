@@ -136,6 +136,15 @@ func (u *UserRecord) SendText(txt string) {
 
 }
 
+func (u *UserRecord) SendWebClientCommand(txt string) {
+
+	events.AddToQueue(events.WebClientCommand{
+		ConnectionId: u.connectionId,
+		Text:         txt,
+	})
+
+}
+
 func (u *UserRecord) SetTempData(key string, value any) {
 	u.lock.Lock()
 	defer u.lock.Unlock()

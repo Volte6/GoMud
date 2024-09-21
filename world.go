@@ -846,6 +846,25 @@ func (w *World) MessageTick() {
 
 	redrawPrompts := make(map[uint64]string)
 
+	eq = events.GetQueue(events.WebClientCommand{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		cmd, typeOk := e.(events.WebClientCommand)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
+			continue
+		}
+
+		if !w.connectionPool.IsWebsocket(cmd.ConnectionId) {
+			continue
+		}
+
+		w.connectionPool.SendTo([]byte(cmd.Text), cmd.ConnectionId)
+
+	}
+
 	eq = events.GetQueue(events.Message{})
 	for eq.Len() > 0 {
 

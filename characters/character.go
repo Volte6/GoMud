@@ -333,11 +333,11 @@ func (c *Character) GetDefaultDiceRoll() (attacks int, dCount int, dSides int, b
 	dSides += int(math.Floor((float64(c.Stats.Strength.ValueAdj) / 12)))
 	bonus += int(math.Floor((float64(c.Stats.Perception.ValueAdj) / 25)))
 
-	if dCount < 1 {
-		dCount = 1
+	if dCount < raceInfo.Damage.DiceCount {
+		dCount = raceInfo.Damage.DiceCount
 	}
-	if dSides < 2 {
-		dSides = 2
+	if dSides < raceInfo.Damage.SideCount {
+		dSides = raceInfo.Damage.SideCount
 	}
 
 	return attacks, dCount, dSides, bonus, buffOnCrit

@@ -115,6 +115,7 @@ type ConnectionDetails struct {
 	lastInputTime     time.Time
 	conn              net.Conn
 	wsConn            *websocket.Conn
+	wsLock            sync.Mutex
 	handlerMutex      sync.Mutex
 	inputHandlerNames []string
 	inputHandlers     []InputHandler
@@ -186,6 +187,9 @@ func (cd *ConnectionDetails) Write(p []byte) (n int, err error) {
 	p = []byte(strings.ReplaceAll(string(p), "\n", "\r\n"))
 
 	if cd.wsConn != nil {
+		cd.wsLock.Lock()
+		defer cd.wsLock.Unlock()
+
 		err := cd.wsConn.WriteMessage(websocket.TextMessage, p)
 		if err != nil {
 			return 0, err
@@ -255,5 +259,6 @@ func NewConnectionDetails(connId ConnectionId, c net.Conn, wsC *websocket.Conn) 
 		inputDisabled: false,
 		conn:          c,
 		wsConn:        wsC,
+		wsLock:        sync.Mutex{},
 	}
 }

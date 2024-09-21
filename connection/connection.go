@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/util"
 	"gopkg.in/yaml.v2"
 )
@@ -48,14 +49,13 @@ func (c *ConnectionTracker) Add(conn net.Conn, wsConn *websocket.Conn) *Connecti
 			if err := yaml.Unmarshal(yfile, &data); err == nil {
 
 				for name, val := range data[`color256`] {
-					connDetails.Write([]byte("COLORMAP:" + name + "=" + val + "\n"))
+					events.AddToQueue(events.WebClientCommand{
+						ConnectionId: connDetails.ConnectionId(),
+						Text:         "COLORMAP:" + name + "=" + val + "\n",
+					})
 				}
 
-			} else {
-				slog.Info("ERROR 2", "msg", err)
 			}
-		} else {
-			slog.Info("ERROR 1", "msg", err)
 		}
 
 	}

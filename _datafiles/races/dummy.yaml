@@ -1,8 +1,6 @@
 raceid: 19
 name: Dummy
 description: A wooden target
-buffids:
-  - 4 # Heal Spell
 size: small
 unarmedname: sticks
 tnlscale: 1

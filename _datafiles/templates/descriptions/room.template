@@ -1,25 +1,29 @@
 <ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">{{ if ne .TinyMapDescription "" }}{{ .TinyMapDescription }}{{ else }}{{ splitstring .Room.GetDescription 80 }}{{ end }}</ansi>
-{{ if ne (len .Room.SkillTraining) 0 }}
+{{- if ne (len .Room.SkillTraining) 0 }}
+
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>
       <ansi fg="yellow-bold">You can train here!</ansi> Type <ansi fg="command">train</ansi> to see what training is available. 
     <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
-{{ end }}
+{{- end }}
 {{- if .Room.IsBank }}
+
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>
                 <ansi fg="yellow-bold">This is a bank!</ansi> Type <ansi fg="command">bank</ansi> to deposit/withdraw. 
     <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
-{{ end }}
+{{- end }}
 {{- if .Room.IsStorage }}
+
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>
        <ansi fg="yellow-bold">This is an item storage location!</ansi> Type <ansi fg="command">storage</ansi> to store/unstore. 
     <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
-{{ end }}
+{{- end }}
 {{- if eq .Room.RoomId -1 }}
+
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>
        <ansi fg="yellow-bold">Type <ansi fg="command">help races</ansi> to see a list of available races.</ansi>
        <ansi fg="yellow-bold">Type <ansi fg="command">start</ansi> to begin playing.</ansi>
     <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
-{{ end }}
+{{- end }}
 {{- if ne (len .TrackingString) 0 }}
 <ansi fg="182">{{ .TrackingString }}</ansi>
 {{ end }}

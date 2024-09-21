@@ -131,11 +131,11 @@ color256:
   table-title: 2
   userid: black
   username: 11 # Bright yellow
-  username-aggro: red
+  username-aggro: 124
   username-downed: 8 # Bright black
   mobname: 6 
   mobname-aggro: 9 # Bright red
-  mobname-downed: red
+  mobname-downed: 124
   spellname: magenta
   nameprefix-pet: 10
   role: 8
@@ -149,7 +149,7 @@ color256:
   container: 12 # Bright blue
   exit: 10 # Bright green
   secret-exit: 8 # Bright black
-  zone: red
+  zone: 124
   map-shop: 2
   map-bank: 10
   map-you: 14
@@ -212,8 +212,8 @@ color256:
   item-bonus-damage: 49
   name-flags-wrapper: 240
   name-flag: 246
-  room-title: 91
-  room-zone: 52
+  room-title: 128
+  room-zone: 124
   health-100: 46
   health-90: 82
   health-80: 118
@@ -245,6 +245,6 @@ color256:
   leaves-message: 8
   spell-neutral: white
   spell-helpful: 2
-  spell-harmful: red
+  spell-harmful: 124
   questflag: 187
   highlight: 238

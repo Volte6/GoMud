@@ -120,7 +120,7 @@ func Emote(rest string, userId int) (bool, error) {
 	}
 
 	room.SendText(
-		fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="blue">%s</ansi>`, user.Character.Name, rest),
+		fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="20">%s</ansi>`, user.Character.Name, rest),
 	)
 
 	return true, nil

@@ -13,4 +13,3 @@
 {{- else -}}
 <ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">Nobody else is here.</ansi>
 {{- end }}
-

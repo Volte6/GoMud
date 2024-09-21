@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GoMud Web Temrinal</title>
+    <title>GoMud Web Terminal</title>
     <style>
         * {
             box-sizing: border-box;
@@ -27,7 +27,7 @@
             color: white;
             border: none;
             cursor: pointer;
-            padding: 5px;
+            padding: 5px 7px 5px 7px;
             font-size: 15px;
             border-radius: 3px;
             z-index: 1; /* Ensure the toggle button is above other elements */
@@ -44,6 +44,7 @@
             display: flex;
             flex-direction: row;
             overflow: hidden;
+            background-color: #000;
         }
 
         /* Updated styles for button column */
@@ -52,14 +53,16 @@
             background-color: #2d2d2d;
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            padding: 5px 5px 0px 10px;
             overflow: hidden;
             transition: width 0.3s ease;
+            margin-top:40px;
+            border-radius: 15px 0px 0px 0px;
         }
 
         #button-column.collapsed {
             width: 0;
-            padding: 10px 0;
+            padding: 5px 0px 0px 0px;
         }
 
         /* Adjust text-output to flex properly */
@@ -74,12 +77,14 @@
             white-space: pre-wrap;
             word-wrap: break-word;
             padding: 10px;
+            /**/
+            transition: background-color 0.5s;
         }
 
         .button-container {
             display: flex;
             align-items: center;
-            margin: 5px 0;
+            margin: 3px 0;
         }
         .command-button {
             flex: 1;
@@ -90,6 +95,7 @@
             cursor: pointer;
             text-align: left;
             font-size: 16px;
+            border-radius: 10px;
         }
         .edit-icon {
             width: 24px;
@@ -132,8 +138,11 @@
         #command-input:focus {
             outline: none;
         }
-        /* Modal Styles */
-        #modal {
+
+        /****************************** 
+        * Button Modal Styles 
+        ******************************/
+        #addbtn-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -144,49 +153,48 @@
             justify-content: center;
             align-items: center;
         }
-        #modal-content {
+        #addbtn-modal-content {
             background: #fff;
             padding: 20px;
             border-radius: 5px;
             width: 300px;
         }
-        #modal-content h2 {
+        #addbtn-modal-content h2 {
             margin-top: 0;
         }
-        #modal-content label {
+        #addbtn-modal-content label {
             display: block;
             margin: 10px 0 5px;
         }
-        #modal-content input {
+        #addbtn-modal-content input {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
         }
-        #modal-buttons {
+        #addbtn-modal-buttons {
             margin-top: 15px;
             text-align: right;
         }
-        #modal-buttons button {
+        #addbtn-modal-buttons button {
             padding: 8px 12px;
             margin-left: 10px;
         }
-        #delete-button {
+        #addbtn-delete-button {
             background-color: #f44336;
             color: white;
             border: none;
             cursor: pointer;
         }
-        #delete-button:hover {
+        #addbtn-delete-button:hover {
             background-color: #d32f2f;
         }
-        /* Styles for the "+Add" button */
-        #add-button-container {
+        #addbtn-add-button-container {
             display: flex;
             align-items: center;
             margin: 5px 0;
             margin-top: auto; /* Push to the bottom */
         }
-        #add-button {
+        #addbtn-add-button {
             width: 100%;
             padding: 10px;
             background-color: #4CAF50;
@@ -195,11 +203,13 @@
             cursor: pointer;
             font-size: 16px;
         }
-        #add-button:hover {
+        #addbtn-add-button:hover {
             background-color: #45a049;
         }
+        /****************************** 
+        * END Button Modal Styles 
+        ******************************/
     </style>
-
 </head>
 <body onLoad="init(); return false;">
     <div id="main-container">
@@ -209,9 +219,8 @@
 Type your commands below.
         </div>
         <div id="button-column" class="collapsed">
-            <!-- "+Add" Button -->
-            <div id="add-button-container">
-                <button id="add-button">+ Add</button>
+            <div id="addbtn-add-button-container">
+                <button id="addbtn-add-button">+ Add</button>
             </div>
         </div>
     </div>
@@ -221,17 +230,17 @@ Type your commands below.
     </div>
 
     <!-- Modal Dialog for Editing Button Properties -->
-    <div id="modal">
-        <div id="modal-content">
-            <h2 id="modal-title">Edit Button</h2>
-            <label for="button-text">Button Text:</label>
-            <input type="text" id="button-text">
-            <label for="button-command">Command:</label>
-            <input type="text" id="button-command">
-            <div id="modal-buttons">
-                <button id="delete-button">Delete</button>
-                <button id="cancel-button">Cancel</button>
-                <button id="save-button">Save</button>
+    <div id="addbtn-modal">
+        <div id="addbtn-modal-content">
+            <h2 id="addbtn-modal-title">Edit Button</h2>
+            <label for="addbtn-button-text">Button Text:</label>
+            <input type="text" id="addbtn-button-text">
+            <label for="addbtn-button-command">Command:</label>
+            <input type="text" id="addbtn-button-command">
+            <div id="addbtn-modal-buttons">
+                <button id="addbtn-delete-button">Delete</button>
+                <button id="addbtn-cancel-button">Cancel</button>
+                <button id="addbtn-save-button">Save</button>
             </div>
         </div>
     </div>
@@ -251,14 +260,14 @@ Type your commands below.
 
         const toggleButton = document.getElementById('toggle-button-column');
         const buttonColumn = document.getElementById('button-column');
-        const saveButton = document.getElementById('save-button');
-        const cancelButton = document.getElementById('cancel-button');
-        const deleteButton = document.getElementById('delete-button');
-        const addButton = document.getElementById('add-button');
-        const modal = document.getElementById('modal');
-        const modalTitle = document.getElementById('modal-title');
-        const buttonTextInput = document.getElementById('button-text');
-        const buttonCommandInput = document.getElementById('button-command');
+        const saveButton = document.getElementById('addbtn-save-button');
+        const cancelButton = document.getElementById('addbtn-cancel-button');
+        const deleteButton = document.getElementById('addbtn-delete-button');
+        const addButton = document.getElementById('addbtn-add-button');
+        const modal = document.getElementById('addbtn-modal');
+        const modalTitle = document.getElementById('addbtn-modal-title');
+        const buttonTextInput = document.getElementById('addbtn-button-text');
+        const buttonCommandInput = document.getElementById('addbtn-button-command');
 
         toggleButton.addEventListener('click', () => {
             if (isButtonColumnVisible) {
@@ -352,7 +361,7 @@ Type your commands below.
                 buttonContainer.appendChild(newEditIcon);
 
                 // Insert the new button before the "+Add" button container
-                const addButtonContainer = document.getElementById('add-button-container');
+                const addButtonContainer = document.getElementById('addbtn-add-button-container');
                 buttonColumn.insertBefore(buttonContainer, addButtonContainer);
 
                 // Add event listeners to the new buttons
@@ -440,37 +449,30 @@ Type your commands below.
 
         function ansiTagsToHtml(message) {
 
-            message = message.replaceAll('<ansi', '<span')
-            message = message.replaceAll('</ansi>', '</span>')
 
-            let fgMatch, bgMatch;
-            while ((fgMatch = message.match(/fg="([A-Za-z0-9_-]+)"/)) || (bgMatch = message.match(/bg="([A-Za-z0-9_-]+)"/))) {
 
-                css = []
-
-                if (fgMatch) {
-                    css.push('color:'+ansi256Color(fgMatch[1]));
-                }
+            const fullTagRegex = /(<ansi\b[^>]*>)/i;
+            const propertyRegex = /(fg|bg)="([A-Za-z0-9_-]+)"/g;
+            while( fullTagMatch = fullTagRegex.exec(message) ) {
                 
-                if (bgMatch) {
-                    css.push('background-color:'+ansi256Color(bgMatch[1]));
-                }
+                const fullTag = fullTagMatch[1];
+                const properties = {};
+                let match;
 
-                if ( css.length ) {
-
-                    if ( fgMatch ) {
-                        message = message.replaceAll(fgMatch[0], 'style="' + css.join(";") + '"')
-                        if ( bgMatch ) {
-                            message = message.replaceAll(bgMatch[0], '')
-                        }
-                    } else {
-                        message = message.replaceAll(bgMatch[0], 'style="' + css.join(";") + '"')
-                        if ( fgMatch ) {
-                            message = message.replaceAll(fgMatch[0], '')
-                        }
+                css = [];
+                while ((match = propertyRegex.exec(fullTag)) !== null) {
+                    if ( match[1] == "fg" ) {
+                        css.push('color:'+ansi256Color(match[2]));
+                    } else if ( match[1] == "bg" ) {
+                        css.push('background-color:'+ansi256Color(match[2]));
                     }
+                    properties[match[1]] = match[2];
                 }
+
+                message = message.replaceAll(fullTag, '<span style="'+ css.join(';') +'">')
             }
+            
+            message = message.replaceAll('</ansi>', '</span>')
 
             return message;
         }
@@ -484,8 +486,9 @@ Type your commands below.
 
         function ansi256Color(inputColor) {
 
-            ansiColor = inputColor;
+            //ansiColor = inputColor.replace(/^\|+|\|+$/g, '');
 
+            ansiColor = inputColor
             if ( colorAliases[inputColor] ) {
                 ansiColor = colorAliases[inputColor];
             }
@@ -536,11 +539,15 @@ Type your commands below.
             }
 
             // Brighten up dark colors
-            if (r < 196 && g == 0 && b == 0) r = 196;
-            if (g < 196 && r == 0 && b == 0) g = 196;
-            if (b < 196 && g == 0 && r == 0) b = 196;
-
-            return `rgb(${r}, ${g}, ${b})`;
+            
+            extra = '';
+            /*
+            if (r <= 128 && g == 0 && b == 0) extra = ';text-shadow: 1px 1px #fff';
+            else if (g <= 128 && r == 0 && b == 0) extra = ';text-shadow: 1px 1px #fff';
+            else if (b <= 128 && g == 0 && r == 0) extra = ';text-shadow: 1px 1px #fff';
+            */
+            
+            return `rgb(${r}, ${g}, ${b})` + extra;
         }
 
         /////////////////////////////////////////////
@@ -572,9 +579,7 @@ Type your commands below.
         }
 
         function handleServerMessage(message) {
-
-            debugLog(message);
-
+            
             // First do a quick check as to whether it might be a webclient command
             if ( message.length > 9 && message.substring(8, 9) == ':' ) {
                 if ( handleWebclientCommand(message) ) {
@@ -596,7 +601,9 @@ Type your commands below.
 
         function handleWebclientCommand(cmdString) {
 
-            if ( cmdString.substring(0, 9) == "COLORMAP:" ) {
+            cmd = cmdString.substring(0, 9);
+
+            if ( cmd == "COLORMAP:" ) {
 
                 debugLog(cmdString);
 
@@ -609,7 +616,7 @@ Type your commands below.
                 return true;
             }
 
-            if ( cmdString.substring(0, 9) == "TEXTMASK:" ) {
+            if ( cmd == "TEXTMASK:" ) {
 
                 debugLog(cmdString);
 
@@ -621,8 +628,6 @@ Type your commands below.
 
                 return true;
             }
-
-            input.type = "password"; // Change back to password to hide the input
 
             return false;
         }
@@ -811,11 +816,19 @@ Type your commands below.
             }
         }
 
+
         /////////////////////////////////////////////
         //
         // Initialization of all terminal interface
         //
         /////////////////////////////////////////////
+        specialCommands = {
+            "!raw": "View server messages in raw format.",
+            "!debug": "See special debug messages in the console.",
+            "!colors": "List all colors / color aliases in the console.",
+            "clear": "Clear the screen",
+        }
+
         textOutput.addEventListener('click', () => {
             textInput.focus();
         });
@@ -834,10 +847,14 @@ Type your commands below.
             addCommandButtonEventListeners(); // Initialize event listeners for existing buttons
 
             console.log("special commands:");
-            console.log("  !raw   - View server messages in raw format");
-            console.log("  !debug - See special debug messages in the console");
-            console.log("  !colors - See all colors / color aliases");
-            console.log("  clear  - Clear the screen");
+            longest = 0;
+            for ( i in specialCommands ) {
+                longest = i.length > longest ? i.length : longest
+            }
+            for ( i in specialCommands ) {
+                console.log('  '+i.padEnd(longest)+" - " + specialCommands[i]); 
+            }
+            
         }
     </script>
 </body>
