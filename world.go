@@ -739,9 +739,11 @@ func (w *World) processInput(userId int, inputText string) {
 		}
 	}
 
-	userPrompt := user.GetCommandPrompt(true)
-	userPromptColorized := templates.AnsiParse(userPrompt)
-	worldManager.GetConnectionPool().SendTo([]byte(userPromptColorized), connId)
+	if worldManager.connectionPool.IsWebsocket(connId) {
+		worldManager.connectionPool.SendTo([]byte(user.GetCommandPrompt(true)), connId)
+	} else {
+		worldManager.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
+	}
 
 }
 
@@ -832,13 +834,14 @@ func (w *World) MessageTick() {
 		messageColorized := templates.AnsiParse(broadcast.Text)
 
 		if broadcast.SkipLineRefresh {
-			w.connectionPool.Broadcast([]byte(broadcast.Text))
+			w.connectionPool.Broadcast([]byte(messageColorized), []byte(broadcast.Text))
 			return
 		}
 
-		w.connectionPool.Broadcast([]byte(term.AnsiMoveCursorColumn.String() +
-			term.AnsiEraseLine.String() +
-			messageColorized))
+		w.connectionPool.Broadcast(
+			[]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized),
+			[]byte(broadcast.Text),
+		)
 	}
 
 	redrawPrompts := make(map[uint64]string)

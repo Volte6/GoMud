@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Terminal Interface with Editable and Deletable Buttons</title>
+    <title>GoMud Web Temrinal</title>
     <style>
-        /* CSS Styles (updated to include "Delete" button in modal) */
-
-        
-
         * {
             box-sizing: border-box;
             margin: 0;
@@ -22,50 +18,18 @@
             flex-direction: column;
             background-color: #1e1e1e;
         }
-        
-        /*
-        #main-container {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
-        
 
-        #text-output {
-            flex: 1;
-            background-color: black;
-            color: #00ff00;
-            overflow-y: auto;
-            font-size: calc(min((100vw / 80), (100vh / 24)));
-            line-height: 1;
-            letter-spacing: 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            padding: 10px;
-        }
-        
-        #button-column {
-            width: 220px;
-            background-color: #2d2d2d;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-        }
-            */
-
-
-            /* START*/
         #toggle-button-column {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 5px;
+            right: 5px;
             background-color: #3e3e3e;
             color: white;
             border: none;
             cursor: pointer;
-            padding: 10px;
-            font-size: 20px;
-            border-radius: 5px;
+            padding: 5px;
+            font-size: 15px;
+            border-radius: 3px;
             z-index: 1; /* Ensure the toggle button is above other elements */
         }
 
@@ -75,9 +39,7 @@
 
         /* Ensure the main container is positioned relatively */
         #main-container {
-
             flex: 1;
-            
             position: relative;
             display: flex;
             flex-direction: row;
@@ -113,13 +75,6 @@
             word-wrap: break-word;
             padding: 10px;
         }
-
-        #button-column.collapsed {
-            width: 0;
-            padding: 10px 0;
-        }
-
-        /* END */
 
         .button-container {
             display: flex;
@@ -169,6 +124,10 @@
             border: none;
             cursor: pointer;
             margin-left: 10px;
+        }
+        #connect-button:disabled {
+            color: #888;
+            pointer-events: none;
         }
         #command-input:focus {
             outline: none;
@@ -239,18 +198,17 @@
         #add-button:hover {
             background-color: #45a049;
         }
-
     </style>
 
 </head>
 <body onLoad="init(); return false;">
     <div id="main-container">
-        <button id="toggle-button-column" title="Hide Buttons">&#9776;</button>
+        <button id="toggle-button-column"  title="Hide Buttons">&#9776;</button>
 
         <div id="text-output">Welcome to the Terminal Interface.
 Type your commands below.
         </div>
-        <div id="button-column">
+        <div id="button-column" class="collapsed">
             <!-- "+Add" Button -->
             <div id="add-button-container">
                 <button id="add-button">+ Add</button>
@@ -280,31 +238,27 @@ Type your commands below.
 
     <script>
 
+        /////////////////////////////////////////////
+        //
+        // Side bar toggle code
+        //
+        /////////////////////////////////////////////
 
-        
+        let isButtonColumnVisible = false;
+        let currentButtonContainer = null; // The container of the button being edited
+        let isAddingNewButton = false; // Flag to check if adding a new button
+        let currentButton = null; // The button being edited
 
-        // Initial state
-        let isButtonColumnVisible = true;
-
-        const textOutput = document.getElementById('text-output');
-        const textInput = document.getElementById('command-input');
-
-        // Get references to the modal and its elements
-        const modal = document.getElementById('modal');
-        const modalTitle = document.getElementById('modal-title');
-        const buttonTextInput = document.getElementById('button-text');
-        const buttonCommandInput = document.getElementById('button-command');
+        const toggleButton = document.getElementById('toggle-button-column');
+        const buttonColumn = document.getElementById('button-column');
         const saveButton = document.getElementById('save-button');
         const cancelButton = document.getElementById('cancel-button');
         const deleteButton = document.getElementById('delete-button');
         const addButton = document.getElementById('add-button');
-        const buttonColumn = document.getElementById('button-column');
-        const toggleButton = document.getElementById('toggle-button-column');
-
-        let currentButton = null; // The button being edited
-        let currentButtonContainer = null; // The container of the button being edited
-        let isAddingNewButton = false; // Flag to check if adding a new button
-
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const buttonTextInput = document.getElementById('button-text');
+        const buttonCommandInput = document.getElementById('button-command');
 
         toggleButton.addEventListener('click', () => {
             if (isButtonColumnVisible) {
@@ -312,17 +266,24 @@ Type your commands below.
                 buttonColumn.classList.add('collapsed');
                 isButtonColumnVisible = false;
                 // Change the toggle button icon to 'Show' icon
-                toggleButton.innerHTML = '&#9654;'; // Right-pointing triangle
+                toggleButton.innerHTML = '&#9776;'; // Hamburger menu icon
                 toggleButton.title = 'Show Buttons';
             } else {
                 // Animate opening
                 buttonColumn.classList.remove('collapsed');
                 isButtonColumnVisible = true;
                 // Change the toggle button icon back to 'Hide' icon
-                toggleButton.innerHTML = '&#9776;'; // Hamburger menu icon
+                toggleButton.innerHTML = '&#9654;'; // Right-pointing triangle
                 toggleButton.title = 'Hide Buttons';
             }
         });
+
+
+        /////////////////////////////////////////////
+        //
+        // Button modifying code
+        //
+        /////////////////////////////////////////////
 
         // Function to open the modal dialog
         function openModal(button, isNew = false) {
@@ -368,7 +329,6 @@ Type your commands below.
             openModal(button);
         }
 
-        
         function addNewButton(name, command) {
                 // Create new button elements
                 const buttonContainer = document.createElement('div');
@@ -400,8 +360,6 @@ Type your commands below.
                 newEditIcon.addEventListener('click', handleEditIconClick);
         }
 
-        addEditIconEventListeners(); // Initialize event listeners for existing buttons
-
         // Add event listeners to the command buttons
         function addCommandButtonEventListeners() {
             const commandButtons = document.querySelectorAll('.command-button');
@@ -416,8 +374,6 @@ Type your commands below.
             const command = button.getAttribute('data-command');
             socket.send(command);
         }
-
-        addCommandButtonEventListeners(); // Initialize event listeners for existing buttons
 
         // Save button in the modal
         saveButton.addEventListener('click', () => {
@@ -455,46 +411,15 @@ Type your commands below.
             openModal(null, true);
         });
 
-        textOutput.addEventListener('click', () => {
-            textInput.focus();
-        });
 
-        function init() {
-            addNewButton('Status', 'status');
-            addNewButton('Inventory', 'inventory');
-            addNewButton('Conditions', 'conditions');
-            addNewButton('Jobs', 'jobs');
-            addNewButton('Skills', 'skills');
-            addNewButton('Spells', 'spells');
-            addNewButton('Kill Stats', 'killstats');
-            addNewButton('Help', 'help');
-        }
-    </script>
+        /////////////////////////////////////////////
+        //
+        // <ansi> tag conversion code
+        //
+        /////////////////////////////////////////////
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <script>
-        let socket = null;
-        const connectButton = document.getElementById('connect-button');
-
+        // Boilerplate aliases
+        // More are loaded optionally via server-provided COLORMAP: commands
         colorAliases = {		
         "black":        0,
 		"red":          1,
@@ -513,110 +438,15 @@ Type your commands below.
 		"cyan-bold":    14,
 		"white-bold":   15,};
 
-
-        connectButton.addEventListener('click', function() {
-            
-            if ( socket != null && socket.readyState === WebSocket.OPEN ) {
-                socket.close();
-                return;
-            }
-
-            console.log("Connecting to: " + 'ws://'+location.host +':80/ws');
-            
-            // Connect to the WebSocket
-            socket = new WebSocket('ws://'+location.host +':80/ws');
-            
-            socket.onopen = function() {
-                appendToOutput("Connected to the server!");
-                connectButton.textContent = 'Disconnect';
-            };
-
-            socket.onmessage = function(event) {
-                processServerText(event.data);
-            };
-
-            socket.onerror = function(error) {
-                appendToOutput("Error: " + error.message);
-            };
-
-            socket.onclose = function(event) {
-                if (event.wasClean) {
-                    appendToOutput(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
-                } else {
-                    appendToOutput('Connection died');
-                }
-                
-                connectButton.textContent = 'Connect';
-            };
-        });
-
-        textInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                if (socket && socket.readyState === WebSocket.OPEN) {
-                    socket.send(event.target.value);
-                    event.target.value = '';
-                } else {
-                    appendToOutput("Not connected to the server.");
-                }
-            }
-        });
-
-        function clearScreen() {
-            textOutput.innerHTML = '';
-        }
-
-        function eraseLastLine() {
-            lastPos = textOutput.innerHTML.lastIndexOf('\n');
-            textOutput.innerHTML = textOutput.innerHTML.substring(0, lastPos+1);
-        }
-
-        function processServerText(message) {
-
-
-            if ( message.substring(0, 11) == "COLORALIAS " ) {
-
-                console.log(message);
-
-                parts = message.substring(11).split('=');
-
-                if ( parts.length > 1 ) {
-                    colorAliases[parts[0].trim()] = parts[1].trim();
-                }
-
-                return;
-            }
-
-            message = processOutput(message);
-
-            appendToOutput(message);
-        }
-
-        function appendToOutput(message) {
-           
-            //output.innerHTML += ansiToHtml(message);
-            message = ansiTagsToHtml(message);
-            message = message.replaceAll("\r", "");
-
-            textOutput.innerHTML += message;
-
-            textOutput.scrollTop = textOutput.scrollHeight;
-        }
-
         function ansiTagsToHtml(message) {
+
             message = message.replaceAll('<ansi', '<span')
             message = message.replaceAll('</ansi>', '</span>')
 
-            while ( true ) {
-
-
-                let fgMatch = message.match(/fg="([A-Za-z0-9_-]+)"/);
-                let bgMatch = message.match(/bg="([A-Za-z0-9_-]+)"/);
+            let fgMatch, bgMatch;
+            while ((fgMatch = message.match(/fg="([A-Za-z0-9_-]+)"/)) || (bgMatch = message.match(/bg="([A-Za-z0-9_-]+)"/))) {
 
                 css = []
-
-                if ( !fgMatch ) {
-                    return message;
-                }
 
                 if (fgMatch) {
                     css.push('color:'+ansi256Color(fgMatch[1]));
@@ -627,7 +457,18 @@ Type your commands below.
                 }
 
                 if ( css.length ) {
-                    message = message.replaceAll(fgMatch[0], 'style="' + css.join(";") + '"')
+
+                    if ( fgMatch ) {
+                        message = message.replaceAll(fgMatch[0], 'style="' + css.join(";") + '"')
+                        if ( bgMatch ) {
+                            message = message.replaceAll(bgMatch[0], '')
+                        }
+                    } else {
+                        message = message.replaceAll(bgMatch[0], 'style="' + css.join(";") + '"')
+                        if ( fgMatch ) {
+                            message = message.replaceAll(fgMatch[0], '')
+                        }
+                    }
                 }
             }
 
@@ -702,39 +543,164 @@ Type your commands below.
             return `rgb(${r}, ${g}, ${b})`;
         }
 
-        function ansiToHtml(ansiString) {
+        /////////////////////////////////////////////
+        //
+        // Basic Websocket code
+        //
+        /////////////////////////////////////////////
 
-            /*
-            const testString = "\x1b[0;31mRed text\x1b[0m and \x1b[1;32mBold green text\x1b[0m.\n" +
-                                "\x1b[38;5;82m256-color text (green)\x1b[0m and \x1b[48;5;196m256-color background (red)\x1b[0m.\n" +
-                                "\x1b[38;5;208mAnother 256-color text (orange)\x1b[0m with \x1b[48;5;21mblue background\x1b[0m.";
-            ansiString += testString;
-            */
+        // Initial state        
+        let socket = null;
+        let rawOutput = false;
+        let debugOutput = false;
 
-            // Map ANSI 16-color codes to CSS color names
+        const connectButton = document.getElementById('connect-button');
+        const textOutput = document.getElementById('text-output');
+        const textInput = document.getElementById('command-input');
 
 
-            // Regular expression to match ANSI escape codes
-            const ansiRegex = /\x1b\[(\d+);?(\d*);?(\d*)?m/g;
 
-            return ansiString.replace(ansiRegex, (match, p1, p2, p3) => {
-                let style = '';
+        function escapeHtml(str) {
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return str.replace(/[&<>"']/g, function(m) {return map[m];});
+        }
 
-                if (p1 === '38' && p2 === '5' && p3) { // 256-color foreground
-                    style += `color:${ansi256Color(parseInt(p3))};`;
-                } else if (p1 === '48' && p2 === '5' && p3) { // 256-color background
-                    style += `background-color:${ansi256Color(parseInt(p3))};`;
-                } else if (p1 in ansi16Colors) { // Standard 16-color foreground
-                    style += `color:${ansi16Colors[p1]};`;
-                } else if (p1 === '1') { // Bold
-                    style += 'font-weight:bold;';
-                } else if (p1 === '0') { // Reset
-                    return '</span>';
+        function handleServerMessage(message) {
+
+            // First do a quick check as to whether it might be a webclient command
+            if ( message.length > 9 && message.substring(8, 9) == ':' ) {
+                if ( handleWebclientCommand(message) ) {
+                    return;
+                }
+            }
+
+            if ( rawOutput ) {
+                message = '<span>'+escapeHtml(message)+'</span>';
+            } else {
+                message = ansiTagsToHtml(message);
+                message = message.replaceAll("\r", "");
+                
+                message = processAnsiCodes(message);
+            }
+
+            appendToOutput(message);
+        }
+
+        function handleWebclientCommand(cmdString) {
+
+            if ( cmdString.substring(0, 9) == "COLORMAP:" ) {
+
+                debugLog(cmdString);
+
+                parts = cmdString.substring(9).split('=');
+
+                if ( parts.length > 1 ) {
+                    colorAliases[parts[0].trim()] = parts[1].trim();
                 }
 
-                return `<span style="${style}">`;
-            }).replace(/\x1b\[0m/g, '</span>'); // Close spans when encountering reset code
+                return true;
+            }
+
+            return false;
         }
+
+
+        connectButton.addEventListener('click', function() {
+            
+            if ( socket != null && socket.readyState === WebSocket.OPEN ) {
+                socket.close();
+                return;
+            }
+
+            debugLog("Connecting to: " + 'ws://'+location.host +':80/ws');
+            
+            // Connect to the WebSocket
+            socket = new WebSocket('ws://'+location.host +':80/ws');
+            
+            socket.onopen = function() {
+                appendToOutput("Connected to the server!");
+                connectButton.disabled = true;
+            };
+
+            socket.onmessage = function(event) {
+                handleServerMessage(event.data);
+            };
+
+            socket.onerror = function(error) {
+                appendToOutput("Error: " + error.message);
+            };
+
+            socket.onclose = function(event) {
+                if (event.wasClean) {
+                    appendToOutput(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
+                } else {
+                    appendToOutput('Connection died');
+                }
+                connectButton.disabled = false;
+            };
+        });
+
+        textInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+
+                if (event.target.value == "!raw") {
+                    rawOutput = !rawOutput;
+                    event.target.value = '';
+                    return;
+                } else if (event.target.value == "!debug") {
+                    debugOutput = !debugOutput;
+                    event.target.value = '';
+                    return;
+                } else if (event.target.value == "!colors" ) {
+                    listColorAliases();
+                    event.target.value = '';
+                    return;
+                }
+                else if (event.target.value == "clear" ) {
+                    clearScreen();
+                    event.target.value = '';
+                    return;
+                }
+
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(event.target.value);
+                    event.target.value = '';
+                } else {
+                    appendToOutput("Not connected to the server.");
+                }
+            }
+        });
+
+        function clearScreen() {
+            textOutput.innerHTML = '';
+        }
+
+        function eraseLastLine() {
+            lastPos = textOutput.innerHTML.lastIndexOf('\n');
+            textOutput.innerHTML = textOutput.innerHTML.substring(0, lastPos+1);
+        }
+
+
+
+        function appendToOutput(message) {
+           
+            textOutput.innerHTML += message;
+
+            // Keep scroll back from getting too long.
+            var maxElements = 10000;
+            while (textOutput.children.length > maxElements) {
+                textOutput.removeChild(textOutput.firstChild);
+            }
+
+            textOutput.scrollTop = textOutput.scrollHeight;
+        }
+
 
         function splitByAnsiCodes(input) {
             // Regular expression to match ANSI escape codes
@@ -743,7 +709,7 @@ Type your commands below.
             return input.split(ansiRegex).filter(part => part !== '');
         }
 
-        function processOutput(outputString) {
+        function processAnsiCodes(outputString) {
 
             finalOutput = [];
             parts = splitByAnsiCodes(outputString);
@@ -756,21 +722,7 @@ Type your commands below.
                     category = categorizeAnsiCode(parts[i]);
 
                     // Check whether last character is an 'm'
-                    if ( category == 'color' ) {
-                        // Process the ANSI code
-                        //finalOutput += parts[i];
-                        /*
-                        if ( i < parts.length - 1 ) {
-                            finalOutput.push( ansiToHtml(parts[i]+parts[i+1]) );
-                            i++;
-                        } else {
-                            finalOutput.push( ansiToHtml(parts[i]) );
-                        }
-                        */
-
-                        finalOutput.push( ansiToHtml(parts[i]) );
-
-                    } else if ( category == 'clearScreen' ) {
+                   if ( category == 'clearScreen' ) {
                         // Process the ANSI code
                         //finalOutput.push( "[CLEAR SCREEN]" );
                         clearScreen();
@@ -789,10 +741,10 @@ Type your commands below.
                         finalOutput.push( "[CURSOR MOVE]" );
                     } else if ( category == 'other' ) {
                         // Process the ANSI code
-                        console.log("OTHER: " + parts[i].replace('\x1b[','ESC['));
+                        debugLog("OTHER: " + parts[i].replace('\x1b[','ESC['));
                     } else {
                         // Process the ANSI code
-                        finalOutput.push( "[NOOP: " + parts[i].replace('\x1b[','ESC[') +"]" );
+                        //finalOutput.push( "[NOOP: " + parts[i].replace('\x1b[','ESC[') +"]" );
                     }
 
                 } else {
@@ -823,6 +775,47 @@ Type your commands below.
             return 'unknown'; // If no pattern matches
         }
         
+        function listColorAliases() {
+            for( name in colorAliases ) {
+                colorStyle = ansi256Color(colorAliases[name]);
+                console.log("%c" + name.padStart(22) + " | " + String(colorAliases[name]).padStart(10) + " | " + colorStyle + "    ",  "font-family: monospace;background-color:#000000;color:" + colorStyle);
+            }
+        }
+
+        function debugLog(message) {
+            if ( debugOutput ) {
+                console.log(message);
+            }
+        }
+
+        /////////////////////////////////////////////
+        //
+        // Initialization of all terminal interface
+        //
+        /////////////////////////////////////////////
+        textOutput.addEventListener('click', () => {
+            textInput.focus();
+        });
+
+        function init() {
+            addNewButton('Status', 'status');
+            addNewButton('Inventory', 'inventory');
+            addNewButton('Conditions', 'conditions');
+            addNewButton('Jobs', 'jobs');
+            addNewButton('Skills', 'skills');
+            addNewButton('Spells', 'spells');
+            addNewButton('Kill Stats', 'killstats');
+            addNewButton('Help', 'help');
+
+            addEditIconEventListeners(); // Initialize event listeners for existing buttons
+            addCommandButtonEventListeners(); // Initialize event listeners for existing buttons
+
+            console.log("special commands:");
+            console.log("  !raw   - View server messages in raw format");
+            console.log("  !debug - See special debug messages in the console");
+            console.log("  !colors - See all colors / color aliases");
+            console.log("  clear  - Clear the screen");
+        }
     </script>
 </body>
 </html>

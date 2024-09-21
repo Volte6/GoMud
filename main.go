@@ -421,9 +421,11 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 				}
 
 				if redrawPrompt {
-					prompt := userObject.GetCommandPrompt(true)
-					promptColorized := templates.AnsiParse(prompt)
-					worldManager.GetConnectionPool().SendTo([]byte(promptColorized), clientInput.ConnectionId)
+					if worldManager.connectionPool.IsWebsocket(clientInput.ConnectionId) {
+						worldManager.connectionPool.SendTo([]byte(userObject.GetCommandPrompt(true)), clientInput.ConnectionId)
+					} else {
+						worldManager.connectionPool.SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
+					}
 				}
 
 			}
@@ -487,9 +489,11 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 					suggestions.Clear()
 					userObject.SetUnsentText(string(clientInput.Buffer), ``)
 
-					prompt := userObject.GetCommandPrompt(true)
-					promptColorized := templates.AnsiParse(prompt)
-					worldManager.GetConnectionPool().SendTo([]byte(promptColorized), clientInput.ConnectionId)
+					if worldManager.connectionPool.IsWebsocket(clientInput.ConnectionId) {
+						worldManager.connectionPool.SendTo([]byte(userObject.GetCommandPrompt(true)), clientInput.ConnectionId)
+					} else {
+						worldManager.connectionPool.SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
+					}
 
 				}
 
