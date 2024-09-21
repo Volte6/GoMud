@@ -74,10 +74,16 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	// Sort the keys
 	sort.Strings(keys)
 
+	strB.WriteString("<p><a href=\"/client\">Log in using the web-based \"virtual terminal\"</a></p>\n")
 	strB.WriteString("<table border=\"1\" cellspacing=\"0\" cellpadding=\"3\">\n")
 	strB.WriteString("<tr><th>Name</th><th>Value</th></tr>\n")
 	for _, k := range keys {
-		strB.WriteString(fmt.Sprintf("<tr><td><b>%s</b></td><td>%v</td></tr>\n", k, allConfigData[k]))
+		displayName := strings.Replace(k, ` (locked)`, ``, -1)
+		if strings.HasSuffix(strings.ToLower(k), `port`) || k == "Seed" {
+			continue
+		} else {
+			strB.WriteString(fmt.Sprintf("<tr><td><b>%s</b></td><td>%v</td></tr>\n", displayName, allConfigData[k]))
+		}
 	}
 	strB.WriteString("</table>\n")
 
