@@ -8,6 +8,8 @@ description: Nestled in the heart of Frostfang, the Magic Academy stands as a be
   spires and turrets reach toward the sky, each glistening like a crystalline beacon
   in the winter sun. Inside, the halls are warm and inviting, illuminated by floating
   orbs of soft, magical light.
+mapsymbol: '%'
+maplegend: Trainer
 biome: city
 exits:
   east:
