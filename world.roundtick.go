@@ -1540,13 +1540,25 @@ func (w *World) HandleAutoHealing(roundNumber uint64) {
 					user.Character.HealthPerRound()*healingFactor,
 					user.Character.ManaPerRound()*healingFactor,
 				)
+
 			}
 		}
 
+		newcmdprompt := user.GetCommandPrompt(true)
+		oldcmdprompt := user.GetTempData(`cmdprompt`)
+
+		// If the prompt hasn't changed, skip redrawing
+		if oldcmdprompt != nil && oldcmdprompt.(string) == newcmdprompt {
+			continue
+		}
+
+		// save the new prompt for next time we want to check
+		user.SetTempData(`cmdprompt`, newcmdprompt)
+
 		if w.connectionPool.IsWebsocket(user.ConnectionId()) {
-			w.connectionPool.SendTo([]byte(user.GetCommandPrompt(true)), user.ConnectionId())
+			w.connectionPool.SendTo([]byte(newcmdprompt), user.ConnectionId())
 		} else {
-			w.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), user.ConnectionId())
+			w.connectionPool.SendTo([]byte(templates.AnsiParse(newcmdprompt)), user.ConnectionId())
 		}
 
 	}
