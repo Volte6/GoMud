@@ -34,3 +34,10 @@ func GetBadCommands() map[string]int {
 
 	return ret
 }
+
+func Clear() {
+	lock.Lock()
+	defer lock.Unlock()
+
+	badCommands = map[string]map[string]int{}
+}

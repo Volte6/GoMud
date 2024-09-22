@@ -480,8 +480,6 @@ Type your commands below.
 
         function ansiTagsToHtml(message) {
 
-
-
             const fullTagRegex = /(<ansi\b[^>]*>)/i;
             const propertyRegex = /(fg|bg)="([A-Za-z0-9_-]+)"/g;
             while( fullTagMatch = fullTagRegex.exec(message) ) {
@@ -504,6 +502,20 @@ Type your commands below.
             }
             
             message = message.replaceAll('</ansi>', '</span>')
+
+            return message;
+        }
+
+        function ansiTagsToPlainText(message) {
+
+            const fullTagRegex = /(<ansi\b[^>]*>)/i;
+            const propertyRegex = /(fg|bg)="([A-Za-z0-9_-]+)"/g;
+            while( fullTagMatch = fullTagRegex.exec(message) ) {
+                const fullTag = fullTagMatch[1];
+                message = message.replaceAll(fullTag, '')
+            }
+            
+            message = message.replaceAll('</ansi>', '')
 
             return message;
         }
@@ -581,6 +593,7 @@ Type your commands below.
         // Initial state        
         let socket = null;
         let rawOutput = false;
+        let monochromeOutput = false;
         let debugOutput = false;
 
         const connectButton = document.getElementById('connect-button');
@@ -613,13 +626,22 @@ Type your commands below.
             }
 
             if ( rawOutput ) {
-                message = '<span>'+escapeHtml(message)+'</span>';
-            } else {
-                message = ansiTagsToHtml(message);
-                message = message.replaceAll("\r", "");
                 
-                message = processAnsiCodes(message);
+                message = '<span>'+escapeHtml(message)+'</span>';
+
+            } else if ( monochromeOutput ) {
+
+                message = ansiTagsToPlainText(message);
+
+            }else {
+
+                message = ansiTagsToHtml(message);
+
             }
+
+            message = message.replaceAll("\r", "");
+                
+            message = processAnsiCodes(message);
 
             appendToOutput(message);
         }
@@ -731,7 +753,11 @@ Type your commands below.
                     rawOutput = !rawOutput;
                     event.target.value = '';
                     return;
-                } else if (event.target.value == "!debug") {
+                } else if (event.target.value == "!monochrome") {
+                    monochromeOutput = !monochromeOutput;
+                    event.target.value = '';
+                    return;
+                }else if (event.target.value == "!debug") {
                     debugOutput = !debugOutput;
                     event.target.value = '';
                     return;
@@ -871,10 +897,10 @@ Type your commands below.
         function printNetStats() {
 
             appendToOutput("\n");
-            appendToOutput("Request Ct:  " + String(payloadsSent) + "\n");
-            appendToOutput("Bytes Sent:  " + String(Math.round(totalBytesSent/1024 * 100) / 100) + "kb\n");
+            appendToOutput(" Request Ct: " + String(payloadsSent) + "\n");
+            appendToOutput(" Bytes Sent: " + String(Math.round(totalBytesSent/1024 * 100) / 100) + "kb\n");
             appendToOutput("Response Ct: " + String(payloadsReceived) + "\n");
-            appendToOutput("Bytes Rcvd:  " + String(Math.round(totalBytesReceived/1024 * 100) / 100) + "kb\n");
+            appendToOutput(" Bytes Rcvd: " + String(Math.round(totalBytesReceived/1024 * 100) / 100) + "kb\n");
             appendToOutput("\n");
 
         }
@@ -900,6 +926,7 @@ Type your commands below.
         /////////////////////////////////////////////
         specialCommands = {
             "!raw": "View server messages in raw format.",
+            "!monochrome": "View server messages in monochrome format.",
             "!debug": "See special debug messages in the console.",
             "!colors": "Print out all color aliases on screen.",
             "!net": "Print out network traffic stats",
@@ -932,6 +959,10 @@ Type your commands below.
                 console.log('  '+i.padEnd(longest)+" - " + specialCommands[i]); 
             }
             
+        }
+
+        function setDefaultColor(clr) {
+            textOutput.style.color = clr;
         }
     </script>
 </body>
