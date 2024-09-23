@@ -1,6 +1,7 @@
 package connection
 
 import (
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"net"
@@ -48,12 +49,12 @@ func (c *ConnectionTracker) Add(conn net.Conn, wsConn *websocket.Conn) *Connecti
 		if yfile, err := os.ReadFile(util.FilePath(string(configs.GetConfig().FileAnsiAliases))); err == nil {
 			if err := yaml.Unmarshal(yfile, &data); err == nil {
 
-				for name, val := range data[`color256`] {
-					events.AddToQueue(events.WebClientCommand{
-						ConnectionId: connDetails.ConnectionId(),
-						Text:         "COLORMAP:" + name + "=" + val + "\n",
-					})
-				}
+				jsonString, _ := json.Marshal(data[`color256`])
+
+				events.AddToQueue(events.WebClientCommand{
+					ConnectionId: connDetails.ConnectionId(),
+					Text:         "COLORMAP:" + string(jsonString) + "\n",
+				})
 
 			}
 		}

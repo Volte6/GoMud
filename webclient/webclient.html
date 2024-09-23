@@ -408,7 +408,7 @@ Type your commands below.
                 button.addEventListener('click', handleCommandButtonClick);
             });
         }
-
+        
         function handleCommandButtonClick(event) {
             const button = event.currentTarget;
             const command = button.getAttribute('data-command');
@@ -423,6 +423,10 @@ Type your commands below.
                 currentButton.textContent = buttonTextInput.value;
                 currentButton.setAttribute('data-command', buttonCommandInput.value);
             }
+
+            // store the change in local settings
+            saveSettings();
+
             closeModal();
         });
 
@@ -436,6 +440,8 @@ Type your commands below.
             if (currentButtonContainer) {
                 currentButtonContainer.remove();
                 closeModal();
+                // store the change in local settings
+                saveSettings();
             }
         });
 
@@ -480,8 +486,6 @@ Type your commands below.
 
         function ansiTagsToHtml(message) {
 
-
-
             const fullTagRegex = /(<ansi\b[^>]*>)/i;
             const propertyRegex = /(fg|bg)="([A-Za-z0-9_-]+)"/g;
             while( fullTagMatch = fullTagRegex.exec(message) ) {
@@ -504,6 +508,20 @@ Type your commands below.
             }
             
             message = message.replaceAll('</ansi>', '</span>')
+
+            return message;
+        }
+
+        function ansiTagsToPlainText(message) {
+
+            const fullTagRegex = /(<ansi\b[^>]*>)/i;
+            const propertyRegex = /(fg|bg)="([A-Za-z0-9_-]+)"/g;
+            while( fullTagMatch = fullTagRegex.exec(message) ) {
+                const fullTag = fullTagMatch[1];
+                message = message.replaceAll(fullTag, '')
+            }
+            
+            message = message.replaceAll('</ansi>', '')
 
             return message;
         }
@@ -581,6 +599,7 @@ Type your commands below.
         // Initial state        
         let socket = null;
         let rawOutput = false;
+        let monochromeOutput = false;
         let debugOutput = false;
 
         const connectButton = document.getElementById('connect-button');
@@ -613,13 +632,22 @@ Type your commands below.
             }
 
             if ( rawOutput ) {
-                message = '<span>'+escapeHtml(message)+'</span>';
-            } else {
-                message = ansiTagsToHtml(message);
-                message = message.replaceAll("\r", "");
                 
-                message = processAnsiCodes(message);
+                message = '<span>'+escapeHtml(message)+'</span>';
+
+            } else if ( monochromeOutput ) {
+
+                message = ansiTagsToPlainText(message);
+
+            }else {
+
+                message = ansiTagsToHtml(message);
+
             }
+
+            message = message.replaceAll("\r", "");
+                
+            message = processAnsiCodes(message);
 
             appendToOutput(message);
         }
@@ -628,20 +656,20 @@ Type your commands below.
 
             cmd = cmdString.substring(0, 9);
 
-            if ( cmd == "COLORMAP:" ) {
+            if ( cmd == "COLORMAP:" ) {// request to update color aliases
 
                 debugLog(cmdString);
 
-                parts = cmdString.substring(9).split('=');
-
-                if ( parts.length > 1 ) {
-                    colorAliases[parts[0].trim()] = parts[1].trim();
+                jsonStr = cmdString.substring(9);
+                if ( jsonObj = JSON.parse(jsonStr) ) {    
+                    for (k in jsonObj) {
+                        colorAliases[k] = jsonObj[k];
+                    }
                 }
-
                 return true;
             }
 
-            if ( cmd == "TEXTMASK:" ) {
+            if ( cmd == "TEXTMASK:" ) { // request to mask input echo to user
 
                 debugLog(cmdString);
 
@@ -731,7 +759,11 @@ Type your commands below.
                     rawOutput = !rawOutput;
                     event.target.value = '';
                     return;
-                } else if (event.target.value == "!debug") {
+                } else if (event.target.value == "!monochrome") {
+                    monochromeOutput = !monochromeOutput;
+                    event.target.value = '';
+                    return;
+                }else if (event.target.value == "!debug") {
                     debugOutput = !debugOutput;
                     event.target.value = '';
                     return;
@@ -778,8 +810,6 @@ Type your commands below.
             lastPos = textOutput.innerHTML.lastIndexOf('\n');
             textOutput.innerHTML = textOutput.innerHTML.substring(0, lastPos+1);
         }
-
-
 
         function appendToOutput(message) {
            
@@ -871,10 +901,10 @@ Type your commands below.
         function printNetStats() {
 
             appendToOutput("\n");
-            appendToOutput("Request Ct:  " + String(payloadsSent) + "\n");
-            appendToOutput("Bytes Sent:  " + String(Math.round(totalBytesSent/1024 * 100) / 100) + "kb\n");
+            appendToOutput(" Request Ct: " + String(payloadsSent) + "\n");
+            appendToOutput(" Bytes Sent: " + String(Math.round(totalBytesSent/1024 * 100) / 100) + "kb\n");
             appendToOutput("Response Ct: " + String(payloadsReceived) + "\n");
-            appendToOutput("Bytes Rcvd:  " + String(Math.round(totalBytesReceived/1024 * 100) / 100) + "kb\n");
+            appendToOutput(" Bytes Rcvd: " + String(Math.round(totalBytesReceived/1024 * 100) / 100) + "kb\n");
             appendToOutput("\n");
 
         }
@@ -900,25 +930,33 @@ Type your commands below.
         /////////////////////////////////////////////
         specialCommands = {
             "!raw": "View server messages in raw format.",
+            "!monochrome": "View server messages in monochrome format.",
             "!debug": "See special debug messages in the console.",
             "!colors": "Print out all color aliases on screen.",
             "!net": "Print out network traffic stats",
             "clear": "Clear the screen",
         }
 
+        defaultSettings = {
+            "defaultcolor": "rgb(204, 238, 255)",
+            "buttons":      [
+                                {"name":"Status",       "cmd":"status"},
+                                {"name":"Inventory",    "cmd":"inventory"},
+                                {"name":"Conditions",   "cmd":"conditions"},
+                                {"name":"Jobs",         "cmd":"jobs"},
+                                {"name":"Skills",       "cmd":"skills"},
+                                {"name":"Spells",       "cmd":"spells"},
+                                {"name":"Kill Stats",   "cmd":"killstats"},
+                                {"name":"Help",         "cmd":"help"}
+                            ]
+        };
+
         textOutput.addEventListener('click', () => {
             textInput.focus();
         });
 
         function init() {
-            addNewButton('Status', 'status');
-            addNewButton('Inventory', 'inventory');
-            addNewButton('Conditions', 'conditions');
-            addNewButton('Jobs', 'jobs');
-            addNewButton('Skills', 'skills');
-            addNewButton('Spells', 'spells');
-            addNewButton('Kill Stats', 'killstats');
-            addNewButton('Help', 'help');
+
 
             addEditIconEventListeners(); // Initialize event listeners for existing buttons
             addCommandButtonEventListeners(); // Initialize event listeners for existing buttons
@@ -931,7 +969,53 @@ Type your commands below.
             for ( i in specialCommands ) {
                 console.log('  '+i.padEnd(longest)+" - " + specialCommands[i]); 
             }
-            
+
+            loadSettings();
+        }
+
+        function setDefaultColor(strColor) {
+
+            let s = new Option().style;
+            s.color = strColor;
+            if ( s.color !== '' || !strColor ) {
+                textOutput.style.color = strColor;
+                // store the change in local settings
+                saveSettings();
+            }
+        }
+
+        function saveSettings() {
+
+            const saveObject = { 
+                defaultcolor: textOutput.style.color, 
+                buttons: [],
+            };
+
+            const commandButtons = document.querySelectorAll('.command-button');
+            commandButtons.forEach(button => {
+                btnObj = {};
+                btnObj.name = button.textContent;
+                btnObj.cmd = button.getAttribute('data-command');
+
+                saveObject.buttons.push(btnObj);
+            });
+
+            localStorage.setItem('terminalConfig', JSON.stringify(saveObject));
+        }
+
+        function loadSettings() {
+
+            loadObject = JSON.parse(localStorage.getItem('terminalConfig'));
+
+            settings = loadObject ? loadObject : defaultSettings;
+
+            setDefaultColor(settings.defaultcolor);
+
+            for ( k in settings.buttons ) {
+                b = settings.buttons[k];
+                addNewButton(b.name, b.cmd);
+            }
+
         }
     </script>
 </body>

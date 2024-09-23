@@ -16,6 +16,10 @@ func BadCommands(rest string, userId int) (bool, error) {
 		return false, fmt.Errorf("user %d not found", userId)
 	}
 
+	if rest == "clear" {
+		badinputtracker.Clear()
+	}
+
 	// Now look for mobs?
 	headers := []string{"Command", "Count"}
 	rows := [][]string{}
