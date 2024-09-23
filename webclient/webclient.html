@@ -984,7 +984,7 @@ Type your commands below.
             }
         }
 
-        function saveSettings() {
+        function saveSettings(forceObject) {
 
             const saveObject = { 
                 defaultcolor: textOutput.style.color, 
@@ -1005,17 +1005,29 @@ Type your commands below.
 
         function loadSettings() {
 
-            loadObject = JSON.parse(localStorage.getItem('terminalConfig'));
-
-            settings = loadObject ? loadObject : defaultSettings;
+            savedConfig = localStorage.getItem('terminalConfig');
+            
+            settings = savedConfig ? JSON.parse(savedConfig) : defaultSettings;
 
             setDefaultColor(settings.defaultcolor);
+
+            // Remove any existing buttons
+            const commandButtons = document.querySelectorAll('.button-container');
+            commandButtons.forEach(button => {
+                button.remove();
+            });
 
             for ( k in settings.buttons ) {
                 b = settings.buttons[k];
                 addNewButton(b.name, b.cmd);
             }
 
+            saveSettings();
+        }
+
+        function resetSettings() {
+            localStorage.setItem('terminalConfig', '');
+            loadSettings();
         }
     </script>
 </body>
