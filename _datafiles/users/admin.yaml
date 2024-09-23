@@ -16,7 +16,7 @@ character:
     to disrupt the balance of the world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 9
+  roomid: 778
   zone: Frostfang
   raceid: 2
   stats:
@@ -56,17 +56,20 @@ character:
   - itemid: 10014
   - itemid: 30007
     uses: 1
+  - itemid: 8
+    uses: 1
+    lastusedround: 1013
   buffs:
     list:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 3
+      roundcounter: 17
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 11
+      roundcounter: 25
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -111,5 +114,5 @@ character:
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/zyHgQkAIQzEFspDr6/U7r+YcBRJIEQkP4ttynYkQu73IopDo7Bzww0AAP//C/NuPUcAAAA=
+roommemoryblob: H4sIAAAAAAAA/0THiwmAYAwD4YVO+FPBa/dfTBQfJPBxs4oQLrePIM2Qdf+pf6HY0QMV7dczAAD//9cgnsdPAAAA
 configoptions: {}
