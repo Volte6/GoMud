@@ -408,7 +408,7 @@ Type your commands below.
                 button.addEventListener('click', handleCommandButtonClick);
             });
         }
-
+        
         function handleCommandButtonClick(event) {
             const button = event.currentTarget;
             const command = button.getAttribute('data-command');
@@ -423,6 +423,10 @@ Type your commands below.
                 currentButton.textContent = buttonTextInput.value;
                 currentButton.setAttribute('data-command', buttonCommandInput.value);
             }
+
+            // store the change in local settings
+            saveSettings();
+
             closeModal();
         });
 
@@ -436,6 +440,8 @@ Type your commands below.
             if (currentButtonContainer) {
                 currentButtonContainer.remove();
                 closeModal();
+                // store the change in local settings
+                saveSettings();
             }
         });
 
@@ -654,12 +660,12 @@ Type your commands below.
 
                 debugLog(cmdString);
 
-                parts = cmdString.substring(9).split('=');
-
-                if ( parts.length > 1 ) {
-                    colorAliases[parts[0].trim()] = parts[1].trim();
+                jsonStr = cmdString.substring(9);
+                if ( jsonObj = JSON.parse(jsonStr) ) {    
+                    for (k in jsonObj) {
+                        colorAliases[k] = jsonObj[k];
+                    }
                 }
-
                 return true;
             }
 
@@ -805,8 +811,6 @@ Type your commands below.
             textOutput.innerHTML = textOutput.innerHTML.substring(0, lastPos+1);
         }
 
-
-
         function appendToOutput(message) {
            
             textOutput.innerHTML += message;
@@ -933,19 +937,26 @@ Type your commands below.
             "clear": "Clear the screen",
         }
 
+        defaultSettings = {
+            "defaultcolor": "rgb(204, 238, 255)",
+            "buttons":      [
+                                {"name":"Status",       "cmd":"status"},
+                                {"name":"Inventory",    "cmd":"inventory"},
+                                {"name":"Conditions",   "cmd":"conditions"},
+                                {"name":"Jobs",         "cmd":"jobs"},
+                                {"name":"Skills",       "cmd":"skills"},
+                                {"name":"Spells",       "cmd":"spells"},
+                                {"name":"Kill Stats",   "cmd":"killstats"},
+                                {"name":"Help",         "cmd":"help"}
+                            ]
+        };
+
         textOutput.addEventListener('click', () => {
             textInput.focus();
         });
 
         function init() {
-            addNewButton('Status', 'status');
-            addNewButton('Inventory', 'inventory');
-            addNewButton('Conditions', 'conditions');
-            addNewButton('Jobs', 'jobs');
-            addNewButton('Skills', 'skills');
-            addNewButton('Spells', 'spells');
-            addNewButton('Kill Stats', 'killstats');
-            addNewButton('Help', 'help');
+
 
             addEditIconEventListeners(); // Initialize event listeners for existing buttons
             addCommandButtonEventListeners(); // Initialize event listeners for existing buttons
@@ -958,11 +969,46 @@ Type your commands below.
             for ( i in specialCommands ) {
                 console.log('  '+i.padEnd(longest)+" - " + specialCommands[i]); 
             }
-            
+
+            loadSettings();
         }
 
         function setDefaultColor(clr) {
             textOutput.style.color = clr;
+        }
+
+        function saveSettings() {
+
+            const saveObject = { 
+                defaultcolor: textOutput.style.color, 
+                buttons: [],
+            };
+
+            const commandButtons = document.querySelectorAll('.command-button');
+            commandButtons.forEach(button => {
+                btnObj = {};
+                btnObj.name = button.textContent;
+                btnObj.cmd = button.getAttribute('data-command');
+
+                saveObject.buttons.push(btnObj);
+            });
+
+            localStorage.setItem('terminalConfig', JSON.stringify(saveObject));
+        }
+
+        function loadSettings() {
+
+            loadObject = JSON.parse(localStorage.getItem('terminalConfig'));
+
+            settings = loadObject ? loadObject : defaultSettings;
+
+            setDefaultColor(settings.defaultcolor);
+
+            for ( k in settings.buttons ) {
+                b = settings.buttons[k];
+                addNewButton(b.name, b.cmd);
+            }
+
         }
     </script>
 </body>
