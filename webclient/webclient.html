@@ -656,7 +656,7 @@ Type your commands below.
 
             cmd = cmdString.substring(0, 9);
 
-            if ( cmd == "COLORMAP:" ) {
+            if ( cmd == "COLORMAP:" ) {// request to update color aliases
 
                 debugLog(cmdString);
 
@@ -669,7 +669,7 @@ Type your commands below.
                 return true;
             }
 
-            if ( cmd == "TEXTMASK:" ) {
+            if ( cmd == "TEXTMASK:" ) { // request to mask input echo to user
 
                 debugLog(cmdString);
 
@@ -973,8 +973,15 @@ Type your commands below.
             loadSettings();
         }
 
-        function setDefaultColor(clr) {
-            textOutput.style.color = clr;
+        function setDefaultColor(strColor) {
+
+            let s = new Option().style;
+            s.color = strColor;
+            if ( s.color !== '' || !strColor ) {
+                textOutput.style.color = strColor;
+                // store the change in local settings
+                saveSettings();
+            }
         }
 
         function saveSettings() {
