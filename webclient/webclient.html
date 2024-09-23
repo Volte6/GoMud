@@ -961,7 +961,7 @@ Type your commands below.
             addEditIconEventListeners(); // Initialize event listeners for existing buttons
             addCommandButtonEventListeners(); // Initialize event listeners for existing buttons
 
-            console.log("special commands:");
+            console.log("%cterminal commands:", "font-weight:bold;");
             longest = 0;
             for ( i in specialCommands ) {
                 longest = i.length > longest ? i.length : longest
@@ -969,6 +969,9 @@ Type your commands below.
             for ( i in specialCommands ) {
                 console.log('  '+i.padEnd(longest)+" - " + specialCommands[i]); 
             }
+            console.log("%cconsole commands:", "font-weight:bold;");
+            console.log("  setDefaultColor({colorString}) - Set the default text color.");
+            console.log("  resetSettings()                - Reset all local settings.");
 
             loadSettings();
         }
