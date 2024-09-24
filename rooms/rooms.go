@@ -141,6 +141,11 @@ func (l *GameLock) SetLocked() {
 	l.UnlockedUntil = 0
 }
 
+type BurningStatus struct {
+	LastBurnRound uint64 `yaml:"-"`
+	BurningUntil  uint64 `yaml:"-"`
+}
+
 type Room struct {
 	mutex             sync.RWMutex
 	RoomId            int    // a unique numeric index of the room. Also the filename.
@@ -166,6 +171,7 @@ type Room struct {
 	IdleMessages      []string                       `yaml:"idlemessages,omitempty"`      // list of messages that can be displayed to players in the room
 	LastIdleMessage   uint8                          `yaml:"-"`                           // index of the last idle message displayed
 	LongTermDataStore map[string]any                 `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
+	Wildfire          BurningStatus                  `yaml:"-"`                           // Whether the room is burning, for how long, and when it can burn again
 	players           []int                          `yaml:"-"`                           // list of user IDs currently in the room
 	mobs              []int                          `yaml:"-"`                           // list of mob instance IDs currently in the room. Does not get saved.
 	visitors          map[VisitorType]map[int]uint64 `yaml:"-"`                           // list of user IDs that have visited this room, and the last round they did
@@ -271,6 +277,30 @@ func (r *Room) SendTextToExits(txt string, isQuiet bool, excludeUserIds ...int) 
 
 	}
 
+}
+
+func (r *Room) Burn(burnRounds int) bool {
+	b, ok := GetBiome(r.Biome)
+	if !ok || !b.burns {
+		return false
+	}
+
+	if r.Wildfire.BurningUntil > 0 {
+		return false
+	}
+
+	rndCt := util.GetRoundCount()
+	if rndCt < r.Wildfire.LastBurnRound+10 {
+		return false
+	}
+
+	r.Wildfire.BurningUntil = rndCt + uint64(burnRounds)
+
+	return true
+}
+
+func (r *Room) IsBurning() bool {
+	return r.Wildfire.BurningUntil > 0
 }
 
 func (r *Room) SetLongTermData(key string, value any) {
@@ -1470,6 +1500,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		RoomLegend:     roomLegend,
 		IsDark:         b.IsDark(),
 		IsNight:        gametime.IsNight(),
+		IsBurning:      r.IsBurning(),
 		TrackingString: ``,
 	}
 

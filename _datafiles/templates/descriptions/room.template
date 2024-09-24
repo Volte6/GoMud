@@ -1,4 +1,4 @@
-<ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">{{ if ne .TinyMapDescription "" }}{{ .TinyMapDescription }}{{ else }}{{ splitstring .Room.GetDescription 80 }}{{ end }}</ansi>
+<ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">{{ if ne .TinyMapDescription "" }}{{ .TinyMapDescription }}{{ else }}{{ if .IsBurning }}{{ colorpattern (splitstring .Room.GetDescription 80) "flame" "words" }}{{ else }}{{ splitstring .Room.GetDescription 80 }}{{ end }}{{ end }}</ansi>
 {{- if ne (len .Room.SkillTraining) 0 }}
 
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>
@@ -23,6 +23,12 @@
        <ansi fg="yellow-bold">Type <ansi fg="command">help races</ansi> to see a list of available races.</ansi>
        <ansi fg="yellow-bold">Type <ansi fg="command">start</ansi> to begin playing.</ansi>
     <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
+{{- end }}
+{{- if .IsBurning }}
+
+    <ansi fg="red">{{ colorpattern "┌───────────────────────────────────────────────────────────────────┐" "flame" }}</ansi>
+       <ansi fg="yellow-bold">{{ colorpattern "!!!               A wildfire is burning here!               !!!" "flame" }}</ansi>
+    <ansi fg="red">{{ colorpattern "└───────────────────────────────────────────────────────────────────┘" "flame" }}</ansi>
 {{- end }}
 {{- if ne (len .TrackingString) 0 }}
 <ansi fg="182">{{ .TrackingString }}</ansi>

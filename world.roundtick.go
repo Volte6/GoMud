@@ -221,6 +221,9 @@ func (w *World) HandlePlayerRoundTicks() {
 			for _, uId := range room.GetPlayers() {
 
 				user := users.GetByUserId(uId)
+				if user == nil {
+					continue
+				}
 
 				// Roundtick any cooldowns
 				user.Character.Cooldowns.RoundTick()

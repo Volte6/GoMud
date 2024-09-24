@@ -13,8 +13,10 @@ import (
 	"time"
 
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/fileloader"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/templates"
@@ -63,6 +65,7 @@ type RoomTemplateDetails struct {
 	TinyMapDescription string
 	IsDark             bool
 	IsNight            bool
+	IsBurning          bool
 	TrackingString     string
 	ExtraMessages      []string
 }
@@ -116,6 +119,63 @@ func RoomMaintenance(out *connection.ConnectionTracker) bool {
 	roomsUpdated := false
 	for _, room := range roomManager.rooms {
 
+		if room.IsBurning() {
+
+			if room.Wildfire.BurningUntil < roundCount {
+
+				room.Wildfire.BurningUntil = 0
+				room.Wildfire.LastBurnRound = roundCount
+
+				room.SendText(`The ` + colorpatterns.ApplyColorPattern(`burning`, `flame`) + ` finally subsides.`)
+
+				for _, exitInfo := range room.Exits {
+
+					if util.RollDice(1, 3) == 1 { // 33% chance of not spreading to this exit
+						continue
+					}
+
+					events.Requeue(events.RoomAction{
+						RoomId: exitInfo.RoomId,
+						Action: `wildfire`,
+					})
+				}
+
+				for _, exitInfo := range room.ExitsTemp {
+
+					if util.RollDice(1, 3) == 1 { // 33% chance of not spreading to this exit
+						continue
+					}
+
+					events.Requeue(events.RoomAction{
+						RoomId: exitInfo.RoomId,
+						Action: `wildfire`,
+					})
+				}
+
+			} else {
+
+				for _, uid := range room.GetPlayers() {
+					if user := users.GetByUserId(uid); user != nil {
+						if user.Character.HasBuff(22) { // burning
+							continue
+						}
+						user.AddBuff(22)
+					}
+				}
+
+				for _, miid := range room.GetMobs() {
+					if mob := mobs.GetInstance(miid); mob != nil {
+						if mob.Character.HasBuff(22) { // burning
+							continue
+						}
+						mob.AddBuff(22)
+					}
+				}
+
+			}
+
+		}
+
 		if visitorCt := room.PruneVisitors(); visitorCt > 0 {
 			roomsUpdated = true
 		}
@@ -154,6 +214,11 @@ func RoomMaintenance(out *connection.ConnectionTracker) bool {
 					}
 				}
 			}
+		}
+
+		// If a room is burning, don't clean it up
+		if room.IsBurning() {
+			continue
 		}
 
 		// Consider unloading rooms from memory?

@@ -228,6 +228,7 @@
         * END Button Modal Styles 
         ******************************/
     </style>
+    <style id="ansiStyles"></style> <!-- Style tag to store dynamic styles -->
 </head>
 <body onLoad="init(); return false;">
     <div id="main-container">
@@ -458,6 +459,30 @@ Type your commands below.
         });
 
 
+        // Function to delete the dynamic style tag
+        function clearAnsiStyles() {
+            const styleTag = document.getElementById("ansiStyles");
+            if (styleTag) {
+                styleTag.innerHTML = ''; // Clear all styles inside the <style> tag
+            }
+        }
+
+        // Function to add a new class with specified foreground (text) and background colors
+        function addAnsiStyle(name, fgcolor, bgcolor) {
+            const styleTag = document.getElementById("ansiStyles");
+
+            // Construct the CSS rule for the new class
+            const newStyle = `
+                .${name} {
+                    ` + (fgcolor ? `color: ${fgcolor};` : ``) + `
+                    ` + (bgcolor ? `background-color: ${bgcolor};` : ``) + `
+                }
+            `;
+
+            // Append the new style to the style tag
+            styleTag.innerHTML += newStyle;
+        }
+        
         /////////////////////////////////////////////
         //
         // <ansi> tag conversion code
@@ -491,20 +516,15 @@ Type your commands below.
             while( fullTagMatch = fullTagRegex.exec(message) ) {
                 
                 const fullTag = fullTagMatch[1];
-                const properties = {};
                 let match;
 
                 css = [];
                 while ((match = propertyRegex.exec(fullTag)) !== null) {
-                    if ( match[1] == "fg" ) {
-                        css.push('color:'+ansi256Color(match[2]));
-                    } else if ( match[1] == "bg" ) {
-                        css.push('background-color:'+ansi256Color(match[2]));
-                    }
-                    properties[match[1]] = match[2];
+                    ansiColor = colorAliases[match[2]] ? colorAliases[match[2]] : match[2];
+                    css.push(match[1] +ansiColor)
                 }
 
-                message = message.replaceAll(fullTag, '<span style="'+ css.join(';') +'">')
+                message = message.replaceAll(fullTag, '<span class="'+ css.join(' ') +'">')
             }
             
             message = message.replaceAll('</ansi>', '</span>')
@@ -816,7 +836,7 @@ Type your commands below.
             textOutput.innerHTML += message;
 
             // Keep scroll back from getting too long.
-            var maxElements = 10000;
+            var maxElements = 5000;
             while (textOutput.children.length > maxElements) {
                 textOutput.removeChild(textOutput.firstChild);
             }
@@ -957,6 +977,10 @@ Type your commands below.
 
         function init() {
 
+            for( i=0; i<255; i++ ) {
+                addAnsiStyle('fg'+String(i), ansi256Color(i), '')
+                addAnsiStyle('bg'+String(i), '', ansi256Color(i))
+            }
 
             addEditIconEventListeners(); // Initialize event listeners for existing buttons
             addCommandButtonEventListeners(); // Initialize event listeners for existing buttons

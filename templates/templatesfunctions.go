@@ -11,6 +11,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/skills"
@@ -189,6 +190,19 @@ var (
 
 			mLevel := util.QuantizeTens(m, mMax)
 			return fmt.Sprintf(`<ansi fg="mana-%d">%d</ansi>/<ansi fg="mana-%d">%d</ansi>%s`, mLevel, m, mLevel, mMax, padding)
+		},
+		"colorpattern": func(s string, pattern string, colorizeStyle ...string) string {
+			style := ``
+			if len(colorizeStyle) > 0 {
+				style = colorizeStyle[0]
+			}
+
+			if style == `words` {
+				return colorpatterns.ApplyColorPattern(s, pattern, colorpatterns.Words)
+			} else if style == `stretch` {
+				return colorpatterns.ApplyColorPattern(s, pattern, colorpatterns.Stretch)
+			}
+			return colorpatterns.ApplyColorPattern(s, pattern)
 		},
 	}
 )
