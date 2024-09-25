@@ -112,7 +112,12 @@ func trySystemCommand(cmd string, connectionPool *connection.ConnectionTracker, 
 	if cmd == "quit" {
 		// Not building complex output, so just preparse the ansi in the template and cache that
 		tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
-		connectionPool.SendTo([]byte(tplTxt), connectionId)
+
+		if connectionPool.IsWebsocket(connectionId) {
+			connectionPool.SendTo([]byte(tplTxt), connectionId)
+		} else {
+			connectionPool.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
+		}
 
 		connectionPool.Kick(connectionId)
 		return true
@@ -130,7 +135,12 @@ func trySystemCommand(cmd string, connectionPool *connection.ConnectionTracker, 
 
 		onlineTableData := templates.GetTable("Online Users", headers, rows)
 		tplTxt, _ := templates.Process("tables/generic", onlineTableData)
-		connectionPool.SendTo([]byte(tplTxt), connectionId)
+
+		if connectionPool.IsWebsocket(connectionId) {
+			connectionPool.SendTo([]byte(tplTxt), connectionId)
+		} else {
+			connectionPool.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
+		}
 
 		// Not building complex output, so just preparse the ansi in the template and cache that
 		//tplTxt, _ := templates.Process("systemcommands/who", onlineUsers)
@@ -141,7 +151,13 @@ func trySystemCommand(cmd string, connectionPool *connection.ConnectionTracker, 
 	if cmd == "help" {
 
 		tplTxt, _ := templates.Process("systemcommands/help", systemCommandList)
-		connectionPool.SendTo([]byte(tplTxt), connectionId)
+
+		if connectionPool.IsWebsocket(connectionId) {
+			connectionPool.SendTo([]byte(tplTxt), connectionId)
+		} else {
+			connectionPool.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
+		}
+
 		return true
 	}
 

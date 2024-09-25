@@ -13,6 +13,7 @@ import (
 	"github.com/volte6/mud/badinputtracker"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
 	"github.com/volte6/mud/events"
@@ -1135,6 +1136,15 @@ func (w *World) TurnTick() {
 			continue
 		}
 
+		if rooms.EffectType(action.Action) == rooms.Wildfire {
+
+			if room.AddEffect(rooms.Wildfire) {
+				room.SendText(colorpatterns.ApplyColorPattern(`A wildfire burns through the area!`, `flame`, colorpatterns.Stretch))
+				room.SendTextToExits(`You notice a `+colorpatterns.ApplyColorPattern(`wildfire`, `flame`, colorpatterns.Stretch)+` start!`, false)
+			}
+
+		}
+
 		// Get the parts of the command
 		parts := strings.SplitN(action.Action, ` `, 3)
 
@@ -1193,6 +1203,11 @@ func (w *World) TurnTick() {
 			if targetMobId > 0 {
 				hitPlayers = false
 			}
+
+			events.Requeue(events.RoomAction{
+				RoomId: room.RoomId,
+				Action: string(rooms.Wildfire),
+			})
 
 			if hitPlayers {
 				for _, uid := range room.GetPlayers() {

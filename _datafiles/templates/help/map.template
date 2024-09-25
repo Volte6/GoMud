@@ -2,7 +2,7 @@
 
 The <ansi fg="skill">map</ansi> command displays a map of the area, centered on your character. 
 
-Nott everything is guaranteed to be shown on the map. For example, hidden areas 
+Not everything is guaranteed to be shown on the map. For example, hidden areas 
 may not be shown.
 
 With each level of training, your mapping skill will become more effective, 
