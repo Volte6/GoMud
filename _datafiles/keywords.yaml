@@ -22,6 +22,7 @@ help:
       - status
       - killstats
       - encumbrance
+      - death
     shops:
       - appraise
       - auction
