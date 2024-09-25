@@ -386,6 +386,18 @@ func lookRoom(userId int, roomId int, secretLook bool) {
 		groundStuff = append(groundStuff, item.DisplayName())
 	}
 
+	// Find stashed items
+	for _, item := range room.Stash {
+		if !item.IsValid() {
+			room.RemoveItem(item, true)
+		}
+		if item.StashedBy != userId {
+			continue
+		}
+		name := item.DisplayName() + ` <ansi fg="item-stashed">(stashed)</ansi>`
+		groundStuff = append(groundStuff, name)
+	}
+
 	groundDetails := map[string]any{
 		`GroundStuff`: groundStuff,
 		`IsDark`:      room.GetBiome().IsDark(),

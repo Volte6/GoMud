@@ -84,7 +84,7 @@ func Search(rest string, userId int) (bool, error) {
 			if !item.IsValid() {
 				room.RemoveItem(item, true)
 			}
-			name := item.DisplayName() + ` <ansi fg="black-bold">(stashed)</ansi>`
+			name := item.DisplayName() + ` <ansi fg="item-stashed">(stashed)</ansi>`
 			stashedItems = append(stashedItems, name)
 		}
 
@@ -164,9 +164,6 @@ func Search(rest string, userId int) (bool, error) {
 			user.SendText(whoTxt)
 
 		}
-
-		//stashedItems := map[string][]string{}
-		//stashedItems["Stashed here:"] = room.Stash
 
 		groundDetails := map[string]any{
 			`GroundStuff`: stashedItems,

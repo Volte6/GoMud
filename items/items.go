@@ -45,6 +45,7 @@ type Item struct {
 	Uncursed      bool           `yaml:"uncursed,omitempty"`     // Is this item uncursed?
 	Enchantments  uint8          `yaml:"enchantments,omitempty"` // Is this item enchanted?
 	Adjectives    []string       `yaml:"adjectives,omitempty"`   // Decorative text for the name of the item (e.g. "exploding")
+	StashedBy     int            `yaml:"stashedby,omitempty"`    // userid of whoever stashed this item
 	tempDataStore map[string]any // Temporary data store for this item. Not saved to disk.
 }
 
