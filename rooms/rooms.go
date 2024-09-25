@@ -1529,8 +1529,14 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		TrackingString: ``,
 	}
 
+	tinymap := GetTinyMap(r.RoomId)
+
+	events.AddToQueue(events.WebClientCommand{
+		ConnectionId: user.ConnectionId(),
+		Text:         "MAPMODAL:" + strings.Join(tinymap, "\n"),
+	})
+
 	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {
-		tinymap := GetTinyMap(r.RoomId)
 		desclineWidth := 80 - 7 // 7 is the width of the tinymap
 		padding := 1
 		description := util.SplitString(r.GetDescription(), desclineWidth-padding)

@@ -157,6 +157,7 @@
             outline: none;
         }
 
+
         /****************************** 
         * Button Modal Styles 
         ******************************/
@@ -263,7 +264,6 @@ Type your commands below.
             </div>
         </div>
     </div>
-
     <script>
         /////////////////////////////////////////////
         //
@@ -705,6 +705,11 @@ Type your commands below.
                 return true;
             }
 
+            if ( cmd == "MAPMODAL:" ) { // Tinymap update
+                createModal(`minimap`, cmdString.substring(9) );
+                return true;
+            }
+
             return false;
         }
 
@@ -1080,6 +1085,138 @@ Type your commands below.
             localStorage.setItem('terminalConfig', '');
             loadSettings();
         }
+
+
+        var closedModals = {};// track any modals that were closed.
+        function createModal(name, text) {
+
+            if ( closedModals[name] ) {
+                return;
+            }
+
+            // Check if a modal with this name already exists
+            var existingModal = document.querySelector('[data-modal-name="' + name + '"]');
+            if (existingModal) {
+                // Update the text content
+                var content = existingModal.querySelector('.modal-content');
+                if (content) {
+                content.innerText = text;
+                // Resize the modal to fit the new content
+                existingModal.style.width = 'auto';
+                existingModal.style.height = 'auto';
+                // Reset font size to initial value
+                content.style.fontSize = content.initialFontSize + 'px';
+                }
+                // Optionally bring the modal to the front
+                existingModal.style.zIndex = 1000;
+                return;
+            }
+
+            // Create the modal container
+            var modal = document.createElement('div');
+            modal.setAttribute('data-modal-name', name); // Set data attribute to identify
+            modal.style.position = 'absolute'; // Absolute positioning for draggable
+            modal.style.backgroundColor = 'white';
+            modal.style.boxSizing = 'border-box';
+            modal.style.border = '1px solid #ccc';
+            modal.style.borderRadius = '8px';
+            modal.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            modal.style.padding = '0'; // Remove padding
+            modal.style.overflow = 'hidden'; // Hide overflow
+            // Initially position the modal at the center of the viewport
+            modal.style.left = '50%';
+            modal.style.top = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.zIndex = 1000; // Ensure the modal is on top
+
+            // Create the header for drag handle
+            var header = document.createElement('div');
+            header.style.cursor = 'move';
+            header.style.padding = '10px';
+            header.style.backgroundColor = '#f1f1f1';
+            header.style.borderBottom = '1px solid #ccc';
+            header.style.userSelect = 'none';
+            header.innerText = name; // Display the name in the header
+
+            // Create the close button
+            var closeButton = document.createElement('span');
+            closeButton.innerHTML = '&times;';
+            closeButton.style.position = 'absolute';
+            closeButton.style.top = '4px';
+            closeButton.style.right = '12px';
+            closeButton.style.cursor = 'pointer';
+            closeButton.style.fontSize = '24px';
+
+            // Close the modal when the close button is clicked
+            closeButton.onclick = function() {
+                document.body.removeChild(modal);
+                closedModals[name] = true;
+            };
+
+            // Create the content div with pre-wrap style
+            var content = document.createElement('div');
+            content.className = 'modal-content'; // Add a class for easy selection
+            content.style.whiteSpace = 'pre-wrap';
+            content.style.padding = '10px';
+            content.innerText = text;
+            // Set initial font size
+            content.style.fontSize = '30px';
+
+            // Store initial font size for scaling
+            content.initialFontSize = parseFloat(window.getComputedStyle(content).fontSize);
+
+            // Assemble the modal
+            modal.appendChild(header);
+            modal.appendChild(closeButton);
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+
+            modal.style.top = '30px'
+
+            // Adjust modal size to fit content
+            modal.style.width = modal.offsetWidth+1 + 'px';
+            modal.style.height = modal.offsetHeight + 'px';
+
+            // Remove the transform after positioning to allow dragging without conflicts
+            modal.style.transform = '';
+
+            // Store initial modal dimensions for scaling
+            modal.initialWidth = modal.offsetWidth;
+            modal.initialHeight = modal.offsetHeight;
+
+            // Drag functionality
+            var isDragging = false;
+            var dragOffsetX = 0;
+            var dragOffsetY = 0;
+
+            header.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                // Get the mouse cursor position at startup
+                dragOffsetX = e.clientX - modal.getBoundingClientRect().left;
+                dragOffsetY = e.clientY - modal.getBoundingClientRect().top;
+                // Bring modal to front
+                modal.style.zIndex = 1001;
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging) {
+                // Calculate the new cursor position
+                var x = e.clientX - dragOffsetX;
+                var y = e.clientY - dragOffsetY;
+                // Set the element's new position
+                modal.style.left = x + 'px';
+                modal.style.top = y + 'px';
+                } 
+            });
+
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+
+        }
+
     </script>
+
+        
 </body>
 </html>
