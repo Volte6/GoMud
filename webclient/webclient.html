@@ -279,6 +279,7 @@ Type your commands below.
         let historyPosition = 0;
         let commandHistoryMaxLength = 30;
 
+
         /////////////////////////////////////////////
         //
         // Side bar toggle code
@@ -413,7 +414,8 @@ Type your commands below.
         function handleCommandButtonClick(event) {
             const button = event.currentTarget;
             const command = button.getAttribute('data-command');
-            SendData(command)
+            SendData(command);
+            textInput.focus();
         }
 
         // Save button in the modal
@@ -621,11 +623,12 @@ Type your commands below.
         let rawOutput = false;
         let monochromeOutput = false;
         let debugOutput = false;
+        // track whether a drag has occurred
+        let isDragging = false;
 
         const connectButton = document.getElementById('connect-button');
         const textOutput = document.getElementById('text-output');
         const textInput = document.getElementById('command-input');
-
 
 
         function escapeHtml(str) {
@@ -972,9 +975,29 @@ Type your commands below.
                             ]
         };
 
-        textOutput.addEventListener('click', () => {
-            //textInput.focus();
+
+        // Add event listener for mousedown to detect the start of a drag
+        textOutput.addEventListener('mousedown', function() {
+            isDragging = false; // Reset the drag flag on mousedown
         });
+
+        // Add event listener for mousemove to detect dragging
+        textOutput.addEventListener('mousemove', function() {
+            isDragging = true; // Set the drag flag if mouse moves while pressed
+        });
+
+        // Add event listener for mouseup to detect the end of a drag and check for selection
+        textOutput.addEventListener('mouseup', function(event) {
+            const selectedText = window.getSelection().toString();
+
+            // Check if there is no selected text and if no drag occurred
+            if (!isDragging && !selectedText) {
+                textInput.focus();
+            }
+
+            isDragging = false;
+        });
+
 
         function init() {
 
