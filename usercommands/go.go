@@ -47,6 +47,11 @@ func Go(rest string, userId int) (bool, error) {
 
 	if goRoomId > 0 || exitName != `` {
 
+		if user.Character.IsDisabled() {
+			user.SendText("You are unable to do that while downed.")
+			return true, nil
+		}
+
 		actionCost := 10
 		encumbered := false
 		if len(user.Character.Items) > user.Character.CarryCapacity() {

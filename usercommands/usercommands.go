@@ -270,20 +270,16 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		}
 	}
 
-	// Try moving if they aren't disabled
-	// This also processes shortened versions of exit names, such as "ea" instead of "east"
-	if !userDisabled {
+	// "go" attempt
+	start := time.Now()
+	defer func() {
+		util.TrackTime(`usr-cmd[go]`, time.Since(start).Seconds())
+	}()
 
-		start := time.Now()
-		defer func() {
-			util.TrackTime(`usr-cmd[go]`, time.Since(start).Seconds())
-		}()
-
-		if handled, err := Go(cmd, userId); handled {
-			return handled, err
-		}
-
+	if handled, err := Go(cmd, userId); handled {
+		return handled, err
 	}
+	// end "go" attempt
 
 	if emoteText, ok := emoteAliases[cmd]; ok {
 		handled, err := Emote(emoteText, userId)
