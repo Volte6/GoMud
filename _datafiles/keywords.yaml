@@ -21,6 +21,7 @@ help:
       - spells
       - status
       - killstats
+      - encumbrance
     shops:
       - appraise
       - auction

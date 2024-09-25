@@ -57,9 +57,9 @@ func Go(rest string, userId int) (bool, error) {
 		if !user.Character.DeductActionPoints(actionCost) {
 
 			if encumbered {
-				user.SendText("You're too tired to move!")
+				user.SendText("You're too encumbered to move (<ansi fg=\"command\">help encumbrance</ansi>)!")
 			} else {
-				user.SendText("You're too encumbered to move!")
+				user.SendText("You're too tired to move (slow down)!")
 			}
 
 			return true, nil

@@ -44,6 +44,7 @@ The <ansi fg="command">set prompt</ansi> command allows you to customize your in
     <ansi fg="magenta">{g}</ansi>     Gold on hand              <ansi fg="magenta">{h}</ansi>     Hidden/Invisible flag
     <ansi fg="magenta">{t}</ansi>     Day/Night symbol (<ansi fg="night">☾</ansi>/<ansi fg="day">☀️</ansi>)    <ansi fg="magenta">{T}</ansi>     Full time of day
     <ansi fg="magenta">{ap}</ansi>    Action Points             <ansi fg="magenta">{w}</ansi>     Wait rounds (fprompt)
+    <ansi fg="magenta">{\n}</ansi>    New Line
 
 The default prompt is:
 <ansi fg="246">{8}[{t} {T} {255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:</ansi>

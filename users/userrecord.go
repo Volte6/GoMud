@@ -271,6 +271,8 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 
 				switch ansiPrompt[tagStartPos : i+1] {
 
+				case "{\\n}":
+					promptOut.WriteString("\n")
 				case "{hp}":
 					if len(hpClass) == 0 {
 						hpClass = fmt.Sprintf(`health-%d`, util.QuantizeTens(u.Character.Health, u.Character.HealthMax.Value))

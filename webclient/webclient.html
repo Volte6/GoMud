@@ -722,6 +722,7 @@ Type your commands below.
                 appendToOutput("Connected to the server!\n");
                 clearScreen();
                 connectButton.disabled = true;
+                textInput.focus();
             };
 
             socket.onmessage = function(event) {
@@ -972,7 +973,7 @@ Type your commands below.
         };
 
         textOutput.addEventListener('click', () => {
-            textInput.focus();
+            //textInput.focus();
         });
 
         function init() {
