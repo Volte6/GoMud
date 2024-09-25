@@ -353,7 +353,9 @@ func lookRoom(userId int, roomId int, secretLook bool) {
 	}
 
 	textOut, _ = templates.Process("descriptions/who", details)
-	user.SendText(textOut)
+	if len(textOut) > 0 {
+		user.SendText(textOut)
+	}
 
 	groundStuff := []string{}
 	for containerName, container := range room.Containers {
@@ -390,7 +392,9 @@ func lookRoom(userId int, roomId int, secretLook bool) {
 		`IsNight`:     gametime.IsNight(),
 	}
 	textOut, _ = templates.Process("descriptions/ontheground", groundDetails)
-	user.SendText(textOut)
+	if len(textOut) > 0 {
+		user.SendText(textOut)
+	}
 
 	textOut, _ = templates.Process("descriptions/exits", details)
 	user.SendText(textOut)
