@@ -242,11 +242,13 @@ func (m *Mob) Command(inputTxt string, waitTurns ...int) {
 		wt = waitTurns[0]
 	}
 
-	events.AddToQueue(events.Input{
-		MobInstanceId: m.InstanceId,
-		InputText:     inputTxt,
-		WaitTurns:     wt,
-	})
+	for _, cmd := range strings.Split(inputTxt, `;`) {
+		events.AddToQueue(events.Input{
+			MobInstanceId: m.InstanceId,
+			InputText:     cmd,
+			WaitTurns:     wt,
+		})
+	}
 
 }
 

@@ -1634,11 +1634,22 @@ func (w *World) CheckForLevelUps() {
 
 			if newLevel, statsDelta := user.Character.LevelUp(); newLevel {
 
+				livesBefore := user.Character.ExtraLives
+
+				c := configs.GetConfig()
+				if c.PermaDeath && c.LevelUpLives > 0 {
+					user.Character.ExtraLives += int(c.LevelUpLives)
+					if user.Character.ExtraLives > int(c.MaxLives) {
+						user.Character.ExtraLives = int(c.MaxLives)
+					}
+				}
+
 				levelUpData := map[string]interface{}{
 					"level":          user.Character.Level,
 					"statsDelta":     statsDelta,
 					"trainingPoints": 1,
 					"statPoints":     1,
+					"livesUp":        user.Character.ExtraLives - livesBefore,
 				}
 				levelUpStr, _ := templates.Process("character/levelup", levelUpData)
 

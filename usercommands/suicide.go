@@ -6,9 +6,12 @@ import (
 	"math"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -48,6 +51,35 @@ func Suicide(rest string, userId int) (bool, error) {
 	events.AddToQueue(events.Broadcast{
 		Text: fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> has <ansi fg="red-bold">DIED!</ansi> <ansi fg="magenta-bold">***</ansi>`, user.Character.Name),
 	})
+
+	// If permadeath is enabled, do some extra bookkeeping
+	if config.PermaDeath {
+
+		if user.Character.ExtraLives > 0 {
+
+			user.Character.ExtraLives--
+
+		} else {
+
+			// Perma-died!!!
+			textOut, _ := templates.Process("character/permadeath", nil)
+			user.SendText(colorpatterns.ApplyColorPattern(textOut, `red`))
+
+			// Unequip everything
+			for _, itm := range user.Character.GetAllWornItems() {
+				Remove(itm.Name(), userId)
+			}
+			// drop all items / gold
+			Drop("all", userId)
+
+			user.Character = characters.New()
+
+			rooms.MoveToRoom(userId, -1)
+
+			return true, nil
+		}
+
+	}
 
 	if config.OnDeathEquipmentDropChance >= 0 {
 		chanceInt := int(config.OnDeathEquipmentDropChance * 100)

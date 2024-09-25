@@ -12,6 +12,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/prompt"
@@ -62,7 +63,9 @@ type UserRecord struct {
 
 func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 
-	return &UserRecord{
+	c := configs.GetConfig()
+
+	u := &UserRecord{
 		connectionId:   connectionId,
 		UserId:         userId,
 		Permission:     PermissionGuest,
@@ -75,6 +78,12 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 		lock:           sync.RWMutex{},
 		tempDataStore:  make(map[string]any),
 	}
+
+	if c.PermaDeath {
+		u.Character.ExtraLives = int(c.StartLives)
+	}
+
+	return u
 }
 
 func (u *UserRecord) PasswordMatches(input string) bool {

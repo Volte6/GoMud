@@ -10,7 +10,8 @@
  Vitality: <ansi fg="{{ if gt .statsDelta.Vitality.Value 0 }}yellow{{ else }}black{{ end }}-bold">{{ .statsDelta.Vitality.Value }}</ansi>    Mysticism: <ansi fg="{{ if gt .statsDelta.Mysticism.Value 0 }}yellow{{ else }}black{{ end }}-bold">{{ .statsDelta.Mysticism.Value }}</ansi>    Perception: <ansi fg="{{ if gt .statsDelta.Perception.Value 0 }}yellow{{ else }}black{{ end }}-bold">{{ .statsDelta.Perception.Value }}</ansi>
 
  <ansi fg="yellow">Training Points:</ansi>   <ansi fg="yellow-bold">+{{ .trainingPoints }}</ansi>    
- <ansi fg="yellow">Bonus Stat Points:</ansi> <ansi fg="yellow-bold">+{{ .statPoints }}</ansi>
+ <ansi fg="yellow">Bonus Stat Points:</ansi> <ansi fg="yellow-bold">+{{ .statPoints }}</ansi>{{ if .livesUp }}
+ <ansi fg="yellow">Extra Lives:</ansi>       <ansi fg="yellow-bold">+{{ .livesUp }}</ansi>{{ end }}
 
 <ansi fg="yellow-bold">*******************************************************************************</ansi>
 <ansi fg="yellow-bold">*******************************************************************************</ansi>
