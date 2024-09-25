@@ -158,11 +158,11 @@ type Room struct {
 	ExitsTemp         map[string]TemporaryRoomExit   `yaml:"-"`               // Temporary exits that will be removed after a certain time. Don't bother saving on sever shutting down.
 	Nouns             map[string]string              `yaml:"nouns,omitempty"` // Interesting nouns to highlight in the room or reveal on succesful searches.
 	Items             []items.Item                   `yaml:"items,omitempty"`
+	Stash             []items.Item                   `yaml:"stash,omitempty"`             // list of items in the room that are not visible to players
 	Gold              int                            `yaml:"gold,omitempty"`              // How much gold is on the ground?
 	SpawnInfo         []SpawnInfo                    `yaml:"spawninfo,omitempty"`         // key is creature ID, value is spawn chance
 	SkillTraining     map[string]TrainingRange       `yaml:"skilltraining,omitempty"`     // list of skills that can be trained in this room
 	Signs             []Sign                         `yaml:"sign,omitempty"`              // list of scribbles in the room
-	Stash             []items.Item                   `yaml:"stash,omitempty"`             // list of items in the room that are not visible to players
 	IdleMessages      []string                       `yaml:"idlemessages,omitempty"`      // list of messages that can be displayed to players in the room
 	LastIdleMessage   uint8                          `yaml:"-"`                           // index of the last idle message displayed
 	LongTermDataStore map[string]any                 `yaml:"longtermdatastore,omitempty"` // Long term data store for the room

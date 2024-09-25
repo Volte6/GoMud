@@ -18,6 +18,8 @@ exits:
     roomid: 22
   west:
     roomid: 20
+stash:
+- itemid: 10001
 spawninfo:
 - mobid: 1
   cooldown: 15
@@ -28,5 +30,3 @@ spawninfo:
 - mobid: 1
   cooldown: 10
   message: A rat falls from the sky.
-stash:
-- itemid: 10001

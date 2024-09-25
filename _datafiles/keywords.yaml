@@ -21,6 +21,8 @@ help:
       - spells
       - status
       - killstats
+      - encumbrance
+      - death
     shops:
       - appraise
       - auction
@@ -146,7 +148,7 @@ help-aliases:
   picklock-example: [pick-example]
   keyring:          [key, keys]
   equip:            [wear, wield, hold]
-  status:           [score]
+  status:           [score, info]
   set-prompt:       [prompt]
   colors:           [color, ansi]
   auction:          [bid]
@@ -158,7 +160,7 @@ help-aliases:
 command-aliases:
   say:              ['.']
   broadcast:        ['`']
-  status:           ['sta', 'stat', 'stats', 'score']
+  status:           ['sta', 'stat', 'stats', 'score', 'info']
   inventory:        ['i', 'inv', 'eq']
   look:             ['l', 'examine']
   go:               ['enter']

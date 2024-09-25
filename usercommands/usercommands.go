@@ -63,75 +63,75 @@ var (
 		`gearup`:      {Gearup, false, false},
 		`get`:         {Get, false, false},
 		`give`:        {Give, false, false},
-		//`go`:         {Go, false, false},
-		`help`:       {Help, true, false},
-		`hire`:       {Hire, false, false},
-		`keyring`:    {KeyRing, true, false},
-		`killstats`:  {Killstats, true, false},
-		`inspect`:    {Inspect, false, false},
-		`inventory`:  {Inventory, true, false},
-		`jobs`:       {Jobs, true, false},
-		`list`:       {List, false, false},
-		`locate`:     {Locate, true, true},
-		`lock`:       {Lock, false, false},
-		`look`:       {Look, true, false},
-		`map`:        {Map, false, false},
-		`macros`:     {Macros, true, false},
-		`motd`:       {Motd, true, false},
-		`offer`:      {Offer, false, false},
-		`online`:     {Online, true, false},
-		`party`:      {Party, true, false},
-		`peep`:       {Peep, false, false},
-		`picklock`:   {Picklock, false, false},
-		`pickpocket`: {Pickpocket, false, false},
-		`prepare`:    {Prepare, true, true}, // Admin only
-		`portal`:     {Portal, false, false},
-		`pray`:       {Pray, false, false},
-		`print`:      {Print, true, false},
-		`quests`:     {Quests, true, false},
-		`quit`:       {Quit, true, false},
-		`questtoken`: {QuestToken, false, true}, // Admin only
-		`rank`:       {Rank, false, false},
-		`read`:       {Read, false, false},
-		`recover`:    {Recover, false, false},
-		`reload`:     {Reload, true, true}, // Admin only
-		`remove`:     {Remove, false, false},
-		`rename`:     {Rename, false, true}, // Admin only
-		`room`:       {Room, false, true},   // Admin only
-		`save`:       {Save, true, false},
-		`say`:        {Say, true, false},
-		`scribe`:     {Scribe, false, false},
-		`search`:     {Search, false, false},
-		`sell`:       {Sell, false, false},
-		`server`:     {Server, false, true}, // Admin only
-		`set`:        {Set, true, false},
-		`share`:      {Share, false, false},
-		`shoot`:      {Shoot, false, false},
-		`shout`:      {Shout, true, false},
-		`show`:       {Show, true, false},
-		`skills`:     {Skills, true, false},
-		`skillset`:   {Skillset, false, true}, // Admin only
-		`sneak`:      {Sneak, false, false},
-		`spawn`:      {Spawn, false, true}, // Admin only
-		`spells`:     {Spells, true, false},
-		`stash`:      {Stash, false, false},
-		`status`:     {Status, true, false},
-		`storage`:    {Storage, false, false},
-		`suicide`:    {Suicide, true, false},
-		`tame`:       {Tame, false, false},
-		`time`:       {Time, true, false},
-		`throw`:      {Throw, false, false},
-		`track`:      {Track, false, false},
-		`trash`:      {Trash, false, false},
-		`train`:      {Train, false, false},
-		`unenchant`:  {Unenchant, false, false},
-		`uncurse`:    {Uncurse, false, false},
-		`unlock`:     {Unlock, false, false},
-		`use`:        {Use, false, false},
-		`dual-wield`: {DualWield, true, false},
-		`whisper`:    {Whisper, true, false},
-		`who`:        {Who, true, false},
-		`zap`:        {Zap, false, true}, // Admin only
+		`go`:          {Go, false, false},
+		`help`:        {Help, true, false},
+		`hire`:        {Hire, false, false},
+		`keyring`:     {KeyRing, true, false},
+		`killstats`:   {Killstats, true, false},
+		`inspect`:     {Inspect, false, false},
+		`inventory`:   {Inventory, true, false},
+		`jobs`:        {Jobs, true, false},
+		`list`:        {List, false, false},
+		`locate`:      {Locate, true, true},
+		`lock`:        {Lock, false, false},
+		`look`:        {Look, true, false},
+		`map`:         {Map, false, false},
+		`macros`:      {Macros, true, false},
+		`motd`:        {Motd, true, false},
+		`offer`:       {Offer, false, false},
+		`online`:      {Online, true, false},
+		`party`:       {Party, true, false},
+		`peep`:        {Peep, false, false},
+		`picklock`:    {Picklock, false, false},
+		`pickpocket`:  {Pickpocket, false, false},
+		`prepare`:     {Prepare, true, true}, // Admin only
+		`portal`:      {Portal, false, false},
+		`pray`:        {Pray, false, false},
+		`print`:       {Print, true, false},
+		`quests`:      {Quests, true, false},
+		`quit`:        {Quit, true, false},
+		`questtoken`:  {QuestToken, false, true}, // Admin only
+		`rank`:        {Rank, false, false},
+		`read`:        {Read, false, false},
+		`recover`:     {Recover, false, false},
+		`reload`:      {Reload, true, true}, // Admin only
+		`remove`:      {Remove, false, false},
+		`rename`:      {Rename, false, true}, // Admin only
+		`room`:        {Room, false, true},   // Admin only
+		`save`:        {Save, true, false},
+		`say`:         {Say, true, false},
+		`scribe`:      {Scribe, false, false},
+		`search`:      {Search, false, false},
+		`sell`:        {Sell, false, false},
+		`server`:      {Server, false, true}, // Admin only
+		`set`:         {Set, true, false},
+		`share`:       {Share, false, false},
+		`shoot`:       {Shoot, false, false},
+		`shout`:       {Shout, true, false},
+		`show`:        {Show, true, false},
+		`skills`:      {Skills, true, false},
+		`skillset`:    {Skillset, false, true}, // Admin only
+		`sneak`:       {Sneak, false, false},
+		`spawn`:       {Spawn, false, true}, // Admin only
+		`spells`:      {Spells, true, false},
+		`stash`:       {Stash, false, false},
+		`status`:      {Status, true, false},
+		`storage`:     {Storage, false, false},
+		`suicide`:     {Suicide, true, false},
+		`tame`:        {Tame, false, false},
+		`time`:        {Time, true, false},
+		`throw`:       {Throw, false, false},
+		`track`:       {Track, false, false},
+		`trash`:       {Trash, false, false},
+		`train`:       {Train, false, false},
+		`unenchant`:   {Unenchant, false, false},
+		`uncurse`:     {Uncurse, false, false},
+		`unlock`:      {Unlock, false, false},
+		`use`:         {Use, false, false},
+		`dual-wield`:  {DualWield, true, false},
+		`whisper`:     {Whisper, true, false},
+		`who`:         {Who, true, false},
+		`zap`:         {Zap, false, true}, // Admin only
 		// Special command only used upon creating a new account
 		`start`: {Start, false, false},
 	}
@@ -270,20 +270,16 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		}
 	}
 
-	// Try moving if they aren't disabled
-	// This also processes shortened versions of exit names, such as "ea" instead of "east"
-	if !userDisabled {
+	// "go" attempt
+	start := time.Now()
+	defer func() {
+		util.TrackTime(`usr-cmd[go]`, time.Since(start).Seconds())
+	}()
 
-		start := time.Now()
-		defer func() {
-			util.TrackTime(`usr-cmd[go]`, time.Since(start).Seconds())
-		}()
-
-		if handled, err := Go(cmd, userId); handled {
-			return handled, err
-		}
-
+	if handled, err := Go(cmd, userId); handled {
+		return handled, err
 	}
+	// end "go" attempt
 
 	if emoteText, ok := emoteAliases[cmd]; ok {
 		handled, err := Emote(emoteText, userId)

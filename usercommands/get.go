@@ -187,6 +187,16 @@ func Get(rest string, userId int) (bool, error) {
 		// Check whether the user has an item in their inventory that matches
 		matchItem, found := room.FindOnFloor(rest, getFromStash)
 
+		// Check if user is specifying an item they stashed
+		if !found && !getFromStash {
+			stashItemMatch, stashFound := room.FindOnFloor(rest, true)
+			if stashFound && stashItemMatch.StashedBy == userId {
+				found = true
+				getFromStash = true
+				matchItem = stashItemMatch
+			}
+		}
+
 		if !found {
 			user.SendText(fmt.Sprintf("You don't see a %s around.", rest))
 		} else {
@@ -197,6 +207,11 @@ func Get(rest string, userId int) (bool, error) {
 			}
 
 			user.Character.CancelBuffsWithFlag(buffs.Hidden) // No longer sneaking
+
+			// If it was in the stash, remove the stash owner tag
+			if getFromStash {
+				matchItem.StashedBy = 0
+			}
 
 			if user.Character.StoreItem(matchItem) {
 
@@ -213,14 +228,23 @@ func Get(rest string, userId int) (bool, error) {
 
 				}
 
-				user.SendText(
-					fmt.Sprintf(`You pick up the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
-				)
-				room.SendText(
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
-					userId,
-				)
-
+				if getFromStash {
+					user.SendText(
+						fmt.Sprintf(`You dig out the <ansi fg="itemname">%s</ansi> from where it was stashed.`, matchItem.DisplayName()),
+					)
+					room.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> digs around in the area and picks something up...`, user.Character.Name),
+						userId,
+					)
+				} else {
+					user.SendText(
+						fmt.Sprintf(`You pick up the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
+					)
+					room.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
+						userId,
+					)
+				}
 				scripting.TryItemScriptEvent(`onFound`, matchItem, userId)
 
 			} else {

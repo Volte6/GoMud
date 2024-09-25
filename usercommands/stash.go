@@ -30,6 +30,9 @@ func Stash(rest string, userId int) (bool, error) {
 		user.SendText(fmt.Sprintf("You don't have a %s to stash.", rest))
 	} else {
 		// Swap the item location
+
+		matchItem.StashedBy = userId
+
 		room.AddItem(matchItem, true)
 		user.Character.RemoveItem(matchItem)
 

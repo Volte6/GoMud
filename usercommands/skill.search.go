@@ -6,6 +6,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
@@ -83,7 +84,7 @@ func Search(rest string, userId int) (bool, error) {
 			if !item.IsValid() {
 				room.RemoveItem(item, true)
 			}
-			name := item.DisplayName() + ` <ansi fg="black-bold">(stashed)</ansi>`
+			name := item.DisplayName() + ` <ansi fg="item-stashed">(stashed)</ansi>`
 			stashedItems = append(stashedItems, name)
 		}
 
@@ -164,9 +165,13 @@ func Search(rest string, userId int) (bool, error) {
 
 		}
 
-		//stashedItems := map[string][]string{}
-		//stashedItems["Stashed here:"] = room.Stash
-		textOut, _ := templates.Process("descriptions/ontheground", stashedItems)
+		groundDetails := map[string]any{
+			`GroundStuff`: stashedItems,
+			`IsDark`:      room.GetBiome().IsDark(),
+			`IsNight`:     gametime.IsNight(),
+		}
+
+		textOut, _ := templates.Process("descriptions/ontheground", groundDetails)
 		user.SendText(textOut)
 	}
 

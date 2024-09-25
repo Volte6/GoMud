@@ -21,6 +21,10 @@ function onCommand(cmd, rest, user, room) {
         fullCommand = cmd + ' ' + rest;
     }
 
+    if ( commandNow >= 2 ) {
+        return false;
+    }
+    
     if ( teach_commands[commandNow] == fullCommand ) {
         
         if ( fullCommand == "equip cap" ) {

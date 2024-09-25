@@ -47,6 +47,11 @@ func Go(rest string, userId int) (bool, error) {
 
 	if goRoomId > 0 || exitName != `` {
 
+		if user.Character.IsDisabled() {
+			user.SendText("You are unable to do that while downed.")
+			return true, nil
+		}
+
 		actionCost := 10
 		encumbered := false
 		if len(user.Character.Items) > user.Character.CarryCapacity() {
@@ -57,9 +62,9 @@ func Go(rest string, userId int) (bool, error) {
 		if !user.Character.DeductActionPoints(actionCost) {
 
 			if encumbered {
-				user.SendText("You're too tired to move!")
+				user.SendText("You're too encumbered to move (<ansi fg=\"command\">help encumbrance</ansi>)!")
 			} else {
-				user.SendText("You're too encumbered to move!")
+				user.SendText("You're too tired to move (slow down)!")
 			}
 
 			return true, nil

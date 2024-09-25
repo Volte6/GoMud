@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
@@ -30,84 +31,69 @@ func Killstats(rest string, userId int) (bool, error) {
 		`<ansi fg="red">%s</ansi>`,
 		`<ansi fg="230">%s</ansi>`,
 	}
+
 	totalKills := 0
+
+	mobKills := map[string]int{}
+	raceKills := map[string]int{}
+	areaKills := map[string]int{}
+
+	for mid, kCt := range user.Character.KD.Kills {
+
+		if mobSpec := mobs.GetMobSpec(mobs.MobId(mid)); mobSpec != nil {
+
+			totalKills += kCt
+
+			// Populate mob kills
+			mobKills[mobSpec.Character.Name] = mobKills[mobSpec.Character.Name] + kCt
+
+			// Populate race kills
+			if raceInfo := races.GetRace(mobSpec.Character.RaceId); raceInfo != nil {
+				raceKills[raceInfo.Name] = raceKills[raceInfo.Name] + kCt
+			}
+
+			// Populate area kills
+			areaKills[mobSpec.Zone] = areaKills[mobSpec.Zone] + kCt
+		}
+	}
+
+	renderStats := mobKills
 
 	if rest == `race` || rest == `races` {
 
-		tableTitle += ` by Race`
-
-		headers = []string{`Race Name`, `Quantity`, `%`}
-
-		totalKills = user.Character.KD.GetRaceKills()
-
-		for raceName, killCt := range user.Character.KD.RaceKills {
-			rows = append(rows, []string{
-				raceName,
-				fmt.Sprintf("%d", killCt),
-				fmt.Sprintf("%2.f%%", float64(killCt)/float64(totalKills)*100),
-			})
-		}
-
-		rows = append(rows, []string{
-			``,
-			``,
-			``,
-		})
-
+		renderStats = raceKills
 		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats area</ansi>`)
 
 	} else if rest == `zone` || rest == `zones` || rest == `area` || rest == `areas` {
 
-		tableTitle += ` by Area`
-
-		headers = []string{`Area Name`, `Quantity`, `%`}
-
-		totalKills = user.Character.KD.GetRaceKills()
-
-		for zoneName, killCt := range user.Character.KD.ZoneKills {
-			rows = append(rows, []string{
-				zoneName,
-				fmt.Sprintf("%d", killCt),
-				fmt.Sprintf("%2.f%%", float64(killCt)/float64(totalKills)*100),
-			})
-		}
-
-		rows = append(rows, []string{
-			``,
-			``,
-			``,
-		})
-
+		renderStats = areaKills
 		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats race</ansi>`)
 
 	} else {
 
-		tableTitle += ` by Mob`
+		rest = `mob` // default to mob
 
-		headers = []string{`Mob Name`, `Quantity`, `%`}
-
-		totalKills = user.Character.KD.GetMobKills()
-
-		for mobId, killCt := range user.Character.KD.Kills {
-			if mobSpec := mobs.GetMobSpec(mobs.MobId(mobId)); mobSpec != nil {
-
-				rows = append(rows, []string{
-					mobSpec.Character.Name,
-					fmt.Sprintf("%d", killCt),
-					fmt.Sprintf("%2.f%%", float64(killCt)/float64(totalKills)*100),
-				})
-			}
-		}
-
-		rows = append(rows, []string{
-			``,
-			``,
-			``,
-		})
-
+		renderStats = mobKills
 		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats area</ansi>`)
 		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats race</ansi>`)
 	}
+
+	headers = []string{strings.Title(rest), `Quantity`, `%`}
+
+	for name, killCt := range renderStats {
+
+		rows = append(rows, []string{
+			name,
+			fmt.Sprintf("%d", killCt),
+			fmt.Sprintf("%2.f%%", float64(killCt)/float64(totalKills)*100),
+		})
+	}
+
+	rows = append(rows, []string{
+		``,
+		``,
+		``,
+	})
 
 	rows = append(rows, []string{
 		`Total Kills`,
@@ -129,7 +115,7 @@ func Killstats(rest string, userId int) (bool, error) {
 		})
 	}
 
-	searchResultsTable := templates.GetTable(tableTitle, headers, rows, formatting)
+	searchResultsTable := templates.GetTable(tableTitle+` by `+strings.Title(rest), headers, rows, formatting)
 	tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
 	tplTxt += fmt.Sprintf("Also try: %s\n", strings.Join(otherSuggestions, `, `))
 	user.SendText(tplTxt)

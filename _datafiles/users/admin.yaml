@@ -64,12 +64,12 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 17
+      roundcounter: 20
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 25
+      roundcounter: 28
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -102,17 +102,10 @@ character:
       1: 5
       2: 4
       58: 8
-    racekills:
-      dummy: 8
-      human: 4
-      rodent: 5
-    zonekills:
-      frostfang: 9
-      tutorial: 8
     totaldeaths: 1
   buffids: []
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/0THiwmAYAwD4YVO+FPBa/dfTBQfJPBxs4oQLrePIM2Qdf+pf6HY0QMV7dczAAD//9cgnsdPAAAA
+roommemoryblob: H4sIAAAAAAAA/0zHgQmAUAwD0YVO+KngtfsvJojoJ4HHhTCrOD6CNEPW87f+heJEL1S0N/sOAAD//1hmAOFPAAAA
 configoptions: {}

@@ -58,6 +58,7 @@ color8:
   item: 2
   itemname: 2
   itemdesc: 2
+  item-stashed: 8
   questname: 6
   xp: 93 # Bright yellow
   experience: 93 # Bright yellow
@@ -184,6 +185,7 @@ color256:
   item: 2
   itemname: 2
   itemdesc: 79
+  item-stashed: 8
   questname: 6
   xp: 11 # Bright yellow
   experience: 11 # Bright yellow

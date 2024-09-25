@@ -353,7 +353,9 @@ func lookRoom(userId int, roomId int, secretLook bool) {
 	}
 
 	textOut, _ = templates.Process("descriptions/who", details)
-	user.SendText(textOut)
+	if len(textOut) > 0 {
+		user.SendText(textOut)
+	}
 
 	groundStuff := []string{}
 	for containerName, container := range room.Containers {
@@ -384,13 +386,27 @@ func lookRoom(userId int, roomId int, secretLook bool) {
 		groundStuff = append(groundStuff, item.DisplayName())
 	}
 
+	// Find stashed items
+	for _, item := range room.Stash {
+		if !item.IsValid() {
+			room.RemoveItem(item, true)
+		}
+		if item.StashedBy != userId {
+			continue
+		}
+		name := item.DisplayName() + ` <ansi fg="item-stashed">(stashed)</ansi>`
+		groundStuff = append(groundStuff, name)
+	}
+
 	groundDetails := map[string]any{
 		`GroundStuff`: groundStuff,
 		`IsDark`:      room.GetBiome().IsDark(),
 		`IsNight`:     gametime.IsNight(),
 	}
 	textOut, _ = templates.Process("descriptions/ontheground", groundDetails)
-	user.SendText(textOut)
+	if len(textOut) > 0 {
+		user.SendText(textOut)
+	}
 
 	textOut, _ = templates.Process("descriptions/exits", details)
 	user.SendText(textOut)

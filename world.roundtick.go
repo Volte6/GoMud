@@ -354,7 +354,7 @@ func (w *World) PruneBuffs() {
 					for _, buffInfo := range buffsToPrune {
 						scripting.TryBuffScriptEvent(`onEnd`, uId, 0, buffInfo.BuffId)
 
-						if buffInfo.BuffId == 0 {
+						if buffInfo.BuffId == 0 { // Log them out // logoff // logout
 							logOff = true
 						}
 					}

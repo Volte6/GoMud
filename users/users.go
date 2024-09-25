@@ -278,6 +278,15 @@ func SetZombieUser(userId int) {
 		u.Character.RemoveBuff(0)
 		u.Character.SetAdjective(`zombie`, true)
 
+		// Prevent guide mob dupes
+		for _, miid := range u.Character.CharmedMobs {
+			if m := mobs.GetInstance(miid); m != nil {
+				if m.MobId == 38 {
+					m.Character.Charmed.RoundsRemaining = 0
+				}
+			}
+		}
+
 		if _, ok := userManager.ZombieConnections[u.connectionId]; ok {
 			return
 		}

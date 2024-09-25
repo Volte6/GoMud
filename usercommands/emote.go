@@ -117,10 +117,13 @@ func Emote(rest string, userId int) (bool, error) {
 
 	if rest[0] == '@' && len(rest) > 1 {
 		rest = rest[1:]
+	} else {
+		user.SendText(fmt.Sprintf(`You Emote: <ansi fg="username">%s</ansi> <ansi fg="20">%s</ansi>`, user.Character.Name, rest))
 	}
 
 	room.SendText(
 		fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="20">%s</ansi>`, user.Character.Name, rest),
+		userId,
 	)
 
 	return true, nil

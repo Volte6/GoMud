@@ -173,7 +173,7 @@ func (c *ConnectionTracker) SendTo(b []byte, ids ...ConnectionId) {
 	}
 
 	if sentCt < 1 {
-		slog.Info("message sent to nobody", "message", string(b))
+		//slog.Info("message sent to nobody", "message", strings.Replace(string(b), "\033", "ESC", -1))
 	}
 }
 
