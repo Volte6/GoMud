@@ -106,9 +106,9 @@ func Suicide(rest string, mobId int) (bool, error) {
 				// Not in a party? Great give them the xp.
 				if p == nil {
 
-					user.Character.KD.AddMobKill(int(mob.MobId))
-					user.Character.KD.AddRaceKill(mob.Character.Race())
-					user.Character.KD.AddZoneKill(mob.Character.Zone)
+					if mob.Character.Zone != `Training` { // Don't track any kills in the training zone
+						user.Character.KD.AddMobKill(int(mob.MobId))
+					}
 
 					xpScaler := float64(mob.Character.Level) / float64(totalPlayerLevels)
 					//if xpScaler > 1 {
@@ -186,8 +186,9 @@ func Suicide(rest string, mobId int) (bool, error) {
 
 					if user := users.GetByUserId(memberId); user != nil {
 
-						user.Character.KD.AddMobKill(int(mob.MobId))
-						user.Character.KD.AddRaceKill(mob.Character.Race())
+						if mob.Character.Zone != `Training` { // Don't track any kills in the training zone
+							user.Character.KD.AddMobKill(int(mob.MobId))
+						}
 
 						grantXP, xpScale := user.Character.GrantXP(xpSplit)
 

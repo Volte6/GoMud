@@ -479,7 +479,18 @@ func (a ScriptActor) GetMobKills(mobId int) int {
 }
 
 func (a ScriptActor) GetRaceKills(race string) int {
-	return a.characterRecord.KD.GetRaceKills(race)
+
+	raceKills := map[string]int{}
+
+	for mid, kCt := range a.characterRecord.KD.Kills {
+		if mobSpec := mobs.GetMobSpec(mobs.MobId(mid)); mobSpec != nil {
+			if raceInfo := races.GetRace(mobSpec.Character.RaceId); raceInfo != nil {
+				raceKills[raceInfo.Name] = raceKills[raceInfo.Name] + kCt
+			}
+		}
+	}
+
+	return raceKills[race]
 }
 
 func (a ScriptActor) GetHealth() int {
