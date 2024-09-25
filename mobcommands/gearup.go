@@ -52,7 +52,6 @@ func Gearup(rest string, mobId int) (bool, error) {
 
 		allBackpackItems := mob.Character.GetAllBackpackItems()
 
-		fmt.Println()
 		for _, itm := range allBackpackItems {
 			itmSpec := itm.GetSpec()
 
@@ -90,7 +89,6 @@ func Gearup(rest string, mobId int) (bool, error) {
 				}
 			}
 		}
-		fmt.Println()
 	}
 
 	return true, nil
