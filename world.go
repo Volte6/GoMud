@@ -1136,11 +1136,13 @@ func (w *World) TurnTick() {
 			continue
 		}
 
-		if action.Action == `wildfire` {
-			if room.Burn(6) {
+		if rooms.EffectType(action.Action) == rooms.Wildfire {
+
+			if room.AddEffect(rooms.Wildfire) {
 				room.SendText(colorpatterns.ApplyColorPattern(`A wildfire burns through the area!`, `flame`, colorpatterns.Stretch))
 				room.SendTextToExits(`You notice a `+colorpatterns.ApplyColorPattern(`wildfire`, `flame`, colorpatterns.Stretch)+` start!`, false)
 			}
+
 		}
 
 		// Get the parts of the command
@@ -1204,7 +1206,7 @@ func (w *World) TurnTick() {
 
 			events.Requeue(events.RoomAction{
 				RoomId: room.RoomId,
-				Action: `wildfire`,
+				Action: string(rooms.Wildfire),
 			})
 
 			if hitPlayers {

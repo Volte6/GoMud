@@ -520,7 +520,7 @@ Type your commands below.
 
                 css = [];
                 while ((match = propertyRegex.exec(fullTag)) !== null) {
-                    ansiColor = colorAliases[match[2]] ? colorAliases[match[2]] : match[2];
+                    ansiColor = colorAliases[match[2]] ? colorAliases[match[2]] : Number(match[2]);
                     css.push(match[1] +ansiColor)
                 }
 
@@ -836,7 +836,7 @@ Type your commands below.
             textOutput.innerHTML += message;
 
             // Keep scroll back from getting too long.
-            var maxElements = 5000;
+            var maxElements = 750;
             while (textOutput.children.length > maxElements) {
                 textOutput.removeChild(textOutput.firstChild);
             }

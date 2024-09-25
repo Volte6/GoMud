@@ -78,6 +78,7 @@ var (
 			symbol:      '⌂',
 			litArea:     true,
 			description: `A standard dwelling, houses can appear almost anywhere. They are usually safe, but may be abandoned or occupied by hostile creatures.`,
+			burns:       true,
 		},
 		`shore`: {
 			name:        `Shore`,
