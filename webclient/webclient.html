@@ -712,7 +712,7 @@ Type your commands below.
 
             if ( cmd == "BARMODAL:" ) { // Tinymap update
                 console.log(ansiTagsToHtml(cmdString.substring(9)))
-                createModal(`prompt`, ansiTagsToHtml(cmdString.substring(9)) );
+                createModal(`prompt (testing)`, ansiTagsToHtml(cmdString.substring(9)) );
                 return true;
             }
 
@@ -1150,6 +1150,7 @@ Type your commands below.
             var closeButton = document.createElement('span');
             closeButton.innerHTML = '&times;';
             closeButton.style.position = 'absolute';
+            closeButton.style.color = '#000';
             closeButton.style.top = '4px';
             closeButton.style.right = '12px';
             closeButton.style.cursor = 'pointer';
