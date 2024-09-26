@@ -428,6 +428,11 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 
 	}
 
+	events.AddToQueue(events.WebClientCommand{
+		ConnectionId: u.ConnectionId(),
+		Text:         "BARMODAL:" + promptOut.String(),
+	})
+
 	if fullRedraw {
 		unsent, suggested := u.GetUnsentText()
 		if len(suggested) > 0 {

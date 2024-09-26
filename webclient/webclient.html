@@ -706,7 +706,13 @@ Type your commands below.
             }
 
             if ( cmd == "MAPMODAL:" ) { // Tinymap update
-                createModal(`minimap`, cmdString.substring(9) );
+                createModal(`minimap`, cmdString.substring(9));
+                return true;
+            }
+
+            if ( cmd == "BARMODAL:" ) { // Tinymap update
+                console.log(ansiTagsToHtml(cmdString.substring(9)))
+                createModal(`prompt`, ansiTagsToHtml(cmdString.substring(9)) );
                 return true;
             }
 
@@ -1100,12 +1106,12 @@ Type your commands below.
                 // Update the text content
                 var content = existingModal.querySelector('.modal-content');
                 if (content) {
-                content.innerText = text;
-                // Resize the modal to fit the new content
-                existingModal.style.width = 'auto';
-                existingModal.style.height = 'auto';
-                // Reset font size to initial value
-                content.style.fontSize = content.initialFontSize + 'px';
+                    content.innerHTML = text;
+                    // Resize the modal to fit the new content
+                    existingModal.style.width = 'auto';
+                    existingModal.style.height = 'auto';
+                    // Reset font size to initial value
+                    content.style.fontSize = content.initialFontSize + 'px';
                 }
                 // Optionally bring the modal to the front
                 existingModal.style.zIndex = 1000;
@@ -1116,7 +1122,8 @@ Type your commands below.
             var modal = document.createElement('div');
             modal.setAttribute('data-modal-name', name); // Set data attribute to identify
             modal.style.position = 'absolute'; // Absolute positioning for draggable
-            modal.style.backgroundColor = 'white';
+            modal.style.backgroundColor = '#1e1e1e';
+            modal.style.color = textOutput.style.color;
             modal.style.boxSizing = 'border-box';
             modal.style.border = '1px solid #ccc';
             modal.style.borderRadius = '8px';
@@ -1134,9 +1141,10 @@ Type your commands below.
             header.style.cursor = 'move';
             header.style.padding = '10px';
             header.style.backgroundColor = '#f1f1f1';
+            header.style.color = '#1e1e1e';
             header.style.borderBottom = '1px solid #ccc';
             header.style.userSelect = 'none';
-            header.innerText = name; // Display the name in the header
+            header.innerHTML = name; // Display the name in the header
 
             // Create the close button
             var closeButton = document.createElement('span');
