@@ -96,8 +96,9 @@ var (
 		`recover`:     {Recover, false, false},
 		`reload`:      {Reload, true, true}, // Admin only
 		`remove`:      {Remove, false, false},
-		`rename`:      {Rename, false, true}, // Admin only
-		`room`:        {Room, false, true},   // Admin only
+		`rename`:      {Rename, false, true},     // Admin only
+		`redescribe`:  {Redescribe, false, true}, // Admin only
+		`room`:        {Room, false, true},       // Admin only
 		`save`:        {Save, true, false},
 		`say`:         {Say, true, false},
 		`scribe`:      {Scribe, false, false},

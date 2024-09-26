@@ -281,18 +281,21 @@ func (i *Item) Rename(newName string, diplayNameOrStyle ...string) {
 	i.Spec.Name = newName
 
 	if len(diplayNameOrStyle) > 0 {
-
-		dispName := diplayNameOrStyle[0]
-
-		if dispName[0:1] == `:` && colorpatterns.IsValidPattern(dispName[1:]) {
-			i.Spec.DisplayName = colorpatterns.ApplyColorPattern(newName, dispName[1:])
-		} else {
-			i.Spec.DisplayName = dispName
-		}
+		// Just in case color short tags are being used...
+		i.Spec.DisplayName = util.ConvertColorShortTags(diplayNameOrStyle[0])
 
 	} else {
 		i.Spec.DisplayName = ``
 	}
+}
+
+func (i *Item) Redescribe(newDescription string) {
+	if i.Spec == nil {
+		specCopy := *GetItemSpec(i.ItemId)
+		i.Spec = &specCopy
+	}
+
+	i.Spec.Description = newDescription
 }
 
 func (i *Item) IsEnchanted() bool {
@@ -487,7 +490,11 @@ func (i *Item) DisplayName() string {
 
 	spec := i.GetSpec()
 	if spec.DisplayName != `` {
-		return prefix + spec.DisplayName + suffix
+		if spec.DisplayName[0:1] == `:` {
+			return prefix + colorpatterns.ApplyColorPattern(spec.Name, spec.DisplayName[1:]) + suffix
+		} else {
+			return prefix + spec.DisplayName + suffix
+		}
 	}
 	return prefix + spec.Name + suffix
 }
