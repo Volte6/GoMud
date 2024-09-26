@@ -226,18 +226,18 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool, forcePromptType ...string
 	u.lock.RLock()
 	defer u.lock.RUnlock()
 
-	promptOut := strings.Builder{}
+	promptOut := ``
 
 	if len(forcePromptType) == 0 || forcePromptType[0] != `mprompt` {
 		if u.activePrompt != nil {
 
 			if activeQuestion := u.activePrompt.GetNextQuestion(); activeQuestion != nil {
-				promptOut.WriteString(activeQuestion.String())
+				promptOut = activeQuestion.String()
 			}
 		}
 	}
 
-	if promptOut.Len() == 0 {
+	if len(promptOut) == 0 {
 
 		var customPrompt any = nil
 		var inCombat bool = u.Character.Aggro != nil
@@ -264,171 +264,7 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool, forcePromptType ...string
 			ansiPrompt = promptDefaultCompiled
 		}
 
-		//
-		// TODO: Need to optimize this section to only calculate/replace when the value is actually used.
-		//
-		var currentXP, tnlXP int = -1, -1
-		var hpPct, mpPct int = -1, -1
-		var acPt int = u.Character.ActionPoints
-		var hpClass, mpClass string
-
-		promptLen := len(ansiPrompt)
-		tagStartPos := -1
-
-		for i := 0; i < promptLen; i++ {
-			if ansiPrompt[i] == '{' {
-				tagStartPos = i
-				continue
-			}
-			if ansiPrompt[i] == '}' {
-
-				switch ansiPrompt[tagStartPos : i+1] {
-
-				case "{\\n}":
-					promptOut.WriteString("\n")
-				case "{hp}":
-					if len(hpClass) == 0 {
-						hpClass = fmt.Sprintf(`health-%d`, util.QuantizeTens(u.Character.Health, u.Character.HealthMax.Value))
-					}
-					promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, hpClass, u.Character.Health))
-
-				case "{hp:-}":
-					promptOut.WriteString(strconv.Itoa(u.Character.Health))
-				case "{HP}":
-					if len(hpClass) == 0 {
-						hpClass = fmt.Sprintf(`health-%d`, util.QuantizeTens(u.Character.Health, u.Character.HealthMax.Value))
-					}
-					promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, hpClass, u.Character.HealthMax.Value))
-				case "{HP:-}":
-					promptOut.WriteString(strconv.Itoa(u.Character.HealthMax.Value))
-				case "{hp%}":
-					if hpPct == -1 {
-						hpPct = int(math.Floor(float64(u.Character.Health) / float64(u.Character.HealthMax.Value) * 100))
-					}
-					if len(hpClass) == 0 {
-						hpClass = fmt.Sprintf(`health-%d`, util.QuantizeTens(u.Character.Health, u.Character.HealthMax.Value))
-					}
-					promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d%%</ansi>`, hpClass, hpPct))
-
-				case "{hp%:-}":
-					if hpPct == -1 {
-						hpPct = int(math.Floor(float64(u.Character.Health) / float64(u.Character.HealthMax.Value) * 100))
-					}
-					promptOut.WriteString(strconv.Itoa(hpPct))
-					promptOut.WriteString(`%`)
-
-				case "{mp}":
-					if len(mpClass) == 0 {
-						mpClass = fmt.Sprintf(`mana-%d`, util.QuantizeTens(u.Character.Mana, u.Character.ManaMax.Value))
-					}
-					promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, mpClass, u.Character.Mana))
-
-				case "{mp:-}":
-					promptOut.WriteString(strconv.Itoa(u.Character.Mana))
-
-				case "{MP}":
-					if len(mpClass) == 0 {
-						mpClass = fmt.Sprintf(`mana-%d`, util.QuantizeTens(u.Character.Mana, u.Character.ManaMax.Value))
-					}
-					promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, mpClass, u.Character.ManaMax.Value))
-
-				case "{MP:-}":
-					promptOut.WriteString(strconv.Itoa(u.Character.ManaMax.Value))
-
-				case "{mp%}":
-					if mpPct == -1 {
-						mpPct = int(math.Floor(float64(u.Character.Mana) / float64(u.Character.ManaMax.Value) * 100))
-					}
-					if len(mpClass) == 0 {
-						mpClass = fmt.Sprintf(`mana-%d`, util.QuantizeTens(u.Character.Mana, u.Character.ManaMax.Value))
-					}
-					promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d%%</ansi>`, mpClass, mpPct))
-
-				case "{mp%:-}":
-					if mpPct == -1 {
-						mpPct = int(math.Floor(float64(u.Character.Mana) / float64(u.Character.ManaMax.Value) * 100))
-					}
-					promptOut.WriteString(strconv.Itoa(mpPct))
-					promptOut.WriteString(`%`)
-
-				case "{ap}":
-					promptOut.WriteString(strconv.Itoa(acPt))
-
-				case "{xp}":
-					if currentXP == -1 && tnlXP == -1 {
-						currentXP, tnlXP = u.Character.XPTNLActual()
-					}
-					promptOut.WriteString(strconv.Itoa(currentXP))
-
-				case "{XP}":
-					if currentXP == -1 && tnlXP == -1 {
-						currentXP, tnlXP = u.Character.XPTNLActual()
-					}
-					promptOut.WriteString(strconv.Itoa(tnlXP))
-
-				case "{xp%}":
-					if currentXP == -1 && tnlXP == -1 {
-						currentXP, tnlXP = u.Character.XPTNLActual()
-					}
-					tnlPercent := int(math.Floor(float64(currentXP) / float64(tnlXP) * 100))
-					promptOut.WriteString(strconv.Itoa(tnlPercent))
-					promptOut.WriteString(`%`)
-
-				case "{h}":
-					hiddenFlag := ``
-					if u.Character.HasBuffFlag(buffs.Hidden) {
-						hiddenFlag = `H`
-					}
-					promptOut.WriteString(hiddenFlag)
-
-				case "{a}":
-					alignClass := u.Character.AlignmentName()
-					promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignClass, alignClass[:1]))
-
-				case "{A}":
-					alignClass := u.Character.AlignmentName()
-					promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignClass, alignClass))
-
-				case "{g}":
-					promptOut.WriteString(strconv.Itoa(u.Character.Gold))
-
-				case "{tp}":
-					promptOut.WriteString(strconv.Itoa(u.Character.TrainingPoints))
-
-				case "{sp}":
-					promptOut.WriteString(strconv.Itoa(u.Character.StatPoints))
-
-				case "{i}":
-					promptOut.WriteString(strconv.Itoa(len(u.Character.Items)))
-
-				case "{I}":
-					promptOut.WriteString(strconv.Itoa(u.Character.CarryCapacity()))
-
-				case "{lvl}":
-					promptOut.WriteString(strconv.Itoa(u.Character.Level))
-
-				case "{w}":
-					if inCombat {
-						promptOut.WriteString(strconv.Itoa(u.Character.Aggro.RoundsWaiting))
-					}
-
-				case "{t}":
-					gd := gametime.GetDate()
-					promptOut.WriteString(gd.String(true))
-
-				case "{T}":
-					gd := gametime.GetDate()
-					promptOut.WriteString(gd.String())
-
-				}
-				tagStartPos = -1
-				continue
-			}
-
-			if tagStartPos == -1 {
-				promptOut.WriteByte(ansiPrompt[i])
-			}
-		}
+		promptOut = u.ProcessPromptString(ansiPrompt)
 
 	}
 
@@ -437,7 +273,179 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool, forcePromptType ...string
 		if len(suggested) > 0 {
 			suggested = `<ansi fg="suggested-text">` + suggested + `</ansi>`
 		}
-		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + promptOut.String() + unsent + suggested
+		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + promptOut + unsent + suggested
+	}
+
+	return promptOut
+}
+
+func (u *UserRecord) ProcessPromptString(promptStr string) string {
+
+	promptOut := strings.Builder{}
+
+	var currentXP, tnlXP int = -1, -1
+	var hpPct, mpPct int = -1, -1
+	var hpClass, mpClass string
+
+	promptLen := len(promptStr)
+	tagStartPos := -1
+
+	for i := 0; i < promptLen; i++ {
+		if promptStr[i] == '{' {
+			tagStartPos = i
+			continue
+		}
+		if promptStr[i] == '}' {
+
+			switch promptStr[tagStartPos : i+1] {
+
+			case `{\n}`:
+				promptOut.WriteString("\n")
+
+			case `{hp}`:
+				if len(hpClass) == 0 {
+					hpClass = fmt.Sprintf(`health-%d`, util.QuantizeTens(u.Character.Health, u.Character.HealthMax.Value))
+				}
+				promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, hpClass, u.Character.Health))
+
+			case `{hp:-}`:
+				promptOut.WriteString(strconv.Itoa(u.Character.Health))
+			case `{HP}`:
+				if len(hpClass) == 0 {
+					hpClass = fmt.Sprintf(`health-%d`, util.QuantizeTens(u.Character.Health, u.Character.HealthMax.Value))
+				}
+				promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, hpClass, u.Character.HealthMax.Value))
+			case `{HP:-}`:
+				promptOut.WriteString(strconv.Itoa(u.Character.HealthMax.Value))
+			case `{hp%}`:
+				if hpPct == -1 {
+					hpPct = int(math.Floor(float64(u.Character.Health) / float64(u.Character.HealthMax.Value) * 100))
+				}
+				if len(hpClass) == 0 {
+					hpClass = fmt.Sprintf(`health-%d`, util.QuantizeTens(u.Character.Health, u.Character.HealthMax.Value))
+				}
+				promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d%%</ansi>`, hpClass, hpPct))
+
+			case `{hp%:-}`:
+				if hpPct == -1 {
+					hpPct = int(math.Floor(float64(u.Character.Health) / float64(u.Character.HealthMax.Value) * 100))
+				}
+				promptOut.WriteString(strconv.Itoa(hpPct))
+				promptOut.WriteString(`%`)
+
+			case `{mp}`:
+				if len(mpClass) == 0 {
+					mpClass = fmt.Sprintf(`mana-%d`, util.QuantizeTens(u.Character.Mana, u.Character.ManaMax.Value))
+				}
+				promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, mpClass, u.Character.Mana))
+
+			case `{mp:-}`:
+				promptOut.WriteString(strconv.Itoa(u.Character.Mana))
+
+			case `{MP}`:
+				if len(mpClass) == 0 {
+					mpClass = fmt.Sprintf(`mana-%d`, util.QuantizeTens(u.Character.Mana, u.Character.ManaMax.Value))
+				}
+				promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d</ansi>`, mpClass, u.Character.ManaMax.Value))
+
+			case `{MP:-}`:
+				promptOut.WriteString(strconv.Itoa(u.Character.ManaMax.Value))
+
+			case `{mp%}`:
+				if mpPct == -1 {
+					mpPct = int(math.Floor(float64(u.Character.Mana) / float64(u.Character.ManaMax.Value) * 100))
+				}
+				if len(mpClass) == 0 {
+					mpClass = fmt.Sprintf(`mana-%d`, util.QuantizeTens(u.Character.Mana, u.Character.ManaMax.Value))
+				}
+				promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%d%%</ansi>`, mpClass, mpPct))
+
+			case `{mp%:-}`:
+				if mpPct == -1 {
+					mpPct = int(math.Floor(float64(u.Character.Mana) / float64(u.Character.ManaMax.Value) * 100))
+				}
+				promptOut.WriteString(strconv.Itoa(mpPct))
+				promptOut.WriteString(`%`)
+
+			case `{ap}`:
+				promptOut.WriteString(strconv.Itoa(u.Character.ActionPoints))
+
+			case `{xp}`:
+				if currentXP == -1 && tnlXP == -1 {
+					currentXP, tnlXP = u.Character.XPTNLActual()
+				}
+				promptOut.WriteString(strconv.Itoa(currentXP))
+
+			case `{XP}`:
+				if currentXP == -1 && tnlXP == -1 {
+					currentXP, tnlXP = u.Character.XPTNLActual()
+				}
+				promptOut.WriteString(strconv.Itoa(tnlXP))
+
+			case `{xp%}`:
+				if currentXP == -1 && tnlXP == -1 {
+					currentXP, tnlXP = u.Character.XPTNLActual()
+				}
+				tnlPercent := int(math.Floor(float64(currentXP) / float64(tnlXP) * 100))
+				promptOut.WriteString(strconv.Itoa(tnlPercent))
+				promptOut.WriteString(`%`)
+
+			case `{h}`:
+				hiddenFlag := ``
+				if u.Character.HasBuffFlag(buffs.Hidden) {
+					hiddenFlag = `H`
+				}
+				promptOut.WriteString(hiddenFlag)
+
+			case `{a}`:
+				alignClass := u.Character.AlignmentName()
+				promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignClass, alignClass[:1]))
+
+			case `{A}`:
+				alignClass := u.Character.AlignmentName()
+				promptOut.WriteString(fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignClass, alignClass))
+
+			case `{g}`:
+				promptOut.WriteString(strconv.Itoa(u.Character.Gold))
+
+			case `{tp}`:
+				promptOut.WriteString(strconv.Itoa(u.Character.TrainingPoints))
+
+			case `{sp}`:
+				promptOut.WriteString(strconv.Itoa(u.Character.StatPoints))
+
+			case `{i}`:
+				promptOut.WriteString(strconv.Itoa(len(u.Character.Items)))
+
+			case `{I}`:
+				promptOut.WriteString(strconv.Itoa(u.Character.CarryCapacity()))
+
+			case `{lvl}`:
+				promptOut.WriteString(strconv.Itoa(u.Character.Level))
+
+			case `{w}`:
+				if u.Character.Aggro != nil {
+					promptOut.WriteString(strconv.Itoa(u.Character.Aggro.RoundsWaiting))
+				} else {
+					promptOut.WriteString(`0`)
+				}
+
+			case `{t}`:
+				gd := gametime.GetDate()
+				promptOut.WriteString(gd.String(true))
+
+			case `{T}`:
+				gd := gametime.GetDate()
+				promptOut.WriteString(gd.String())
+
+			}
+			tagStartPos = -1
+			continue
+		}
+
+		if tagStartPos == -1 {
+			promptOut.WriteByte(promptStr[i])
+		}
 	}
 
 	return promptOut.String()
