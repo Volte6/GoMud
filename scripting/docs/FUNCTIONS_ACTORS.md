@@ -63,6 +63,9 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.CharmRemove()](#actorobjectcharmremove)
   - [ActorObject.CharmExpire()](#actorobjectcharmexpire)
   - [ActorObject.GetCharmCount() int](#actorobjectgetcharmcount-int)
+  - [ActorObject.GiveTrainingPoints(amt int)](#actorobjectgivetrainingpointsamt-int)
+  - [ActorObject.GiveStatPoints(amt int)](#actorobjectgivestatpointsamt-int)
+  - [ActorObject.GiveExtraLife()](#actorobjectgiveextralife)
   - [ActorObject.ShorthandId() string](#actorobjectshorthandid-string)
 
 
@@ -438,6 +441,23 @@ Forces the current charm of the mob to expire
 
 ## [ActorObject.GetCharmCount() int](/scripting/actor_func.go)
 Returns the number of charmed creatures in the actors control
+
+## [ActorObject.GiveTrainingPoints(amt int)](/scripting/actor_func.go)
+Increases training points for player
+
+|  Argument | Explanation |
+| --- | --- |
+| amt | How many training points to give |
+
+## [ActorObject.GiveStatPoints(amt int)](/scripting/actor_func.go)
+Increases stat points for player
+
+|  Argument | Explanation |
+| --- | --- |
+| amt | How many stat points to give |
+
+## [ActorObject.GiveExtraLife()](/scripting/actor_func.go)
+Increases extra lives by 1 for the player/actor
 
 ## [ActorObject.ShorthandId() string](/scripting/actor_func.go)
 Returns the shorthand ID string to refer to the mob or player ( `@123` or `#122` )

@@ -539,6 +539,14 @@ func (a ScriptActor) GiveStatPoints(ct int) {
 	a.characterRecord.StatPoints += ct
 }
 
+func (a ScriptActor) GiveExtraLife() {
+	c := configs.GetConfig()
+	a.characterRecord.ExtraLives += 1
+	if a.characterRecord.ExtraLives > int(c.MaxLives) {
+		a.characterRecord.ExtraLives = int(c.MaxLives)
+	}
+}
+
 // ////////////////////////////////////////////////////////
 //
 // Functions only really useful for mobs
