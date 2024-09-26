@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Rename(rest string, userId int) (bool, error) {
+func Redescribe(rest string, userId int) (bool, error) {
 
 	// Load user details
 	user := users.GetByUserId(userId)
@@ -45,18 +45,14 @@ func Rename(rest string, userId int) (bool, error) {
 		oldNameSimple := matchItem.DisplayName()
 		oldName := matchItem.DisplayName()
 
-		if len(args) > 2 {
-			matchItem.Rename(strings.TrimSpace(args[1]), strings.TrimSpace(args[2]))
-		} else {
-			matchItem.Rename(strings.TrimSpace(args[1]))
-		}
+		matchItem.Redescribe(rest)
 
 		matchItem.Validate()
 
 		user.Character.StoreItem(matchItem)
 
 		user.SendText(
-			fmt.Sprintf(`You chant softly and wave your hand over the <ansi fg="item">%s</ansi>. Success! It's now a <ansi fg="item">%s</ansi>`, oldNameSimple, matchItem.DisplayName()),
+			fmt.Sprintf(`You chant softly and wave your hand over the <ansi fg="item">%s</ansi>. Success! It now has a new description!`, oldNameSimple),
 		)
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> chants softly and waves their hand over <ansi fg="item">%s</ansi>, causing it to glow briefly.`, user.Character.Name, oldName),

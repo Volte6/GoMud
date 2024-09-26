@@ -1184,6 +1184,19 @@ func GetSpecificMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, 
 	return ``
 }
 
+func GetRoomCount(zoneName string) int {
+
+	roomManager.RLock()
+	defer roomManager.RUnlock()
+
+	zoneInfo, ok := roomManager.zones[zoneName]
+	if !ok {
+		return 0
+	}
+
+	return len(zoneInfo.RoomIds)
+}
+
 func LoadDataFiles() {
 
 	if err := loadAllRoomZones(); err != nil {

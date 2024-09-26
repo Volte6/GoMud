@@ -1547,6 +1547,17 @@ func (w *World) TurnTick() {
 
 	if turnCt%uint64(c.TurnsPerSecond()) == 0 {
 		w.CheckForLevelUps()
+
+		// TODO: Move this elsewhere
+		// Testing concept, later will be replaced with a `mprompt` (modalprompt)
+		for _, uId := range users.GetOnlineUserIds() {
+			if user := users.GetByUserId(uId); user != nil {
+				events.AddToQueue(events.WebClientCommand{
+					ConnectionId: user.ConnectionId(),
+					Text:         "MODALADD:mprompt (testing)=" + user.GetCommandPrompt(false, `mprompt`),
+				})
+			}
+		}
 	}
 
 	//

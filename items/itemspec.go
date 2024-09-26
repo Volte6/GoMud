@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/fileloader"
 	"github.com/volte6/mud/util"
@@ -297,10 +296,6 @@ func (i *ItemSpec) Validate() error {
 	}
 
 	if i.DisplayName != `` {
-		// a : prefix means it's a color pattern specified that will be applied to the regular name
-		if i.DisplayName[0:1] == `:` {
-			i.DisplayName = colorpatterns.ApplyColorPattern(i.Name, i.DisplayName[1:])
-		}
 		i.DisplayName = util.ConvertColorShortTags(i.DisplayName)
 	}
 

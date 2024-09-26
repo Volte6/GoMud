@@ -15,7 +15,8 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ItemObject.NameComplex() string](#itemobjectnamecomplex-string)
   - [ItemObject.SetTempData(key string, value any)](#itemobjectsettempdatakey-string-value-any)
   - [ItemObject.GetTempData(key string) any](#itemobjectgettempdatakey-string-any)
-  - [ItemObject.ShorthandId() string](#itemobjectshorthandid-string)
+  - [ItemObject.Rename(newName string \[, displayNameOrStyle string\])](#itemobjectrenamenewname-string--displaynameorstyle-string)
+  - [ItemObject.Redescribe(newDescription string)](#itemobjectredescribenewdescription-string)
 
 ## [CreateItem(itemId int) ItemObject ](/scripting/item_func.go)
 Creates a new instance of an item and returns it.
@@ -83,5 +84,17 @@ Sets temporary data of any sort on the item. This data is not saved/loaded when 
 | key | The name to retrieve data under. |
 
 
-## [ItemObject.ShorthandId() string](/scripting/item_func.go)
-Returns the shorthand ID string to refer to the item ( `!123` )
+## [ItemObject.Rename(newName string [, displayNameOrStyle string])](/scripting/item_func.go)
+Renames the item, also optionally provide a fancy name or colorpattern
+
+|  Argument | Explanation |
+| --- | --- |
+| newName | The plaintext name. |
+| displayNameOrStyle | A fancy name in ansi tags, color short tags, or a pattern like :flame |
+
+## [ItemObject.Redescribe(newDescription string)](/scripting/item_func.go)
+Change the description for an item
+
+|  Argument | Explanation |
+| --- | --- |
+| newDescription | The plaintext new description. |

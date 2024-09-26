@@ -67,6 +67,8 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GiveStatPoints(amt int)](#actorobjectgivestatpointsamt-int)
   - [ActorObject.GiveExtraLife()](#actorobjectgiveextralife)
   - [ActorObject.ShorthandId() string](#actorobjectshorthandid-string)
+  - [ActorObject.WebClientModalOpen(name string, value string)](#actorobjectwebclientmodalopenname-string-value-string)
+  - [ActorObject.WebClientModalClose(name string)](#actorobjectwebclientmodalclosename-string)
 
 
 
@@ -461,3 +463,19 @@ Increases extra lives by 1 for the player/actor
 
 ## [ActorObject.ShorthandId() string](/scripting/actor_func.go)
 Returns the shorthand ID string to refer to the mob or player ( `@123` or `#122` )
+
+## [ActorObject.WebClientModalOpen(name string, value string)](/scripting/actor_func.go)
+Opens a modal and populates it with content, IF the user is on a webclient
+
+|  Argument | Explanation |
+| --- | --- |
+| name | title of the modal |
+| value | content of the modal |
+
+## [ActorObject.WebClientModalClose(name string)](/scripting/actor_func.go)
+Closes a modal if one by the name exists, IF the user is on a webclient
+
+|  Argument | Explanation |
+| --- | --- |
+| name | title of the modal to close |
+

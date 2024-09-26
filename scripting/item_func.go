@@ -95,6 +95,14 @@ func (i ScriptItem) ShorthandId() string {
 	return i.itemRecord.ShorthandId()
 }
 
+func (i ScriptItem) Rename(newName string, displayNameOrStyle ...string) {
+	i.itemRecord.Rename(newName, displayNameOrStyle...)
+}
+
+func (i ScriptItem) Redescribe(newDescription string) {
+	i.itemRecord.Redescribe(newDescription)
+}
+
 // Converts an item into a ScriptItem for use in the scripting engine
 func GetItem(i items.Item) *ScriptItem {
 	sItm := newScriptItem(i)

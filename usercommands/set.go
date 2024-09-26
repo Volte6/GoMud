@@ -203,6 +203,37 @@ func Set(rest string, userId int) (bool, error) {
 
 	}
 
+	if setTarget == `mprompt` {
+
+		if len(args) < 1 {
+			currentPrompt := user.GetConfigOption(`mprompt`)
+			if currentPrompt == nil {
+				currentPrompt = users.PromptDefault
+			}
+			user.SendText("Your current mprompt:\n")
+			user.SendText(currentPrompt.(string))
+			user.SendText("\n" + `Type <ansi fg="command">help set-prompt</ansi> for more info on customizing prompts.` + "\n")
+			return true, nil
+		}
+
+		promptStr := rest[len(setTarget)+1:]
+
+		if promptStr == `default` {
+			user.SetConfigOption(`mprompt`, nil)
+			user.SetConfigOption(`mprompt-compiled`, nil)
+		} else if promptStr == `none` {
+			user.SetConfigOption(`mprompt`, ``)
+			user.SetConfigOption(`mprompt-compiled`, ``)
+		} else {
+			user.SetConfigOption(`mprompt`, promptStr)
+			user.SetConfigOption(`mprompt-compiled`, util.ConvertColorShortTags(promptStr))
+		}
+
+		user.SendText("mprompt set.")
+		return true, nil
+
+	}
+
 	// Are they setting a macro?
 	if len(setTarget) == 2 && setTarget[0] == '=' {
 		macroNum, _ := strconv.Atoi(string(args[0][1]))
