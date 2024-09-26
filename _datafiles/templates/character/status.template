@@ -12,7 +12,7 @@
    <ansi fg="yellow">Exp:    </ansi>{{ printf "%-22s" ( tnl .UserId )              }}  └──────────────────────────────────────────┘
    <ansi fg="yellow">Health: </ansi>{{ printf "%s" $hpDisplay                   }}  ┌─ <ansi fg="black-bold">.:</ansi><ansi fg="20">Wealth</ansi> ────────┐ ┌─ <ansi fg="black-bold">.:</ansi><ansi fg="20">Training</ansi> ───────┐
    <ansi fg="yellow">Mana:   </ansi>{{ printf "%s" $mpDisplay                   }}  │ <ansi fg="yellow">Gold: </ansi>{{ printf "%-11s" (numberFormat .Character.Gold) }} │ │ <ansi fg="yellow">Train Pts:</ansi> {{ printf "%-7d" .Character.TrainingPoints }} │
- │ <ansi fg="yellow">Armor:  </ansi>{{ printf "%-6s" ( printf "%d" (.Character.GetDefense)) }} {{ if permadeath }}<ansi fg="yellow">Lives: </ansi>{{ printf "%-9d" .Character.ExtraLives }}{{ else }}              {{ end }} │ │ <ansi fg="yellow">Bank: </ansi>{{ printf "%-11s" (numberFormat .Character.Bank) }} │ │ <ansi fg="yellow">Stat Pts:</ansi>  {{ printf "%-7d" .Character.StatPoints }} │
+ │ <ansi fg="yellow">Armor:  </ansi>{{ printf "%-6s" ( printf "%d" (.Character.GetDefense)) }} {{ if permadeath }}<ansi fg="yellow">Lives: </ansi>{{ printf "%-7d" .Character.ExtraLives }}{{ else }}              {{ end }} │ │ <ansi fg="yellow">Bank: </ansi>{{ printf "%-11s" (numberFormat .Character.Bank) }} │ │ <ansi fg="yellow">Stat Pts:</ansi>  {{ printf "%-7d" .Character.StatPoints }} │
  └───────────────────────────────┘ └───────────────────┘ └────────────────────┘
 {{- if gt .Character.StatPoints 0 }}{{ if lt .Character.Level 5 }}
                    <ansi fg="red-bold">TIP:</ansi> <ansi fg="210">Type <ansi fg="command">status train</ansi> to spend stat points on improvements.</ansi> {{ end }}{{ end -}}

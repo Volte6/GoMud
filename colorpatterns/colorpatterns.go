@@ -156,6 +156,13 @@ func CompileColorPatterns() {
 	colorsCompiled = true
 }
 
+func IsValidPattern(pName string) bool {
+	if _, ok := numericPatterns[pName]; ok {
+		return true
+	}
+	return false
+}
+
 func init() {
 	CompileColorPatterns()
 }

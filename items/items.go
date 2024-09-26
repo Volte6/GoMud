@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 	"unicode"
 
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/util"
 )
 
@@ -271,14 +272,27 @@ func (i *Item) AddWornBuff(buffId int) {
 	i.Spec.WornBuffIds = append(i.Spec.WornBuffIds, buffId)
 }
 
-func (i *Item) Rename(newName string) {
+func (i *Item) Rename(newName string, diplayNameOrStyle ...string) {
 	if i.Spec == nil {
 		specCopy := *GetItemSpec(i.ItemId)
 		i.Spec = &specCopy
 	}
 
 	i.Spec.Name = newName
-	i.Spec.DisplayName = ``
+
+	if len(diplayNameOrStyle) > 0 {
+
+		dispName := diplayNameOrStyle[0]
+
+		if dispName[0:1] == `:` && colorpatterns.IsValidPattern(dispName[1:]) {
+			i.Spec.DisplayName = colorpatterns.ApplyColorPattern(newName, dispName[1:])
+		} else {
+			i.Spec.DisplayName = dispName
+		}
+
+	} else {
+		i.Spec.DisplayName = ``
+	}
 }
 
 func (i *Item) IsEnchanted() bool {

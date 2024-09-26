@@ -44,11 +44,19 @@ func Rename(rest string, userId int) (bool, error) {
 		user.Character.RemoveItem(matchItem)
 		oldNameSimple := matchItem.DisplayName()
 		oldName := matchItem.DisplayName()
-		matchItem.Rename(strings.TrimSpace(rest))
+
+		if len(args) > 2 {
+			matchItem.Rename(strings.TrimSpace(args[1]), strings.TrimSpace(args[2]))
+		} else {
+			matchItem.Rename(strings.TrimSpace(args[1]))
+		}
+
+		matchItem.Validate()
+
 		user.Character.StoreItem(matchItem)
 
 		user.SendText(
-			fmt.Sprintf(`You chant softly and wave your hand over the <ansi fg="item">%s</ansi>. Success!`, oldNameSimple),
+			fmt.Sprintf(`You chant softly and wave your hand over the <ansi fg="item">%s</ansi>. Success! It's now a <ansi fg="item">%s</ansi>`, oldNameSimple, matchItem.DisplayName()),
 		)
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> chants softly and waves their hand over <ansi fg="item">%s</ansi>, causing it to glow briefly.`, user.Character.Name, oldName),
