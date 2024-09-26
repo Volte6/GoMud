@@ -144,6 +144,21 @@ LogoutRounds: 3
 #   RoomIds players will be put in when starting the game/tutorial
 #   RoomIds 900-999 are reserved for Tutorial rooms.
 TutorialStartRooms: [900, 990]
+# - PermaDeath - 
+#   If true, players lose their character if they die with zero lives left.
+PermaDeath: true
+# - StartLives - 
+#   (Req: PermaDeath) Hhow many lives players start with before being reset.
+StartLives: 3
+# - MaxLives - 
+#   (Req: PermaDeath) The maximum lives a player can have.
+MaxLives: 3
+# - LevelUpLives -
+#   (Req: PermaDeath) If non zero, players gain this many lives per level.
+LevelUpLives: 1
+# - PricePerLife - 
+#   (Req: PermaDeath) If non-zero, players can buy extra lives for this amount.
+PricePerLife: 1000000
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS

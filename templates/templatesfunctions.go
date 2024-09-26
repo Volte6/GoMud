@@ -204,6 +204,9 @@ var (
 			}
 			return colorpatterns.ApplyColorPattern(s, pattern)
 		},
+		"permadeath": func() bool {
+			return bool(configs.GetConfig().PermaDeath)
+		},
 	}
 )
 
