@@ -706,15 +706,19 @@ Type your commands below.
             }
 
             // generic modal. Expected format is 
-            // MODALOUT:{modaltitle}={modalbody} 
+            // MODALADD:{modaltitle}={modalbody} 
             // {modalbody} supports ansitags
-            if ( cmd == `MODALOUT:` ) { 
+            if ( cmd == `MODALADD:` ) { 
                 modalDetails = cmdString.substring(9);
 
                 splitPos = modalDetails.indexOf("=");
 
-                createModal(modalDetails.substring(0, splitPos), ansiTagsToHtml(modalDetails.substring(splitPos+1)));
+                createDynamicModal(modalDetails.substring(0, splitPos), ansiTagsToHtml(modalDetails.substring(splitPos+1)));
 
+                return true
+            }
+            if ( cmd == `MODALREM:` ) { 
+                closeDynamicModal(cmdString.substring(9));
                 return true
             }
 
@@ -1096,7 +1100,17 @@ Type your commands below.
 
 
         var closedModals = {};// track any modals that were closed.
-        function createModal(name, text) {
+
+        function closeDynamicModal(name) {
+
+            var existingModal = document.querySelector('[data-modal-name="' + name + '"]');
+            if (existingModal) {
+                document.body.removeChild(existingModal);
+                closedModals[name] = true;
+            }
+        }
+
+        function createDynamicModal(name, text) {
 
             if ( closedModals[name] ) {
                 return;

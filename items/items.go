@@ -272,7 +272,7 @@ func (i *Item) AddWornBuff(buffId int) {
 	i.Spec.WornBuffIds = append(i.Spec.WornBuffIds, buffId)
 }
 
-func (i *Item) Rename(newName string, diplayNameOrStyle ...string) {
+func (i *Item) Rename(newName string, displayNameOrStyle ...string) {
 	if i.Spec == nil {
 		specCopy := *GetItemSpec(i.ItemId)
 		i.Spec = &specCopy
@@ -280,9 +280,9 @@ func (i *Item) Rename(newName string, diplayNameOrStyle ...string) {
 
 	i.Spec.Name = newName
 
-	if len(diplayNameOrStyle) > 0 {
+	if len(displayNameOrStyle) > 0 {
 		// Just in case color short tags are being used...
-		i.Spec.DisplayName = util.ConvertColorShortTags(diplayNameOrStyle[0])
+		i.Spec.DisplayName = util.ConvertColorShortTags(displayNameOrStyle[0])
 
 	} else {
 		i.Spec.DisplayName = ``

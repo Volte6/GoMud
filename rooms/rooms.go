@@ -1533,7 +1533,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 
 	events.AddToQueue(events.WebClientCommand{
 		ConnectionId: user.ConnectionId(),
-		Text:         "MODALOUT:minimap=" + strings.Join(tinymap, "\n"),
+		Text:         "MODALADD:tinymap=" + strings.Join(tinymap, "\n"),
 	})
 
 	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {

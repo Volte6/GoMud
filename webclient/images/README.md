@@ -145,6 +145,10 @@ _Learn any skill, if you can find the right trainer._
 
 <a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/skill-training.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/skill-training.png" width="600" alt="accessibility text"></a>
 
+## Server Configurable/Optional Permadeath
+
+<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/permadeath.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/permadeath.png" width="600" alt="accessibility text"></a>
+
 
 ## Tinymap
 
