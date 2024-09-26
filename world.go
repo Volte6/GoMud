@@ -1542,6 +1542,15 @@ func (w *World) TurnTick() {
 			if user.Character.ActionPoints > user.Character.ActionPointsMax.Value {
 				user.Character.ActionPoints = user.Character.ActionPointsMax.Value
 			}
+
+			if turnCt%5 == 0 {
+				// TODO: Move this elsewhere
+				// Testing concept, later will be replaced with a `mprompt` (modalprompt)
+				events.AddToQueue(events.WebClientCommand{
+					ConnectionId: user.ConnectionId(),
+					Text:         "MODALOUT:mprompt (testing)=" + user.GetCommandPrompt(false, `mprompt`),
+				})
+			}
 		}
 	}
 

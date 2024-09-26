@@ -705,15 +705,17 @@ Type your commands below.
                 return true;
             }
 
-            if ( cmd == "MAPMODAL:" ) { // Tinymap update
-                createModal(`minimap`, cmdString.substring(9));
-                return true;
-            }
+            // generic modal. Expected format is 
+            // MODALOUT:{modaltitle}={modalbody} 
+            // {modalbody} supports ansitags
+            if ( cmd == `MODALOUT:` ) { 
+                modalDetails = cmdString.substring(9);
 
-            if ( cmd == "BARMODAL:" ) { // Tinymap update
-                console.log(ansiTagsToHtml(cmdString.substring(9)))
-                createModal(`prompt (testing)`, ansiTagsToHtml(cmdString.substring(9)) );
-                return true;
+                splitPos = modalDetails.indexOf("=");
+
+                createModal(modalDetails.substring(0, splitPos), ansiTagsToHtml(modalDetails.substring(splitPos+1)));
+
+                return true
             }
 
             return false;
@@ -1167,7 +1169,7 @@ Type your commands below.
             content.className = 'modal-content'; // Add a class for easy selection
             content.style.whiteSpace = 'pre-wrap';
             content.style.padding = '10px';
-            content.innerText = text;
+            content.innerHTML = text;
             // Set initial font size
             content.style.fontSize = '30px';
 

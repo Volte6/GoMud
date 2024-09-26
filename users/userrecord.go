@@ -221,20 +221,19 @@ func (u *UserRecord) GetConnectTime() time.Time {
 	return u.connectionTime
 }
 
-func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
+func (u *UserRecord) GetCommandPrompt(fullRedraw bool, forcePromptType ...string) string {
 
 	u.lock.RLock()
 	defer u.lock.RUnlock()
 
 	promptOut := strings.Builder{}
 
-	promptPrefix := ``
-	promptSuffix := ``
+	if len(forcePromptType) == 0 || forcePromptType[0] != `mprompt` {
+		if u.activePrompt != nil {
 
-	if u.activePrompt != nil {
-
-		if activeQuestion := u.activePrompt.GetNextQuestion(); activeQuestion != nil {
-			promptOut.WriteString(activeQuestion.String())
+			if activeQuestion := u.activePrompt.GetNextQuestion(); activeQuestion != nil {
+				promptOut.WriteString(activeQuestion.String())
+			}
 		}
 	}
 
@@ -243,13 +242,18 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 		var customPrompt any = nil
 		var inCombat bool = u.Character.Aggro != nil
 
-		if inCombat {
-			customPrompt = u.GetConfigOption(`fprompt-compiled`)
-		}
+		if len(forcePromptType) > 0 {
+			customPrompt = u.GetConfigOption(forcePromptType[0] + `-compiled`)
+		} else {
 
-		// No other custom prompts? try the default setting
-		if customPrompt == nil {
-			customPrompt = u.GetConfigOption(`prompt-compiled`)
+			if inCombat {
+				customPrompt = u.GetConfigOption(`fprompt-compiled`)
+			}
+
+			// No other custom prompts? try the default setting
+			if customPrompt == nil {
+				customPrompt = u.GetConfigOption(`prompt-compiled`)
+			}
 		}
 
 		var ok bool
@@ -428,20 +432,15 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 
 	}
 
-	events.AddToQueue(events.WebClientCommand{
-		ConnectionId: u.ConnectionId(),
-		Text:         "BARMODAL:" + promptOut.String(),
-	})
-
 	if fullRedraw {
 		unsent, suggested := u.GetUnsentText()
 		if len(suggested) > 0 {
 			suggested = `<ansi fg="suggested-text">` + suggested + `</ansi>`
 		}
-		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + promptPrefix + promptOut.String() + promptSuffix + unsent + suggested
+		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + promptOut.String() + unsent + suggested
 	}
 
-	return promptPrefix + promptOut.String() + promptSuffix
+	return promptOut.String()
 }
 
 func (u *UserRecord) RoundTick() {
