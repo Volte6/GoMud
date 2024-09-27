@@ -21,6 +21,7 @@ import (
 
 	"github.com/Volte6/ansitags"
 	"github.com/gorilla/websocket"
+	"github.com/natefinch/lumberjack"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/colorpatterns"
@@ -51,10 +52,6 @@ const (
 )
 
 var (
-	localLogger = slog.New(
-		util.GetColorLogHandler(os.Stderr, slog.LevelDebug),
-	)
-
 	sigChan            = make(chan os.Signal, 1)
 	workerShutdownChan = make(chan bool, 1)
 
@@ -681,6 +678,20 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 
 func setupLogger() {
 
+	logLevel := strings.ToUpper(strings.TrimSpace(os.Getenv(`LOG_LEVEL`)))
+	if logLevel == `` {
+		logLevel = `HIGH`
+	}
+
+	var slogLevel slog.Level
+	if logLevel[0:1] == `L` {
+		slogLevel = slog.LevelDebug
+	} else if logLevel[0:1] == `M` {
+		slogLevel = slog.LevelInfo
+	} else {
+		slogLevel = slog.LevelDebug
+	}
+
 	logPath := os.Getenv(`LOG_PATH`)
 	if logPath != `` {
 
@@ -701,6 +712,13 @@ func setupLogger() {
 			panic(fmt.Errorf("error accessing log file path: %v", err))
 		}
 
+		lj := &lumberjack.Logger{
+			Filename:   logPath,
+			MaxSize:    100,  // Maximum size in megabytes before rotation
+			MaxBackups: 10,   // Maximum number of old log files to retain
+			Compress:   true, // Compress rotated files
+		}
+
 		// Open or create the log file
 		file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
@@ -709,13 +727,18 @@ func setupLogger() {
 		defer file.Close()
 
 		fileLogger := slog.New(
-			util.GetColorLogHandler(file, slog.LevelDebug),
+			util.GetColorLogHandler(lj, slogLevel),
 		)
 
 		// Setup the default logger
 		slog.SetDefault(fileLogger)
+
 	} else {
-		// Setup the default logger
+
+		localLogger := slog.New(
+			util.GetColorLogHandler(os.Stderr, slogLevel),
+		)
+
 		slog.SetDefault(localLogger)
 	}
 
