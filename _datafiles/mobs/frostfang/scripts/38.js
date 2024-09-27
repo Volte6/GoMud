@@ -81,7 +81,7 @@ function onIdle(mob, room) {
             break;
         case 3:
             if ( !charmer.HasQuest(`2-start`) ) {
-                mob.Command(`sayto @` + charmer.UserId() + ` I have heard the king worries. If we can find an audience with him we can try to <ansi fg="command">ask</ansi> him about a quest.`);
+                mob.Command(`sayto @` + charmer.UserId() + ` I have heard the king worries. If we can find an audience with him we can try to <ansi fg="command">ask</ansi> him about a quest. He is north of town square.`);
                 mob.SetTempData(`lastTipRound`, roundNow);
             }
             break;
@@ -90,7 +90,7 @@ function onIdle(mob, room) {
             mob.SetTempData(`lastTipRound`, roundNow);
             break;
         case 5:
-            mob.Command(`sayto @` + charmer.UserId() + `You can find help on many subjects by typing <ansi fg="command">help</ansi>.`);
+            mob.Command(`sayto @` + charmer.UserId() + ` You can find help on many subjects by typing <ansi fg="command">help</ansi>.`);
             mob.SetTempData(`lastTipRound`, roundNow);
             break;
         default:

@@ -62,4 +62,9 @@ Or if you have docker installed:
 
 **Default Password:** _password_
 
+## Env Vars
 
+When running several environment variables can be set to alter behaviors of the mud:
+
+* **CONFIG_PATH**_=/path/to/alternative/config.yaml_ - This can provide a path to a copy of the config.yaml containing only values you wish to override. This way you don't have to modify the original config.yaml
+* **LOG_PATH**_=/path/to/log.txt_ - This will write all logs to a specified file. If unspecified, will write to *stderr*.

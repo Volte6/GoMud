@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"slices"
 	"strconv"
@@ -50,7 +51,7 @@ const (
 )
 
 var (
-	logger = slog.New(
+	localLogger = slog.New(
 		util.GetColorLogHandler(os.Stderr, slog.LevelDebug),
 	)
 
@@ -67,8 +68,7 @@ var (
 
 func main() {
 
-	// Setup the default logger
-	slog.SetDefault(logger)
+	setupLogger()
 
 	configs.ReloadConfig()
 	c := configs.GetConfig()
@@ -362,7 +362,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 		// Was there an error? If so, we should probably just stop processing input
 		if err != nil {
-			logger.Warn("InputHandler", "error", err)
+			slog.Warn("InputHandler", "error", err)
 			continue
 		}
 
@@ -677,4 +677,46 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 	}()
 
 	return server
+}
+
+func setupLogger() {
+
+	logPath := os.Getenv(`LOG_PATH`)
+	if logPath != `` {
+
+		fileInfo, err := os.Stat(logPath)
+		if err == nil {
+			if fileInfo.IsDir() {
+				panic(fmt.Errorf("log file path is a directory: %s", logPath))
+			}
+
+		} else if os.IsNotExist(err) {
+			// File does not exist; check if the directory exists
+			dir := filepath.Dir(logPath)
+			if _, err := os.Stat(dir); os.IsNotExist(err) {
+				panic(fmt.Errorf("directory for log file does not exist: %s", dir))
+			}
+		} else {
+			// Some other error
+			panic(fmt.Errorf("error accessing log file path: %v", err))
+		}
+
+		// Open or create the log file
+		file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			panic(fmt.Errorf("failed to open log file: %v", err))
+		}
+		defer file.Close()
+
+		fileLogger := slog.New(
+			util.GetColorLogHandler(file, slog.LevelDebug),
+		)
+
+		// Setup the default logger
+		slog.SetDefault(fileLogger)
+	} else {
+		// Setup the default logger
+		slog.SetDefault(localLogger)
+	}
+
 }
