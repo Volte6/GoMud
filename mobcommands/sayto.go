@@ -46,10 +46,10 @@ func SayTo(rest string, mobId int) (bool, error) {
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 
 	if isSneaking {
-		toUser.SendText(fmt.Sprintf(`someone says to you, "<ansi fg="yellow">%s</ansi>"`, rest))
+		toUser.SendText(fmt.Sprintf(`someone says to you, "<ansi fg="saytext">%s</ansi>"`, rest))
 	} else {
-		toUser.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to you, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest))
-		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to <ansi fg="username">%s</ansi>, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, toUser.Character.Name, rest), mobId)
+		toUser.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to you, "<ansi fg="saytext">%s</ansi>"`, mob.Character.Name, rest))
+		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to <ansi fg="username">%s</ansi>, "<ansi fg="saytext">%s</ansi>"`, mob.Character.Name, toUser.Character.Name, rest), toUser.UserId)
 	}
 
 	return true, nil

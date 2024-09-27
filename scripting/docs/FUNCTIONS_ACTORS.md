@@ -59,16 +59,20 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetManaPct() float](#actorobjectgetmanapct-float)
   - [ActorObject.SetAdjective(adj string, addIt bool)](#actorobjectsetadjectiveadj-string-addit-bool)
   - [ActorObject.IsCharmed( \[userId1, userId2, etc \] ) bool ](#actorobjectischarmed-userid1-userid2-etc---bool-)
+  - [ActorObject.GetCharmedUserId() int ](#actorobjectgetcharmeduserid-int-)
   - [ActorObject.CharmSet(userId int, charmRounds int, \[ onRevertCommand1, onRevertCommand2, etc \])](#actorobjectcharmsetuserid-int-charmrounds-int--onrevertcommand1-onrevertcommand2-etc-)
   - [ActorObject.CharmRemove()](#actorobjectcharmremove)
   - [ActorObject.CharmExpire()](#actorobjectcharmexpire)
   - [ActorObject.GetCharmCount() int](#actorobjectgetcharmcount-int)
+  - [ActorObject.GetTrainingPoints() int](#actorobjectgettrainingpoints-int)
   - [ActorObject.GiveTrainingPoints(amt int)](#actorobjectgivetrainingpointsamt-int)
+  - [ActorObject.GetStatPoints() int](#actorobjectgetstatpoints-int)
   - [ActorObject.GiveStatPoints(amt int)](#actorobjectgivestatpointsamt-int)
   - [ActorObject.GiveExtraLife()](#actorobjectgiveextralife)
   - [ActorObject.ShorthandId() string](#actorobjectshorthandid-string)
   - [ActorObject.WebClientModalOpen(name string, value string)](#actorobjectwebclientmodalopenname-string-value-string)
   - [ActorObject.WebClientModalClose(name string)](#actorobjectwebclientmodalclosename-string)
+  - [ActorObject.GetLastInputRound() int](#actorobjectgetlastinputround-int)
 
 
 
@@ -426,6 +430,9 @@ Sets a mob to charmed by a user for a set number of rounds.
 | --- | --- |
 | userId | One or more users to test against. If ommitted, returns true if charmed at all by anyone. |
 
+## [ActorObject.GetCharmedUserId() int ](/scripting/actor_func.go)
+Returns the userId that charmed this actor (or zero if none)
+
 ## [ActorObject.CharmSet(userId int, charmRounds int, [ onRevertCommand1, onRevertCommand2, etc ])](/scripting/actor_func.go)
 Sets a mob to charmed by a user for a set number of rounds.
 
@@ -444,12 +451,18 @@ Forces the current charm of the mob to expire
 ## [ActorObject.GetCharmCount() int](/scripting/actor_func.go)
 Returns the number of charmed creatures in the actors control
 
+## [ActorObject.GetTrainingPoints() int](/scripting/actor_func.go)
+Returns the number of Training Points the actor has.
+
 ## [ActorObject.GiveTrainingPoints(amt int)](/scripting/actor_func.go)
 Increases training points for player
 
 |  Argument | Explanation |
 | --- | --- |
 | amt | How many training points to give |
+
+## [ActorObject.GetStatPoints() int](/scripting/actor_func.go)
+Returns the number of Stat Points the actor has.
 
 ## [ActorObject.GiveStatPoints(amt int)](/scripting/actor_func.go)
 Increases stat points for player
@@ -478,4 +491,8 @@ Closes a modal if one by the name exists, IF the user is on a webclient
 |  Argument | Explanation |
 | --- | --- |
 | name | title of the modal to close |
+
+## [ActorObject.GetLastInputRound() int](/scripting/actor_func.go)
+Returns the last round number the user input anything at all
+
 

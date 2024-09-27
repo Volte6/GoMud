@@ -17,10 +17,3 @@ exits:
     roomid: 4
   west:
     roomid: 879
-items:
-- itemid: 20043
-- itemid: 8
-  uses: 3
-- itemid: 30002
-  uses: 1
-gold: 12
