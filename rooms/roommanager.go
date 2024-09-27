@@ -313,7 +313,9 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 				// Track it
 				user.Character.TrackCharmed(guideMob.InstanceId, true)
 
-				guideMob.Command(`say Hello <ansi fg="username">` + user.Character.Name + `</ansi>! I'll be here to help protect you while you learn the ropes.`)
+				guideMob.Command(`sayto ` + user.ShorthandId() + ` I'll be here to help protect you while you learn the ropes.`)
+				guideMob.Command(`sayto ` + user.ShorthandId() + ` I can create a portal to take us back to Town Square any time. Just <ansi fg="command">ask</ansi> me about it.`)
+
 				user.SendText(`Your guide will try and stick around until you reach level 5.`)
 			}
 		}
