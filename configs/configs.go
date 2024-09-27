@@ -17,7 +17,7 @@ import (
 
 const defaultConfigPath = "_datafiles/config.yaml"
 
-type config struct {
+type Config struct {
 	Version                      ConfigString      `yaml:"Version"` // Cuurrent version of all datafiles
 	MaxCPUCores                  ConfigInt         `yaml:"MaxCPUCores"`
 	FolderItemData               ConfigString      `yaml:"FolderItemData"`
@@ -89,7 +89,7 @@ type config struct {
 }
 
 var (
-	configData           config = config{overrides: map[string]any{}}
+	configData           Config = Config{overrides: map[string]any{}}
 	configDataLock       sync.RWMutex
 	ErrInvalidConfigName = errors.New("invalid config name")
 	ErrLockedConfig      = errors.New("config name is locked")
@@ -180,7 +180,7 @@ func SetVal(propName string, propVal string, force ...bool) error {
 }
 
 // Get all config data in a map with the field name as the key for easy iteration
-func (c config) AllConfigData() map[string]any {
+func (c Config) AllConfigData() map[string]any {
 
 	lockedLoookup := map[string]struct{}{
 		`locked`: {},
@@ -243,11 +243,11 @@ func (c config) AllConfigData() map[string]any {
 	return output
 }
 
-func (c *config) GetOverrides() map[string]any {
+func (c *Config) GetOverrides() map[string]any {
 	return c.overrides
 }
 
-func (c *config) SetOverrides(overrides map[string]any) error {
+func (c *Config) SetOverrides(overrides map[string]any) error {
 
 	c.overrides = map[string]any{}
 	for k, v := range overrides {
@@ -300,7 +300,7 @@ func (c *config) SetOverrides(overrides map[string]any) error {
 }
 
 // Ensures certain ranges and defaults are observed
-func (c *config) Validate() {
+func (c *Config) Validate() {
 
 	if c.MaxCPUCores < 0 {
 		c.MaxCPUCores = 0 // default
@@ -478,7 +478,7 @@ func (c *config) Validate() {
 	c.validated = true
 }
 
-func (c config) GetDeathXPPenalty() (setting string, pct float64) {
+func (c Config) GetDeathXPPenalty() (setting string, pct float64) {
 
 	setting = string(c.OnDeathXPPenalty)
 	pct = 0.0
@@ -499,39 +499,39 @@ func (c config) GetDeathXPPenalty() (setting string, pct float64) {
 	return setting, pct
 }
 
-func (c config) TurnsPerRound() int {
+func (c Config) TurnsPerRound() int {
 	return c.turnsPerRound
 }
 
-func (c config) TurnsPerAutoSave() int {
+func (c Config) TurnsPerAutoSave() int {
 	return c.turnsPerSave
 }
 
-func (c config) TurnsPerSecond() int {
+func (c Config) TurnsPerSecond() int {
 	return c.turnsPerSecond
 }
 
-func (c config) MinutesToRounds(minutes int) int {
+func (c Config) MinutesToRounds(minutes int) int {
 	return int(math.Ceil(c.roundsPerMinute * float64(minutes)))
 }
 
-func (c config) SecondsToRounds(seconds int) int {
+func (c Config) SecondsToRounds(seconds int) int {
 	return int(math.Ceil(float64(seconds) / float64(c.RoundSeconds)))
 }
 
-func (c config) MinutesToTurns(minutes int) int {
+func (c Config) MinutesToTurns(minutes int) int {
 	return int(math.Ceil(float64(minutes*60*1000) / float64(c.TurnMs)))
 }
 
-func (c config) SecondsToTurns(seconds int) int {
+func (c Config) SecondsToTurns(seconds int) int {
 	return int(math.Ceil(float64(seconds*1000) / float64(c.TurnMs)))
 }
 
-func (c config) RoundsToSeconds(rounds int) int {
+func (c Config) RoundsToSeconds(rounds int) int {
 	return int(math.Ceil(float64(rounds) * float64(c.RoundSeconds)))
 }
 
-func (c config) IsBannedName(name string) bool {
+func (c Config) IsBannedName(name string) bool {
 
 	var startsWith bool
 	var endsWith bool
@@ -570,7 +570,7 @@ func (c config) IsBannedName(name string) bool {
 	return false
 }
 
-func GetConfig() config {
+func GetConfig() Config {
 	configDataLock.RLock()
 	defer configDataLock.RUnlock()
 
@@ -597,7 +597,7 @@ func ReloadConfig() error {
 		return err
 	}
 
-	tmpConfigData := config{}
+	tmpConfigData := Config{}
 	err = yaml.Unmarshal(bytes, &tmpConfigData)
 	if err != nil {
 		return err

@@ -17,6 +17,7 @@ General purpose global functions
   - [UtilIsDay() bool](#utilisday-bool)
   - [UtilLocateUser(search int|string) int](#utillocateusersearch-intstring-int)
   - [UtilApplyColorPattern(input string, patternName string \[, wordsOnly bool\]) string ](#utilapplycolorpatterninput-string-patternname-string--wordsonly-bool-string-)
+  - [UtilGetConfig() config ](#utilgetconfig-config-)
 
 ## [UtilGetRoundNumber() int](/scripting/util_func.go) 
 _Gets the current Round number, which always counts up_
@@ -126,4 +127,5 @@ Applies a color pattern to a string, and returns the colorized string
 | patternName | the name of the color pattern you want to apply, such as "rainbow" - [see colorpatterns/colorpatterns.go](../../colorpatterns/colorpatterns.go) |
 | wordsOnly | If true, colors only change on a per-word basis. |
 
-
+## [UtilGetConfig() config ](/scripting/util_func.go)
+Returns a config object with properties defined in the config yaml

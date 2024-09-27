@@ -525,11 +525,19 @@ func (a ScriptActor) GetCharmCount() int {
 	return len(a.characterRecord.GetCharmIds())
 }
 
+func (a ScriptActor) GetTrainingPoints() int {
+	return a.characterRecord.TrainingPoints
+}
+
 func (a ScriptActor) GiveTrainingPoints(ct int) {
 	if ct < 1 {
 		return
 	}
 	a.characterRecord.TrainingPoints += ct
+}
+
+func (a ScriptActor) GetStatPoints() int {
+	return a.characterRecord.StatPoints
 }
 
 func (a ScriptActor) GiveStatPoints(ct int) {
@@ -578,6 +586,10 @@ func (a ScriptActor) IsCharmed(userId ...int) bool {
 		return a.characterRecord.IsCharmed()
 	}
 	return a.characterRecord.IsCharmed(userId[0])
+}
+
+func (a ScriptActor) GetCharmedUserId() int {
+	return a.characterRecord.GetCharmedUserId()
 }
 
 func (a ScriptActor) CharmSet(userId int, charmRounds int, onRevertCommand ...string) {
@@ -640,6 +652,13 @@ func (a ScriptActor) ShorthandId() string {
 	}
 
 	return ``
+}
+
+func (a ScriptActor) GetLastInputRound() uint64 {
+	if a.userRecord != nil {
+		return a.userRecord.GetLastInputRound()
+	}
+	return 0
 }
 
 // ////////////////////////////////////////////////////////

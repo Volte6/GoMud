@@ -28,6 +28,7 @@ func setUtilFunctions(vm *goja.Runtime) {
 	vm.Set(`UtilIsDay`, UtilIsDay)
 	vm.Set(`UtilLocateUser`, UtilLocateUser)
 	vm.Set(`UtilApplyColorPattern`, UtilApplyColorPattern)
+	vm.Set(`UtilGetConfig`, UtilGetConfig)
 }
 
 // ////////////////////////////////////////////////////////
@@ -141,4 +142,8 @@ func UtilApplyColorPattern(input string, patternName string, wordsOnly ...bool) 
 		return colorpatterns.ApplyColorPattern(input, patternName, colorpatterns.Words)
 	}
 	return colorpatterns.ApplyColorPattern(input, patternName)
+}
+
+func UtilGetConfig() configs.Config {
+	return configs.GetConfig()
 }
