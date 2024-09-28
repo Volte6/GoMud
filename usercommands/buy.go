@@ -32,6 +32,8 @@ func Buy(rest string, userId int) (bool, error) {
 		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
+	didPurchase := false
+
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
 
 		mob := mobs.GetInstance(mobId)
@@ -137,14 +139,14 @@ func Buy(rest string, userId int) (bool, error) {
 
 			mob.Command(`say Sorry, I can't offer that right now.` + extraSay)
 
-			return true, nil
+			continue
 		}
 
 		matchedShopItem := nameToShopItem[match]
 
 		if matchedShopItem.Quantity == 0 && matchedShopItem.QuantityMax > 0 {
 			mob.Command(`say I don't have that item right now.`)
-			return true, nil
+			continue
 		}
 
 		price := 0
@@ -158,25 +160,26 @@ func Buy(rest string, userId int) (bool, error) {
 
 		if user.Character.Gold < price {
 			mob.Command(`say You don't have enough gold for that.`)
-			return true, nil
+			continue
 		}
 
 		if matchedShopItem.MobId > 0 {
 			maxCharmed := user.Character.GetSkillLevel(skills.Tame) + 1
 			if len(user.Character.GetCharmIds()) >= maxCharmed {
 				user.SendText(fmt.Sprintf(`You can only have %d mobs following you at a time.`, maxCharmed))
-				return true, nil
+				continue
 			}
 		}
 
 		if !mob.Character.Shop.Destock(matchedShopItem) {
 			mob.Command(`say I don't have that item right now.`)
-			return true, nil
+			continue
 		}
 
 		user.Character.Gold -= price
 		mob.Character.Gold += price >> 2 // They only retain 1/4th
 
+		didPurchase = true
 		if matchedShopItem.ItemId > 0 {
 			// Give them the item
 			newItm := items.New(matchedShopItem.ItemId)
@@ -200,7 +203,7 @@ func Buy(rest string, userId int) (bool, error) {
 				userId,
 			)
 
-			return true, nil
+			break
 		}
 
 		if matchedShopItem.MobId > 0 {
@@ -223,7 +226,7 @@ func Buy(rest string, userId int) (bool, error) {
 
 			newMob.Command(`emote is ready to serve.`)
 
-			return true, nil
+			break
 		}
 
 		if matchedShopItem.BuffId > 0 {
@@ -238,12 +241,14 @@ func Buy(rest string, userId int) (bool, error) {
 
 			mob.Command(`say I've done what I can.`)
 
-			return true, nil
+			break
 		}
 
 	}
 
-	user.SendText("Visit a merchant to buy objects.")
+	if !didPurchase {
+		user.SendText("Visit a merchant to buy objects.")
+	}
 
 	return true, nil
 }
