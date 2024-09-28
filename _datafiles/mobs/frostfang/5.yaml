@@ -32,10 +32,6 @@ character:
       quantitymax: 1
     - itemid: 20009
       quantitymax: 1
-    - mobid: 38
-      quantitymax: 1
-    - buffid: 4
-      price: 200
   equipment:
     weapon:
       itemid: 10007
