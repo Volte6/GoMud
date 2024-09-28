@@ -33,6 +33,7 @@ const (
 	Scribe      SkillTag = `scribe`      // [LVL 1-4] Dark Acolyte's Chamber - ROOM 160
 	Protection  SkillTag = `protection`  // TODO
 	Tame        SkillTag = `tame`        // [LVL 1-4] Give mushroom to fairie in ROOM 558, train in ROOM 830
+	Trading     SkillTag = `trading`     // TODO
 )
 
 var (
@@ -42,6 +43,7 @@ var (
 			Search,
 			Peep,
 			Inspect,
+			Trading,
 		},
 		"assassin": {
 			Skulduggery,
@@ -78,6 +80,10 @@ var (
 		"sorcerer": {
 			Cast,
 			Enchant,
+		},
+		"merchant": {
+			Peep,
+			Trading,
 		},
 	}
 )
