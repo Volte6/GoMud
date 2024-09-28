@@ -15,22 +15,26 @@ func Sell(rest string, userId int) (bool, error) {
 	// Load user details
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
+
 		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
+
 	if room == nil {
 		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	item, found := user.Character.FindInBackpack(rest)
+
 	if !found {
 		user.SendText("You don't have that item.")
 		return true, nil
 	}
 
 	itemSpec := item.GetSpec()
+
 	if itemSpec.ItemId < 1 {
 		return true, nil
 	}
@@ -76,11 +80,7 @@ func Sell(rest string, userId int) (bool, error) {
 		user.Character.Gold += sellValue
 		user.Character.RemoveItem(item)
 
-		if _, ok := mob.ShopStock[item.ItemId]; !ok {
-			mob.ShopStock[item.ItemId] = 1
-		} else {
-			mob.ShopStock[item.ItemId]++
-		}
+		mob.Character.Shop.StockItem(item.ItemId)
 
 		user.SendText(
 			fmt.Sprintf(`You sell a <ansi fg="itemname">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, item.DisplayName(), sellValue),
@@ -97,4 +97,5 @@ func Sell(rest string, userId int) (bool, error) {
 	}
 
 	return true, nil
+
 }

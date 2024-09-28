@@ -384,12 +384,7 @@ Type your commands below.
                 const newEditIcon = document.createElement('button');
                 newEditIcon.className = 'edit-icon';
                 newEditIcon.title = 'Edit';
-                newEditIcon.innerHTML = `
-                    <svg viewBox="0 0 20 20">
-                        <path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/>
-                    </svg>
-                `;
-
+                newEditIcon.innerHTML = '<svg viewBox="0 0 20 20"><path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/></svg>';
                 buttonContainer.appendChild(newCommandButton);
                 buttonContainer.appendChild(newEditIcon);
 
@@ -470,7 +465,7 @@ Type your commands below.
         }
 
         // Function to add a new class with specified foreground (text) and background colors
-        function addAnsiStyle(name, fgcolor, bgcolor) {
+        function addAnsiStyle(name, fgcolor, bgcolor, misc) {
             const styleTag = document.getElementById("ansiStyles");
 
             // Construct the CSS rule for the new class
@@ -478,6 +473,7 @@ Type your commands below.
                 .${name} {
                     ` + (fgcolor ? `color: ${fgcolor};` : ``) + `
                     ` + (bgcolor ? `background-color: ${bgcolor};` : ``) + `
+                    ` + (misc ? misc + `;` : ``) + `
                 }
             `;
 
@@ -514,7 +510,7 @@ Type your commands below.
         function ansiTagsToHtml(message) {
 
             const fullTagRegex = /(<ansi\b[^>]*>)/i;
-            const propertyRegex = /(fg|bg)="([A-Za-z0-9_-]+)"/g;
+            const propertyRegex = /(fg|bg|bold)="([A-Za-z0-9_-]+)"/g;
             while( fullTagMatch = fullTagRegex.exec(message) ) {
                 
                 const fullTag = fullTagMatch[1];
@@ -522,8 +518,18 @@ Type your commands below.
 
                 css = [];
                 while ((match = propertyRegex.exec(fullTag)) !== null) {
-                    ansiColor = colorAliases[match[2]] ? colorAliases[match[2]] : Number(match[2]);
-                    css.push(match[1] +ansiColor)
+                    
+                    if ( match[1] == 'fg' || match[1] == 'bg' ) {
+                        ansiColor = colorAliases[match[2]] ? colorAliases[match[2]] : Number(match[2]);
+                        css.push(match[1] + ansiColor);
+                    } else if ( match[1] == 'bold' ) {
+                        console.log(match);
+                        if (match[2] == 0 || match[2] == 'false' ) {
+                            css.push('bold-off');
+                        } else {
+                            css.push('bold');
+                        }
+                    }
                 }
 
                 message = message.replaceAll(fullTag, '<span class="'+ css.join(' ') +'">')
@@ -708,7 +714,7 @@ Type your commands below.
             // generic modal. Expected format is 
             // MODALADD:{modaltitle}={modalbody} 
             // {modalbody} supports ansitags
-            if ( cmd == `MODALADD:` ) { 
+            if ( cmd == 'MODALADD:' ) { 
                 modalDetails = cmdString.substring(9);
 
                 splitPos = modalDetails.indexOf("=");
@@ -717,7 +723,7 @@ Type your commands below.
 
                 return true
             }
-            if ( cmd == `MODALREM:` ) { 
+            if ( cmd == 'MODALREM:' ) { 
                 closeDynamicModal(cmdString.substring(9));
                 return true
             }
@@ -1019,9 +1025,11 @@ Type your commands below.
         function init() {
 
             for( i=0; i<255; i++ ) {
-                addAnsiStyle('fg'+String(i), ansi256Color(i), '')
-                addAnsiStyle('bg'+String(i), '', ansi256Color(i))
+                addAnsiStyle('fg'+String(i), ansi256Color(i), '');
+                addAnsiStyle('bg'+String(i), '', ansi256Color(i));
             }
+            addAnsiStyle('bold', '', '', 'font-weight:bold');
+            addAnsiStyle('bold-off', '', '', 'font-weight:normal !important');
 
             addEditIconEventListeners(); // Initialize event listeners for existing buttons
             addCommandButtonEventListeners(); // Initialize event listeners for existing buttons

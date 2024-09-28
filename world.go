@@ -372,8 +372,8 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 						continue
 					}
 
-					for itemId := range mob.ShopStock {
-						item := items.New(itemId)
+					for _, stockInfo := range mob.Character.Shop.GetInstock() {
+						item := items.New(stockInfo.ItemId)
 						if item.ItemId > 0 {
 							itemList = append(itemList, item)
 						}

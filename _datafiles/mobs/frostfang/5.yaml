@@ -8,15 +8,8 @@ idlecommands:
   - 'say type `list` to see my wares'
   - 'say If you''re looking to sell something, I may be interested... as long as it''s not too special or unique'
   - emote shuffles some papers
-  - emote is counting his coins;restock gold
+  - emote is counting his coins
   - emote is watching you
-  - restock 20002/2
-  - restock 20003/1
-  - restock 20004/2
-  - restock 20006/2
-  - restock 20007/1
-  - restock 20008/1
-  - restock 20009/1
 activitylevel: 1
 character:
   name: armorer
@@ -24,6 +17,25 @@ character:
   raceid: 1
   level: 29
   gold: 10
+  shop:
+    - itemid: 20002
+      quantitymax: 2
+    - itemid: 20003
+      quantitymax: 1
+    - itemid: 20004
+      quantitymax: 2
+    - itemid: 20006
+      quantitymax: 2
+    - itemid: 20007
+      quantitymax: 1
+    - itemid: 20008
+      quantitymax: 1
+    - itemid: 20009
+      quantitymax: 1
+    - mobid: 38
+      quantitymax: 1
+    - buffid: 4
+      price: 200
   equipment:
     weapon:
       itemid: 10007

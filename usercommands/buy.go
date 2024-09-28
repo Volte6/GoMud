@@ -3,10 +3,13 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
@@ -36,55 +39,147 @@ func Buy(rest string, userId int) (bool, error) {
 			continue
 		}
 
+		/// Run restock routine
+		mob.Character.Shop.Restock()
+
+		nameToShopItem := map[string]characters.ShopItem{}
+
 		itemNames := []string{}
-		for itemId := range mob.ShopStock {
-			item := items.New(itemId)
-			if item.ItemId > 0 {
-				itemNames = append(itemNames, item.Name())
+		itemNamesFancy := []string{}
+		itemPrices := map[int]int{}
+
+		mercNames := []string{}
+		mercPrices := map[int]int{}
+
+		buffNames := []string{}
+		buffPrices := map[int]int{}
+
+		for _, saleItem := range mob.Character.Shop.GetInstock() {
+
+			if saleItem.ItemId > 0 {
+				item := items.New(saleItem.ItemId)
+				if item.ItemId == 0 {
+					continue
+				}
+				itemNames = append(itemNames, item.GetSpec().Name)
+				itemNamesFancy = append(itemNamesFancy, item.DisplayName())
+				nameToShopItem[item.GetSpec().Name] = saleItem
+
+				price := saleItem.Price
+				if price == 0 {
+					price = item.GetSpec().Value
+				}
+				itemPrices[saleItem.ItemId] = price
+
+				continue
 			}
+
+			if saleItem.MobId > 0 {
+				mobInfo := mobs.GetMobSpec(mobs.MobId(saleItem.MobId))
+				if mobInfo == nil {
+					continue
+				}
+				mercNames = append(mercNames, mobInfo.Character.Name)
+				nameToShopItem[mobInfo.Character.Name] = saleItem
+
+				price := saleItem.Price
+				if price == 0 {
+					price = 250 * mobInfo.Character.Level
+				}
+				mercPrices[saleItem.MobId] = price
+
+				continue
+			}
+
+			if saleItem.BuffId > 0 {
+				buffInfo := buffs.GetBuffSpec(saleItem.BuffId)
+				if buffInfo == nil {
+					continue
+				}
+				buffNames = append(buffNames, buffInfo.Name)
+				nameToShopItem[buffInfo.Name] = saleItem
+
+				price := saleItem.Price
+				if price == 0 {
+					price = 1000
+				}
+				buffPrices[saleItem.BuffId] = price
+
+				continue
+			}
+
 		}
 
-		match, closeMatch := util.FindMatchIn(rest, itemNames...)
+		allNames := []string{}
+		allNames = append(allNames, itemNames...)
+		allNames = append(allNames, mercNames...)
+		allNames = append(allNames, buffNames...)
+
+		match, closeMatch := util.FindMatchIn(rest, allNames...)
 		if match == "" {
 			match = closeMatch
 		}
 
 		if match == "" {
-			extraSay := ""
+
+			extraSay := ``
+
 			if len(itemNames) > 0 {
-				extraSay = fmt.Sprintf(` Any interest in a <ansi fg="itemname">%s</ansi>?`, itemNames[util.Rand(len(itemNames))])
+				randSelection := util.Rand(len(itemNames))
+				extraSay = fmt.Sprintf(` Any interest in this %s?`, itemNamesFancy[randSelection])
+			} else if len(buffNames) > 0 {
+				randSelection := util.Rand(len(buffNames))
+				extraSay = fmt.Sprintf(` Maybe you would enjoy this %s enchantment?`, buffNames[randSelection])
+			} else if len(mercNames) > 0 {
+				randSelection := util.Rand(len(mercNames))
+				extraSay = fmt.Sprintf(` %s is a loyal mercenary, if you're interested.`, mercNames[randSelection])
 			}
 
-			mob.Command(`say Sorry, I don't have that item right now.` + extraSay)
+			mob.Command(`say Sorry, I can't offer that right now.` + extraSay)
 
 			return true, nil
 		}
 
-		for itemId := range mob.ShopStock {
-			item := items.New(itemId)
-			if item.ItemId < 1 {
-				continue
-			}
-			if item.Name() != match {
-				continue
-			}
+		matchedShopItem := nameToShopItem[match]
 
-			if user.Character.Gold < item.GetSpec().Value {
+		if matchedShopItem.Quantity == 0 && matchedShopItem.QuantityMax > 0 {
+			mob.Command(`say I don't have that item right now.`)
+			return true, nil
+		}
 
-				mob.Command(`say You don't have enough gold for that.`)
+		price := 0
+		if matchedShopItem.ItemId > 0 {
+			price = itemPrices[matchedShopItem.ItemId]
+		} else if matchedShopItem.MobId > 0 {
+			price = mercPrices[matchedShopItem.MobId]
+		} else if matchedShopItem.BuffId > 0 {
+			price = buffPrices[matchedShopItem.BuffId]
+		}
 
+		if user.Character.Gold < price {
+			mob.Command(`say You don't have enough gold for that.`)
+			return true, nil
+		}
+
+		if matchedShopItem.MobId > 0 {
+			maxCharmed := user.Character.GetSkillLevel(skills.Tame) + 1
+			if len(user.Character.GetCharmIds()) >= maxCharmed {
+				user.SendText(fmt.Sprintf(`You can only have %d mobs following you at a time.`, maxCharmed))
 				return true, nil
 			}
+		}
 
-			user.Character.Gold -= item.GetSpec().Value
-			mob.Character.Gold += item.GetSpec().Value >> 2 // They only retain 1/4th
+		if !mob.Character.Shop.Destock(matchedShopItem) {
+			mob.Command(`say I don't have that item right now.`)
+			return true, nil
+		}
 
-			mob.ShopStock[itemId]--
-			if mob.ShopStock[itemId] <= 0 {
-				delete(mob.ShopStock, itemId)
-			}
+		user.Character.Gold -= price
+		mob.Character.Gold += price >> 2 // They only retain 1/4th
 
-			newItm := items.New(item.ItemId)
+		if matchedShopItem.ItemId > 0 {
+			// Give them the item
+			newItm := items.New(matchedShopItem.ItemId)
 			user.Character.StoreItem(newItm)
 
 			iSpec := newItm.GetSpec()
@@ -98,17 +193,57 @@ func Buy(rest string, userId int) (bool, error) {
 			}
 
 			user.SendText(
-				fmt.Sprintf(`You buy a <ansi fg="itemname">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, item.DisplayName(), item.GetSpec().Value),
+				fmt.Sprintf(`You buy a <ansi fg="itemname">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, newItm.DisplayName(), price),
 			)
 			room.SendText(
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> buys a <ansi fg="itemname">%s</ansi> from <ansi fg="mobname">%s</ansi>.`, user.Character.Name, item.DisplayName(), mob.Character.Name),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> buys a <ansi fg="itemname">%s</ansi> from <ansi fg="mobname">%s</ansi>.`, user.Character.Name, newItm.DisplayName(), mob.Character.Name),
 				userId,
 			)
 
-			break
-
+			return true, nil
 		}
+
+		if matchedShopItem.MobId > 0 {
+			// Give them the merc
+
+			newMob := mobs.NewMobById(mobs.MobId(matchedShopItem.MobId), user.Character.RoomId)
+			// Charm 'em
+			newMob.Character.Charm(user.UserId, -2, characters.CharmExpiredRevert)
+			user.Character.TrackCharmed(newMob.InstanceId, true)
+
+			room.AddMob(newMob.InstanceId)
+
+			user.SendText(
+				fmt.Sprintf(`You pay <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, price, mob.Character.Name),
+			)
+			room.SendText(
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, price, mob.Character.Name),
+				userId,
+			)
+
+			newMob.Command(`emote is ready to serve.`)
+
+			return true, nil
+		}
+
+		if matchedShopItem.BuffId > 0 {
+			// Apply the buff
+			mob.Command(`emote mutters a soft incantation.`)
+
+			events.AddToQueue(events.Buff{
+				UserId:        user.UserId,
+				MobInstanceId: 0,
+				BuffId:        matchedShopItem.BuffId,
+			})
+
+			mob.Command(`say I've done what I can.`)
+
+			return true, nil
+		}
+
 	}
+
+	user.SendText("Visit a merchant to buy objects.")
 
 	return true, nil
 }

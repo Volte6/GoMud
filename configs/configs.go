@@ -71,11 +71,12 @@ type Config struct {
 	TutorialStartRooms ConfigSliceString `yaml:"TutorialStartRooms"` // List of all rooms that can be used to begin the tutorial process
 
 	// Perma-death related configs
-	PermaDeath   ConfigBool `yaml:"PermaDeath"`   // Is permadeath enabled?
-	StartLives   ConfigInt  `yaml:"StartLives"`   // Starting permadeath lives
-	MaxLives     ConfigInt  `yaml:"MaxLives"`     // Maximum permadeath lives
-	LevelUpLives ConfigInt  `yaml:"LevelUpLives"` // # lives gained on level up
-	PricePerLife ConfigInt  `yaml:"PricePerLife"` // Price in gold to buy new lives
+	PermaDeath        ConfigBool `yaml:"PermaDeath"`        // Is permadeath enabled?
+	StartLives        ConfigInt  `yaml:"StartLives"`        // Starting permadeath lives
+	MaxLives          ConfigInt  `yaml:"MaxLives"`          // Maximum permadeath lives
+	LevelUpLives      ConfigInt  `yaml:"LevelUpLives"`      // # lives gained on level up
+	PricePerLife      ConfigInt  `yaml:"PricePerLife"`      // Price in gold to buy new lives
+	ShopRestockRounds ConfigInt  `yaml:"ShopRestockRounds"` // Default time it takes to restock 1 quantity in shops
 
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.

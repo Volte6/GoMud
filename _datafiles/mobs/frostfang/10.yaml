@@ -7,11 +7,8 @@ groups:
 idlecommands:
   - 'say type `list` to see my wares'
   - 'say If you''re looking to sell something, I may be interested... as long as it''s not too special or unique'
-  - emote is counting his coins;restock gold
+  - emote is counting his coins
   - emote watches you carefully
-  - restock 10004/4
-  - restock 10001/5
-  - restock 10002/5
 activitylevel: 1
 character:
   name: ivar froststeel
@@ -19,6 +16,13 @@ character:
   raceid: 1
   level: 25
   gold: 10
+  shop:
+    - itemid: 10004
+      quantitymax: 4
+    - itemid: 10001
+      quantitymax: 5
+    - itemid: 10002
+      quantitymax: 5
   equipment:
     weapon:
       itemid: 10006

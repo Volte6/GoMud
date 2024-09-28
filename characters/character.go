@@ -60,6 +60,7 @@ type Character struct {
 	Alignment       int8              // The alignment of the character
 	Gold            int               // The gold the character is holding
 	Bank            int               // The gold the character has in the bank
+	Shop            Shop              `yaml:"shop,omitempty"`      // Definition of shop services/items this character stocks (or just has at the moment)
 	SpellBook       map[string]int    `yaml:"spellbook,omitempty"` // The spells the character has learned
 	Charmed         *CharmInfo        `yaml:"-"`                   // If they are charmed, this is the info
 	CharmedMobs     []int             `yaml:"-"`                   // If they have charmed anyone, this is the list of mob instance ids

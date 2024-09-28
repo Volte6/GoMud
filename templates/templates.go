@@ -205,7 +205,7 @@ func GetTable(title string, headers []string, rows [][]string, formatting ...[]s
 
 		for c := 0; c < hdrColCt; c++ {
 			if len(rows[r][c])+1 > table.ColumnWidths[c] {
-				table.ColumnWidths[c] = len([]rune(rows[r][c]))
+				table.ColumnWidths[c] = len([]rune(ansitags.Parse(rows[r][c], ansitags.StripTags)))
 			}
 		}
 	}

@@ -186,6 +186,7 @@ command-aliases:
   keyring:          ['key', 'keys']
   whisper:          ['/w']
   unlock:           ['open']
+  buy:              ['hire']
   'party chat':     ['pchat', 'psay']
   'bank deposit':   ['deposit']
   'bank withdraw':  ['withdraw']

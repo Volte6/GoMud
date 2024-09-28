@@ -32,8 +32,8 @@ function onIdle(mob, room) {
             targetRoom = GetRoom(charmer.GetRoomId() );
             if ( targetRoom != null ) {
                 mob.MoveRoom( charmer.GetRoomId() );
-                room.SendText(`A large ` + UtilApplyColorPattern('swirling portal', 'pink') + ` appears, and ` + mob.GetCharacterName(true) + ` steps into it, right before disappears.`);
-                targetRoom.SendText(`A large ` + UtilApplyColorPattern('swirling portal', 'pink') + ` appears, and ` + mob.GetCharacterName(true) + ` steps out of it, right before disappears.`);
+                room.SendText(`A large ` + UtilApplyColorPattern('swirling portal', 'pink') + ` appears, and ` + mob.GetCharacterName(true) + ` steps into it, right before it disappears.`);
+                targetRoom.SendText(`A large ` + UtilApplyColorPattern('swirling portal', 'pink') + ` appears, and ` + mob.GetCharacterName(true) + ` steps out of it, right before it disappears.`);
                 mob.Command(`say I almost lost you ` + charmer.GetCharacterName(true) + `!`);
             }
             
@@ -95,6 +95,14 @@ function onIdle(mob, room) {
             break;
         case 6:
             mob.Command(`sayto @` + charmer.UserId() + ` I can create a portal to take us back to Town Square any time. Just <ansi fg="command">ask</ansi> me about it.`);
+            mob.SetTempData(`lastTipRound`, roundNow);
+            break;
+        case 7:
+            mob.Command(`sayto @` + charmer.UserId() + ` If you have friends to play with, you can party up! <ansi fg="command">help party</ansi> to learn more.`);
+            mob.SetTempData(`lastTipRound`, roundNow);
+            break;
+        case 8:
+            mob.Command(`sayto @` + charmer.UserId() + ` You can send a message to everyone using the <ansi fg="command">broadcast</ansi> command.`);
             mob.SetTempData(`lastTipRound`, roundNow);
             break;
         default:

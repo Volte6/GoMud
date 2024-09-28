@@ -438,65 +438,8 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 				if mob := mobs.NewMobById(mobs.MobId(spawnInfo.MobId), r.RoomId); mob != nil {
 
 					// If a merchant, fill up stocks on first time being loaded in
-					if mob.IsMerchant {
-						if len(mob.ShopStock) == 0 {
-
-							for _, cmd := range mob.IdleCommands {
-
-								if strings.HasPrefix(cmd, "restock ") {
-
-									cmdParts := strings.Split(cmd, " ")
-									if len(cmdParts) == 2 {
-
-										parts := strings.Split(cmdParts[1], "/")
-										itemId, _ := strconv.Atoi(parts[0])
-										qty := 1
-										if len(parts) == 2 {
-											qty, _ = strconv.Atoi(parts[1])
-										}
-
-										mob.ShopStock[itemId] = qty
-
-									}
-								}
-								if strings.HasPrefix(cmd, "restockservant ") {
-									cmdParts := strings.Split(cmd, " ")
-									if len(cmdParts) == 2 {
-
-										parts := strings.Split(cmdParts[1], "/")
-										mobId, _ := strconv.Atoi(parts[0])
-
-										qty := 1
-										if len(parts) > 2 {
-											qty, _ = strconv.Atoi(parts[1])
-										}
-
-										price := 999999
-										if len(parts) > 1 {
-											price, _ = strconv.Atoi(parts[2])
-										}
-
-										found := false
-										for idx, servantInfo := range mob.ShopServants {
-											if servantInfo.MobId == mobs.MobId(mobId) {
-												mob.ShopServants[idx].Quantity = qty
-												mob.ShopServants[idx].Price = price
-												found = true
-											}
-										}
-
-										if !found {
-											mob.ShopServants = append(mob.ShopServants, mobs.MobForHire{
-												MobId:    mobs.MobId(mobId),
-												Quantity: qty,
-												Price:    price,
-											})
-										}
-
-									}
-								}
-							}
-						}
+					if mob.HasShop() {
+						mob.Character.Shop.Restock()
 					}
 
 					if len(spawnInfo.BuffIds) > 0 {
@@ -978,7 +921,7 @@ func (r *Room) GetMobs(findTypes ...FindFlag) []int {
 			continue
 		}
 
-		if typeFlag&FindMerchant == FindMerchant && mob.IsMerchant {
+		if typeFlag&FindMerchant == FindMerchant && mob.HasShop() {
 			mobMatches = append(mobMatches, mobId)
 			continue
 		}

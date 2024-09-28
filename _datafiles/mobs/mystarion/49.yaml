@@ -11,11 +11,6 @@ idlecommands:
   - say If you're looking to sell something, I may be interested... as long as it's
     not too special or unique
   - emote is watching you
-  - restock 9/1
-  - restock 18/3
-  - restock 19/1
-  - restock 10019/1
-  - restock 23/8
 combatcommands:
   - 'say How dare you attack the citizens of Mystarion! We do not forget!'
 ismerchant: true
@@ -25,6 +20,17 @@ character:
   raceid: 1
   level: 30
   gold: 3
+  shop:
+    - itemid: 9
+      quantitymax: 1
+    - itemid: 18
+      quantitymax: 3
+    - itemid: 19
+      quantitymax: 1
+    - itemid: 10019
+      quantitymax: 1
+    - itemid: 23
+      quantitymax: 8
   equipment:
     weapon:
       itemid: 10018

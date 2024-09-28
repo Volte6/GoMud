@@ -44,8 +44,6 @@ var (
 		"lookfortrouble": {LookForTrouble, false},
 		"portal":         {Portal, false},
 		"remove":         {Remove, false},
-		"restock":        {Restock, false},
-		"restockservant": {RestockServant, false},
 		"say":            {Say, true},
 		"sayto":          {SayTo, true},
 		"shout":          {Shout, true},
