@@ -197,10 +197,14 @@ func List(rest string, userId int) (bool, error) {
 		}
 	}
 
-	for _, userId := range room.GetPlayers(rooms.FindMerchant) {
+	for _, uid := range room.GetPlayers(rooms.FindMerchant) {
 
-		user := users.GetByUserId(userId)
-		if user == nil {
+		if uid == userId {
+			continue
+		}
+
+		shopUser := users.GetByUserId(uid)
+		if shopUser == nil {
 			continue
 		}
 
@@ -210,7 +214,7 @@ func List(rest string, userId int) (bool, error) {
 		mercsAvailable := characters.Shop{}
 		buffsAvailable := characters.Shop{}
 
-		for _, saleItem := range user.Character.Shop.GetInstock() {
+		for _, saleItem := range shopUser.Character.Shop.GetInstock() {
 
 			if saleItem.ItemId > 0 {
 				itemsAvailable = append(itemsAvailable, saleItem)
@@ -264,7 +268,7 @@ func List(rest string, userId int) (bool, error) {
 				return num1 < num2
 			})
 
-			onlineTableData := templates.GetTable(fmt.Sprintf(`%s by <ansi fg="username">%s</ansi>`, colorpatterns.ApplyColorPattern(`Items for sale`, `cyan`), user.Character.Name), headers, rows)
+			onlineTableData := templates.GetTable(fmt.Sprintf(`%s by <ansi fg="username">%s</ansi>`, colorpatterns.ApplyColorPattern(`Items for sale`, `cyan`), shopUser.Character.Name), headers, rows)
 			tplTxt, _ := templates.Process("tables/shoplist", onlineTableData)
 			user.SendText(tplTxt)
 			user.SendText(fmt.Sprintf(`To buy something, type: <ansi fg="command">buy [name]</ansi>%s`, term.CRLFStr))
@@ -313,7 +317,7 @@ func List(rest string, userId int) (bool, error) {
 				return num1 < num2
 			})
 
-			onlineTableData := templates.GetTable(fmt.Sprintf(`%s by <ansi fg="username">%s</ansi>`, colorpatterns.ApplyColorPattern(`Mercenaries for hire`, `flame`), user.Character.Name), headers, rows)
+			onlineTableData := templates.GetTable(fmt.Sprintf(`%s by <ansi fg="username">%s</ansi>`, colorpatterns.ApplyColorPattern(`Mercenaries for hire`, `flame`), shopUser.Character.Name), headers, rows)
 			tplTxt, _ := templates.Process("tables/shoplist", onlineTableData)
 			user.SendText(tplTxt)
 			user.SendText(fmt.Sprintf(`To Hire a merc, type: <ansi fg="command">hire [name]</ansi>%s`, term.CRLFStr))
@@ -349,7 +353,7 @@ func List(rest string, userId int) (bool, error) {
 				return num1 < num2
 			})
 
-			onlineTableData := templates.GetTable(fmt.Sprintf(`%s by <ansi fg="username">%s</ansi>`, colorpatterns.ApplyColorPattern(`Enchantments`, `rainbow`), user.Character.Name), headers, rows)
+			onlineTableData := templates.GetTable(fmt.Sprintf(`%s by <ansi fg="username">%s</ansi>`, colorpatterns.ApplyColorPattern(`Enchantments`, `rainbow`), shopUser.Character.Name), headers, rows)
 			tplTxt, _ := templates.Process("tables/shoplist", onlineTableData)
 			user.SendText(tplTxt)
 			user.SendText(fmt.Sprintf(`To buy an enchantment, type: <ansi fg="command">buy [name]</ansi>%s`, term.CRLFStr))

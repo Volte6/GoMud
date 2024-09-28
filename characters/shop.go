@@ -109,7 +109,7 @@ func (s *Shop) Destock(si ShopItem) bool {
 
 		(*s)[i].Quantity -= 1
 
-		if (*s)[i].Quantity == 0 {
+		if (*s)[i].Quantity == 0 && (*s)[i].QuantityMax == -1 {
 			(*s) = append((*s)[:i], (*s)[i+1:]...)
 		}
 
@@ -128,4 +128,8 @@ func (s *Shop) GetInstock() Shop {
 		}
 	}
 	return ret
+}
+
+func (si *ShopItem) Available() bool {
+	return si.Quantity > 0 || si.QuantityMax == 0
 }
