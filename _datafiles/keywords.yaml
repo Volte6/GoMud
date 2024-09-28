@@ -153,6 +153,7 @@ help-aliases:
   colors:           [color, ansi]
   auction:          [bid]
   killstats:        [kills, kd]
+  trading:          [haggle]
 # Default aliases for commands
 # For example: inv -> inventory
 # They can be command + argument aliases
