@@ -133,7 +133,7 @@ func Suicide(rest string, mobId int) (bool, error) {
 					user.Character.UpdateAlignment(alignmentAdj)
 					alignmentAfter := user.Character.AlignmentName()
 
-					slog.Debug("Alignment", "user.Character.Alignment", user.Character.Alignment, "mob.Character.Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
+					slog.Debug("Alignment", "user Alignment", user.Character.Alignment, "mob Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
 
 					if alignmentBefore != alignmentAfter {
 						alignmentBefore = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentBefore, alignmentBefore)
@@ -223,7 +223,7 @@ func Suicide(rest string, mobId int) (bool, error) {
 						user.Character.UpdateAlignment(alignmentAdj)
 						alignmentAfter := user.Character.AlignmentName()
 
-						slog.Debug("Alignment", "user.Character.Alignment", user.Character.Alignment, "mob.Character.Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
+						slog.Debug("Alignment", "user Alignment", user.Character.Alignment, "mob Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
 
 						if alignmentBefore != alignmentAfter {
 							alignmentBefore = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentBefore, alignmentBefore)

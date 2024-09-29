@@ -1,7 +1,6 @@
 package combat
 
 import (
-	"log/slog"
 	"math"
 
 	"github.com/volte6/mud/characters"
@@ -111,8 +110,6 @@ func AlignmentChange(killerAlignment int8, killedAlignment int8) int {
 
 	delta := killerAlignment - killedAlignment
 	deltaAbs := math.Abs(float64(delta))
-
-	slog.Info("AlignmentChange", "delta", delta)
 
 	factor := 0
 	if delta < 0 { // if killer alignment was less than killed alignment
