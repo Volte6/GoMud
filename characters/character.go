@@ -80,6 +80,7 @@ type Character struct {
 	KD              KDStats           `yaml:"kd,omitempty"`            // Kill/Death stats
 	MiscData        map[string]any    `yaml:"miscdata,omitempty"`      // Any random other data that needs to be stored
 	ExtraLives      int               `yaml:"extralives,omitempty"`    // How many lives remain. If enabled, players can perma-die if they die at zero
+	MobMastery      MobMasteries      `yaml:"mobmastery,omitempty"`    // Tracks particular masteries around a given mob
 	roomHistory     []int             // A stack FILO of the last X rooms the character has been in
 	followers       []int             // everyone following this user
 	BuffIds         []int
@@ -576,58 +577,6 @@ func (c *Character) GetPlayerName(viewingUserId int, renderFlags ...NameRenderFl
 	return c.getFormattedName(viewingUserId, `username`, renderFlags...)
 }
 
-func (c *Character) getFormattedName(viewingUserId int, uType string, renderFlags ...NameRenderFlag) FormattedName {
-	f := FormattedName{
-		Name:       c.Name,
-		Type:       uType,
-		Adjectives: make([]string, 0, len(c.Adjectives)),
-	}
-
-	includeHealth := false
-	for _, flag := range renderFlags {
-		if flag == RenderHealth {
-			includeHealth = true
-		} else if flag == RenderShortAdjectives {
-			f.UseShortAdjectives = true
-		}
-	}
-
-	if includeHealth {
-		if c.Health < 1 {
-			f.Adjectives = append(f.Adjectives, `downed`)
-		} else {
-			pctHealth := int(math.Ceil(float64(c.Health) / float64(c.HealthMax.Value) * 100))
-			f.Adjectives = append(f.Adjectives, strconv.Itoa(pctHealth)+`%`)
-		}
-	}
-
-	f.Adjectives = append(f.Adjectives, c.Adjectives...)
-
-	if c.HasBuffFlag(buffs.EmitsLight) {
-		f.Adjectives = append(f.Adjectives, `lit`)
-	}
-
-	if c.HasBuffFlag(buffs.Hidden) {
-		f.Adjectives = append(f.Adjectives, `hidden`)
-	}
-
-	if c.HasBuffFlag(buffs.Poison) {
-		f.Adjectives = append(f.Adjectives, `poisoned`)
-	}
-
-	if len(c.Shop) > 0 {
-		f.Adjectives = append(f.Adjectives, `shop`)
-	}
-
-	if c.Health < 1 {
-		f.Suffix = `downed`
-	} else if c.Aggro != nil && c.Aggro.UserId == viewingUserId {
-		f.Suffix = `aggro`
-	}
-
-	return f
-}
-
 func (c *Character) SetAdjective(adj string, addToList bool) {
 	if c.Adjectives == nil {
 		c.Adjectives = []string{}
@@ -645,6 +594,71 @@ func (c *Character) SetAdjective(adj string, addToList bool) {
 	if addToList {
 		c.Adjectives = append(c.Adjectives, adj)
 	}
+}
+
+func (c *Character) GetAdjectives() []string {
+
+	retAdjectives := []string{}
+
+	// Start dynamic adjectives
+	if c.Health < 1 {
+		retAdjectives = append(retAdjectives, `downed`)
+	}
+
+	if len(c.Shop) > 0 {
+		retAdjectives = append(retAdjectives, `shop`)
+	}
+
+	if c.HasBuffFlag(buffs.EmitsLight) {
+		retAdjectives = append(retAdjectives, `lit`)
+	}
+
+	if c.HasBuffFlag(buffs.Hidden) {
+		retAdjectives = append(retAdjectives, `hidden`)
+	}
+
+	if c.HasBuffFlag(buffs.Poison) {
+		retAdjectives = append(retAdjectives, `poisoned`)
+	}
+	// End dynamic adjectives
+
+	retAdjectives = append(retAdjectives, c.Adjectives...)
+
+	return retAdjectives
+}
+
+func (c *Character) getFormattedName(viewingUserId int, uType string, renderFlags ...NameRenderFlag) FormattedName {
+
+	f := FormattedName{
+		Name:       c.Name,
+		Type:       uType,
+		Adjectives: make([]string, 0, len(c.Adjectives)),
+	}
+
+	includeHealth := false
+	for _, flag := range renderFlags {
+		if flag == RenderHealth {
+			includeHealth = true
+		} else if flag == RenderShortAdjectives {
+			f.UseShortAdjectives = true
+		}
+	}
+
+	// If including health, only do so if not downed, because downed shows as its own adjective.
+	if includeHealth && c.Health > 0 {
+		pctHealth := int(math.Ceil(float64(c.Health) / float64(c.HealthMax.Value) * 100))
+		f.Adjectives = append(f.Adjectives, strconv.Itoa(pctHealth)+`%`)
+	}
+
+	f.Adjectives = append(f.Adjectives, c.GetAdjectives()...)
+
+	if c.Health < 1 {
+		f.Suffix = `downed`
+	} else if c.Aggro != nil && c.Aggro.UserId == viewingUserId {
+		f.Suffix = `aggro`
+	}
+
+	return f
 }
 
 func (c *Character) PruneCooldowns() {
@@ -912,24 +926,9 @@ func (c *Character) GetSkillLevelCost(currentLevel int) int {
 	return currentLevel
 }
 
-func (c *Character) GetTameCreatureSkill(userId int, creatureName string) int {
-
-	skillValue := c.GetMiscData(`tameskill-` + creatureName)
-	if sVal, ok := skillValue.(int); ok {
-		return sVal
-	}
-	return -1
-
-}
-
 func (c *Character) GetMaxCharmedCreatures() int {
 	lvl := c.GetSkillLevel(skills.Tame)
 	return lvl + 1
-}
-
-func (c *Character) SetTameCreatureSkill(userId int, creatureName string, proficiency int) error {
-	c.SetMiscData(`tameskill-`+creatureName, proficiency)
-	return nil
 }
 
 func (c *Character) GetMemoryCapacity() int {

@@ -5,6 +5,11 @@ import (
 	"github.com/volte6/mud/util"
 )
 
+const (
+	StockTemporary = -1
+	StockUnlimited = 0
+)
+
 type Shop []ShopItem
 
 type ShopItem struct {
@@ -21,19 +26,19 @@ type ShopItem struct {
 
 func (s *Shop) Restock() bool {
 
+	if len(*s) < 1 {
+		return false
+	}
+
 	defaultRestockInterval := configs.GetConfig().ShopRestockRounds
 
 	roundNow := util.GetRoundCount()
 	restocked := false
 
-	if len(*s) < 1 {
-		return restocked
-	}
-
 	for i, fsItem := range *s {
 
 		// 0 max means never restocks, always available
-		if fsItem.QuantityMax < 1 {
+		if fsItem.QuantityMax <= StockUnlimited {
 			continue
 		}
 
@@ -46,7 +51,7 @@ func (s *Shop) Restock() bool {
 			itemRestockInterval = uint64(defaultRestockInterval)
 		}
 
-		for roundNow-fsItem.lastRestockRound > itemRestockInterval {
+		for roundNow-fsItem.lastRestockRound >= itemRestockInterval {
 			restocked = true
 
 			fsItem.lastRestockRound += itemRestockInterval
@@ -82,7 +87,7 @@ func (s *Shop) StockItem(itemId int) bool {
 	*s = append(*s, ShopItem{
 		ItemId:      itemId,
 		Quantity:    1,
-		QuantityMax: -1,
+		QuantityMax: StockTemporary,
 	})
 
 	return true
@@ -103,13 +108,13 @@ func (s *Shop) Destock(si ShopItem) bool {
 		}
 
 		// If unlimited quantity, just return true
-		if (*s)[i].QuantityMax == 0 {
+		if (*s)[i].QuantityMax == StockUnlimited {
 			return true
 		}
 
 		(*s)[i].Quantity -= 1
 
-		if (*s)[i].Quantity == 0 && (*s)[i].QuantityMax == -1 {
+		if (*s)[i].Quantity == 0 && (*s)[i].QuantityMax == StockTemporary {
 			(*s) = append((*s)[:i], (*s)[i+1:]...)
 		}
 
@@ -123,7 +128,7 @@ func (s *Shop) Destock(si ShopItem) bool {
 func (s *Shop) GetInstock() Shop {
 	ret := Shop{}
 	for _, fsItem := range *s {
-		if fsItem.Quantity > 0 || fsItem.QuantityMax == 0 {
+		if fsItem.Quantity > 0 || fsItem.QuantityMax == StockUnlimited {
 			ret = append(ret, fsItem)
 		}
 	}
@@ -131,5 +136,5 @@ func (s *Shop) GetInstock() Shop {
 }
 
 func (si *ShopItem) Available() bool {
-	return si.Quantity > 0 || si.QuantityMax == 0
+	return si.Quantity > 0 || si.QuantityMax == StockUnlimited
 }

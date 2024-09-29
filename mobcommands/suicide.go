@@ -145,9 +145,9 @@ func Suicide(rest string, mobId int) (bool, error) {
 					if util.Rand(1000) < targetNumber {
 						if mob.IsTameable() && user.Character.GetSkillLevel(skills.Tame) > 0 {
 
-							currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)
+							currentSkill := user.Character.MobMastery.GetTame(int(mob.MobId))
 							if currentSkill < 50 {
-								user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
+								user.Character.MobMastery.SetTame(int(mob.MobId), currentSkill+1)
 								if currentSkill == -1 {
 									user.SendText(fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name))
 								} else {
@@ -220,9 +220,9 @@ func Suicide(rest string, mobId int) (bool, error) {
 						if util.Rand(1000) < targetNumber {
 							if mob.IsTameable() && user.Character.GetSkillLevel(skills.Tame) > 0 {
 
-								currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)
+								currentSkill := user.Character.MobMastery.GetTame(int(mob.MobId))
 								if currentSkill < 50 {
-									user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
+									user.Character.MobMastery.SetTame(int(mob.MobId), currentSkill+1)
 
 									if currentSkill == -1 {
 										user.SendText(fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name))

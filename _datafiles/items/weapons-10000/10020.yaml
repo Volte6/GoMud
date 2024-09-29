@@ -1,0 +1,11 @@
+itemid: 10020
+name: long whip
+namesimple: whip
+description: A long whip used by circus performers.
+type: weapon
+hands: 1
+subtype: whipping
+damage:
+  diceroll: 1d5
+statmods:
+  tame: 8

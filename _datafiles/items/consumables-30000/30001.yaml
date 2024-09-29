@@ -1,7 +1,6 @@
 itemid: 30001
 name: small red potion
 namesimple: bottle
-displayname: ":rainbow"
 description: A small red potion... you COULD drink it...
 type: potion
 subtype: drinkable
