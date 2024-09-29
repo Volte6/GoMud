@@ -1,6 +1,7 @@
 raceid: 10
 name: Rodent
 description: A small furry creature with strong teeth.
+defaultalignment: -20
 size: small
 unarmedname: teeth and nails
 tnlscale: 1

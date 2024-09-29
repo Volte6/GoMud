@@ -1,6 +1,7 @@
 raceid: 11
 name: Canine
 description: A canine.
+defaultalignment: 0
 buffids:
   - 28 # Super hearing
 size: medium

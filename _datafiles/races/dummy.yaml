@@ -1,6 +1,7 @@
 raceid: 19
 name: Dummy
 description: A wooden target
+defaultalignment: 0
 size: small
 unarmedname: sticks
 tnlscale: 1

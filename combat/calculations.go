@@ -1,6 +1,7 @@
 package combat
 
 import (
+	"log/slog"
 	"math"
 
 	"github.com/volte6/mud/characters"
@@ -97,4 +98,44 @@ func ChanceToTame(s *users.UserRecord, t *mobs.Mob) int {
 	}
 
 	return int(math.Ceil((float64(proficiencyModifier) + float64(levelDiff) + healthModifier + float64(sizeModifier)) * aggroModifier))
+}
+
+// Evil killing good:
+// -50 - 50 = -100
+// -100 - 50 = -150
+
+// Good killing evil:
+// 50 - -50 = 100
+// 100 - -50 = 150
+func AlignmentChange(killerAlignment int8, killedAlignment int8) int {
+
+	delta := killerAlignment - killedAlignment
+	deltaAbs := math.Abs(float64(delta))
+
+	slog.Info("AlignmentChange", "delta", delta)
+
+	factor := 0
+	if delta < 0 { // if killer alignment was less than killed alignment
+		factor = 1
+	} else if delta > 0 { // opposite
+		factor = -1
+	}
+
+	if deltaAbs < 10 {
+		return 0
+	}
+
+	if deltaAbs < 30 {
+		return factor * 1
+	}
+
+	if deltaAbs < 60 {
+		return factor * 2
+	}
+
+	if deltaAbs < 80 {
+		return factor * 3
+	}
+
+	return factor * 4
 }

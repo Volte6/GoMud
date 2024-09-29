@@ -17,6 +17,7 @@ character:
   zone: Nowhere
   raceid: 1
   level: 50
+  alignment: -65
   gold: 75
   equipment:
     head:

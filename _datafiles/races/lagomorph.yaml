@@ -1,6 +1,7 @@
 raceid: 18
 name: Lagomorph
 description: Kinda like a rodent. But not.
+defaultalignment: 0
 buffids:
   - 3 # Cold Tolerant
 size: small

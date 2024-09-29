@@ -158,6 +158,14 @@ func NewMobById(mobId MobId, homeRoomId int) *Mob {
 			mob.Character.Items[idx].Validate()
 		}
 
+		if mob.Character.Alignment == 0 {
+			if raceInfo := races.GetRace(mob.Character.RaceId); raceInfo != nil {
+				if raceInfo.DefaultAlignment != 0 {
+					mob.Character.Alignment = raceInfo.DefaultAlignment
+				}
+			}
+		}
+
 		mob.Character.Equipment.Weapon.Validate()
 		mob.Character.Equipment.Offhand.Validate()
 		mob.Character.Equipment.Head.Validate()
@@ -359,6 +367,28 @@ func (r *Mob) HatesRace(raceName string) bool {
 		}
 	}
 	return false
+}
+
+func (r *Mob) HatesAlignment(otherAlignment int8) bool {
+
+	// If either are neutral, no hatred
+	if characters.AlignmentToString(r.Character.Alignment) == `neutral` || characters.AlignmentToString(otherAlignment) == `neutral` {
+		return false
+	}
+
+	// If both on the good side, no hatred
+	if r.Character.Alignment > 0 && otherAlignment > 0 {
+		return false
+	}
+
+	// If both on the evil side, no hatred
+	if r.Character.Alignment < 0 && otherAlignment < 0 {
+		return false
+	}
+
+	delta := int(math.Abs(float64(r.Character.Alignment) - float64(otherAlignment)))
+
+	return delta > characters.AlignmentAggroThreshold
 }
 
 func (r *Mob) HatesMob(m *Mob) bool {

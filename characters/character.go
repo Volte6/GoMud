@@ -33,10 +33,6 @@ var (
 type NameRenderFlag uint8
 
 const (
-	AlignmentMinimum int8 = -100
-	AlignmentNeutral int8 = 0
-	AlignmentMaximum int8 = 100
-
 	RenderHealth NameRenderFlag = iota
 	RenderAggro
 	RenderShortAdjectives
@@ -1564,49 +1560,18 @@ func (c *Character) Race() string {
 	return `Ghostly Spirit`
 }
 
-func (c *Character) AlignmentName() string {
-
-	if c.Alignment < AlignmentNeutral {
-		// -80 to -100
-		if c.Alignment <= AlignmentNeutral-80 {
-			return `unholy`
-		}
-		// -60 to -79
-		if c.Alignment <= AlignmentNeutral-60 {
-			return `evil`
-		}
-		// -40 to -59
-		if c.Alignment <= AlignmentNeutral-40 {
-			return `corrupt`
-		}
-		// -20 to -39
-		if c.Alignment <= AlignmentNeutral-20 {
-			return `misguided`
-		}
-
-	} else if c.Alignment > AlignmentNeutral {
-
-		// 80-100
-		if c.Alignment >= AlignmentNeutral+80 {
-			return `holy`
-		}
-		// 60 to 79
-		if c.Alignment >= AlignmentNeutral+60 {
-			return `good`
-		}
-		// 40 to 59
-		if c.Alignment >= AlignmentNeutral+40 {
-			return `virtuous`
-		}
-		// 20 to 39
-		if c.Alignment >= AlignmentNeutral+40 {
-			return `lawful`
-		}
-
+func (c *Character) UpdateAlignment(amt int) {
+	newAlignment := int(c.Alignment) + amt
+	if newAlignment < int(AlignmentMinimum) {
+		newAlignment = int(AlignmentMinimum)
+	} else if newAlignment > int(AlignmentMaximum) {
+		newAlignment = int(AlignmentMaximum)
 	}
+	c.Alignment = int8(newAlignment)
+}
 
-	return `neutral`
-
+func (c *Character) AlignmentName() string {
+	return AlignmentToString(c.Alignment)
 }
 
 func (c *Character) GetAllBackpackItems() []items.Item {

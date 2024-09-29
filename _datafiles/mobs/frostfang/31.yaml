@@ -13,6 +13,7 @@ character:
   zone: Nowhere
   raceid: 11
   level: 10
+  alignment: -20
   gold: 0
   equipment:
     neck:

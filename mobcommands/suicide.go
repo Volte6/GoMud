@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/combat"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
@@ -126,6 +127,21 @@ func Suicide(rest string, mobId int) (bool, error) {
 						fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
 					)
 
+					// Apply alignment changes
+					alignmentBefore := user.Character.AlignmentName()
+					alignmentAdj := combat.AlignmentChange(user.Character.Alignment, mob.Character.Alignment)
+					user.Character.UpdateAlignment(alignmentAdj)
+					alignmentAfter := user.Character.AlignmentName()
+
+					slog.Debug("Alignment", "user.Character.Alignment", user.Character.Alignment, "mob.Character.Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
+
+					if alignmentBefore != alignmentAfter {
+						alignmentBefore = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentBefore, alignmentBefore)
+						alignmentAfter = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentAfter, alignmentAfter)
+						updateTxt := fmt.Sprintf(`<ansi fg="231">Your alignment has shifted from %s to %s!</ansi>`, alignmentBefore, alignmentAfter)
+						user.SendText(updateTxt)
+					}
+
 					// Chance to learn to tame the creature.
 					levelDelta := user.Character.Level - mob.Character.Level
 					if levelDelta < 0 {
@@ -200,6 +216,21 @@ func Suicide(rest string, mobId int) (bool, error) {
 						user.SendText(
 							fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
 						)
+
+						// Apply alignment changes
+						alignmentBefore := user.Character.AlignmentName()
+						alignmentAdj := combat.AlignmentChange(user.Character.Alignment, mob.Character.Alignment)
+						user.Character.UpdateAlignment(alignmentAdj)
+						alignmentAfter := user.Character.AlignmentName()
+
+						slog.Debug("Alignment", "user.Character.Alignment", user.Character.Alignment, "mob.Character.Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
+
+						if alignmentBefore != alignmentAfter {
+							alignmentBefore = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentBefore, alignmentBefore)
+							alignmentAfter = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentAfter, alignmentAfter)
+							updateTxt := fmt.Sprintf(`<ansi fg="231">Your alignment has shifted from %s to %s!</ansi>`, alignmentBefore, alignmentAfter)
+							user.SendText(updateTxt)
+						}
 
 						// Chance to learn to tame the creature.
 						levelDelta := user.Character.Level - mob.Character.Level

@@ -14,3 +14,4 @@ character:
   description: 'He appears to mean no harm, and may even have a few things to teach you.'
   raceid: 1
   level: 15
+  alignment: -40

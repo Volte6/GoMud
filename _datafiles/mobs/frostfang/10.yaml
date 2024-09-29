@@ -15,6 +15,7 @@ character:
   description: 'Ivar Froststeel, the proprietor of Frostfang Armory, is a towering figure swathed in fur-lined leathers and adorned with intricate silver jewelry. His long, silver hair flows down his back, and a well-groomed beard frames his stern, yet wise face. His piercing blue eyes, reminiscent of glacial ice, seem to assess the worthiness of each customer who steps through the door.'
   raceid: 1
   level: 25
+  alignment: 30
   gold: 10
   shop:
     - itemid: 10004

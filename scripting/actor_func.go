@@ -469,14 +469,7 @@ func (a ScriptActor) GetAlignmentName() string {
 }
 
 func (a ScriptActor) ChangeAlignment(alignmentChange int) {
-	newAlignment := int(a.characterRecord.Alignment) + alignmentChange
-	if newAlignment < -100 {
-		newAlignment = -100
-	} else if newAlignment > 100 {
-		newAlignment = 100
-	}
-
-	a.characterRecord.Alignment = int8(newAlignment)
+	a.characterRecord.UpdateAlignment(alignmentChange)
 }
 
 func (a ScriptActor) HasSpell(spellId string) bool {
