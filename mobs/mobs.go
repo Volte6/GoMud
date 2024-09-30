@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"math"
 	"os"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -62,9 +61,8 @@ type Mob struct {
 	InstanceId      int         `yaml:"-"`
 	HomeRoomId      int         `yaml:"-"`
 	Hostile         bool        // whether they attack on sight
-	IsMerchant      bool        `yaml:"ismerchant,omitempty"` // Are they a merchant?
-	LastIdleCommand uint8       `yaml:"-"`                    // Track what hte last used idlecommand was
-	BoredomCounter  uint8       `yaml:"-"`                    // how many rounds have passed since this mob has seen a player
+	LastIdleCommand uint8       `yaml:"-"` // Track what hte last used idlecommand was
+	BoredomCounter  uint8       `yaml:"-"` // how many rounds have passed since this mob has seen a player
 	Groups          []string    // What group do they identify with? Helps with teamwork
 	Hates           []string    `yaml:"hates,omitempty"`        // What NPC groups or races do they hate and probably fight if encountered?
 	IdleCommands    []string    `yaml:"idlecommands,omitempty"` // Commands they may do while idle (not in combat)
@@ -72,16 +70,14 @@ type Mob struct {
 	CombatCommands  []string    `yaml:"combatcommands,omitempty"` // Commands they may do while in combat
 	DamageTaken     map[int]int `yaml:"-"`                        // key = who, value = how much
 	Character       characters.Character
-	ShopStock       map[int]int  `yaml:"shopstock,omitempty"`
-	ShopServants    []MobForHire `yaml:"shopservants,omitempty"`
-	MaxWander       int          `yaml:"maxwander,omitempty"` // Max rooms to wander from home
-	GoingHome       bool         `yaml:"-"`                   // WHether they are trying to get home
-	RoomStack       []int        `yaml:"-"`                   // Stack of rooms to get back home
-	PreventIdle     bool         `yaml:"-"`                   // Whether they can't possibly be idle
-	ScriptTag       string       `yaml:"scripttag"`           // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
-	tempDataStore   map[string]any
+	MaxWander       int      `yaml:"maxwander,omitempty"`       // Max rooms to wander from home
+	GoingHome       bool     `yaml:"-"`                         // WHether they are trying to get home
+	RoomStack       []int    `yaml:"-"`                         // Stack of rooms to get back home
+	PreventIdle     bool     `yaml:"-"`                         // Whether they can't possibly be idle
+	ScriptTag       string   `yaml:"scripttag"`                 // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
 	QuestFlags      []string `yaml:"questflags,omitempty,flow"` // What quest flags are set on this mob?
 	BuffIds         []int    `yaml:"buffids,omitempty"`         // Buff Id's this mob always has upon spawn
+	tempDataStore   map[string]any
 }
 
 func MobInstanceExists(instanceId int) bool {
@@ -160,6 +156,14 @@ func NewMobById(mobId MobId, homeRoomId int) *Mob {
 
 		for idx, _ := range mob.Character.Items {
 			mob.Character.Items[idx].Validate()
+		}
+
+		if mob.Character.Alignment == 0 {
+			if raceInfo := races.GetRace(mob.Character.RaceId); raceInfo != nil {
+				if raceInfo.DefaultAlignment != 0 {
+					mob.Character.Alignment = raceInfo.DefaultAlignment
+				}
+			}
 		}
 
 		mob.Character.Equipment.Weapon.Validate()
@@ -252,14 +256,12 @@ func (m *Mob) Command(inputTxt string, waitTurns ...int) {
 
 }
 
+func (m *Mob) HasShop() bool {
+	return len(m.Character.Shop) > 0
+}
+
 func (m *Mob) IsTameable() bool {
-	if m.IsMerchant {
-		return false
-	}
-	if len(m.ShopStock) > 0 {
-		return false
-	}
-	if len(m.ShopServants) > 0 {
+	if m.HasShop() {
 		return false
 	}
 	if len(m.ScriptTag) > 0 {
@@ -299,13 +301,13 @@ func (m *Mob) GetTempData(key string) any {
 }
 
 func (m *Mob) Despawns() bool {
-	if m.IsMerchant {
+	if m.HasShop() {
 		return false
 	}
 	return true
 }
 
-func (r *Mob) GetSellPrice(item items.Item) int {
+func (m *Mob) GetSellPrice(item items.Item) int {
 
 	if item.IsSpecial() {
 		return 0
@@ -313,64 +315,47 @@ func (r *Mob) GetSellPrice(item items.Item) int {
 
 	itemType := item.GetSpec().Type
 	itemSubtype := item.GetSpec().Subtype
-	value := item.GetSpec().Value
+	value := 0
 	likesType := false
 	likesSubtype := false
 
-	if len(r.IdleCommands) > 0 {
-		for _, cmdStr := range r.IdleCommands {
-			if strings.HasPrefix(cmdStr, "restock ") {
-				cmdStr = strings.TrimPrefix(cmdStr, "restock ")
-				cmdParts := strings.Split(cmdStr, "/")
-				itemId, _ := strconv.Atoi(cmdParts[0])
-				if iSpec := items.New(itemId); iSpec.ItemId != 0 {
-					if iSpec.GetSpec().Type == itemType {
-						likesType = true
-					}
-					if iSpec.GetSpec().Subtype == itemSubtype {
-						likesSubtype = true
-					}
-				}
-			}
-			if likesType && likesSubtype {
-				break
-			}
+	for _, stockItm := range m.Character.Shop.GetInstock() {
+		if stockItm.ItemId == 0 {
+			continue
 		}
-	}
 
-	if len(r.Character.Items) > 0 {
-		for _, item := range r.Character.Items {
-			if item.GetSpec().Type == itemType {
-				likesType = true
-			}
-			if item.GetSpec().Subtype == itemSubtype {
-				likesSubtype = true
-			}
-			if likesType && likesSubtype {
-				break
-			}
+		tmpItm := items.New(stockItm.ItemId)
+		if tmpItm.ItemId == 0 {
+			continue
 		}
-	}
 
-	for _, item := range r.Character.Equipment.GetAllItems() {
-		if item.GetSpec().Type == itemType {
+		if tmpItm.GetSpec().Type == itemType {
 			likesType = true
 		}
-		if item.GetSpec().Subtype == itemSubtype {
+
+		if tmpItm.GetSpec().Subtype == itemSubtype {
 			likesSubtype = true
 		}
-		if likesType && likesSubtype {
-			break
+
+		if stockItm.ItemId == item.ItemId {
+			value = stockItm.Price
 		}
+	}
+
+	if value == 0 {
+		value = item.GetSpec().Value
 	}
 
 	priceScale := 0.0
+
 	if likesType {
 		priceScale += 0.1
 	}
+
 	if likesSubtype {
 		priceScale += 0.1
 	}
+
 	return int(math.Ceil(float64(value) * priceScale))
 }
 
@@ -382,6 +367,28 @@ func (r *Mob) HatesRace(raceName string) bool {
 		}
 	}
 	return false
+}
+
+func (r *Mob) HatesAlignment(otherAlignment int8) bool {
+
+	// If either are neutral, no hatred
+	if characters.AlignmentToString(r.Character.Alignment) == `neutral` || characters.AlignmentToString(otherAlignment) == `neutral` {
+		return false
+	}
+
+	// If both on the good side, no hatred
+	if r.Character.Alignment > 0 && otherAlignment > 0 {
+		return false
+	}
+
+	// If both on the evil side, no hatred
+	if r.Character.Alignment < 0 && otherAlignment < 0 {
+		return false
+	}
+
+	delta := int(math.Abs(float64(r.Character.Alignment) - float64(otherAlignment)))
+
+	return delta > characters.AlignmentAggroThreshold
 }
 
 func (r *Mob) HatesMob(m *Mob) bool {
@@ -476,11 +483,6 @@ func (r *Mob) Validate() error {
 	}
 	if r.ActivityLevel > 10 {
 		r.ActivityLevel = 10
-	}
-	if r.IsMerchant {
-		if r.ShopStock == nil {
-			r.ShopStock = make(map[int]int)
-		}
 	}
 
 	r.Character.Validate()

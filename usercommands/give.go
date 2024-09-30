@@ -196,10 +196,12 @@ func Give(rest string, userId int) (bool, error) {
 					}
 				}
 
-				m.Command(fmt.Sprintf(`emote considers the <ansi fg="itemname">%s</ansi> for a moment.`, giveItem.DisplayName()))
-
-				m.Command(fmt.Sprintf(`gearup !%d`, giveItem.ItemId))
-
+				if giveGoldAmount > 0 {
+					m.Command(`emote counts his gold coins and chuckles a bit.`)
+				} else {
+					m.Command(fmt.Sprintf(`emote considers the <ansi fg="itemname">%s</ansi> for a moment.`, giveItem.DisplayName()))
+					m.Command(fmt.Sprintf(`gearup !%d`, giveItem.ItemId))
+				}
 			} else {
 				user.SendText("Something went wrong.")
 			}

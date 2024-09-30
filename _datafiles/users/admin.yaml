@@ -16,7 +16,7 @@ character:
     to disrupt the balance of the world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 9
+  roomid: 76
   zone: Frostfang
   raceid: 2
   stats:
@@ -39,11 +39,11 @@ character:
   experience: 12255
   trainingpoints: 32
   statpoints: 23
-  health: 43
+  health: 33
   mana: 31
   actionpoints: 202
   alignment: 0
-  gold: 0
+  gold: 90
   bank: 0
   spellbook:
     curepoison: 1
@@ -64,13 +64,17 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 29
+      roundcounter: 16
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 22
+      roundcounter: 39
       triggersleft: 1000000000
+    - buffid: 1
+      onstartevent: true
+      roundcounter: 7
+      triggersleft: 1
   equipment:
     weapon:
       itemid: 10001
@@ -89,6 +93,7 @@ character:
     peep: 4
     protection: 4
     skulduggery: 1
+    tame: 4
   keyring:
     784-chest: DUU
     key-110-west: "3"
@@ -100,9 +105,14 @@ character:
       58: 8
     totaldeaths: 1
   extralives: 1
+  mobmastery:
+    tame:
+      1: 87
+      54: 50
+      55: 40
   buffids: []
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/zLRMdExN9Ex1DHUMdIx1jHRMYWzEWLIIoY65mBooWMJCAAA//8eQJyLPAAAAA==
+roommemoryblob: H4sIAAAAAAAA/zI0s9DBj82htCUmrWNqomNqqmNqBiLNjGFscx0zIxAJETc30zE3AwQAAP//Al3lOWcAAAA=
 configoptions: {}

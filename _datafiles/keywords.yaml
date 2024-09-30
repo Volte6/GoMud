@@ -153,6 +153,7 @@ help-aliases:
   colors:           [color, ansi]
   auction:          [bid]
   killstats:        [kills, kd]
+  trading:          [haggle]
 # Default aliases for commands
 # For example: inv -> inventory
 # They can be command + argument aliases
@@ -186,6 +187,7 @@ command-aliases:
   keyring:          ['key', 'keys']
   whisper:          ['/w']
   unlock:           ['open']
+  buy:              ['hire']
   'party chat':     ['pchat', 'psay']
   'bank deposit':   ['deposit']
   'bank withdraw':  ['withdraw']

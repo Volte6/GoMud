@@ -30,20 +30,21 @@ const (
 )
 
 type Race struct {
-	RaceId        int
-	Name          string
-	Description   string
-	BuffIds       []int // Permabuffs this race always has
-	Size          Size
-	TNLScale      float32
-	UnarmedName   string
-	Tameable      bool
-	Damage        items.Damage
-	Selectable    bool
-	AngryCommands []string         // randomly chosen to queue when they are angry/entering combat.
-	KnowsFirstAid bool             // Whether they can apply aid to other players.
-	Stats         stats.Statistics // Base stats for this race.
-	DisabledSlots []string         `yaml:"disabledslots,omitempty"`
+	RaceId           int
+	Name             string
+	Description      string
+	DefaultAlignment int8
+	BuffIds          []int // Permabuffs this race always has
+	Size             Size
+	TNLScale         float32
+	UnarmedName      string
+	Tameable         bool
+	Damage           items.Damage
+	Selectable       bool
+	AngryCommands    []string         // randomly chosen to queue when they are angry/entering combat.
+	KnowsFirstAid    bool             // Whether they can apply aid to other players.
+	Stats            stats.Statistics // Base stats for this race.
+	DisabledSlots    []string         `yaml:"disabledslots,omitempty"`
 }
 
 func GetRaces() []Race {

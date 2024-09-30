@@ -32,8 +32,8 @@ function onIdle(mob, room) {
             targetRoom = GetRoom(charmer.GetRoomId() );
             if ( targetRoom != null ) {
                 mob.MoveRoom( charmer.GetRoomId() );
-                room.SendText(`A large ` + UtilApplyColorPattern('swirling portal', 'pink') + ` appears, and ` + mob.GetCharacterName(true) + ` steps into it, right before disappears.`);
-                targetRoom.SendText(`A large ` + UtilApplyColorPattern('swirling portal', 'pink') + ` appears, and ` + mob.GetCharacterName(true) + ` steps out of it, right before disappears.`);
+                room.SendText(`A large ` + UtilApplyColorPattern('swirling portal', 'pink') + ` appears, and ` + mob.GetCharacterName(true) + ` steps into it, right before it disappears.`);
+                targetRoom.SendText(`A large ` + UtilApplyColorPattern('swirling portal', 'pink') + ` appears, and ` + mob.GetCharacterName(true) + ` steps out of it, right before it disappears.`);
                 mob.Command(`say I almost lost you ` + charmer.GetCharacterName(true) + `!`);
             }
             
@@ -66,7 +66,7 @@ function onIdle(mob, room) {
         return false;
     }
 
-    switch( UtilDiceRoll(1, 10) ) {
+    switch( UtilDiceRoll(1, 12) ) {
         case 1:
             if ( charmer.GetStatPoints() > 0 ) {
                 mob.Command(`sayto @` + charmer.UserId() + ` It looks like you've got some stat points to spend. Type <ansi fg="command">status train</ansi> to upgrade your stats!`);
@@ -81,7 +81,7 @@ function onIdle(mob, room) {
             break;
         case 3:
             if ( !charmer.HasQuest(`2-start`) ) {
-                mob.Command(`sayto @` + charmer.UserId() + ` I have heard the king worries. If we can find an audience with him we can try to <ansi fg="command">ask</ansi> him about a quest.`);
+                mob.Command(`sayto @` + charmer.UserId() + ` I have heard the king worries. If we can find an audience with him we can try to <ansi fg="command">ask</ansi> him about a quest. He is north of town square.`);
                 mob.SetTempData(`lastTipRound`, roundNow);
             }
             break;
@@ -90,7 +90,19 @@ function onIdle(mob, room) {
             mob.SetTempData(`lastTipRound`, roundNow);
             break;
         case 5:
-            mob.Command(`sayto @` + charmer.UserId() + `You can find help on many subjects by typing <ansi fg="command">help</ansi>.`);
+            mob.Command(`sayto @` + charmer.UserId() + ` You can find help on many subjects by typing <ansi fg="command">help</ansi>.`);
+            mob.SetTempData(`lastTipRound`, roundNow);
+            break;
+        case 6:
+            mob.Command(`sayto @` + charmer.UserId() + ` I can create a portal to take us back to Town Square any time. Just <ansi fg="command">ask</ansi> me about it.`);
+            mob.SetTempData(`lastTipRound`, roundNow);
+            break;
+        case 7:
+            mob.Command(`sayto @` + charmer.UserId() + ` If you have friends to play with, you can party up! <ansi fg="command">help party</ansi> to learn more.`);
+            mob.SetTempData(`lastTipRound`, roundNow);
+            break;
+        case 8:
+            mob.Command(`sayto @` + charmer.UserId() + ` You can send a message to everyone using the <ansi fg="command">broadcast</ansi> command.`);
             mob.SetTempData(`lastTipRound`, roundNow);
             break;
         default:
@@ -100,3 +112,37 @@ function onIdle(mob, room) {
 
     return true;
 }
+
+
+
+const homeNouns = ["home", "portal", "return", "townsquare", "town square"];
+
+function onAsk(mob, room, eventDetails) {
+
+    charmedUserId = mob.GetCharmedUserId();
+
+    if ( eventDetails.sourceId != charmedUserId ) {
+        return false;
+    }
+
+    user = GetUser(eventDetails.sourceId);
+
+    match = UtilFindMatchIn(eventDetails.askText, homeNouns);
+    if ( match.found ) {
+
+        if ( user.GetRoomId() == 1 ) {
+            mob.Command(`sayto @`+String(eventDetails.sourceId)+` we're already at Town Square. Look around!`);
+            return true;
+        }
+
+        mob.Command(`sayto @`+String(eventDetails.sourceId)+` back to Town Square? Sure thing, lets go!`);
+        mob.Command(`emote whispers a soft incantation and summons a ` + UtilApplyColorPattern(`glowing portal`, `cyan`) + `.`);
+
+        room.AddTemporaryExit(`glowing portal`, `:cyan`, 1, 3);
+
+        return true;
+    }
+
+    return false;
+}
+

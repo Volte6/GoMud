@@ -1,6 +1,7 @@
 raceid: 8
 name: Reptilian
 description: A creature resembling a lizard somewhat.
+defaultalignment: -20
 size: medium
 unarmedname: claws
 tnlscale: 1

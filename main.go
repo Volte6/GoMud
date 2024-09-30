@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"slices"
 	"strconv"
@@ -20,6 +21,7 @@ import (
 
 	"github.com/Volte6/ansitags"
 	"github.com/gorilla/websocket"
+	"github.com/natefinch/lumberjack"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/colorpatterns"
@@ -50,10 +52,6 @@ const (
 )
 
 var (
-	logger = slog.New(
-		util.GetColorLogHandler(os.Stderr, slog.LevelDebug),
-	)
-
 	sigChan            = make(chan os.Signal, 1)
 	workerShutdownChan = make(chan bool, 1)
 
@@ -67,8 +65,7 @@ var (
 
 func main() {
 
-	// Setup the default logger
-	slog.SetDefault(logger)
+	setupLogger()
 
 	configs.ReloadConfig()
 	c := configs.GetConfig()
@@ -362,7 +359,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 		// Was there an error? If so, we should probably just stop processing input
 		if err != nil {
-			logger.Warn("InputHandler", "error", err)
+			slog.Warn("InputHandler", "error", err)
 			continue
 		}
 
@@ -677,4 +674,72 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 	}()
 
 	return server
+}
+
+func setupLogger() {
+
+	logLevel := strings.ToUpper(strings.TrimSpace(os.Getenv(`LOG_LEVEL`)))
+	if logLevel == `` {
+		logLevel = `HIGH`
+	}
+
+	var slogLevel slog.Level
+	if logLevel[0:1] == `L` {
+		slogLevel = slog.LevelDebug
+	} else if logLevel[0:1] == `M` {
+		slogLevel = slog.LevelInfo
+	} else {
+		slogLevel = slog.LevelDebug
+	}
+
+	logPath := os.Getenv(`LOG_PATH`)
+	if logPath != `` {
+
+		fileInfo, err := os.Stat(logPath)
+		if err == nil {
+			if fileInfo.IsDir() {
+				panic(fmt.Errorf("log file path is a directory: %s", logPath))
+			}
+
+		} else if os.IsNotExist(err) {
+			// File does not exist; check if the directory exists
+			dir := filepath.Dir(logPath)
+			if _, err := os.Stat(dir); os.IsNotExist(err) {
+				panic(fmt.Errorf("directory for log file does not exist: %s", dir))
+			}
+		} else {
+			// Some other error
+			panic(fmt.Errorf("error accessing log file path: %v", err))
+		}
+
+		lj := &lumberjack.Logger{
+			Filename:   logPath,
+			MaxSize:    100,  // Maximum size in megabytes before rotation
+			MaxBackups: 10,   // Maximum number of old log files to retain
+			Compress:   true, // Compress rotated files
+		}
+
+		// Open or create the log file
+		file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			panic(fmt.Errorf("failed to open log file: %v", err))
+		}
+		defer file.Close()
+
+		fileLogger := slog.New(
+			util.GetColorLogHandler(lj, slogLevel),
+		)
+
+		// Setup the default logger
+		slog.SetDefault(fileLogger)
+
+	} else {
+
+		localLogger := slog.New(
+			util.GetColorLogHandler(os.Stderr, slogLevel),
+		)
+
+		slog.SetDefault(localLogger)
+	}
+
 }

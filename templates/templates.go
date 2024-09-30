@@ -8,6 +8,7 @@ import (
 	"sync"
 	"text/template"
 	"time"
+	"unicode/utf8"
 
 	"log/slog"
 
@@ -146,6 +147,7 @@ type TemplateTable struct {
 	Title          string
 	Header         []string
 	Rows           [][]string
+	TrueCellSize   [][]int
 	ColumnCount    int
 	ColumnWidths   []int
 	Formatting     [][]string
@@ -155,7 +157,7 @@ type TemplateTable struct {
 func (t TemplateTable) GetCell(row int, column int) string {
 
 	cellStr := t.Rows[row][column]
-	repeatCt := t.ColumnWidths[column] - len([]rune(cellStr))
+	repeatCt := t.ColumnWidths[column] - t.TrueCellSize[row][column]
 	if repeatCt > 0 {
 		cellStr += strings.Repeat(` `, repeatCt)
 	}
@@ -176,6 +178,7 @@ func GetTable(title string, headers []string, rows [][]string, formatting ...[]s
 		Title:        title,
 		Header:       headers,
 		Rows:         rows,
+		TrueCellSize: [][]int{},
 		ColumnCount:  len(headers),
 		ColumnWidths: make([]int, len(headers)),
 		Formatting:   formatting,
@@ -184,18 +187,20 @@ func GetTable(title string, headers []string, rows [][]string, formatting ...[]s
 	hdrColCt := len(headers)
 	rowCt := len(rows)
 	table.formatRowCount = len(formatting)
+	table.TrueCellSize = make([][]int, rowCt)
 
 	// Get the longest element
 	for i := 0; i < hdrColCt; i++ {
 		if len(headers[i])+1 > table.ColumnWidths[i] {
-			table.ColumnWidths[i] = len([]rune(headers[i]))
+			table.ColumnWidths[i] = utf8.RuneCountInString(headers[i])
 		}
 	}
 
 	// Get the longest element
 	for r := 0; r < rowCt; r++ {
-
 		rowColCt := len(rows[r])
+		table.TrueCellSize[r] = make([]int, rowColCt)
+
 		if hdrColCt < rowColCt {
 			for i := hdrColCt; i < rowColCt; i++ {
 				table.Header = append(table.Header, ``)
@@ -204,9 +209,11 @@ func GetTable(title string, headers []string, rows [][]string, formatting ...[]s
 		}
 
 		for c := 0; c < hdrColCt; c++ {
-			if len(rows[r][c])+1 > table.ColumnWidths[c] {
-				table.ColumnWidths[c] = len([]rune(rows[r][c]))
+			sz := utf8.RuneCountInString(ansitags.Parse(rows[r][c], ansitags.StripTags))
+			if sz+1 > table.ColumnWidths[c] {
+				table.ColumnWidths[c] = sz
 			}
+			table.TrueCellSize[r][c] = sz
 		}
 	}
 

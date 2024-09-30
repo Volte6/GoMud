@@ -438,65 +438,8 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 				if mob := mobs.NewMobById(mobs.MobId(spawnInfo.MobId), r.RoomId); mob != nil {
 
 					// If a merchant, fill up stocks on first time being loaded in
-					if mob.IsMerchant {
-						if len(mob.ShopStock) == 0 {
-
-							for _, cmd := range mob.IdleCommands {
-
-								if strings.HasPrefix(cmd, "restock ") {
-
-									cmdParts := strings.Split(cmd, " ")
-									if len(cmdParts) == 2 {
-
-										parts := strings.Split(cmdParts[1], "/")
-										itemId, _ := strconv.Atoi(parts[0])
-										qty := 1
-										if len(parts) == 2 {
-											qty, _ = strconv.Atoi(parts[1])
-										}
-
-										mob.ShopStock[itemId] = qty
-
-									}
-								}
-								if strings.HasPrefix(cmd, "restockservant ") {
-									cmdParts := strings.Split(cmd, " ")
-									if len(cmdParts) == 2 {
-
-										parts := strings.Split(cmdParts[1], "/")
-										mobId, _ := strconv.Atoi(parts[0])
-
-										qty := 1
-										if len(parts) > 2 {
-											qty, _ = strconv.Atoi(parts[1])
-										}
-
-										price := 999999
-										if len(parts) > 1 {
-											price, _ = strconv.Atoi(parts[2])
-										}
-
-										found := false
-										for idx, servantInfo := range mob.ShopServants {
-											if servantInfo.MobId == mobs.MobId(mobId) {
-												mob.ShopServants[idx].Quantity = qty
-												mob.ShopServants[idx].Price = price
-												found = true
-											}
-										}
-
-										if !found {
-											mob.ShopServants = append(mob.ShopServants, mobs.MobForHire{
-												MobId:    mobs.MobId(mobId),
-												Quantity: qty,
-												Price:    price,
-											})
-										}
-
-									}
-								}
-							}
-						}
+					if mob.HasShop() {
+						mob.Character.Shop.Restock()
 					}
 
 					if len(spawnInfo.BuffIds) > 0 {
@@ -816,96 +759,17 @@ func (r *Room) MarkVisited(id int, vType VisitorType, subtrackTurns ...int) {
 	r.lastVisited = util.GetRoundCount()
 }
 
-func (r *Room) PlayerCt() int {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-	return len(r.players)
-}
-
-func (r *Room) GetPlayers(findTypes ...FindFlag) []int {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	var typeFlag FindFlag = 0
-	if len(findTypes) < 1 {
-		typeFlag = FindAll
-	} else {
-		for _, ff := range findTypes {
-			typeFlag |= ff
-		}
-	}
-
-	// If no filtering, just copy all mobs in the room and return it
-	if typeFlag == FindAll {
-		return append([]int{}, r.players...)
-	}
-
-	playerMatches := []int{}
-	var isCharmed bool = false
-
-	for _, userId := range r.players {
-
-		user := users.GetByUserId(userId)
-		if user == nil {
-			continue
-		}
-
-		if typeFlag == FindAll {
-			playerMatches = append(playerMatches, userId)
-			continue
-		}
-
-		if user.Character.Aggro != nil {
-			if typeFlag&FindFightingPlayer == FindFightingPlayer && user.Character.Aggro.UserId != 0 {
-				playerMatches = append(playerMatches, userId)
-				continue
-			}
-			if typeFlag&FindFightingMob == FindFightingMob && user.Character.Aggro.MobInstanceId != 0 {
-				playerMatches = append(playerMatches, userId)
-				continue
-			}
-		}
-
-		if typeFlag&FindHasLight == FindHasLight && user.Character.HasBuffFlag(buffs.EmitsLight) {
-			playerMatches = append(playerMatches, userId)
-			continue
-		}
-
-		isCharmed = user.Character.IsCharmed()
-
-		if isCharmed && typeFlag&FindCharmed == FindCharmed {
-			playerMatches = append(playerMatches, userId)
-			continue
-		}
-
-		// If not allied with players
-		// and not current aggressive to anything
-		// and won't automatically attack players
-		if typeFlag&FindNeutral == FindNeutral && !isCharmed && user.Character.Aggro == nil {
-			playerMatches = append(playerMatches, userId)
-			continue
-		}
-
-		if typeFlag&FindDowned == FindDowned && user.Character.Health < 1 {
-			playerMatches = append(playerMatches, userId)
-			continue
-		}
-
-		if typeFlag&FindBuffed == FindBuffed && len(user.Character.Buffs.List) > 0 {
-			playerMatches = append(playerMatches, userId)
-			continue
-		}
-
-	}
-
-	return playerMatches
-}
-
 func (r *Room) MobCt() int {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
 	return len(r.mobs)
+}
+
+func (r *Room) PlayerCt() int {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+	return len(r.players)
 }
 
 func (r *Room) GetMobs(findTypes ...FindFlag) []int {
@@ -978,7 +842,7 @@ func (r *Room) GetMobs(findTypes ...FindFlag) []int {
 			continue
 		}
 
-		if typeFlag&FindMerchant == FindMerchant && mob.IsMerchant {
+		if typeFlag&FindMerchant == FindMerchant && mob.HasShop() {
 			mobMatches = append(mobMatches, mobId)
 			continue
 		}
@@ -995,6 +859,90 @@ func (r *Room) GetMobs(findTypes ...FindFlag) []int {
 	}
 
 	return mobMatches
+}
+
+func (r *Room) GetPlayers(findTypes ...FindFlag) []int {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	var typeFlag FindFlag = 0
+	if len(findTypes) < 1 {
+		typeFlag = FindAll
+	} else {
+		for _, ff := range findTypes {
+			typeFlag |= ff
+		}
+	}
+
+	// If no filtering, just copy all mobs in the room and return it
+	if typeFlag == FindAll {
+		return append([]int{}, r.players...)
+	}
+
+	playerMatches := []int{}
+	var isCharmed bool = false
+
+	for _, userId := range r.players {
+
+		user := users.GetByUserId(userId)
+		if user == nil {
+			continue
+		}
+
+		if typeFlag == FindAll {
+			playerMatches = append(playerMatches, userId)
+			continue
+		}
+
+		if user.Character.Aggro != nil {
+			if typeFlag&FindFightingPlayer == FindFightingPlayer && user.Character.Aggro.UserId != 0 {
+				playerMatches = append(playerMatches, userId)
+				continue
+			}
+			if typeFlag&FindFightingMob == FindFightingMob && user.Character.Aggro.MobInstanceId != 0 {
+				playerMatches = append(playerMatches, userId)
+				continue
+			}
+		}
+
+		if typeFlag&FindHasLight == FindHasLight && user.Character.HasBuffFlag(buffs.EmitsLight) {
+			playerMatches = append(playerMatches, userId)
+			continue
+		}
+
+		isCharmed = user.Character.IsCharmed()
+
+		if isCharmed && typeFlag&FindCharmed == FindCharmed {
+			playerMatches = append(playerMatches, userId)
+			continue
+		}
+
+		// If not allied with players
+		// and not current aggressive to anything
+		// and won't automatically attack players
+		if typeFlag&FindNeutral == FindNeutral && !isCharmed && user.Character.Aggro == nil {
+			playerMatches = append(playerMatches, userId)
+			continue
+		}
+
+		if typeFlag&FindMerchant == FindMerchant && user.HasShop() {
+			playerMatches = append(playerMatches, userId)
+			continue
+		}
+
+		if typeFlag&FindDowned == FindDowned && user.Character.Health < 1 {
+			playerMatches = append(playerMatches, userId)
+			continue
+		}
+
+		if typeFlag&FindBuffed == FindBuffed && len(user.Character.Buffs.List) > 0 {
+			playerMatches = append(playerMatches, userId)
+			continue
+		}
+
+	}
+
+	return playerMatches
 }
 
 func (r *Room) IsCalm() bool {

@@ -75,6 +75,83 @@ func Look(rest string, userId int) (bool, error) {
 	if len(rest) > 0 {
 		lookAt := rest
 
+		//
+		// look for any mobs, players, npcs
+		//
+
+		playerId, mobId := room.FindByName(lookAt)
+
+		if playerId > 0 || mobId > 0 {
+
+			statusTxt := ""
+			invTxt := ""
+
+			if playerId > 0 {
+
+				u := *users.GetByUserId(playerId)
+
+				if !isSneaking {
+					u.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at you.`, user.Character.Name),
+					)
+
+					room.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at <ansi fg="username">%s</ansi>.`, user.Character.Name, u.Character.Name),
+						u.UserId)
+				}
+
+				descTxt, _ := templates.Process("character/description", u)
+				user.SendText(descTxt)
+
+				itemNames := []string{}
+				for _, item := range u.Character.Items {
+					itemNames = append(itemNames, item.DisplayName())
+				}
+
+				invData := map[string]any{
+					`Equipment`: &u.Character.Equipment,
+					`ItemNames`: itemNames,
+				}
+
+				inventoryTxt, _ := templates.Process("character/inventory-look", invData)
+				user.SendText(inventoryTxt)
+
+			} else if mobId > 0 {
+
+				m := mobs.GetInstance(mobId)
+
+				if !isSneaking {
+					targetName := m.Character.GetMobName(0).String()
+					room.SendText(
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at %s.`, user.Character.Name, targetName),
+						userId,
+					)
+				}
+
+				descTxt, _ := templates.Process("character/description", m)
+				user.SendText(descTxt)
+
+				itemNames := []string{}
+				for _, item := range m.Character.Items {
+					itemNames = append(itemNames, item.DisplayName())
+				}
+
+				invData := map[string]any{
+					`Equipment`: &m.Character.Equipment,
+					`ItemNames`: itemNames,
+				}
+
+				inventoryTxt, _ := templates.Process("character/inventory-look", invData)
+				user.SendText(inventoryTxt)
+			}
+
+			user.SendText(statusTxt)
+			user.SendText(invTxt)
+
+			return true, nil
+
+		}
+
 		containerName := room.FindContainerByName(lookAt)
 		if containerName != `` {
 
@@ -193,83 +270,6 @@ func Look(rest string, userId int) (bool, error) {
 			user.SendText(``)
 
 			return true, nil
-		}
-
-		//
-		// look for any mobs, players, npcs
-		//
-
-		playerId, mobId := room.FindByName(lookAt)
-
-		if playerId > 0 || mobId > 0 {
-
-			statusTxt := ""
-			invTxt := ""
-
-			if playerId > 0 {
-
-				u := *users.GetByUserId(playerId)
-
-				if !isSneaking {
-					u.SendText(
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at you.`, user.Character.Name),
-					)
-
-					room.SendText(
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at <ansi fg="username">%s</ansi>.`, user.Character.Name, u.Character.Name),
-						u.UserId)
-				}
-
-				descTxt, _ := templates.Process("character/description", u)
-				user.SendText(descTxt)
-
-				itemNames := []string{}
-				for _, item := range u.Character.Items {
-					itemNames = append(itemNames, item.DisplayName())
-				}
-
-				invData := map[string]any{
-					`Equipment`: &u.Character.Equipment,
-					`ItemNames`: itemNames,
-				}
-
-				inventoryTxt, _ := templates.Process("character/inventory-look", invData)
-				user.SendText(inventoryTxt)
-
-			} else if mobId > 0 {
-
-				m := mobs.GetInstance(mobId)
-
-				if !isSneaking {
-					targetName := m.Character.GetMobName(0).String()
-					room.SendText(
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at %s.`, user.Character.Name, targetName),
-						userId,
-					)
-				}
-
-				descTxt, _ := templates.Process("character/description", m)
-				user.SendText(descTxt)
-
-				itemNames := []string{}
-				for _, item := range m.Character.Items {
-					itemNames = append(itemNames, item.DisplayName())
-				}
-
-				invData := map[string]any{
-					`Equipment`: &m.Character.Equipment,
-					`ItemNames`: itemNames,
-				}
-
-				inventoryTxt, _ := templates.Process("character/inventory-look", invData)
-				user.SendText(inventoryTxt)
-			}
-
-			user.SendText(statusTxt)
-			user.SendText(invTxt)
-
-			return true, nil
-
 		}
 
 		user.SendText("Look at what???")

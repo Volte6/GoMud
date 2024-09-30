@@ -38,6 +38,10 @@ var (
 		// Have they disconnected and are zombie status?
 		`poisoned`:       colorpatterns.ApplyColorPattern(`☠poisoned`, `purple`),
 		`poisoned-short`: colorpatterns.ApplyColorPattern(`☠`, `purple`),
+
+		// Do they sell stuff?
+		`shop`:       colorpatterns.ApplyColorPattern(`shop`, `gold`),
+		`shop-short`: colorpatterns.ApplyColorPattern(`$`, `gold`),
 	}
 )
 

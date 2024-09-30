@@ -60,6 +60,7 @@ func Start(rest string, userId int) (bool, error) {
 
 				if r.Selectable {
 					user.Character.RaceId = r.Id()
+					user.Character.Alignment = r.DefaultAlignment
 					user.Character.Validate()
 
 					user.SendText(fmt.Sprintf(`<ansi fg="magenta">Your ghostly form materializes into that of a %s!</ansi>%s`, r.Name, term.CRLFStr))

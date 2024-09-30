@@ -73,6 +73,10 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.WebClientModalOpen(name string, value string)](#actorobjectwebclientmodalopenname-string-value-string)
   - [ActorObject.WebClientModalClose(name string)](#actorobjectwebclientmodalclosename-string)
   - [ActorObject.GetLastInputRound() int](#actorobjectgetlastinputround-int)
+  - [ActorObject.GetTameMastery() Object](#actorobjectgettamemastery-object)
+  - [ActorObject.SetTameMastery(mobId int, newSkillLevel int)](#actorobjectsettamemasterymobid-int-newskilllevel-int)
+  - [ActorObject.GetChanceToTame(target ScriptActor) int](#actorobjectgetchancetotametarget-scriptactor-int)
+  - [ActorObject.GetStatMod(statModName string) int](#actorobjectgetstatmodstatmodname-string-int)
 
 
 
@@ -495,4 +499,27 @@ Closes a modal if one by the name exists, IF the user is on a webclient
 ## [ActorObject.GetLastInputRound() int](/scripting/actor_func.go)
 Returns the last round number the user input anything at all
 
+## [ActorObject.GetTameMastery() Object](/scripting/actor_func.go)
+Returns an object where keys are the mobId and the value is the tame level
 
+## [ActorObject.SetTameMastery(mobId int, newSkillLevel int)](/scripting/actor_func.go)
+Sets the tame mastery of a specific mobId to a specific skill level
+
+|  Argument | Explanation |
+| --- | --- |
+| mobId | MobId for the type |
+| newSkillLevel | New level to set it at |
+
+## [ActorObject.GetChanceToTame(target ScriptActor) int](/scripting/actor_func.go)
+Get the chance in 100 to tame a target
+
+|  Argument | Explanation |
+| --- | --- |
+| target | [ActorObject](FUNCTIONS_ACTORS.md) |
+
+## [ActorObject.GetStatMod(statModName string) int](/scripting/actor_func.go)
+returns the total specific statmod from worn items and buffs
+
+|  Argument | Explanation |
+| --- | --- |
+| statModName | The name of the special stat mod, such as "strength" or "tame" |

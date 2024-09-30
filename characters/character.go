@@ -33,10 +33,6 @@ var (
 type NameRenderFlag uint8
 
 const (
-	AlignmentMinimum int8 = -100
-	AlignmentNeutral int8 = 0
-	AlignmentMaximum int8 = 100
-
 	RenderHealth NameRenderFlag = iota
 	RenderAggro
 	RenderShortAdjectives
@@ -60,6 +56,7 @@ type Character struct {
 	Alignment       int8              // The alignment of the character
 	Gold            int               // The gold the character is holding
 	Bank            int               // The gold the character has in the bank
+	Shop            Shop              `yaml:"shop,omitempty"`      // Definition of shop services/items this character stocks (or just has at the moment)
 	SpellBook       map[string]int    `yaml:"spellbook,omitempty"` // The spells the character has learned
 	Charmed         *CharmInfo        `yaml:"-"`                   // If they are charmed, this is the info
 	CharmedMobs     []int             `yaml:"-"`                   // If they have charmed anyone, this is the list of mob instance ids
@@ -79,6 +76,7 @@ type Character struct {
 	KD              KDStats           `yaml:"kd,omitempty"`            // Kill/Death stats
 	MiscData        map[string]any    `yaml:"miscdata,omitempty"`      // Any random other data that needs to be stored
 	ExtraLives      int               `yaml:"extralives,omitempty"`    // How many lives remain. If enabled, players can perma-die if they die at zero
+	MobMastery      MobMasteries      `yaml:"mobmastery,omitempty"`    // Tracks particular masteries around a given mob
 	roomHistory     []int             // A stack FILO of the last X rooms the character has been in
 	followers       []int             // everyone following this user
 	BuffIds         []int
@@ -575,54 +573,6 @@ func (c *Character) GetPlayerName(viewingUserId int, renderFlags ...NameRenderFl
 	return c.getFormattedName(viewingUserId, `username`, renderFlags...)
 }
 
-func (c *Character) getFormattedName(viewingUserId int, uType string, renderFlags ...NameRenderFlag) FormattedName {
-	f := FormattedName{
-		Name:       c.Name,
-		Type:       uType,
-		Adjectives: make([]string, 0, len(c.Adjectives)),
-	}
-
-	includeHealth := false
-	for _, flag := range renderFlags {
-		if flag == RenderHealth {
-			includeHealth = true
-		} else if flag == RenderShortAdjectives {
-			f.UseShortAdjectives = true
-		}
-	}
-
-	if includeHealth {
-		if c.Health < 1 {
-			f.Adjectives = append(f.Adjectives, `downed`)
-		} else {
-			pctHealth := int(math.Ceil(float64(c.Health) / float64(c.HealthMax.Value) * 100))
-			f.Adjectives = append(f.Adjectives, strconv.Itoa(pctHealth)+`%`)
-		}
-	}
-
-	f.Adjectives = append(f.Adjectives, c.Adjectives...)
-
-	if c.HasBuffFlag(buffs.EmitsLight) {
-		f.Adjectives = append(f.Adjectives, `lit`)
-	}
-
-	if c.HasBuffFlag(buffs.Hidden) {
-		f.Adjectives = append(f.Adjectives, `hidden`)
-	}
-
-	if c.HasBuffFlag(buffs.Poison) {
-		f.Adjectives = append(f.Adjectives, `poisoned`)
-	}
-
-	if c.Health < 1 {
-		f.Suffix = `downed`
-	} else if c.Aggro != nil && c.Aggro.UserId == viewingUserId {
-		f.Suffix = `aggro`
-	}
-
-	return f
-}
-
 func (c *Character) SetAdjective(adj string, addToList bool) {
 	if c.Adjectives == nil {
 		c.Adjectives = []string{}
@@ -640,6 +590,71 @@ func (c *Character) SetAdjective(adj string, addToList bool) {
 	if addToList {
 		c.Adjectives = append(c.Adjectives, adj)
 	}
+}
+
+func (c *Character) GetAdjectives() []string {
+
+	retAdjectives := []string{}
+
+	// Start dynamic adjectives
+	if c.Health < 1 {
+		retAdjectives = append(retAdjectives, `downed`)
+	}
+
+	if len(c.Shop) > 0 {
+		retAdjectives = append(retAdjectives, `shop`)
+	}
+
+	if c.HasBuffFlag(buffs.EmitsLight) {
+		retAdjectives = append(retAdjectives, `lit`)
+	}
+
+	if c.HasBuffFlag(buffs.Hidden) {
+		retAdjectives = append(retAdjectives, `hidden`)
+	}
+
+	if c.HasBuffFlag(buffs.Poison) {
+		retAdjectives = append(retAdjectives, `poisoned`)
+	}
+	// End dynamic adjectives
+
+	retAdjectives = append(retAdjectives, c.Adjectives...)
+
+	return retAdjectives
+}
+
+func (c *Character) getFormattedName(viewingUserId int, uType string, renderFlags ...NameRenderFlag) FormattedName {
+
+	f := FormattedName{
+		Name:       c.Name,
+		Type:       uType,
+		Adjectives: make([]string, 0, len(c.Adjectives)),
+	}
+
+	includeHealth := false
+	for _, flag := range renderFlags {
+		if flag == RenderHealth {
+			includeHealth = true
+		} else if flag == RenderShortAdjectives {
+			f.UseShortAdjectives = true
+		}
+	}
+
+	// If including health, only do so if not downed, because downed shows as its own adjective.
+	if includeHealth && c.Health > 0 {
+		pctHealth := int(math.Ceil(float64(c.Health) / float64(c.HealthMax.Value) * 100))
+		f.Adjectives = append(f.Adjectives, strconv.Itoa(pctHealth)+`%`)
+	}
+
+	f.Adjectives = append(f.Adjectives, c.GetAdjectives()...)
+
+	if c.Health < 1 {
+		f.Suffix = `downed`
+	} else if c.Aggro != nil && c.Aggro.UserId == viewingUserId {
+		f.Suffix = `aggro`
+	}
+
+	return f
 }
 
 func (c *Character) PruneCooldowns() {
@@ -907,24 +922,9 @@ func (c *Character) GetSkillLevelCost(currentLevel int) int {
 	return currentLevel
 }
 
-func (c *Character) GetTameCreatureSkill(userId int, creatureName string) int {
-
-	skillValue := c.GetMiscData(`tameskill-` + creatureName)
-	if sVal, ok := skillValue.(int); ok {
-		return sVal
-	}
-	return -1
-
-}
-
 func (c *Character) GetMaxCharmedCreatures() int {
 	lvl := c.GetSkillLevel(skills.Tame)
 	return lvl + 1
-}
-
-func (c *Character) SetTameCreatureSkill(userId int, creatureName string, proficiency int) error {
-	c.SetMiscData(`tameskill-`+creatureName, proficiency)
-	return nil
 }
 
 func (c *Character) GetMemoryCapacity() int {
@@ -1560,49 +1560,18 @@ func (c *Character) Race() string {
 	return `Ghostly Spirit`
 }
 
-func (c *Character) AlignmentName() string {
-
-	if c.Alignment < AlignmentNeutral {
-		// -80 to -100
-		if c.Alignment <= AlignmentNeutral-80 {
-			return `unholy`
-		}
-		// -60 to -79
-		if c.Alignment <= AlignmentNeutral-60 {
-			return `evil`
-		}
-		// -40 to -59
-		if c.Alignment <= AlignmentNeutral-40 {
-			return `corrupt`
-		}
-		// -20 to -39
-		if c.Alignment <= AlignmentNeutral-20 {
-			return `misguided`
-		}
-
-	} else if c.Alignment > AlignmentNeutral {
-
-		// 80-100
-		if c.Alignment >= AlignmentNeutral+80 {
-			return `holy`
-		}
-		// 60 to 79
-		if c.Alignment >= AlignmentNeutral+60 {
-			return `good`
-		}
-		// 40 to 59
-		if c.Alignment >= AlignmentNeutral+40 {
-			return `virtuous`
-		}
-		// 20 to 39
-		if c.Alignment >= AlignmentNeutral+40 {
-			return `lawful`
-		}
-
+func (c *Character) UpdateAlignment(amt int) {
+	newAlignment := int(c.Alignment) + amt
+	if newAlignment < int(AlignmentMinimum) {
+		newAlignment = int(AlignmentMinimum)
+	} else if newAlignment > int(AlignmentMaximum) {
+		newAlignment = int(AlignmentMaximum)
 	}
+	c.Alignment = int8(newAlignment)
+}
 
-	return `neutral`
-
+func (c *Character) AlignmentName() string {
+	return AlignmentToString(c.Alignment)
 }
 
 func (c *Character) GetAllBackpackItems() []items.Item {

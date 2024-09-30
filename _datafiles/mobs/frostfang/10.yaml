@@ -7,18 +7,23 @@ groups:
 idlecommands:
   - 'say type `list` to see my wares'
   - 'say If you''re looking to sell something, I may be interested... as long as it''s not too special or unique'
-  - emote is counting his coins;restock gold
+  - emote is counting his coins
   - emote watches you carefully
-  - restock 10004/4
-  - restock 10001/5
-  - restock 10002/5
 activitylevel: 1
 character:
   name: ivar froststeel
   description: 'Ivar Froststeel, the proprietor of Frostfang Armory, is a towering figure swathed in fur-lined leathers and adorned with intricate silver jewelry. His long, silver hair flows down his back, and a well-groomed beard frames his stern, yet wise face. His piercing blue eyes, reminiscent of glacial ice, seem to assess the worthiness of each customer who steps through the door.'
   raceid: 1
   level: 25
+  alignment: 30
   gold: 10
+  shop:
+    - itemid: 10004
+      quantitymax: 4
+    - itemid: 10001
+      quantitymax: 5
+    - itemid: 10002
+      quantitymax: 5
   equipment:
     weapon:
       itemid: 10006
@@ -30,4 +35,4 @@ character:
       itemid: 20003
   items:
     - itemid: 10004
-ismerchant: true
+

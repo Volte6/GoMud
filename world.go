@@ -372,8 +372,8 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 						continue
 					}
 
-					for itemId := range mob.ShopStock {
-						item := items.New(itemId)
+					for _, stockInfo := range mob.Character.Shop.GetInstock() {
+						item := items.New(stockInfo.ItemId)
 						if item.ItemId > 0 {
 							itemList = append(itemList, item)
 						}
@@ -740,7 +740,7 @@ func (w *World) processInput(userId int, inputText string) {
 			badinputtracker.TrackBadCommand(command, remains)
 
 			user.SendText(fmt.Sprintf(`<ansi fg="command">%s</ansi> not recognized. Type <ansi fg="command">help</ansi> for commands.`, command))
-			user.Command(`emote looks a little confused`)
+			user.Command(`emote @looks a little confused`)
 		}
 	}
 

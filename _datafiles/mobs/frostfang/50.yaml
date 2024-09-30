@@ -6,8 +6,6 @@ groups:
   - frostfang-npc
 idlecommands:
   - 'say type `list` to see what magical objects I have for sale'
-  - restock 30014/3
-  - restock 24/1
 activitylevel: 1
 character:
   name: moilyn the wizard
@@ -15,4 +13,9 @@ character:
   raceid: 1
   level: 29
   gold: 10
-ismerchant: true
+  shop:
+    - itemid: 30014
+      quantitymax: 3
+    - itemid: 24
+      quantitymax: 1
+

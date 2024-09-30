@@ -1,6 +1,7 @@
 raceid: 17
 name: Monkey
 description: Just a monkey
+defaultalignment: -30
 size: medium
 unarmedname: fists
 tnlscale: 1

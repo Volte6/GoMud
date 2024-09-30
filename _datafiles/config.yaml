@@ -159,6 +159,10 @@ LevelUpLives: 1
 # - PricePerLife - 
 #   (Req: PermaDeath) If non-zero, players can buy extra lives for this amount.
 PricePerLife: 1000000
+# - ShopRestockRounds - 
+#   The default number of rounds shops take to restock 1 item. This can still be 
+#   overriden in character shop definitions if desired.
+ShopRestockRounds: 75
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS

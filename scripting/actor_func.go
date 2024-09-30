@@ -6,6 +6,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/combat"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
@@ -138,6 +139,18 @@ func (a ScriptActor) GetTempData(key string) any {
 		}
 	}
 	return nil
+}
+
+func (a ScriptActor) GetTameMastery() map[int]int {
+	return a.characterRecord.MobMastery.GetAllTame()
+}
+
+func (a ScriptActor) SetTameMastery(mobId int, newSkillLevel int) {
+	a.characterRecord.MobMastery.SetTame(mobId, newSkillLevel)
+}
+
+func (a ScriptActor) GetChanceToTame(target ScriptActor) int {
+	return combat.ChanceToTame(a.userRecord, target.mobRecord)
 }
 
 func (a ScriptActor) SetMiscCharacterData(key string, value any) {
@@ -388,6 +401,10 @@ func (a ScriptActor) GiveBuff(buffId int) {
 
 }
 
+func (a ScriptActor) GetStatMod(statModName string) int {
+	return a.characterRecord.Buffs.StatMod(statModName) + a.characterRecord.Equipment.StatMod(statModName)
+}
+
 func (a ScriptActor) HasBuffFlag(buffFlag string) bool {
 	return a.characterRecord.HasBuffFlag(buffs.Flag(buffFlag))
 }
@@ -452,14 +469,7 @@ func (a ScriptActor) GetAlignmentName() string {
 }
 
 func (a ScriptActor) ChangeAlignment(alignmentChange int) {
-	newAlignment := int(a.characterRecord.Alignment) + alignmentChange
-	if newAlignment < -100 {
-		newAlignment = -100
-	} else if newAlignment > 100 {
-		newAlignment = 100
-	}
-
-	a.characterRecord.Alignment = int8(newAlignment)
+	a.characterRecord.UpdateAlignment(alignmentChange)
 }
 
 func (a ScriptActor) HasSpell(spellId string) bool {

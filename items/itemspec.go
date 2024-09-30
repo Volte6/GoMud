@@ -75,6 +75,7 @@ const (
 	Slashing    ItemSubType = "slashing"
 	Shooting    ItemSubType = "shooting" // bows, crossbows, guns, etc.
 	Claws       ItemSubType = "claws"
+	Whipping    ItemSubType = "whipping"
 
 	BlobContent ItemSubType = "blobcontent"
 	Gold        ItemSubType = "gold"

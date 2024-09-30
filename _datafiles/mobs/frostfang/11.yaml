@@ -8,20 +8,27 @@ idlecommands:
   - 'say type `list` to see my wares'
   - 'say If you''re looking to sell something, I may be interested... as long as it''s not too special or unique'
   - emote shuffles some papers
-  - emote is counting her coins;restock gold
+  - emote is counting her coins
   - emote is watching you
-  - restock 30001/3
-  - restock 20005/1
-  - restock 6/3
-  - restock 8/1
-  - restock 30015/2
 activitylevel: 1
 character:
   name: brynja snowdeal
   description: 'With a reputation for fair dealings and an uncanny ability to procure the rarest of items, Brynja is well-regarded among the Emporium''s patrons. Her quick wit and sharp tongue are as legendary as her bargaining skills, ensuring that negotiations with Brynja are always an interesting affair. Despite her tough exterior, she possesses a keen sense of her customers'' needs, often pointing them towards the item they didn''t even realize they were looking for.'
   raceid: 1
   level: 20
+  alignment: 30
   gold: 50
+  shop:
+    - itemid: 30001
+      quantitymax: 3
+    - itemid: 20005
+      quantitymax: 1
+    - itemid: 6
+      quantitymax: 3
+    - itemid: 8
+      quantitymax: 1
+    - itemid: 30015
+      quantitymax: 2
   equipment:
     weapon:
       itemid: 10005
@@ -33,4 +40,4 @@ character:
       itemid: 20003
   items:
     - itemid: 30001
-ismerchant: true
+

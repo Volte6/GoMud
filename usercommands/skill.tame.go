@@ -3,6 +3,7 @@ package usercommands
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
@@ -31,39 +32,38 @@ func Tame(rest string, userId int) (bool, error) {
 	}
 
 	skillLevel := user.Character.GetSkillLevel(skills.Tame)
-	creatureTameSkill := make(map[string]int)
-
-	for _, creatureName := range user.Character.GetMiscDataKeys(`tameskill-`) {
-
-		skillValue := user.Character.GetMiscData(`tameskill-` + creatureName)
-
-		if skillValueInt, ok := skillValue.(int); ok {
-			creatureTameSkill[creatureName] = skillValueInt
-		} else {
-			creatureTameSkill[creatureName] = 0
-		}
-
-	}
-
 	if skillLevel == 0 {
 		user.SendText("You don't know how to tame.")
 		return true, errors.New(`you don't know how to tame`)
 	}
 
-	if len(rest) == 0 {
+	if rest == `list` || rest == `` {
 
-		headers := []string{"Creature", "Proficiency"}
-
+		/*
+			user.Character.MobMastery.SetTame(1, 87)
+			user.Character.MobMastery.SetTame(54, 50)
+			user.Character.MobMastery.SetTame(55, 40)
+		*/
+		headers := []string{`Name`, `Proficiency`}
 		rows := [][]string{}
 
-		for creatureName, modProficiency := range creatureTameSkill {
-			rows = append(rows, []string{creatureName, fmt.Sprintf("%d", modProficiency)})
+		for mobId, proficiency := range user.Character.MobMastery.GetAllTame() {
+
+			mobInfo := mobs.GetMobSpec(mobs.MobId(mobId))
+			if mobInfo == nil {
+				continue
+			}
+
+			rows = append(rows, []string{
+				//mobInfo.Character.Name,
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi>`, mobInfo.Character.Name),
+				strconv.Itoa(proficiency) + `%`,
+			})
 		}
 
-		onlineTableData := templates.GetTable(`Your taming proficiency`, headers, rows)
-		tplTxt, _ := templates.Process("tables/generic", onlineTableData)
+		tameTableData := templates.GetTable(`Your taming proficiency`, headers, rows)
+		tplTxt, _ := templates.Process("tables/generic", tameTableData)
 		user.SendText(tplTxt)
-
 		user.SendText(`<ansi fg="command">help tame</ansi> to find out more.`)
 
 		return true, nil

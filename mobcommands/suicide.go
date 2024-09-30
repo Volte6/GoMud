@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/volte6/mud/buffs"
+	"github.com/volte6/mud/combat"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
 	"github.com/volte6/mud/rooms"
@@ -126,6 +127,21 @@ func Suicide(rest string, mobId int) (bool, error) {
 						fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
 					)
 
+					// Apply alignment changes
+					alignmentBefore := user.Character.AlignmentName()
+					alignmentAdj := combat.AlignmentChange(user.Character.Alignment, mob.Character.Alignment)
+					user.Character.UpdateAlignment(alignmentAdj)
+					alignmentAfter := user.Character.AlignmentName()
+
+					slog.Debug("Alignment", "user Alignment", user.Character.Alignment, "mob Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
+
+					if alignmentBefore != alignmentAfter {
+						alignmentBefore = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentBefore, alignmentBefore)
+						alignmentAfter = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentAfter, alignmentAfter)
+						updateTxt := fmt.Sprintf(`<ansi fg="231">Your alignment has shifted from %s to %s!</ansi>`, alignmentBefore, alignmentAfter)
+						user.SendText(updateTxt)
+					}
+
 					// Chance to learn to tame the creature.
 					levelDelta := user.Character.Level - mob.Character.Level
 					if levelDelta < 0 {
@@ -145,9 +161,9 @@ func Suicide(rest string, mobId int) (bool, error) {
 					if util.Rand(1000) < targetNumber {
 						if mob.IsTameable() && user.Character.GetSkillLevel(skills.Tame) > 0 {
 
-							currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)
+							currentSkill := user.Character.MobMastery.GetTame(int(mob.MobId))
 							if currentSkill < 50 {
-								user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
+								user.Character.MobMastery.SetTame(int(mob.MobId), currentSkill+1)
 								if currentSkill == -1 {
 									user.SendText(fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name))
 								} else {
@@ -201,6 +217,21 @@ func Suicide(rest string, mobId int) (bool, error) {
 							fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
 						)
 
+						// Apply alignment changes
+						alignmentBefore := user.Character.AlignmentName()
+						alignmentAdj := combat.AlignmentChange(user.Character.Alignment, mob.Character.Alignment)
+						user.Character.UpdateAlignment(alignmentAdj)
+						alignmentAfter := user.Character.AlignmentName()
+
+						slog.Debug("Alignment", "user Alignment", user.Character.Alignment, "mob Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
+
+						if alignmentBefore != alignmentAfter {
+							alignmentBefore = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentBefore, alignmentBefore)
+							alignmentAfter = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentAfter, alignmentAfter)
+							updateTxt := fmt.Sprintf(`<ansi fg="231">Your alignment has shifted from %s to %s!</ansi>`, alignmentBefore, alignmentAfter)
+							user.SendText(updateTxt)
+						}
+
 						// Chance to learn to tame the creature.
 						levelDelta := user.Character.Level - mob.Character.Level
 						if levelDelta < 0 {
@@ -220,9 +251,9 @@ func Suicide(rest string, mobId int) (bool, error) {
 						if util.Rand(1000) < targetNumber {
 							if mob.IsTameable() && user.Character.GetSkillLevel(skills.Tame) > 0 {
 
-								currentSkill := user.Character.GetTameCreatureSkill(user.UserId, mob.Character.Name)
+								currentSkill := user.Character.MobMastery.GetTame(int(mob.MobId))
 								if currentSkill < 50 {
-									user.Character.SetTameCreatureSkill(user.UserId, mob.Character.Name, currentSkill+1)
+									user.Character.MobMastery.SetTame(int(mob.MobId), currentSkill+1)
 
 									if currentSkill == -1 {
 										user.SendText(fmt.Sprintf(`<ansi fg="magenta">***</ansi> You've learned how to tame a <ansi fg="mobname">%s</ansi>! <ansi fg="magenta">***</ansi>`, mob.Character.Name))

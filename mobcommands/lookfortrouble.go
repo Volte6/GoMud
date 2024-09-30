@@ -76,7 +76,7 @@ func LookForTrouble(rest string, mobId int) (bool, error) {
 			}
 
 			// Does this specific mob hate this player?
-			if mob.HatesRace(raceInfo.Name) {
+			if mob.HatesRace(raceInfo.Name) || mob.HatesAlignment(user.Character.Alignment) {
 
 				allPotentialTargets = append(allPotentialTargets, playerId)
 

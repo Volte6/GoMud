@@ -112,6 +112,10 @@ func (u *UserRecord) GetLastInputRound() uint64 {
 	return u.lastInputRound
 }
 
+func (u *UserRecord) HasShop() bool {
+	return len(u.Character.Shop) > 0
+}
+
 func (u *UserRecord) Command(inputTxt string, waitTurns ...int) {
 
 	wt := 0

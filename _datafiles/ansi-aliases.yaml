@@ -7,7 +7,7 @@ color8:
   username: 93 # Bright yellow
   username-aggro: red
   username-downed: 90 # Bright black
-  mobname: 6 
+  mobname: 14 
   mobname-aggro: 91 # Bright red
   mobname-downed: red
   spellname: magenta
@@ -135,7 +135,7 @@ color256:
   username: 11 # Bright yellow
   username-aggro: 124
   username-downed: 8 # Bright black
-  mobname: 6 
+  mobname: 51
   mobname-aggro: 9 # Bright red
   mobname-downed: 124
   spellname: magenta

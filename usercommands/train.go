@@ -178,7 +178,7 @@ func Train(rest string, userId int) (bool, error) {
 
 				if match == string(skills.Tame) {
 					if newLevel == 1 {
-						user.Character.SetTameCreatureSkill(userId, `rat`, 0)
+						user.Character.MobMastery.SetTame(1, 1)
 						user.SendText(`You've learned how to tame a <ansi fg="mobname">rat</ansi>!`)
 					}
 				}
