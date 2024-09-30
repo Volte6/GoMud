@@ -99,40 +99,67 @@ func ChanceToTame(s *users.UserRecord, t *mobs.Mob) int {
 	return int(math.Ceil((float64(proficiencyModifier) + float64(levelDiff) + healthModifier + float64(sizeModifier)) * aggroModifier))
 }
 
-// Evil killing good:
-// -50 - 50 = -100
-// -100 - 50 = -150
-
-// Good killing evil:
-// 50 - -50 = 100
-// 100 - -50 = 150
 func AlignmentChange(killerAlignment int8, killedAlignment int8) int {
 
-	delta := killerAlignment - killedAlignment
-	deltaAbs := math.Abs(float64(delta))
+	isKillerGood := killerAlignment > characters.AlignmentNeutralHigh
+	isKillerEvil := killerAlignment < characters.AlignmentNeutralLow
+	isKillerNeutral := killerAlignment >= characters.AlignmentNeutralLow && killerAlignment <= characters.AlignmentNeutralHigh
+
+	isKilledGood := killedAlignment > characters.AlignmentNeutralHigh
+	isKilledEvil := killedAlignment < characters.AlignmentNeutralLow
+	isKilledNeutral := killedAlignment >= characters.AlignmentNeutralLow && killedAlignment <= characters.AlignmentNeutralHigh
+
+	// Normalize the delta to positive, then half, so 0-100
+	deltaAbs := math.Abs(math.Max(float64(killerAlignment), float64(killedAlignment))-math.Min(float64(killerAlignment), float64(killedAlignment))) * 0.5
+
+	changeAmt := 0
+	if deltaAbs <= 10 {
+		changeAmt = 0
+	} else if deltaAbs <= 30 {
+		changeAmt = 1
+	} else if deltaAbs <= 60 {
+		changeAmt = 2
+	} else if deltaAbs <= 80 {
+		changeAmt = 3
+	} else {
+		changeAmt = 4
+	}
 
 	factor := 0
-	if delta < 0 { // if killer alignment was less than killed alignment
-		factor = 1
-	} else if delta > 0 { // opposite
-		factor = -1
+
+	if isKillerGood {
+
+		if isKilledGood { // good vs good is especially evil
+			factor = -2
+			changeAmt = int(math.Max(float64(changeAmt), 1)) // At least 1 when killing own kind
+		} else if isKilledEvil { // good vs evil is good
+			factor = 1
+		} else if isKilledNeutral { // good vs neutral is evil
+			factor = -1
+		}
+
+	} else if isKillerEvil {
+
+		if isKilledGood { // evil vs good is evil
+			factor = -1
+		} else if isKilledEvil { // evil vs evil is especially good
+			factor = 2
+			changeAmt = int(math.Max(float64(changeAmt), 1)) // At least 1 when killing own kind
+		} else if isKilledNeutral { // evil vs neutral is evil
+			factor = -1
+		}
+
+	} else if isKillerNeutral {
+
+		if isKilledGood { // neutral vs good is evil
+			factor = -1
+		} else if isKilledEvil { // neutral vs evil is good
+			factor = 1
+		} else if isKilledNeutral { // neutral vs evil is nothing
+			factor = 0
+		}
+
 	}
 
-	if deltaAbs < 10 {
-		return 0
-	}
-
-	if deltaAbs < 30 {
-		return factor * 1
-	}
-
-	if deltaAbs < 60 {
-		return factor * 2
-	}
-
-	if deltaAbs < 80 {
-		return factor * 3
-	}
-
-	return factor * 4
+	return factor * changeAmt
 }
