@@ -163,6 +163,12 @@ PricePerLife: 1000000
 #   The default number of rounds shops take to restock 1 item. This can still be 
 #   overriden in character shop definitions if desired.
 ShopRestockRounds: 75
+# - ConsistentAttackMessages - 
+#   If true, each weapon will consistently use the same message for each type of
+#   attack. If false, it will randomize the messages. Setting this to true gives
+#   each weapon a more unique feel in battle, but combat may feel less varied.
+#   Note: see _datafiles/combat-messages/* to see/add weapon type messages.
+ConsistentAttackMessages: true
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS

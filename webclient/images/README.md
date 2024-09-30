@@ -134,9 +134,9 @@ _Know when you've made progress on a quest._
 
 ## Shops
 
-_Buy and sell objects at shops._
+_Buy and sell items, mercenaries, or enchantments at shops._
 
-<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/shops.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/shops.png" width="600" alt="accessibility text"></a>
+<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/item_merc_enchantment_shops.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/item_merc_enchantment_shops.png" width="600" alt="accessibility text"></a>
 
 
 ## Skill Training
@@ -149,6 +149,12 @@ _Learn any skill, if you can find the right trainer._
 
 <a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/permadeath.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/permadeath.png" width="600" alt="accessibility text"></a>
 
+
+## Beast Taming
+
+_Tame mobs to follow you._
+
+<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/taming.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/taming.png" width="600" alt="accessibility text"></a>
 
 ## Tinymap
 
