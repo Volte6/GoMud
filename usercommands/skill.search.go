@@ -26,7 +26,7 @@ Level 4 - You are always aware of hidden players/mobs in the area
 (Lvl 3) <ansi fg="skill">search</ansi> Finds special/unknown "things of interest" in the area.
 (Lvl 4) <ansi fg="skill">search</ansi> Doubles your chance of success when searching.
 */
-func Search(rest string, user *users.UserRecord) (bool, error) {
+func Search(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Search)
 
@@ -40,12 +40,6 @@ func Search(rest string, user *users.UserRecord) (bool, error) {
 			fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Search.String())),
 		)
 		return true, fmt.Errorf("you're doing that too often")
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// 10% + 1% for every 2 smarts

@@ -16,7 +16,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Buff(rest string, user *users.UserRecord) (bool, error) {
+func Buff(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// args should look like one of the following:
 	// target buffId - put buff on target if in the room

@@ -15,13 +15,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Drop(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Drop(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
@@ -36,13 +30,13 @@ func Drop(rest string, user *users.UserRecord) (bool, error) {
 		iCopies := []items.Item{}
 
 		if user.Character.Gold > 0 {
-			Drop(fmt.Sprintf("%d gold", user.Character.Gold), user)
+			Drop(fmt.Sprintf("%d gold", user.Character.Gold), user, room)
 		}
 
 		iCopies = append(iCopies, user.Character.Items...)
 
 		for _, item := range iCopies {
-			Drop(item.Name(), user)
+			Drop(item.Name(), user, room)
 		}
 
 		return true, nil

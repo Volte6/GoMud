@@ -8,13 +8,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Gearup(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Gearup(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	wornItems := map[items.ItemType]items.Item{}
 	wearNewItems := map[items.ItemType]items.Item{}

@@ -10,6 +10,7 @@ import (
 
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/gametime"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -19,7 +20,7 @@ var (
 	memoryReportCache = map[string]util.MemoryResult{}
 )
 
-func Server(rest string, user *users.UserRecord) (bool, error) {
+func Server(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.server", nil)

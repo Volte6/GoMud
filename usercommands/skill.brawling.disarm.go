@@ -14,7 +14,7 @@ import (
 Brawling Skill
 Level 4 - Attempt to disarm an opponent.
 */
-func Disarm(rest string, user *users.UserRecord) (bool, error) {
+func Disarm(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 
@@ -26,12 +26,6 @@ func Disarm(rest string, user *users.UserRecord) (bool, error) {
 	if user.Character.Aggro == nil {
 		user.SendText("Disarm is only used while in combat!")
 		return true, nil
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	attackMobInstanceId := user.Character.Aggro.MobInstanceId

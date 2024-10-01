@@ -8,19 +8,7 @@ import (
 	"github.com/volte6/mud/rooms"
 )
 
-func Say(rest string, mobId int) (bool, error) {
-
-	// Load user details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(mob.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
+func Say(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	// Don't bother if no players are present
 	if room.PlayerCt() < 1 {
@@ -31,7 +19,7 @@ func Say(rest string, mobId int) (bool, error) {
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 
 	if isSneaking {
-		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="saytext">%s</ansi>"`, rest), mobId)
+		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="saytext">%s</ansi>"`, rest))
 	} else {
 		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="saytext">%s</ansi>"`, mob.Character.Name, rest))
 	}

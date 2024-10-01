@@ -13,18 +13,12 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Look(rest string, user *users.UserRecord) (bool, error) {
+func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	secretLook := false
 	if strings.HasPrefix(rest, "secretly") {
 		secretLook = true
 		rest = strings.TrimSpace(strings.TrimPrefix(rest, "secretly"))
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// 0 = none. 1 = can see this room. 2 = can see this room and all exits

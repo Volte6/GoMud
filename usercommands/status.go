@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Status(rest string, user *users.UserRecord) (bool, error) {
+func Status(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	//possibleStatuses := []string{`strength`, `speed`, `smarts`, `vitality`, `mysticism`, `perception`}
 
@@ -107,7 +108,7 @@ func Status(rest string, user *users.UserRecord) (bool, error) {
 	tplTxt, _ := templates.Process("character/status", user)
 	user.SendText(tplTxt)
 
-	Inventory(``, user)
+	Inventory(``, user, room)
 
 	return true, nil
 }

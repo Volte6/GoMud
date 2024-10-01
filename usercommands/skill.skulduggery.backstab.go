@@ -18,7 +18,7 @@ import (
 SkullDuggery Skill
 Level 2 - Backstab
 */
-func Backstab(rest string, user *users.UserRecord) (bool, error) {
+func Backstab(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
@@ -32,12 +32,6 @@ func Backstab(rest string, user *users.UserRecord) (bool, error) {
 	if !isSneaking {
 		user.SendText("You can't backstab unless you're hidden!")
 		return true, nil
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// Do a check for whether these can backstab

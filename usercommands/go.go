@@ -14,7 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Go(rest string, user *users.UserRecord) (bool, error) {
+func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if user.Character.Aggro != nil {
 		user.SendText("You can't do that! You are in combat!")
@@ -28,12 +28,6 @@ func Go(rest string, user *users.UserRecord) (bool, error) {
 	}
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
 
 	handled := false
 
@@ -295,7 +289,7 @@ func Go(rest string, user *users.UserRecord) (bool, error) {
 			}
 
 			handled = true
-			Look(`secretly`, user)
+			Look(`secretly`, user, room)
 
 			scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId)
 		}

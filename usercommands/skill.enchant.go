@@ -14,12 +14,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Uncurse(rest string, user *users.UserRecord) (bool, error) {
-	return Enchant("uncurse "+rest, user)
+func Uncurse(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+	return Enchant("uncurse "+rest, user, room)
 }
 
-func Unenchant(rest string, user *users.UserRecord) (bool, error) {
-	return Enchant("remove "+rest, user)
+func Unenchant(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+	return Enchant("remove "+rest, user, room)
 }
 
 /*
@@ -29,13 +29,7 @@ Level 2 - Enchant equipment with a defensive bonus.
 Level 3 - Add a stat bonus to a weapon or equipment in addition to the above.
 Level 4 - Remove the enchantment or curse from any object.
 */
-func Enchant(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Enchant(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Enchant)
 

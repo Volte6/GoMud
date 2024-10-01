@@ -8,15 +8,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Uncurse(rest string, mobId int) (bool, error) {
-
-	// Load mob details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
-
-	room := rooms.LoadRoom(mob.Character.RoomId)
+func Uncurse(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	for _, pid := range room.GetPlayers() {
 

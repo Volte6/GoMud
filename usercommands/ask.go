@@ -14,13 +14,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Ask(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Ask(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// Core "useful" commands
 	usefulCommands := []string{

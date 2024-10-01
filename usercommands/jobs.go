@@ -6,13 +6,14 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Jobs(rest string, user *users.UserRecord) (bool, error) {
+func Jobs(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	type JobDisplay struct {
 		Name       string

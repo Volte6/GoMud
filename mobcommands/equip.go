@@ -10,15 +10,8 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Equip(rest string, mobId int) (bool, error) {
+func Equip(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
-	// Load user details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
-
-	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
 		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
@@ -30,7 +23,7 @@ func Equip(rest string, mobId int) (bool, error) {
 		for _, item := range itemCopies {
 			iSpec := item.GetSpec()
 			if iSpec.Subtype == items.Wearable || iSpec.Type == items.Weapon {
-				Equip(item.Name(), mobId)
+				Equip(item.Name(), mob, room)
 			}
 		}
 		return true, nil

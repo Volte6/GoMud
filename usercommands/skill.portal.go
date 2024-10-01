@@ -20,11 +20,11 @@ Level 2 - Teleport back to the root of the area you are in
 Level 3 - Set a new destination for your portal teleportation
 Level 4 - Create a physical portal that you can share with players, or return through.
 */
-func Portal(rest string, user *users.UserRecord) (bool, error) {
+func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
-		if handled, err := Go(`portal`, user); handled {
+		if handled, err := Go(`portal`, user, room); handled {
 			return handled, err
 		}
 	}
@@ -34,12 +34,6 @@ func Portal(rest string, user *users.UserRecord) (bool, error) {
 	if skillLevel == 0 {
 		user.SendText("You don't know how to portal.")
 		return true, errors.New(`you don't know how to portal`)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// Establish the default portal location

@@ -10,21 +10,15 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Equip(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Equip(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if rest == "all" {
-		return Gearup(``, user)
+		return Gearup(``, user, room)
 		itemCopies := append([]items.Item{}, user.Character.Items...)
 		for _, item := range itemCopies {
 			iSpec := item.GetSpec()
 			if iSpec.Subtype == items.Wearable || iSpec.Type == items.Weapon {
-				Equip(item.Name(), user)
+				Equip(item.Name(), user, room)
 			}
 		}
 		return true, nil

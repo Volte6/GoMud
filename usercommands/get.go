@@ -13,13 +13,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Get(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
@@ -30,14 +24,14 @@ func Get(rest string, user *users.UserRecord) (bool, error) {
 
 	if args[0] == "all" {
 		if room.Gold > 0 {
-			Get(`gold`, user)
+			Get(`gold`, user, room)
 		}
 
 		if len(room.Items) > 0 {
 			iCopies := append([]items.Item{}, room.Items...)
 
 			for _, item := range iCopies {
-				Get(item.Name(), user)
+				Get(item.Name(), user, room)
 			}
 		}
 

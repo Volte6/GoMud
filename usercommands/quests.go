@@ -6,12 +6,13 @@ import (
 	"sort"
 
 	"github.com/volte6/mud/quests"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Quests(rest string, user *users.UserRecord) (bool, error) {
+func Quests(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	type QuestRecord struct {
 		Id          int

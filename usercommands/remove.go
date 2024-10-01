@@ -9,17 +9,11 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Remove(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Remove(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if rest == "all" {
 		for _, item := range user.Character.Equipment.GetAllItems() {
-			Remove(item.Name(), user)
+			Remove(item.Name(), user, room)
 		}
 		return true, nil
 	}

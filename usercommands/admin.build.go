@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func IBuild(rest string, user *users.UserRecord) (bool, error) {
+func IBuild(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// args should look like one of the following:
 	// info <optional room id>
@@ -115,7 +115,7 @@ func IBuild(rest string, user *users.UserRecord) (bool, error) {
 	return true, nil
 }
 
-func Build(rest string, user *users.UserRecord) (bool, error) {
+func Build(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// args should look like one of the following:
 	// info <optional room id>

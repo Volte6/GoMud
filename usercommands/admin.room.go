@@ -14,13 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Room(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	handled := true
 
@@ -281,7 +275,7 @@ func Room(rest string, user *users.UserRecord) (bool, error) {
 					}
 				}
 
-				Look(`secretly`, user)
+				Look(`secretly`, user, room)
 
 				scripting.TryRoomScriptEvent(`onEnter`, user.UserId, gotoRoomId)
 

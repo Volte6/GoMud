@@ -6,12 +6,13 @@ import (
 
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/races"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Inventory(rest string, user *users.UserRecord) (bool, error) {
+func Inventory(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	itemNames := []string{}
 	itemNamesFormatted := []string{}

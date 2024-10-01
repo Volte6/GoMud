@@ -4,11 +4,12 @@ import (
 	"sort"
 
 	"github.com/volte6/mud/keywords"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
 
-func Alias(rest string, user *users.UserRecord) (bool, error) {
+func Alias(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// biuld array and look up table for sorting purposes
 	allOutCmds := []string{}

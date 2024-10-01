@@ -5,12 +5,13 @@ import (
 
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/quests"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func QuestToken(rest string, user *users.UserRecord) (bool, error) {
+func QuestToken(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// args should look like one of the following:
 	// questtoken <tokenname>

@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/events"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
 )
 
 // Global chat room
-func Broadcast(rest string, user *users.UserRecord) (bool, error) {
+func Broadcast(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	events.AddToQueue(events.Broadcast{
 		Text: fmt.Sprintf(`<ansi fg="black-bold">(broadcast)</ansi> <ansi fg="username">%s</ansi>: <ansi fg="yellow">%s</ansi>%s`, user.Character.Name, rest, term.CRLFStr),

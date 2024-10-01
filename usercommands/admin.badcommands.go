@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/badinputtracker"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
 
-func BadCommands(rest string, user *users.UserRecord) (bool, error) {
+func BadCommands(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if rest == "clear" {
 		badinputtracker.Clear()

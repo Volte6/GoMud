@@ -3,6 +3,7 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
@@ -13,7 +14,7 @@ type SkillsOptions struct {
 	SkillCooldowns map[string]int
 }
 
-func Skills(rest string, user *users.UserRecord) (bool, error) {
+func Skills(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	allSkills := user.Character.GetSkills()
 	allCooldowns := map[string]int{}

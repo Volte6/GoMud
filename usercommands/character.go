@@ -18,13 +18,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Character(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if !room.IsCharacterRoom {
 		return false, fmt.Errorf(`not in a IsCharacterRoom`)
@@ -289,7 +283,7 @@ func Character(rest string, user *users.UserRecord) (bool, error) {
 			tmpChar := user.Character
 			user.Character = &char
 
-			Status(``, user)
+			Status(``, user, room)
 
 			user.Character = tmpChar
 

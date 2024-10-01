@@ -16,15 +16,8 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Suicide(rest string, mobId int) (bool, error) {
+func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
-	// Load user details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
-
-	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
 		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}

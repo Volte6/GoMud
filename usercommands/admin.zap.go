@@ -9,13 +9,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Zap(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Zap(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if user.Character.Aggro == nil || user.Character.Aggro.MobInstanceId == 0 {
 		user.SendText("You are not in combat.")

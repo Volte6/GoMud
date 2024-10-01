@@ -7,12 +7,13 @@ import (
 
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/races"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Experience(rest string, user *users.UserRecord) (bool, error) {
+func Experience(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 

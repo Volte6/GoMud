@@ -16,18 +16,13 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Suicide(rest string, user *users.UserRecord) (bool, error) {
+func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	config := configs.GetConfig()
 
 	if user.Character.Zone == `Shadow Realm` {
 		user.SendText(`You're already dead!`)
 		return true, errors.New(`already dead`)
-	}
-
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf("room %d not found", user.Character.RoomId)
 	}
 
 	if user.Character.HasBuffFlag(buffs.ReviveOnDeath) {
@@ -61,10 +56,10 @@ func Suicide(rest string, user *users.UserRecord) (bool, error) {
 
 			// Unequip everything
 			for _, itm := range user.Character.GetAllWornItems() {
-				Remove(itm.Name(), user)
+				Remove(itm.Name(), user, room)
 			}
 			// drop all items / gold
-			Drop("all", user)
+			Drop("all", user, room)
 
 			user.Character = characters.New()
 
@@ -80,25 +75,25 @@ func Suicide(rest string, user *users.UserRecord) (bool, error) {
 		for _, itm := range user.Character.GetAllWornItems() {
 			if util.Rand(100) < chanceInt {
 
-				Remove(itm.Name(), user)
+				Remove(itm.Name(), user, room)
 
-				Drop(itm.Name(), user)
+				Drop(itm.Name(), user, room)
 
 			}
 		}
 	}
 
 	if user.Character.Gold > 0 {
-		Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), user)
+		Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), user, room)
 	}
 
 	if config.OnDeathAlwaysDropBackpack {
-		Drop("all", user)
+		Drop("all", user, room)
 	} else if config.OnDeathEquipmentDropChance >= 0 {
 		chanceInt := int(config.OnDeathEquipmentDropChance * 100)
 		for _, itm := range user.Character.GetAllBackpackItems() {
 			if util.Rand(100) < chanceInt {
-				Drop(itm.Name(), user)
+				Drop(itm.Name(), user, room)
 			}
 		}
 	}

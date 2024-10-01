@@ -18,20 +18,13 @@ Level 2 - Scribe to a sign
 Level 3 - Scribe a hidden rune
 Level 4 - TODO
 */
-func Scribe(rest string, user *users.UserRecord) (bool, error) {
+func Scribe(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Scribe)
 
 	if skillLevel == 0 {
 		user.SendText("You don't know how to scribe.")
 		return true, fmt.Errorf("you don't know how to scribe")
-	}
-
-	// Load current room details
-
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// args should look like one of the following:

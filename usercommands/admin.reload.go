@@ -4,11 +4,12 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
 
-func Reload(rest string, user *users.UserRecord) (bool, error) {
+func Reload(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.reload", nil)

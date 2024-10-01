@@ -1,7 +1,6 @@
 package mobcommands
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/volte6/mud/events"
@@ -14,19 +13,7 @@ import (
 // or
 // givequest 1-start Say has anyone seen my locket?
 // The second message will only be executed if the quest is successfully given.
-func GiveQuest(rest string, mobId int) (bool, error) {
-
-	// Load user details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(mob.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
+func GiveQuest(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	// Don't bother if no players are present
 	if room.PlayerCt() < 1 {

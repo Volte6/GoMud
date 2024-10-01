@@ -15,7 +15,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Start(rest string, user *users.UserRecord) (bool, error) {
+func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if user.Character.RoomId != -1 {
 		return false, errors.New(`only allowed in the void`)
@@ -46,7 +46,7 @@ func Start(rest string, user *users.UserRecord) (bool, error) {
 		if question.Response == `?` {
 
 			question.RejectResponse()
-			return Help(`races`, user)
+			return Help(`races`, user, room)
 
 		}
 

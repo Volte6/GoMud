@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
 
-func Spells(rest string, user *users.UserRecord) (bool, error) {
+func Spells(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `MPs`, `Wait`, `Casts`, `% Chance`}
 

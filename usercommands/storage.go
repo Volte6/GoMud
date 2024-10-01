@@ -14,14 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Storage(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Storage(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if !room.IsStorage {
 		user.SendText(`You are not at a storage location.` + term.CRLFStr)
@@ -69,7 +62,7 @@ func Storage(rest string, user *users.UserRecord) (bool, error) {
 		if itemName == `all` {
 
 			for _, itm := range user.Character.GetAllBackpackItems() {
-				Storage(fmt.Sprintf(`add !%d`, itm.ItemId), user)
+				Storage(fmt.Sprintf(`add !%d`, itm.ItemId), user, room)
 
 				spaceLeft--
 				if spaceLeft < 0 {
@@ -100,7 +93,7 @@ func Storage(rest string, user *users.UserRecord) (bool, error) {
 		if itemName == `all` {
 
 			for _, itm := range user.ItemStorage.GetItems() {
-				Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), user)
+				Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), user, room)
 			}
 
 			return true, nil

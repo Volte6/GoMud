@@ -1,16 +1,19 @@
 package mobcommands
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/util"
 )
 
 // Signature of user command
-type MobCommand func(rest string, mobId int) (bool, error)
+type MobCommand func(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error)
 
 type CommandAccess struct {
 	Func              MobCommand
@@ -78,9 +81,18 @@ func TryCommand(cmd string, rest string, mobId int) (bool, error) {
 
 	mobDisabled := false
 
-	if mob := mobs.GetInstance(mobId); mob != nil {
-		mobDisabled = mob.Character.IsDisabled()
+	mob := mobs.GetInstance(mobId)
+	if mob == nil {
+		return false, errors.New(`mob instance doesn't exist`)
 	}
+
+	room := rooms.LoadRoom(mob.Character.RoomId)
+	if room == nil {
+		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
+	}
+
+	mobDisabled = mob.Character.IsDisabled()
+
 	// Try any room props, only return if the response indicates it was handled
 	/*
 		if !mobDisabled {
@@ -103,7 +115,7 @@ func TryCommand(cmd string, rest string, mobId int) (bool, error) {
 			util.TrackTime(`mob-cmd[`+cmd+`]`, time.Since(start).Seconds())
 		}()
 
-		handled, err := cmdInfo.Func(rest, mobId)
+		handled, err := cmdInfo.Func(rest, mob, room)
 		return handled, err
 
 	}
@@ -114,7 +126,7 @@ func TryCommand(cmd string, rest string, mobId int) (bool, error) {
 			util.TrackTime(`mob-cmd[go]`, time.Since(start).Seconds())
 		}()
 
-		if handled, err := Go(cmd, mobId); err != nil {
+		if handled, err := Go(cmd, mob, room); err != nil {
 			return handled, err
 		} else if handled {
 			return true, nil
@@ -122,7 +134,7 @@ func TryCommand(cmd string, rest string, mobId int) (bool, error) {
 
 	}
 	if emoteText, ok := emoteAliases[cmd]; ok {
-		handled, err := Emote(emoteText, mobId)
+		handled, err := Emote(emoteText, mob, room)
 		return handled, err
 	}
 

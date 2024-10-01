@@ -11,24 +11,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Look(rest string, mobId int) (bool, error) {
+func Look(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	secretLook := false
 	if strings.HasPrefix(rest, "secretly") {
 		secretLook = true
 		rest = strings.TrimSpace(strings.TrimPrefix(rest, "secretly"))
-	}
-
-	// Load user details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(mob.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
@@ -51,12 +39,12 @@ func Look(rest string, mobId int) (bool, error) {
 			}
 
 			if !isSneaking {
-				room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> peers toward the %s.`, mob.Character.Name, exitName), mobId)
+				room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> peers toward the %s.`, mob.Character.Name, exitName))
 			}
 
 			if lookRoomId > 0 {
 
-				lookRoom(mobId, lookRoomId, secretLook || isSneaking)
+				lookRoom(mob, lookRoomId, secretLook || isSneaking)
 
 				return true, nil
 			}
@@ -141,15 +129,14 @@ func Look(rest string, mobId int) (bool, error) {
 			// Make it a "secret looks" now because we don't want another look message sent out by the lookRoom() func
 			secretLook = true
 		}
-		lookRoom(mobId, room.RoomId, secretLook || isSneaking)
+		lookRoom(mob, room.RoomId, secretLook || isSneaking)
 	}
 
 	return true, nil
 }
 
-func lookRoom(mobId int, roomId int, secretLook bool) {
+func lookRoom(mob *mobs.Mob, roomId int, secretLook bool) {
 
-	mob := mobs.GetInstance(mobId)
 	room := rooms.LoadRoom(roomId)
 
 	if mob == nil || room == nil {

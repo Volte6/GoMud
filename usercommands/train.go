@@ -23,14 +23,7 @@ type TrainingOptions struct {
 	Options        []TrainingOption
 }
 
-func Train(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Train(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if len(room.SkillTraining) == 0 {
 		user.SendText(`You must find a trainer to perform training.`)

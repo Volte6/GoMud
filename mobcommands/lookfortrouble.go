@@ -12,13 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func LookForTrouble(rest string, mobId int) (bool, error) {
-
-	// Load user details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
+func LookForTrouble(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	// Already aggroed, skip.
 	if mob.Character.Aggro != nil {
@@ -28,7 +22,6 @@ func LookForTrouble(rest string, mobId int) (bool, error) {
 	// Make a list of all players this gorup is hostile to in this room.
 	isCharmed := mob.Character.IsCharmed()
 
-	room := rooms.LoadRoom(mob.Character.RoomId)
 	allPotentialTargets := []int{}
 	nonDownedUserTargets := []int{}
 	possibleMobTargets := []int{}
@@ -107,7 +100,7 @@ func LookForTrouble(rest string, mobId int) (bool, error) {
 
 		// Still nothing, look for trouble in mobs they hate
 		for _, considerMobInstanceId := range room.GetMobs() {
-			if mobId == considerMobInstanceId {
+			if mob.InstanceId == considerMobInstanceId {
 				continue
 			}
 

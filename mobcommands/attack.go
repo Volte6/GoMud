@@ -12,19 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Attack(rest string, mobId int) (bool, error) {
-
-	// Load mob details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(mob.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
+func Attack(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
@@ -39,7 +27,7 @@ func Attack(rest string, mobId int) (bool, error) {
 		// If no argument supplied, attack whoever is attacking the player currently.
 		for _, mId := range room.GetMobs(rooms.FindFightingMob) {
 			m := mobs.GetInstance(mId)
-			if m.Character.Aggro != nil && m.Character.Aggro.MobInstanceId == mobId {
+			if m.Character.Aggro != nil && m.Character.Aggro.MobInstanceId == mob.InstanceId {
 				attackMobInstanceId = m.InstanceId
 				break
 			}
@@ -48,7 +36,7 @@ func Attack(rest string, mobId int) (bool, error) {
 		if attackMobInstanceId == 0 {
 			for _, uId := range room.GetPlayers(rooms.FindFightingMob) {
 				u := users.GetByUserId(uId)
-				if u.Character.Aggro != nil && u.Character.Aggro.MobInstanceId == mobId {
+				if u.Character.Aggro != nil && u.Character.Aggro.MobInstanceId == mob.InstanceId {
 					attackPlayerId = u.UserId
 					break
 				}
@@ -58,7 +46,7 @@ func Attack(rest string, mobId int) (bool, error) {
 		attackPlayerId, attackMobInstanceId = room.FindByName(rest)
 	}
 
-	if attackMobInstanceId == mobId { // Can't attack self!
+	if attackMobInstanceId == mob.InstanceId { // Can't attack self!
 		attackMobInstanceId = 0
 	}
 

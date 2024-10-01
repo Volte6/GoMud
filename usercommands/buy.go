@@ -16,16 +16,10 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Buy(rest string, user *users.UserRecord) (bool, error) {
+func Buy(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if rest == "" {
-		return List(rest, user)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+		return List(rest, user, room)
 	}
 
 	targetMobInstanceId := 0

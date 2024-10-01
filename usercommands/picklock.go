@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Picklock(rest string, user *users.UserRecord) (bool, error) {
+func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	lockpickItm := items.Item{}
 	for _, itm := range user.Character.GetAllBackpackItems() {
@@ -25,12 +25,6 @@ func Picklock(rest string, user *users.UserRecord) (bool, error) {
 	if lockpickItm.ItemId < 1 {
 		user.SendText(`You need <ansi fg="item">lockpicks</ansi> to pick a lock.`)
 		return true, nil
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))

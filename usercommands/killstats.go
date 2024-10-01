@@ -6,11 +6,12 @@ import (
 
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/races"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
 
-func Killstats(rest string, user *users.UserRecord) (bool, error) {
+func Killstats(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	otherSuggestions := []string{}
 

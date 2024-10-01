@@ -15,7 +15,7 @@ import (
 Brawling Skill
 Level 3 - Attempt to tackle an opponent, making them miss a round.
 */
-func Tackle(rest string, user *users.UserRecord) (bool, error) {
+func Tackle(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 
@@ -27,12 +27,6 @@ func Tackle(rest string, user *users.UserRecord) (bool, error) {
 	if user.Character.Aggro == nil {
 		user.SendText("Tackle is only used while in combat!")
 		return true, nil
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	if !user.Character.TryCooldown(skills.Brawling.String(`tackle`), 5) {

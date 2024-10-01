@@ -1,11 +1,13 @@
 package usercommands
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/keywords"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -187,7 +189,7 @@ func GetHelpSuggestions(text string, includeAdmin bool) []string {
 }
 
 // Signature of user command
-type UserCommand func(rest string, user *users.UserRecord) (bool, error)
+type UserCommand func(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 func TryCommand(cmd string, rest string, userId int) (bool, error) {
 
@@ -226,27 +228,33 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 	userDisabled := false
 	isAdmin := false
 	user := users.GetByUserId(userId)
-	if user != nil {
+	if user == nil {
+		return false, fmt.Errorf(`user %d not found`, userId)
+	}
 
-		// Cancel any buffs they have that get cancelled based on them doing anything at all
-		user.Character.CancelBuffsWithFlag(buffs.CancelOnAction)
+	room := rooms.LoadRoom(user.Character.RoomId)
+	if room == nil {
+		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
+	}
 
-		userDisabled = user.Character.IsDisabled()
-		isAdmin = user.Permission == users.PermissionAdmin
-		isAdmin = isAdmin || user.HasAdminCommand(cmd)
+	// Cancel any buffs they have that get cancelled based on them doing anything at all
+	user.Character.CancelBuffsWithFlag(buffs.CancelOnAction)
 
-		// Check if the "rest" is an item the character has
-		matchingItem, found := user.Character.FindInBackpack(rest)
-		if !found {
-			matchingItem, found = user.Character.FindOnBody(rest)
-		}
+	userDisabled = user.Character.IsDisabled()
+	isAdmin = user.Permission == users.PermissionAdmin
+	isAdmin = isAdmin || user.HasAdminCommand(cmd)
 
-		if found {
-			// If the item has a script, run it
-			if handled, err := scripting.TryItemCommand(cmd, matchingItem, user.UserId); err == nil {
-				if handled { // For this event, handled represents whether to reject the move.
-					return handled, err
-				}
+	// Check if the "rest" is an item the character has
+	matchingItem, found := user.Character.FindInBackpack(rest)
+	if !found {
+		matchingItem, found = user.Character.FindOnBody(rest)
+	}
+
+	if found {
+		// If the item has a script, run it
+		if handled, err := scripting.TryItemCommand(cmd, matchingItem, user.UserId); err == nil {
+			if handled { // For this event, handled represents whether to reject the move.
+				return handled, err
 			}
 		}
 	}
@@ -266,7 +274,7 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 			}()
 
 			// Run the command here
-			handled, err := cmdInfo.Func(rest, user)
+			handled, err := cmdInfo.Func(rest, user, room)
 			return handled, err
 
 		}
@@ -278,13 +286,13 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		util.TrackTime(`usr-cmd[go]`, time.Since(start).Seconds())
 	}()
 
-	if handled, err := Go(cmd, user); handled {
+	if handled, err := Go(cmd, user, room); handled {
 		return handled, err
 	}
 	// end "go" attempt
 
 	if emoteText, ok := emoteAliases[cmd]; ok {
-		handled, err := Emote(emoteText, user)
+		handled, err := Emote(emoteText, user, room)
 		return handled, err
 	}
 
@@ -293,7 +301,7 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		if len(rest) > 0 {
 			castCmd += ` ` + rest
 		}
-		return Cast(castCmd, user)
+		return Cast(castCmd, user, room)
 	}
 
 	return false, nil

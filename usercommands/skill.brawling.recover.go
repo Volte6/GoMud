@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/mud/events"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 )
@@ -12,7 +13,7 @@ import (
 Brawling Skill
 Level 1 - Enter a state of rest where health is recovered more quickly
 */
-func Recover(rest string, user *users.UserRecord) (bool, error) {
+func Recover(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 

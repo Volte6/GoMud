@@ -12,7 +12,7 @@ import (
 SkullDuggery Skill
 Level 1 - Sneak
 */
-func Sneak(rest string, user *users.UserRecord) (bool, error) {
+func Sneak(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 

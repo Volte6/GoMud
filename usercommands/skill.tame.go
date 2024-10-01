@@ -23,7 +23,7 @@ Level 2 - Tame up to 3 creatures
 Level 3 - Tame up to 4 creatures
 Level 4 - Tame up to 5 creatures
 */
-func Tame(rest string, user *users.UserRecord) (bool, error) {
+func Tame(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Tame)
 	if skillLevel == 0 {
@@ -61,11 +61,6 @@ func Tame(rest string, user *users.UserRecord) (bool, error) {
 		user.SendText(`<ansi fg="command">help tame</ansi> to find out more.`)
 
 		return true, nil
-	}
-
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// valid peep targets are: mobs, players

@@ -92,13 +92,7 @@ var (
 	}
 )
 
-func Emote(rest string, user *users.UserRecord) (bool, error) {
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Emote(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if len(rest) == 0 {
 		user.SendText("You emote.")

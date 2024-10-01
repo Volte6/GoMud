@@ -1,8 +1,6 @@
 package mobcommands
 
 import (
-	"fmt"
-
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/mobs"
@@ -10,24 +8,12 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Backstab(rest string, mobId int) (bool, error) {
-
-	// Load mob details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
+func Backstab(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	// Must be sneaking
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 	if !isSneaking {
 		return true, nil
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(mob.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	attackPlayerId := 0
@@ -42,7 +28,7 @@ func Backstab(rest string, mobId int) (bool, error) {
 			// If no argument supplied, attack whoever is attacking the player currently.
 			for _, mId := range room.GetMobs(rooms.FindFightingMob) {
 				m := mobs.GetInstance(mId)
-				if m.Character.Aggro != nil && m.Character.Aggro.MobInstanceId == mobId {
+				if m.Character.Aggro != nil && m.Character.Aggro.MobInstanceId == mob.InstanceId {
 					attackMobInstanceId = m.InstanceId
 					break
 				}
@@ -51,7 +37,7 @@ func Backstab(rest string, mobId int) (bool, error) {
 			if attackMobInstanceId == 0 {
 				for _, uId := range room.GetPlayers(rooms.FindFightingMob) {
 					u := users.GetByUserId(uId)
-					if u.Character.Aggro != nil && u.Character.Aggro.MobInstanceId == mobId {
+					if u.Character.Aggro != nil && u.Character.Aggro.MobInstanceId == mob.InstanceId {
 						attackPlayerId = u.UserId
 						break
 					}
@@ -63,7 +49,7 @@ func Backstab(rest string, mobId int) (bool, error) {
 		attackPlayerId, attackMobInstanceId = room.FindByName(rest)
 	}
 
-	if attackMobInstanceId == mobId {
+	if attackMobInstanceId == mob.InstanceId {
 		attackMobInstanceId = 0
 	}
 

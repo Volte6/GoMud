@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/auctions"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Auction(rest string, user *users.UserRecord) (bool, error) {
+func Auction(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if on := user.GetConfigOption(`auction`); on != nil && !on.(bool) {
 

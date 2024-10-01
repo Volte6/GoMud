@@ -23,19 +23,13 @@ Level 2 - Become proficient in a spell at 125% rate
 Level 3 - Become proficient in a spell at 175% rate
 Level 4 - Become proficient in a spell at 250% rate
 */
-func Cast(rest string, user *users.UserRecord) (bool, error) {
+func Cast(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Cast)
 
 	if skillLevel == 0 {
 		user.SendText("You don't know how to cast spells yet.")
 		return true, errors.New(`you don't know how to cast spells yet`)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))

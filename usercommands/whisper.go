@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Whisper(rest string, user *users.UserRecord) (bool, error) {
+func Whisper(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	args := util.SplitButRespectQuotes(rest)
 

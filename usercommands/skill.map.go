@@ -21,7 +21,7 @@ Level 2 - Map a 9x7 area
 Level 3 - Map a 13x9 area
 Level 4 - Map a 17x9 area, and enables the "wide" version.
 */
-func Map(rest string, user *users.UserRecord) (bool, error) {
+func Map(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Map)
 
