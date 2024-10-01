@@ -13,10 +13,6 @@ import (
 
 func Throw(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
-
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 2 {

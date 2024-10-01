@@ -12,10 +12,6 @@ import (
 
 func Equip(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
-
 	if rest == "all" {
 		itemCopies := []items.Item{}
 		itemCopies = append(itemCopies, mob.Character.Items...)

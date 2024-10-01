@@ -10,10 +10,6 @@ import (
 
 func Remove(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
-
 	if rest == "all" {
 		for _, item := range mob.Character.Equipment.GetAllItems() {
 			Remove(item.Name(), mob, room)

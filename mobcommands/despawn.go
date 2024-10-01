@@ -1,7 +1,6 @@
 package mobcommands
 
 import (
-	"fmt"
 	"log/slog"
 
 	"github.com/volte6/mud/mobs"
@@ -9,10 +8,6 @@ import (
 )
 
 func Despawn(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
-
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
 
 	slog.Info("despawn", "mobname", mob.Character.Name, "reason", rest)
 

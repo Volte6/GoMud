@@ -18,10 +18,6 @@ import (
 
 func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
-
 	if rest != `vanish` && mob.Character.HasBuffFlag(buffs.ReviveOnDeath) {
 
 		mob.Character.Health = mob.Character.HealthMax.Value

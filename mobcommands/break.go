@@ -9,10 +9,6 @@ import (
 
 func Break(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
-
 	if mob.Character.Aggro != nil {
 		mob.Character.Aggro = nil
 		room.SendText(
