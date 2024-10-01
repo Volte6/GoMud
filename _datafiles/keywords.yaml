@@ -23,6 +23,7 @@ help:
       - killstats
       - encumbrance
       - death
+      - character
     shops:
       - appraise
       - auction

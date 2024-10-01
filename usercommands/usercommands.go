@@ -36,6 +36,7 @@ var (
 		`badcommands`: {BadCommands, true, true}, // Admin only
 		`biome`:       {Biome, true, false},
 		`broadcast`:   {Broadcast, true, false},
+		`character`:   {Character, true, false},
 		`tackle`:      {Tackle, false, false},
 		`bank`:        {Bank, false, false},
 		`break`:       {Break, false, false},

@@ -8,6 +8,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/races"
@@ -91,6 +92,12 @@ func GetWaitMessages(stepType items.Intensity, sourceChar *characters.Character,
 
 	var toAttackerMsg, toDefenderMsg, toAttackerRoomMsg, toDefenderRoomMsg items.ItemMessage
 
+	// zero means randomly selected, otherwise use the ItemId to consistently choose a message
+	msgSeed := 0
+	if configs.GetConfig().ConsistentAttackMessages {
+		msgSeed = sourceChar.Equipment.Weapon.ItemId
+	}
+
 	tokenReplacements := map[items.TokenName]string{
 		items.TokenItemName:     races.GetRace(sourceChar.RaceId).UnarmedName,
 		items.TokenSource:       sourceChar.Name,
@@ -104,17 +111,17 @@ func GetWaitMessages(stepType items.Intensity, sourceChar *characters.Character,
 	}
 
 	if sourceChar.RoomId == targetChar.RoomId {
-		toAttackerMsg = msgs.Together.ToAttacker.Get()
-		toDefenderMsg = msgs.Together.ToDefender.Get()
-		toAttackerRoomMsg = msgs.Together.ToRoom.Get()
+		toAttackerMsg = msgs.Together.ToAttacker.Get(msgSeed)
+		toDefenderMsg = msgs.Together.ToDefender.Get(msgSeed)
+		toAttackerRoomMsg = msgs.Together.ToRoom.Get(msgSeed)
 		toDefenderRoomMsg = items.ItemMessage("")
 
 	} else {
 
-		toAttackerMsg = msgs.Separate.ToAttacker.Get()
-		toDefenderMsg = msgs.Separate.ToDefender.Get()
-		toAttackerRoomMsg = msgs.Separate.ToAttackerRoom.Get()
-		toDefenderRoomMsg = msgs.Separate.ToDefenderRoom.Get()
+		toAttackerMsg = msgs.Separate.ToAttacker.Get(msgSeed)
+		toDefenderMsg = msgs.Separate.ToDefender.Get(msgSeed)
+		toAttackerRoomMsg = msgs.Separate.ToAttackerRoom.Get(msgSeed)
+		toDefenderRoomMsg = msgs.Separate.ToDefenderRoom.Get(msgSeed)
 
 		// Find the exit that leads to the target from the source (if any)
 		if atkRoom := rooms.LoadRoom(sourceChar.RoomId); atkRoom != nil {
@@ -290,6 +297,12 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 			}
 
+			// zero means randomly selected, otherwise use the ItemId to consistently choose a message
+			msgSeed := 0
+			if configs.GetConfig().ConsistentAttackMessages {
+				msgSeed = weapon.ItemId
+			}
+
 			slog.Info("DiceRolls", "attacks", attacks, "dCount", dCount, "dSides", dSides, "dBonus", dBonus, "critBuffs", critBuffs)
 
 			// Individual weapons may get multiple attacks
@@ -345,17 +358,17 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 				if sourceChar.RoomId == targetChar.RoomId {
 
-					toAttackerMsg = msgs.Together.ToAttacker.Get()
-					toDefenderMsg = msgs.Together.ToDefender.Get()
-					toAttackerRoomMsg = msgs.Together.ToRoom.Get()
+					toAttackerMsg = msgs.Together.ToAttacker.Get(msgSeed)
+					toDefenderMsg = msgs.Together.ToDefender.Get(msgSeed)
+					toAttackerRoomMsg = msgs.Together.ToRoom.Get(msgSeed)
 					toDefenderRoomMsg = items.ItemMessage("")
 
 				} else {
 
-					toAttackerMsg = msgs.Separate.ToAttacker.Get()
-					toDefenderMsg = msgs.Separate.ToDefender.Get()
-					toAttackerRoomMsg = msgs.Separate.ToAttackerRoom.Get()
-					toDefenderRoomMsg = msgs.Separate.ToDefenderRoom.Get()
+					toAttackerMsg = msgs.Separate.ToAttacker.Get(msgSeed)
+					toDefenderMsg = msgs.Separate.ToDefender.Get(msgSeed)
+					toAttackerRoomMsg = msgs.Separate.ToAttackerRoom.Get(msgSeed)
+					toDefenderRoomMsg = msgs.Separate.ToDefenderRoom.Get(msgSeed)
 
 					slog.Error("toDefenderRoomMsg", "msg", toDefenderRoomMsg)
 					// Find the exit that leads to the target from the source (if any)

@@ -17,6 +17,12 @@
        <ansi fg="yellow-bold">This is an item storage location!</ansi> Type <ansi fg="command">storage</ansi> to store/unstore. 
     <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
 {{- end }}
+{{- if .Room.IsCharacterRoom }}
+
+    <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>
+       <ansi fg="yellow-bold">This is a character room!</ansi> Type <ansi fg="command">character</ansi> to interact. 
+    <ansi fg="red">└───────────────────────────────────────────────────────────────────┘</ansi>
+{{- end }}
 {{- if eq .Room.RoomId -1 }}
 
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>

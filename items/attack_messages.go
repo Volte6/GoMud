@@ -42,10 +42,21 @@ func (am ItemMessage) SetTokenValue(tokenName TokenName, tokenValue string) Item
 	return ItemMessage(strings.Replace(string(am), string(tokenName), tokenValue, -1))
 }
 
-func (mo MessageOptions) Get() ItemMessage {
+func (mo MessageOptions) Get(seedNum ...int) ItemMessage {
+
 	if ct := len(mo); ct > 0 {
-		return mo[util.Rand(ct)]
+
+		if len(seedNum) == 0 || seedNum[0] == 0 {
+			return mo[util.Rand(ct)]
+		}
+
+		if seedNum[0] == 0 {
+			return mo[0]
+		}
+
+		return mo[seedNum[0]%len(mo)]
 	}
+
 	return ItemMessage("")
 }
 

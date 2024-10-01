@@ -145,9 +145,10 @@ type Room struct {
 	mutex             sync.RWMutex
 	RoomId            int    // a unique numeric index of the room. Also the filename.
 	Zone              string // zone is a way to partition rooms into groups. Also into folders.
-	ZoneRoot          bool   `yaml:"zoneroot,omitempty"`  // Is this the root room? If transported to a zone this is the room you end up in. Also copied for new room creation.
-	IsBank            bool   `yaml:"isbank,omitempty"`    // Is this a bank room? If so, players can deposit/withdraw gold here.
-	IsStorage         bool   `yaml:"isstorage,omitempty"` // Is this a storage room? If so, players can add/remove objects here.
+	ZoneRoot          bool   `yaml:"zoneroot,omitempty"`        // Is this the root room? If transported to a zone this is the room you end up in. Also copied for new room creation.
+	IsBank            bool   `yaml:"isbank,omitempty"`          // Is this a bank room? If so, players can deposit/withdraw gold here.
+	IsStorage         bool   `yaml:"isstorage,omitempty"`       // Is this a storage room? If so, players can add/remove objects here.
+	IsCharacterRoom   bool   `yaml:"ischaracterroom,omitempty"` // Is this a room where characters can create new characters to swap between them?
 	Title             string
 	Description       string
 	MapSymbol         string               `yaml:"mapsymbol,omitempty"`  // The symbol to use when generating a map of the zone

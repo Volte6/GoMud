@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
@@ -71,7 +72,7 @@ func Start(rest string, userId int) (bool, error) {
 
 	}
 
-	if strings.EqualFold(user.Character.Name, user.Username) || len(user.Character.Name) == 0 {
+	if strings.EqualFold(user.Character.Name, user.Username) || len(user.Character.Name) == 0 || strings.ToLower(user.Character.Name) == `nameless` {
 
 		question := cmdPrompt.Ask(`What will you be known as (name)?`, []string{})
 		if !question.Done {
@@ -82,6 +83,14 @@ func Start(rest string, userId int) (bool, error) {
 			user.SendText(`Your username cannot match your character name!`)
 			question.RejectResponse()
 			return true, nil
+		}
+
+		for _, c := range characters.LoadAlts(user.Username) {
+			if strings.EqualFold(question.Response, c.Name) {
+				user.SendText(`Your already have a character named that!`)
+				question.RejectResponse()
+				return true, nil
+			}
 		}
 
 		if err := user.SetCharacterName(question.Response); err != nil {
