@@ -107,6 +107,13 @@ _Hire mercenaries to help you in combat. You can even boss them around._
 <a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/mercs.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/mercs.png" width="600" alt="accessibility text"></a>
 
 
+## Alt Characters
+
+_Create and change between different characters tied to just one login (Server configurable)._
+
+<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/alt-characters.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/alt-characters.png" width="600" alt="accessibility text"></a>
+
+
 ## Online Status
 
 _See who's online to pester for help._

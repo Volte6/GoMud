@@ -41,7 +41,7 @@ const (
 type Character struct {
 	Name            string            // The name of the character
 	Description     string            // A description of the character.
-	Adjectives      []string          // Decorative text for the name of the character (e.g. "sleeping", "dead", "wounded")
+	Adjectives      []string          `yaml:"adjectives,omitempty"` // Decorative text for the name of the character (e.g. "sleeping", "dead", "wounded")
 	RoomId          int               // The room id the character is in.
 	Zone            string            // The zone the character is in. The folder the room can be located in too.
 	RaceId          int               // Character race
@@ -56,13 +56,13 @@ type Character struct {
 	Alignment       int8              // The alignment of the character
 	Gold            int               // The gold the character is holding
 	Bank            int               // The gold the character has in the bank
-	Shop            Shop              `yaml:"shop,omitempty"`      // Definition of shop services/items this character stocks (or just has at the moment)
-	SpellBook       map[string]int    `yaml:"spellbook,omitempty"` // The spells the character has learned
-	Charmed         *CharmInfo        `yaml:"-"`                   // If they are charmed, this is the info
-	CharmedMobs     []int             `yaml:"-"`                   // If they have charmed anyone, this is the list of mob instance ids
-	Items           []items.Item      // The items the character is holding
-	Buffs           buffs.Buffs       `yaml:"buffs,omitempty"` // The buffs the character has active
-	Equipment       Worn              // The equipment the character is wearing
+	Shop            Shop              `yaml:"shop,omitempty"`          // Definition of shop services/items this character stocks (or just has at the moment)
+	SpellBook       map[string]int    `yaml:"spellbook,omitempty"`     // The spells the character has learned
+	Charmed         *CharmInfo        `yaml:"-"`                       // If they are charmed, this is the info
+	CharmedMobs     []int             `yaml:"-"`                       // If they have charmed anyone, this is the list of mob instance ids
+	Items           []items.Item      `yaml:"items,omitempty"`         // The items the character is holding
+	Buffs           buffs.Buffs       `yaml:"buffs,omitempty"`         // The buffs the character has active
+	Equipment       Worn              `yaml:"equipment,omitempty"`     // The equipment the character is wearing
 	TNLScale        float32           `yaml:"-"`                       // The experience scale of the character. Don't write to yaml since is dynamically calculated.
 	HealthMax       stats.StatInfo    `yaml:"-"`                       // The maximum health of the character. Don't write to yaml since is dynamically calculated.
 	ManaMax         stats.StatInfo    `yaml:"-"`                       // The maximum mana of the character. Don't write to yaml since is dynamically calculated.
@@ -79,8 +79,7 @@ type Character struct {
 	MobMastery      MobMasteries      `yaml:"mobmastery,omitempty"`    // Tracks particular masteries around a given mob
 	roomHistory     []int             // A stack FILO of the last X rooms the character has been in
 	followers       []int             // everyone following this user
-	BuffIds         []int
-	permaBuffIds    []int // Buff Id's that are always present for this character
+	permaBuffIds    []int             // Buff Id's that are always present for this character
 }
 
 func New() *Character {
@@ -1209,18 +1208,23 @@ func (c *Character) XPTL(lvl int) int {
 }
 
 // Returns the actual xp in regards to the current level/next level
-func (c *Character) XPTNLActual() (currentXP int, tnlXP int) {
-	currentLevelXP := c.XPTL(c.Level - 1)
+func (c *Character) XPTNLActual() (xpPastCurrentLevel int, tnlXP int) {
+
+	xpForCurrentLevel := c.XPTL(c.Level - 1)
 	if c.Level == 1 {
-		currentLevelXP = 0
+		xpForCurrentLevel = 0
 	}
-	nextLevelXP := c.XPTL(c.Level)
-	tnlXP = nextLevelXP - currentLevelXP
-	currentXP = c.Experience - currentLevelXP
-	return currentXP, tnlXP
+
+	xpForNextLevel := c.XPTL(c.Level)
+	tnlXP = xpForNextLevel - xpForCurrentLevel
+
+	xpPastCurrentLevel = c.Experience - xpForCurrentLevel
+
+	return xpPastCurrentLevel, tnlXP
 }
 
 func (c *Character) LevelUp() (bool, stats.Statistics) {
+
 	if c.XPTNL() > c.Experience {
 		return false, stats.Statistics{}
 	}

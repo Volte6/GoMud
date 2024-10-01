@@ -1,5 +1,6 @@
 roomid: 271
 zone: Frostfang
+ischaracterroom: true
 title: Soldiers Barracks
 description: The main hall is lined with rows of simple, sturdy bunk beds, each neatly
   made with crisp, gray blankets and a small wooden locker at the foot for personal
@@ -7,6 +8,8 @@ description: The main hall is lined with rows of simple, sturdy bunk beds, each 
   and spears, all polished to a shine and ready for use. The floor is bare stone,
   worn smooth by the constant tread of boots, and the walls are adorned with banners
   and insignia that represent various ranks and units within the Frostfang military.
+mapsymbol: '&'
+maplegend: Alts
 biome: city
 exits:
   southwest:

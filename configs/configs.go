@@ -79,6 +79,7 @@ type Config struct {
 
 	ShopRestockRounds        ConfigInt  `yaml:"ShopRestockRounds"`        // Default time it takes to restock 1 quantity in shops
 	ConsistentAttackMessages ConfigBool `yaml:"ConsistentAttackMessages"` // Whether each weapon has consistent attack messages
+	MaxAltCharacters         ConfigInt  `yaml:"MaxAltCharacters"`         // How many characters beyond the default character can they create?
 
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.
