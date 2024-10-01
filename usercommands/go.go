@@ -289,7 +289,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			}
 
 			handled = true
-			Look(`secretly`, user, room)
+			Look(`secretly`, user, destRoom)
 
 			scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId)
 		}

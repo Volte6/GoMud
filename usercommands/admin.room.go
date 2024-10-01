@@ -275,7 +275,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					}
 				}
 
-				Look(`secretly`, user, room)
+				Look(`secretly`, user, gotoRoom)
 
 				scripting.TryRoomScriptEvent(`onEnter`, user.UserId, gotoRoomId)
 
