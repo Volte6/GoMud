@@ -8,13 +8,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Quit(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Quit(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -28,7 +22,7 @@ func Quit(rest string, userId int) (bool, error) {
 	}
 
 	events.AddToQueue(events.Buff{
-		UserId:        userId,
+		UserId:        user.UserId,
 		MobInstanceId: 0,
 		BuffId:        0,
 	})

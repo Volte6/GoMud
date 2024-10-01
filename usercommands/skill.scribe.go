@@ -18,13 +18,7 @@ Level 2 - Scribe to a sign
 Level 3 - Scribe a hidden rune
 Level 4 - TODO
 */
-func Scribe(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Scribe(rest string, user *users.UserRecord) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Scribe)
 
@@ -86,13 +80,13 @@ func Scribe(rest string, userId int) (bool, error) {
 					user.SendText("You knock down the old sign and replace it with a new one.")
 					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> knocks down the old sign and replaces it with a new one.`, user.Character.Name),
-						userId,
+						user.UserId,
 					)
 				} else {
 					user.SendText("You find some junk wood and scrawl a message onto it.")
 					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> finds some junk wood and scrawls a message onto it.`, user.Character.Name),
-						userId,
+						user.UserId,
 					)
 				}
 			}
@@ -117,7 +111,7 @@ func Scribe(rest string, userId int) (bool, error) {
 			if len(rest) > 50 {
 				user.SendText("That won't fit! Keep it under 50 letters.")
 			} else {
-				if replaced := room.AddSign(rest, userId, 7); replaced {
+				if replaced := room.AddSign(rest, user.UserId, 7); replaced {
 					user.SendText("You scratch out the old rune and replace it with a new one.")
 				} else {
 					user.SendText("You scratch a rune into the floor.")

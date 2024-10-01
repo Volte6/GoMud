@@ -13,13 +13,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Get(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf(`user %d not found`, userId)
-	}
+func Get(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -36,14 +30,14 @@ func Get(rest string, userId int) (bool, error) {
 
 	if args[0] == "all" {
 		if room.Gold > 0 {
-			Get(`gold`, userId)
+			Get(`gold`, user)
 		}
 
 		if len(room.Items) > 0 {
 			iCopies := append([]items.Item{}, room.Items...)
 
 			for _, item := range iCopies {
-				Get(item.Name(), userId)
+				Get(item.Name(), user)
 			}
 		}
 
@@ -107,7 +101,7 @@ func Get(rest string, userId int) (bool, error) {
 				)
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up some <ansi fg="gold">gold</ansi> from the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName),
-					userId,
+					user.UserId,
 				)
 			}
 
@@ -144,10 +138,10 @@ func Get(rest string, userId int) (bool, error) {
 				)
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi> from the <ansi fg="container">%s</ansi>...`, user.Character.Name, matchItem.DisplayName(), containerName),
-					userId,
+					user.UserId,
 				)
 
-				scripting.TryItemScriptEvent(`onFound`, matchItem, userId)
+				scripting.TryItemScriptEvent(`onFound`, matchItem, user.UserId)
 
 			} else {
 				user.SendText(
@@ -177,7 +171,7 @@ func Get(rest string, userId int) (bool, error) {
 				)
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up some <ansi fg="gold">gold</ansi>.`, user.Character.Name),
-					userId,
+					user.UserId,
 				)
 			}
 
@@ -190,7 +184,7 @@ func Get(rest string, userId int) (bool, error) {
 		// Check if user is specifying an item they stashed
 		if !found && !getFromStash {
 			stashItemMatch, stashFound := room.FindOnFloor(rest, true)
-			if stashFound && stashItemMatch.StashedBy == userId {
+			if stashFound && stashItemMatch.StashedBy == user.UserId {
 				found = true
 				getFromStash = true
 				matchItem = stashItemMatch
@@ -234,7 +228,7 @@ func Get(rest string, userId int) (bool, error) {
 					)
 					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> digs around in the area and picks something up...`, user.Character.Name),
-						userId,
+						user.UserId,
 					)
 				} else {
 					user.SendText(
@@ -242,10 +236,10 @@ func Get(rest string, userId int) (bool, error) {
 					)
 					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
-						userId,
+						user.UserId,
 					)
 				}
-				scripting.TryItemScriptEvent(`onFound`, matchItem, userId)
+				scripting.TryItemScriptEvent(`onFound`, matchItem, user.UserId)
 
 			} else {
 				user.SendText(

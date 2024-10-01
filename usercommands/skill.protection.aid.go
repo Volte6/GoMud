@@ -17,13 +17,7 @@ Protection Skill
 Level 1 - Aid (revive) a player
 Level 3 - Aid (revive) a player, even during combat
 */
-func Aid(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Aid(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -45,7 +39,7 @@ func Aid(rest string, userId int) (bool, error) {
 
 	aidPlayerId, _ := room.FindByName(rest, rooms.FindDowned)
 
-	if aidPlayerId == userId {
+	if aidPlayerId == user.UserId {
 		aidPlayerId = 0
 	}
 
@@ -74,7 +68,7 @@ func Aid(rest string, userId int) (bool, error) {
 			}
 
 			continueCasting := true
-			if handled, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro); err == nil {
+			if handled, err := scripting.TrySpellScriptEvent(`onCast`, user.UserId, 0, spellAggro); err == nil {
 				continueCasting = handled
 			}
 

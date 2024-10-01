@@ -8,13 +8,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func BadCommands(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func BadCommands(rest string, user *users.UserRecord) (bool, error) {
 
 	if rest == "clear" {
 		badinputtracker.Clear()

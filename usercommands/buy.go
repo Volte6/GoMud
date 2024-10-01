@@ -16,16 +16,10 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Buy(rest string, userId int) (bool, error) {
+func Buy(rest string, user *users.UserRecord) (bool, error) {
 
 	if rest == "" {
-		return List(rest, userId)
-	}
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf(`user %d not found`, userId)
+		return List(rest, user)
 	}
 
 	// Load current room details
@@ -45,7 +39,7 @@ func Buy(rest string, userId int) (bool, error) {
 		if args[len(args)-2] == `from` {
 			targetUserId, targetMobInstanceId = room.FindByName(args[len(args)-1])
 
-			if userId == targetUserId {
+			if user.UserId == targetUserId {
 				user.SendText("You can't buy from yourself.")
 				return true, nil
 			}

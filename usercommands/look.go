@@ -13,18 +13,12 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Look(rest string, userId int) (bool, error) {
+func Look(rest string, user *users.UserRecord) (bool, error) {
 
 	secretLook := false
 	if strings.HasPrefix(rest, "secretly") {
 		secretLook = true
 		rest = strings.TrimSpace(strings.TrimPrefix(rest, "secretly"))
-	}
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
 	}
 
 	// Load current room details
@@ -124,7 +118,7 @@ func Look(rest string, userId int) (bool, error) {
 					targetName := m.Character.GetMobName(0).String()
 					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at %s.`, user.Character.Name, targetName),
-						userId,
+						user.UserId,
 					)
 				}
 
@@ -224,12 +218,12 @@ func Look(rest string, userId int) (bool, error) {
 
 			user.SendText(fmt.Sprintf("You peer toward the %s.", exitName))
 			if !isSneaking {
-				room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> peers toward the %s.`, user.Character.Name, exitName), userId)
+				room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> peers toward the %s.`, user.Character.Name, exitName), user.UserId)
 			}
 
 			if lookRoomId > 0 {
 
-				lookRoom(user.UserId, lookRoomId, secretLook || isSneaking)
+				lookRoom(user, lookRoomId, secretLook || isSneaking)
 
 				return true, nil
 			}
@@ -259,7 +253,7 @@ func Look(rest string, userId int) (bool, error) {
 			if !isSneaking {
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, user.Character.Name, lookItem.DisplayName()),
-					userId,
+					user.UserId,
 				)
 			}
 
@@ -281,24 +275,23 @@ func Look(rest string, userId int) (bool, error) {
 		if !secretLook && !isSneaking {
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking around.`, user.Character.Name),
-				userId,
+				user.UserId,
 			)
 
 			// Make it a "secret looks" now because we don't want another look message sent out by the lookRoom() func
 			secretLook = true
 		}
-		lookRoom(user.UserId, room.RoomId, secretLook || isSneaking)
+		lookRoom(user, room.RoomId, secretLook || isSneaking)
 	}
 
 	return true, nil
 }
 
-func lookRoom(userId int, roomId int, secretLook bool) {
+func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 
-	user := users.GetByUserId(userId)
 	room := rooms.LoadRoom(roomId)
 
-	if user == nil || room == nil {
+	if room == nil {
 		return
 	}
 
@@ -313,12 +306,12 @@ func lookRoom(userId int, roomId int, secretLook bool) {
 		if lookFromName == "" {
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking into the room from somewhere...`, user.Character.Name),
-				userId,
+				user.UserId,
 			)
 		} else {
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking into the room from the <ansi fg="exit">%s</ansi> exit`, user.Character.Name, lookFromName),
-				userId,
+				user.UserId,
 			)
 		}
 	}
@@ -334,7 +327,7 @@ func lookRoom(userId int, roomId int, secretLook bool) {
 	signCt := 0
 	privateSigns := room.GetPrivateSigns()
 	for _, sign := range privateSigns {
-		if sign.VisibleUserId == userId {
+		if sign.VisibleUserId == user.UserId {
 			signCt++
 			textOut, _ = templates.Process("descriptions/rune", sign)
 			user.SendText(textOut)
@@ -391,7 +384,7 @@ func lookRoom(userId int, roomId int, secretLook bool) {
 		if !item.IsValid() {
 			room.RemoveItem(item, true)
 		}
-		if item.StashedBy != userId {
+		if item.StashedBy != user.UserId {
 			continue
 		}
 		name := item.DisplayName() + ` <ansi fg="item-stashed">(stashed)</ansi>`

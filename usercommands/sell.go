@@ -10,14 +10,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Sell(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Sell(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -87,11 +80,11 @@ func Sell(rest string, userId int) (bool, error) {
 		)
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> sells a <ansi fg="itemname">%s</ansi>.`, user.Character.Name, item.DisplayName()),
-			userId,
+			user.UserId,
 		)
 
 		// Trigger lost event
-		scripting.TryItemScriptEvent(`onLost`, item, userId)
+		scripting.TryItemScriptEvent(`onLost`, item, user.UserId)
 
 		break
 	}

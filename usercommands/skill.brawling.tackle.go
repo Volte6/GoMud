@@ -15,13 +15,7 @@ import (
 Brawling Skill
 Level 3 - Attempt to tackle an opponent, making them miss a round.
 */
-func Tackle(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Tackle(rest string, user *users.UserRecord) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 
@@ -72,7 +66,7 @@ func Tackle(rest string, userId int) (bool, error) {
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges and tackles <ansi fg="mobname">%s</ansi>!`, user.Character.Name, m.Character.Name),
-					userId,
+					user.UserId,
 				)
 
 				events.AddToQueue(events.Buff{
@@ -88,7 +82,7 @@ func Tackle(rest string, userId int) (bool, error) {
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to tackle <ansi fg="mobname">%s</ansi> and misses!`, user.Character.Name, m.Character.Name),
-					userId,
+					user.UserId,
 				)
 
 			}
@@ -122,7 +116,7 @@ func Tackle(rest string, userId int) (bool, error) {
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges and tackles <ansi fg="username">%s</ansi>!`, user.Character.Name, u.Character.Name),
-					userId,
+					user.UserId,
 					attackPlayerId,
 				)
 
@@ -145,7 +139,7 @@ func Tackle(rest string, userId int) (bool, error) {
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> lunges to tackle <ansi fg="username">%s</ansi> and misses!`, user.Character.Name, u.Character.Name),
-					userId,
+					user.UserId,
 					attackPlayerId,
 				)
 

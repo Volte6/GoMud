@@ -14,13 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Shoot(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Shoot(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -90,7 +84,7 @@ func Shoot(rest string, userId int) (bool, error) {
 
 		if m != nil {
 
-			if m.Character.IsCharmed(userId) {
+			if m.Character.IsCharmed(user.UserId) {
 				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
 				return true, nil
 			}
@@ -104,7 +98,7 @@ func Shoot(rest string, userId int) (bool, error) {
 			if !isSneaking {
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to shoot at <ansi fg="mobname">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, m.Character.Name, exitName),
-					userId,
+					user.UserId,
 				)
 			}
 
@@ -133,7 +127,7 @@ func Shoot(rest string, userId int) (bool, error) {
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to shoot at <ansi fg="username">%s</ansi> through the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, p.Character.Name, exitName),
-					userId,
+					user.UserId,
 				)
 
 			}

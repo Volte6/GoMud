@@ -21,13 +21,7 @@ import (
 Brawling Skill
 Level 2 - You can throw objects at NPCs or other rooms.
 */
-func Throw(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf(`user %d not found`, userId)
-	}
+func Throw(rest string, user *users.UserRecord) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 	handled := false
@@ -74,7 +68,7 @@ func Throw(rest string, userId int) (bool, error) {
 		if user.Character.RemoveItem(itemMatch) {
 
 			// Trigger onLost event
-			scripting.TryItemScriptEvent(`onLost`, itemMatch, userId)
+			scripting.TryItemScriptEvent(`onLost`, itemMatch, user.UserId)
 
 			// Tell the player they are throwing the item
 			user.SendText(
@@ -84,7 +78,7 @@ func Throw(rest string, userId int) (bool, error) {
 			// Tell the old room they are leaving
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="itemname">%s</ansi> at <ansi fg="mobname">%s</ansi>.`, user.Character.Name, itemMatch.DisplayName(), targetMob.Character.Name),
-				userId,
+				user.UserId,
 			)
 
 			// If grenades are dropped, they explode and affect everyone in the room!
@@ -128,7 +122,7 @@ func Throw(rest string, userId int) (bool, error) {
 		// Tell the old room they are leaving
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="itemname">%s</ansi> at <ansi fg="username">%s</ansi>.`, user.Character.Name, itemMatch.DisplayName(), targetUser.Character.Name),
-			userId,
+			user.UserId,
 			targetUser.UserId)
 
 		// If grenades are dropped, they explode and affect everyone in the room!
@@ -195,13 +189,13 @@ func Throw(rest string, userId int) (bool, error) {
 			// Tell the old room they are leaving
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, user.Character.Name, itemMatch.DisplayName(), exitName),
-				userId,
+				user.UserId,
 			)
 
 			// Tell the new room the item arrived
 			throwToRoom.SendText(
 				fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
-				userId,
+				user.UserId,
 			)
 
 			// If grenades are dropped, they explode and affect everyone in the room!
@@ -270,13 +264,13 @@ func Throw(rest string, userId int) (bool, error) {
 					// Tell the old room they are leaving
 					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, user.Character.Name, itemMatch.DisplayName(), tempExit.Title),
-						userId,
+						user.UserId,
 					)
 
 					// Tell the new room the item arrived
 					throwToRoom.SendText(
 						fmt.Sprintf(`A <ansi fg="item">%s</ansi> flies through the air from %s and lands on the floor.`, itemMatch.DisplayName(), returnExitName),
-						userId,
+						user.UserId,
 					)
 
 					// If grenades are dropped, they explode and affect everyone in the room!

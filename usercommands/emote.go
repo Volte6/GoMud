@@ -92,13 +92,7 @@ var (
 	}
 )
 
-func Emote(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Emote(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -110,7 +104,7 @@ func Emote(rest string, userId int) (bool, error) {
 		user.SendText("You emote.")
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> emotes.`, user.Character.Name),
-			userId,
+			user.UserId,
 		)
 		return true, nil
 	}
@@ -123,7 +117,7 @@ func Emote(rest string, userId int) (bool, error) {
 
 	room.SendText(
 		fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="20">%s</ansi>`, user.Character.Name, rest),
-		userId,
+		user.UserId,
 	)
 
 	return true, nil

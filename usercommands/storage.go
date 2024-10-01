@@ -14,13 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Storage(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Storage(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 
@@ -75,7 +69,7 @@ func Storage(rest string, userId int) (bool, error) {
 		if itemName == `all` {
 
 			for _, itm := range user.Character.GetAllBackpackItems() {
-				Storage(fmt.Sprintf(`add !%d`, itm.ItemId), userId)
+				Storage(fmt.Sprintf(`add !%d`, itm.ItemId), user)
 
 				spaceLeft--
 				if spaceLeft < 0 {
@@ -99,14 +93,14 @@ func Storage(rest string, userId int) (bool, error) {
 		user.SendText(fmt.Sprintf(`You placed the <ansi fg="itemname">%s</ansi> into storage.`, itm.DisplayName()))
 
 		// Trigger lost event
-		scripting.TryItemScriptEvent(`onLost`, itm, userId)
+		scripting.TryItemScriptEvent(`onLost`, itm, user.UserId)
 
 	} else if action == `remove` {
 
 		if itemName == `all` {
 
 			for _, itm := range user.ItemStorage.GetItems() {
-				Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), userId)
+				Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), user)
 			}
 
 			return true, nil
@@ -141,7 +135,7 @@ func Storage(rest string, userId int) (bool, error) {
 
 			user.SendText(fmt.Sprintf(`You removed the <ansi fg="itemname">%s</ansi> from storage.`, itm.DisplayName()))
 
-			scripting.TryItemScriptEvent(`onFound`, itm, userId)
+			scripting.TryItemScriptEvent(`onFound`, itm, user.UserId)
 
 		} else {
 			user.SendText(`You can't carry that!`)

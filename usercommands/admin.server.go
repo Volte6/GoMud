@@ -19,13 +19,7 @@ var (
 	memoryReportCache = map[string]util.MemoryResult{}
 )
 
-func Server(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Server(rest string, user *users.UserRecord) (bool, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.server", nil)

@@ -12,13 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Share(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Share(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -26,7 +20,7 @@ func Share(rest string, userId int) (bool, error) {
 		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
-	party := parties.Get(userId)
+	party := parties.Get(user.UserId)
 	if party == nil {
 		user.SendText("You can only share in a party.")
 		return true, nil
@@ -54,9 +48,9 @@ func Share(rest string, userId int) (bool, error) {
 			return true, nil
 		}
 
-		partyMembersInRoom := []int{userId} // make sure party leader gets first share
+		partyMembersInRoom := []int{user.UserId} // make sure party leader gets first share
 		for _, uid := range room.GetPlayers(rooms.FindAll) {
-			if uid == userId {
+			if uid == user.UserId {
 				continue
 			}
 			if party.IsMember(uid) {

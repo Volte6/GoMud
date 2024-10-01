@@ -10,13 +10,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Rename(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Rename(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -60,7 +54,7 @@ func Rename(rest string, userId int) (bool, error) {
 		)
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> chants softly and waves their hand over <ansi fg="item">%s</ansi>, causing it to glow briefly.`, user.Character.Name, oldName),
-			userId,
+			user.UserId,
 		)
 	}
 

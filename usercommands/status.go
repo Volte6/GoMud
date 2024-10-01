@@ -10,13 +10,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Status(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Status(rest string, user *users.UserRecord) (bool, error) {
 
 	//possibleStatuses := []string{`strength`, `speed`, `smarts`, `vitality`, `mysticism`, `perception`}
 
@@ -113,7 +107,7 @@ func Status(rest string, userId int) (bool, error) {
 	tplTxt, _ := templates.Process("character/status", user)
 	user.SendText(tplTxt)
 
-	Inventory(``, userId)
+	Inventory(``, user)
 
 	return true, nil
 }

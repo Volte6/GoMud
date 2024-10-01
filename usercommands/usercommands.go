@@ -187,7 +187,7 @@ func GetHelpSuggestions(text string, includeAdmin bool) []string {
 }
 
 // Signature of user command
-type UserCommand func(rest string, userId int) (bool, error)
+type UserCommand func(rest string, user *users.UserRecord) (bool, error)
 
 func TryCommand(cmd string, rest string, userId int) (bool, error) {
 
@@ -265,7 +265,8 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 				util.TrackTime(`usr-cmd[`+cmd+`]`, time.Since(start).Seconds())
 			}()
 
-			handled, err := cmdInfo.Func(rest, userId)
+			// Run the command here
+			handled, err := cmdInfo.Func(rest, user)
 			return handled, err
 
 		}
@@ -277,13 +278,13 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		util.TrackTime(`usr-cmd[go]`, time.Since(start).Seconds())
 	}()
 
-	if handled, err := Go(cmd, userId); handled {
+	if handled, err := Go(cmd, user); handled {
 		return handled, err
 	}
 	// end "go" attempt
 
 	if emoteText, ok := emoteAliases[cmd]; ok {
-		handled, err := Emote(emoteText, userId)
+		handled, err := Emote(emoteText, user)
 		return handled, err
 	}
 
@@ -292,7 +293,7 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		if len(rest) > 0 {
 			castCmd += ` ` + rest
 		}
-		return Cast(castCmd, userId)
+		return Cast(castCmd, user)
 	}
 
 	return false, nil

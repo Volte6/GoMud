@@ -30,13 +30,7 @@ Level 2 - Display all players and mobs to recently walk through here
 Level 3 - Shows exit information for all tracked players or mobs
 Level 4 - Specify a mob or username and every room you enter will tell you what exit they took.
 */
-func Track(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Track(rest string, user *users.UserRecord) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Track)
 
@@ -114,7 +108,7 @@ func Track(rest string, userId int) (bool, error) {
 
 		for uId, timeLeft := range room.Visitors(rooms.VisitorUser) {
 
-			if uId == userId {
+			if uId == user.UserId {
 				continue
 			}
 
@@ -226,7 +220,7 @@ func Track(rest string, userId int) (bool, error) {
 
 			for uId, _ := range room.Visitors(rooms.VisitorUser) {
 
-				if uId == userId {
+				if uId == user.UserId {
 					continue
 				}
 
@@ -333,7 +327,7 @@ func Track(rest string, userId int) (bool, error) {
 
 			for uId, timeLeft := range room.Visitors(rooms.VisitorUser) {
 
-				if uId == userId {
+				if uId == user.UserId {
 					continue
 				}
 

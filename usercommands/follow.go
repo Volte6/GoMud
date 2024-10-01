@@ -7,13 +7,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Follow(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Follow(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -27,7 +21,7 @@ func Follow(rest string, userId int) (bool, error) {
 	}
 
 	playerId, _ := room.FindByName(rest)
-	if playerId == userId {
+	if playerId == user.UserId {
 		playerId = 0
 	}
 
@@ -43,7 +37,7 @@ func Follow(rest string, userId int) (bool, error) {
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> is following you.`, user.Character.Name),
 		)
 
-		followUser.Character.AddFollower(userId)
+		followUser.Character.AddFollower(user.UserId)
 
 	}
 

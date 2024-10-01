@@ -12,13 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func IBuild(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func IBuild(rest string, user *users.UserRecord) (bool, error) {
 
 	// args should look like one of the following:
 	// info <optional room id>
@@ -60,7 +54,7 @@ func IBuild(rest string, userId int) (bool, error) {
 				user.SendText(fmt.Sprintf(`Moved to room %d.`, roomId))
 
 				events.AddToQueue(events.Input{
-					UserId:    userId,
+					UserId:    user.UserId,
 					InputText: `look`,
 				}, true)
 
@@ -121,13 +115,7 @@ func IBuild(rest string, userId int) (bool, error) {
 	return true, nil
 }
 
-func Build(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Build(rest string, user *users.UserRecord) (bool, error) {
 
 	// args should look like one of the following:
 	// info <optional room id>
@@ -155,7 +143,7 @@ func Build(rest string, userId int) (bool, error) {
 				} else {
 					user.SendText(fmt.Sprintf("Moved to room %d.", roomId))
 					events.AddToQueue(events.Input{
-						UserId:    userId,
+						UserId:    user.UserId,
 						InputText: `look`,
 					}, true)
 				}
@@ -247,7 +235,7 @@ func Build(rest string, userId int) (bool, error) {
 				user.SendText(fmt.Sprintf("Moved to room %d.", destinationRoom.RoomId))
 
 				events.AddToQueue(events.Input{
-					UserId:    userId,
+					UserId:    user.UserId,
 					InputText: `look`,
 				}, true)
 			}

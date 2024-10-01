@@ -10,13 +10,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Equip(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf(`user %d not found`, userId)
-	}
+func Equip(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -25,12 +19,12 @@ func Equip(rest string, userId int) (bool, error) {
 	}
 
 	if rest == "all" {
-		return Gearup(``, userId)
+		return Gearup(``, user)
 		itemCopies := append([]items.Item{}, user.Character.Items...)
 		for _, item := range itemCopies {
 			iSpec := item.GetSpec()
 			if iSpec.Subtype == items.Wearable || iSpec.Type == items.Weapon {
-				Equip(item.Name(), userId)
+				Equip(item.Name(), user)
 			}
 		}
 		return true, nil
@@ -67,7 +61,7 @@ func Equip(rest string, userId int) (bool, error) {
 					)
 					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, user.Character.Name, oldItem.DisplayName()),
-						userId,
+						user.UserId,
 					)
 
 					user.Character.StoreItem(oldItem)
@@ -80,7 +74,7 @@ func Equip(rest string, userId int) (bool, error) {
 				)
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on their <ansi fg="item">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()),
-					userId,
+					user.UserId,
 				)
 			} else {
 				user.SendText(
@@ -88,7 +82,7 @@ func Equip(rest string, userId int) (bool, error) {
 				)
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> wields their <ansi fg="item">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()),
-					userId,
+					user.UserId,
 				)
 			}
 

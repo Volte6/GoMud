@@ -9,13 +9,7 @@ import (
 )
 
 // Global chat room
-func Broadcast(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Broadcast(rest string, user *users.UserRecord) (bool, error) {
 
 	events.AddToQueue(events.Broadcast{
 		Text: fmt.Sprintf(`<ansi fg="black-bold">(broadcast)</ansi> <ansi fg="username">%s</ansi>: <ansi fg="yellow">%s</ansi>%s`, user.Character.Name, rest, term.CRLFStr),

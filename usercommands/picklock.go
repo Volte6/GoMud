@@ -12,13 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Picklock(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Picklock(rest string, user *users.UserRecord) (bool, error) {
 
 	lockpickItm := items.Item{}
 	for _, itm := range user.Character.GetAllBackpackItems() {
@@ -116,14 +110,14 @@ func Picklock(rest string, userId int) (bool, error) {
 
 		if containerName != `` {
 
-			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), userId)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), user.UserId)
 
 			container := room.Containers[containerName]
 			container.Lock.SetUnlocked()
 			room.Containers[containerName] = container
 		} else {
 
-			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), userId)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), user.UserId)
 
 			exitInfo := room.Exits[exitName]
 			exitInfo.Lock.SetUnlocked()
@@ -201,14 +195,14 @@ func Picklock(rest string, userId int) (bool, error) {
 
 		if containerName != `` {
 
-			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), userId)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), user.UserId)
 
 			container := room.Containers[containerName]
 			container.Lock.SetUnlocked()
 			room.Containers[containerName] = container
 		} else {
 
-			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), userId)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), user.UserId)
 
 			exitInfo := room.Exits[exitName]
 			exitInfo.Lock.SetUnlocked()
@@ -221,9 +215,9 @@ func Picklock(rest string, userId int) (bool, error) {
 
 	} else {
 		if containerName != `` {
-			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to pick the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), userId)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to pick the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), user.UserId)
 		} else {
-			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to pick the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), userId)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to pick the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), user.UserId)
 		}
 	}
 

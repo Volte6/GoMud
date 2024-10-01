@@ -15,13 +15,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Drop(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Drop(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -42,13 +36,13 @@ func Drop(rest string, userId int) (bool, error) {
 		iCopies := []items.Item{}
 
 		if user.Character.Gold > 0 {
-			Drop(fmt.Sprintf("%d gold", user.Character.Gold), userId)
+			Drop(fmt.Sprintf("%d gold", user.Character.Gold), user)
 		}
 
 		iCopies = append(iCopies, user.Character.Items...)
 
 		for _, item := range iCopies {
-			Drop(item.Name(), userId)
+			Drop(item.Name(), user)
 		}
 
 		return true, nil
@@ -77,7 +71,7 @@ func Drop(rest string, userId int) (bool, error) {
 		)
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, dropAmt),
-			userId,
+			user.UserId,
 		)
 
 		return true, nil
@@ -102,7 +96,7 @@ func Drop(rest string, userId int) (bool, error) {
 		)
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
-			userId,
+			user.UserId,
 		)
 
 		// If grenades are dropped, they explode and affect everyone in the room!
@@ -123,7 +117,7 @@ func Drop(rest string, userId int) (bool, error) {
 		room.AddItem(matchItem, false)
 
 		// Trigger onLost event
-		scripting.TryItemScriptEvent(`onLost`, matchItem, userId)
+		scripting.TryItemScriptEvent(`onLost`, matchItem, user.UserId)
 	}
 
 	return true, nil

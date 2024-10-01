@@ -9,13 +9,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Spells(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf(`user %d not found`, userId)
-	}
+func Spells(rest string, user *users.UserRecord) (bool, error) {
 
 	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `MPs`, `Wait`, `Casts`, `% Chance`}
 

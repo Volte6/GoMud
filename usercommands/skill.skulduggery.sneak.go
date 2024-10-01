@@ -1,8 +1,6 @@
 package usercommands
 
 import (
-	"fmt"
-
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/rooms"
@@ -14,13 +12,7 @@ import (
 SkullDuggery Skill
 Level 1 - Sneak
 */
-func Sneak(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Sneak(rest string, user *users.UserRecord) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
@@ -47,7 +39,7 @@ func Sneak(rest string, userId int) (bool, error) {
 	}
 
 	events.AddToQueue(events.Buff{
-		UserId:        userId,
+		UserId:        user.UserId,
 		MobInstanceId: 0,
 		BuffId:        9,
 	})

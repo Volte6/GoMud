@@ -18,13 +18,7 @@ import (
 SkullDuggery Skill
 Level 2 - Backstab
 */
-func Backstab(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Backstab(rest string, user *users.UserRecord) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
@@ -75,7 +69,7 @@ func Backstab(rest string, userId int) (bool, error) {
 		// If no argument supplied, attack whoever is attacking the player currently.
 		for _, mId := range room.GetMobs(rooms.FindFightingPlayer) {
 			m := mobs.GetInstance(mId)
-			if m.Character.Aggro != nil && m.Character.Aggro.UserId == userId {
+			if m.Character.Aggro != nil && m.Character.Aggro.UserId == user.UserId {
 				attackMobInstanceId = m.InstanceId
 				break
 			}
@@ -84,7 +78,7 @@ func Backstab(rest string, userId int) (bool, error) {
 		if attackMobInstanceId == 0 {
 			for _, uId := range room.GetPlayers(rooms.FindFightingPlayer) {
 				u := users.GetByUserId(uId)
-				if u.Character.Aggro != nil && u.Character.Aggro.UserId == userId {
+				if u.Character.Aggro != nil && u.Character.Aggro.UserId == user.UserId {
 					attackPlayerId = u.UserId
 					break
 				}
@@ -94,7 +88,7 @@ func Backstab(rest string, userId int) (bool, error) {
 		attackPlayerId, attackMobInstanceId = room.FindByName(rest)
 	}
 
-	if attackPlayerId == userId { // Can't attack self!
+	if attackPlayerId == user.UserId { // Can't attack self!
 		attackPlayerId = 0
 	}
 
@@ -107,7 +101,7 @@ func Backstab(rest string, userId int) (bool, error) {
 
 		m := mobs.GetInstance(attackMobInstanceId)
 
-		if m.Character.IsCharmed(userId) {
+		if m.Character.IsCharmed(user.UserId) {
 			user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
 			return true, nil
 		}

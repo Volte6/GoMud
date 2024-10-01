@@ -13,13 +13,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Party(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Party(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -36,15 +30,15 @@ func Party(rest string, userId int) (bool, error) {
 		rest = strings.TrimSpace(rest)
 	}
 
-	currentParty := parties.Get(userId)
+	currentParty := parties.Get(user.UserId)
 
 	if partyCommand == `create` || partyCommand == `new` || partyCommand == `start` {
 
 		// check if they are already part of a party
 		if currentParty != nil {
-			if currentParty.Invited(userId) {
+			if currentParty.Invited(user.UserId) {
 				user.SendText(`You already have a pending party invite. Try <ansi fg="command">party accept/decline</ansi> first`)
-			} else if currentParty.IsLeader(userId) {
+			} else if currentParty.IsLeader(user.UserId) {
 				user.SendText(`You already own a party Type <ansi fg="command">party list</ansi> for more info.`)
 			} else {
 				user.SendText(`You are already party of a party.`)
@@ -52,7 +46,7 @@ func Party(rest string, userId int) (bool, error) {
 			return true, nil
 		}
 
-		if currentParty = parties.New(userId); currentParty != nil {
+		if currentParty = parties.New(user.UserId); currentParty != nil {
 			user.SendText(`You started a new party!`)
 		} else {
 			user.SendText(`Something went wrong.`)
@@ -75,10 +69,10 @@ func Party(rest string, userId int) (bool, error) {
 
 		// Not in a party? Create one.
 		if currentParty == nil {
-			currentParty = parties.New(userId)
+			currentParty = parties.New(user.UserId)
 		}
 
-		if !currentParty.IsLeader(userId) {
+		if !currentParty.IsLeader(user.UserId) {
 			user.SendText(`You are not the leader of your party.`)
 			return true, nil
 		}
@@ -118,11 +112,11 @@ func Party(rest string, userId int) (bool, error) {
 
 	if partyCommand == `accept` || partyCommand == `join` {
 
-		if currentParty.AcceptInvite(userId) {
+		if currentParty.AcceptInvite(user.UserId) {
 
 			user.SendText(`You joined the party!`)
 			for _, uid := range currentParty.UserIds {
-				if uid == userId {
+				if uid == user.UserId {
 					continue
 				}
 				if u := users.GetByUserId(uid); u != nil {
@@ -138,7 +132,7 @@ func Party(rest string, userId int) (bool, error) {
 
 	if partyCommand == `decline` {
 
-		if currentParty.DeclineInvite(userId) {
+		if currentParty.DeclineInvite(user.UserId) {
 
 			if u := users.GetByUserId(currentParty.LeaderUserId); u != nil {
 				u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> declined the invitation.`, user.Character.Name))
@@ -159,7 +153,7 @@ func Party(rest string, userId int) (bool, error) {
 		rows := [][]string{}
 
 		if currentParty != nil {
-			isInvited := currentParty.Invited(userId)
+			isInvited := currentParty.Invited(user.UserId)
 			leaderId := currentParty.LeaderUserId
 
 			charmedMobInstanceIds := []int{}
@@ -271,7 +265,7 @@ func Party(rest string, userId int) (bool, error) {
 		}
 	}
 
-	if currentParty.Invited(userId) {
+	if currentParty.Invited(user.UserId) {
 		user.SendText(`You haven't accepted an invitation to the party.`)
 		return true, nil
 	}
@@ -290,7 +284,7 @@ func Party(rest string, userId int) (bool, error) {
 			return true, nil
 		}
 
-		wasOnBefore := currentParty.SetAutoAttack(userId, autoAttackOn)
+		wasOnBefore := currentParty.SetAutoAttack(user.UserId, autoAttackOn)
 
 		if autoAttackOn {
 			if wasOnBefore {
@@ -309,7 +303,7 @@ func Party(rest string, userId int) (bool, error) {
 
 	if partyCommand == `leave` || partyCommand == `quit` {
 
-		if currentParty.IsLeader(userId) {
+		if currentParty.IsLeader(user.UserId) {
 
 			if len(currentParty.UserIds) <= 1 {
 				user.SendText(`You disbanded the party.`)
@@ -321,7 +315,7 @@ func Party(rest string, userId int) (bool, error) {
 
 			// promote someone else to leader
 			for _, uid := range currentParty.UserIds {
-				if uid == userId {
+				if uid == user.UserId {
 					continue
 				}
 
@@ -350,12 +344,12 @@ func Party(rest string, userId int) (bool, error) {
 			}
 		}
 
-		currentParty.Leave(userId)
+		currentParty.Leave(user.UserId)
 
 		user.SendText(`You left the party.`)
 
 		for _, uid := range currentParty.UserIds {
-			if uid == userId {
+			if uid == user.UserId {
 				continue
 			}
 			if u := users.GetByUserId(uid); u != nil {
@@ -367,13 +361,13 @@ func Party(rest string, userId int) (bool, error) {
 
 	if partyCommand == `disband` || partyCommand == `stop` {
 
-		if !currentParty.IsLeader(userId) {
+		if !currentParty.IsLeader(user.UserId) {
 			user.SendText(`You are not the leader of your party.`)
 			return true, nil
 		}
 
 		for _, uid := range currentParty.UserIds {
-			if uid == userId {
+			if uid == user.UserId {
 				continue
 			}
 			if u := users.GetByUserId(uid); u != nil {
@@ -395,7 +389,7 @@ func Party(rest string, userId int) (bool, error) {
 
 	if partyCommand == `kick` {
 
-		if !currentParty.IsLeader(userId) {
+		if !currentParty.IsLeader(user.UserId) {
 			user.SendText(`You are not the leader of your party.`)
 			return true, nil
 		}
@@ -438,7 +432,7 @@ func Party(rest string, userId int) (bool, error) {
 
 	if partyCommand == `promote` {
 
-		if !currentParty.IsLeader(userId) {
+		if !currentParty.IsLeader(user.UserId) {
 			user.SendText(`You are not the leader of your party.`)
 			return true, nil
 		}
@@ -490,7 +484,7 @@ func Party(rest string, userId int) (bool, error) {
 		}
 
 		for _, uId := range currentParty.GetMembers() {
-			if uId == userId {
+			if uId == user.UserId {
 				continue
 			}
 			if u := users.GetByUserId(uId); u != nil {

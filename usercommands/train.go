@@ -23,13 +23,7 @@ type TrainingOptions struct {
 	Options        []TrainingOption
 }
 
-func Train(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Train(rest string, user *users.UserRecord) (bool, error) {
 
 	// Load current room details
 
@@ -134,12 +128,12 @@ func Train(rest string, userId int) (bool, error) {
 			user.SendText(`The trainer pokes you on your chest, "I think you're in the wrong place, pal."`)
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> looks a little confused.`, user.Character.Name),
-				userId)
+				user.UserId)
 		} else if currentLevel == 4 { // Max level
 			user.SendText(`The trainer chuckles, "I admire your ambition, but you have already mastered that skill!"`)
 			room.SendText(
 				fmt.Sprintf(`The trainer chuckles and says something you can't quite make out to <ansi fg="username">%s</ansi>`, user.Character.Name),
-				userId)
+				user.UserId)
 		} else if currentLevel < trainingRange.Min-1 { // Not high enough level
 			user.SendText(`The trainer shakes his head, "You aren't ready to train here."`)
 		} else {
@@ -150,7 +144,7 @@ func Train(rest string, userId int) (bool, error) {
 				user.SendText(`The trainer pulls you close and says quietly, "You aren't ready yet. Return when you have more experience."`)
 				room.SendText(
 					fmt.Sprintf(`The trainer pulls <ansi fg="username">%s</ansi> close and mumbles something in their ear.`, user.Character.Name),
-					userId)
+					user.UserId)
 			} else {
 
 				// Take away the cost
@@ -174,7 +168,7 @@ func Train(rest string, userId int) (bool, error) {
 				user.SendText(`"Congratulations!", the trainer exclaims. You are now a little more prepared for the world.`)
 				room.SendText(
 					fmt.Sprintf(`The trainer shakes <ansi fg="username">%ss</ansi> hand while congratulating them. Must be nice.`, user.Character.Name),
-					userId)
+					user.UserId)
 
 				if match == string(skills.Tame) {
 					if newLevel == 1 {

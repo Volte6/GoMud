@@ -26,13 +26,7 @@ Level 4 - You are always aware of hidden players/mobs in the area
 (Lvl 3) <ansi fg="skill">search</ansi> Finds special/unknown "things of interest" in the area.
 (Lvl 4) <ansi fg="skill">search</ansi> Doubles your chance of success when searching.
 */
-func Search(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Search(rest string, user *users.UserRecord) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Search)
 
@@ -60,7 +54,7 @@ func Search(rest string, userId int) (bool, error) {
 	user.SendText("You snoop around for a bit...\n")
 	room.SendText(
 		fmt.Sprintf(`<ansi fg="username">%s</ansi> is snooping around.`, user.Character.Name),
-		userId,
+		user.UserId,
 	)
 
 	// Check room exists
@@ -91,7 +85,7 @@ func Search(rest string, userId int) (bool, error) {
 		hiddenPlayers := []string{}
 
 		for _, pId := range room.GetPlayers() {
-			if pId == userId {
+			if pId == user.UserId {
 				continue
 			}
 			if p := users.GetByUserId(pId); p != nil {

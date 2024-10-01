@@ -12,13 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Jobs(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf(`user %d not found`, userId)
-	}
+func Jobs(rest string, user *users.UserRecord) (bool, error) {
 
 	type JobDisplay struct {
 		Name       string
