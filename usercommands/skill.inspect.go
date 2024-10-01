@@ -18,19 +18,7 @@ Level 2 - Reveals weapon damage or uses an item has left.
 Level 3 - Reveals any stat modifiers an item has.
 Level 4 - Reveals special magical properties like elemental effects.
 */
-func Inspect(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Inspect(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if user.Character.GetSkillLevel(skills.Inspect) == 0 {
 		user.SendText("You don't know how to inspect.")
@@ -63,7 +51,7 @@ func Inspect(rest string, userId int) (bool, error) {
 		)
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> inspects their <ansi fg="item">%s</ansi>...`, user.Character.Name, matchItem.DisplayName()),
-			userId,
+			user.UserId,
 		)
 
 		type inspectDetails struct {

@@ -6,18 +6,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
 
-func Online(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Online(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	headers := []string{`Name`, `Level`, `Alignment`, `Profession`, `Online`, `Role`}
 

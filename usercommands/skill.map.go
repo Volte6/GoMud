@@ -21,13 +21,7 @@ Level 2 - Map a 9x7 area
 Level 3 - Map a 13x9 area
 Level 4 - Map a 17x9 area, and enables the "wide" version.
 */
-func Map(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Map(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Map)
 
@@ -145,9 +139,9 @@ func Map(rest string, userId int) (bool, error) {
 
 	var rGraph *rooms.RoomGraph
 	if rest == "wide" {
-		rGraph = rooms.GenerateZoneMap(zone, roomId, userId, mapWidth, mapHeight, mapMode)
+		rGraph = rooms.GenerateZoneMap(zone, roomId, user.UserId, mapWidth, mapHeight, mapMode)
 	} else {
-		rGraph = rooms.GenerateZoneMap(zone, roomId, userId, int(math.Ceil(float64(mapWidth)/2))<<1, int(math.Ceil(float64(mapHeight)/2))<<1, mapMode)
+		rGraph = rooms.GenerateZoneMap(zone, roomId, user.UserId, int(math.Ceil(float64(mapWidth)/2))<<1, int(math.Ceil(float64(mapHeight)/2))<<1, mapMode)
 	}
 
 	if skillLevel > 4 {
@@ -166,7 +160,7 @@ func Map(rest string, userId int) (bool, error) {
 		}
 	}
 
-	if p := parties.Get(userId); p != nil {
+	if p := parties.Get(user.UserId); p != nil {
 		for _, uid := range p.GetMembers() {
 			if tmpUser := users.GetByUserId(uid); tmpUser != nil {
 

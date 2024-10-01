@@ -11,22 +11,10 @@ import (
 // Format should be:
 // callforhelp blows his horn
 // "blows his horn" will be emoted to the room
-func CallForHelp(rest string, mobId int) (bool, error) {
-
-	// Load user details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(mob.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
+func CallForHelp(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	if mob.Character.Aggro == nil || mob.Character.Aggro.UserId == 0 {
-		return false, fmt.Errorf(`mob %d has no aggro`, mobId)
+		return false, fmt.Errorf(`mob %d has no aggro`, mob.InstanceId)
 	}
 
 	calledForHelp := false

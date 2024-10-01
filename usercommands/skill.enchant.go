@@ -14,12 +14,12 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Uncurse(rest string, userId int) (bool, error) {
-	return Enchant("uncurse "+rest, userId)
+func Uncurse(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+	return Enchant("uncurse "+rest, user, room)
 }
 
-func Unenchant(rest string, userId int) (bool, error) {
-	return Enchant("remove "+rest, userId)
+func Unenchant(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+	return Enchant("remove "+rest, user, room)
 }
 
 /*
@@ -29,19 +29,7 @@ Level 2 - Enchant equipment with a defensive bonus.
 Level 3 - Add a stat bonus to a weapon or equipment in addition to the above.
 Level 4 - Remove the enchantment or curse from any object.
 */
-func Enchant(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Enchant(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Enchant)
 
@@ -113,7 +101,7 @@ func Enchant(rest string, userId int) (bool, error) {
 
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their cursed <ansi fg="itemname">%s</ansi> concentrates. An malevolent ethereal whisp seems to float away.`, user.Character.Name, matchItem.DisplayName()),
-				userId,
+				user.UserId,
 			)
 
 			user.SendText(
@@ -132,7 +120,7 @@ func Enchant(rest string, userId int) (bool, error) {
 
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their <ansi fg="itemname">%s</ansi> and slowly waves their hand over it. Runes appear to glow on the surface, which fade as they float away.`, user.Character.Name, matchItem.DisplayName()),
-				userId,
+				user.UserId,
 			)
 
 			user.SendText(
@@ -216,7 +204,7 @@ func Enchant(rest string, userId int) (bool, error) {
 
 		if roll < chanceToDestroy {
 			user.SendText(fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> explodes in a shower of sparks!`, matchItem.DisplayName()))
-			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their <ansi fg="itemname">%s</ansi> and slowly waves their hand over it. The <ansi fg="itemname">%s</ansi> explodes in a shower of sparks!`, user.Character.Name, matchItem.DisplayName(), matchItem.DisplayName()), userId)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their <ansi fg="itemname">%s</ansi> and slowly waves their hand over it. The <ansi fg="itemname">%s</ansi> explodes in a shower of sparks!`, user.Character.Name, matchItem.DisplayName(), matchItem.DisplayName()), user.UserId)
 			return true, nil
 		}
 
@@ -225,7 +213,7 @@ func Enchant(rest string, userId int) (bool, error) {
 
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their <ansi fg="itemname">%s</ansi> and slowly waves their hand over it. The <ansi fg="itemname">%s</ansi> glows briefly for a moment and then the glow fades away.`, user.Character.Name, matchItem.DisplayName(), matchItem.DisplayName()),
-			userId,
+			user.UserId,
 		)
 
 		user.SendText(

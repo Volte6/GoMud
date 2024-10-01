@@ -12,19 +12,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Attack(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Attack(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	attackPlayerId := 0
 	attackMobInstanceId := 0
@@ -39,7 +27,7 @@ func Attack(rest string, userId int) (bool, error) {
 				continue
 			}
 
-			if m.Character.Aggro.UserId == userId {
+			if m.Character.Aggro.UserId == user.UserId {
 				attackMobInstanceId = m.InstanceId
 				break
 			}
@@ -59,7 +47,7 @@ func Attack(rest string, userId int) (bool, error) {
 					continue
 				}
 
-				if u.Character.Aggro.UserId == userId {
+				if u.Character.Aggro.UserId == user.UserId {
 					attackPlayerId = u.UserId
 					break
 				}
@@ -101,7 +89,7 @@ func Attack(rest string, userId int) (bool, error) {
 		attackPlayerId, attackMobInstanceId = room.FindByName(rest)
 	}
 
-	if attackPlayerId == userId { // Can't attack self!
+	if attackPlayerId == user.UserId { // Can't attack self!
 		attackPlayerId = 0
 	}
 
@@ -125,7 +113,7 @@ func Attack(rest string, userId int) (bool, error) {
 		m := mobs.GetInstance(attackMobInstanceId)
 
 		if m != nil {
-			if m.Character.IsCharmed(userId) {
+			if m.Character.IsCharmed(user.UserId) {
 				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is your friend!`, m.Character.Name))
 				return true, nil
 			}
@@ -157,13 +145,13 @@ func Attack(rest string, userId int) (bool, error) {
 			if !isSneaking {
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, user.Character.Name, m.Character.Name),
-					userId,
+					user.UserId,
 				)
 			}
 
 			for _, instId := range room.GetMobs(rooms.FindCharmed) {
 				if m := mobs.GetInstance(instId); m != nil {
-					if m.Character.Aggro == nil && m.Character.IsCharmed(userId) { // Charmed mobs help the player
+					if m.Character.Aggro == nil && m.Character.IsCharmed(user.UserId) { // Charmed mobs help the player
 
 						m.Command(fmt.Sprintf(`attack #%d`, attackMobInstanceId)) // # denotes a specific mob instanceId
 
@@ -220,12 +208,12 @@ func Attack(rest string, userId int) (bool, error) {
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, user.Character.Name, p.Character.Name),
-					userId, attackPlayerId)
+					user.UserId, attackPlayerId)
 			}
 
 			for _, instId := range room.GetMobs(rooms.FindCharmed) {
 				if m := mobs.GetInstance(instId); m != nil {
-					if m.Character.Aggro == nil && m.Character.IsCharmed(userId) { // Charmed mobs help the player
+					if m.Character.Aggro == nil && m.Character.IsCharmed(user.UserId) { // Charmed mobs help the player
 
 						m.Command(fmt.Sprintf(`attack @%d`, attackPlayerId)) // @ denotes a specific user id
 

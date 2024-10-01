@@ -13,25 +13,13 @@ import (
 
 // Mob portaling is different than player portaling.
 // Mob portals are open for shorter periods, and go to specific locations.
-func Portal(rest string, mobId int) (bool, error) {
-
-	// Load user details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
+func Portal(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
-		if handled, err := Go(`portal`, mobId); handled {
+		if handled, err := Go(`portal`, mob, room); handled {
 			return handled, err
 		}
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(mob.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
 
 	var err error

@@ -10,19 +10,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Appraise(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Appraise(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
 
@@ -74,7 +62,7 @@ func Appraise(rest string, userId int) (bool, error) {
 		mob.Character.Gold += appraisePrice
 
 		user.SendText(fmt.Sprintf(`You give <ansi fg="mobname">%s</ansi> %d gold to appraise <ansi fg="itemname">%s</ansi>.`, mob.Character.Name, appraisePrice, itemSpec.Name))
-		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> appraises <ansi fg="itemname">%s</ansi>.`, user.Character.Name, itemSpec.Name), userId)
+		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> appraises <ansi fg="itemname">%s</ansi>.`, user.Character.Name, itemSpec.Name), user.UserId)
 
 		inspectTxt, _ := templates.Process("descriptions/inspect", details)
 		user.SendText(inspectTxt)

@@ -21,13 +21,7 @@ Level 2 - Reveals detailed stats of a player or mob.
 Level 3 - Reveals detailed stats of the player or mob, plus equipment and items
 Level 4 - eveals detailed stats of the player or mob, plus equipment and items, and tells you the % chance of dropping items.
 */
-func Peep(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Peep(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Peep)
 
@@ -52,11 +46,6 @@ func Peep(rest string, userId int) (bool, error) {
 			`You're using that skill just a little too fast.`,
 		)
 		return true, errors.New(`you're doing that too often`)
-	}
-
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// valid peep targets are: mobs, players
@@ -130,7 +119,7 @@ func Peep(rest string, userId int) (bool, error) {
 
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is peeping at <ansi fg="username">%s</ansi>.`, user.Character.Name, u.Character.Name),
-				userId,
+				user.UserId,
 				u.UserId)
 
 		} else if mobId > 0 {
@@ -189,7 +178,7 @@ func Peep(rest string, userId int) (bool, error) {
 
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is peeping at %s.`, user.Character.Name, targetName),
-				userId,
+				user.UserId,
 			)
 
 		}

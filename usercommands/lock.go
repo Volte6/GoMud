@@ -10,19 +10,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Lock(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Lock(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
@@ -57,7 +45,7 @@ func Lock(rest string, userId int) (bool, error) {
 			room.Containers[containerName] = container
 
 			user.SendText(fmt.Sprintf(`You use a key to relock the <ansi fg="container">%s</ansi>.`, containerName))
-			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to relock the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName), userId)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to relock the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName), user.UserId)
 		} else if hasBackpackKey {
 
 			itmSpec := backpackKeyItm.GetSpec()
@@ -73,7 +61,7 @@ func Lock(rest string, userId int) (bool, error) {
 			user.SendText(fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to lock the <ansi fg="container">%s</ansi>, and add it to your key ring for the future.`, itmSpec.Name, containerName))
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to lock the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName),
-				userId)
+				user.UserId)
 		} else {
 			user.SendText(`You do not have the key for that.`)
 		}
@@ -103,7 +91,7 @@ func Lock(rest string, userId int) (bool, error) {
 			room.Exits[exitName] = exitInfo
 
 			user.SendText(fmt.Sprintf(`You use a key to relock the <ansi fg="exit">%s</ansi> lock.`, exitName))
-			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to relock the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), userId)
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to relock the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), user.UserId)
 		} else if hasBackpackKey {
 
 			itmSpec := backpackKeyItm.GetSpec()
@@ -119,7 +107,7 @@ func Lock(rest string, userId int) (bool, error) {
 			user.SendText(fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to lock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName))
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to lock the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
-				userId)
+				user.UserId)
 		} else {
 			user.SendText(`You do not have the key for that.`)
 		}

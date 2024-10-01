@@ -16,13 +16,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Buff(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Buff(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// args should look like one of the following:
 	// target buffId - put buff on target if in the room
@@ -90,7 +84,7 @@ func Buff(rest string, userId int) (bool, error) {
 				}
 
 			} else if len(args) == 1 {
-				targetUserId = userId
+				targetUserId = user.UserId
 				buffId, _ = strconv.Atoi(args[0])
 				if buffId == 0 {
 					// Grab the first match

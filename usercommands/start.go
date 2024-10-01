@@ -15,13 +15,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Start(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if user.Character.RoomId != -1 {
 		return false, errors.New(`only allowed in the void`)
@@ -52,7 +46,7 @@ func Start(rest string, userId int) (bool, error) {
 		if question.Response == `?` {
 
 			question.RejectResponse()
-			return Help(`races`, userId)
+			return Help(`races`, user, room)
 
 		}
 
@@ -127,7 +121,7 @@ func Start(rest string, userId int) (bool, error) {
 
 		if _, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, int(rid)); err == nil {
 
-			rooms.MoveToRoom(userId, int(rid))
+			rooms.MoveToRoom(user.UserId, int(rid))
 			return true, nil
 		}
 

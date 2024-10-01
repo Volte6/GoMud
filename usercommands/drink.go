@@ -10,19 +10,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Drink(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Drink(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// Check whether the user has an item in their inventory that matches
 	matchItem, found := user.Character.FindInBackpack(rest)
@@ -45,7 +33,7 @@ func Drink(rest string, userId int) (bool, error) {
 		user.Character.UseItem(matchItem)
 
 		user.SendText(fmt.Sprintf(`You drink the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()))
-		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> drinks <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()), userId)
+		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> drinks <ansi fg="itemname">%s</ansi>.`, user.Character.Name, matchItem.DisplayName()), user.UserId)
 
 		for _, buffId := range itemSpec.BuffIds {
 

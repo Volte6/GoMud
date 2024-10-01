@@ -17,19 +17,7 @@ import (
 Protection Skill
 Level 4 - Pray to gods for a blessing
 */
-func Pray(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Pray(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Protection)
 
@@ -48,7 +36,7 @@ func Pray(rest string, userId int) (bool, error) {
 	prayPlayerId, prayMobId := 0, 0
 
 	if rest == `` {
-		prayPlayerId = userId
+		prayPlayerId = user.UserId
 	} else {
 		prayPlayerId, prayMobId = room.FindByName(rest)
 	}
@@ -67,7 +55,7 @@ func Pray(rest string, userId int) (bool, error) {
 
 	if prayPlayerId > 0 {
 
-		if prayPlayerId == userId {
+		if prayPlayerId == user.UserId {
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> begins to pray.`, user.Character.Name), user.UserId)
 		} else {
 			targetUser := users.GetByUserId(prayPlayerId)

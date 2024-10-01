@@ -10,19 +10,7 @@ import (
 	"github.com/volte6/mud/scripting"
 )
 
-func Converse(rest string, mobId int) (bool, error) {
-
-	// Load user details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(mob.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
+func Converse(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	// Don't bother if no players are present
 	if room.PlayerCt() < 1 {
@@ -32,9 +20,9 @@ func Converse(rest string, mobId int) (bool, error) {
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 
 	if isSneaking {
-		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="yellow">%s</ansi>"`, rest), mobId)
+		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="yellow">%s</ansi>"`, rest))
 	} else {
-		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest), mobId)
+		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest))
 	}
 
 	roomMobs := room.GetMobs(rooms.FindIdle)
@@ -51,12 +39,12 @@ func Converse(rest string, mobId int) (bool, error) {
 			continue
 		}
 
-		mob := mobs.GetInstance(roomMobInstId)
-		if mob == nil {
+		targetMob := mobs.GetInstance(roomMobInstId)
+		if targetMob == nil {
 			continue
 		}
 
-		if handled, err := scripting.TryMobConverse(rest, roomMobInstId, mobId); err == nil {
+		if handled, err := scripting.TryMobConverse(rest, targetMob.InstanceId, mob.InstanceId); err == nil {
 			if handled {
 				return true, nil
 			}

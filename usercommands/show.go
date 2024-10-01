@@ -13,19 +13,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Show(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Show(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	rest = util.StripPrepositions(rest)
 
@@ -80,7 +68,7 @@ func Show(rest string, userId int) (bool, error) {
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, user.Character.Name, showItem.DisplayName(), targetUser.Character.Name),
 				targetUser.UserId,
-				userId)
+				user.UserId)
 
 		} else {
 			user.SendText("Something went wrong.")
@@ -108,11 +96,11 @@ func Show(rest string, userId int) (bool, error) {
 				)
 
 				// Do trigger of onShow
-				scripting.TryMobScriptEvent(`onShow`, targetMob.InstanceId, userId, `user`, map[string]any{`gold`: 0, `item`: showItem})
+				scripting.TryMobScriptEvent(`onShow`, targetMob.InstanceId, user.UserId, `user`, map[string]any{`gold`: 0, `item`: showItem})
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> shows their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, showItem.DisplayName(), targetMob.Character.Name),
-					userId,
+					user.UserId,
 				)
 
 			} else {

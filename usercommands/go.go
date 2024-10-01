@@ -14,13 +14,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Go(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if user.Character.Aggro != nil {
 		user.SendText("You can't do that! You are in combat!")
@@ -34,12 +28,6 @@ func Go(rest string, userId int) (bool, error) {
 	}
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
 
 	handled := false
 
@@ -93,7 +81,7 @@ func Go(rest string, userId int) (bool, error) {
 				user.SendText(`You know this lock well, you quickly pick it.`)
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> quickly picks the lock on the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
-					userId)
+					user.UserId)
 
 				exitInfo.Lock.SetUnlocked()
 				room.Exits[exitName] = exitInfo
@@ -102,7 +90,7 @@ func Go(rest string, userId int) (bool, error) {
 				user.SendText(fmt.Sprintf(`You use the key on your key ring to unlock the <ansi fg="exit">%s</ansi> exit.`, exitName))
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to unlock the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
-					userId)
+					user.UserId)
 
 				exitInfo.Lock.SetUnlocked()
 				room.Exits[exitName] = exitInfo
@@ -116,7 +104,7 @@ func Go(rest string, userId int) (bool, error) {
 					user.SendText(fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to unlock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName))
 					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to unlock the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
-						userId)
+						user.UserId)
 
 					// Key entries look like:
 					// "key-<roomid>-<exitname>": "<itemid>"
@@ -186,23 +174,23 @@ func Go(rest string, userId int) (bool, error) {
 					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> leaves towards the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
 					),
-					userId)
+					user.UserId)
 				// Tell the new room they have arrived
 				destRoom.SendText(
 					fmt.Sprintf(string(c.EnterRoomMessageWrapper),
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> enters from %s.`, user.Character.Name, enterFromExit),
 					),
-					userId)
+					user.UserId)
 
 				destRoom.SendTextToExits(`You hear someone moving around.`, true, room.GetPlayers(rooms.FindAll)...)
 			}
 
-			if currentParty := parties.Get(userId); currentParty != nil {
+			if currentParty := parties.Get(user.UserId); currentParty != nil {
 
-				if currentParty.IsLeader(userId) {
+				if currentParty.IsLeader(user.UserId) {
 
 					for _, partyMemberId := range currentParty.UserIds {
-						if partyMemberId == userId {
+						if partyMemberId == user.UserId {
 							continue
 						}
 						if partyUser := users.GetByUserId(partyMemberId); partyUser != nil {
@@ -221,7 +209,7 @@ func Go(rest string, userId int) (bool, error) {
 				if mob == nil {
 					continue
 				}
-				if mob.Character.IsCharmed(userId) { // Charmed mobs follow
+				if mob.Character.IsCharmed(user.UserId) { // Charmed mobs follow
 
 					mob.Command(rest)
 
@@ -301,7 +289,7 @@ func Go(rest string, userId int) (bool, error) {
 			}
 
 			handled = true
-			Look(`secretly`, userId)
+			Look(`secretly`, user, room)
 
 			scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId)
 		}
@@ -320,7 +308,7 @@ func Go(rest string, userId int) (bool, error) {
 					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> is bumping into walls.`, user.Character.Name),
 					),
-					userId)
+					user.UserId)
 			}
 			handled = true
 		}

@@ -1,21 +1,15 @@
 package usercommands
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/volte6/mud/keywords"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
 
-func Alias(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Alias(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// biuld array and look up table for sorting purposes
 	allOutCmds := []string{}

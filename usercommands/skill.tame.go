@@ -23,13 +23,7 @@ Level 2 - Tame up to 3 creatures
 Level 3 - Tame up to 4 creatures
 Level 4 - Tame up to 5 creatures
 */
-func Tame(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Tame(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Tame)
 	if skillLevel == 0 {
@@ -69,11 +63,6 @@ func Tame(rest string, userId int) (bool, error) {
 		return true, nil
 	}
 
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
-
 	// valid peep targets are: mobs, players
 	_, mobId := room.FindByName(rest)
 
@@ -81,7 +70,7 @@ func Tame(rest string, userId int) (bool, error) {
 
 		if mob := mobs.GetInstance(mobId); mob != nil {
 
-			if mob.Character.IsCharmed(userId) {
+			if mob.Character.IsCharmed(user.UserId) {
 				user.SendText("They are already charmed.")
 				return true, errors.New(`they are already charmed`)
 			}
@@ -95,7 +84,7 @@ func Tame(rest string, userId int) (bool, error) {
 			}
 
 			continueCasting := true
-			if handled, err := scripting.TrySpellScriptEvent(`onCast`, userId, 0, spellAggro); err == nil {
+			if handled, err := scripting.TrySpellScriptEvent(`onCast`, user.UserId, 0, spellAggro); err == nil {
 				continueCasting = handled
 			}
 

@@ -1,7 +1,6 @@
 package mobcommands
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/volte6/mud/characters"
@@ -14,19 +13,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Cast(rest string, mobId int) (bool, error) {
-
-	// Load user details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(mob.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
-	}
+func Cast(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
@@ -70,7 +57,7 @@ func Cast(rest string, mobId int) (bool, error) {
 		if spellArg == `` {
 
 			// No target specified? Default to self
-			spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobId)
+			spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mob.InstanceId)
 
 		} else {
 
@@ -101,7 +88,7 @@ func Cast(rest string, mobId int) (bool, error) {
 					for _, pUserId := range playersFightingMobs {
 
 						if u := users.GetByUserId(pUserId); u != nil {
-							if u.Character.IsAggro(0, mobId) {
+							if u.Character.IsAggro(0, mob.InstanceId) {
 								spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, pUserId)
 								break
 							}
@@ -119,7 +106,7 @@ func Cast(rest string, mobId int) (bool, error) {
 						for _, mId := range mobsFightingMobs {
 
 							if m := mobs.GetInstance(mId); m != nil {
-								if m.Character.IsAggro(0, mobId) {
+								if m.Character.IsAggro(0, mob.InstanceId) {
 									spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mId)
 									break
 								}
@@ -144,7 +131,7 @@ func Cast(rest string, mobId int) (bool, error) {
 
 	} else if spellInfo.Type == spells.HelpMulti {
 
-		spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobId)
+		spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mob.InstanceId)
 
 		if !mob.Character.IsCharmed() {
 
@@ -192,7 +179,7 @@ func Cast(rest string, mobId int) (bool, error) {
 		mobsFightingMobs := room.GetMobs(rooms.FindFightingMob)
 		for _, mobInstId := range mobsFightingMobs {
 			if m := mobs.GetInstance(mobInstId); m != nil {
-				if m.Character.IsAggro(0, mobId) || m.HatesRace(m.Character.Race()) {
+				if m.Character.IsAggro(0, mob.InstanceId) || m.HatesRace(m.Character.Race()) {
 					spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
 				}
 			}
@@ -201,7 +188,7 @@ func Cast(rest string, mobId int) (bool, error) {
 		playersFightingMobs := room.GetPlayers(rooms.FindFightingMob)
 		for _, uId := range playersFightingMobs {
 			if u := users.GetByUserId(uId); u != nil {
-				if u.Character.IsAggro(0, mobId) {
+				if u.Character.IsAggro(0, mob.InstanceId) {
 					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
 				}
 			}
@@ -217,7 +204,7 @@ func Cast(rest string, mobId int) (bool, error) {
 	if len(spellAggro.TargetUserIds) > 0 || len(spellAggro.TargetMobInstanceIds) > 0 || len(spellAggro.SpellRest) > 0 {
 
 		continueCasting := true
-		if allowContinueCasting, err := scripting.TrySpellScriptEvent(`onCast`, 0, mobId, spellAggro); err == nil {
+		if allowContinueCasting, err := scripting.TrySpellScriptEvent(`onCast`, 0, mob.InstanceId, spellAggro); err == nil {
 			continueCasting = allowContinueCasting
 		}
 

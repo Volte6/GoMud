@@ -8,19 +8,14 @@ import (
 
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/races"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/spells"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Help(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf(`user %d not found`, userId)
-	}
+func Help(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	var helpTxt string
 	var err error = nil

@@ -10,19 +10,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Say(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Say(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 	isDrunk := user.Character.HasBuffFlag(buffs.Drunk)
@@ -32,9 +20,9 @@ func Say(rest string, userId int) (bool, error) {
 		rest = drunkify(rest)
 	}
 	if isSneaking {
-		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="saytext">%s</ansi>"`, rest), userId)
+		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="saytext">%s</ansi>"`, rest), user.UserId)
 	} else {
-		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> says, "<ansi fg="saytext">%s</ansi>"`, user.Character.Name, rest), userId)
+		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> says, "<ansi fg="saytext">%s</ansi>"`, user.Character.Name, rest), user.UserId)
 	}
 
 	user.SendText(fmt.Sprintf(`You say, "<ansi fg="saytext">%s</ansi>"`, rest))

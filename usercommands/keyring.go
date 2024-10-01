@@ -12,13 +12,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func KeyRing(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func KeyRing(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	headers := []string{`Type`, `Location`, `Where`, `Sequence`}
 	allFormatting := [][]string{}

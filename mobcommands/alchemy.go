@@ -10,15 +10,8 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Alchemy(rest string, mobId int) (bool, error) {
+func Alchemy(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
-	// Load user details
-	mob := mobs.GetInstance(mobId)
-	if mob == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("mob %d not found", mobId)
-	}
-
-	room := rooms.LoadRoom(mob.Character.RoomId)
 	if room == nil {
 		return false, fmt.Errorf(`room %d not found`, mob.Character.RoomId)
 	}
@@ -29,7 +22,7 @@ func Alchemy(rest string, mobId int) (bool, error) {
 		// select a random item
 		if len(mob.Character.Items) > 0 {
 			matchItem := mob.Character.Items[util.Rand(len(mob.Character.Items))]
-			Alchemy(matchItem.Name(), mobId)
+			Alchemy(matchItem.Name(), mob, room)
 
 		}
 		return true, nil
@@ -43,7 +36,7 @@ func Alchemy(rest string, mobId int) (bool, error) {
 		}
 
 		for _, item := range iCopies {
-			Alchemy(item.Name(), mobId)
+			Alchemy(item.Name(), mob, room)
 		}
 
 		return true, nil

@@ -17,19 +17,7 @@ import (
 SkullDuggery Skill
 Level 3 - Backstab
 */
-func Bump(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Bump(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 
@@ -43,7 +31,7 @@ func Bump(rest string, userId int) (bool, error) {
 		return true, nil
 	}
 
-	if room.AreMobsAttacking(userId) {
+	if room.AreMobsAttacking(user.UserId) {
 		user.SendText("You can't do that while you are under attack!")
 		return true, nil
 	}
@@ -102,7 +90,7 @@ func Bump(rest string, userId int) (bool, error) {
 
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> accidentally bumps into <ansi fg="mobname">%s</ansi>!`, user.Character.Name, m.Character.Name),
-				userId,
+				user.UserId,
 			)
 
 		}
@@ -147,7 +135,7 @@ func Bump(rest string, userId int) (bool, error) {
 
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> accidentally bumps into <ansi fg="username">%s</ansi>!`, user.Character.Name, p.Character.Name),
-				userId,
+				user.UserId,
 				pickPlayerId,
 			)
 

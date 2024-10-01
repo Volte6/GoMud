@@ -15,19 +15,7 @@ import (
 	"github.com/volte6/mud/util"
 )
 
-func Give(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Give(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	rest = util.StripPrepositions(rest)
 
@@ -109,7 +97,7 @@ func Give(rest string, userId int) (bool, error) {
 				targetUser.UserId)
 
 			// Trigger onLost event
-			scripting.TryItemScriptEvent(`onLost`, giveItem, userId)
+			scripting.TryItemScriptEvent(`onLost`, giveItem, user.UserId)
 
 			scripting.TryItemScriptEvent(`onFound`, giveItem, targetUser.UserId)
 
@@ -170,7 +158,7 @@ func Give(rest string, userId int) (bool, error) {
 					)
 					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> gave some gold to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, m.Character.Name),
-						userId,
+						user.UserId,
 					)
 				} else {
 
@@ -182,15 +170,15 @@ func Give(rest string, userId int) (bool, error) {
 					)
 					room.SendText(
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> gave their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, giveItem.DisplayName(), m.Character.Name),
-						userId,
+						user.UserId,
 					)
 
 					// Trigger onLost event
-					scripting.TryItemScriptEvent(`onLost`, giveItem, userId)
+					scripting.TryItemScriptEvent(`onLost`, giveItem, user.UserId)
 
 				}
 
-				if handled, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, userId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}); err == nil {
+				if handled, err := scripting.TryMobScriptEvent(`onGive`, m.InstanceId, user.UserId, `user`, map[string]any{`gold`: giveGoldAmount, `item`: giveItem}); err == nil {
 					if handled {
 						return true, nil
 					}

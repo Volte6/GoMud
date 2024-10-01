@@ -20,17 +20,11 @@ Level 2 - Teleport back to the root of the area you are in
 Level 3 - Set a new destination for your portal teleportation
 Level 4 - Create a physical portal that you can share with players, or return through.
 */
-func Portal(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
-		if handled, err := Go(`portal`, userId); handled {
+		if handled, err := Go(`portal`, user, room); handled {
 			return handled, err
 		}
 	}
@@ -40,12 +34,6 @@ func Portal(rest string, userId int) (bool, error) {
 	if skillLevel == 0 {
 		user.SendText("You don't know how to portal.")
 		return true, errors.New(`you don't know how to portal`)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	// Establish the default portal location
@@ -94,12 +82,12 @@ func Portal(rest string, userId int) (bool, error) {
 			user.SendText("You draw a quick symbol in the air with your finger, and the world warps around you. You seem to have moved.")
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> draws a quick symbol in the air, and is sucked into a portal!`, user.Character.Name),
-				userId,
+				user.UserId,
 			)
 			newRoom := rooms.LoadRoom(portalTargetRoomId)
 			newRoom.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> suddenly pops into existence!`, user.Character.Name),
-				userId,
+				user.UserId,
 			)
 		} else {
 			user.SendText("Oops, portal sad!")
@@ -115,7 +103,7 @@ func Portal(rest string, userId int) (bool, error) {
 			user.SendText("You enscribe a glowing pentagram on the ground with your finger, which then fades away. Your portals now lead to this area.")
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> enscribes a glowing pentagram on the ground with their finger. It quickly fades away.`, user.Character.Name),
-				userId,
+				user.UserId,
 			)
 		}
 
@@ -125,7 +113,7 @@ func Portal(rest string, userId int) (bool, error) {
 			user.SendText("You draw an arcane symbol in the air with your finger. Your portals now lead to their default location.")
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> draws a shape in the air with their finger. The floor trembles mildly, but then returns to normal.`, user.Character.Name),
-				userId,
+				user.UserId,
 			)
 		}
 	}
@@ -168,7 +156,7 @@ func Portal(rest string, userId int) (bool, error) {
 
 				if r1 := rooms.LoadRoom(portalRoomId1); r1 != nil {
 
-					if tmpExit, found := r1.FindTemporaryExitByUserId(userId); found {
+					if tmpExit, found := r1.FindTemporaryExitByUserId(user.UserId); found {
 						if r1.RemoveTemporaryExit(tmpExit) {
 							r1.SendText(
 								fmt.Sprintf("Suddenly, the %s before you snaps closed, leaving no evidence it ever existed.", glowingPortalColorized),
@@ -180,7 +168,7 @@ func Portal(rest string, userId int) (bool, error) {
 
 				if r2 := rooms.LoadRoom(portalRoomId2); r2 != nil {
 
-					if tmpExit, found := r2.FindTemporaryExitByUserId(userId); found {
+					if tmpExit, found := r2.FindTemporaryExitByUserId(user.UserId); found {
 						if r2.RemoveTemporaryExit(tmpExit) {
 							r2.SendText(
 								fmt.Sprintf("Suddenly, the %s before you snaps closed, leaving no evidence it ever existed.", glowingPortalColorized),
@@ -205,7 +193,7 @@ func Portal(rest string, userId int) (bool, error) {
 			newPortal := rooms.TemporaryRoomExit{
 				RoomId:  portalTargetRoomId,
 				Title:   fmt.Sprintf(`%s from <ansi fg="username">%s</ansi>`, glowingPortalColorized, user.Character.Name),
-				UserId:  userId,
+				UserId:  user.UserId,
 				Expires: time.Now().Add(time.Duration(portalLifeInSeconds) * time.Second),
 			}
 
@@ -219,7 +207,7 @@ func Portal(rest string, userId int) (bool, error) {
 			)
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> traces the shape of a doorway with their finger, and a %s appears!`, user.Character.Name, glowingPortalColorized),
-				userId,
+				user.UserId,
 			)
 
 			// Modify it for this room

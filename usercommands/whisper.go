@@ -4,17 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Whisper(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Whisper(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	args := util.SplitButRespectQuotes(rest)
 

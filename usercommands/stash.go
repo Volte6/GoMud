@@ -9,19 +9,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Stash(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Stash(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// Check whether the user has an item in their inventory that matches
 	matchItem, found := user.Character.FindInBackpack(rest)
@@ -31,7 +19,7 @@ func Stash(rest string, userId int) (bool, error) {
 	} else {
 		// Swap the item location
 
-		matchItem.StashedBy = userId
+		matchItem.StashedBy = user.UserId
 
 		room.AddItem(matchItem, true)
 		user.Character.RemoveItem(matchItem)
@@ -44,11 +32,11 @@ func Stash(rest string, userId int) (bool, error) {
 		if !isSneaking {
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is attempting to look unsuspicious.`, user.Character.Name),
-				userId)
+				user.UserId)
 		}
 
 		// Trigger lost event
-		scripting.TryItemScriptEvent(`onLost`, matchItem, userId)
+		scripting.TryItemScriptEvent(`onLost`, matchItem, user.UserId)
 	}
 
 	return true, nil

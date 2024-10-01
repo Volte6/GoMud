@@ -1,21 +1,15 @@
 package usercommands
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
 
-func Reload(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Reload(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.reload", nil)

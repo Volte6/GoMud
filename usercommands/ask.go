@@ -14,19 +14,7 @@ import (
 	"github.com/volte6/mud/users"
 )
 
-func Ask(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
-	}
+func Ask(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// Core "useful" commands
 	usefulCommands := []string{
@@ -61,7 +49,7 @@ func Ask(rest string, userId int) (bool, error) {
 			if mob == nil {
 				continue
 			}
-			if mob.Character.IsCharmed(userId) {
+			if mob.Character.IsCharmed(user.UserId) {
 
 				mob.Command(fmt.Sprintf(`say I can do a few useful things, such as %s`,
 					fmt.Sprintf(`<ansi fg="command">%s</ansi>`, strings.Join(usefulCommands, `</ansi>, <ansi fg="command">`))))
@@ -106,7 +94,7 @@ func Ask(rest string, userId int) (bool, error) {
 			args = args[1:]
 		}
 
-		if mob.Character.IsCharmed(userId) {
+		if mob.Character.IsCharmed(user.UserId) {
 
 			mobCmd := args[0]
 			askRest := strings.Join(args[1:], ` `)
@@ -138,7 +126,7 @@ func Ask(rest string, userId int) (bool, error) {
 		}
 
 		rest = strings.Join(args, ` `)
-		if handled, err := scripting.TryMobScriptEvent(`onAsk`, mobId, userId, `user`, map[string]any{"askText": rest}); err == nil {
+		if handled, err := scripting.TryMobScriptEvent(`onAsk`, mobId, user.UserId, `user`, map[string]any{"askText": rest}); err == nil {
 
 			if !handled {
 				mob.Command(`emote shakes their head.`)

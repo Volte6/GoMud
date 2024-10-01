@@ -6,18 +6,13 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/auctions"
+	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 )
 
-func Auction(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Auction(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if on := user.GetConfigOption(`auction`); on != nil && !on.(bool) {
 
@@ -91,12 +86,12 @@ func Auction(rest string, userId int) (bool, error) {
 			return true, nil
 		}
 
-		if currentAuction.SellerUserId == userId {
+		if currentAuction.SellerUserId == user.UserId {
 			user.SendText(`You cannot bid on your own auction.`)
 			return true, nil
 		}
 
-		if currentAuction.HighestBidUserId == userId {
+		if currentAuction.HighestBidUserId == user.UserId {
 			user.SendText(`You are already the highest bidder.`)
 			return true, nil
 		}
@@ -122,7 +117,7 @@ func Auction(rest string, userId int) (bool, error) {
 			return true, nil
 		}
 
-		if err := auctions.Bid(userId, amt); err != nil {
+		if err := auctions.Bid(user.UserId, amt); err != nil {
 			user.SendText(err.Error())
 			return true, nil
 		}
@@ -185,7 +180,7 @@ func Auction(rest string, userId int) (bool, error) {
 
 	user.SendText(fmt.Sprintf("Auctioning your <ansi fg=\"item\">%s</ansi> for <ansi fg=\"gold\">%d gold</ansi>.", matchItem.DisplayName(), amt))
 
-	if auctions.StartAuction(matchItem, userId, amt) {
+	if auctions.StartAuction(matchItem, user.UserId, amt) {
 		user.Character.RemoveItem(matchItem)
 	}
 

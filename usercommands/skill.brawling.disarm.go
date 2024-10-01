@@ -14,13 +14,7 @@ import (
 Brawling Skill
 Level 4 - Attempt to disarm an opponent.
 */
-func Disarm(rest string, userId int) (bool, error) {
-
-	// Load user details
-	user := users.GetByUserId(userId)
-	if user == nil { // Something went wrong. User not found.
-		return false, fmt.Errorf("user %d not found", userId)
-	}
+func Disarm(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 
@@ -32,12 +26,6 @@ func Disarm(rest string, userId int) (bool, error) {
 	if user.Character.Aggro == nil {
 		user.SendText("Disarm is only used while in combat!")
 		return true, nil
-	}
-
-	// Load current room details
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
 	attackMobInstanceId := user.Character.Aggro.MobInstanceId
@@ -78,7 +66,7 @@ func Disarm(rest string, userId int) (bool, error) {
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> disarms <ansi fg="mobname">%s</ansi>!`, user.Character.Name, m.Character.Name),
-					userId,
+					user.UserId,
 				)
 
 				removedItem := m.Character.Equipment.Weapon
@@ -92,7 +80,7 @@ func Disarm(rest string, userId int) (bool, error) {
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to disarm <ansi fg="mobname">%s</ansi> and fails!`, user.Character.Name, m.Character.Name),
-					userId,
+					user.UserId,
 				)
 
 			}
@@ -126,7 +114,7 @@ func Disarm(rest string, userId int) (bool, error) {
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> disarms <ansi fg="username">%s</ansi>!`, user.Character.Name, u.Character.Name),
-					userId,
+					user.UserId,
 					attackPlayerId,
 				)
 
@@ -147,7 +135,7 @@ func Disarm(rest string, userId int) (bool, error) {
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> tries to disarm <ansi fg="username">%s</ansi> and misses!`, user.Character.Name, u.Character.Name),
-					userId,
+					user.UserId,
 					attackPlayerId,
 				)
 
