@@ -34,6 +34,7 @@ Information on scripting in GoMud can be found in the [scripting README](scripti
 - [Searchable Inventory](https://www.youtube.com/watch?v=iDUbdeR2BUg)
 - [Day/Night Cycles](https://www.youtube.com/watch?v=CiEbOp244cw)
 - [Web Socket "Virtual Terminal"](https://www.youtube.com/watch?v=L-qtybXO4aw)
+- [Alternate Characters](https://www.youtube.com/watch?v=VERF2l70W34)
 
 # Quick Start
 
@@ -69,3 +70,19 @@ When running several environment variables can be set to alter behaviors of the 
 * **CONFIG_PATH**_=/path/to/alternative/config.yaml_ - This can provide a path to a copy of the config.yaml containing only values you wish to override. This way you don't have to modify the original config.yaml
 * **LOG_PATH**_=/path/to/log.txt_ - This will write all logs to a specified file. If unspecified, will write to *stderr*.
 * **LOG_LEVEL**_={LOW/MEDIUM/HIGH}_ - This sets how verbose you want the logs to be. _(Note: Log files rotate every 100MB)_
+
+## Platform specific
+
+### Raspberry pi
+
+Want to run GoMud on a raspberry pi? No problem! I do it all the time! It runs great on a [$15 Raspberry Pi Zero 2](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/). However, in my experience the raspberry pi struggles to compile the binary directly, 
+so it is recommended that you compile the binary locally and then copy it over to the raspberry pi.
+
+There is a convenient `make` command to compile the pi chipset provided: 
+
+`make build_rpi` ( this will output a binary named: `go-mud-server-rpi` )
+
+Or (window user?) just use the build comand directly: 
+
+`env GOOS=linux GOARCH=arm GOARM=5 go build -o go-mud-server-rpi`
+
