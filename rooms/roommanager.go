@@ -495,7 +495,7 @@ func loadAllRoomZones() error {
 			continue
 		}
 
-		slog.Error("No Entrance", "roomId", roomId, "filePath", filePath)
+		slog.Warn("No Entrance", "roomId", roomId, "filePath", filePath)
 	}
 
 	for _, loadedRoom := range loadedRooms {
