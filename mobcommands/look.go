@@ -153,11 +153,11 @@ func lookRoom(mob *mobs.Mob, roomId int, secretLook bool) {
 		lookFromName := room.FindExitTo(mob.Character.RoomId)
 		if lookFromName == "" {
 			room.SendText(
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking into the room from somewhere...`, mob.Character.Name),
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking into the room from somewhere...`, mob.Character.Name),
 			)
 		} else {
 			room.SendText(
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking into the room from the <ansi fg="exit">%s</ansi> exit`, mob.Character.Name, lookFromName),
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking into the room from the <ansi fg="exit">%s</ansi> exit`, mob.Character.Name, lookFromName),
 			)
 		}
 	}

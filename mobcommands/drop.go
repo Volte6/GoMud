@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
@@ -54,6 +55,10 @@ func Drop(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		}
 	}
 
+	if mob.Character.HasBuffFlag(buffs.PermaGear) {
+		return true, nil
+	}
+
 	// Check whether the user has an item in their inventory that matches
 	matchItem, found := mob.Character.FindInBackpack(rest)
 
@@ -64,7 +69,7 @@ func Drop(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		mob.Character.RemoveItem(matchItem)
 
 		room.SendText(
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))
+			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))
 	}
 
 	return true, nil

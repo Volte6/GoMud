@@ -3,11 +3,13 @@ package usercommands
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"sort"
 	"strconv"
 
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
@@ -62,10 +64,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 			menuOptions = append(menuOptions, `view`)
 			menuOptions = append(menuOptions, `change`)
 			menuOptions = append(menuOptions, `delete`)
-
-			if user.Permission == users.PermissionAdmin {
-				menuOptions = append(menuOptions, `hire`)
-			}
+			menuOptions = append(menuOptions, `hire`)
 		}
 
 		if len(nameToAlt) > 0 {
@@ -331,8 +330,41 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 
 			char.Validate()
 
+			gearValue := char.GetGearValue()
+
+			charValue := gearValue + (250 * char.Level)
+
+			slog.Debug(`Hire Alt`, `UserId`, user.UserId, `alt-name`, char.Name, `gear-value`, gearValue, `level`, char.Level, `total`, charValue)
+
+			question := cmdPrompt.Ask(fmt.Sprintf(`<ansi fg="51">The price to hire <ansi fg="username">%s</ansi> is <ansi fg="gold">%d gold</ansi>. Are you sure?</ansi>`, char.Name, charValue), []string{`yes`, `no`}, `no`)
+			if !question.Done {
+				return true, nil
+			}
+
+			if question.Response != `yes` {
+				user.ClearPrompt()
+				return true, nil
+			}
+
+			if user.Character.Gold < charValue {
+				user.SendText(fmt.Sprintf(`You only have <ansi fg="gold">%d gold</ansi> and it would cost <ansi fg="gold">%d gold</ansi> to hire <ansi fg="username">%s</ansi>.`, charValue, charValue, char.Name))
+				user.ClearPrompt()
+				return true, nil
+			}
+
+			user.Character.Gold -= charValue
+
 			m := mobs.NewMobById(59, user.Character.RoomId)
 			m.Character = char
+
+			// To prevent dupes/exploits, clear vulnerable copied data
+			m.Character.Items = []items.Item{}   // Clear items
+			m.Character.Gold = 0                 // Clear gold
+			m.Character.Bank = 0                 // Clear bank
+			m.Character.Shop = characters.Shop{} // Clear shop
+
+			m.Character.AddBuff(36, true) // Give a perma-gear buff, so that items can't be removed.
+
 			room.AddMob(m.InstanceId)
 			m.Character.Charm(user.UserId, -1, `suicide vanish`)
 

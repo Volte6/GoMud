@@ -262,34 +262,38 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	}
 
-	// Check for any dropped loot...
-	for _, item := range mob.Character.Items {
-		msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.DisplayName())
-		room.SendText(msg)
-		room.AddItem(item, false)
-	}
+	if !mob.Character.HasBuffFlag(buffs.PermaGear) {
 
-	allWornItems := mob.Character.Equipment.GetAllItems()
-
-	for _, item := range allWornItems {
-
-		roll := util.Rand(100)
-
-		util.LogRoll(`Drop Item`, roll, mob.ItemDropChance)
-
-		if roll >= mob.ItemDropChance {
-			continue
+		// Check for any dropped loot...
+		for _, item := range mob.Character.Items {
+			msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.DisplayName())
+			room.SendText(msg)
+			room.AddItem(item, false)
 		}
 
-		msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.DisplayName())
-		room.SendText(msg)
-		room.AddItem(item, false)
-	}
+		allWornItems := mob.Character.Equipment.GetAllItems()
 
-	if mob.Character.Gold > 0 {
-		msg := fmt.Sprintf(`<ansi fg="yellow-bold">%d gold</ansi> drops to the ground.`, mob.Character.Gold)
-		room.SendText(msg)
-		room.Gold += mob.Character.Gold
+		for _, item := range allWornItems {
+
+			roll := util.Rand(100)
+
+			util.LogRoll(`Drop Item`, roll, mob.ItemDropChance)
+
+			if roll >= mob.ItemDropChance {
+				continue
+			}
+
+			msg := fmt.Sprintf(`<ansi fg="item">%s</ansi> drops to the ground.`, item.DisplayName())
+			room.SendText(msg)
+			room.AddItem(item, false)
+		}
+
+		if mob.Character.Gold > 0 {
+			msg := fmt.Sprintf(`<ansi fg="yellow-bold">%d gold</ansi> drops to the ground.`, mob.Character.Gold)
+			room.SendText(msg)
+			room.Gold += mob.Character.Gold
+		}
+
 	}
 
 	// Destroy any record of this mob.

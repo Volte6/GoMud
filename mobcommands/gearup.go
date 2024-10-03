@@ -3,12 +3,18 @@ package mobcommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 )
 
 func Gearup(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
+
+	if mob.Character.HasBuffFlag(buffs.PermaGear) {
+		mob.Command(`emote struggles with their gear for a while, then gives up.`)
+		return true, nil
+	}
 
 	if rest != `` {
 		// Check whether the user has an item in their inventory that matches

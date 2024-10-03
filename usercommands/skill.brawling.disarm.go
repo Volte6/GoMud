@@ -3,6 +3,7 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
@@ -43,6 +44,11 @@ func Disarm(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 		m := mobs.GetInstance(attackMobInstanceId)
 
 		if m != nil {
+
+			if m.Character.HasBuffFlag(buffs.PermaGear) {
+				user.SendText(fmt.Sprintf(`Some force prevents you from disarming <ansi fg="mobname">%s</ansi>!`, m.Character.Name))
+				return true, nil
+			}
 
 			if m.Character.Equipment.Weapon.ItemId == 0 {
 				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> has no weapon to disarm!`, m.Character.Name))
@@ -90,6 +96,11 @@ func Disarm(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 		u := users.GetByUserId(attackPlayerId)
 
 		if u != nil {
+
+			if u.Character.HasBuffFlag(buffs.PermaGear) {
+				user.SendText(fmt.Sprintf(`Some force prevents you from disarming <ansi fg="username">%s</ansi>!`, u.Character.Name))
+				return true, nil
+			}
 
 			chanceIn100 := (user.Character.Stats.Speed.ValueAdj + user.Character.Stats.Smarts.ValueAdj) - (u.Character.Stats.Strength.ValueAdj + u.Character.Stats.Perception.ValueAdj)
 			if chanceIn100 < 0 {

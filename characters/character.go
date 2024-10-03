@@ -1617,6 +1617,41 @@ func (c *Character) GetAllWornItems() []items.Item {
 	return wornItems
 }
 
+func (c *Character) GetGearValue() int {
+	value := 0
+	if c.Equipment.Weapon.ItemId > 0 {
+		value += c.Equipment.Weapon.GetSpec().Value
+	}
+	if c.Equipment.Offhand.ItemId > 0 {
+		value += c.Equipment.Offhand.GetSpec().Value
+	}
+	if c.Equipment.Head.ItemId > 0 {
+		value += c.Equipment.Head.GetSpec().Value
+	}
+	if c.Equipment.Neck.ItemId > 0 {
+		value += c.Equipment.Neck.GetSpec().Value
+	}
+	if c.Equipment.Body.ItemId > 0 {
+		value += c.Equipment.Body.GetSpec().Value
+	}
+	if c.Equipment.Belt.ItemId > 0 {
+		value += c.Equipment.Belt.GetSpec().Value
+	}
+	if c.Equipment.Gloves.ItemId > 0 {
+		value += c.Equipment.Gloves.GetSpec().Value
+	}
+	if c.Equipment.Ring.ItemId > 0 {
+		value += c.Equipment.Ring.GetSpec().Value
+	}
+	if c.Equipment.Legs.ItemId > 0 {
+		value += c.Equipment.Legs.GetSpec().Value
+	}
+	if c.Equipment.Feet.ItemId > 0 {
+		value += c.Equipment.Feet.GetSpec().Value
+	}
+	return value
+}
+
 func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bool, failureReason string) {
 
 	i.Validate()
