@@ -84,7 +84,7 @@ func LoadFlatFile[T LoadableSimple](path string) (T, error) {
 	}
 
 	// Make sure the Filepath it claims is correct in case we need to save it later
-	if !strings.HasSuffix(path, loaded.Filepath()) {
+	if !strings.HasSuffix(path, filepath.FromSlash(loaded.Filepath())) {
 		return loaded, errors.New(fmt.Sprintf(`filesystem path "%s" did not end in Filepath() "%s" for type %T`, path, loaded.Filepath(), loaded))
 	}
 
@@ -211,7 +211,7 @@ func LoadAllFlatFiles[K comparable, T Loadable[K]](basePath string, fileTypes ..
 			return nil
 		}
 
-		if !strings.HasSuffix(path, loaded.Filepath()) {
+		if !strings.HasSuffix(path, filepath.FromSlash(loaded.Filepath())) {
 			return errors.New(fmt.Sprintf(`filesystem path "%s" did not end in Filepath() "%s" for type %T`, path, loaded.Filepath(), loaded))
 		}
 

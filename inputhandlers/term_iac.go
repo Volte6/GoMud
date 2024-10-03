@@ -38,6 +38,25 @@ func TelnetIACHandler(clientInput *connection.ClientInput, connectionPool *conne
 	for _, iacCmd := range iacCmds {
 		// Check incoming Telnet IAC commands for anything useful...
 
+		if ok, payload := term.Matches(iacCmd, term.TelnetAcceptedChangeCharset); ok {
+			slog.Info("Received", "type", "IAC (TelnetAcceptedChangeCharset)", "data", term.BytesString(payload))
+			continue
+		}
+
+		if ok, _ := term.Matches(iacCmd, term.TelnetRejectedChangeCharset); ok {
+			slog.Info("Received", "type", "IAC (TelnetRejectedChangeCharset)")
+			continue
+		}
+
+		if ok, _ := term.Matches(iacCmd, term.TelnetAgreeChangeCharset); ok {
+			slog.Info("Received", "type", "IAC (TelnetAgreeChangeCharset)")
+			connectionPool.SendTo(
+				term.TelnetCharset.BytesWithPayload([]byte(" UTF-8")),
+				clientInput.ConnectionId,
+			)
+			continue
+		}
+
 		// Is it a screen size report?
 		if ok, payload := term.Matches(iacCmd, term.TelnetScreenSizeResponse); ok {
 

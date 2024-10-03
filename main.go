@@ -268,10 +268,9 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 		connDetails.ConnectionId(),
 	)
 
-	// Can separate with a space multiple charsets:
-	// "UTF-8 ISO-8859-1"
+	// Send request to change charset
 	worldManager.GetConnectionPool().SendTo(
-		term.TelnetCharset.BytesWithPayload([]byte(" UTF-8")),
+		term.TelnetRequestChangeCharset.BytesWithPayload(nil),
 		connDetails.ConnectionId(),
 	)
 
@@ -430,6 +429,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 		}
 
 		if lastHandler == "LoginInputHandler" {
+
 			// Remove the login handler
 			connDetails.RemoveInputHandler("LoginInputHandler")
 			// Replace it with a regular echo handler.
