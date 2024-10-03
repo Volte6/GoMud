@@ -194,7 +194,7 @@ func GetByConnectionId(connectionId connection.ConnectionId) *UserRecord {
 }
 
 // First time creating a user.
-func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, error) {
+func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (*UserRecord, string, error) {
 
 	slog.Info("Logging in user", "username", u.Username, "connectionId", connectionId)
 
@@ -203,14 +203,15 @@ func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, err
 
 	u.Character.SetAdjective(`zombie`, false)
 
-	// Set their input round to current to track idle time fresh
-	u.SetLastInputRound(util.GetRoundCount())
-
 	if userId, ok := userManager.Usernames[u.Username]; ok {
 
 		if otherConnId, ok := userManager.UserConnections[userId]; ok {
 
 			if _, ok := userManager.ZombieConnections[otherConnId]; ok {
+
+				if zombieUser, ok := userManager.Users[u.UserId]; ok {
+					u = zombieUser
+				}
 
 				// The user is a zombie.
 				delete(userManager.ZombieConnections, otherConnId)
@@ -228,17 +229,23 @@ func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, err
 					}
 				}
 
-				return "Reconnecting...", nil
+				// Set their input round to current to track idle time fresh
+				u.SetLastInputRound(util.GetRoundCount())
+
+				return u, "Reconnecting...", nil
 			}
 
 		}
 
-		return "That user is already logged in.", errors.New("user is already logged in")
+		return nil, "That user is already logged in.", errors.New("user is already logged in")
 	}
 
 	if len(u.AdminCommands) > 0 {
 		u.Permission = PermissionMod
 	}
+
+	// Set their input round to current to track idle time fresh
+	u.SetLastInputRound(util.GetRoundCount())
 
 	u.connectionId = connectionId
 
@@ -253,7 +260,7 @@ func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (string, err
 		}
 	}
 
-	return "", nil
+	return u, "", nil
 }
 
 func SetZombieConnection(connId connection.ConnectionId) {

@@ -46,6 +46,16 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 		return true, errors.New(`level 5 minimum`)
 	}
 
+	// Form a set of all mobs currently charmed (and possibly hired)
+	hiredOutChars := map[string]characters.Character{}
+	for _, mobInstanceId := range user.Character.GetCharmIds() {
+		mob := mobs.GetInstance(mobInstanceId)
+		if mob == nil {
+			continue
+		}
+		hiredOutChars[mob.Character.Name] = mob.Character
+	}
+
 	menuOptions := []string{`new`}
 
 	cmdPrompt, isNew := user.StartPrompt(`character`, rest)
@@ -68,7 +78,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 		}
 
 		if len(nameToAlt) > 0 {
-			altTblTxt := getAltTable(nameToAlt)
+			altTblTxt := getAltTable(nameToAlt, hiredOutChars)
 			user.SendText(``)
 			user.SendText(altTblTxt)
 		}
@@ -132,7 +142,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 	if question.Response == `delete` {
 
 		if len(nameToAlt) > 0 {
-			altTblTxt := getAltTable(nameToAlt)
+			altTblTxt := getAltTable(nameToAlt, hiredOutChars)
 			user.SendText(``)
 			user.SendText(altTblTxt)
 		}
@@ -150,6 +160,13 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 		if match != `` {
 
 			delChar := nameToAlt[match]
+
+			// Do they already have this mob hired??
+			if friend, ok := hiredOutChars[delChar.Name]; ok && friend.Description == delChar.Description {
+				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is currently hired out.`, delChar.Name))
+				user.ClearPrompt()
+				return true, nil
+			}
 
 			question := cmdPrompt.Ask(`<ansi fg="red">Are you SURE you want to delete <ansi fg="username">`+delChar.Name+`</ansi>?</ansi>`, []string{`yes`, `no`}, `no`)
 			if !question.Done {
@@ -189,7 +206,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 	if question.Response == `change` {
 
 		if len(nameToAlt) > 0 {
-			altTblTxt := getAltTable(nameToAlt)
+			altTblTxt := getAltTable(nameToAlt, hiredOutChars)
 			user.SendText(``)
 			user.SendText(altTblTxt)
 		}
@@ -207,6 +224,13 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 		if match != `` {
 
 			char := nameToAlt[match]
+
+			// Do they already have this mob hired??
+			if friend, ok := hiredOutChars[char.Name]; ok && friend.Description == char.Description {
+				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is currently hired out.`, char.Name))
+				user.ClearPrompt()
+				return true, nil
+			}
 
 			question := cmdPrompt.Ask(`<ansi fg="51">Are you SURE you want to change to <ansi fg="username">`+char.Name+`</ansi>?</ansi>`, []string{`yes`, `no`}, `no`)
 			if !question.Done {
@@ -258,7 +282,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 	if question.Response == `view` {
 
 		if len(nameToAlt) > 0 {
-			altTblTxt := getAltTable(nameToAlt)
+			altTblTxt := getAltTable(nameToAlt, hiredOutChars)
 			user.SendText(``)
 			user.SendText(altTblTxt)
 		}
@@ -276,6 +300,13 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 		if match != `` {
 
 			char := nameToAlt[match]
+
+			// Do they already have this mob hired??
+			if friend, ok := hiredOutChars[char.Name]; ok && friend.Description == char.Description {
+				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is currently hired out.`, char.Name))
+				user.ClearPrompt()
+				return true, nil
+			}
 
 			char.Validate()
 
@@ -308,11 +339,13 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 	/////////////////////////
 	if question.Response == `hire` {
 
-		if len(nameToAlt) > 0 {
-			altTblTxt := getAltTable(nameToAlt)
-			user.SendText(``)
-			user.SendText(altTblTxt)
-		}
+		/*
+			if len(nameToAlt) > 0 {
+				altTblTxt := getAltTable(nameToAlt, hiredOutChars)
+				user.SendText(``)
+				user.SendText(altTblTxt)
+			}
+		*/
 
 		question := cmdPrompt.Ask(`Enter the name of the character you wish to hire:`, []string{})
 		if !question.Done {
@@ -327,6 +360,13 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 		if match != `` {
 
 			char := nameToAlt[match]
+
+			// Do they already have this mob hired??
+			if friend, ok := hiredOutChars[char.Name]; ok && friend.Description == char.Description {
+				user.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is already hired out.`, char.Name))
+				user.ClearPrompt()
+				return true, nil
+			}
 
 			char.Validate()
 
@@ -352,6 +392,14 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 				return true, nil
 			}
 
+			// Prevent follower overage
+			maxCharmed := user.Character.GetSkillLevel(skills.Tame) + 1
+			if len(hiredOutChars) >= maxCharmed {
+				user.SendText(fmt.Sprintf(`You can only have %d mobs following you at a time.`, maxCharmed))
+				user.ClearPrompt()
+				return true, nil
+			}
+
 			user.Character.Gold -= charValue
 
 			m := mobs.NewMobById(59, user.Character.RoomId)
@@ -366,7 +414,9 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 			m.Character.AddBuff(36, true) // Give a perma-gear buff, so that items can't be removed.
 
 			room.AddMob(m.InstanceId)
+
 			m.Character.Charm(user.UserId, -1, `suicide vanish`)
+			user.Character.TrackCharmed(m.InstanceId, true)
 
 			user.SendText(`<ansi fg="username">` + m.Character.Name + `</ansi> appears to help you out!`)
 			room.SendText(`<ansi fg="username">`+m.Character.Name+`</ansi> appears to help <ansi fg="username">`+user.Character.Name+`</ansi>!`, user.UserId)
@@ -388,9 +438,9 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 	return true, nil
 }
 
-func getAltTable(nameToAlt map[string]characters.Character) string {
+func getAltTable(nameToAlt map[string]characters.Character, charmedChars map[string]characters.Character) string {
 
-	headers := []string{"Name", "Level", "Race", "Profession", "Alignment"}
+	headers := []string{"Name", "Level", "Race", "Profession", "Alignment", "Status"}
 	rows := [][]string{}
 
 	for _, char := range nameToAlt {
@@ -401,12 +451,20 @@ func getAltTable(nameToAlt map[string]characters.Character) string {
 			raceName = raceInfo.Name
 		}
 
+		mobBusy := ``
+		if c, ok := charmedChars[char.Name]; ok {
+			if c.Description == char.Description {
+				mobBusy = `<ansi fg="210">busy</ansi>`
+			}
+		}
+
 		rows = append(rows, []string{
 			fmt.Sprintf(`<ansi fg="username">%s</ansi>`, char.Name),
 			strconv.Itoa(char.Level),
 			raceName,
 			skills.GetProfession(allRanks),
 			fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, char.AlignmentName(), char.AlignmentName()),
+			mobBusy,
 		})
 
 	}
