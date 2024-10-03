@@ -56,8 +56,26 @@ var (
 	TelnetEchoOff = TerminalCommand{[]byte{TELNET_IAC, TELNET_WONT, TELNET_OPT_ECHO}, []byte{}}
 	// // Line Mode Off
 	TelnetLineModeOff = TerminalCommand{[]byte{TELNET_IAC, TELNET_WONT, TELNET_OPT_LINE_MODE}, []byte{}}
-	// // UTF-8
-	TelnetCharset = TerminalCommand{[]byte{TELNET_IAC, TELNET_SB, TELNET_OPT_CHARSET, '1'}, []byte{TELNET_IAC, TELNET_SE}}
+
+	//
+	// Handshake example:
+	// Server (TelnetRequestChangeCharset)	-> Client
+	// Server 								<- (TelnetAgreeChangeCharset) Client
+	// Server (TelnetCharset)				-> Client
+	// Server								<- (TelnetAcceptedChangeCharset) Client
+	//
+	// Indicate wish to change charset
+	TelnetRequestChangeCharset = TerminalCommand{[]byte{TELNET_IAC, TELNET_WILL, TELNET_OPT_CHARSET}, []byte{}}
+	// Client agreed to accept a change
+	TelnetAgreeChangeCharset = TerminalCommand{[]byte{TELNET_IAC, TELNET_DO, TELNET_OPT_CHARSET}, []byte{}}
+	// Send actual charset change
+	// Can separate with a space multiple charsets:
+	// " UTF-8 ISO-8859-1"
+	TelnetCharset = TerminalCommand{[]byte{TELNET_IAC, TELNET_SB, TELNET_OPT_CHARSET, 1}, []byte{TELNET_IAC, TELNET_SE}}
+	// Client accepted change
+	TelnetAcceptedChangeCharset = TerminalCommand{[]byte{TELNET_IAC, TELNET_SB, 2}, []byte{TELNET_IAC, TELNET_SE}}
+	// Client rejectected change
+	TelnetRejectedChangeCharset = TerminalCommand{[]byte{TELNET_IAC, TELNET_SB, 3, TELNET_IAC, TELNET_SE}, []byte{}}
 
 	///////////////////////////
 	// ANSI COMMANDS
@@ -183,7 +201,9 @@ type TerminalCommand struct {
 func (cmd *TerminalCommand) BytesWithPayload(payload []byte) []byte {
 	result := []byte{}
 	result = append(result, cmd.chars...)
-	result = append(result, payload...)
+	if len(payload) > 0 {
+		result = append(result, payload...)
+	}
 	result = append(result, cmd.endChars...)
 	return result
 }
