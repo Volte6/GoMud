@@ -12,6 +12,11 @@ import (
 
 func Equip(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
+	if mob.Character.HasBuffFlag(buffs.PermaGear) {
+		mob.Command(`emote struggles with their gear for a while, then gives up.`)
+		return true, nil
+	}
+
 	if rest == "all" {
 		itemCopies := []items.Item{}
 		itemCopies = append(itemCopies, mob.Character.Items...)
@@ -68,7 +73,7 @@ func Equip(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 					if oldItem.ItemId != 0 {
 
 						room.SendText(
-							fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, oldItem.DisplayName()))
+							fmt.Sprintf(`<ansi fg="mobname">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, oldItem.DisplayName()))
 
 						mob.Character.StoreItem(oldItem)
 					}
@@ -77,10 +82,10 @@ func Equip(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 				if iSpec.Subtype == items.Wearable {
 
 					room.SendText(
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> puts on <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
+						fmt.Sprintf(`<ansi fg="mobname">%s</ansi> puts on <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
 				} else {
 					room.SendText(
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> wields <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
+						fmt.Sprintf(`<ansi fg="mobname">%s</ansi> wields <ansi fg="item">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
 				}
 
 				mob.Character.Validate()
