@@ -112,7 +112,7 @@ func Give(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 				mob.Character.RemoveItem(giveItem)
 
 				room.SendText(
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> gave their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, giveItem.DisplayName(), m.Character.Name),
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> gave their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, giveItem.DisplayName(), m.Character.Name),
 				)
 			} else if giveGoldAmount > 0 {
 
@@ -120,7 +120,7 @@ func Give(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 				mob.Character.Gold -= giveGoldAmount
 
 				room.SendText(
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> gave some gold to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, m.Character.Name),
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> gave some gold to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, m.Character.Name),
 				)
 			}
 

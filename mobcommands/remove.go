@@ -10,6 +10,11 @@ import (
 
 func Remove(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
+	if mob.Character.HasBuffFlag(buffs.PermaGear) {
+		mob.Command(`emote struggles with their gear for a while, then gives up.`)
+		return true, nil
+	}
+
 	if rest == "all" {
 		for _, item := range mob.Character.Equipment.GetAllItems() {
 			Remove(item.Name(), mob, room)
@@ -27,7 +32,7 @@ func Remove(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 			mob.Character.CancelBuffsWithFlag(buffs.Hidden)
 
 			room.SendText(
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, matchItem.DisplayName()),
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> removes their <ansi fg="item">%s</ansi> and stores it away.`, mob.Character.Name, matchItem.DisplayName()),
 			)
 
 			mob.Character.StoreItem(matchItem)

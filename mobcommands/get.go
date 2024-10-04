@@ -90,7 +90,7 @@ func Get(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		mob.Character.StoreItem(matchItem)
 
 		room.SendText(
-			fmt.Sprintf(`<ansi fg="username">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))
+			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))
 	}
 
 	return true, nil

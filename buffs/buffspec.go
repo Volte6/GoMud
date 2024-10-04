@@ -41,6 +41,9 @@ const (
 	// Death preventing
 	ReviveOnDeath Flag = `revive-on-death`
 
+	// Gear related
+	PermaGear Flag = `perma-gear`
+
 	// Harmful flags
 	Poison Flag = `poison`
 	Drunk  Flag = `drunk`

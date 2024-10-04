@@ -132,10 +132,12 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 					Text:         `TEXTMASK:false`,
 				})
 
-				// Password matched, assign the loaded data
-				state.UserObject = tmpUser
+				tmpUser, msg, err := users.LoginUser(tmpUser, clientInput.ConnectionId)
 
-				msg, err := users.LoginUser(tmpUser, clientInput.ConnectionId)
+				// Password matched, assign the loaded data
+				if tmpUser != nil {
+					state.UserObject = tmpUser
+				}
 
 				if len(msg) > 0 {
 					connectionPool.SendTo([]byte(msg), clientInput.ConnectionId)
