@@ -72,3 +72,11 @@ type WebClientCommand struct {
 }
 
 func (b WebClientCommand) Type() string { return `WebClientCommand` }
+
+// Messages that are intended to reach all users on the system
+type GMCP struct {
+	UserId  int
+	Payload any
+}
+
+func (b GMCP) Type() string { return `GMCP` }

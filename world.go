@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -825,7 +826,35 @@ func (w *World) ConfigTick() {
 // Handles sending out queued up messaged to users
 func (w *World) MessageTick() {
 
-	eq := events.GetQueue(events.Broadcast{})
+	// Dispatch GMCP events
+	eq := events.GetQueue(events.GMCP{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		gmcp, typeOk := e.(events.GMCP)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "GMCP", "Actual Type", e.Type())
+			continue
+		}
+
+		if gmcp.UserId < 1 {
+			continue
+		}
+
+		if user := users.GetByUserId(gmcp.UserId); user != nil {
+			payload, err := json.Marshal(gmcp.Payload)
+			if err != nil {
+				slog.Error("Event", "Type", "GMCP", "data", gmcp.Payload, "error", err)
+				continue
+			}
+			w.connectionPool.SendTo([]byte(payload), user.ConnectionId())
+		}
+
+	}
+
+	// System-wide broadcasts
+	eq = events.GetQueue(events.Broadcast{})
 	for eq.Len() > 0 {
 
 		e := eq.Poll().(events.Event)

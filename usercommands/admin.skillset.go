@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/volte6/mud/rooms"
+	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/util"
 
 	"github.com/volte6/mud/templates"
@@ -24,13 +25,29 @@ func Skillset(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 		// send some sort of help info?
 		infoOutput, _ := templates.Process("admincommands/help/command.skillset", nil)
 		user.SendText(infoOutput)
+
+		user.SendText(`Skill Names:`)
+		for _, name := range skills.GetAllSkillNames() {
+			user.SendText(`  <ansi fg="skill">` + string(name) + `</ansi>`)
+		}
+
+		return true, nil
+	}
+
+	if args[0] == `all` {
+		skillValueInt, _ := strconv.Atoi(args[1])
+
+		for _, skillName := range skills.GetAllSkillNames() {
+			user.Character.SetSkill(string(skillName), skillValueInt)
+		}
+
 		return true, nil
 	}
 
 	skillName := strings.ToLower(args[0])
 	skillValueInt, _ := strconv.Atoi(args[1])
 
-	found := true
+	found := skills.SkillExists(skillName)
 
 	if found {
 		user.Character.SetSkill(skillName, skillValueInt)

@@ -51,6 +51,10 @@ function onIdle(mob, room) {
         lastTipRound = 0;
     }
 
+    if ( lastTipRound == -1 ) {
+        return true;
+    }
+
     lastUserInput = charmer.GetLastInputRound();
     roundsSinceInput = roundNow - lastUserInput;
 
@@ -70,52 +74,61 @@ function onIdle(mob, room) {
         case 1:
             if ( charmer.GetStatPoints() > 0 ) {
                 mob.Command(`sayto @` + charmer.UserId() + ` It looks like you've got some stat points to spend. Type <ansi fg="command">status train</ansi> to upgrade your stats!`);
-                mob.SetTempData(`lastTipRound`, roundNow);
             }
             break;
         case 2:
             if ( !charmer.HasQuest(`4-start`) ) {
                 mob.Command(`sayto @` + charmer.UserId() + ` There's a guard in the barracks that constantly complains about being hungry. You should <ansi fg="command">ask</ansi> him about it.`);
-                mob.SetTempData(`lastTipRound`, roundNow);
             }
             break;
         case 3:
             if ( !charmer.HasQuest(`2-start`) ) {
                 mob.Command(`sayto @` + charmer.UserId() + ` I have heard the king worries. If we can find an audience with him we can try to <ansi fg="command">ask</ansi> him about a quest. He is north of town square.`);
-                mob.SetTempData(`lastTipRound`, roundNow);
             }
             break;
         case 4:
-            mob.Command(`sayto @` + charmer.UserId() + ` There are some rats to bash around the temple south of town square. Just don't go TOO far south, it get dangerous!`);
-            mob.SetTempData(`lastTipRound`, roundNow);
+            mob.Command(`sayto @` + charmer.UserId() + ` You can find help on many subjects by typing <ansi fg="command">help</ansi>.`);
             break;
         case 5:
-            mob.Command(`sayto @` + charmer.UserId() + ` You can find help on many subjects by typing <ansi fg="command">help</ansi>.`);
-            mob.SetTempData(`lastTipRound`, roundNow);
+            mob.Command(`sayto @` + charmer.UserId() + ` I can create a portal to take us back to <ansi fg="room-title">Town Square</ansi> any time. Just <ansi fg="command">ask</ansi> me about it.`);
             break;
         case 6:
-            mob.Command(`sayto @` + charmer.UserId() + ` I can create a portal to take us back to Town Square any time. Just <ansi fg="command">ask</ansi> me about it.`);
-            mob.SetTempData(`lastTipRound`, roundNow);
+            mob.Command(`sayto @` + charmer.UserId() + ` If you have friends to play with, you can party up! <ansi fg="command">help party</ansi> to learn more.`);
             break;
         case 7:
-            mob.Command(`sayto @` + charmer.UserId() + ` If you have friends to play with, you can party up! <ansi fg="command">help party</ansi> to learn more.`);
-            mob.SetTempData(`lastTipRound`, roundNow);
-            break;
-        case 8:
             mob.Command(`sayto @` + charmer.UserId() + ` You can send a message to everyone using the <ansi fg="command">broadcast</ansi> command.`);
-            mob.SetTempData(`lastTipRound`, roundNow);
+            break
+        case 8:
+            if ( charmer.GetLevel() < 2 ) {
+                mob.Command(`sayto @` + charmer.UserId() + ` There are some <ansi fg="mobname">rats</ansi> to bash around the <ansi fg="room-title">The Sanctuary of the Benevolent Heart</ansi> south of <ansi fg="room-title">Town Square</ansi>. Just don't go TOO far south, it get dangerous!`);
+                break;
+            }
+        case 9:
+            if ( charmer.GetLevel() < 2 ) {
+                mob.Command(`sayto @` + charmer.UserId() + ` Type <ansi fg="command">status</ansi> to learn about yourself!`);
+            }
+            break;
+        case 10:
+            if ( charmer.GetLevel() < 2 ) {
+                mob.Command(`sayto @` + charmer.UserId() + ` Killing stuff is a great way to get stronger, but don''t pick a fight with the locals!`);
+            }
             break;
         default:
-            mob.SetTempData(`lastTipRound`, roundNow);
             break;
     }
+
+    // Prevent from triggering too often
+    mob.SetTempData(`lastTipRound`, roundNow);
 
     return true;
 }
 
 
-
+// Things to ask to get a portal created
 const homeNouns = ["home", "portal", "return", "townsquare", "town square"];
+
+// Things to ask to shut up the guide
+const silenceNouns = ["silence", "quiet", "shut up", "shh"];
 
 function onAsk(mob, room, eventDetails) {
 
@@ -131,14 +144,24 @@ function onAsk(mob, room, eventDetails) {
     if ( match.found ) {
 
         if ( user.GetRoomId() == 1 ) {
-            mob.Command(`sayto @`+String(eventDetails.sourceId)+` we're already at Town Square. Look around!`);
+            mob.Command(`sayto @`+String(eventDetails.sourceId)+` we're already at <ansi fg="room-title">Town Square</ansi>. <ansi fg="command">Look</ansi> around!`);
             return true;
         }
 
-        mob.Command(`sayto @`+String(eventDetails.sourceId)+` back to Town Square? Sure thing, lets go!`);
+        mob.Command(`sayto @`+String(eventDetails.sourceId)+` back to <ansi fg="room-title">Town Square</ansi>? Sure thing, lets go!`);
         mob.Command(`emote whispers a soft incantation and summons a ` + UtilApplyColorPattern(`glowing portal`, `cyan`) + `.`);
 
         room.AddTemporaryExit(`glowing portal`, `:cyan`, 1, 3);
+
+        return true;
+    }
+
+    match = UtilFindMatchIn(eventDetails.askText, silenceNouns);
+    if ( match.found ) {
+
+        mob.Command(`sayto @`+String(eventDetails.sourceId)+` I'll try and be quieter.`);
+        
+        mob.SetTempData(`lastTipRound`, -1);
 
         return true;
     }
