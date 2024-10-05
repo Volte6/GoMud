@@ -300,10 +300,33 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	user.Character.Zone = newRoom.Zone
 	user.Character.RememberRoom(newRoom.RoomId) // Mark this room as remembered.
 
-	if (len(isSpawn) > 0 && isSpawn[0]) && (formerRoomId < 900 || formerRoomId > 999) {
-		if user.Character.Level < 5 {
+	roundNow := util.GetRoundCount()
 
-			if toRoomId > -1 {
+	if user.Character.Level < 5 && toRoomId > -1 {
+
+		if formerRoomId < 900 || formerRoomId > 999 {
+
+			var lastGuideRound uint64 = 0
+			tmpLGR := user.GetTempData(`lastGuideRound`)
+			if tmpLGRUint, ok := tmpLGR.(uint64); ok {
+				lastGuideRound = tmpLGRUint
+			}
+
+			spawnGuide := false
+			if (roundNow - lastGuideRound) > uint64(configs.GetConfig().SecondsToRounds(300)) {
+				spawnGuide = true
+			}
+
+			if spawnGuide {
+				for _, miid := range user.Character.GetCharmIds() {
+					if testMob := mobs.GetInstance(miid); testMob != nil && testMob.MobId == 38 {
+						spawnGuide = false
+						break
+					}
+				}
+			}
+
+			if spawnGuide {
 
 				room := LoadRoom(toRoomId)
 				guideMob := mobs.NewMobById(38, 1)
@@ -313,10 +336,15 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 				// Track it
 				user.Character.TrackCharmed(guideMob.InstanceId, true)
 
+				room.SendText(`<ansi fg="mobname">` + guideMob.Character.Name + `</ansi> appears in a shower of sparks!`)
+
 				guideMob.Command(`sayto ` + user.ShorthandId() + ` I'll be here to help protect you while you learn the ropes.`)
 				guideMob.Command(`sayto ` + user.ShorthandId() + ` I can create a portal to take us back to Town Square any time. Just <ansi fg="command">ask</ansi> me about it.`)
 
 				user.SendText(`Your guide will try and stick around until you reach level 5.`)
+
+				user.SetTempData(`lastGuideRound`, roundNow)
+
 			}
 		}
 	}

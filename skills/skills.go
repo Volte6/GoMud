@@ -37,6 +37,8 @@ const (
 )
 
 var (
+	allSkillNames = []SkillTag{}
+
 	Professions = map[string][]SkillTag{
 		"treasure hunter": {
 			Map,
@@ -95,6 +97,19 @@ type ProfessionRank struct {
 	PointsToMax      float64
 	Completion       float64
 	Skills           []string
+}
+
+func SkillExists(sk string) bool {
+	for _, skTag := range allSkillNames {
+		if sk == string(skTag) {
+			return true
+		}
+	}
+	return false
+}
+
+func GetAllSkillNames() []SkillTag {
+	return append([]SkillTag{}, allSkillNames...)
 }
 
 func GetProfessionRanks(allRanks map[string]int) []ProfessionRank {
@@ -165,7 +180,17 @@ func GetProfession(allRanks map[string]int) string {
 		experienceName = experienceName + ` `
 	}
 
-	return experienceName + strings.Join(chosenProfessions, `/`)
+	if len(chosenProfessions) == len(Professions) {
+		return experienceName + `demigod`
+	}
+
+	extra := ``
+	if len(chosenProfessions) > 3 {
+		chosenProfessions = chosenProfessions[0:3]
+		extra = ` (and more)`
+	}
+
+	return experienceName + strings.Join(chosenProfessions, `/`) + extra
 }
 
 // Possible value is something like 1-10
@@ -188,4 +213,22 @@ func GetExperienceLevel(percentage float64) string {
 	}
 
 	return `scrub`
+}
+
+func init() {
+
+	skillNameSet := map[SkillTag]struct{}{}
+
+	for _, skills := range Professions {
+		for _, skillName := range skills {
+
+			if _, ok := skillNameSet[skillName]; ok {
+				continue
+			}
+
+			skillNameSet[skillName] = struct{}{}
+			allSkillNames = append(allSkillNames, skillName)
+		}
+	}
+
 }

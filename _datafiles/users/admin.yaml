@@ -16,7 +16,7 @@ character:
     to disrupt the balance of the world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 270
+  roomid: 271
   zone: Frostfang
   raceid: 2
   stats:
@@ -35,12 +35,12 @@ character:
       base: 2
     perception:
       training: 2
-  level: 5
-  experience: 18000
+  level: 4
+  experience: 15000
   trainingpoints: 38
   statpoints: 29
-  health: 44
-  mana: 32
+  health: 43
+  mana: 31
   actionpoints: 202
   alignment: 0
   gold: 90
@@ -64,12 +64,12 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 16
+      roundcounter: 26
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 9
+      roundcounter: 4
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -83,13 +83,20 @@ character:
       uncursed: true
   skills:
     brawling: 4
-    dual-wield: 2
+    cast: 4
+    dual-wield: 4
+    enchant: 4
     inspect: 4
-    map: 5
+    map: 4
     peep: 4
+    portal: 4
     protection: 4
-    skulduggery: 1
+    scribe: 4
+    search: 4
+    skulduggery: 4
     tame: 4
+    track: 4
+    trading: 4
   keyring:
     784-chest: DUU
     key-110-west: "3"
@@ -109,5 +116,5 @@ character:
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/zLUMdIx1jHRMdUxMjfQsTCyBNNG5oZQbAAIAAD//yKVk8AhAAAA
+roommemoryblob: H4sIAAAAAAAA/zIyN9QxMjcEBAAA//9QTHwrBwAAAA==
 configoptions: {}

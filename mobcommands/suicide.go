@@ -60,6 +60,16 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		fmt.Sprintf(`<ansi fg="mobname">%s</ansi> has died.`, mob.Character.Name),
 	)
 
+	// Special handling of "The Guide"
+	// Mark this moment to prevent an immediate respawn
+	if mob.MobId == 38 {
+		if mob.Character.Charmed != nil {
+			if tmpU := users.GetByUserId(mob.Character.Charmed.UserId); tmpU != nil {
+				tmpU.SetTempData(`lastGuideRound`, util.GetRoundCount())
+			}
+		}
+	}
+
 	mobXP := mob.Character.XPTL(mob.Character.Level - 1)
 
 	xpVal := mobXP / 125
