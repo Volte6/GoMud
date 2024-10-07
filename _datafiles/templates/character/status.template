@@ -15,4 +15,4 @@
  │ <ansi fg="yellow">Armor:  </ansi>{{ printf "%-6s" ( printf "%d" (.Character.GetDefense)) }} {{ if permadeath }}<ansi fg="yellow">Lives: </ansi>{{ printf "%-7d" .Character.ExtraLives }}{{ else }}              {{ end }} │ │ <ansi fg="yellow">Bank: </ansi>{{ printf "%-11s" (numberFormat .Character.Bank) }} │ │ <ansi fg="yellow">Stat Pts:</ansi>  {{ printf "%-7d" .Character.StatPoints }} │
  └───────────────────────────────┘ └───────────────────┘ └────────────────────┘
 {{- if gt .Character.StatPoints 0 }}{{ if lt .Character.Level 5 }}
-                   <ansi fg="red-bold">TIP:</ansi> <ansi fg="210">Type <ansi fg="command">status train</ansi> to spend stat points on improvements.</ansi> {{ end }}{{ end -}}
+                   <ansi fg="alert-5">TIP:</ansi> <ansi fg="alert-2">Type <ansi fg="command">status train</ansi> to spend stat points on improvements.</ansi> {{ end }}{{ end -}}

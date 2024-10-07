@@ -129,6 +129,12 @@ color8:
   questflag: 3
   highlight: 90
   saytext: 93 # bright yellow
+  alert-5: 9
+  alert-4: 1
+  alert-3: 1
+  alert-2: 1
+  alert-1: 1
+  noun: 7
 color256:
   table-title: 2
   userid: black
@@ -252,3 +258,9 @@ color256:
   questflag: 187
   highlight: 238
   saytext: 230
+  alert-5: 196
+  alert-4: 203
+  alert-3: 210
+  alert-2: 210
+  alert-1: 217
+  noun: 115

@@ -1,4 +1,4 @@
-<ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">{{ if ne .TinyMapDescription "" }}{{ .TinyMapDescription }}{{ else }}{{ if .IsBurning }}{{ colorpattern (splitstring .Room.GetDescription 80) "flame" "words" }}{{ else }}{{ splitstring .Room.GetDescription 80 }}{{ end }}{{ end }}</ansi>
+<ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">{{ .Description }}</ansi>
 {{- if ne (len .Room.SkillTraining) 0 }}
 
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>

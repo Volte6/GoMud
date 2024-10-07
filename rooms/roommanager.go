@@ -51,23 +51,23 @@ type ZoneInfo struct {
 }
 
 type RoomTemplateDetails struct {
-	Room               *Room
-	VisiblePlayers     []characters.FormattedName
-	VisibleMobs        []characters.FormattedName
-	VisibleExits       map[string]RoomExit
-	TemporaryExits     map[string]TemporaryRoomExit
-	UserId             int
-	Character          *characters.Character
-	Permission         string
-	RoomSymbol         string
-	RoomLegend         string
-	Nouns              []string
-	TinyMapDescription string
-	IsDark             bool
-	IsNight            bool
-	IsBurning          bool
-	TrackingString     string
-	ExtraMessages      []string
+	Room           *Room
+	VisiblePlayers []characters.FormattedName
+	VisibleMobs    []characters.FormattedName
+	VisibleExits   map[string]RoomExit
+	TemporaryExits map[string]TemporaryRoomExit
+	UserId         int
+	Character      *characters.Character
+	Permission     string
+	RoomSymbol     string
+	RoomLegend     string
+	Nouns          []string
+	Description    string
+	IsDark         bool
+	IsNight        bool
+	IsBurning      bool
+	TrackingString string
+	ExtraMessages  []string
 }
 
 var (

@@ -185,9 +185,7 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			}
 		}
 
-		if !found {
-			user.SendText(fmt.Sprintf("You don't see a %s around.", rest))
-		} else {
+		if found {
 
 			if matchItem.HasAdjective(`exploding`) {
 				user.SendText(`You can't pick that up, it's about to explode!`)
@@ -242,7 +240,21 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			}
 		}
 
+		//
+		// Look for any nouns in the room info
+		//
+		foundNoun, _ := room.FindNoun(rest)
+		if len(foundNoun) > 0 {
+
+			user.SendText(fmt.Sprintf(`You can't get the <ansi fg="noun">%s</ansi>`, foundNoun))
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is grasping at the air.`, user.Character.Name), user.UserId)
+
+			return true, nil
+		}
+
 	}
+
+	user.SendText(fmt.Sprintf("You don't see a %s around.", rest))
 
 	return true, nil
 }

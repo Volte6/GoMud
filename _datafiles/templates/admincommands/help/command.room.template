@@ -24,6 +24,11 @@ Set a property of the room. This updates basic properties of the room you are in
         <ansi fg="command">zone</ansi> (string)        - e.g. <ansi fg="command">room set zone "trash"</ansi>
         <ansi fg="command">spawninfo clear</ansi>      <ansi fg="red">CAREFUL! CLEARS SPAWN INFO!</ansi>
 
+    Nouns:
+        Room nouns are extra descriptive tags that can be "looked" at by players.
+        <ansi fg="command">room nouns</ansi> - List all nouns for the room
+        <ansi fg="command">room noun [name] [description[</ansi> - Add or overwrite a noun
+
 <ansi fg="command">room exit [exit_name] [room_id]</ansi> - e.g. <ansi fg="command">room exit west 159</ansi>
 This will create a new exit that links to a specific room_id using the exit_name provided.
 <ansi fg="red-bold">!Beware!</ansi> if the spacial relationship with compass direction rooms is done incorrectly, 
