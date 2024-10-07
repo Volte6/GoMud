@@ -1311,27 +1311,30 @@ func (r *Room) FindContainerByName(containerNameSearch string) string {
 
 func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) {
 
-	if desc, ok := r.Nouns[noun]; ok {
-		return noun, desc
-	}
-
-	allSearchNouns := []string{}
-
 	for _, newNoun := range strings.Split(noun, ` `) {
-		allSearchNouns = append(allSearchNouns, newNoun)
+
+		if desc, ok := r.Nouns[newNoun]; ok {
+			return noun, desc
+		}
+
 		// If ended in `s`, strip it and add a new word to the search list
 		if len(newNoun) > 1 && noun[len(newNoun)-1:] == `s` {
-			allSearchNouns = append(allSearchNouns, newNoun[:len(newNoun)-1])
+			if desc, ok := r.Nouns[newNoun[:len(newNoun)-1]]; ok {
+				return newNoun[:len(newNoun)-1], desc
+			}
+		} else if desc, ok := r.Nouns[newNoun+`s`]; ok { // `s`` at end
+			return newNoun + `s`, desc
 		}
-		if len(newNoun) > 2 && noun[len(newNoun)-1:] == `es` {
-			allSearchNouns = append(allSearchNouns, newNoun[:len(newNoun)-2])
-		}
-	}
 
-	for _, testNoun := range allSearchNouns {
-		if desc, ok := r.Nouns[testNoun]; ok {
-			return testNoun, desc
+		// Strip 'es' such as 'torches'
+		if len(newNoun) > 2 && noun[len(newNoun)-2:] == `es` {
+			if desc, ok := r.Nouns[newNoun[:len(newNoun)-2]]; ok {
+				return newNoun[:len(newNoun)-2], desc
+			}
+		} else if desc, ok := r.Nouns[newNoun+`es`]; ok { // `es` at end
+			return newNoun + `es`, desc
 		}
+
 	}
 
 	return ``, ``
