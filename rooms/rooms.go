@@ -11,6 +11,7 @@ import (
 
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
@@ -1308,6 +1309,34 @@ func (r *Room) FindContainerByName(containerNameSearch string) string {
 	return closeMatch
 }
 
+func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) {
+
+	if desc, ok := r.Nouns[noun]; ok {
+		return noun, desc
+	}
+
+	allSearchNouns := []string{}
+
+	for _, newNoun := range strings.Split(noun, ` `) {
+		allSearchNouns = append(allSearchNouns, newNoun)
+		// If ended in `s`, strip it and add a new word to the search list
+		if len(newNoun) > 1 && noun[len(newNoun)-1:] == `s` {
+			allSearchNouns = append(allSearchNouns, newNoun[:len(newNoun)-1])
+		}
+		if len(newNoun) > 2 && noun[len(newNoun)-1:] == `es` {
+			allSearchNouns = append(allSearchNouns, newNoun[:len(newNoun)-2])
+		}
+	}
+
+	for _, testNoun := range allSearchNouns {
+		if desc, ok := r.Nouns[testNoun]; ok {
+			return testNoun, desc
+		}
+	}
+
+	return ``, ``
+}
+
 func (r *Room) FindExitByName(exitNameSearch string) (exitName string, exitRoomId int) {
 
 	exitNames := []string{}
@@ -1466,7 +1495,8 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		VisibleMobs:    []characters.FormattedName{},
 		VisibleExits:   make(map[string]RoomExit),
 		TemporaryExits: make(map[string]TemporaryRoomExit),
-		Room:           r,               // The room being viewed
+		Room:           r, // The room being viewed
+		Description:    r.GetDescription(),
 		UserId:         user.UserId,     // Who is viewing the room
 		Character:      user.Character,  // The character of the user viewing the room
 		Permission:     user.Permission, // The permission level of the user viewing the room
@@ -1488,7 +1518,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {
 		desclineWidth := 80 - 7 // 7 is the width of the tinymap
 		padding := 1
-		description := util.SplitString(r.GetDescription(), desclineWidth-padding)
+		description := util.SplitString(details.Description, desclineWidth-padding)
 
 		for i := 0; i < len(tinymap); i++ {
 			if i > len(description)-1 {
@@ -1498,7 +1528,37 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 			description[i] += strings.Repeat(` `, desclineWidth-len(description[i])) + tinymap[i]
 		}
 
-		details.TinyMapDescription = strings.Join(description, "\n")
+		if user.Permission == users.PermissionAdmin {
+			if len(r.Nouns) > 0 {
+				for i := range description {
+					for noun, _ := range r.Nouns {
+						description[i] = strings.Replace(description[i], noun, `<ansi fg="noun">`+noun+`</ansi>`, 1)
+					}
+				}
+			}
+		}
+
+		details.Description = strings.Join(description, "\n")
+	} else {
+
+		roomDesc := util.SplitString(details.Description, 80)
+
+		if user.Permission == users.PermissionAdmin {
+			if len(r.Nouns) > 0 {
+				for i := range roomDesc {
+					for noun, _ := range r.Nouns {
+						roomDesc[i] = strings.Replace(roomDesc[i], noun, `<ansi fg="noun">`+noun+`</ansi>`, 1)
+					}
+				}
+			}
+		}
+
+		details.Description = strings.Join(roomDesc, "\n")
+	}
+
+	// If burning, apply burning text effect?
+	if details.IsBurning {
+		details.Description = colorpatterns.ApplyColorPattern(details.Description, `flame`, colorpatterns.Words)
 	}
 
 	nameFlags := []characters.NameRenderFlag{}

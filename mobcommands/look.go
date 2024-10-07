@@ -8,7 +8,6 @@ import (
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
 )
 
 func Look(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
@@ -21,105 +20,21 @@ func Look(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 
-	args := util.SplitButRespectQuotes(rest)
-
-	// Looking AT something?
-	if len(args) > 0 {
-		lookAt := args[0]
-
-		//
-		// Check room exits
-		//
-		exitName, lookRoomId := room.FindExitByName(lookAt)
-		if lookRoomId > 0 {
-
-			exitInfo := room.Exits[exitName]
-			if exitInfo.Lock.IsLocked() {
-				return true, nil
-			}
-
-			if !isSneaking {
-				room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> peers toward the %s.`, mob.Character.Name, exitName))
-			}
-
-			if lookRoomId > 0 {
-
-				lookRoom(mob, lookRoomId, secretLook || isSneaking)
-
-				return true, nil
-			}
+	// trim off some fluff
+	if len(rest) > 2 {
+		if rest[0:3] == `at ` {
+			rest = rest[3:]
 		}
-
-		//
-		// Check for anything in their backpack they might want to look at
-		//
-		if lookItem, found := mob.Character.FindInBackpack(rest); found {
-
-			if !isSneaking {
-				room.SendText(
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.DisplayName()),
-				)
-			}
-
-			return true, nil
+	}
+	if len(rest) > 3 {
+		if rest[0:4] == `the ` {
+			rest = rest[4:]
 		}
+	}
 
-		//
-		// look for any mobs, players, npcs
-		//
+	lookAt := rest
 
-		playerId, mobId := room.FindByName(lookAt)
-
-		if playerId > 0 || mobId > 0 {
-
-			if playerId > 0 {
-
-				u := *users.GetByUserId(playerId)
-
-				if !isSneaking {
-					u.SendText(
-						fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at you.`, mob.Character.Name),
-					)
-
-					room.SendText(
-						fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at <ansi fg="username">%s</ansi>.`, mob.Character.Name, u.Character.Name),
-						u.UserId)
-				}
-
-			} else if mobId > 0 {
-
-				m := mobs.GetInstance(mobId)
-
-				if !isSneaking {
-					targetName := m.Character.GetMobName(0).String()
-					room.SendText(
-						fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at %s.`, mob.Character.Name, targetName),
-					)
-				}
-
-			}
-
-			return true, nil
-
-		}
-
-		//
-		// Check for any equipment they are wearing they might want to look at
-		//
-		if lookItem, found := mob.Character.FindOnBody(rest); found {
-
-			if !isSneaking {
-				room.SendText(
-					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.DisplayName()),
-				)
-			}
-
-			return true, nil
-		}
-
-		return true, nil
-
-	} else {
+	if len(lookAt) == 0 {
 
 		if !secretLook && !isSneaking {
 			room.SendText(
@@ -130,6 +45,112 @@ func Look(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 			secretLook = true
 		}
 		lookRoom(mob, room.RoomId, secretLook || isSneaking)
+
+		return true, nil
+
+	}
+
+	//
+	// Check room exits
+	//
+	exitName, lookRoomId := room.FindExitByName(lookAt)
+	if lookRoomId > 0 {
+
+		exitInfo := room.Exits[exitName]
+		if exitInfo.Lock.IsLocked() {
+			return true, nil
+		}
+
+		if !isSneaking {
+			room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> peers toward the %s.`, mob.Character.Name, exitName))
+		}
+
+		if lookRoomId > 0 {
+
+			lookRoom(mob, lookRoomId, secretLook || isSneaking)
+
+			return true, nil
+		}
+	}
+
+	//
+	// Check for anything in their backpack they might want to look at
+	//
+	if lookItem, found := mob.Character.FindInBackpack(lookAt); found {
+
+		if !isSneaking {
+			room.SendText(
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.DisplayName()),
+			)
+		}
+
+		return true, nil
+	}
+
+	//
+	// look for any mobs, players, npcs
+	//
+
+	playerId, mobId := room.FindByName(lookAt)
+
+	if playerId > 0 || mobId > 0 {
+
+		if playerId > 0 {
+
+			u := *users.GetByUserId(playerId)
+
+			if !isSneaking {
+				u.SendText(
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at you.`, mob.Character.Name),
+				)
+
+				room.SendText(
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at <ansi fg="username">%s</ansi>.`, mob.Character.Name, u.Character.Name),
+					u.UserId)
+			}
+
+		} else if mobId > 0 {
+
+			m := mobs.GetInstance(mobId)
+
+			if !isSneaking {
+				targetName := m.Character.GetMobName(0).String()
+				room.SendText(
+					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at %s.`, mob.Character.Name, targetName),
+				)
+			}
+
+		}
+
+		return true, nil
+
+	}
+
+	//
+	// Check for any equipment they are wearing they might want to look at
+	//
+	if lookItem, found := mob.Character.FindOnBody(lookAt); found {
+
+		if !isSneaking {
+			room.SendText(
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is admiring their <ansi fg="item">%s</ansi>.`, mob.Character.Name, lookItem.DisplayName()),
+			)
+		}
+
+		return true, nil
+	}
+
+	//
+	// Look for any nouns in the room info
+	//
+	foundNoun, _ := room.FindNoun(lookAt)
+	if len(foundNoun) > 0 {
+
+		if !isSneaking {
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is examining the <ansi fg="noun">%s</ansi>.`, mob.Character.Name, foundNoun))
+		}
+
+		return true, nil
 	}
 
 	return true, nil

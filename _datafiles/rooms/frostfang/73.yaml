@@ -17,5 +17,24 @@ biome: city
 exits:
   west:
     roomid: 72
+nouns:
+  aurora: The sky above is occasionally illuminated by the soft, swirling colors of
+    an aurora, casting a magical glow across the entire garden.
+  bench: A small wooden bench, covered in a fine layer of frost, sits beside the frozen
+    pond, offering a place to rest and take in the beauty of the garden.
+  evergreens: Tall evergreens loom above, their snow-laden branches standing vigil
+    over the garden, their presence both protective and serene.
+  ferns: These hardy plants sway gently in the breeze, their leaves shimmering under
+    the weight of delicate frost.
+  moonflowers: These ethereal flowers line the pathways, glowing faintly in the moonlight,
+    their luminescence lighting the way through the garden.
+  pond: The surface of the pond is a perfect sheet of ice, its smooth surface reflecting
+    the snowfall and the occasional flicker of auroras overhead.
+  roses: Pale, icy petals glitter like gemstones, their fragile beauty enhanced by
+    a thin layer of frost that sparkles in the light.
+  table: A simple wooden table stands beside the bench, its surface coated with frost,
+    as if waiting for an icy tea party that never happened.
+  winterberries: Clusters of bright red berries offer a stark contrast to the surrounding
+    whiteness, nestled snugly beneath the evergreen boughs.
 items:
 - itemid: 10

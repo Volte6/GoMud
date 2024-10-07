@@ -34,6 +34,46 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	var roomId int = 0
 	roomCmd := strings.ToLower(args[0])
 
+	if roomCmd == `noun` || roomCmd == `nouns` {
+
+		// room noun chair "a chair for sitting"
+		if len(args) > 2 {
+			noun := args[1]
+			description := strings.Join(args[2:], ` `)
+
+			if room.Nouns == nil {
+				room.Nouns = map[string]string{}
+			}
+			room.Nouns[noun] = description
+
+			user.SendText(`Noun Added:`)
+			user.SendText(fmt.Sprintf(`<ansi fg="noun">%s</ansi> - %s`, strings.Repeat(` `, 20-len(noun))+noun, description))
+
+			return true, nil
+		}
+
+		// room noun chair
+		if len(args) == 2 || (len(args) == 3 && len(args[2]) == 0) {
+
+			if _, ok := room.Nouns[args[1]]; ok {
+				delete(room.Nouns, args[1])
+				user.SendText(`Noun deleted.`)
+			} else {
+				user.SendText(`Noun not found.`)
+			}
+
+			return true, nil
+		}
+
+		// room noun
+		// room nouns
+		user.SendText(`Room Nouns:`)
+		for noun, description := range room.Nouns {
+			user.SendText(fmt.Sprintf(`<ansi fg="noun">%s</ansi> - %s`, strings.Repeat(` `, 20-len(noun))+noun, description))
+		}
+		return true, nil
+	}
+
 	if roomCmd == "copy" && len(args) >= 3 {
 
 		property := args[1]

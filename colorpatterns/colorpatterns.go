@@ -3,7 +3,9 @@ package colorpatterns
 import (
 	"fmt"
 	"math"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -80,6 +82,26 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 
 	patternDir := 1
 	patternPosition := 0
+	inTagPlaceholder := false
+
+	//
+	// Tokenize existing ansi tags to avoid colorizing them
+	//
+	// Regular expression to match <ansi ...>...</ansi> tags
+	re := regexp.MustCompile(`<ansi[^>]*>.*?</ansi>`)
+	// Counter to keep track of the unique numbers
+	counter := 0
+	preExistingTags := map[string]string{}
+	// Function to replace each match with a unique number
+	input = re.ReplaceAllStringFunc(input, func(match string) string {
+		counter++
+		tag := `:` + strconv.Itoa(counter)
+		preExistingTags[tag] = match
+		return tag
+	})
+	//
+	// End tokenization
+	//
 
 	if len(method) == 0 {
 		// Color change on a per character basis (not spaces), reverses at the end
@@ -96,8 +118,26 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 		}
 	} else if method[0] == Words {
 		// Color change on a per word basis
+
 		newString.WriteString(`<ansi>`)
 		for i, runeChar := range input {
+
+			// Handle placeholder tags that look like :123
+			if inTagPlaceholder {
+				if runeChar != 32 {
+					newString.WriteString(string(runeChar))
+					continue
+				}
+				inTagPlaceholder = false
+			} else {
+				if runeChar == ':' {
+					inTagPlaceholder = true
+					newString.WriteString(string(runeChar))
+					continue
+				}
+			}
+			// End handling placeholder tags
+
 			if i == 0 || runeChar == 32 { // space
 				newString.WriteString(fmt.Sprintf(`</ansi><ansi fg="%d">`, patternValues[patternPosition%patternValueLength]))
 				patternPosition++ // advance the color token position
@@ -109,6 +149,23 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 		// Color stops changing and stays on the final color
 		newString.WriteString(`<ansi>`)
 		for _, runeChar := range input {
+
+			// Handle placeholder tags that look like :123
+			if inTagPlaceholder {
+				if runeChar != 32 {
+					newString.WriteString(string(runeChar))
+					continue
+				}
+				inTagPlaceholder = false
+			} else {
+				if runeChar == ':' {
+					inTagPlaceholder = true
+					newString.WriteString(string(runeChar))
+					continue
+				}
+			}
+			// End handling placeholder tags
+
 			newString.WriteString(fmt.Sprintf(`<ansi fg="%d">%s</ansi>`, patternValues[patternPosition], string(runeChar)))
 			if patternPosition < patternValueLength-1 && runeChar != 32 { // space
 				patternPosition += 1 // advance the color token position
@@ -124,6 +181,23 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 		}
 		newString.WriteString(`<ansi>`)
 		for _, runeChar := range input {
+
+			// Handle placeholder tags that look like :123
+			if inTagPlaceholder {
+				if runeChar != 32 {
+					newString.WriteString(string(runeChar))
+					continue
+				}
+				inTagPlaceholder = false
+			} else {
+				if runeChar == ':' {
+					inTagPlaceholder = true
+					newString.WriteString(string(runeChar))
+					continue
+				}
+			}
+			// End handling placeholder tags
+
 			newString.WriteString(fmt.Sprintf(`<ansi fg="%d">%s</ansi>`, patternValues[patternPosition], string(runeChar)))
 			subCounter++
 			if patternPosition < patternValueLength-1 && runeChar != 32 { // space
@@ -135,7 +209,13 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 		newString.WriteString(`</ansi>`)
 	}
 
-	return newString.String()
+	finalString := newString.String()
+
+	for tmp, replacement := range preExistingTags {
+		finalString = strings.Replace(finalString, tmp, replacement, -1)
+	}
+
+	return finalString
 }
 
 func CompileColorPatterns() {
