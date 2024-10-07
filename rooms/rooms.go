@@ -1317,8 +1317,12 @@ func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) 
 			return noun, desc
 		}
 
+		if len(newNoun) < 2 {
+			continue
+		}
+
 		// If ended in `s`, strip it and add a new word to the search list
-		if len(newNoun) > 1 && noun[len(newNoun)-1:] == `s` {
+		if noun[len(newNoun)-1:] == `s` {
 			if desc, ok := r.Nouns[newNoun[:len(newNoun)-1]]; ok {
 				return newNoun[:len(newNoun)-1], desc
 			}
@@ -1326,13 +1330,35 @@ func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) 
 			return newNoun + `s`, desc
 		}
 
+		// Switch ending of `y` to `ies`
+		if noun[len(newNoun)-1:] == `y` {
+			if desc, ok := r.Nouns[newNoun[:len(newNoun)-1]+`ies`]; ok { // `ies` instead of `y` at end
+				return newNoun[:len(newNoun)-1] + `ies`, desc
+			}
+		}
+
+		if len(newNoun) < 3 {
+			continue
+		}
+
 		// Strip 'es' such as 'torches'
-		if len(newNoun) > 2 && noun[len(newNoun)-2:] == `es` {
+		if noun[len(newNoun)-2:] == `es` {
 			if desc, ok := r.Nouns[newNoun[:len(newNoun)-2]]; ok {
 				return newNoun[:len(newNoun)-2], desc
 			}
 		} else if desc, ok := r.Nouns[newNoun+`es`]; ok { // `es` at end
 			return newNoun + `es`, desc
+		}
+
+		if len(newNoun) < 4 {
+			continue
+		}
+
+		// Strip 'es' such as 'torches'
+		if noun[len(newNoun)-3:] == `ies` {
+			if desc, ok := r.Nouns[newNoun[:len(newNoun)-3]+`y`]; ok { // `y` instead of `ies` at end
+				return newNoun[:len(newNoun)-3] + `y`, desc
+			}
 		}
 
 	}
