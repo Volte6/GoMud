@@ -12,3 +12,7 @@ biome: city
 exits:
   east:
     roomid: 43
+nouns:
+  lantern: The lantern is old, and doesn't appear to be in working order. It's hanging
+    on the wall, but the glass is cracked and the wick is missing.
+  light: :lantern
