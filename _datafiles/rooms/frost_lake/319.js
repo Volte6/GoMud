@@ -1,21 +1,4 @@
 
-
-const island = ["rocky island", "island", "rocks"];
-
-function onCommand_look(rest, user, room) {
-
-    matches = UtilFindMatchIn(rest, island);
-    if ( matches.found ) {
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" peers out into the water.");
-        SendUserMessage(user.UserId(), "A large island sits in the middle of the lake, but a closer rocky island sits to the northwest of here.");
-        return true;
-    }
-
-
-    return false;
-}
-
-
 function onIdle(room) {
 
     if ( UtilGetRoundNumber()%30 == 0 ) {

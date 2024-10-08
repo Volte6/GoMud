@@ -9,7 +9,7 @@ function onCommand(cmd, rest, user, room) {
     if ( cmd == "look" ) {
 
         SendUserMessage(user.UserId(), "The obelisk crackles with subtle dark energy. It seems like it could be dangerous to the touch.");
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" looks at the obelisk.");
+        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" looks at the obelisk.", user.UserId());
         
         return true;
     }
@@ -17,7 +17,7 @@ function onCommand(cmd, rest, user, room) {
     if ( cmd == "touch" ) {
       
         SendUserMessage(user.UserId(), "You reach out and touch the obelisk.");
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" reaches out and touches the obelisk.");
+        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" reaches out and touches the obelisk.", user.UserId());
 
         if ( !user.TrainSkill("portal", 1) ) {
             

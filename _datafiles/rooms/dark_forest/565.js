@@ -13,23 +13,20 @@ function onCommand_look(rest, user, room) {
 
     matches = UtilFindMatchIn(rest, bridge);
     if ( matches.found ) {
-        SendUserMessage(user.UserId(), "The bridge is uncrossable now. Before you is a large chasm that disappears into darkness.");
-        if (roundNow >= ropeAvailableRound) {
+        if (roundNow < ropeAvailableRound) {
+            SendUserMessage(user.UserId(), "");
             SendUserMessage(user.UserId(), "Someone has tied a rope to a tree here. They must have climbed down.");
         }
-
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" examines the broken bridge.");   
-        return true;
+        return false;
     }
 
     matches = UtilFindMatchIn(rest, chasm);
     if ( matches.found ) {
-        SendUserMessage(user.UserId(), "The cliff is too steep to climb down. You'd need a rope or something to descend.");
-        if (roundNow >= ropeAvailableRound) {
+        if (roundNow < ropeAvailableRound) {
+            SendUserMessage(user.UserId(), "");
             SendUserMessage(user.UserId(), "Someone has tied a rope to a tree here. They must have climbed down.");
         }
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" looks down into the chasm.");   
-        return true;
+        return false;
     }
 
     return false;
@@ -53,19 +50,19 @@ function onCommand(cmd, rest, user, room) {
         user.MoveRoom(downRoom);
         user.Command("look");
 
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" pulls out a rope, ties one end to a tree and descends into the chasm.");
+        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" pulls out a rope, ties one end to a tree and descends into the chasm.", user.UserId());
         climbDown = true;
 
     } else {
         
         if ( !user.HasItemId(23) ) {
             SendUserMessage(user.UserId(), "There's really no way down into the chasm without assistance or the right tool.");
-            SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" tempts fate by getting a little too close to the edge.");   
+            SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" tempts fate by getting a little too close to the edge.", user.UserId());   
             return true;
         }
 
         SendUserMessage(user.UserId(), "You pull out your rope, tie one end to a tree and descend into the chasm.");
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" pulls out a rope, ties one end to a tree and descends into the chasm.");
+        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" pulls out a rope, ties one end to a tree and descends into the chasm.", user.UserId());
 
         user.MoveRoom(downRoom);
         user.Command("look");
@@ -92,7 +89,7 @@ function onCommand(cmd, rest, user, room) {
 
                 if ( a.UserId() > 0 ) {
                     
-                    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" pulls out a rope, ties one end to a tree and descends into the chasm.");
+                    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" pulls out a rope, ties one end to a tree and descends into the chasm.", user.UserId());
 
                     SendUserMessage(a.UserId(), "You follow "+user.GetCharacterName(true)+" down the rope.");
                     SendRoomMessage(room.RoomId(), a.GetCharacterName(true)+" climbs down the rope.", a.UserId());

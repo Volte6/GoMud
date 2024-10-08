@@ -19,7 +19,7 @@ function onCommand_look(rest, user, room) {
     matches = UtilFindMatchIn(rest, glimmer);
     if ( matches.found ) {
         SendUserMessage(user.UserId(), "Nestled inside a pile of leaves is some sort of golden object.");
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" seems to be digging around in the leaves.");   
+        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" seems to be digging around in the leaves.", user.UserId());   
         return true;
     }
 
@@ -54,7 +54,7 @@ function onCommand(cmd, rest, user, room) {
     }
     
     SendUserMessage(user.UserId(), "You brush aside the leaves and take the <ansi fg=\"itemname\">golden locket</ansi>.");
-    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" takes a <ansi fg=\"itemname\">golden locket</ansi> from the pile of leaves.");
+    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" takes a <ansi fg=\"itemname\">golden locket</ansi> from the pile of leaves.", user.UserId());
     
     user.GiveItem(20025);
     user.GiveQuest("1-return");

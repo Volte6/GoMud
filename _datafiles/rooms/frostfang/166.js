@@ -19,7 +19,7 @@ function onCommand_vault(rest, user, room) {
 
     if (guard_present && !hidden) {
         SendUserMessage(user.UserId(), "A guard blocks you from entering the vault.");
-        SendRoomMessage(room.RoomId(), "A guard blocks "+user.GetCharacterName(true)+" from entering the vault.");
+        SendRoomMessage(room.RoomId(), "A guard blocks "+user.GetCharacterName(true)+" from entering the vault.", user.UserId());
         return true;
     }
 

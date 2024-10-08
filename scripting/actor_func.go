@@ -535,6 +535,10 @@ func (a ScriptActor) GetCharmCount() int {
 	return len(a.characterRecord.GetCharmIds())
 }
 
+func (a ScriptActor) GetMaxCharmCount() int {
+	return a.characterRecord.GetMaxCharmedCreatures()
+}
+
 func (a ScriptActor) GetTrainingPoints() int {
 	return a.characterRecord.TrainingPoints
 }
@@ -581,6 +585,17 @@ func (a ScriptActor) WebClientModalClose(name string) {
 			Text:         "MODALREM:" + name,
 		})
 	}
+}
+
+func (a ScriptActor) Uncurse() []*ScriptItem {
+
+	retList := []*ScriptItem{}
+
+	for _, itm := range a.characterRecord.Uncurse() {
+		retList = append(retList, GetItem(itm))
+	}
+
+	return retList
 }
 
 // ////////////////////////////////////////////////////////

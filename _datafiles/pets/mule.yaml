@@ -1,0 +1,5 @@
+type: mule
+statmods:
+  strength: 5
+powers:
+  - carry-items

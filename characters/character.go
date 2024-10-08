@@ -11,6 +11,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/pets"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/skills"
@@ -77,6 +78,7 @@ type Character struct {
 	MiscData        map[string]any    `yaml:"miscdata,omitempty"`      // Any random other data that needs to be stored
 	ExtraLives      int               `yaml:"extralives,omitempty"`    // How many lives remain. If enabled, players can perma-die if they die at zero
 	MobMastery      MobMasteries      `yaml:"mobmastery,omitempty"`    // Tracks particular masteries around a given mob
+	Pet             *pets.Pet         `yaml:"pet,omitempty"`           // Do they have a pet?
 	roomHistory     []int             // A stack FILO of the last X rooms the character has been in
 	followers       []int             // everyone following this user
 	permaBuffIds    []int             // Buff Id's that are always present for this character
@@ -1883,4 +1885,61 @@ func (c *Character) reapplyPermabuffs(removedItems ...items.Item) {
 			c.AddBuff(buffId, true)
 		}
 	}
+}
+
+func (c *Character) Uncurse() []items.Item {
+
+	uncursedList := []items.Item{}
+
+	if c.Equipment.Weapon.IsCursed() {
+		c.Equipment.Weapon.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Weapon)
+	}
+
+	if c.Equipment.Offhand.IsCursed() {
+		c.Equipment.Offhand.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Offhand)
+	}
+
+	if c.Equipment.Head.IsCursed() {
+		c.Equipment.Head.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Head)
+	}
+
+	if c.Equipment.Neck.IsCursed() {
+		c.Equipment.Neck.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Neck)
+	}
+
+	if c.Equipment.Body.IsCursed() {
+		c.Equipment.Body.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Body)
+	}
+
+	if c.Equipment.Belt.IsCursed() {
+		c.Equipment.Belt.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Belt)
+	}
+
+	if c.Equipment.Gloves.IsCursed() {
+		c.Equipment.Gloves.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Gloves)
+	}
+
+	if c.Equipment.Ring.IsCursed() {
+		c.Equipment.Ring.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Ring)
+	}
+
+	if c.Equipment.Legs.IsCursed() {
+		c.Equipment.Legs.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Legs)
+	}
+
+	if c.Equipment.Feet.IsCursed() {
+		c.Equipment.Feet.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Feet)
+	}
+
+	return uncursedList
 }

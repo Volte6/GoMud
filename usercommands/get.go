@@ -238,6 +238,8 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 				)
 			}
+
+			return true, nil
 		}
 
 		//

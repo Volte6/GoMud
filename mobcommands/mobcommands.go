@@ -56,10 +56,9 @@ var (
 		"sneak":          {Sneak, false},
 		"suicide":        {Suicide, true},
 		//		"stash":  {Stash, false},
-		"throw":   {Throw, false},
-		"trash":   {Trash, false},
-		"uncurse": {Uncurse, false},
-		"wander":  {Wander, false},
+		"throw":  {Throw, false},
+		"trash":  {Trash, false},
+		"wander": {Wander, false},
 	}
 )
 

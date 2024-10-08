@@ -1,0 +1,5 @@
+type: cat
+statmods:
+  speed: 5
+powers:
+  - attack

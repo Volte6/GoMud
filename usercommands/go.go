@@ -58,6 +58,8 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			return true, nil
 		}
 
+		originRoomId := user.Character.RoomId
+
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
 
@@ -124,8 +126,6 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		}
 
-		originRoomId := user.Character.RoomId
-
 		// Load current room details
 		destRoom := rooms.LoadRoom(goRoomId)
 		if destRoom == nil {
@@ -182,6 +182,19 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					),
 					user.UserId)
 
+				// Tell everyone if the pet is following
+				if user.Character.Pet != nil {
+
+					user.SendText(fmt.Sprintf(`<ansi fg="petname">%s</ansi> follows you.`, user.Character.Pet.Name))
+
+					destRoom.SendText(
+						fmt.Sprintf(string(c.EnterRoomMessageWrapper),
+							fmt.Sprintf(`<ansi fg="petname">%s</ansi> (<ansi fg="username">%s's</ansi> %s) enters from %s.`, user.Character.Pet.Name, user.Character.Name, user.Character.Pet.Type, enterFromExit),
+						),
+						user.UserId,
+					)
+				}
+
 				destRoom.SendTextToExits(`You hear someone moving around.`, true, room.GetPlayers(rooms.FindAll)...)
 			}
 
@@ -209,10 +222,12 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				if mob == nil {
 					continue
 				}
+				// They only follow if they're in the same room as the player
+				if mob.Character.RoomId != originRoomId {
+					continue
+				}
 				if mob.Character.IsCharmed(user.UserId) { // Charmed mobs follow
-
 					mob.Command(rest)
-
 				}
 			}
 

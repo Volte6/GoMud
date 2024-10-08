@@ -13,3 +13,11 @@ biome: forest
 exits:
   east:
     roomid: 567
+nouns:
+  bridge: The bridge is uncrossable now. Before you is a large chasm that disappears
+    into darkness.
+  chasm: The cliff is too steep to climb down. You'd need a rope or something to descend.
+  cliff: The cliff is too steep to climb down. You'd need a rope or something to descend.
+  down: The cliff is too steep to climb down. You'd need a rope or something to descend.
+  edge: The cliff is too steep to climb down. You'd need a rope or something to descend.
+  gorge: The cliff is too steep to climb down. You'd need a rope or something to descend.

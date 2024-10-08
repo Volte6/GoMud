@@ -17,6 +17,7 @@ import (
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/pets"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -1314,6 +1315,9 @@ func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) 
 	for _, newNoun := range strings.Split(noun, ` `) {
 
 		if desc, ok := r.Nouns[newNoun]; ok {
+			if desc[0:1] == `:` {
+				return desc[1:], r.Nouns[desc[1:]]
+			}
 			return noun, desc
 		}
 
@@ -1323,17 +1327,31 @@ func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) 
 
 		// If ended in `s`, strip it and add a new word to the search list
 		if noun[len(newNoun)-1:] == `s` {
-			if desc, ok := r.Nouns[newNoun[:len(newNoun)-1]]; ok {
-				return newNoun[:len(newNoun)-1], desc
+			testNoun := newNoun[:len(newNoun)-1]
+			if desc, ok := r.Nouns[testNoun]; ok {
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
 			}
-		} else if desc, ok := r.Nouns[newNoun+`s`]; ok { // `s`` at end
-			return newNoun + `s`, desc
+		} else {
+			testNoun := newNoun + `s`
+			if desc, ok := r.Nouns[testNoun]; ok { // `s`` at end
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
+			}
 		}
 
 		// Switch ending of `y` to `ies`
 		if noun[len(newNoun)-1:] == `y` {
-			if desc, ok := r.Nouns[newNoun[:len(newNoun)-1]+`ies`]; ok { // `ies` instead of `y` at end
-				return newNoun[:len(newNoun)-1] + `ies`, desc
+			testNoun := newNoun[:len(newNoun)-1] + `ies`
+			if desc, ok := r.Nouns[testNoun]; ok { // `ies` instead of `y` at end
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
 			}
 		}
 
@@ -1343,11 +1361,21 @@ func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) 
 
 		// Strip 'es' such as 'torches'
 		if noun[len(newNoun)-2:] == `es` {
-			if desc, ok := r.Nouns[newNoun[:len(newNoun)-2]]; ok {
-				return newNoun[:len(newNoun)-2], desc
+			testNoun := newNoun[:len(newNoun)-2]
+			if desc, ok := r.Nouns[testNoun]; ok {
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
 			}
-		} else if desc, ok := r.Nouns[newNoun+`es`]; ok { // `es` at end
-			return newNoun + `es`, desc
+		} else {
+			testNoun := newNoun + `es`
+			if desc, ok := r.Nouns[testNoun]; ok { // `es` at end
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
+			}
 		}
 
 		if len(newNoun) < 4 {
@@ -1356,8 +1384,12 @@ func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) 
 
 		// Strip 'es' such as 'torches'
 		if noun[len(newNoun)-3:] == `ies` {
-			if desc, ok := r.Nouns[newNoun[:len(newNoun)-3]+`y`]; ok { // `y` instead of `ies` at end
-				return newNoun[:len(newNoun)-3] + `y`, desc
+			testNoun := newNoun[:len(newNoun)-3] + `y`
+			if desc, ok := r.Nouns[testNoun]; ok { // `y` instead of `ies` at end
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
 			}
 		}
 
@@ -1557,7 +1589,12 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 			description[i] += strings.Repeat(` `, desclineWidth-len(description[i])) + tinymap[i]
 		}
 
-		if user.Permission == users.PermissionAdmin {
+		renderNouns := user.Permission == users.PermissionAdmin
+		if user.Character.Pet != nil && user.Character.Pet.HasPower(pets.SeeNouns) {
+			renderNouns = true
+		}
+
+		if renderNouns {
 			if len(r.Nouns) > 0 {
 				for i := range description {
 					for noun, _ := range r.Nouns {
@@ -1572,7 +1609,12 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 
 		roomDesc := util.SplitString(details.Description, 80)
 
-		if user.Permission == users.PermissionAdmin {
+		renderNouns := user.Permission == users.PermissionAdmin
+		if user.Character.Pet != nil && user.Character.Pet.HasPower(pets.SeeNouns) {
+			renderNouns = true
+		}
+
+		if renderNouns {
 			if len(r.Nouns) > 0 {
 				for i := range roomDesc {
 					for noun, _ := range r.Nouns {

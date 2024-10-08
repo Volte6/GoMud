@@ -60,7 +60,7 @@ function onGive(mob, room, eventDetails) {
     SendUserMessage(eventDetails.sourceId, 'Suddenly, you are sucked into a strange portal.');
     SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" is sucked into a strange portal.", user.UserId());
 
-    SendRoomMessage(830, user.GetCharacterName(true)+" appears through a portal.");
+    SendRoomMessage(830, user.GetCharacterName(true)+" appears through a portal.", user.UserId());
        
     user.MoveRoom(830);
 

@@ -15,5 +15,12 @@ exits:
     roomid: 320
   southwest:
     roomid: 318
+nouns:
+  island: A large island sits in the middle of the lake, but a closer rocky island
+    sits to the northwest of here.
+  rocks: A large island sits in the middle of the lake, but a closer rocky island
+    sits to the northwest of here.
+  rocky island: A large island sits in the middle of the lake, but a closer rocky
+    island sits to the northwest of here.
 idlemessages:
 - "304"

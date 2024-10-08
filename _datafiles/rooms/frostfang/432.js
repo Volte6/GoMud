@@ -18,7 +18,7 @@ function onCommand_look(rest, user, room) {
     }
 
     SendUserMessage(user.UserId(), "A <ansi fg=\"item\">crowbar</ansi> leans besides the fireplace. Probably used for poking the fire and moving the logs around.");
-    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" looks at the <ansi fg=\"item\">crowbar</ansi> by the fireplace.");   
+    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" looks at the <ansi fg=\"item\">crowbar</ansi> by the fireplace.", user.UserId());   
 
     return true;
 }
@@ -44,7 +44,7 @@ function onCommand(cmd, rest, user, room) {
     crowbarAvailableRound = roundNow + UtilGetMinutesToRounds(15)
 
     SendUserMessage(user.UserId(), "You take the <ansi fg=\"item\">crowbar</ansi>. They probably won't miss it.");
-    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" takes the <ansi fg=\"item\">crowbar</ansi> from beside the fireplace.");   
+    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" takes the <ansi fg=\"item\">crowbar</ansi> from beside the fireplace.", user.UserId());   
     
     user.GiveItem(10012);
 

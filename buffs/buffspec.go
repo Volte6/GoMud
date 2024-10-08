@@ -42,7 +42,8 @@ const (
 	ReviveOnDeath Flag = `revive-on-death`
 
 	// Gear related
-	PermaGear Flag = `perma-gear`
+	PermaGear   Flag = `perma-gear`
+	RemoveCurse Flag = `remove-curse`
 
 	// Harmful flags
 	Poison Flag = `poison`

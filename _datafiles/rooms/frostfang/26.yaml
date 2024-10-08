@@ -20,7 +20,12 @@ exits:
   south:
     roomid: 25
 nouns:
-  raven's eyes: The raven's eyes look smooth and shiny.
+  bird: Looking more closely, the eyes of the raven are made of onyx. They are clean
+    and clear, as if polished.
+  raven: Looking more closely, the eyes of the raven are made of onyx. They are clean
+    and clear, as if polished.
+  raven's eyes: Looking more closely, the eyes of the raven are made of onyx. They
+    are clean and clear, as if polished.
 spawninfo:
 - mobid: 1
   cooldown: 10
