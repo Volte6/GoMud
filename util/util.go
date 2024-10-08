@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"crypto/sha256"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -721,4 +722,21 @@ func PercentOfTotal(value1 int, value2 int) float64 {
 		return 0
 	}
 	return (float64(value1) + float64(value2)) / float64(value1)
+}
+
+func ValidateName(name string) error {
+
+	if len(name) < 2 || len(name) > 16 {
+		return fmt.Errorf("length must be between %d and %d characters long", 2, 16)
+	}
+
+	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(name[:1]) {
+		return errors.New(`provided name starts with a non alpha character`)
+	}
+
+	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(name) {
+		return errors.New(`provided name contains non alphanumeric or underscore characters`)
+	}
+
+	return nil
 }

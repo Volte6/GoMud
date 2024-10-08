@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/fileloader"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/util"
@@ -15,6 +16,7 @@ import (
 
 type Pet struct {
 	Name          string         `yaml:"name,omitempty"`          // Name of the pet (player provided hopefully)
+	NameStyle     string         `yaml:"namestyle,omitempty"`     // Optional color pattern to apply
 	Type          string         `yaml:"type"`                    // type of pet
 	Food          Food           `yaml:"food,omitempty"`          // how much food the pet has
 	LastMealRound uint8          `yaml:"lastmealround,omitempty"` // When the pet was last fed
@@ -29,6 +31,30 @@ var (
 
 	petDataFilesFolderPath = "_datafiles/pets"
 )
+
+func (p *Pet) StatMod(statName string) int {
+	if p.StatMods == nil {
+		return 0
+	}
+	return p.StatMods[statName]
+}
+
+func (p *Pet) Exists() bool {
+	return p.Type != ``
+}
+
+func (p *Pet) DisplayName() string {
+
+	if len(p.NameStyle) > 0 {
+		patternName := p.NameStyle
+		if patternName[0:1] == `:` {
+			patternName = patternName[1:]
+		}
+		return colorpatterns.ApplyColorPattern(p.Name, patternName)
+	}
+
+	return fmt.Sprintf(`<ansi fg="petname">%s</ansi>`, p.Name)
+}
 
 func (p *Pet) HasPower(pwr Power) bool {
 	for _, pwrName := range p.Powers {

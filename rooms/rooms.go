@@ -1590,7 +1590,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		}
 
 		renderNouns := user.Permission == users.PermissionAdmin
-		if user.Character.Pet != nil && user.Character.Pet.HasPower(pets.SeeNouns) {
+		if user.Character.Pet.Exists() && user.Character.Pet.HasPower(pets.SeeNouns) {
 			renderNouns = true
 		}
 
@@ -1610,7 +1610,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		roomDesc := util.SplitString(details.Description, 80)
 
 		renderNouns := user.Permission == users.PermissionAdmin
-		if user.Character.Pet != nil && user.Character.Pet.HasPower(pets.SeeNouns) {
+		if user.Character.Pet.Exists() && user.Character.Pet.HasPower(pets.SeeNouns) {
 			renderNouns = true
 		}
 

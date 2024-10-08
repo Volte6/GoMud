@@ -402,7 +402,7 @@ func (a ScriptActor) GiveBuff(buffId int) {
 }
 
 func (a ScriptActor) GetStatMod(statModName string) int {
-	return a.characterRecord.Buffs.StatMod(statModName) + a.characterRecord.Equipment.StatMod(statModName)
+	return a.characterRecord.StatMod(statModName)
 }
 
 func (a ScriptActor) HasBuffFlag(buffFlag string) bool {
