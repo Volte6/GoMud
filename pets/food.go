@@ -13,11 +13,11 @@ func (f Food) String() string {
 	}
 
 	if f == 2 {
-		return `moody`
+		return `hungry`
 	}
 
 	if f == 3 {
-		return `hungry`
+		return `well fed`
 	}
 
 	return `full`

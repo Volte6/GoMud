@@ -46,15 +46,20 @@ func (p *Pet) Exists() bool {
 
 func (p *Pet) DisplayName() string {
 
+	name := p.Name
+	if name == `` {
+		name = p.Type
+	}
+
 	if len(p.NameStyle) > 0 {
 		patternName := p.NameStyle
 		if patternName[0:1] == `:` {
 			patternName = patternName[1:]
 		}
-		return colorpatterns.ApplyColorPattern(p.Name, patternName)
+		return colorpatterns.ApplyColorPattern(name, patternName)
 	}
 
-	return fmt.Sprintf(`<ansi fg="petname">%s</ansi>`, p.Name)
+	return fmt.Sprintf(`<ansi fg="petname">%s</ansi>`, name)
 }
 
 func (p *Pet) StoreItem(i items.Item) bool {
