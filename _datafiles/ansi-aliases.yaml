@@ -10,6 +10,7 @@ color8:
   mobname: 14 
   mobname-aggro: 91 # Bright red
   mobname-downed: red
+  petname: 3
   spellname: magenta
   nameprefix-pet: 92
   role: 90
@@ -144,6 +145,7 @@ color256:
   mobname: 51
   mobname-aggro: 9 # Bright red
   mobname-downed: 124
+  petname: 215
   spellname: magenta
   nameprefix-pet: 10
   role: 8

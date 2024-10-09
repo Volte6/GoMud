@@ -1,8 +1,5 @@
 
-const runes = ["rune", "runes"];
-const statues = ["statue", "statues"];
-const statue_left = ["zyphrial", "left", "first"];
-const statue_right = ["vorthos", "right", "second"];
+
 const magic_phrase = "zyphrial lumara vorthos";
 
 function onCommand_west(rest, user, room) {
@@ -22,40 +19,6 @@ function onCommand_west(rest, user, room) {
     }
 }
 
-// cmd specific handler
-function onCommand_look(rest, user, room) {
-
-
-    runesMatch = UtilFindMatchIn(rest, runes);
-    if ( runesMatch.found ) {
-        SendUserMessage(user.UserId(), "The runes on the gate aren't just decorative; they appear to be part of an old language, possibly used for protective spells or rituals. The runes are only partially readable, and two of the words are scratched out. All you can make out is \"<ansi fg=\"109\">Z-p---l lumara -ort--s.</ansi>\"");
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" examines the runes.", user.UserId());
-        return true;
-    }
-
-    statuesMatch = UtilFindMatchIn(rest, statues);
-    if ( statuesMatch.found ) {
-        SendUserMessage(user.UserId(), "The statues of the guardian beasts stand as imposing monoliths on either side of the West Gate. Carved from a deep-gray, almost black stone, they depict creatures that seem to be a blend of myth and reality. The one on the left is known as Zyphrial, and on the right is Vorthos.");
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" examines the stone statues.", user.UserId());
-        return true;
-    }
-
-    leftStatueMatch = UtilFindMatchIn(rest, statue_left);
-    if ( leftStatueMatch.found ) {
-        SendUserMessage(user.UserId(), "The statue on the left, named Zyphrial, has the body of a lion, muscular and poised, but its head is that of a majestic eagle with sharp, piercing eyes and a beak that looks ready to snap. Its wings, though folded, span wide, hinting at the power they hold when unfurled.");
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" examines the statue on the left.", user.UserId());
-        return true;
-    }
-
-    leftStatueMatch = UtilFindMatchIn(rest, statue_right);
-    if ( leftStatueMatch.found ) {
-        SendUserMessage(user.UserId(), "The statue on the right, known as Vorthos, is serpentine, its long, coiled body reminiscent of a dragon. It has the scales of a reptile, but its face is almost humanoid, with deep-set eyes and a wise, contemplative expression. Twin horns spiral upwards from its forehead, and its clawed feet grip the base as if it's ready to pounce.");
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" examines the statue on the right.", user.UserId());
-        return true;
-    }
-
-    return false;
-}
 
 function onCommand_say(rest, user, room) {
     
@@ -80,3 +43,4 @@ function onCommand_say(rest, user, room) {
 
     return true;
 }
+

@@ -11,6 +11,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/items"
+	"github.com/volte6/mud/pets"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/skills"
@@ -77,6 +78,7 @@ type Character struct {
 	MiscData        map[string]any    `yaml:"miscdata,omitempty"`      // Any random other data that needs to be stored
 	ExtraLives      int               `yaml:"extralives,omitempty"`    // How many lives remain. If enabled, players can perma-die if they die at zero
 	MobMastery      MobMasteries      `yaml:"mobmastery,omitempty"`    // Tracks particular masteries around a given mob
+	Pet             pets.Pet          `yaml:"pet,omitempty"`           // Do they have a pet?
 	roomHistory     []int             // A stack FILO of the last X rooms the character has been in
 	followers       []int             // everyone following this user
 	permaBuffIds    []int             // Buff Id's that are always present for this character
@@ -177,7 +179,7 @@ func (c *Character) GetBaseCastSuccessChance(spellId string) int {
 
 	// add by any stat mods for casting, or casting school
 	// 0-xx
-	targetNumber += c.Equipment.StatMod(`casting`, `casting-`+string(sp.School))
+	targetNumber += c.StatMod(`casting`) + c.StatMod(`casting-`+string(sp.School))
 
 	if targetNumber < 0 {
 		targetNumber = 0
@@ -398,7 +400,7 @@ func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
 		return 0, 100
 	}
 
-	xpScale = c.Buffs.StatMod("xpscale") + 100
+	xpScale = c.StatMod("xpscale") + 100
 
 	if xpScale == 100 {
 		actualXP = xp
@@ -651,6 +653,10 @@ func (c *Character) getFormattedName(viewingUserId int, uType string, renderFlag
 		f.Suffix = `downed`
 	} else if c.Aggro != nil && c.Aggro.UserId == viewingUserId {
 		f.Suffix = `aggro`
+	}
+
+	if c.Pet.Exists() {
+		f.PetName = c.Pet.DisplayName()
 	}
 
 	return f
@@ -1264,7 +1270,7 @@ func (c *Character) Heal(hp int, mana int) {
 }
 
 func (c *Character) HealthPerRound() int {
-	return 1 + c.Equipment.StatMod(`healthrecovery`)
+	return 1 + c.StatMod(`healthrecovery`)
 	/*
 		healAmt := math.Round(float64(c.Stats.Vitality.ValueAdj)/8) +
 			math.Round(float64(c.Level)/12) +
@@ -1275,7 +1281,7 @@ func (c *Character) HealthPerRound() int {
 }
 
 func (c *Character) ManaPerRound() int {
-	return 1 + c.Equipment.StatMod(`manarecovery`)
+	return 1 + c.StatMod(`manarecovery`)
 	/*
 		healAmt := math.Round(float64(c.Stats.Mysticism.ValueAdj)/8) +
 			math.Round(float64(c.Level)/12) +
@@ -1294,7 +1300,7 @@ func (c *Character) MovementCost() int {
 }
 
 func (c *Character) StatMod(statName string) int {
-	return c.Equipment.StatMod(statName) + c.Buffs.StatMod(statName)
+	return c.Equipment.StatMod(statName) + c.Buffs.StatMod(statName) + c.Pet.StatMod(statName)
 }
 
 func (c *Character) RecalculateStats() {
@@ -1312,12 +1318,12 @@ func (c *Character) RecalculateStats() {
 	}
 
 	// Add any mods for equipment
-	c.Stats.Strength.Mods = c.Equipment.StatMod("strength") + c.Buffs.StatMod("strength")
-	c.Stats.Speed.Mods = c.Equipment.StatMod("speed") + c.Buffs.StatMod("speed")
-	c.Stats.Smarts.Mods = c.Equipment.StatMod("smarts") + c.Buffs.StatMod("smarts")
-	c.Stats.Vitality.Mods = c.Equipment.StatMod("vitality") + c.Buffs.StatMod("vitality")
-	c.Stats.Mysticism.Mods = c.Equipment.StatMod("mysticism") + c.Buffs.StatMod("mysticism")
-	c.Stats.Perception.Mods = c.Equipment.StatMod("perception") + c.Buffs.StatMod("perception")
+	c.Stats.Strength.Mods = c.StatMod("strength")
+	c.Stats.Speed.Mods = c.StatMod("speed")
+	c.Stats.Smarts.Mods = c.StatMod("smarts")
+	c.Stats.Vitality.Mods = c.StatMod("vitality")
+	c.Stats.Mysticism.Mods = c.StatMod("mysticism")
+	c.Stats.Perception.Mods = c.StatMod("perception")
 
 	// Recalculate stats
 	// Stats are basically:
@@ -1332,14 +1338,12 @@ func (c *Character) RecalculateStats() {
 	// Set HP/MP maxes
 	// This relies on the above stats so has to be calculated afterwards
 	c.HealthMax.Mods = 5 +
-		c.Buffs.StatMod("healthmax") + // Any sort of spell buffs etc. are just direct modifiers
-		c.Equipment.StatMod("healthmax") + // However many points you have from equipment, you get 1 hp per point
+		c.StatMod("healthmax") + // Any sort of spell buffs etc. are just direct modifiers
 		c.Level + // For every level you get 1 hp
 		c.Stats.Vitality.ValueAdj*4 // for every vitality you get 3hp
 
 	c.ManaMax.Mods = 4 +
-		c.Buffs.StatMod("manamax") + // Any sort of spell buffs etc. are just direct modifiers
-		c.Equipment.StatMod("manamax") + // However many points you have from equipment, you get 1 hp per point
+		c.StatMod("manamax") + // Any sort of spell buffs etc. are just direct modifiers
 		c.Level + // For every level you get 1 mp
 		c.Stats.Mysticism.ValueAdj*3 // for every Mysticism you get 2mp
 
@@ -1407,6 +1411,10 @@ func (c *Character) Validate(recalcPermaBuffs ...bool) error {
 
 	if len(c.Description) == 0 {
 		c.Description = c.Name + " seems thoroughly uninteresting."
+	}
+
+	if c.Pet.Exists() {
+		c.Pet.Validate()
 	}
 
 	if c.SpellBook == nil {
@@ -1847,6 +1855,13 @@ func (c *Character) reapplyPermabuffs(removedItems ...items.Item) {
 		}
 	}
 
+	// Apply any buffs from pet
+	if c.Pet.Exists() {
+		for _, buffId := range c.Pet.GetBuffs() {
+			buffIdCount[buffId] = 100 // Don't allow pet buffs to be removed, keep this number high
+		}
+	}
+
 	// Track any buffs that come from an item
 	// If these don't show up as still being required by an item (such as a yaml file was changed)
 	// This will cause them to be removed.
@@ -1883,4 +1898,61 @@ func (c *Character) reapplyPermabuffs(removedItems ...items.Item) {
 			c.AddBuff(buffId, true)
 		}
 	}
+}
+
+func (c *Character) Uncurse() []items.Item {
+
+	uncursedList := []items.Item{}
+
+	if c.Equipment.Weapon.IsCursed() {
+		c.Equipment.Weapon.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Weapon)
+	}
+
+	if c.Equipment.Offhand.IsCursed() {
+		c.Equipment.Offhand.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Offhand)
+	}
+
+	if c.Equipment.Head.IsCursed() {
+		c.Equipment.Head.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Head)
+	}
+
+	if c.Equipment.Neck.IsCursed() {
+		c.Equipment.Neck.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Neck)
+	}
+
+	if c.Equipment.Body.IsCursed() {
+		c.Equipment.Body.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Body)
+	}
+
+	if c.Equipment.Belt.IsCursed() {
+		c.Equipment.Belt.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Belt)
+	}
+
+	if c.Equipment.Gloves.IsCursed() {
+		c.Equipment.Gloves.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Gloves)
+	}
+
+	if c.Equipment.Ring.IsCursed() {
+		c.Equipment.Ring.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Ring)
+	}
+
+	if c.Equipment.Legs.IsCursed() {
+		c.Equipment.Legs.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Legs)
+	}
+
+	if c.Equipment.Feet.IsCursed() {
+		c.Equipment.Feet.Uncursed = true
+		uncursedList = append(uncursedList, c.Equipment.Feet)
+	}
+
+	return uncursedList
 }

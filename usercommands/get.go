@@ -40,6 +40,7 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	getFromStash := false
 	containerName := ``
+	petUserId := 0
 
 	if len(args) >= 2 {
 		// Detect "stash" or "from stash" at end and remove it
@@ -70,6 +71,55 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				rest = strings.Join(args[0:len(args)-1], " ")
 			}
 		}
+
+		//
+		// Look for any pets in the room
+		//
+		petUserId = room.FindByPetName(args[len(args)-1])
+		if petUserId > 0 {
+
+			if petUserId != user.UserId {
+				user.SendText(`You can't do that!`)
+				return true, nil
+			}
+
+			getFromStash = false
+			if petUser := users.GetByUserId(petUserId); petUser != nil {
+
+				if args[len(args)-2] == "from" {
+					rest = strings.Join(args[0:len(args)-2], " ")
+				} else {
+					rest = strings.Join(args[0:len(args)-1], " ")
+				}
+			}
+		}
+	}
+
+	if petUserId == user.UserId {
+
+		matchItem, found := user.Character.Pet.FindItem(rest)
+		if !found {
+			user.SendText(fmt.Sprintf(`You don't see a %s carried by %s.`, rest, user.Character.Pet.DisplayName()))
+		} else {
+
+			if user.Character.Pet.RemoveItem(matchItem) {
+				if !user.Character.StoreItem(matchItem) {
+					user.Character.Pet.StoreItem(matchItem)
+				}
+
+				user.SendText(
+					fmt.Sprintf(`You remove a <ansi fg="itemname">%s</ansi> from %s.`, matchItem.DisplayName(), user.Character.Pet.DisplayName()),
+				)
+				room.SendText(
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> removes a <ansi fg="itemname">%s</ansi> from %s...`, user.Character.Name, matchItem.DisplayName(), user.Character.Pet.DisplayName()),
+					user.UserId,
+				)
+
+				scripting.TryItemScriptEvent(`onFound`, matchItem, user.UserId)
+			}
+		}
+
+		return true, nil
 
 	}
 
@@ -238,6 +288,8 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
 				)
 			}
+
+			return true, nil
 		}
 
 		//

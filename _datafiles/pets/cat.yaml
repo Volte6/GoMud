@@ -1,0 +1,5 @@
+type: cat
+statmods:
+  speed: 5
+damage:
+  diceroll: 1d3

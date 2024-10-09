@@ -1,0 +1,5 @@
+type: dog
+statmods:
+  strength: 5
+powers:
+  - see-hidden

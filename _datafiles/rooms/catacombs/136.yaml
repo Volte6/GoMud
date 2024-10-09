@@ -15,21 +15,13 @@ description: Within the labyrinthine silence of the catacombs, The Crypt of the 
 exits:
   north:
     roomid: 132
-items:
-- itemid: 10014
-- itemid: 20011
-- itemid: 20001
-- itemid: 20015
-  uncursed: true
-- itemid: 30002
-  uses: 1
-- itemid: 10004
-- itemid: 20004
-- itemid: 30007
-  uses: 1
-- itemid: 8
-  uses: 1
-- itemid: 10006
+nouns:
+  sarcophagus: The sarcophagus lies solemn and imposing, its ancient stone surface
+    etched with enigmatic runes and the stern visage of the entombed sovereign, exuding
+    an air of timeless dominion and whispered dread.
+  tomb: The sarcophagus lies solemn and imposing, its ancient stone surface etched
+    with enigmatic runes and the stern visage of the entombed sovereign, exuding an
+    air of timeless dominion and whispered dread.
 spawninfo:
 - mobid: 17
   cooldown: 90

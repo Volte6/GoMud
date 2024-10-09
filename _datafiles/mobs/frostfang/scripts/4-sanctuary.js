@@ -37,15 +37,8 @@ function onGive(mob, room, eventDetails) {
 
         user.SetMiscCharacterData("donation-tally-sanctuary", totalDonated);
 
-        if (eventDetails.gold < 100) {
-            mob.Command("say Thank you for your donation.")
-            mob.Command("emote nods softly.")
-        } else {
-            mob.Command("say Thank you for your generous donation.")
-            mob.Command("emote bows deeply.")
-            mob.Command("emote claps his hands together in prayer and begins to chant.")
-            mob.Command("uncurse")
-        }
+        mob.Command("say Thank you for your donation.")
+        mob.Command("emote nods softly.")
 
         mob.Command("say You have donated a total of <ansi fg=\"gold\">"+String(totalDonated)+" gold</ansi>!")
 
@@ -79,15 +72,11 @@ function onIdle(mob, room) {
     round = UtilGetRoundNumber();
     action = round % 6;
 
-    if (action > 2) {
+    if (action > 1) {
         return false;
     }
 
-    if (action == 2 ) {
-        mob.Command("say Have you taken the time to help the poor today?")
-    } else if (action == 1) {
-        mob.Command(`say For a <ansi fg="gold">100 gold</ansi> donation, I will remove any curses afflicting your party.`)
-    }
+    mob.Command("say Have you taken the time to help the poor today?")
 
     mob.Command(`say To make a donation, simply <ansi fg="command">give</ansi> the gold to me.`)
 

@@ -17,3 +17,8 @@ character:
   level: 5
   alignment: 100
   items: []
+  shop:
+    - buffid: 14
+      price: 50
+    - buffid: 37
+      price: 100

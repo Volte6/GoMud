@@ -70,7 +70,7 @@ func (i ScriptItem) MarkLastUsed(clear ...bool) uint64 {
 
 func (i ScriptItem) Name(simpleVersion ...bool) string {
 	if len(simpleVersion) > 0 && simpleVersion[0] {
-		return i.Name()
+		return i.NameSimple()
 	}
 	return i.itemRecord.DisplayName()
 }

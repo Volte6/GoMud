@@ -314,8 +314,25 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, nil
 	}
 
-	// Nothing found
+	//
+	// Look for any pets in the room
+	//
+	petUserId := room.FindByPetName(rest)
+	if petUserId > 0 {
+		if petUser := users.GetByUserId(petUserId); petUser != nil {
 
+			user.SendText(fmt.Sprintf(`You look at %s`, petUser.Character.Pet.DisplayName()))
+
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at %s.`, user.Character.Name, petUser.Character.Pet.DisplayName()), user.UserId)
+
+			textOut, _ := templates.Process("character/pet", petUser)
+			user.SendText(textOut)
+
+			return true, nil
+		}
+	}
+
+	// Nothing found
 	user.SendText("Look at what???")
 
 	return true, nil

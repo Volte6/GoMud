@@ -58,6 +58,8 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			return true, nil
 		}
 
+		originRoomId := user.Character.RoomId
+
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
 
@@ -124,8 +126,6 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		}
 
-		originRoomId := user.Character.RoomId
-
 		// Load current room details
 		destRoom := rooms.LoadRoom(goRoomId)
 		if destRoom == nil {
@@ -161,7 +161,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			if isSneaking {
 				user.SendText(
 					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
-						fmt.Sprintf(`You <ansi fg="black-bold">sneak</ansi> towards the %s exit.`, exitName),
+						fmt.Sprintf(`You <ansi fg="black-bold">sneak</ansi> towards the <ansi fg="exit">%s</ansi> exit.`, exitName),
 					))
 			} else {
 				user.SendText(
@@ -170,17 +170,43 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					))
 
 				// Tell the old room they are leaving
-				room.SendText(
-					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> leaves towards the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
-					),
-					user.UserId)
-				// Tell the new room they have arrived
-				destRoom.SendText(
-					fmt.Sprintf(string(c.EnterRoomMessageWrapper),
-						fmt.Sprintf(`<ansi fg="username">%s</ansi> enters from %s.`, user.Character.Name, enterFromExit),
-					),
-					user.UserId)
+				if user.Character.Pet.Exists() {
+
+					room.SendText(
+						fmt.Sprintf(string(c.ExitRoomMessageWrapper),
+							fmt.Sprintf(`<ansi fg="username">%s</ansi> and %s leave towards the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, user.Character.Pet.DisplayName(), exitName),
+						),
+						user.UserId)
+
+				} else {
+					room.SendText(
+						fmt.Sprintf(string(c.ExitRoomMessageWrapper),
+							fmt.Sprintf(`<ansi fg="username">%s</ansi> leaves towards the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
+						),
+						user.UserId)
+				}
+
+				// Tell everyone if the pet is following
+				if user.Character.Pet.Exists() {
+
+					user.SendText(fmt.Sprintf(`%s follows you.`, user.Character.Pet.DisplayName()))
+
+					destRoom.SendText(
+						fmt.Sprintf(string(c.ExitRoomMessageWrapper),
+							fmt.Sprintf(`<ansi fg="username">%s</ansi> and %s enters from <ansi fg="exit">%s</ansi>.`, user.Character.Name, user.Character.Pet.DisplayName(), exitName),
+						),
+						user.UserId)
+
+				} else {
+
+					// Tell the new room they have arrived
+					destRoom.SendText(
+						fmt.Sprintf(string(c.EnterRoomMessageWrapper),
+							fmt.Sprintf(`<ansi fg="username">%s</ansi> enters from <ansi fg="exit">%s</ansi>.`, user.Character.Name, enterFromExit),
+						),
+						user.UserId)
+
+				}
 
 				destRoom.SendTextToExits(`You hear someone moving around.`, true, room.GetPlayers(rooms.FindAll)...)
 			}
@@ -209,10 +235,12 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				if mob == nil {
 					continue
 				}
+				// They only follow if they're in the same room as the player
+				if mob.Character.RoomId != originRoomId {
+					continue
+				}
 				if mob.Character.IsCharmed(user.UserId) { // Charmed mobs follow
-
 					mob.Command(rest)
-
 				}
 			}
 

@@ -402,7 +402,7 @@ func (a ScriptActor) GiveBuff(buffId int) {
 }
 
 func (a ScriptActor) GetStatMod(statModName string) int {
-	return a.characterRecord.Buffs.StatMod(statModName) + a.characterRecord.Equipment.StatMod(statModName)
+	return a.characterRecord.StatMod(statModName)
 }
 
 func (a ScriptActor) HasBuffFlag(buffFlag string) bool {
@@ -535,6 +535,10 @@ func (a ScriptActor) GetCharmCount() int {
 	return len(a.characterRecord.GetCharmIds())
 }
 
+func (a ScriptActor) GetMaxCharmCount() int {
+	return a.characterRecord.GetMaxCharmedCreatures()
+}
+
 func (a ScriptActor) GetTrainingPoints() int {
 	return a.characterRecord.TrainingPoints
 }
@@ -581,6 +585,17 @@ func (a ScriptActor) WebClientModalClose(name string) {
 			Text:         "MODALREM:" + name,
 		})
 	}
+}
+
+func (a ScriptActor) Uncurse() []*ScriptItem {
+
+	retList := []*ScriptItem{}
+
+	for _, itm := range a.characterRecord.Uncurse() {
+		retList = append(retList, GetItem(itm))
+	}
+
+	return retList
 }
 
 // ////////////////////////////////////////////////////////

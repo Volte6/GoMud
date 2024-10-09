@@ -2,20 +2,12 @@
 
 crateAvailableRound = 0;
 
-const caravan = ["caravan", "caravans", "wagon", "wagons"];
 const crate = ["crate", "crates", "box"];
 const verbs = ["open", "pry"];
 
 function onCommand_look(rest, user, room) {
 
     roundNow = UtilGetRoundNumber();
-
-    matches = UtilFindMatchIn(rest, caravan);
-    if ( matches.found ) {
-        SendUserMessage(user.UserId(), "The caravan, long since destroyed, once belonged to the frostfire guild of magicians. There must have been some impressive artifacts carreid by them once.");
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" examines the caravan.");   
-        return true;
-    }
 
     matches = UtilFindMatchIn(rest, crate);
     if ( matches.found ) {
@@ -25,7 +17,7 @@ function onCommand_look(rest, user, room) {
             SendUserMessage(user.UserId(), "The scattered crates are mostly broken and empty, save one that is still intact.");
         }
         
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" examines the broken crates.");   
+        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" examines the broken crates.", user.UserId());   
         return true;
     }
 
@@ -47,18 +39,18 @@ function onCommand(cmd, rest, user, room) {
     roundNow = UtilGetRoundNumber();
             
     if (roundNow < crateAvailableRound) {
-        SendUserMessage(user.UserId(), "There's nothign here but broken, empty crates.");
+        SendUserMessage(user.UserId(), "There's nothing here but broken, empty crates.");
         return true;
     }
 
     if ( !user.HasItemId(10012) ) {
         SendUserMessage(user.UserId(), "You'll need some kind of tool to open that.");
-        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" is messing around with an in-tact crate.");   
+        SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" is messing around with an in-tact crate.", user.UserId());   
         return true;
     }
 
     SendUserMessage(user.UserId(), "You pry the box open and remove a glowing crystal from inside.");
-    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" pries the box open and removes something that emits a faint glow.");   
+    SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" pries the box open and removes something that emits a faint glow.", user.UserId());   
     
     user.GiveItem(4);
 

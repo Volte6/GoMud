@@ -1,0 +1,7 @@
+buffid: 37
+name: Remove Curse
+description: Curses are removed from worn equipment
+roundinterval: 1
+triggercount: 1
+flags:
+  - remove-curse

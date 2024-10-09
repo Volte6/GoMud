@@ -343,8 +343,12 @@ func LogOutUserByConnectionId(connectionId connection.ConnectionId) error {
 // First time creating a user.
 func CreateUser(u *UserRecord) error {
 
+	if err := util.ValidateName(u.Username); err != nil {
+		return errors.New("that username is not allowed: " + err.Error())
+	}
+
 	if configs.GetConfig().IsBannedName(u.Username) {
-		return errors.New("that username is not allowed")
+		return errors.New(`that username is prohibited`)
 	}
 
 	for _, name := range mobs.GetAllMobNames() {

@@ -84,6 +84,7 @@ var (
 		`online`:      {Online, true, false},
 		`party`:       {Party, true, false},
 		`peep`:        {Peep, false, false},
+		`pet`:         {Pet, false, false},
 		`picklock`:    {Picklock, false, false},
 		`pickpocket`:  {Pickpocket, false, false},
 		`prepare`:     {Prepare, true, true}, // Admin only

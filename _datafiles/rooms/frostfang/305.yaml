@@ -12,3 +12,7 @@ biome: road
 exits:
   west:
     roomid: 303
+nouns:
+  caravan: :wagons
+  wagons: The caravan, long since destroyed, once belonged to the frostfire guild
+    of magicians. There must have been some impressive artifacts carreid by them once.

@@ -64,6 +64,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.CharmRemove()](#actorobjectcharmremove)
   - [ActorObject.CharmExpire()](#actorobjectcharmexpire)
   - [ActorObject.GetCharmCount() int](#actorobjectgetcharmcount-int)
+  - [ActorObject.GetMaxCharmCount() int](#actorobjectgetmaxcharmcount-int)
   - [ActorObject.GetTrainingPoints() int](#actorobjectgettrainingpoints-int)
   - [ActorObject.GiveTrainingPoints(amt int)](#actorobjectgivetrainingpointsamt-int)
   - [ActorObject.GetStatPoints() int](#actorobjectgetstatpoints-int)
@@ -454,6 +455,9 @@ Forces the current charm of the mob to expire
 
 ## [ActorObject.GetCharmCount() int](/scripting/actor_func.go)
 Returns the number of charmed creatures in the actors control
+
+## [ActorObject.GetMaxCharmCount() int](/scripting/actor_func.go)
+Returns the maximum allowed charmed creatures for this actor
 
 ## [ActorObject.GetTrainingPoints() int](/scripting/actor_func.go)
 Returns the number of Training Points the actor has.

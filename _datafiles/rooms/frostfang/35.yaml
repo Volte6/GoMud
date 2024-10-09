@@ -22,6 +22,28 @@ exits:
     roomid: 824
   west:
     roomid: 167
+nouns:
+  first: :zyphrial
+  left: :zyphrial
+  right: :vorthos
+  runes: The runes on the gate aren't just decorative; they appear to be part of an
+    old language, possibly used for protective spells or rituals. The runes are only
+    partially readable, and two of the words are scratched out. All you can make out
+    is [ <ansi fg="109">Z-p---l lumara -ort--s</ansi> ].
+  second: :vorthos
+  statues: The statues of the guardian beasts stand as imposing monoliths on either
+    side of the West Gate. Carved from a deep-gray, almost black stone, they depict
+    creatures that seem to be a blend of myth and reality. The one on the left is
+    known as Zyphrial, and on the right is Vorthos.
+  vorthos: The statue on the right, known as Vorthos, is serpentine, its long, coiled
+    body reminiscent of a dragon. It has the scales of a reptile, but its face is
+    almost humanoid, with deep-set eyes and a wise, contemplative expression. Twin
+    horns spiral upwards from its forehead, and its clawed feet grip the base as if
+    it's ready to pounce.
+  zyphrial: The statue on the left, named Zyphrial, has the body of a lion, muscular
+    and poised, but its head is that of a majestic eagle with sharp, piercing eyes
+    and a beak that looks ready to snap. Its wings, though folded, span wide, hinting
+    at the power they hold when unfurled.
 idlemessages:
 - You hear the wind howling outside the gate.
 - The wind whistles through the arrow slits in the watchtowers.

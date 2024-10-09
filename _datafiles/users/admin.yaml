@@ -16,34 +16,34 @@ character:
     to disrupt the balance of the world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 271
+  roomid: 1
   zone: Frostfang
   raceid: 2
   stats:
     strength:
       training: 6
     speed:
-      training: 3
+      training: 28
       base: 1
     smarts:
       training: 1
       base: 1
     vitality:
-      training: 1
+      training: 5
     mysticism:
       training: 1
       base: 2
     perception:
       training: 2
-  level: 4
-  experience: 15000
-  trainingpoints: 38
-  statpoints: 29
-  health: 43
-  mana: 31
+  level: 5
+  experience: 17470
+  trainingpoints: 44
+  statpoints: 6
+  health: 48
+  mana: 32
   actionpoints: 202
-  alignment: 0
-  gold: 90
+  alignment: -1
+  gold: 9950
   bank: 0
   spellbook:
     curepoison: 1
@@ -52,28 +52,26 @@ character:
     illum: 1
     mm: 1
   items:
+  - itemid: 10006
+    uncursed: true
   - itemid: 10012
-  - itemid: 10014
-  - itemid: 30007
-    uses: 1
-  - itemid: 8
-    uses: 1
-    lastusedround: 1013
   buffs:
     list:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 26
+      roundcounter: 18
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 4
+      roundcounter: 26
       triggersleft: 1000000000
   equipment:
     weapon:
-      itemid: 10001
+      itemid: 10004
+    offhand:
+      itemid: 20004
     belt:
       itemid: 20011
     gloves:
@@ -101,10 +99,11 @@ character:
     784-chest: DUU
     key-110-west: "3"
   kd:
-    totalkills: 17
+    totalkills: 20
     kills:
       1: 5
-      2: 4
+      2: 6
+      18: 1
       58: 8
     totaldeaths: 1
   extralives: 3
@@ -113,8 +112,26 @@ character:
       1: 87
       54: 50
       55: 40
+  pet:
+    name: fisher
+    type: mule
+    food: 4
+    damage:
+      attacks: 1
+      diceroll: 2d4
+      dicecount: 2
+      sidecount: 4
+    statmods:
+      strength: 5
+    powers:
+    - carry-items
+    items:
+    - itemid: 30002
+      uses: 1
+    - itemid: 30002
+      uses: 1
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/zIyN9QxMjcEBAAA//9QTHwrBwAAAA==
+roommemoryblob: H4sIAAAAAAAA/zLXsdCBYXzQXMcQAgEBAAD//5lVkjYxAAAA
 configoptions: {}

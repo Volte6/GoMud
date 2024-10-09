@@ -13,6 +13,7 @@ import (
 	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
+	"github.com/volte6/mud/util"
 )
 
 func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
@@ -85,6 +86,18 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 				question.RejectResponse()
 				return true, nil
 			}
+		}
+
+		if err := util.ValidateName(question.Response); err != nil {
+			user.SendText(`that name is not allowed: ` + err.Error())
+			question.RejectResponse()
+			return true, nil
+		}
+
+		if configs.GetConfig().IsBannedName(question.Response) {
+			user.SendText(`that username is prohibited`)
+			question.RejectResponse()
+			return true, nil
 		}
 
 		if err := user.SetCharacterName(question.Response); err != nil {

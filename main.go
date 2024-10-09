@@ -33,6 +33,7 @@ import (
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/keywords"
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/pets"
 	"github.com/volte6/mud/quests"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
@@ -123,6 +124,7 @@ func main() {
 	items.LoadDataFiles()
 	races.LoadDataFiles()
 	mobs.LoadDataFiles()
+	pets.LoadDataFiles()
 	quests.LoadDataFiles()
 	templates.LoadAliases()
 	keywords.LoadAliases()

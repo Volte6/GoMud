@@ -17,6 +17,7 @@ import (
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/pets"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -61,15 +62,16 @@ const (
 	AffectsRoom   = "room"   // Does it affect everyone in the room?
 
 	// Useful for finding mobs/players
-	FindCharmed        FindFlag = 0b000000001 // charmed
-	FindNeutral        FindFlag = 0b000000010 // Not aggro, not charmed, not Hostile
-	FindFightingPlayer FindFlag = 0b000000100 // aggro vs. a player
-	FindFightingMob    FindFlag = 0b000001000 // aggro vs. a mob
-	FindHostile        FindFlag = 0b000010000 // will auto-attack players
-	FindMerchant       FindFlag = 0b000100000 // is a merchant
-	FindDowned         FindFlag = 0b001000000 // hp < 1
-	FindBuffed         FindFlag = 0b010000000 // has a buff
-	FindHasLight       FindFlag = 0b100000000 // has a light source
+	FindCharmed        FindFlag = 0b0000000001 // charmed
+	FindNeutral        FindFlag = 0b0000000010 // Not aggro, not charmed, not Hostile
+	FindFightingPlayer FindFlag = 0b0000000100 // aggro vs. a player
+	FindFightingMob    FindFlag = 0b0000001000 // aggro vs. a mob
+	FindHostile        FindFlag = 0b0000010000 // will auto-attack players
+	FindMerchant       FindFlag = 0b0000100000 // is a merchant
+	FindDowned         FindFlag = 0b0001000000 // hp < 1
+	FindBuffed         FindFlag = 0b0010000000 // has a buff
+	FindHasLight       FindFlag = 0b0100000000 // has a light source
+	FindHasPet         FindFlag = 0b1000000000 // has a pet
 	// Combinatorial flags
 	FindFighting          = FindFightingPlayer | FindFightingMob // Currently in combat (aggro)
 	FindIdle              = FindCharmed | FindNeutral            // Not aggro or hostile
@@ -858,6 +860,11 @@ func (r *Room) GetMobs(findTypes ...FindFlag) []int {
 			mobMatches = append(mobMatches, mobId)
 			continue
 		}
+
+		if typeFlag&FindHasPet == FindHasPet && mob.Character.Pet.Exists() {
+			mobMatches = append(mobMatches, mobId)
+			continue
+		}
 	}
 
 	return mobMatches
@@ -942,6 +949,10 @@ func (r *Room) GetPlayers(findTypes ...FindFlag) []int {
 			continue
 		}
 
+		if typeFlag&FindHasPet == FindHasPet && user.Character.Pet.Exists() {
+			playerMatches = append(playerMatches, userId)
+			continue
+		}
 	}
 
 	return playerMatches
@@ -1108,6 +1119,29 @@ func (r *Room) FindByName(searchName string, findTypes ...FindFlag) (playerId in
 	mobInstanceId, _ = r.findMobByName(searchName, findTypes...)
 	playerId, _ = r.findPlayerByName(searchName, findTypes...)
 	return playerId, mobInstanceId
+}
+
+func (r *Room) FindByPetName(searchName string) (playerId int) {
+	// Map name to display name
+	petOwners := map[string]int{}
+	petNames := []string{}
+
+	for _, uId := range r.GetPlayers(FindHasPet) {
+		if u := users.GetByUserId(uId); u != nil {
+			petOwners[u.Character.Pet.Name] = u.UserId
+			petNames = append(petNames, u.Character.Pet.Name)
+		}
+	}
+
+	match, closeMatch := util.FindMatchIn(searchName, petNames...)
+	if match == `` {
+		if closeMatch == `` {
+			return 0
+		}
+		return petOwners[closeMatch]
+	}
+
+	return petOwners[match]
 }
 
 func (r *Room) findPlayerByName(searchName string, findTypes ...FindFlag) (int, error) {
@@ -1314,6 +1348,9 @@ func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) 
 	for _, newNoun := range strings.Split(noun, ` `) {
 
 		if desc, ok := r.Nouns[newNoun]; ok {
+			if desc[0:1] == `:` {
+				return desc[1:], r.Nouns[desc[1:]]
+			}
 			return noun, desc
 		}
 
@@ -1323,17 +1360,31 @@ func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) 
 
 		// If ended in `s`, strip it and add a new word to the search list
 		if noun[len(newNoun)-1:] == `s` {
-			if desc, ok := r.Nouns[newNoun[:len(newNoun)-1]]; ok {
-				return newNoun[:len(newNoun)-1], desc
+			testNoun := newNoun[:len(newNoun)-1]
+			if desc, ok := r.Nouns[testNoun]; ok {
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
 			}
-		} else if desc, ok := r.Nouns[newNoun+`s`]; ok { // `s`` at end
-			return newNoun + `s`, desc
+		} else {
+			testNoun := newNoun + `s`
+			if desc, ok := r.Nouns[testNoun]; ok { // `s`` at end
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
+			}
 		}
 
 		// Switch ending of `y` to `ies`
 		if noun[len(newNoun)-1:] == `y` {
-			if desc, ok := r.Nouns[newNoun[:len(newNoun)-1]+`ies`]; ok { // `ies` instead of `y` at end
-				return newNoun[:len(newNoun)-1] + `ies`, desc
+			testNoun := newNoun[:len(newNoun)-1] + `ies`
+			if desc, ok := r.Nouns[testNoun]; ok { // `ies` instead of `y` at end
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
 			}
 		}
 
@@ -1343,11 +1394,21 @@ func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) 
 
 		// Strip 'es' such as 'torches'
 		if noun[len(newNoun)-2:] == `es` {
-			if desc, ok := r.Nouns[newNoun[:len(newNoun)-2]]; ok {
-				return newNoun[:len(newNoun)-2], desc
+			testNoun := newNoun[:len(newNoun)-2]
+			if desc, ok := r.Nouns[testNoun]; ok {
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
 			}
-		} else if desc, ok := r.Nouns[newNoun+`es`]; ok { // `es` at end
-			return newNoun + `es`, desc
+		} else {
+			testNoun := newNoun + `es`
+			if desc, ok := r.Nouns[testNoun]; ok { // `es` at end
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
+			}
 		}
 
 		if len(newNoun) < 4 {
@@ -1356,8 +1417,12 @@ func (r *Room) FindNoun(noun string) (foundNoun string, nounDescription string) 
 
 		// Strip 'es' such as 'torches'
 		if noun[len(newNoun)-3:] == `ies` {
-			if desc, ok := r.Nouns[newNoun[:len(newNoun)-3]+`y`]; ok { // `y` instead of `ies` at end
-				return newNoun[:len(newNoun)-3] + `y`, desc
+			testNoun := newNoun[:len(newNoun)-3] + `y`
+			if desc, ok := r.Nouns[testNoun]; ok { // `y` instead of `ies` at end
+				if desc[0:1] == `:` {
+					return desc[1:], r.Nouns[desc[1:]]
+				}
+				return testNoun, desc
 			}
 		}
 
@@ -1520,8 +1585,8 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 	}
 
 	details := &RoomTemplateDetails{
-		VisiblePlayers: []characters.FormattedName{},
-		VisibleMobs:    []characters.FormattedName{},
+		VisiblePlayers: []string{},
+		VisibleMobs:    []string{},
 		VisibleExits:   make(map[string]RoomExit),
 		TemporaryExits: make(map[string]TemporaryRoomExit),
 		Room:           r, // The room being viewed
@@ -1557,7 +1622,12 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 			description[i] += strings.Repeat(` `, desclineWidth-len(description[i])) + tinymap[i]
 		}
 
-		if user.Permission == users.PermissionAdmin {
+		renderNouns := user.Permission == users.PermissionAdmin
+		if user.Character.Pet.Exists() && user.Character.Pet.HasPower(pets.SeeNouns) {
+			renderNouns = true
+		}
+
+		if renderNouns {
 			if len(r.Nouns) > 0 {
 				for i := range description {
 					for noun, _ := range r.Nouns {
@@ -1572,7 +1642,12 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 
 		roomDesc := util.SplitString(details.Description, 80)
 
-		if user.Permission == users.PermissionAdmin {
+		renderNouns := user.Permission == users.PermissionAdmin
+		if user.Character.Pet.Exists() && user.Character.Pet.HasPower(pets.SeeNouns) {
+			renderNouns = true
+		}
+
+		if renderNouns {
 			if len(r.Nouns) > 0 {
 				for i := range roomDesc {
 					for noun, _ := range r.Nouns {
@@ -1608,22 +1683,30 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 			if player != nil {
 
 				if player.Character.HasBuffFlag(buffs.Hidden) { // Don't show them if they are sneaking
-					continue
+					if !user.Character.Pet.Exists() || user.Character.Pet.HasPower(pets.SeeHidden) {
+						continue
+					}
 				}
 
 				pName := player.Character.GetPlayerName(user.UserId, renderFlags...)
-				details.VisiblePlayers = append(details.VisiblePlayers, pName)
+				details.VisiblePlayers = append(details.VisiblePlayers, pName.String())
 			}
 		}
 	}
 
-	visibleFriendlyMobs := []characters.FormattedName{}
+	if user.Character.Pet.Exists() {
+		details.VisiblePlayers = append(details.VisiblePlayers, fmt.Sprintf(`%s (your pet)`, user.Character.Pet.DisplayName()))
+	}
+
+	visibleFriendlyMobs := []string{}
 
 	for idx, mobInstanceId := range r.mobs {
 		if mob := mobs.GetInstance(mobInstanceId); mob != nil {
 
 			if mob.Character.HasBuffFlag(buffs.Hidden) { // Don't show them if they are sneaking
-				continue
+				if !user.Character.Pet.Exists() || !user.Character.Pet.HasPower(pets.SeeHidden) {
+					continue
+				}
 			}
 
 			tmpNameFlags := nameFlags
@@ -1637,9 +1720,9 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 			}
 
 			if mob.Character.IsCharmed() {
-				visibleFriendlyMobs = append(visibleFriendlyMobs, mobName)
+				visibleFriendlyMobs = append(visibleFriendlyMobs, mobName.String())
 			} else {
-				details.VisibleMobs = append(details.VisibleMobs, mobName)
+				details.VisibleMobs = append(details.VisibleMobs, mobName.String())
 			}
 		} else {
 			r.mobs = append(r.mobs[:idx], r.mobs[idx+1:]...)

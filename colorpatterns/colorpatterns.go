@@ -106,6 +106,22 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 	if len(method) == 0 {
 		// Color change on a per character basis (not spaces), reverses at the end
 		for _, runeChar := range input {
+
+			// Handle placeholder tags that look like :123
+			if inTagPlaceholder {
+				if runeChar != 32 {
+					newString.WriteString(string(runeChar))
+					continue
+				}
+				inTagPlaceholder = false
+			} else {
+				if runeChar == ':' {
+					inTagPlaceholder = true
+					newString.WriteString(string(runeChar))
+					continue
+				}
+			}
+
 			newString.WriteString(fmt.Sprintf(`<ansi fg="%d">%s</ansi>`, patternValues[patternPosition], string(runeChar)))
 			if runeChar != 32 { // space
 				if patternPosition == patternValueLength-1 {

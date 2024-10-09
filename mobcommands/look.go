@@ -153,6 +153,21 @@ func Look(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		return true, nil
 	}
 
+	//
+	// Look for any pets in the room
+	//
+	petUserId := room.FindByPetName(rest)
+	if petUserId > 0 {
+
+		if petUser := users.GetByUserId(petUserId); petUser != nil {
+
+			room.SendText(
+				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> is looking at %s.`, mob.Character.Name, petUser.Character.Pet.DisplayName()))
+
+			return true, nil
+		}
+	}
+
 	return true, nil
 }
 

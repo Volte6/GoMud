@@ -33,6 +33,10 @@ function onCast(sourceActor, targetActor) {
         return true;
     }
 
+    if ( sourceActor.GetCharmCount() >= sourceActor.GetMaxCharmCount() ) {
+        sourceActor.SendText(`You already have too many followers.`)
+    }
+    
     chance = sourceActor.GetChanceToTame(targetActor)+sourceActor.GetStatMod(`tame`);
     
     SendUserMessage(sourceActor.UserId(), '<ansi fg="219">You have a <ansi fg="151">'+chance+'% chance</ansi> to successfully tame the '+targetActor.GetCharacterName(true)+'.</ansi>');
@@ -99,6 +103,10 @@ function onMagic(sourceActor, targetActor) {
     if ( targetActor.IsCharmed() ) {
         SendUserMessage(sourceActor.UserId(), 'Already friendly!');
         return false;
+    }
+
+    if ( sourceActor.GetCharmCount() >= sourceActor.GetMaxCharmCount() ) {
+        sourceActor.SendText(`You already have too many followers.`)
     }
 
     targetName = targetActor.GetCharacterName(true);
