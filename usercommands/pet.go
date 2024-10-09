@@ -60,50 +60,28 @@ func Pet(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, nil
 	}
 
-	// Map name to display name
-	petDisplayNames := map[string]string{}
-	petNames := []string{}
-
-	if user.Character.Pet.Exists() {
-		petDisplayNames[user.Character.Pet.Name] = user.Character.Pet.DisplayName()
-		petNames = append(petNames, user.Character.Pet.Name)
-	}
-
-	for _, uId := range room.GetPlayers() {
-		if uId == user.UserId {
-			continue
-		}
-
-		if u := users.GetByUserId(uId); u != nil {
-			if u.Character.Pet.Exists() {
-				petDisplayNames[u.Character.Pet.Name] = u.Character.Pet.DisplayName()
-				petNames = append(petNames, u.Character.Pet.Name)
-			}
-		}
-	}
-
-	match, closeMatch := util.FindMatchIn(rest, petNames...)
-	if match == `` {
-		match = closeMatch
-	}
-
-	if match == `` {
+	petUserId := room.FindByPetName(rest)
+	if petUserId == 0 {
 		user.SendText(`Can't find that to pet.`)
 		return true, nil
 	}
 
-	user.SendText(fmt.Sprintf(`You pet %s`, petDisplayNames[match]))
+	petUser := users.GetByUserId(petUserId)
+	if petUser == nil {
+		user.SendText(`Can't find that to pet.`)
+		return true, nil
+	}
 
-	room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> pets %s`, user.Character.Name, petDisplayNames[match]), user.UserId)
+	user.SendText(fmt.Sprintf(`You pet %s`, petUser.Character.Pet.DisplayName()))
+
+	room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> pets %s`, user.Character.Name, petUser.Character.Pet.DisplayName()), user.UserId)
 
 	roll := util.RollDice(1, 4)
 
 	if roll == 1 {
-		room.SendText(fmt.Sprintf(`%s twirls a bit.`, petDisplayNames[match]))
-	}
-
-	if roll == 2 {
-		room.SendText(fmt.Sprintf(`%s stiffens.`, petDisplayNames[match]))
+		room.SendText(fmt.Sprintf(`%s twirls a bit.`, petUser.Character.Pet.DisplayName()))
+	} else if roll == 2 {
+		room.SendText(fmt.Sprintf(`%s stiffens.`, petUser.Character.Pet.DisplayName()))
 	}
 
 	return true, nil

@@ -16,7 +16,7 @@ character:
     to disrupt the balance of the world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 1
+  roomid: 8
   zone: Frostfang
   raceid: 2
   stats:
@@ -36,7 +36,7 @@ character:
     perception:
       training: 2
   level: 4
-  experience: 15000
+  experience: 15255
   trainingpoints: 43
   statpoints: 5
   health: 59
@@ -52,49 +52,26 @@ character:
     illum: 1
     mm: 1
   items:
-  - itemid: 10012
-  - itemid: 10014
-  - itemid: 30007
-    uses: 1
-  - itemid: 8
-    uses: 1
-    lastusedround: 1013
-  - itemid: 10014
-  - itemid: 20011
-  - itemid: 20001
-  - itemid: 20015
+  - itemid: 10006
     uncursed: true
-  - itemid: 30002
-    uses: 1
-  - itemid: 10004
-  - itemid: 30007
-    uses: 1
-  - itemid: 8
-    uses: 1
-    lastusedround: 1013
-  - itemid: 10001
-  - itemid: 20004
+  - itemid: 10012
   buffs:
     list:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 13
+      roundcounter: 2
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 21
-      triggersleft: 1000000000
-    - buffid: 1
-      onstartevent: true
-      permabuff: true
-      roundcounter: 2
+      roundcounter: 10
       triggersleft: 1000000000
   equipment:
     weapon:
-      itemid: 10006
-      uncursed: true
+      itemid: 10004
+    offhand:
+      itemid: 20004
     belt:
       itemid: 20011
     gloves:
@@ -137,10 +114,19 @@ character:
       55: 40
   pet:
     name: fisher
-    type: dog
+    type: mule
     food: 4
+    statmods:
+      strength: 5
+    powers:
+    - carry-items
+    items:
+    - itemid: 30002
+      uses: 1
+    - itemid: 30002
+      uses: 1
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/zIyN9MxNjAFY0MwNDXBTaFAQAAAAP//U44hHzsAAAA=
+roommemoryblob: H4sIAAAAAAAA/zI10TE11TE1A5MmOoY65joWcIwTAgIAAP//zQs5jjYAAAA=
 configoptions: {}

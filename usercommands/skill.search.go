@@ -99,7 +99,7 @@ func Search(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 		if len(hiddenPlayers) > 0 {
 
 			details := room.GetRoomDetails(user)
-			details.VisiblePlayers = []characters.FormattedName{}
+			details.VisiblePlayers = []string{}
 
 			for _, name := range hiddenPlayers {
 				details.VisiblePlayers = append(details.VisiblePlayers,
@@ -107,7 +107,7 @@ func Search(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 						Name:   name,
 						Type:   `username`,
 						Suffix: `hidden`,
-					},
+					}.String(),
 				)
 			}
 
@@ -136,7 +136,7 @@ func Search(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 		if len(hiddenMobs) > 0 {
 
 			details := room.GetRoomDetails(user)
-			details.VisiblePlayers = []characters.FormattedName{}
+			details.VisiblePlayers = []string{}
 
 			for _, name := range hiddenMobs {
 				details.VisibleMobs = append(details.VisiblePlayers,
@@ -144,7 +144,7 @@ func Search(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 						Name:   name,
 						Type:   `mob`,
 						Suffix: `hidden`,
-					},
+					}.String(),
 				)
 			}
 

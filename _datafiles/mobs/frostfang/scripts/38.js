@@ -110,7 +110,7 @@ function onIdle(mob, room) {
             break;
         case 10:
             if ( charmer.GetLevel() < 2 ) {
-                mob.Command(`sayto @` + charmer.UserId() + ` Killing stuff is a great way to get stronger, but don''t pick a fight with the locals!`);
+                mob.Command(`sayto @` + charmer.UserId() + ` Killing stuff is a great way to get stronger, but don't pick a fight with the locals!`);
             }
             break;
         default:

@@ -56,6 +56,50 @@ func (p *Pet) DisplayName() string {
 	return fmt.Sprintf(`<ansi fg="petname">%s</ansi>`, p.Name)
 }
 
+func (p *Pet) StoreItem(i items.Item) bool {
+
+	if !p.HasPower(CarryItems) {
+		return false
+	}
+
+	if i.ItemId < 1 {
+		return false
+	}
+	i.Validate()
+	p.Items = append(p.Items, i)
+	return true
+}
+
+func (p *Pet) RemoveItem(i items.Item) bool {
+
+	for j := len(p.Items) - 1; j >= 0; j-- {
+		if p.Items[j].Equals(i) {
+			p.Items = append(p.Items[:j], p.Items[j+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
+func (p *Pet) FindItem(itemName string) (items.Item, bool) {
+
+	if itemName == `` {
+		return items.Item{}, false
+	}
+
+	closeMatchItem, matchItem := items.FindMatchIn(itemName, p.Items...)
+
+	if matchItem.ItemId != 0 {
+		return matchItem, true
+	}
+
+	if closeMatchItem.ItemId != 0 {
+		return closeMatchItem, true
+	}
+
+	return items.Item{}, false
+}
+
 func (p *Pet) HasPower(pwr Power) bool {
 	for _, pwrName := range p.Powers {
 		if pwrName == pwr {

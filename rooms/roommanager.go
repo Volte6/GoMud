@@ -52,8 +52,8 @@ type ZoneInfo struct {
 
 type RoomTemplateDetails struct {
 	Room           *Room
-	VisiblePlayers []characters.FormattedName
-	VisibleMobs    []characters.FormattedName
+	VisiblePlayers []string
+	VisibleMobs    []string
 	VisibleExits   map[string]RoomExit
 	TemporaryExits map[string]TemporaryRoomExit
 	UserId         int

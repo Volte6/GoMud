@@ -62,15 +62,16 @@ const (
 	AffectsRoom   = "room"   // Does it affect everyone in the room?
 
 	// Useful for finding mobs/players
-	FindCharmed        FindFlag = 0b000000001 // charmed
-	FindNeutral        FindFlag = 0b000000010 // Not aggro, not charmed, not Hostile
-	FindFightingPlayer FindFlag = 0b000000100 // aggro vs. a player
-	FindFightingMob    FindFlag = 0b000001000 // aggro vs. a mob
-	FindHostile        FindFlag = 0b000010000 // will auto-attack players
-	FindMerchant       FindFlag = 0b000100000 // is a merchant
-	FindDowned         FindFlag = 0b001000000 // hp < 1
-	FindBuffed         FindFlag = 0b010000000 // has a buff
-	FindHasLight       FindFlag = 0b100000000 // has a light source
+	FindCharmed        FindFlag = 0b0000000001 // charmed
+	FindNeutral        FindFlag = 0b0000000010 // Not aggro, not charmed, not Hostile
+	FindFightingPlayer FindFlag = 0b0000000100 // aggro vs. a player
+	FindFightingMob    FindFlag = 0b0000001000 // aggro vs. a mob
+	FindHostile        FindFlag = 0b0000010000 // will auto-attack players
+	FindMerchant       FindFlag = 0b0000100000 // is a merchant
+	FindDowned         FindFlag = 0b0001000000 // hp < 1
+	FindBuffed         FindFlag = 0b0010000000 // has a buff
+	FindHasLight       FindFlag = 0b0100000000 // has a light source
+	FindHasPet         FindFlag = 0b1000000000 // has a pet
 	// Combinatorial flags
 	FindFighting          = FindFightingPlayer | FindFightingMob // Currently in combat (aggro)
 	FindIdle              = FindCharmed | FindNeutral            // Not aggro or hostile
@@ -859,6 +860,11 @@ func (r *Room) GetMobs(findTypes ...FindFlag) []int {
 			mobMatches = append(mobMatches, mobId)
 			continue
 		}
+
+		if typeFlag&FindHasPet == FindHasPet && mob.Character.Pet.Exists() {
+			mobMatches = append(mobMatches, mobId)
+			continue
+		}
 	}
 
 	return mobMatches
@@ -943,6 +949,10 @@ func (r *Room) GetPlayers(findTypes ...FindFlag) []int {
 			continue
 		}
 
+		if typeFlag&FindHasPet == FindHasPet && user.Character.Pet.Exists() {
+			playerMatches = append(playerMatches, userId)
+			continue
+		}
 	}
 
 	return playerMatches
@@ -1109,6 +1119,29 @@ func (r *Room) FindByName(searchName string, findTypes ...FindFlag) (playerId in
 	mobInstanceId, _ = r.findMobByName(searchName, findTypes...)
 	playerId, _ = r.findPlayerByName(searchName, findTypes...)
 	return playerId, mobInstanceId
+}
+
+func (r *Room) FindByPetName(searchName string) (playerId int) {
+	// Map name to display name
+	petOwners := map[string]int{}
+	petNames := []string{}
+
+	for _, uId := range r.GetPlayers(FindHasPet) {
+		if u := users.GetByUserId(uId); u != nil {
+			petOwners[u.Character.Pet.Name] = u.UserId
+			petNames = append(petNames, u.Character.Pet.Name)
+		}
+	}
+
+	match, closeMatch := util.FindMatchIn(searchName, petNames...)
+	if match == `` {
+		if closeMatch == `` {
+			return 0
+		}
+		return petOwners[closeMatch]
+	}
+
+	return petOwners[match]
 }
 
 func (r *Room) findPlayerByName(searchName string, findTypes ...FindFlag) (int, error) {
@@ -1552,8 +1585,8 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 	}
 
 	details := &RoomTemplateDetails{
-		VisiblePlayers: []characters.FormattedName{},
-		VisibleMobs:    []characters.FormattedName{},
+		VisiblePlayers: []string{},
+		VisibleMobs:    []string{},
 		VisibleExits:   make(map[string]RoomExit),
 		TemporaryExits: make(map[string]TemporaryRoomExit),
 		Room:           r, // The room being viewed
@@ -1654,12 +1687,16 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 				}
 
 				pName := player.Character.GetPlayerName(user.UserId, renderFlags...)
-				details.VisiblePlayers = append(details.VisiblePlayers, pName)
+				details.VisiblePlayers = append(details.VisiblePlayers, pName.String())
 			}
 		}
 	}
 
-	visibleFriendlyMobs := []characters.FormattedName{}
+	if user.Character.Pet.Exists() {
+		details.VisiblePlayers = append(details.VisiblePlayers, fmt.Sprintf(`%s (your pet)`, user.Character.Pet.DisplayName()))
+	}
+
+	visibleFriendlyMobs := []string{}
 
 	for idx, mobInstanceId := range r.mobs {
 		if mob := mobs.GetInstance(mobInstanceId); mob != nil {
@@ -1679,9 +1716,9 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 			}
 
 			if mob.Character.IsCharmed() {
-				visibleFriendlyMobs = append(visibleFriendlyMobs, mobName)
+				visibleFriendlyMobs = append(visibleFriendlyMobs, mobName.String())
 			} else {
-				details.VisibleMobs = append(details.VisibleMobs, mobName)
+				details.VisibleMobs = append(details.VisibleMobs, mobName.String())
 			}
 		} else {
 			r.mobs = append(r.mobs[:idx], r.mobs[idx+1:]...)
