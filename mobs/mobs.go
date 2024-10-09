@@ -74,7 +74,7 @@ type Mob struct {
 	GoingHome       bool     `yaml:"-"`                         // WHether they are trying to get home
 	RoomStack       []int    `yaml:"-"`                         // Stack of rooms to get back home
 	PreventIdle     bool     `yaml:"-"`                         // Whether they can't possibly be idle
-	ScriptTag       string   `yaml:"scripttag"`                 // Script for this mob: mobs/frostfang/scripts/{mobId}-{ScriptTag}.js
+	ScriptTag       string   `yaml:"scripttag"`                 // Script for this mob: mobs/frostfang/scripts/{mobId}-{mobname}-{ScriptTag}.js
 	QuestFlags      []string `yaml:"questflags,omitempty,flow"` // What quest flags are set on this mob?
 	BuffIds         []int    `yaml:"buffids,omitempty"`         // Buff Id's this mob always has upon spawn
 	tempDataStore   map[string]any
@@ -490,12 +490,14 @@ func (r *Mob) Validate() error {
 }
 
 func (m *Mob) Filename() string {
-	return fmt.Sprintf("%d.yaml", m.Id())
+
+	filename := util.ConvertForFilename(m.Character.Name)
+	return fmt.Sprintf("%d-%s.yaml", m.Id(), filename)
 }
 
 func (m *Mob) Filepath() string {
 	zone := ZoneNameSanitize(m.Zone)
-	return util.FilePath(zone, `/`, fmt.Sprintf("%d.yaml", m.Id()))
+	return util.FilePath(zone, `/`, m.Filename())
 }
 
 func (r *Mob) Save() error {
@@ -541,7 +543,6 @@ func (m *Mob) GetScriptPath() string {
 	}
 
 	scriptFilePath := `scripts/` + strings.Replace(mobFilePath, `.yaml`, newExt, 1)
-
 	fullScriptPath := strings.Replace(mobDataFilesFolderPath+`/`+m.Filepath(),
 		mobFilePath,
 		scriptFilePath,
@@ -623,9 +624,7 @@ func LoadDataFiles() {
 	}
 
 	for _, mob := range mobs {
-
 		mob.Character.CacheDescription()
-
 		allMobNames = append(allMobNames, mob.Character.Name)
 	}
 

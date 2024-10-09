@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/volte6/mud/fileloader"
+	"github.com/volte6/mud/util"
 )
 
 const (
@@ -55,7 +56,8 @@ func (r *Quest) Validate() error {
 }
 
 func (r *Quest) Filename() string {
-	return fmt.Sprintf("%d.yaml", r.Id())
+	filename := util.ConvertForFilename(r.Name)
+	return fmt.Sprintf("%d-%s.yaml", r.Id(), filename)
 }
 
 func (r *Quest) Filepath() string {
