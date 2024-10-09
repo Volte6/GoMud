@@ -1413,6 +1413,10 @@ func (c *Character) Validate(recalcPermaBuffs ...bool) error {
 		c.Description = c.Name + " seems thoroughly uninteresting."
 	}
 
+	if c.Pet.Exists() {
+		c.Pet.Validate()
+	}
+
 	if c.SpellBook == nil {
 		c.SpellBook = make(map[string]int)
 	}

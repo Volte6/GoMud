@@ -1,5 +1,5 @@
 type: cat
 statmods:
   speed: 5
-powers:
-  - attack
+damage:
+  diceroll: 1d3

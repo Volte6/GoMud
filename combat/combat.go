@@ -470,6 +470,33 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 				attackResult.DamageToSourceReduction += attackSourceReduction
 			}
 
+			if util.RollDice(1, 5) == 1 { // 20% chance to join
+				if sourceChar.RoomId == targetChar.RoomId {
+					if sourceChar.Pet.Exists() && sourceChar.Pet.Damage.DiceRoll != `` {
+
+						attacks, dCount, dSides, dBonus, critBuffs = sourceChar.Pet.GetDiceRoll()
+
+						for i := 0; i < attacks; i++ {
+
+							attackTargetDamage := util.RollDice(dCount, dSides) + dBonus
+
+							attackResult.DamageToTarget += attackTargetDamage
+
+							toAttackerMsg := fmt.Sprintf(`%s jumps into the fray and deals <ansi fg="damage">%d damage</ansi> to <ansi fg="%sname">%s</ansi>!`, sourceChar.Pet.DisplayName(), attackTargetDamage, string(targetType), targetChar.Name)
+							attackResult.SendToSource(toAttackerMsg)
+
+							toDefenderMsg := fmt.Sprintf(`%s jumps into the fray and deals <ansi fg="damage">%d damage</ansi> to you!`, sourceChar.Pet.DisplayName(), attackTargetDamage)
+							attackResult.SendToTarget(toDefenderMsg)
+
+							toAttackerRoomMsg := fmt.Sprintf(`%s jumps into the fray and deals <ansi fg="damage">%d damage</ansi> to <ansi fg="%sname">%s</ansi>!`, sourceChar.Pet.DisplayName(), attackTargetDamage, string(targetType), targetChar.Name)
+							attackResult.SendToTargetRoom(toAttackerRoomMsg)
+
+						}
+
+					}
+				}
+			}
+
 		}
 	}
 	return attackResult

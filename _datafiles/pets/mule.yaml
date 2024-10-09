@@ -1,5 +1,5 @@
 type: mule
 statmods:
-  strength: 5
+  vitality: 5
 powers:
   - carry-items

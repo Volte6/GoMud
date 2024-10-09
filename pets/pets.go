@@ -20,6 +20,7 @@ type Pet struct {
 	Type          string         `yaml:"type"`                    // type of pet
 	Food          Food           `yaml:"food,omitempty"`          // how much food the pet has
 	LastMealRound uint8          `yaml:"lastmealround,omitempty"` // When the pet was last fed
+	Damage        items.Damage   `yaml:"damage,omitempty"`        // When the pet was last fed
 	StatMods      map[string]int `yaml:"statmods,omitempty"`      // stat mods the pet provides
 	BuffIds       []int          `yaml:"buffids,omitempty"`       // Permabuffs this pet affords the player
 	Powers        []Power        `yaml:"powers,omitempty"`        // Passive abilities this pet has
@@ -109,6 +110,10 @@ func (p *Pet) HasPower(pwr Power) bool {
 	return false
 }
 
+func (p *Pet) GetDiceRoll() (attacks int, dCount int, dSides int, bonus int, buffOnCrit []int) {
+	return p.Damage.Attacks, p.Damage.DiceCount, p.Damage.SideCount, p.Damage.BonusDamage, p.Damage.CritBuffIds
+}
+
 func GetPetCopy(petId string) Pet {
 	if petInfo, ok := petTypes[petId]; ok {
 		return *petInfo
@@ -172,6 +177,9 @@ func (p *Pet) Validate() error {
 	if p.Items == nil {
 		p.Items = []items.Item{}
 	}
+
+	p.Damage.InitDiceRoll(p.Damage.DiceRoll)
+	p.Damage.FormatDiceRoll()
 
 	return nil
 }

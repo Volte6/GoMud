@@ -16,7 +16,7 @@ character:
     to disrupt the balance of the world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 8
+  roomid: 1
   zone: Frostfang
   raceid: 2
   stats:
@@ -35,14 +35,14 @@ character:
       base: 2
     perception:
       training: 2
-  level: 4
-  experience: 15255
-  trainingpoints: 43
-  statpoints: 5
-  health: 59
-  mana: 31
+  level: 5
+  experience: 17470
+  trainingpoints: 44
+  statpoints: 6
+  health: 48
+  mana: 32
   actionpoints: 202
-  alignment: 1
+  alignment: -1
   gold: 9950
   bank: 0
   spellbook:
@@ -60,12 +60,12 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 2
+      roundcounter: 18
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 10
+      roundcounter: 26
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -99,10 +99,10 @@ character:
     784-chest: DUU
     key-110-west: "3"
   kd:
-    totalkills: 18
+    totalkills: 20
     kills:
       1: 5
-      2: 4
+      2: 6
       18: 1
       58: 8
     totaldeaths: 1
@@ -116,6 +116,11 @@ character:
     name: fisher
     type: mule
     food: 4
+    damage:
+      attacks: 1
+      diceroll: 2d4
+      dicecount: 2
+      sidecount: 4
     statmods:
       strength: 5
     powers:
@@ -128,5 +133,5 @@ character:
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/zI10TE11TE1A5MmOoY65joWcIwTAgIAAP//zQs5jjYAAAA=
+roommemoryblob: H4sIAAAAAAAA/zLXsdCBYXzQXMcQAgEBAAD//5lVkjYxAAAA
 configoptions: {}
