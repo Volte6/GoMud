@@ -740,3 +740,24 @@ func ValidateName(name string) error {
 
 	return nil
 }
+
+// Make everything lowercase
+// Convert anything that isn't a-z, 0-9 into _
+func ConvertForFilename(input string) string {
+
+	s := []byte(strings.ToLower(input))
+
+	pos := 0
+	for _, b := range s {
+		if b == '\'' { // skip apostrophes
+			continue
+		} else if ('a' <= b && b <= 'z') || ('0' <= b && b <= '9') {
+			s[pos] = b
+		} else {
+			s[pos] = '_' // If not in the allowed range, convert to underscore
+		}
+		pos++
+	}
+
+	return string(s[0:pos])
+}

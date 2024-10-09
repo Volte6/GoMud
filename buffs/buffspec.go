@@ -167,7 +167,8 @@ func (b *BuffSpec) Validate() error {
 }
 
 func (b *BuffSpec) Filename() string {
-	return fmt.Sprintf("%d.yaml", b.BuffId)
+	filename := util.ConvertForFilename(b.Name)
+	return fmt.Sprintf("%d-%s.yaml", b.BuffId, filename)
 }
 
 func (b *BuffSpec) Filepath() string {

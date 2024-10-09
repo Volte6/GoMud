@@ -311,20 +311,24 @@ func (i *ItemSpec) Validate() error {
 }
 
 func (i *ItemSpec) Filename() string {
-	return fmt.Sprintf("%d.yaml", i.ItemId)
+	filename := util.ConvertForFilename(i.Name)
+	return fmt.Sprintf("%d-%s.yaml", i.ItemId, filename)
 }
 
 func (i *ItemSpec) Filepath() string {
+
+	folderName := ``
 	if i.ItemId >= 30000 {
-		return fmt.Sprintf("consumables-30000/%s", i.Filename())
+		folderName = `consumables-30000`
+	} else if i.ItemId >= 20000 {
+		folderName = `armor-20000/` + string(i.Type)
+	} else if i.ItemId >= 10000 {
+		folderName = `weapons-10000`
+	} else {
+		folderName = `other-0`
 	}
-	if i.ItemId >= 20000 {
-		return fmt.Sprintf("armor-20000/%s/%s", i.Type, i.Filename())
-	}
-	if i.ItemId >= 10000 {
-		return fmt.Sprintf("weapons-10000/%s", i.Filename())
-	}
-	return fmt.Sprintf("other-0/%s", i.Filename())
+
+	return folderName + `/` + i.Filename()
 }
 
 func (i ItemSpec) GetScript() string {
@@ -354,23 +358,6 @@ func GetItemSpec(itemId int) *ItemSpec {
 		}
 	}
 	return nil
-}
-
-func getScriptPath(itemId int) string {
-
-	if itemId >= 50000 {
-		return fmt.Sprintf(`%s/grenades-50000/%d.js`, itemDataFilesFolderPath, itemId)
-	} else if itemId >= 30000 {
-		return fmt.Sprintf(`%s/consumables-30000/%d.js`, itemDataFilesFolderPath, itemId)
-	} else if itemId >= 20000 {
-		return fmt.Sprintf(`%s/armor-20000/%d.js`, itemDataFilesFolderPath, itemId)
-	} else if itemId >= 10000 {
-		return fmt.Sprintf(`%s/weapons-10000/%d.js`, itemDataFilesFolderPath, itemId)
-	} else if itemId >= 1 {
-		return fmt.Sprintf(`%s/other-0/%d.js`, itemDataFilesFolderPath, itemId)
-	}
-
-	return ``
 }
 
 // file self loads due to init()

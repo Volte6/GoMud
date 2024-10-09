@@ -18,5 +18,5 @@ character:
       itemid: 20024
     feet:
       itemid: 20003
-  scriptag: winterfire
-  questflags: [5-return]
+scripttag: winterfire
+questflags: [5-return]

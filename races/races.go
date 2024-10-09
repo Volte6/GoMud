@@ -150,9 +150,8 @@ func (r Race) GetEnabledSlots() []string {
 }
 
 func (r *Race) Filename() string {
-	filename := strings.ToLower(r.Name)
-	filename = strings.Replace(filename, " ", "_", -1)
-	return fmt.Sprintf("%s.yaml", filename)
+	filename := util.ConvertForFilename(r.Name)
+	return fmt.Sprintf("%d-%s.yaml", r.RaceId, filename)
 }
 
 func (r *Race) Filepath() string {
@@ -160,14 +159,13 @@ func (r *Race) Filepath() string {
 }
 
 func (r *Race) Save() error {
-	fileName := strings.ToLower(r.Name)
 
 	bytes, err := yaml.Marshal(r)
 	if err != nil {
 		return err
 	}
 
-	saveFilePath := util.FilePath(raceDataFilesFolderPath, `/`, fmt.Sprintf("%s.yaml", fileName))
+	saveFilePath := util.FilePath(raceDataFilesFolderPath, `/`, r.Filename())
 
 	err = os.WriteFile(saveFilePath, bytes, 0644)
 	if err != nil {

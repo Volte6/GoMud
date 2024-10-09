@@ -138,8 +138,7 @@ func GetPetSpec(petId string) Pet {
 }
 
 func (p *Pet) Filename() string {
-	filename := strings.ToLower(p.Type)
-	filename = strings.Replace(filename, " ", "_", -1)
+	filename := util.ConvertForFilename(p.Type)
 	return fmt.Sprintf("%s.yaml", filename)
 }
 
