@@ -51,6 +51,12 @@ _in this example, the player has a dagger and shield equipped, but equipping a b
 <a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/1h-2h-weapons.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/1h-2h-weapons.png" width="600" alt="accessibility text"></a>
 
 
+## Pets
+
+_Pets are special famliars that help the player and provide special bonuses or utility._
+
+<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/pets.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/webclient/images/pets.png" width="600" alt="accessibility text"></a>
+
 ## Custom Prompts
 
 _Players can customize their prompts, including colors._
