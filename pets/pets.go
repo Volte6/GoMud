@@ -23,7 +23,7 @@ type Pet struct {
 	Damage        items.Damage   `yaml:"damage,omitempty"`        // When the pet was last fed
 	StatMods      map[string]int `yaml:"statmods,omitempty"`      // stat mods the pet provides
 	BuffIds       []int          `yaml:"buffids,omitempty"`       // Permabuffs this pet affords the player
-	Powers        []Power        `yaml:"powers,omitempty"`        // Passive abilities this pet has
+	Capacity      int            `yaml:"capacity,omitempty"`      // How many items this mob can carry
 	Items         []items.Item   `yaml:"items,omitempty"`         // Items held by this pet
 }
 
@@ -64,7 +64,7 @@ func (p *Pet) DisplayName() string {
 
 func (p *Pet) StoreItem(i items.Item) bool {
 
-	if !p.HasPower(CarryItems) {
+	if p.Capacity < 1 {
 		return false
 	}
 
@@ -108,15 +108,6 @@ func (p *Pet) FindItem(itemName string) (items.Item, bool) {
 	}
 
 	return items.Item{}, false
-}
-
-func (p *Pet) HasPower(pwr Power) bool {
-	for _, pwrName := range p.Powers {
-		if pwrName == pwr {
-			return true
-		}
-	}
-	return false
 }
 
 func (p *Pet) GetDiceRoll() (attacks int, dCount int, dSides int, bonus int, buffOnCrit []int) {
@@ -176,10 +167,6 @@ func (p *Pet) Validate() error {
 
 	if p.BuffIds == nil {
 		p.BuffIds = []int{}
-	}
-
-	if p.Powers == nil {
-		p.Powers = []Power{}
 	}
 
 	if p.Items == nil {

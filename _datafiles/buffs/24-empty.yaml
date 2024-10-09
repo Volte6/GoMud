@@ -1,6 +1,6 @@
 buffid: 24
-name: Warriors Respite
-description: You are focused on recovering.
+name: empty
+description: Placeholder
 roundinterval: 1
 triggercount: 20
 flags:

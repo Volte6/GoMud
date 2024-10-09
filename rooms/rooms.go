@@ -17,7 +17,6 @@ import (
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/pets"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
@@ -1609,6 +1608,11 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		Text:         "MODALADD:tinymap=" + strings.Join(tinymap, "\n"),
 	})
 
+	renderNouns := user.Permission == users.PermissionAdmin
+	if user.Character.Pet.Exists() && user.Character.HasBuffFlag(buffs.SeeNouns) {
+		renderNouns = true
+	}
+
 	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {
 		desclineWidth := 80 - 7 // 7 is the width of the tinymap
 		padding := 1
@@ -1622,17 +1626,10 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 			description[i] += strings.Repeat(` `, desclineWidth-len(description[i])) + tinymap[i]
 		}
 
-		renderNouns := user.Permission == users.PermissionAdmin
-		if user.Character.Pet.Exists() && user.Character.Pet.HasPower(pets.SeeNouns) {
-			renderNouns = true
-		}
-
-		if renderNouns {
-			if len(r.Nouns) > 0 {
-				for i := range description {
-					for noun, _ := range r.Nouns {
-						description[i] = strings.Replace(description[i], noun, `<ansi fg="noun">`+noun+`</ansi>`, 1)
-					}
+		if renderNouns && len(r.Nouns) > 0 {
+			for i := range description {
+				for noun, _ := range r.Nouns {
+					description[i] = strings.Replace(description[i], noun, `<ansi fg="noun">`+noun+`</ansi>`, 1)
 				}
 			}
 		}
@@ -1642,17 +1639,10 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 
 		roomDesc := util.SplitString(details.Description, 80)
 
-		renderNouns := user.Permission == users.PermissionAdmin
-		if user.Character.Pet.Exists() && user.Character.Pet.HasPower(pets.SeeNouns) {
-			renderNouns = true
-		}
-
-		if renderNouns {
-			if len(r.Nouns) > 0 {
-				for i := range roomDesc {
-					for noun, _ := range r.Nouns {
-						roomDesc[i] = strings.Replace(roomDesc[i], noun, `<ansi fg="noun">`+noun+`</ansi>`, 1)
-					}
+		if renderNouns && len(r.Nouns) > 0 {
+			for i := range roomDesc {
+				for noun, _ := range r.Nouns {
+					roomDesc[i] = strings.Replace(roomDesc[i], noun, `<ansi fg="noun">`+noun+`</ansi>`, 1)
 				}
 			}
 		}
@@ -1683,7 +1673,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 			if player != nil {
 
 				if player.Character.HasBuffFlag(buffs.Hidden) { // Don't show them if they are sneaking
-					if !user.Character.Pet.Exists() || user.Character.Pet.HasPower(pets.SeeHidden) {
+					if !user.Character.Pet.Exists() || !user.Character.HasBuffFlag(buffs.SeeHidden) {
 						continue
 					}
 				}
@@ -1704,7 +1694,7 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		if mob := mobs.GetInstance(mobInstanceId); mob != nil {
 
 			if mob.Character.HasBuffFlag(buffs.Hidden) { // Don't show them if they are sneaking
-				if !user.Character.Pet.Exists() || !user.Character.Pet.HasPower(pets.SeeHidden) {
+				if !user.Character.Pet.Exists() || !user.Character.HasBuffFlag(buffs.SeeHidden) {
 					continue
 				}
 			}

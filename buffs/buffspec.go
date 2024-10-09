@@ -59,6 +59,10 @@ const (
 	Warmed       Flag = `warmed`
 	Hydrated     Flag = `hydrated`
 	Thirsty      Flag = `thirsty`
+
+	// Flags that reveal things
+	SeeHidden Flag = `see-hidden`
+	SeeNouns  Flag = `see-nouns`
 )
 
 var (

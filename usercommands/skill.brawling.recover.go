@@ -34,17 +34,10 @@ func Recover(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 		return true, nil
 	}
 
-	applyBuffId := 23
-	if skillLevel >= 3 {
-		applyBuffId = 25
-	} else if skillLevel >= 2 {
-		applyBuffId = 24
-	}
-
 	events.AddToQueue(events.Buff{
 		UserId:        user.UserId,
 		MobInstanceId: 0,
-		BuffId:        applyBuffId,
+		BuffId:        23, // Warriors respite
 	})
 
 	return true, nil

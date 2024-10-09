@@ -1370,7 +1370,7 @@ func (w *World) TurnTick() {
 		}
 
 		// Apply the buff
-		targetChar.AddBuff(buff.BuffId)
+		targetChar.AddBuff(buff.BuffId, false)
 
 		//
 		// Fire onStart for buff script

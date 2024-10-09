@@ -1145,9 +1145,9 @@ func (c *Character) HasBuff(buffId int) bool {
 	return c.Buffs.HasBuff(buffId)
 }
 
-func (c *Character) AddBuff(buffId int, isPermanent ...bool) error {
+func (c *Character) AddBuff(buffId int, isPermanent bool) error {
 	buffId = int(math.Abs(float64(buffId)))
-	if !c.Buffs.AddBuff(buffId, isPermanent...) {
+	if !c.Buffs.AddBuff(buffId, isPermanent) {
 		return fmt.Errorf(`failed to add buff. target: "%s" buffId: %d`, c.Name, buffId)
 	}
 	c.Validate()
@@ -1858,6 +1858,7 @@ func (c *Character) reapplyPermabuffs(removedItems ...items.Item) {
 	// Apply any buffs from pet
 	if c.Pet.Exists() {
 		for _, buffId := range c.Pet.GetBuffs() {
+			slog.Error("TEST", "buffId", buffId)
 			buffIdCount[buffId] = 100 // Don't allow pet buffs to be removed, keep this number high
 		}
 	}
