@@ -1683,7 +1683,9 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 			if player != nil {
 
 				if player.Character.HasBuffFlag(buffs.Hidden) { // Don't show them if they are sneaking
-					continue
+					if !user.Character.Pet.Exists() || user.Character.Pet.HasPower(pets.SeeHidden) {
+						continue
+					}
 				}
 
 				pName := player.Character.GetPlayerName(user.UserId, renderFlags...)
@@ -1702,7 +1704,9 @@ func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
 		if mob := mobs.GetInstance(mobInstanceId); mob != nil {
 
 			if mob.Character.HasBuffFlag(buffs.Hidden) { // Don't show them if they are sneaking
-				continue
+				if !user.Character.Pet.Exists() || !user.Character.Pet.HasPower(pets.SeeHidden) {
+					continue
+				}
 			}
 
 			tmpNameFlags := nameFlags
