@@ -26,3 +26,6 @@ character:
       itemid: 20002
     feet:
       itemid: 20003
+  shop:
+    - pettype: cat
+      price: 12000

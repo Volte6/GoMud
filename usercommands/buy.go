@@ -10,6 +10,7 @@ import (
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
+	"github.com/volte6/mud/pets"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/users"
@@ -109,6 +110,9 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 	buffNames := []string{}
 	buffPrices := map[int]int{}
 
+	petNames := []string{}
+	petPrices := map[string]int{}
+
 	var saleItems characters.Shop
 	if shopMob != nil {
 		saleItems = shopMob.Character.Shop.GetInstock()
@@ -170,12 +174,31 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 			continue
 		}
 
+		if saleItem.PetType != `` {
+			petInfo := pets.GetPetCopy(saleItem.PetType)
+			if !petInfo.Exists() {
+				continue
+			}
+			petNames = append(petNames, petInfo.Type)
+			nameToShopItem[petInfo.Type] = saleItem
+
+			price := saleItem.Price
+			if price == 0 {
+				price = 10000
+			}
+
+			petPrices[saleItem.PetType] = price
+
+			continue
+		}
+
 	}
 
 	allNames := []string{}
 	allNames = append(allNames, itemNames...)
 	allNames = append(allNames, mercNames...)
 	allNames = append(allNames, buffNames...)
+	allNames = append(allNames, petNames...)
 
 	match, closeMatch := util.FindMatchIn(request, allNames...)
 	if match == `` {
@@ -196,6 +219,9 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 			} else if len(mercNames) > 0 {
 				randSelection := util.Rand(len(mercNames))
 				extraSay = fmt.Sprintf(` <ansi fg="mobname">%s</ansi> is a loyal mercenary, if you're interested.`, mercNames[randSelection])
+			} else if len(petNames) > 0 {
+				randSelection := util.Rand(len(petNames))
+				extraSay = fmt.Sprintf(` <ansi fg="petname">%s</ansi> is a loyal mercenary, if you're interested.`, petNames[randSelection])
 			}
 
 			shopMob.Command(`say Sorry, I can't offer that right now.` + extraSay)
@@ -221,6 +247,8 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 		price = mercPrices[matchedShopItem.MobId]
 	} else if matchedShopItem.BuffId > 0 {
 		price = buffPrices[matchedShopItem.BuffId]
+	} else if matchedShopItem.PetType != `` {
+		price = petPrices[matchedShopItem.PetType]
 	}
 
 	if user.Character.Gold < price {
@@ -386,6 +414,64 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 		if shopMob != nil {
 			shopMob.Command(`say I've done what I can.`, 1)
 		}
+
+		return true
+	}
+
+	if matchedShopItem.PetType != `` {
+
+		petInfo := pets.GetPetCopy(matchedShopItem.PetType)
+
+		if shopMob != nil {
+
+			user.SendText(
+				fmt.Sprintf(`You pay <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, price, shopMob.Character.Name),
+			)
+
+			room.SendText(
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, price, shopMob.Character.Name),
+				user.UserId,
+			)
+
+		} else if shopUser != nil {
+
+			user.SendText(
+				fmt.Sprintf(`You pay <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, price, shopUser.Character.Name),
+			)
+
+			shopUser.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> pays you <ansi fg="gold">%d gold</ansi> for the %s.`, user.Character.Name, price, petInfo.DisplayName()))
+
+			room.SendText(
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays to <ansi fg="username">%s</ansi> for the %s.`, user.Character.Name, shopUser.Character.Name, petInfo.DisplayName()),
+				user.UserId, shopUser.UserId)
+
+		}
+
+		// Apply the buff
+		if shopMob != nil {
+			shopMob.Command(fmt.Sprintf(`say Take care of your %s, it will always be loyal to you.`, petInfo.DisplayName()), 1)
+			shopMob.Command(`say You can name your pet with the <ansi fg="command">pet</ansi> command.`, 1)
+		}
+
+		if user.Character.Pet.Exists() {
+
+			if len(user.Character.Pet.Items) > 0 {
+
+				room.SendText(fmt.Sprintf(`%s drops everything they were carrying.`, user.Character.Pet.DisplayName()))
+
+				for _, item := range user.Character.Pet.Items {
+					room.AddItem(item, false)
+				}
+			}
+
+			room.SendText(fmt.Sprintf(`%s sadly slinks away into the shadows. Never to be seen again.`, user.Character.Pet.DisplayName()))
+		}
+
+		for i := 0; i < 5; i++ {
+			petInfo.Food.Add()
+		}
+
+		user.Character.Pet = petInfo
 
 		return true
 	}
