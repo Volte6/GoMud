@@ -82,6 +82,10 @@ func (p *Pet) RemoveItem(i items.Item) bool {
 	return false
 }
 
+func (p *Pet) GetBuffs() []int {
+	return append([]int{}, p.BuffIds...)
+}
+
 func (p *Pet) FindItem(itemName string) (items.Item, bool) {
 
 	if itemName == `` {

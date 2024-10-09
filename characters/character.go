@@ -1855,6 +1855,13 @@ func (c *Character) reapplyPermabuffs(removedItems ...items.Item) {
 		}
 	}
 
+	// Apply any buffs from pet
+	if c.Pet.Exists() {
+		for _, buffId := range c.Pet.GetBuffs() {
+			buffIdCount[buffId] = 100 // Don't allow pet buffs to be removed, keep this number high
+		}
+	}
+
 	// Track any buffs that come from an item
 	// If these don't show up as still being required by an item (such as a yaml file was changed)
 	// This will cause them to be removed.
