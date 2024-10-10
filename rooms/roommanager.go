@@ -699,11 +699,13 @@ func GetZoneRoot(zone string) (int, error) {
 }
 
 func GetZoneConfig(zone string) *ZoneConfig {
-	roomManager.Lock()
-	defer roomManager.Unlock()
 
-	if zoneInfo, ok := roomManager.zones[zone]; ok {
-		if r := roomManager.rooms[zoneInfo.RootRoomId]; r != nil {
+	roomManager.Lock()
+	zoneInfo, ok := roomManager.zones[zone]
+	roomManager.Unlock()
+
+	if ok {
+		if r := LoadRoom(zoneInfo.RootRoomId); r != nil {
 			return &r.ZoneConfig
 		}
 	}

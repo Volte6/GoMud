@@ -33,6 +33,7 @@ func Zone(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	zoneConfig := rooms.GetZoneConfig(room.Zone)
 	if zoneConfig == nil {
+		user.SendText(fmt.Sprintf(`Couldn't find zone info for <ansi fg="red">%s</ansi>`, room.Zone))
 		return true, nil
 	}
 
