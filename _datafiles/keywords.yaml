@@ -24,6 +24,7 @@ help:
       - encumbrance
       - death
       - character
+      - pets
     shops:
       - appraise
       - auction
@@ -155,6 +156,7 @@ help-aliases:
   auction:          [bid]
   killstats:        [kills, kd]
   trading:          [haggle]
+  pets:             [pet]
 # Default aliases for commands
 # For example: inv -> inventory
 # They can be command + argument aliases

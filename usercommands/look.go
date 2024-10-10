@@ -330,6 +330,9 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	// Look for any pets in the room
 	//
 	petUserId := room.FindByPetName(rest)
+	if petUserId == 0 && rest == `pet` && user.Character.Pet.Exists() {
+		petUserId = user.UserId
+	}
 	if petUserId > 0 {
 		if petUser := users.GetByUserId(petUserId); petUser != nil {
 

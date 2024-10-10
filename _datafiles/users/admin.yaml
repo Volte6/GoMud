@@ -55,22 +55,23 @@ character:
   - itemid: 10006
     uncursed: true
   - itemid: 10012
+  - itemid: 30002
+    uses: 1
   buffs:
     list:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 15
+      roundcounter: 18
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 8
+      roundcounter: 41
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
       permabuff: true
-      roundcounter: 12
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -130,13 +131,12 @@ character:
       strength: 5
     buffids:
     - 39
+    capacity: 5
     items:
-    - itemid: 30002
-      uses: 1
     - itemid: 30002
       uses: 1
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/7LQQYfmOobo0EjH0FjH0ETH3EDH3BiCAAEAAP//PvwbXjgAAAA=
+roommemoryblob: H4sIAAAAAAAA/7LQQYbmOobo0EjH0FjH0ETH3EDH3BgZAQIAAP//JfQlxDoAAAA=
 configoptions: {}
