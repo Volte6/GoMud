@@ -55,14 +55,6 @@ func Sell(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			continue
 		}
 
-		if sellValue > mob.Character.Gold {
-
-			mob.Command(`say I'm low on funds right now. Maybe later.`)
-
-			continue
-		}
-
-		mob.Character.Gold -= sellValue
 		user.Character.Gold += sellValue
 		user.Character.RemoveItem(item)
 

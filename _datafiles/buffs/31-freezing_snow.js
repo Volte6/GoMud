@@ -6,7 +6,7 @@ function onStart(actor, triggersLeft) {
         actor.RemoveBuff(31)
         return
     }
-    harmAmt = actor.AddHealth(-1 * UtilDiceRoll(1, 10));
+    harmAmt = actor.AddHealth(-1 * UtilDiceRoll(1, 2));
     if (harmAmt < 1 ) {
         harmAmt *= -1;
     }

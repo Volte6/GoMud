@@ -787,7 +787,7 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 	if !handled {
 		if len(command) > 0 {
-			mob.Command(fmt.Sprintf(`emote looks a little confused (%s %s).`, mob.Character.Name, command, remains))
+			mob.Command(fmt.Sprintf(`emote looks a little confused (%s %s).`, command, remains))
 		}
 	}
 
@@ -1370,7 +1370,7 @@ func (w *World) TurnTick() {
 		}
 
 		// Apply the buff
-		targetChar.AddBuff(buff.BuffId)
+		targetChar.AddBuff(buff.BuffId, false)
 
 		//
 		// Fire onStart for buff script

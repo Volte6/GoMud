@@ -61,6 +61,9 @@ func Pet(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	}
 
 	petUserId := room.FindByPetName(rest)
+	if petUserId == 0 && rest == `pet` && user.Character.Pet.Exists() {
+		petUserId = user.UserId
+	}
 	if petUserId == 0 {
 		user.SendText(`Can't find that to pet.`)
 		return true, nil

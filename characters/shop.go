@@ -32,18 +32,20 @@ func (s *Shop) Restock() bool {
 	}
 
 	defaultRestockInterval := configs.GetConfig().ShopRestockRounds
-
 	roundNow := util.GetRoundCount()
 	restocked := false
+	pruneItems := []int{}
 
 	for i, fsItem := range *s {
 
+		restocked = false
+
 		// 0 max means never restocks, always available
-		if fsItem.QuantityMax <= StockUnlimited {
+		if fsItem.QuantityMax == StockUnlimited {
 			continue
 		}
 
-		if fsItem.Quantity >= fsItem.QuantityMax {
+		if fsItem.Quantity == fsItem.QuantityMax {
 			continue
 		}
 
@@ -55,21 +57,50 @@ func (s *Shop) Restock() bool {
 		for roundNow-fsItem.lastRestockRound >= itemRestockInterval {
 			restocked = true
 
-			fsItem.lastRestockRound += itemRestockInterval
-			fsItem.Quantity += 1
-
-			if fsItem.Quantity >= fsItem.QuantityMax {
-				fsItem.Quantity = fsItem.QuantityMax
+			if fsItem.QuantityMax == StockUnlimited { // unlimited? No adjustment needed
 				break
 			}
+
+			if fsItem.Quantity == fsItem.QuantityMax { // currently at the max qty? No adjustment needed
+				break
+			}
+
+			fsItem.lastRestockRound += itemRestockInterval
+
+			// Non Unlimited, Non temporary
+			if fsItem.Quantity < fsItem.QuantityMax { // increase stock if needed
+				fsItem.Quantity += 1
+				continue
+			}
+
+			// Temp item handling
+			if fsItem.QuantityMax == StockTemporary {
+
+				if fsItem.Quantity > 0 { // decrease stock on temp items
+					fsItem.Quantity--
+				}
+
+			}
+
 		}
 
 		if restocked {
 			fsItem.lastRestockRound = roundNow
 		}
 
-		(*s)[i] = fsItem
+		// Once zeroed, prune it
+		if fsItem.QuantityMax == StockTemporary && fsItem.Quantity == 0 {
+			pruneItems = append(pruneItems, i)
+		}
 
+		(*s)[i] = fsItem
+	}
+
+	if len(pruneItems) > 0 {
+		for pos := len(pruneItems) - 1; pos >= 0; pos-- {
+			i := pruneItems[pos]
+			(*s) = append((*s)[:i], (*s)[i+1:]...)
+		}
 	}
 
 	return restocked
@@ -86,9 +117,10 @@ func (s *Shop) StockItem(itemId int) bool {
 	}
 
 	*s = append(*s, ShopItem{
-		ItemId:      itemId,
-		Quantity:    1,
-		QuantityMax: StockTemporary,
+		ItemId:           itemId,
+		Quantity:         1,
+		QuantityMax:      StockTemporary,
+		lastRestockRound: util.GetRoundCount(),
 	})
 
 	return true

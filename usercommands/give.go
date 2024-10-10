@@ -9,7 +9,6 @@ import (
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/pets"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/scripting"
 	"github.com/volte6/mud/users"
@@ -204,6 +203,9 @@ func Give(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	// Look for any pets in the room
 	//
 	petUserId := room.FindByPetName(giveWho)
+	if petUserId == 0 && giveWho == `pet` && user.Character.Pet.Exists() {
+		petUserId = user.UserId
+	}
 	if petUserId > 0 {
 
 		petUser := users.GetByUserId(petUserId)
@@ -220,30 +222,9 @@ func Give(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		user.SendText(fmt.Sprintf(`You give the <ansi fg="itemname">%s</ansi> to %s.`, giveItem.DisplayName(), petUser.Character.Pet.DisplayName()))
 		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> gives their <ansi fg="itemname">%s</ansi> to %s...`, user.Character.Name, giveItem.DisplayName(), petUser.Character.Pet.DisplayName()), user.UserId)
 
-		carryMax := 0
-		petAccepts := true
-		if petUserId != user.UserId {
-			petAccepts = false
-		}
-
-		if petUser.Character.Pet.HasPower(pets.CarryItems) {
-			carryMax += 5
-		}
-		if petUser.Character.Pet.HasPower(pets.CarryItemsMore) {
-			carryMax += 10
-		}
-
-		if carryMax < 1 {
-			petAccepts = false
-		}
-
-		if len(petUser.Character.Pet.Items) >= carryMax {
-			petAccepts = false
-		}
-
 		user.Character.RemoveItem(giveItem)
 
-		if !petAccepts || !petUser.Character.Pet.StoreItem(giveItem) {
+		if len(petUser.Character.Pet.Items) >= petUser.Character.Pet.Capacity || !petUser.Character.Pet.StoreItem(giveItem) {
 			room.SendText(fmt.Sprintf(`%s throws the <ansi fg="itemname">%s</ansi> onto the ground.`, petUser.Character.Pet.DisplayName(), giveItem.DisplayName()))
 			room.AddItem(giveItem, false)
 		}

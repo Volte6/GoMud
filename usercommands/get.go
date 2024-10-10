@@ -76,6 +76,9 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		// Look for any pets in the room
 		//
 		petUserId = room.FindByPetName(args[len(args)-1])
+		if petUserId == 0 && args[len(args)-1] == `pet` && user.Character.Pet.Exists() {
+			petUserId = user.UserId
+		}
 		if petUserId > 0 {
 
 			if petUserId != user.UserId {

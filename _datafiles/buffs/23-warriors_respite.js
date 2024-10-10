@@ -7,9 +7,19 @@ function onStart(actor, triggersLeft) {
 
 // Invoked every time the buff is triggered (see roundinterval)
 function onTrigger(actor, triggersLeft) {
-    healAmt = actor.AddHealth(UtilDiceRoll(1, 4))
 
-    SendUserMessage(actor.UserId(), 'You heal for <ansi fg="damage">'+String(healAmt)+' damage</ansi>.')
+    skillLevel = actor.GetSkillLevel("brawling");
+    
+    maxHealing = 4;
+    if (skillLevel == 3) {
+        maxHealing = 6;
+    } else if (skillLevel >= 4) {
+        maxHealing = 8;
+    }
+
+    healAmt = actor.AddHealth(UtilDiceRoll(1, maxHealing))
+
+    SendUserMessage(actor.UserId(), 'You heal for <ansi fg="healing">'+String(healAmt)+' hitpoints</ansi>.')
     SendRoomMessage(actor.GetRoomId(), actor.GetCharacterName(true)+' is healing while they meditate.', actor.UserId())
 }
 

@@ -1,5 +1,5 @@
 type: owl
 statmods:
   smarts: 5
-powers:
-  - see-nouns
+buffids:
+  - 39

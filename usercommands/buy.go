@@ -286,7 +286,7 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 
 	user.Character.Gold -= price
 	if shopMob != nil {
-		shopMob.Character.Gold += price >> 2 // They only retain 1/4th
+		shopMob.Character.Gold += 1 // only gains 1 gold with each sale
 	} else if shopUser != nil {
 		shopUser.Character.Gold += price
 	}
