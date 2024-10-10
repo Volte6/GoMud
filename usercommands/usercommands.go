@@ -135,7 +135,8 @@ var (
 		`dual-wield`:  {DualWield, true, false},
 		`whisper`:     {Whisper, true, false},
 		`who`:         {Who, true, false},
-		`zap`:         {Zap, false, true}, // Admin only
+		`zap`:         {Zap, false, true},  // Admin only
+		`zone`:        {Zone, false, true}, // Admin only
 		// Special command only used upon creating a new account
 		`start`: {Start, false, false},
 	}

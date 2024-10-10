@@ -1,6 +1,7 @@
 roomid: 612
 zone: Mystarion
-zoneroot: true
+zoneconfig:
+  roomid: 612
 title: Main road
 description: The road itself becomes a cobblestone path, the stones worn smooth by
   centuries of use, each one seemingly placed with intention, leading inexorably towards

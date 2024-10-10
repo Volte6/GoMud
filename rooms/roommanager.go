@@ -548,7 +548,7 @@ func loadAllRoomZones() error {
 		zoneInfo := roomManager.zones[loadedRoom.Zone]
 		zoneInfo.RoomIds[loadedRoom.RoomId] = struct{}{}
 
-		if loadedRoom.ZoneRoot {
+		if loadedRoom.ZoneConfig.RoomId == loadedRoom.RoomId {
 			zoneInfo.RootRoomId = loadedRoom.RoomId
 			zoneInfo.DefaultBiome = loadedRoom.Biome
 		}
@@ -637,7 +637,7 @@ func addRoomToMemory(r *Room) {
 	zoneInfo := roomManager.zones[r.Zone]
 	zoneInfo.RoomIds[r.RoomId] = struct{}{}
 
-	if r.ZoneRoot {
+	if r.ZoneConfig.RoomId == r.RoomId {
 		zoneInfo.RootRoomId = r.RoomId
 	}
 
@@ -696,6 +696,18 @@ func GetZoneRoot(zone string) (int, error) {
 	}
 
 	return 0, fmt.Errorf("zone %s does not exist.", zone)
+}
+
+func GetZoneConfig(zone string) *ZoneConfig {
+	roomManager.Lock()
+	defer roomManager.Unlock()
+
+	if zoneInfo, ok := roomManager.zones[zone]; ok {
+		if r := roomManager.rooms[zoneInfo.RootRoomId]; r != nil {
+			return &r.ZoneConfig
+		}
+	}
+	return nil
 }
 
 func IsRoomLoaded(roomId int) bool {
@@ -887,7 +899,9 @@ func CreateZone(zoneName string) (roomId int, err error) {
 	}
 
 	newRoom := NewRoom(zoneName)
-	newRoom.ZoneRoot = true
+
+	newRoom.ZoneConfig = ZoneConfig{RoomId: newRoom.RoomId}
+
 	if err := newRoom.Validate(); err != nil {
 		return 0, err
 	}

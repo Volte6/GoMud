@@ -126,7 +126,7 @@ func MobIdByName(mobName string) MobId {
 	return 0
 }
 
-func NewMobById(mobId MobId, homeRoomId int) *Mob {
+func NewMobById(mobId MobId, homeRoomId int, forceLevel ...int) *Mob {
 
 	mobMutex.Lock()
 	defer mobMutex.Unlock()
@@ -141,10 +141,16 @@ func NewMobById(mobId MobId, homeRoomId int) *Mob {
 		mob.Character.RoomId = homeRoomId
 		mob.InstanceId = instanceCounter
 		mob.DamageTaken = make(map[int]int)
+
+		// Level related stuff
+		if len(forceLevel) > 0 && forceLevel[0] > 0 {
+			mob.Character.Level = forceLevel[0]
+		}
 		mob.Character.StatPoints = mob.Character.Level
 		mob.Character.Level--
 		mob.Character.Experience = mob.Character.XPTNL()
 		mob.Character.Level++
+
 		// Apply training for those stats
 		mob.Character.AutoTrain()
 		mob.Character.Health = mob.Character.HealthMax.Value

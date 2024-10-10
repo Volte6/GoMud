@@ -1,6 +1,7 @@
 roomid: 304
 zone: Frost Lake
-zoneroot: true
+zoneconfig:
+  roomid: 304
 title: Frost Lake Shore
 description: The stillness here is profound, the world holding its breath in reverence
   for this enchanting realm. The silence is broken only by the soft, melodic chime

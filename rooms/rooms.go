@@ -50,6 +50,8 @@ type SpawnInfo struct {
 	ScriptTag    string   `yaml:"scripttag,omitempty"`       // (optional) if set, will override the mob's script tag
 	QuestFlags   []string `yaml:"questflags,omitempty,flow"` // (optional) list of quest flags to set on the mob
 	BuffIds      []int    `yaml:"buffids,omitempty,flow"`    // (optional) list of buffs the mob always has active
+	Level        int      `yaml:"level,omitempty"`           // (optional) force this mob to a specific level
+	LevelMod     int      `yaml:"levelmod,omitempty"`        // (optional) modify this mobs level by this amount
 }
 
 type FindFlag uint16
@@ -143,14 +145,44 @@ func (l *GameLock) SetLocked() {
 	l.UnlockedUntil = 0
 }
 
+type ZoneConfig struct {
+	RoomId       int `yaml:"roomid,omitempty"`
+	MobAutoScale struct {
+		Minimum int `yaml:"minimum,omitempty"` // level scaling minimum
+		Maximum int `yaml:"maximum,omitempty"` // level scaling maximum
+	} `yaml:"autoscale,omitempty"` // level scaling range if any
+}
+
+func (z *ZoneConfig) Validate() {
+	if z.MobAutoScale.Minimum < 0 {
+		z.MobAutoScale.Minimum = 0
+	}
+
+	if z.MobAutoScale.Maximum < 0 {
+		z.MobAutoScale.Maximum = 0
+	}
+
+	// If either is set, neither can be zero.
+	if z.MobAutoScale.Minimum > 0 || z.MobAutoScale.Maximum > 0 {
+
+		if z.MobAutoScale.Maximum < z.MobAutoScale.Minimum {
+			z.MobAutoScale.Maximum = z.MobAutoScale.Minimum
+		}
+
+		if z.MobAutoScale.Minimum == 0 {
+			z.MobAutoScale.Minimum = z.MobAutoScale.Maximum
+		}
+	}
+}
+
 type Room struct {
 	mutex             sync.RWMutex
-	RoomId            int    // a unique numeric index of the room. Also the filename.
-	Zone              string // zone is a way to partition rooms into groups. Also into folders.
-	ZoneRoot          bool   `yaml:"zoneroot,omitempty"`        // Is this the root room? If transported to a zone this is the room you end up in. Also copied for new room creation.
-	IsBank            bool   `yaml:"isbank,omitempty"`          // Is this a bank room? If so, players can deposit/withdraw gold here.
-	IsStorage         bool   `yaml:"isstorage,omitempty"`       // Is this a storage room? If so, players can add/remove objects here.
-	IsCharacterRoom   bool   `yaml:"ischaracterroom,omitempty"` // Is this a room where characters can create new characters to swap between them?
+	RoomId            int        // a unique numeric index of the room. Also the filename.
+	Zone              string     // zone is a way to partition rooms into groups. Also into folders.
+	ZoneConfig        ZoneConfig `yaml:"zoneconfig,omitempty"`      // If non-null is a root room.
+	IsBank            bool       `yaml:"isbank,omitempty"`          // Is this a bank room? If so, players can deposit/withdraw gold here.
+	IsStorage         bool       `yaml:"isstorage,omitempty"`       // Is this a storage room? If so, players can add/remove objects here.
+	IsCharacterRoom   bool       `yaml:"ischaracterroom,omitempty"` // Is this a room where characters can create new characters to swap between them?
 	Title             string
 	Description       string
 	MapSymbol         string               `yaml:"mapsymbol,omitempty"`  // The symbol to use when generating a map of the zone
@@ -438,7 +470,28 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 		if spawnInfo.CooldownLeft < 1 {
 
 			if spawnInfo.MobId > 0 && spawnInfo.InstanceId == 0 {
-				if mob := mobs.NewMobById(mobs.MobId(spawnInfo.MobId), r.RoomId); mob != nil {
+
+				forceLevel := 0
+
+				if spawnInfo.Level > 0 {
+					forceLevel = spawnInfo.Level
+				} else {
+
+					// Get the zone settings, check for scaling
+					if zConfig := GetZoneConfig(r.Zone); zConfig != nil {
+
+						if zConfig.MobAutoScale.Minimum > 0 {
+							forceLevel = util.Rand(zConfig.MobAutoScale.Maximum-zConfig.MobAutoScale.Minimum) + zConfig.MobAutoScale.Minimum
+						}
+
+						if forceLevel > 0 {
+							forceLevel += spawnInfo.LevelMod
+						}
+
+					}
+				}
+
+				if mob := mobs.NewMobById(mobs.MobId(spawnInfo.MobId), r.RoomId, forceLevel); mob != nil {
 
 					// If a merchant, fill up stocks on first time being loaded in
 					if mob.HasShop() {
@@ -2156,6 +2209,14 @@ func (r *Room) Validate() error {
 			c.Items[i].Validate()
 		}
 		r.Containers[cName] = c
+	}
+
+	if r.ZoneConfig.RoomId != r.RoomId {
+		r.ZoneConfig = ZoneConfig{}
+	} else {
+
+		r.ZoneConfig.Validate()
+
 	}
 
 	return nil

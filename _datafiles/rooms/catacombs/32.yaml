@@ -1,6 +1,7 @@
 roomid: 32
 zone: Catacombs
-zoneroot: true
+zoneconfig:
+  roomid: 32
 title: Entrance to the Catacombs
 description: Beneath the Sanctuary of the Benevolent Heart lies the labyrinthine expanse
   known as the Catacombs. A network of narrow, winding tunnels and chambers, the Catacombs

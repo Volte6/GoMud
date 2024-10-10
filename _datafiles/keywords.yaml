@@ -127,6 +127,7 @@ help:
       - skillset
       - spawn
       - zap
+      - zone
 # Aliases for keywords when typing: help <keyword>
 # Key is the target keyword, value is the list of aliases
 help-aliases:

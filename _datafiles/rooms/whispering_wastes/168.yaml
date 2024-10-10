@@ -1,6 +1,7 @@
 roomid: 168
 zone: Whispering Wastes
-zoneroot: true
+zoneconfig:
+  roomid: 168
 title: Frozen Wasteland
 description: The relentless blizzard swallows the world in a veil of white. The sky,
   a perpetual twilight, casts a surreal glow over the endless expanse of snow and

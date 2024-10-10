@@ -1,6 +1,10 @@
 roomid: 1
 zone: Frostfang
-zoneroot: true
+zoneconfig:
+  roomid: 1
+  autoscale:
+    minimum: 50
+    maximum: 99
 title: Town Square
 description: In the shimmering heart of Frostfang, a city wrapped in a perpetual blanket
   of snow and illuminated by the ethereal glow of the auroras, lies the Town Square.

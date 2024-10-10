@@ -1,6 +1,7 @@
 roomid: 900
 zone: Tutorial
-zoneroot: true
+zoneconfig:
+  roomid: 900
 title: Learning to Look
 description: You are at the Newbie School. Here you will learn the very basics of
   how to navigate and interact with the world. Pay attention, because once you complete
