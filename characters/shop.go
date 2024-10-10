@@ -35,15 +35,16 @@ func (s *Shop) Restock() bool {
 
 	roundNow := util.GetRoundCount()
 	restocked := false
+	pruneItems := []int{}
 
 	for i, fsItem := range *s {
 
 		// 0 max means never restocks, always available
-		if fsItem.QuantityMax <= StockUnlimited {
+		if fsItem.QuantityMax == StockUnlimited {
 			continue
 		}
 
-		if fsItem.Quantity >= fsItem.QuantityMax {
+		if fsItem.Quantity == fsItem.QuantityMax {
 			continue
 		}
 
@@ -56,10 +57,18 @@ func (s *Shop) Restock() bool {
 			restocked = true
 
 			fsItem.lastRestockRound += itemRestockInterval
-			fsItem.Quantity += 1
 
-			if fsItem.Quantity >= fsItem.QuantityMax {
-				fsItem.Quantity = fsItem.QuantityMax
+			if fsItem.Quantity < fsItem.QuantityMax {
+				fsItem.Quantity += 1
+				continue
+			}
+
+			if fsItem.Quantity > fsItem.QuantityMax {
+				fsItem.Quantity--
+				continue
+			}
+
+			if fsItem.Quantity == fsItem.QuantityMax {
 				break
 			}
 		}
@@ -68,8 +77,18 @@ func (s *Shop) Restock() bool {
 			fsItem.lastRestockRound = roundNow
 		}
 
-		(*s)[i] = fsItem
+		if fsItem.Quantity < 1 && fsItem.QuantityMax == StockTemporary {
+			pruneItems = append(pruneItems, i)
+		}
 
+		(*s)[i] = fsItem
+	}
+
+	if len(pruneItems) > 0 {
+		for pos := len(pruneItems) - 1; pos >= 0; pos-- {
+			i := pruneItems[pos]
+			(*s) = append((*s)[:i], (*s)[i+1:]...)
+		}
 	}
 
 	return restocked

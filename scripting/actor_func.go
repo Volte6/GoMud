@@ -11,6 +11,7 @@ import (
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/parties"
+	"github.com/volte6/mud/pets"
 	"github.com/volte6/mud/races"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
@@ -596,6 +597,14 @@ func (a ScriptActor) Uncurse() []*ScriptItem {
 	}
 
 	return retList
+}
+
+func (a ScriptActor) GetPet() *pets.Pet {
+
+	if a.characterRecord.Pet.Exists() {
+		return &a.characterRecord.Pet
+	}
+	return nil
 }
 
 // ////////////////////////////////////////////////////////

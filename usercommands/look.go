@@ -301,6 +301,18 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		user.SendText(``)
 
 		if !isSneaking {
+
+			renderNouns := user.Permission == users.PermissionAdmin
+			if user.Character.Pet.Exists() && user.Character.HasBuffFlag(buffs.SeeNouns) {
+				renderNouns = true
+			}
+
+			if renderNouns && len(room.Nouns) > 0 {
+				for noun, _ := range room.Nouns {
+					foundDesc = strings.Replace(foundDesc, noun, `<ansi fg="noun">`+noun+`</ansi>`, 1)
+				}
+			}
+
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> is examining the <ansi fg="noun">%s</ansi>.`, user.Character.Name, foundNoun),
 				user.UserId,
