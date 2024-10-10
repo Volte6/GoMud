@@ -41,13 +41,14 @@ func Zone(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		user.SendText(``)
 		user.SendText(fmt.Sprintf(`<ansi fg="yellow-bold">Zone Config for <ansi fg="red">%s</ansi></ansi>`, room.Zone))
-		user.SendText(fmt.Sprintf(`  <ansi fg="yellow-bold">Root Room Id: </ansi> <ansi fg="red">%d</ansi>`, zoneConfig.RoomId))
+		user.SendText(fmt.Sprintf(`  <ansi fg="yellow-bold">Root Room Id:    </ansi> <ansi fg="red">%d</ansi>`, zoneConfig.RoomId))
 
 		if zoneConfig.MobAutoScale.Maximum == 0 {
-			user.SendText(`  <ansi fg="yellow-bold">Mob AutoScale:</ansi> <ansi fg="red">[disabled]</ansi>`)
+			user.SendText(`  <ansi fg="yellow-bold">Mob AutoScale:</ansi>    <ansi fg="red">[disabled]</ansi>`)
 		} else {
-			user.SendText(fmt.Sprintf(`  <ansi fg="yellow-bold">Mob AutoScale:</ansi> <ansi fg="red">%d</ansi> - <ansi fg="red">%d</ansi>`, zoneConfig.MobAutoScale.Minimum, zoneConfig.MobAutoScale.Maximum))
+			user.SendText(fmt.Sprintf(`  <ansi fg="yellow-bold">Mob AutoScale:</ansi>    <ansi fg="red">%d</ansi> - <ansi fg="red">%d</ansi>`, zoneConfig.MobAutoScale.Minimum, zoneConfig.MobAutoScale.Maximum))
 		}
+
 		user.SendText(``)
 
 		return true, nil

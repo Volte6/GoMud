@@ -20,3 +20,4 @@ spawninfo:
 - mobid: 7
   cooldown: 20
   message: A serving wench enters from a back room.
+  levelmod: 10

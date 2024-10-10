@@ -336,11 +336,14 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 					if zConfig := GetZoneConfig(r.Zone); zConfig != nil {
 
 						if zConfig.MobAutoScale.Minimum > 0 {
-							forceLevel = util.Rand(zConfig.MobAutoScale.Maximum-zConfig.MobAutoScale.Minimum) + zConfig.MobAutoScale.Minimum
+							forceLevel = zConfig.GenerateRandomLevel()
 						}
 
 						if forceLevel > 0 {
 							forceLevel += spawnInfo.LevelMod
+							if forceLevel < 1 {
+								forceLevel = 1
+							}
 						}
 
 					}
@@ -2031,7 +2034,6 @@ func (r *Room) Validate() error {
 	if len(r.SpawnInfo) > 0 {
 
 		defaultCooldown := uint16(configs.GetConfig().MinutesToRounds(15))
-
 		for idx, sInfo := range r.SpawnInfo {
 			// Spawn periods if left empty default to 15 minutes
 			if sInfo.Cooldown == 0 {

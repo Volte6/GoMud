@@ -22,3 +22,4 @@ spawninfo:
 - mobid: 1
   cooldown: 24
   message: A rat falls from the sky.
+  level: 1

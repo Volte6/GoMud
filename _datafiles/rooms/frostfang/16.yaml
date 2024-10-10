@@ -20,3 +20,4 @@ spawninfo:
 - mobid: 1
   cooldown: 15
   message: A rat scurries out from a dark hole and wiggles its whiskers.
+  level: 1

@@ -17,3 +17,4 @@ spawninfo:
 - mobid: 1
   cooldown: 8
   message: A rat wanders out from nowhere and looks at you.
+  level: 1
