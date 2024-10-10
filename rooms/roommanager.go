@@ -28,6 +28,17 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var (
+	roomManager = &RoomManager{
+		rooms:                make(map[int]*Room),
+		zones:                make(map[string]ZoneInfo),
+		roomsWithUsers:       make(map[int]int),
+		roomsWithMobs:        make(map[int]int),
+		roomDescriptionCache: make(map[string]string),
+		roomIdToFileCache:    make(map[int]string),
+	}
+)
+
 type RoomManager struct {
 	sync.RWMutex
 	rooms                map[int]*Room
@@ -69,17 +80,6 @@ type RoomTemplateDetails struct {
 	TrackingString string
 	ExtraMessages  []string
 }
-
-var (
-	roomManager = &RoomManager{
-		rooms:                make(map[int]*Room),
-		zones:                make(map[string]ZoneInfo),
-		roomsWithUsers:       make(map[int]int),
-		roomsWithMobs:        make(map[int]int),
-		roomDescriptionCache: make(map[string]string),
-		roomIdToFileCache:    make(map[int]string),
-	}
-)
 
 func GetNextRoomId() int {
 	return int(configs.GetConfig().NextRoomId)
