@@ -318,19 +318,22 @@ func (m *Mob) GetSellPrice(item items.Item) int {
 	value := 0
 	likesType := false
 	likesSubtype := false
+	newAddition := true
 	priceScale := 0.0
 
-	for _, stockItm := range m.Character.Shop.GetInstock() {
+	currentSaleItems := m.Character.Shop.GetInstock()
+
+	for _, stockItm := range currentSaleItems {
 		if stockItm.ItemId == 0 {
 			continue
 		}
 
 		if stockItm.ItemId == item.ItemId { // If it's in stock, we can set everyting and break out
-
+			newAddition = false // already stocking this item
 			likesType = true
 			likesSubtype = true
 			value = stockItm.Price
-			// Scale down amount willing to pay by up to 75%:
+			// Scale down amount willing to pay based on how many there are already in stock
 			priceScale = 1.0 - (float64(stockItm.Quantity) / 20)
 			break
 		}
@@ -349,6 +352,11 @@ func (m *Mob) GetSellPrice(item items.Item) int {
 			likesSubtype = true
 			priceScale += 0.5
 		}
+	}
+
+	// If this is a new addition, don't allow more than 20 varieites
+	if newAddition && len(currentSaleItems) >= 20 {
+		return 0
 	}
 
 	if value == 0 {

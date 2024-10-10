@@ -32,12 +32,13 @@ func (s *Shop) Restock() bool {
 	}
 
 	defaultRestockInterval := configs.GetConfig().ShopRestockRounds
-
 	roundNow := util.GetRoundCount()
 	restocked := false
 	pruneItems := []int{}
 
 	for i, fsItem := range *s {
+
+		restocked = false
 
 		// 0 max means never restocks, always available
 		if fsItem.QuantityMax == StockUnlimited {
@@ -56,28 +57,39 @@ func (s *Shop) Restock() bool {
 		for roundNow-fsItem.lastRestockRound >= itemRestockInterval {
 			restocked = true
 
+			if fsItem.QuantityMax == StockUnlimited { // unlimited? No adjustment needed
+				break
+			}
+
+			if fsItem.Quantity == fsItem.QuantityMax { // currently at the max qty? No adjustment needed
+				break
+			}
+
 			fsItem.lastRestockRound += itemRestockInterval
 
-			if fsItem.Quantity < fsItem.QuantityMax {
+			// Non Unlimited, Non temporary
+			if fsItem.Quantity < fsItem.QuantityMax { // increase stock if needed
 				fsItem.Quantity += 1
 				continue
 			}
 
-			if fsItem.Quantity > fsItem.QuantityMax {
-				fsItem.Quantity--
-				continue
+			// Temp item handling
+			if fsItem.QuantityMax == StockTemporary {
+
+				if fsItem.Quantity > 0 { // decrease stock on temp items
+					fsItem.Quantity--
+				}
+
 			}
 
-			if fsItem.Quantity == fsItem.QuantityMax {
-				break
-			}
 		}
 
 		if restocked {
 			fsItem.lastRestockRound = roundNow
 		}
 
-		if fsItem.Quantity < 1 && fsItem.QuantityMax == StockTemporary {
+		// Once zeroed, prune it
+		if fsItem.QuantityMax == StockTemporary && fsItem.Quantity == 0 {
 			pruneItems = append(pruneItems, i)
 		}
 
@@ -105,9 +117,10 @@ func (s *Shop) StockItem(itemId int) bool {
 	}
 
 	*s = append(*s, ShopItem{
-		ItemId:      itemId,
-		Quantity:    1,
-		QuantityMax: StockTemporary,
+		ItemId:           itemId,
+		Quantity:         1,
+		QuantityMax:      StockTemporary,
+		lastRestockRound: util.GetRoundCount(),
 	})
 
 	return true
