@@ -21,3 +21,4 @@ spawninfo:
   maxwander: 2
   scripttag: hungry
   questflags: [4-return]
+  levelmod: 55

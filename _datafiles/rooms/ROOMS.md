@@ -6,12 +6,11 @@
 
 * Level 1-5 (Alley Rats)
 * Level 5-10 (Slums)
-* Level 10-15 (Catacombs)
-* Level 30 (Thieves Guild)
+  * (Thieves Guild 20-25)
+* Level 8-13 (Catacombs)
+  * (Lich 16-21)
 
 ## Wispering Wastes
-
-
 
 * Level 5-15 (Eastern)
 * Level 15-25 (Western)

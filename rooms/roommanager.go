@@ -28,6 +28,17 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var (
+	roomManager = &RoomManager{
+		rooms:                make(map[int]*Room),
+		zones:                make(map[string]ZoneInfo),
+		roomsWithUsers:       make(map[int]int),
+		roomsWithMobs:        make(map[int]int),
+		roomDescriptionCache: make(map[string]string),
+		roomIdToFileCache:    make(map[int]string),
+	}
+)
+
 type RoomManager struct {
 	sync.RWMutex
 	rooms                map[int]*Room
@@ -69,17 +80,6 @@ type RoomTemplateDetails struct {
 	TrackingString string
 	ExtraMessages  []string
 }
-
-var (
-	roomManager = &RoomManager{
-		rooms:                make(map[int]*Room),
-		zones:                make(map[string]ZoneInfo),
-		roomsWithUsers:       make(map[int]int),
-		roomsWithMobs:        make(map[int]int),
-		roomDescriptionCache: make(map[string]string),
-		roomIdToFileCache:    make(map[int]string),
-	}
-)
 
 func GetNextRoomId() int {
 	return int(configs.GetConfig().NextRoomId)
@@ -548,7 +548,7 @@ func loadAllRoomZones() error {
 		zoneInfo := roomManager.zones[loadedRoom.Zone]
 		zoneInfo.RoomIds[loadedRoom.RoomId] = struct{}{}
 
-		if loadedRoom.ZoneRoot {
+		if loadedRoom.ZoneConfig.RoomId == loadedRoom.RoomId {
 			zoneInfo.RootRoomId = loadedRoom.RoomId
 			zoneInfo.DefaultBiome = loadedRoom.Biome
 		}
@@ -637,7 +637,7 @@ func addRoomToMemory(r *Room) {
 	zoneInfo := roomManager.zones[r.Zone]
 	zoneInfo.RoomIds[r.RoomId] = struct{}{}
 
-	if r.ZoneRoot {
+	if r.ZoneConfig.RoomId == r.RoomId {
 		zoneInfo.RootRoomId = r.RoomId
 	}
 
@@ -696,6 +696,20 @@ func GetZoneRoot(zone string) (int, error) {
 	}
 
 	return 0, fmt.Errorf("zone %s does not exist.", zone)
+}
+
+func GetZoneConfig(zone string) *ZoneConfig {
+
+	roomManager.Lock()
+	zoneInfo, ok := roomManager.zones[zone]
+	roomManager.Unlock()
+
+	if ok {
+		if r := LoadRoom(zoneInfo.RootRoomId); r != nil {
+			return &r.ZoneConfig
+		}
+	}
+	return nil
 }
 
 func IsRoomLoaded(roomId int) bool {
@@ -887,7 +901,9 @@ func CreateZone(zoneName string) (roomId int, err error) {
 	}
 
 	newRoom := NewRoom(zoneName)
-	newRoom.ZoneRoot = true
+
+	newRoom.ZoneConfig = ZoneConfig{RoomId: newRoom.RoomId}
+
 	if err := newRoom.Validate(); err != nil {
 		return 0, err
 	}

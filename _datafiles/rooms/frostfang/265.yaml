@@ -18,3 +18,4 @@ spawninfo:
   name: sophie
   scripttag: locketsadness
   questflags: [1-return]
+  levelmod: 10

@@ -16,8 +16,8 @@ character:
     to disrupt the balance of the world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 73
-  zone: Frostfang
+  roomid: 467
+  zone: Frostfang Slums
   raceid: 2
   stats:
     strength:
@@ -39,7 +39,7 @@ character:
   experience: 17470
   trainingpoints: 44
   statpoints: 6
-  health: 60
+  health: 57
   mana: 32
   actionpoints: 202
   alignment: -1
@@ -62,16 +62,17 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 18
+      roundcounter: 26
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 41
+      roundcounter: 4
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
       permabuff: true
+      roundcounter: 8
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -138,5 +139,5 @@ character:
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/7LQQYbmOobo0EjH0FjH0ETH3EDH3BgZAQIAAP//JfQlxDoAAAA=
+roommemoryblob: H4sIAAAAAAAA/1TDwQkAIBTD0IVyqb9W3H8x8fBBSV54ExqokNFEwbU/5btbgrPaCQAA//8qwUlYTAAAAA==
 configoptions: {}

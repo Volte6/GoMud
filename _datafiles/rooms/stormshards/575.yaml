@@ -1,6 +1,7 @@
 roomid: 575
 zone: Stormshards
-zoneroot: true
+zoneconfig:
+  roomid: 575
 title: Mountain path
 description: As the path ascends, the terrain becomes more rugged; the trees thin
   out, giving way to rocky outcrops and steep, craggy inclines. The earth underfoot

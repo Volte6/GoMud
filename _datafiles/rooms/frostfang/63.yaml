@@ -20,3 +20,4 @@ spawninfo:
 - mobid: 5
   cooldown: 20
   message: The armorer enters from a back room.
+  levelmod: 40

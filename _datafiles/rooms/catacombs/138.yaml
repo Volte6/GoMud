@@ -1,15 +1,15 @@
 roomid: 138
 zone: Catacombs
 title: Beneath the Crypt
-description: "Engulfed by the darkness after the unexpected descent, you find yourself
+description: Engulfed by the darkness after the unexpected descent, you find yourself
   in an expansive hidden chamber that exists in defiance of the crypt above. A palpable
   sense of abandonment pervades the space, heavy with the echoes of a time when such
-  secrets were zealously guarded. The walls, pressing in with the chill of the earthb\0\x19s
+  secrets were zealously guarded. The walls, pressing in with the chill of the earth's
   depths, are intricately etched with hieroglyphs whose colors have faded to ghostly
   hues, depicting scenes that tantalize with glimpses into a forgotten epoch. At the
   center lies a pool of water, stagnant and opaque, its still surface a dark mirror
   that absorbs rather than reflects the meager light, adding to the chamber's oppressive
-  enigma."
+  enigma.
 exits:
   up:
     roomid: 136
@@ -17,3 +17,4 @@ spawninfo:
 - mobid: 14
   cooldown: 450
   message: Bones scattered about come together to form an undead lich.
+  levelmod: 8

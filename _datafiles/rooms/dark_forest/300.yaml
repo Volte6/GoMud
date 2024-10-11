@@ -1,6 +1,7 @@
 roomid: 300
 zone: Dark Forest
-zoneroot: true
+zoneconfig:
+  roomid: 300
 title: Forest Road
 description: As you venture further along the old road, it leads you into the heart
   of the foreboding Dark Forest. The transition from the tranquil Frost Lake to this

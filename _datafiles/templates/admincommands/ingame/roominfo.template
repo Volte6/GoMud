@@ -1,5 +1,5 @@
 
-<ansi fg="yellow-bold">RoomId:</ansi>         <ansi fg="red">{{ .RoomId }}</ansi>{{ if .ZoneRoot }} <ansi fg="196">(This is the zone root.)</ansi>{{ end }}
+<ansi fg="yellow-bold">RoomId:</ansi>         <ansi fg="red">{{ .RoomId }}</ansi>{{ if eq .ZoneConfig.RoomId .RoomId }} <ansi fg="196">(This is the zone root.)</ansi>{{ end }}
 <ansi fg="yellow-bold">Filepath:</ansi>       <ansi fg="129">{{ .Filepath }}</ansi>
 <ansi fg="yellow-bold">Zone:</ansi>           <ansi fg="room-zone">{{ .Zone }}</ansi>
 <ansi fg="yellow-bold">MapSymbol:</ansi>      <ansi fg="map-{{ lowercase .MapLegend }}">{{ .GetMapSymbol }}</ansi>

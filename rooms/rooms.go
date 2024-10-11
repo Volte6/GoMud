@@ -34,24 +34,6 @@ var (
 	}
 )
 
-type SpawnInfo struct {
-	MobId        int      `yaml:"mobid,omitempty"`           // Mob template Id to spawn
-	InstanceId   int      `yaml:"-"`                         // Mob instance Id that was spawned (tracks whether exists currently)
-	Container    string   `yaml:"container,omitempty"`       // If set, any item spawned will go into the container.
-	ItemId       int      `yaml:"itemid,omitempty"`          // Item template Id to spawn on the floor
-	Gold         int      `yaml:"gold,omitempty"`            // How much gold to spawn on the floor
-	CooldownLeft uint16   `yaml:"-"`                         // How many rounds remain before it can spawn again. Only decrements if mob no longer exists.
-	Cooldown     uint16   `yaml:"cooldown,omitempty"`        // How many rounds to wait before spawning again after it is killed.
-	Message      string   `yaml:"message,omitempty"`         // (optional) message to display to the room when this creature spawns, instead of a default
-	Name         string   `yaml:"name,omitempty"`            // (optional) if set, will override the mob's name
-	ForceHostile bool     `yaml:"forcehostile,omitempty"`    // (optional) if true, forces the mob to be hostile.
-	MaxWander    int      `yaml:"maxwander,omitempty"`       // (optional) if set, will override the mob's max wander distance
-	IdleCommands []string `yaml:"idlecommands,omitempty"`    // (optional) list of commands to override the default of the mob. Useful when you need a mob to be more unique.
-	ScriptTag    string   `yaml:"scripttag,omitempty"`       // (optional) if set, will override the mob's script tag
-	QuestFlags   []string `yaml:"questflags,omitempty,flow"` // (optional) list of quest flags to set on the mob
-	BuffIds      []int    `yaml:"buffids,omitempty,flow"`    // (optional) list of buffs the mob always has active
-}
-
 type FindFlag uint16
 type VisitorType string
 
@@ -80,77 +62,14 @@ const (
 	VisitorMob  = "mob"
 )
 
-type Sign struct {
-	VisibleUserId int       // What user can see it? If 0, then everyone can see it.
-	DisplayText   string    // What text to display
-	Expires       time.Time // When this sign expires.
-}
-
-type GameLock struct {
-	Difficulty    uint8  `yaml:"difficulty,omitempty"` // 0 - no lock. greater than zero = difficulty to unlock.
-	UnlockedUntil uint64 `yaml:"-"`                    // What round it was unlocked at, when util.GetRoundCount() > UnlockedUntil, it is relocked (set to zero).
-}
-type Container struct {
-	Lock  GameLock     `yaml:"lock,omitempty"` // 0 - no lock. greater than zero = difficulty to unlock.
-	Items []items.Item `yaml:"-"`              // Don't save contents, let room prep handle. What is found inside of the chest.
-	Gold  int          `yaml:"-"`              // Don't save contents, let room prep handle. How much gold is found inside of the chest.
-}
-
-func (c Container) HasLock() bool {
-	return c.Lock.Difficulty > 0
-}
-
-func (c *Container) AddItem(i items.Item) {
-	c.Items = append(c.Items, i)
-}
-
-func (c *Container) RemoveItem(i items.Item) {
-	for j := len(c.Items) - 1; j >= 0; j-- {
-		if c.Items[j].Equals(i) {
-			c.Items = append(c.Items[:j], c.Items[j+1:]...)
-			break
-		}
-	}
-}
-
-func (c *Container) FindItem(itemName string) (items.Item, bool) {
-
-	// Search floor
-	closeMatchItem, matchItem := items.FindMatchIn(itemName, c.Items...)
-
-	if matchItem.ItemId != 0 {
-		return matchItem, true
-	}
-
-	if closeMatchItem.ItemId != 0 {
-		return closeMatchItem, true
-	}
-
-	return items.Item{}, false
-}
-
-func (l GameLock) IsLocked() bool {
-	return l.Difficulty > 0 && l.UnlockedUntil < util.GetRoundCount()
-}
-
-func (l *GameLock) SetUnlocked() {
-	if l.Difficulty > 0 && l.UnlockedUntil < util.GetRoundCount() {
-		l.UnlockedUntil = util.GetRoundCount() + uint64(configs.GetConfig().MinutesToRounds(5))
-	}
-}
-
-func (l *GameLock) SetLocked() {
-	l.UnlockedUntil = 0
-}
-
 type Room struct {
 	mutex             sync.RWMutex
-	RoomId            int    // a unique numeric index of the room. Also the filename.
-	Zone              string // zone is a way to partition rooms into groups. Also into folders.
-	ZoneRoot          bool   `yaml:"zoneroot,omitempty"`        // Is this the root room? If transported to a zone this is the room you end up in. Also copied for new room creation.
-	IsBank            bool   `yaml:"isbank,omitempty"`          // Is this a bank room? If so, players can deposit/withdraw gold here.
-	IsStorage         bool   `yaml:"isstorage,omitempty"`       // Is this a storage room? If so, players can add/remove objects here.
-	IsCharacterRoom   bool   `yaml:"ischaracterroom,omitempty"` // Is this a room where characters can create new characters to swap between them?
+	RoomId            int        // a unique numeric index of the room. Also the filename.
+	Zone              string     // zone is a way to partition rooms into groups. Also into folders.
+	ZoneConfig        ZoneConfig `yaml:"zoneconfig,omitempty"`      // If non-null is a root room.
+	IsBank            bool       `yaml:"isbank,omitempty"`          // Is this a bank room? If so, players can deposit/withdraw gold here.
+	IsStorage         bool       `yaml:"isstorage,omitempty"`       // Is this a storage room? If so, players can add/remove objects here.
+	IsCharacterRoom   bool       `yaml:"ischaracterroom,omitempty"` // Is this a room where characters can create new characters to swap between them?
 	Title             string
 	Description       string
 	MapSymbol         string               `yaml:"mapsymbol,omitempty"`  // The symbol to use when generating a map of the zone
@@ -182,26 +101,6 @@ type TrainingRange struct {
 	Max int
 }
 
-// There is a magic portal of Chuckles, magic portal of Henry here!
-// There is a magical hole in the east wall here!
-type TemporaryRoomExit struct {
-	RoomId  int       // Where does it lead to?
-	Title   string    // Does this exist have a special title?
-	UserId  int       // Who created it?
-	Expires time.Time // When will it be auto-cleaned up?
-}
-
-type RoomExit struct {
-	RoomId       int
-	Secret       bool     `yaml:"secret,omitempty"`
-	MapDirection string   `yaml:"mapdirection,omitempty"` // Optionaly indicate the direction of this exit for mapping purposes
-	Lock         GameLock `yaml:"lock,omitempty"`         // 0 - no lock. greater than zero = difficulty to unlock.
-}
-
-func (re RoomExit) HasLock() bool {
-	return re.Lock.Difficulty > 0
-}
-
 func NewRoom(zone string) *Room {
 	r := &Room{
 		RoomId:        GetNextRoomId(),
@@ -219,18 +118,6 @@ func NewRoom(zone string) *Room {
 	SetNextRoomId(r.RoomId + 1)
 
 	return r
-}
-
-// Takes a room identifying string and breaks it apart into a room id and zone.
-func ParseExit(exitStr string) (roomId int, zone string) {
-	if index := strings.Index(exitStr, "/"); index != -1 {
-		z, rm := strings.ToLower(exitStr[index+1:]), exitStr[0:index]
-		roomId, _ = strconv.Atoi(rm)
-		zone = z
-	} else {
-		roomId, _ = strconv.Atoi(exitStr)
-	}
-	return roomId, zone
 }
 
 func (r *Room) SendText(txt string, excludeUserIds ...int) {
@@ -438,7 +325,31 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 		if spawnInfo.CooldownLeft < 1 {
 
 			if spawnInfo.MobId > 0 && spawnInfo.InstanceId == 0 {
-				if mob := mobs.NewMobById(mobs.MobId(spawnInfo.MobId), r.RoomId); mob != nil {
+
+				forceLevel := 0
+
+				if spawnInfo.Level > 0 {
+					forceLevel = spawnInfo.Level
+				} else {
+
+					// Get the zone settings, check for scaling
+					if zConfig := GetZoneConfig(r.Zone); zConfig != nil {
+
+						if zConfig.MobAutoScale.Minimum > 0 {
+							forceLevel = zConfig.GenerateRandomLevel()
+						}
+
+						if forceLevel > 0 {
+							forceLevel += spawnInfo.LevelMod
+							if forceLevel < 1 {
+								forceLevel = 1
+							}
+						}
+
+					}
+				}
+
+				if mob := mobs.NewMobById(mobs.MobId(spawnInfo.MobId), r.RoomId, forceLevel); mob != nil {
 
 					// If a merchant, fill up stocks on first time being loaded in
 					if mob.HasShop() {
@@ -2123,7 +2034,6 @@ func (r *Room) Validate() error {
 	if len(r.SpawnInfo) > 0 {
 
 		defaultCooldown := uint16(configs.GetConfig().MinutesToRounds(15))
-
 		for idx, sInfo := range r.SpawnInfo {
 			// Spawn periods if left empty default to 15 minutes
 			if sInfo.Cooldown == 0 {
@@ -2156,6 +2066,14 @@ func (r *Room) Validate() error {
 			c.Items[i].Validate()
 		}
 		r.Containers[cName] = c
+	}
+
+	if r.ZoneConfig.RoomId != r.RoomId {
+		r.ZoneConfig = ZoneConfig{}
+	} else {
+
+		r.ZoneConfig.Validate()
+
 	}
 
 	return nil

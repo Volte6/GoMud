@@ -1,6 +1,7 @@
 roomid: 1000
 zone: Sun Anvil
-zoneroot: true
+zoneconfig:
+  roomid: 1000
 title: Desert's Edge
 description: You find yourself at the threshold of the Sun Anvil Desert, where the
   air itself seems to shimmer under the relentless glare of a merciless sun. The ground

@@ -25,3 +25,4 @@ spawninfo:
   cooldown: 20
   message: You notice a rat catcher setting up some traps.
   questflags: [7-tradetrap]
+  level: 40

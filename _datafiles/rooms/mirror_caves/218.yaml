@@ -1,6 +1,7 @@
 roomid: 218
 zone: Mirror Caves
-zoneroot: true
+zoneconfig:
+  roomid: 218
 title: Cave Entrance
 description: "As you cautiously step into the entrance of the mirror caves, a chilling
   draft greets you, carrying the faint scent of earth and ancient stone. The cave's

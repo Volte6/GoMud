@@ -24,9 +24,12 @@ spawninfo:
 - mobid: 1
   cooldown: 15
   message: A rat scurries out from a dark hole and wiggles its whiskers.
+  level: 1
 - mobid: 1
   cooldown: 20
   message: A rat wanders out from nowhere and looks at you.
+  level: 1
 - mobid: 1
   cooldown: 10
   message: A rat falls from the sky.
+  level: 1

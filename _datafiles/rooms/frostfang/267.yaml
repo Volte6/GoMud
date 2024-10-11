@@ -17,3 +17,4 @@ exits:
 spawninfo:
 - mobid: 26
   cooldown: 60
+  levelmod: 10
