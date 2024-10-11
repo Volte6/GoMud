@@ -67,14 +67,15 @@ func TryItemScriptEvent(eventName string, item items.Item, userId int) (bool, er
 			return false, finalErr
 		}
 
-		if boolVal, ok := res.Export().(bool); ok {
-			return boolVal, nil
-		}
-
 		if eventName != `onLost` {
 			// Save any changed that might have happened to the item
 			sUser.characterRecord.UpdateItem(item, *sItem.itemRecord)
 		}
+
+		if boolVal, ok := res.Export().(bool); ok {
+			return boolVal, nil
+		}
+
 	}
 
 	return false, nil
@@ -127,12 +128,12 @@ func TryItemCommand(cmd string, item items.Item, userId int) (bool, error) {
 			return false, finalErr
 		}
 
+		// Save any changed that might have happened to the item
+		sUser.characterRecord.UpdateItem(item, *sItem.itemRecord)
+
 		if boolVal, ok := res.Export().(bool); ok {
 			return boolVal, nil
 		}
-
-		// Save any changed that might have happened to the item
-		sUser.characterRecord.UpdateItem(item, *sItem.itemRecord)
 
 	} else if onCommandFunc, ok := vmw.GetFunction(`onCommand`); ok {
 
@@ -168,12 +169,13 @@ func TryItemCommand(cmd string, item items.Item, userId int) (bool, error) {
 			return false, finalErr
 		}
 
+		// Save any changed that might have happened to the item
+		sUser.characterRecord.UpdateItem(item, *sItem.itemRecord)
+
 		if boolVal, ok := res.Export().(bool); ok {
 			return boolVal, nil
 		}
 
-		// Save any changed that might have happened to the item
-		sUser.characterRecord.UpdateItem(item, *sItem.itemRecord)
 	}
 
 	return false, nil

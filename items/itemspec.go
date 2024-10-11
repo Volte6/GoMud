@@ -23,7 +23,8 @@ type TokenName string
 type WeaponHands = int
 
 var (
-	items map[int]*ItemSpec = make(map[int]*ItemSpec)
+	items         map[int]*ItemSpec = make(map[int]*ItemSpec)
+	itemNameCache                   = map[int]string{}
 )
 
 const (
@@ -311,6 +312,11 @@ func (i *ItemSpec) Validate() error {
 }
 
 func (i *ItemSpec) Filename() string {
+
+	if name, ok := itemNameCache[i.ItemId]; ok {
+		return fmt.Sprintf("%d-%s.yaml", i.ItemId, util.ConvertForFilename(name))
+	}
+
 	filename := util.ConvertForFilename(i.Name)
 	return fmt.Sprintf("%d-%s.yaml", i.ItemId, filename)
 }

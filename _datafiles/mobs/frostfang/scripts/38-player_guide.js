@@ -130,6 +130,8 @@ const homeNouns = ["home", "portal", "return", "townsquare", "town square"];
 // Things to ask to shut up the guide
 const silenceNouns = ["silence", "quiet", "shut up", "shh"];
 
+const leaveNouns = ["leave", "leave me alone", "die", "quit", "go away", "unfollow", "get lost"];
+
 function onAsk(mob, room, eventDetails) {
 
     charmedUserId = mob.GetCharmedUserId();
@@ -162,6 +164,17 @@ function onAsk(mob, room, eventDetails) {
         mob.Command(`sayto @`+String(eventDetails.sourceId)+` I'll try and be quieter.`);
         
         mob.SetTempData(`lastTipRound`, -1);
+
+        return true;
+    }
+
+
+    match = UtilFindMatchIn(eventDetails.askText, leaveNouns);
+    if ( match.found ) {
+
+        mob.Command(`sayto @`+String(eventDetails.sourceId)+` I'll be on my way then.`);
+        mob.Command(`emote bows and bids you farewell, disappearing into the scenery`);
+        mob.Command(`despawn charmed mob expired`)
 
         return true;
     }

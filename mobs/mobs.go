@@ -21,12 +21,13 @@ import (
 )
 
 var (
-	mobs            map[int]*Mob = map[int]*Mob{}
-	allMobNames                  = []string{}
-	mobInstances    map[int]*Mob = map[int]*Mob{}
-	instanceCounter int          = 0
+	instanceCounter int = 0
 	mobMutex        sync.RWMutex
-	mobsHatePlayers map[string]map[int]int = map[string]map[int]int{}
+	mobs            = map[int]*Mob{}
+	allMobNames     = []string{}
+	mobInstances    = map[int]*Mob{}
+	mobsHatePlayers = map[string]map[int]int{}
+	mobNameCache    = map[MobId]string{}
 )
 
 const (
@@ -511,7 +512,10 @@ func (r *Mob) Validate() error {
 }
 
 func (m *Mob) Filename() string {
-
+	if name, ok := mobNameCache[m.MobId]; ok {
+		return fmt.Sprintf("%d-%s.yaml", m.Id(), util.ConvertForFilename(name))
+	}
+	// Failover to character name
 	filename := util.ConvertForFilename(m.Character.Name)
 	return fmt.Sprintf("%d-%s.yaml", m.Id(), filename)
 }
@@ -569,6 +573,7 @@ func (m *Mob) GetScriptPath() string {
 		scriptFilePath,
 		1)
 
+	slog.Info("SCRIPT PATH", "path", util.FilePath(fullScriptPath))
 	return util.FilePath(fullScriptPath)
 }
 
@@ -647,6 +652,8 @@ func LoadDataFiles() {
 	for _, mob := range mobs {
 		mob.Character.CacheDescription()
 		allMobNames = append(allMobNames, mob.Character.Name)
+		// Keep track of all original names associated with a given mobId
+		mobNameCache[mob.MobId] = mob.Character.Name
 	}
 
 	slog.Info("mobs.LoadDataFiles()", "loadedCount", len(mobs), "Time Taken", time.Since(start))
