@@ -61,9 +61,9 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 			// drop all items / gold
 			Drop("all", user, room)
 
-			user.Character = characters.New()
-
 			rooms.MoveToRoom(user.UserId, -1)
+
+			user.Character = characters.New()
 
 			return true, nil
 		}
