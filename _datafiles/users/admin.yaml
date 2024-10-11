@@ -62,17 +62,17 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 25
+      roundcounter: 26
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 3
+      roundcounter: 4
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
       permabuff: true
-      roundcounter: 7
+      roundcounter: 8
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -139,5 +139,5 @@ character:
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/1TDsQ0AMQzDwIXY6C3rkf0XC1ykMMhrshL6UCGjRsF1lvLsJ8H5xw0AAP//GNE+U0oAAAA=
+roommemoryblob: H4sIAAAAAAAA/1TDwQkAIBTD0IVyqb9W3H8x8fBBSV54ExqokNFEwbU/5btbgrPaCQAA//8qwUlYTAAAAA==
 configoptions: {}

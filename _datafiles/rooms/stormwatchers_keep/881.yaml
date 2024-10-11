@@ -1,5 +1,5 @@
-roomid: 891
-zone: Whispering Wastes
+roomid: 881
+zone: Stormwatchers Keep
 title: Stormwatchers Keep
 description: The Halls of Stormwatchers Keep are a labyrinthine network of grand corridors
   and chambers carved into the heart of a colossal glacier. Each hall is adorned with
@@ -7,8 +7,5 @@ description: The Halls of Stormwatchers Keep are a labyrinthine network of grand
   the storied history of the Stormwatcher order.
 biome: fort
 exits:
-  south:
-    roomid: 888
-spawninfo:
-- mobid: 51
-  cooldown: 85
+  east:
+    roomid: 880
