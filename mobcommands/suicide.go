@@ -72,7 +72,7 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	mobXP := mob.Character.XPTL(mob.Character.Level - 1)
 
-	xpVal := mobXP / 125
+	xpVal := mobXP / 90
 
 	xpVariation := xpVal / 100
 	if xpVariation < 1 {
@@ -110,12 +110,25 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 						user.Character.KD.AddMobKill(int(mob.MobId))
 					}
 
-					xpScaler := float64(mob.Character.Level) / float64(totalPlayerLevels)
-					//if xpScaler > 1 {
-					xpVal = int(math.Ceil(float64(xpVal) * xpScaler))
-					//}
+					xpScaler := 1.0
 
-					grantXP, xpScale := user.Character.GrantXP(xpVal)
+					// If there's a level delta of more than 5, apply a scaler
+					if math.Abs(float64(mob.Character.Level)-float64(totalPlayerLevels)) > 5 {
+
+						xpScaler = float64(mob.Character.Level) / float64(totalPlayerLevels) // How much of the mobs level is the player?
+						if xpScaler > 1.5 {
+							xpScaler = 1.5
+						} else if xpScaler < 0.25 {
+							xpScaler = 0.25
+						}
+
+					}
+
+					finalXPVal := int(math.Ceil(float64(xpVal) * xpScaler))
+
+					slog.Info("XP Calculation", "MobLevel", mob.Character.Level, "XPBase", mobXP, "xpVal", xpVal, "xpVariation", xpVariation, "xpScaler", xpScaler, "finalXPVal", finalXPVal)
+
+					grantXP, xpScale := user.Character.GrantXP(finalXPVal)
 
 					xpMsgExtra := ``
 					if xpScale != 100 {
