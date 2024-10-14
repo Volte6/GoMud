@@ -229,52 +229,63 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	}
 
-	// Are they setting a macro?
+	// Are they setting a macro? // setTarget should be "=1" etc
 	if len(setTarget) == 2 && setTarget[0] == '=' {
-		macroNum, _ := strconv.Atoi(string(args[0][1]))
+
+		setVal := strings.Join(args, ` `)
+
+		macroNum, _ := strconv.Atoi(string(setTarget[1]))
 		if macroNum == 0 {
 			user.SendText("Invalid macro number supplied.")
 			return true, nil
 		}
+
 		if user.Macros == nil {
 			user.Macros = make(map[string]string)
 		}
-		rest = strings.TrimSpace(rest[2:])
 
-		if len(rest) > 128 {
-			rest = rest[:128]
+		// Keep macros small enough.
+		if len(setVal) > 128 {
+			setVal = setVal[:128]
 		}
 
-		if len(rest) == 0 {
-			delete(user.Macros, args[0])
-
-			user.SendText(
-				fmt.Sprintf(`Macro <ansi fg="command">=%d</ansi> deleted.`, macroNum),
-			)
+		if len(setVal) == 0 {
+			delete(user.Macros, setTarget)
+			user.SendText(fmt.Sprintf(`Macro <ansi fg="command">=%d</ansi> deleted.`, macroNum))
 		} else {
 
-			for _, cmd := range strings.Split(rest, ";") {
-				if len(cmd) > 0 {
-					if cmd[0] == '=' {
-						user.SendText(
-							`You cannot reference macros inside of a macro`,
-						)
-						return true, nil
-					}
-				}
+			allComands := strings.Split(setVal, ";")
+			if len(allComands) > 10 {
+				user.SendText(`Macros are limited to 10 commands.`)
+				return true, nil
 			}
 
-			user.Macros[args[0]] = rest
+			finalMacroCommands := []string{}
 
-			user.SendText(
-				fmt.Sprintf(`Macro set. Type <ansi fg="command">=%d</ansi> or press <ansi fg="command">F%d</ansi> to use it.`, macroNum, macroNum),
-			)
+			for _, cmd := range allComands {
+
+				if len(cmd) > 0 {
+					if cmd[0] == '=' {
+						user.SendText(`You cannot reference macros inside of a macro`)
+						return true, nil
+					}
+					finalMacroCommands = append(finalMacroCommands, cmd)
+				}
+
+			}
+
+			if len(finalMacroCommands) < 1 {
+				user.SendText(`There was a problem setting your macro.`)
+				return true, nil
+			}
+
+			user.Macros[setTarget] = strings.Join(finalMacroCommands, `;`)
+
+			user.SendText(fmt.Sprintf(`Macro set. Type <ansi fg="command">=%d</ansi> or (if your terminal supports it) press <ansi fg="command">F%d</ansi> to use it.`, macroNum, macroNum))
 		}
 
 		return true, nil
 	}
-	// Setting macros:
-	// set =1 "say hello"
 
 	return true, nil
 }

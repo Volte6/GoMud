@@ -25,6 +25,7 @@ help:
       - death
       - character
       - pets
+      - train
     shops:
       - appraise
       - auction
@@ -76,7 +77,7 @@ help:
       - read
       - say
       - shout
-      - train
+      - broadcast
       - whisper
       - quit
     parties:
@@ -109,6 +110,7 @@ help:
       - search
       - skulduggery
       - sneak
+      - tame
       - track
       - unenchant
       - uncurse
@@ -158,6 +160,7 @@ help-aliases:
   killstats:        [kills, kd]
   trading:          [haggle]
   pets:             [pet]
+  macros:           [macro]
 # Default aliases for commands
 # For example: inv -> inventory
 # They can be command + argument aliases
@@ -180,7 +183,7 @@ command-aliases:
   attack:           ['a', 'k', 'kill', 'fight']
   get:              ['g', 'take']
   command:          ['cmd']
-  macros:           ['=?']
+  macros:           ['=?', 'macro']
   sneak:            ['sn']
   spells:           ['spellbook']
   backstab:         ['bs']

@@ -777,6 +777,13 @@ Type your commands below.
 
         textInput.addEventListener('keydown', function(event) {
             
+            // Macro support
+            if ( event.key.substring(0, 1) == "F" && event.key.length == 2 ) {
+                macroNum = event.key.substring(1, 2)
+                SendData("="+macroNum)
+                return
+            }
+
             if (event.key == 'ArrowUp' || event.key == 'ArrowDown') {
                 if ( event.key == 'ArrowUp' ) {
                     historyPosition += 1;
