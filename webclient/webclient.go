@@ -85,7 +85,8 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	strB.WriteString("</style></head><body>\n")
 	strB.WriteString("<h1>GoMud</h1>\n")
 
-	allConfigData := configs.GetConfig().AllConfigData()
+	// exclude port, seed, and filepath info from webpage
+	allConfigData := configs.GetConfig().AllConfigData(`*port`, `seed`, `folder*`, `file*`)
 
 	// Extract keys into a slice
 	keys := make([]string, 0, len(allConfigData))
@@ -102,11 +103,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	strB.WriteString("<tr><th>Name</th><th>Value</th></tr>\n")
 	for _, k := range keys {
 		displayName := strings.Replace(k, ` (locked)`, ``, -1)
-		if strings.HasSuffix(strings.ToLower(displayName), `port`) || strings.ToLower(displayName) == "seed" {
-			continue
-		} else {
-			strB.WriteString(fmt.Sprintf("<tr><td><b>%s</b></td><td>%v</td></tr>\n", displayName, allConfigData[k]))
-		}
+		strB.WriteString(fmt.Sprintf("<tr><td><b>%s</b></td><td>%v</td></tr>\n", displayName, allConfigData[k]))
 	}
 	strB.WriteString("</table>\n")
 

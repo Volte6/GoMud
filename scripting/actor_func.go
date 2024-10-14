@@ -565,8 +565,8 @@ func (a ScriptActor) GiveStatPoints(ct int) {
 func (a ScriptActor) GiveExtraLife() {
 	c := configs.GetConfig()
 	a.characterRecord.ExtraLives += 1
-	if a.characterRecord.ExtraLives > int(c.MaxLives) {
-		a.characterRecord.ExtraLives = int(c.MaxLives)
+	if a.characterRecord.ExtraLives > int(c.LivesMax) {
+		a.characterRecord.ExtraLives = int(c.LivesMax)
 	}
 }
 

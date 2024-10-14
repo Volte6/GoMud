@@ -71,11 +71,11 @@ type Config struct {
 	TutorialStartRooms ConfigSliceString `yaml:"TutorialStartRooms"` // List of all rooms that can be used to begin the tutorial process
 
 	// Perma-death related configs
-	PermaDeath   ConfigBool `yaml:"PermaDeath"`   // Is permadeath enabled?
-	StartLives   ConfigInt  `yaml:"StartLives"`   // Starting permadeath lives
-	MaxLives     ConfigInt  `yaml:"MaxLives"`     // Maximum permadeath lives
-	LevelUpLives ConfigInt  `yaml:"LevelUpLives"` // # lives gained on level up
-	PricePerLife ConfigInt  `yaml:"PricePerLife"` // Price in gold to buy new lives
+	PermaDeath     ConfigBool `yaml:"PermaDeath"`     // Is permadeath enabled?
+	LivesStart     ConfigInt  `yaml:"LivesStart"`     // Starting permadeath lives
+	LivesMax       ConfigInt  `yaml:"LivesMax"`       // Maximum permadeath lives
+	LivesOnLevelUp ConfigInt  `yaml:"LivesOnLevelUp"` // # lives gained on level up
+	PricePerLife   ConfigInt  `yaml:"PricePerLife"`   // Price in gold to buy new lives
 
 	ShopRestockRounds        ConfigInt  `yaml:"ShopRestockRounds"`        // Default time it takes to restock 1 quantity in shops
 	ConsistentAttackMessages ConfigBool `yaml:"ConsistentAttackMessages"` // Whether each weapon has consistent attack messages
@@ -184,7 +184,7 @@ func SetVal(propName string, propVal string, force ...bool) error {
 }
 
 // Get all config data in a map with the field name as the key for easy iteration
-func (c Config) AllConfigData() map[string]any {
+func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
 
 	lockedLoookup := map[string]struct{}{
 		`locked`: {},
@@ -214,6 +214,20 @@ func (c Config) AllConfigData() map[string]any {
 
 		if _, ok := lockedLoookup[strings.ToLower(name)]; ok {
 			mapName = fmt.Sprintf(`%s (locked)`, name)
+		}
+
+		if len(excludeStrings) > 0 {
+			testName := strings.ToLower(mapName)
+			skip := false
+			for _, s := range excludeStrings {
+				if util.StringWildcardMatch(testName, s) {
+					skip = true
+					break
+				}
+			}
+			if skip {
+				continue
+			}
 		}
 
 		itm := items.Field(i)

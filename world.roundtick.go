@@ -1637,10 +1637,10 @@ func (w *World) CheckForLevelUps() {
 				livesBefore := user.Character.ExtraLives
 
 				c := configs.GetConfig()
-				if c.PermaDeath && c.LevelUpLives > 0 {
-					user.Character.ExtraLives += int(c.LevelUpLives)
-					if user.Character.ExtraLives > int(c.MaxLives) {
-						user.Character.ExtraLives = int(c.MaxLives)
+				if c.PermaDeath && c.LivesOnLevelUp > 0 {
+					user.Character.ExtraLives += int(c.LivesOnLevelUp)
+					if user.Character.ExtraLives > int(c.LivesMax) {
+						user.Character.ExtraLives = int(c.LivesMax)
 					}
 				}
 

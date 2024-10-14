@@ -147,15 +147,15 @@ TutorialStartRooms: [900, 990]
 # - PermaDeath - 
 #   If true, players lose their character if they die with zero lives left.
 PermaDeath: true
-# - StartLives - 
+# - LivesStart - 
 #   (Req: PermaDeath) Hhow many lives players start with before being reset.
-StartLives: 3
-# - MaxLives - 
+LivesStart: 3
+# - LivesMax - 
 #   (Req: PermaDeath) The maximum lives a player can have.
-MaxLives: 3
-# - LevelUpLives -
+LivesMax: 3
+# - LivesOnLevelUp -
 #   (Req: PermaDeath) If non zero, players gain this many lives per level.
-LevelUpLives: 1
+LivesOnLevelUp: 1
 # - PricePerLife - 
 #   (Req: PermaDeath) If non-zero, players can buy extra lives for this amount.
 PricePerLife: 1000000
