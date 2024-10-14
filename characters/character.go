@@ -1410,7 +1410,7 @@ func (c *Character) CanDualWield() bool {
 func (c *Character) Validate(recalcPermaBuffs ...bool) error {
 
 	if len(c.Description) == 0 {
-		c.Description = c.Name + " seems thoroughly uninteresting."
+		c.Description = "They seem thoroughly uninteresting."
 	}
 
 	if c.Pet.Exists() {
