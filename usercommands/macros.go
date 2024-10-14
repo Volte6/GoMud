@@ -2,6 +2,7 @@ package usercommands
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/volte6/mud/rooms"
@@ -15,9 +16,16 @@ func Macros(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 		return true, nil
 	}
 
-	user.SendText(`<ansi fg="yellow">Your macros:</ansi>`)
-	for macro, macroCommand := range user.Macros {
+	sortedKeys := make([]string, 0, len(user.Macros))
 
+	for k := range user.Macros {
+		sortedKeys = append(sortedKeys, k)
+	}
+	sort.Strings(sortedKeys)
+
+	user.SendText(`<ansi fg="226">Your macros:</ansi>`)
+	for _, macro := range sortedKeys {
+		macroCommand := user.Macros[macro]
 		user.SendText(``)
 
 		user.SendText(fmt.Sprintf(`  <ansi fg="228">%s</ansi>:`, macro))
