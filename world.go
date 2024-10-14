@@ -698,7 +698,7 @@ func (w *World) processInput(userId int, inputText string) {
 		if user.Macros != nil && len(inputText) == 2 {
 			if macro, ok := user.Macros[inputText]; ok {
 				handled = true
-				for _, newCmd := range strings.Split(macro, `;`) {
+				for waitTime, newCmd := range strings.Split(macro, `;`) {
 					if newCmd == `` {
 						continue
 					}
@@ -706,6 +706,7 @@ func (w *World) processInput(userId int, inputText string) {
 					events.AddToQueue(events.Input{
 						UserId:    userId,
 						InputText: newCmd,
+						WaitTurns: waitTime,
 					})
 
 				}
