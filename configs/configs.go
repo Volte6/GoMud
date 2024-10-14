@@ -551,37 +551,11 @@ func (c Config) RoundsToSeconds(rounds int) int {
 
 func (c Config) IsBannedName(name string) bool {
 
-	var startsWith bool
-	var endsWith bool
-
 	name = strings.ToLower(strings.TrimSpace(name))
 
 	for _, bannedName := range c.BannedNames {
-
-		bannedName = strings.ToLower(bannedName)
-
-		if strings.HasPrefix(bannedName, `*`) {
-			endsWith = true
-			bannedName = bannedName[1:]
-		}
-
-		if strings.HasSuffix(bannedName, `*`) {
-			startsWith = true
-			bannedName = bannedName[0 : len(bannedName)-1]
-		}
-
-		if startsWith && endsWith { // if it is contained anywhere
-			if strings.Contains(name, bannedName) {
-				return true
-			}
-		} else if startsWith { // if it starts with
-			if strings.HasPrefix(name, bannedName) {
-				return true
-			}
-		} else if endsWith { // if it ends with
-			if strings.HasSuffix(name, bannedName) {
-				return true
-			}
+		if util.StringWildcardMatch(name, strings.ToLower(bannedName)) {
+			return true
 		}
 	}
 
