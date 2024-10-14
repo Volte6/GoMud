@@ -471,7 +471,10 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 			petInfo.Food.Add()
 		}
 
+		petInfo.Name = petInfo.Type
 		user.Character.Pet = petInfo
+		// make sure new pet buffs get applied
+		user.Character.Validate(true)
 
 		return true
 	}
