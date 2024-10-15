@@ -26,6 +26,13 @@ help:
       - character
       - pets
       - train
+    communication:
+      - emote
+      - say
+      - shout
+      - broadcast
+      - whisper
+      - inbox
     shops:
       - appraise
       - auction
@@ -72,13 +79,9 @@ help:
       - throw
       - trash
       - use
-    general:
-      - emote
       - read
-      - say
-      - shout
-      - broadcast
-      - whisper
+    general:
+      - online
       - quit
     parties:
       - follow
@@ -195,6 +198,7 @@ command-aliases:
   whisper:          ['/w']
   unlock:           ['open']
   buy:              ['hire']
+  trash:            ['junk']
   'party chat':     ['pchat', 'psay']
   'bank deposit':   ['deposit']
   'bank withdraw':  ['withdraw']
@@ -203,6 +207,7 @@ command-aliases:
   'rank back':      ['backrank']
   'rank front':     ['frontrank']
   'auction bid':    ['bid']
+  
   # Direction aliases
 direction-aliases:
   n:  north

@@ -410,6 +410,10 @@ func LoadUser(username string) (*UserRecord, error) {
 	loadedUser.Character.SetRoomMemory(rebuiltMemory)
 	loadedUser.RoomMemoryBlob = ``
 
+	if loadedUser.Joined.IsZero() {
+		loadedUser.Joined = time.Now()
+	}
+
 	if err := loadedUser.Character.Validate(true); err == nil {
 		SaveUser(*loadedUser)
 	}
