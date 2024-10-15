@@ -3,6 +3,7 @@ package users
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -417,6 +418,58 @@ func LoadUser(username string) (*UserRecord, error) {
 	loadedUser.connectionTime = time.Now()
 
 	return loadedUser, nil
+}
+
+// Loads all user recvords and runs against a function.
+// Stops searching if false is returned.
+func SearchOfflineUsers(searchFunc func(u *UserRecord) bool) {
+
+	userManager.Lock()
+	defer userManager.Unlock()
+
+	basePath := util.FilePath(string(configs.GetConfig().FolderUserData))
+
+	filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
+
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		if len(path) > 10 && path[len(path)-10:] == `-alts.yaml` {
+			return nil
+		}
+
+		var uRecord UserRecord
+
+		fpathLower := path[len(path)-5:] // Only need to compare the last 5 characters
+		if fpathLower == `.yaml` {
+
+			bytes, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			err = yaml.Unmarshal(bytes, &uRecord)
+			if err != nil {
+				return err
+			}
+
+			// If this is an online user, skip it
+			if _, ok := userManager.Usernames[uRecord.Username]; ok {
+				return nil
+			}
+
+			if res := searchFunc(&uRecord); !res {
+				return errors.New(`done searching`)
+			}
+		}
+		return nil
+	})
+
 }
 
 func SaveUser(u UserRecord) error {

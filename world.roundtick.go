@@ -1721,7 +1721,30 @@ func (w *World) ProcessAuction(tNow time.Time) {
 				}
 			}
 
-		} else {
+			if a.SellerUserId > 0 {
+				if sellerUser := users.GetByUserId(a.SellerUserId); sellerUser != nil {
+					sellerUser.Character.Bank += a.HighestBid
+					msg := fmt.Sprintf(`<ansi fg="yellow">Your auction ended and <ansi fg="gold">%d gold</ansi> has been deposited into your bank account.</ansi>%s`, a.HighestBid, term.CRLFStr)
+					sellerUser.SendText(msg)
+				} else {
+
+					users.SearchOfflineUsers(func(u *users.UserRecord) bool {
+						if u.UserId == a.SellerUserId {
+							sellerUser = u
+							return false
+						}
+						return true
+					})
+
+					if sellerUser != nil {
+						sellerUser.Character.Bank += a.HighestBid
+						users.SaveUser(*sellerUser)
+					}
+
+				}
+			}
+
+		} else if a.SellerUserId > 0 {
 			if user := users.GetByUserId(a.SellerUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
 					msg := fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr)
