@@ -1,6 +1,10 @@
 package users
 
-import "time"
+import (
+	"time"
+
+	"github.com/volte6/mud/items"
+)
 
 type Inbox []Message
 
@@ -8,6 +12,9 @@ type Message struct {
 	FromUserId int
 	FromName   string
 	Message    string
+	Item       items.Item
+	Gold       int
+	Read       bool
 	DateSent   time.Time
 }
 

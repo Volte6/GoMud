@@ -1723,11 +1723,10 @@ func (w *World) ProcessAuction(tNow time.Time) {
 
 			if a.SellerUserId > 0 {
 
-				msg := fmt.Sprintf(`Your auction of the <ansi fg="item">%s</ansi> has ended while you were offline. The highest bid was made by <ansi fg="username">%s</ansi> for <ansi fg="gold">%d gold</ansi>. The <ansi fg="gold">%d gold</ansi> has been deposited into your bank account.%s`, a.ItemData.DisplayName(), a.HighestBidderName, a.HighestBid, a.HighestBid, term.CRLFStr)
+				msg := fmt.Sprintf(`Your auction of the <ansi fg="item">%s</ansi> has ended while you were offline. The highest bid was made by <ansi fg="username">%s</ansi> for <ansi fg="gold">%d gold</ansi>.%s`, a.ItemData.DisplayName(), a.HighestBidderName, a.HighestBid, term.CRLFStr)
 
 				if sellerUser := users.GetByUserId(a.SellerUserId); sellerUser != nil {
 					sellerUser.Character.Bank += a.HighestBid
-
 					sellerUser.SendText(`<ansi fg="yellow">` + msg + `</ansi>`)
 				} else {
 
@@ -1744,9 +1743,10 @@ func (w *World) ProcessAuction(tNow time.Time) {
 							users.Message{
 								FromName: `Auction System`,
 								Message:  msg,
+								Gold:     a.HighestBid,
+								Item:     a.ItemData,
 							},
 						)
-						sellerUser.Character.Bank += a.HighestBid
 						users.SaveUser(*sellerUser)
 					}
 
