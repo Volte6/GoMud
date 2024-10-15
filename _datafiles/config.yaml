@@ -176,6 +176,11 @@ ConsistentAttackMessages: true
 #   greater than 0. Otherwise they are locked to a signle character and have to
 #   sign up with a new user login if they intend to create a new character.
 MaxAltCharacters: 3
+# - TimeFormat - 
+#   When real world time is shown, what format should be used?
+#   This uses a Go time format string, which is kinda weird.
+#   See: https://go.dev/src/time/format.go
+TimeFormat: 'Monday, 02-Jan-2006 03:04:05PM'
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS
@@ -285,6 +290,8 @@ OnLoginCommands:
 - motd 
 - print
 - online
+- print
+- inbox check
 - print 
 # - Motd -
 #   Message of the day. This is displayed when the motd command is run.

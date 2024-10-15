@@ -70,6 +70,7 @@ var (
 		`help`:        {Help, true, false},
 		`keyring`:     {KeyRing, true, false},
 		`killstats`:   {Killstats, true, false},
+		`inbox`:       {Inbox, true, false},
 		`inspect`:     {Inspect, false, false},
 		`inventory`:   {Inventory, true, false},
 		`jobs`:        {Jobs, true, false},
