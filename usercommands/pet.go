@@ -51,6 +51,11 @@ func Pet(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			}
 		}
 
+		if foundUserId, _ := users.CharacterNameSearch(newName); foundUserId > 0 {
+			user.SendText(`There's a character with that name. That would be too confusing!`)
+			return true, nil
+		}
+
 		user.Character.Pet.Name = newName
 
 		user.SendText(fmt.Sprintf(`You name your pet: %s.`, user.Character.Pet.DisplayName()))

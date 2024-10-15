@@ -11,6 +11,7 @@ import (
 
 	"log/slog"
 
+	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/connection"
 	"github.com/volte6/mud/mobs"
@@ -474,6 +475,37 @@ func SearchOfflineUsers(searchFunc func(u *UserRecord) bool) {
 		return nil
 	})
 
+}
+
+// searches for a character name and returns the user that owns it
+// Slow and possibly memory intensive - use strategically
+func CharacterNameSearch(nameToFind string) (foundUserId int, foundUserName string) {
+
+	foundUserId = 0
+	foundUserName = ``
+
+	SearchOfflineUsers(func(u *UserRecord) bool {
+
+		if strings.EqualFold(u.Character.Name, nameToFind) {
+			foundUserId = u.UserId
+			foundUserName = u.Username
+			return false
+		}
+
+		// Not found? Search alts...
+
+		for _, char := range characters.LoadAlts(u.Username) {
+			if strings.EqualFold(char.Name, nameToFind) {
+				foundUserId = u.UserId
+				foundUserName = u.Username
+				return false
+			}
+		}
+
+		return true
+	})
+
+	return foundUserId, foundUserName
 }
 
 func SaveUser(u UserRecord) error {
