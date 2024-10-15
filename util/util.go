@@ -761,3 +761,31 @@ func ConvertForFilename(input string) string {
 
 	return string(s[0:pos])
 }
+
+func StringWildcardMatch(stringToSearch string, patternToSearch string) bool {
+
+	if stringToSearch == patternToSearch {
+		return true
+	}
+
+	startsWith := false
+	endsWith := false
+
+	if patternToSearch[0] == '*' {
+		endsWith = true
+		patternToSearch = patternToSearch[1:]
+	}
+
+	if patternToSearch[len(patternToSearch)-1] == '*' {
+		startsWith = true
+		patternToSearch = patternToSearch[0 : len(patternToSearch)-1]
+	}
+
+	if startsWith && !endsWith { // if it starts with
+		return strings.HasPrefix(stringToSearch, patternToSearch)
+	} else if endsWith && !startsWith { // if it ends with
+		return strings.HasSuffix(stringToSearch, patternToSearch)
+	}
+
+	return strings.Contains(stringToSearch, patternToSearch)
+}

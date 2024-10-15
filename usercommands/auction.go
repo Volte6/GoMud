@@ -130,7 +130,7 @@ func Auction(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 			if u := users.GetByUserId(uid); u != nil {
 				auctionOn := u.GetConfigOption(`auction`)
 				if auctionOn == nil || auctionOn.(bool) {
-					user.SendText(auctionTxt)
+					u.SendText(auctionTxt)
 				}
 			}
 		}

@@ -59,6 +59,8 @@ type Config struct {
 	Motd                         ConfigString      `yaml:"Motd"`                         // Message of the day to display when a user logs in
 	BannedNames                  ConfigSliceString `yaml:"BannedNames"`                  // List of names that are not allowed to be used
 
+	TimeFormat ConfigString `yaml:"TimeFormat"` // How to format time when displaying real time
+
 	OnDeathEquipmentDropChance ConfigFloat  `yaml:"OnDeathEquipmentDropChance"` // Chance a player will drop a given piece of equipment on death
 	OnDeathAlwaysDropBackpack  ConfigBool   `yaml:"OnDeathAlwaysDropBackpack"`  // If true, players will always drop their backpack items on death
 	OnDeathXPPenalty           ConfigString `yaml:"OnDeathXPPenalty"`           // Possible values are: none, level, 10%, 25%, 50%, 75%, 90%, 100%
@@ -71,11 +73,11 @@ type Config struct {
 	TutorialStartRooms ConfigSliceString `yaml:"TutorialStartRooms"` // List of all rooms that can be used to begin the tutorial process
 
 	// Perma-death related configs
-	PermaDeath   ConfigBool `yaml:"PermaDeath"`   // Is permadeath enabled?
-	StartLives   ConfigInt  `yaml:"StartLives"`   // Starting permadeath lives
-	MaxLives     ConfigInt  `yaml:"MaxLives"`     // Maximum permadeath lives
-	LevelUpLives ConfigInt  `yaml:"LevelUpLives"` // # lives gained on level up
-	PricePerLife ConfigInt  `yaml:"PricePerLife"` // Price in gold to buy new lives
+	PermaDeath     ConfigBool `yaml:"PermaDeath"`     // Is permadeath enabled?
+	LivesStart     ConfigInt  `yaml:"LivesStart"`     // Starting permadeath lives
+	LivesMax       ConfigInt  `yaml:"LivesMax"`       // Maximum permadeath lives
+	LivesOnLevelUp ConfigInt  `yaml:"LivesOnLevelUp"` // # lives gained on level up
+	PricePerLife   ConfigInt  `yaml:"PricePerLife"`   // Price in gold to buy new lives
 
 	ShopRestockRounds        ConfigInt  `yaml:"ShopRestockRounds"`        // Default time it takes to restock 1 quantity in shops
 	ConsistentAttackMessages ConfigBool `yaml:"ConsistentAttackMessages"` // Whether each weapon has consistent attack messages
@@ -184,7 +186,7 @@ func SetVal(propName string, propVal string, force ...bool) error {
 }
 
 // Get all config data in a map with the field name as the key for easy iteration
-func (c Config) AllConfigData() map[string]any {
+func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
 
 	lockedLoookup := map[string]struct{}{
 		`locked`: {},
@@ -214,6 +216,20 @@ func (c Config) AllConfigData() map[string]any {
 
 		if _, ok := lockedLoookup[strings.ToLower(name)]; ok {
 			mapName = fmt.Sprintf(`%s (locked)`, name)
+		}
+
+		if len(excludeStrings) > 0 {
+			testName := strings.ToLower(mapName)
+			skip := false
+			for _, s := range excludeStrings {
+				if util.StringWildcardMatch(testName, s) {
+					skip = true
+					break
+				}
+			}
+			if skip {
+				continue
+			}
 		}
 
 		itm := items.Field(i)
@@ -336,6 +352,10 @@ func (c *Config) Validate() {
 
 	if c.FileKeywords == `` {
 		c.FileKeywords = `_datafiles/keywords.yaml` // default
+	}
+
+	if c.TimeFormat == `` {
+		c.TimeFormat = `Monday, 02-Jan-2006 03:04:05PM`
 	}
 
 	// Nothing to do with CarefulSaveFiles
@@ -537,37 +557,11 @@ func (c Config) RoundsToSeconds(rounds int) int {
 
 func (c Config) IsBannedName(name string) bool {
 
-	var startsWith bool
-	var endsWith bool
-
 	name = strings.ToLower(strings.TrimSpace(name))
 
 	for _, bannedName := range c.BannedNames {
-
-		bannedName = strings.ToLower(bannedName)
-
-		if strings.HasPrefix(bannedName, `*`) {
-			endsWith = true
-			bannedName = bannedName[1:]
-		}
-
-		if strings.HasSuffix(bannedName, `*`) {
-			startsWith = true
-			bannedName = bannedName[0 : len(bannedName)-1]
-		}
-
-		if startsWith && endsWith { // if it is contained anywhere
-			if strings.Contains(name, bannedName) {
-				return true
-			}
-		} else if startsWith { // if it starts with
-			if strings.HasPrefix(name, bannedName) {
-				return true
-			}
-		} else if endsWith { // if it ends with
-			if strings.HasSuffix(name, bannedName) {
-				return true
-			}
+		if util.StringWildcardMatch(name, strings.ToLower(bannedName)) {
+			return true
 		}
 	}
 

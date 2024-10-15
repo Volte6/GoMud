@@ -147,15 +147,15 @@ TutorialStartRooms: [900, 990]
 # - PermaDeath - 
 #   If true, players lose their character if they die with zero lives left.
 PermaDeath: true
-# - StartLives - 
+# - LivesStart - 
 #   (Req: PermaDeath) Hhow many lives players start with before being reset.
-StartLives: 3
-# - MaxLives - 
+LivesStart: 3
+# - LivesMax - 
 #   (Req: PermaDeath) The maximum lives a player can have.
-MaxLives: 3
-# - LevelUpLives -
+LivesMax: 3
+# - LivesOnLevelUp -
 #   (Req: PermaDeath) If non zero, players gain this many lives per level.
-LevelUpLives: 1
+LivesOnLevelUp: 1
 # - PricePerLife - 
 #   (Req: PermaDeath) If non-zero, players can buy extra lives for this amount.
 PricePerLife: 1000000
@@ -176,6 +176,11 @@ ConsistentAttackMessages: true
 #   greater than 0. Otherwise they are locked to a signle character and have to
 #   sign up with a new user login if they intend to create a new character.
 MaxAltCharacters: 3
+# - TimeFormat - 
+#   When real world time is shown, what format should be used?
+#   This uses a Go time format string, which is kinda weird.
+#   See: https://go.dev/src/time/format.go
+TimeFormat: 'Monday, 02-Jan-2006 03:04:05PM'
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS
@@ -285,6 +290,8 @@ OnLoginCommands:
 - motd 
 - print
 - online
+- print
+- inbox check
 - print 
 # - Motd -
 #   Message of the day. This is displayed when the motd command is run.

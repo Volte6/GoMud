@@ -1637,10 +1637,10 @@ func (w *World) CheckForLevelUps() {
 				livesBefore := user.Character.ExtraLives
 
 				c := configs.GetConfig()
-				if c.PermaDeath && c.LevelUpLives > 0 {
-					user.Character.ExtraLives += int(c.LevelUpLives)
-					if user.Character.ExtraLives > int(c.MaxLives) {
-						user.Character.ExtraLives = int(c.MaxLives)
+				if c.PermaDeath && c.LivesOnLevelUp > 0 {
+					user.Character.ExtraLives += int(c.LivesOnLevelUp)
+					if user.Character.ExtraLives > int(c.LivesMax) {
+						user.Character.ExtraLives = int(c.LivesMax)
 					}
 				}
 
@@ -1721,7 +1721,39 @@ func (w *World) ProcessAuction(tNow time.Time) {
 				}
 			}
 
-		} else {
+			if a.SellerUserId > 0 {
+
+				msg := fmt.Sprintf(`Your auction of the <ansi fg="item">%s</ansi> has ended while you were offline. The highest bid was made by <ansi fg="username">%s</ansi> for <ansi fg="gold">%d gold</ansi>.%s`, a.ItemData.DisplayName(), a.HighestBidderName, a.HighestBid, term.CRLFStr)
+
+				if sellerUser := users.GetByUserId(a.SellerUserId); sellerUser != nil {
+					sellerUser.Character.Bank += a.HighestBid
+					sellerUser.SendText(`<ansi fg="yellow">` + msg + `</ansi>`)
+				} else {
+
+					users.SearchOfflineUsers(func(u *users.UserRecord) bool {
+						if u.UserId == a.SellerUserId {
+							sellerUser = u
+							return false
+						}
+						return true
+					})
+
+					if sellerUser != nil {
+						sellerUser.Inbox.Add(
+							users.Message{
+								FromName: `Auction System`,
+								Message:  msg,
+								Gold:     a.HighestBid,
+								Item:     a.ItemData,
+							},
+						)
+						users.SaveUser(*sellerUser)
+					}
+
+				}
+			}
+
+		} else if a.SellerUserId > 0 {
 			if user := users.GetByUserId(a.SellerUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
 					msg := fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr)

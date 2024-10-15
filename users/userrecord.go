@@ -59,6 +59,7 @@ type UserRecord struct {
 	activePrompt   *prompt.Prompt
 	isZombie       bool           // are they a zombie currently?
 	RenderSettings RenderSettings `yaml:"-"`
+	Inbox          Inbox          `yaml:"inbox,omitempty"`
 }
 
 func NewUserRecord(userId int, connectionId uint64) *UserRecord {
@@ -80,7 +81,7 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 	}
 
 	if c.PermaDeath {
-		u.Character.ExtraLives = int(c.StartLives)
+		u.Character.ExtraLives = int(c.LivesStart)
 	}
 
 	return u
