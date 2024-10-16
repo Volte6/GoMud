@@ -4,7 +4,6 @@ import (
 	"log/slog"
 
 	"github.com/volte6/mud/connection"
-	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/term"
 )
 
@@ -43,11 +42,9 @@ func AnsiHandler(clientInput *connection.ClientInput, connectionPool *connection
 
 				if err != nil {
 
-					events.AddToQueue(events.ClientSettings{
-						ConnectionId: clientInput.ConnectionId,
-						ScreenWidth:  uint32(w),
-						ScreenHeight: uint32(h),
-					})
+					c := connectionPool.Get(clientInput.ConnectionId)
+					c.ClientSettings.Display.ScreenWidth = uint32(w)
+					c.ClientSettings.Display.ScreenHeight = uint32(h)
 
 				}
 			}

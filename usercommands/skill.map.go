@@ -112,22 +112,24 @@ func Map(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if skillLevel > 4 {
 
-		if user.RenderSettings.ScreenWidth == 0 {
-			user.RenderSettings.ScreenWidth = 80
-			user.RenderSettings.ScreenHeight = 40
+		sw := 80
+		sh := 40
+		if user.ClientSettings().Display.ScreenWidth > 0 {
+			sw = int(user.ClientSettings().Display.ScreenWidth)
+			sh = int(user.ClientSettings().Display.ScreenHeight)
 		}
 
-		mapWidth = int(user.RenderSettings.ScreenWidth) - borderWidth
-		mapHeight = int(user.RenderSettings.ScreenHeight) - borderHeight // extra 2 for the new lines after
+		mapWidth = int(sw) - borderWidth
+		mapHeight = sh - borderHeight // extra 2 for the new lines after
 		if mapHeight%2 != 0 {
 			mapHeight--
 		}
 
-		if mapWidth > int(user.RenderSettings.ScreenWidth)-borderWidth {
-			mapWidth = int(user.RenderSettings.ScreenWidth) - borderWidth
+		if mapWidth > sw-borderWidth {
+			mapWidth = sw - borderWidth
 		}
-		if mapHeight > int(user.RenderSettings.ScreenHeight)-borderHeight {
-			mapHeight = int(user.RenderSettings.ScreenHeight) - borderHeight
+		if mapHeight > sh-borderHeight {
+			mapHeight = sh - borderHeight
 		}
 
 	}

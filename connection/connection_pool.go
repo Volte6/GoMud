@@ -20,6 +20,11 @@ const ReadBufferSize = 1024
 
 type ConnectionId = uint64
 
+var (
+	// Global instance of connectionTracker.
+	connectionPool ConnectionTracker = ConnectionTracker{}
+)
+
 type ConnectionTracker struct {
 	connectCounter    uint64         // a counter for each time a connection is accepted
 	disconnectCounter uint64         // a counter for each tim ea connection is dropped
@@ -28,7 +33,9 @@ type ConnectionTracker struct {
 }
 
 func (c *ConnectionTracker) Signal(s os.Signal) {
-	c.shutdownChannel <- s
+	if c.shutdownChannel != nil {
+		c.shutdownChannel <- s
+	}
 }
 
 func (c *ConnectionTracker) Add(conn net.Conn, wsConn *websocket.Conn) *ConnectionDetails {
@@ -177,15 +184,6 @@ func (c *ConnectionTracker) SendTo(b []byte, ids ...ConnectionId) {
 	}
 }
 
-func sliceContains(slice []ConnectionId, id ConnectionId) bool {
-	for _, v := range slice {
-		if v == id {
-			return true
-		}
-	}
-	return false
-}
-
 // make this more efficient later
 func (c *ConnectionTracker) ActiveConnectionCount() int {
 	ct := 0
@@ -197,12 +195,22 @@ func (c *ConnectionTracker) ActiveConnectionCount() int {
 
 }
 
+// make this more efficient later
+func (c *ConnectionTracker) SetShutdownChan(osSignalChan chan os.Signal) {
+	if connectionPool.shutdownChannel != nil {
+		panic("Can't set shutdown channel a second time!")
+	}
+	connectionPool.shutdownChannel = osSignalChan
+}
+
 func (c *ConnectionTracker) Stats() (connections uint64, disconnections uint64) {
 	return atomic.LoadUint64(&c.connectCounter), atomic.LoadUint64(&c.disconnectCounter)
 }
 
-var connTracker *ConnectionTracker = nil
+func GetPool() *ConnectionTracker {
+	return &connectionPool
+}
 
-func New(osSignalChan chan os.Signal) *ConnectionTracker {
-	return &ConnectionTracker{shutdownChannel: osSignalChan}
+func GetSettings(id ConnectionId) ClientSettings {
+	return connectionPool.Get(id).ClientSettings
 }

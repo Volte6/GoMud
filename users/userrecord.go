@@ -13,6 +13,7 @@ import (
 	"github.com/volte6/mud/buffs"
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/connection"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/prompt"
@@ -33,11 +34,6 @@ var (
 	promptFindTagsRegex   = regexp.MustCompile(`\{[a-zA-Z%:\-]+\}`)
 )
 
-type RenderSettings struct {
-	ScreenWidth  uint32
-	ScreenHeight uint32
-}
-
 type UserRecord struct {
 	UserId         int                   `yaml:"userid"`
 	Permission     string                `yaml:"permission"`
@@ -51,7 +47,6 @@ type UserRecord struct {
 	RoomMemoryBlob string                `yaml:"roommemoryblob,omitempty"`
 	ConfigOptions  map[string]any        `yaml:"configoptions,omitempty"`
 	Inbox          Inbox                 `yaml:"inbox,omitempty"`
-	RenderSettings RenderSettings        `yaml:"-"`
 	connectionId   uint64
 	unsentText     string
 	suggestText    string
@@ -87,6 +82,10 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 	}
 
 	return u
+}
+
+func (u *UserRecord) ClientSettings() connection.ClientSettings {
+	return connection.GetSettings(u.connectionId)
 }
 
 func (u *UserRecord) PasswordMatches(input string) bool {

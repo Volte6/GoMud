@@ -52,6 +52,7 @@ var (
 		`command`:     {Command, false, true}, // Admin only
 		`conditions`:  {Conditions, true, false},
 		`consider`:    {Consider, true, false},
+		`default`:     {Default, false, false},
 		`disarm`:      {Disarm, false, false},
 		`drop`:        {Drop, true, false},
 		`drink`:       {Drink, false, false},

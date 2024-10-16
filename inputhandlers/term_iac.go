@@ -1,10 +1,10 @@
 package inputhandlers
 
 import (
+	"encoding/json"
 	"log/slog"
 
 	"github.com/volte6/mud/connection"
-	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/term"
 )
 
@@ -38,6 +38,97 @@ func TelnetIACHandler(clientInput *connection.ClientInput, connectionPool *conne
 	for _, iacCmd := range iacCmds {
 		// Check incoming Telnet IAC commands for anything useful...
 
+		if term.IsGMCPCommand(iacCmd) {
+
+			if ok, payload := term.Matches(iacCmd, term.GmcpAccept); ok {
+				slog.Info("Received", "type", "IAC (Client-GMCP Accept)", "data", term.BytesString(payload))
+				continue
+			}
+
+			if ok, payload := term.Matches(iacCmd, term.GmcpRefuse); ok {
+				slog.Info("Received", "type", "IAC (Client-GMCP Refuse)", "data", term.BytesString(payload))
+				continue
+			}
+
+			if len(iacCmd) >= 5 && iacCmd[len(iacCmd)-2] == term.TELNET_IAC && iacCmd[len(iacCmd)-1] == term.TELNET_SE {
+				// Unhanlded IAC command, log it
+
+				requestBody := iacCmd[3 : len(iacCmd)-2]
+				//slog.Info("Received", "type", "GMCP", "size", len(iacCmd), "data", string(requestBody))
+
+				spaceAt := 0
+				for i := 0; i < len(requestBody); i++ {
+					if requestBody[i] == 32 {
+						spaceAt = i
+						break
+					}
+				}
+
+				command := ``
+				payload := []byte{}
+
+				if spaceAt > 0 && spaceAt < len(requestBody) {
+					command = string(requestBody[0:spaceAt])
+					payload = requestBody[spaceAt+1:]
+				} else {
+					command = string(requestBody)
+				}
+
+				if _, ok := term.SupportedGMCP[command]; !ok {
+					slog.Error("Received", "type", "GMCP (Ignored)", "command", command, "payload", string(payload))
+					continue
+				}
+
+				slog.Debug("Received", "type", "GMCP (Handling)", "command", command, "payload", string(payload))
+
+				switch command {
+
+				case `External.Discord.Hello`:
+					decoded := term.GMCPDiscord{}
+					if err := json.Unmarshal(payload, &decoded); err == nil {
+						c := connectionPool.Get(clientInput.ConnectionId)
+						c.ClientSettings.Discord.User = decoded.User
+						c.ClientSettings.Discord.Private = decoded.Private
+					}
+				case `Core.Hello`:
+					decoded := term.GMCPHello{}
+					if err := json.Unmarshal(payload, &decoded); err == nil {
+						c := connectionPool.Get(clientInput.ConnectionId)
+						c.ClientSettings.Client.Name = decoded.Client
+						c.ClientSettings.Client.Version = decoded.Version
+					}
+				case `Core.Supports.Set`:
+					decoded := term.GMCPSupportsSet{}
+					if err := json.Unmarshal(payload, &decoded); err == nil {
+						c := connectionPool.Get(clientInput.ConnectionId)
+						c.ClientSettings.GMCPModules = decoded.GetSupportedModules()
+					}
+				case `Core.Supports.Remove`:
+					decoded := term.GMCPSupportsRemove{}
+					if err := json.Unmarshal(payload, &decoded); err == nil {
+						c := connectionPool.Get(clientInput.ConnectionId)
+						if len(c.ClientSettings.GMCPModules) > 0 {
+							for _, name := range decoded {
+								delete(c.ClientSettings.GMCPModules, name)
+							}
+						}
+					}
+				case `Char.Login`:
+					decoded := term.GMCPLogin{}
+					if err := json.Unmarshal(payload, &decoded); err == nil {
+						slog.Info("GMCP LOGIN", "username", decoded.Name, "password", decoded.Password)
+					}
+				}
+
+				continue
+			}
+
+			// Unhanlded IAC command, log it
+			slog.Info("Received", "type", "GMCP?", "size", len(iacCmd), "data", string(iacCmd))
+
+			continue
+		}
+
 		if ok, payload := term.Matches(iacCmd, term.TelnetAcceptedChangeCharset); ok {
 			slog.Info("Received", "type", "IAC (TelnetAcceptedChangeCharset)", "data", term.BytesString(payload))
 			continue
@@ -68,11 +159,9 @@ func TelnetIACHandler(clientInput *connection.ClientInput, connectionPool *conne
 
 				if err == nil {
 
-					events.AddToQueue(events.ClientSettings{
-						ConnectionId: clientInput.ConnectionId,
-						ScreenWidth:  uint32(w),
-						ScreenHeight: uint32(h),
-					})
+					c := connectionPool.Get(clientInput.ConnectionId)
+					c.ClientSettings.Display.ScreenWidth = uint32(w)
+					c.ClientSettings.Display.ScreenHeight = uint32(h)
 
 				}
 
@@ -82,7 +171,7 @@ func TelnetIACHandler(clientInput *connection.ClientInput, connectionPool *conne
 		}
 
 		// Unhanlded IAC command, log it
-		slog.Info("Received", "type", "IAC", "size", len(clientInput.DataIn), "data", term.TelnetCommandToString(iacCmd))
+		slog.Info("Received", "type", "IAC (Unhandled)", "size", len(clientInput.DataIn), "data", term.TelnetCommandToString(iacCmd))
 
 	}
 

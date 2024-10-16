@@ -276,6 +276,12 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 		connDetails.ConnectionId(),
 	)
 
+	// Send request to enable GMCP
+	worldManager.GetConnectionPool().SendTo(
+		term.GmcpEnable.BytesWithPayload(nil),
+		connDetails.ConnectionId(),
+	)
+
 	clientSetupCommands := "" + //term.AnsiAltModeStart.String() + // alternative mode (No scrollback)
 		//term.AnsiCursorHide.String() + // Hide Cursor (Because we will manually echo back)
 		//term.AnsiCharSetUTF8.String() + // UTF8 mode
