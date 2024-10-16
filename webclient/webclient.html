@@ -636,6 +636,34 @@ Type your commands below.
         const textOutput = document.getElementById('text-output');
         const textInput = document.getElementById('command-input');
 
+        const codeShortcuts = {
+            // Numpad to directions
+            "Numpad1": "southwest",
+            "Numpad2": "south",
+            "Numpad3": "southeast",
+            "Numpad4": "west",
+            "Numpad5": "look",
+            "Numpad6": "east",
+            "Numpad7": "northwest",
+            "Numpad8": "north",
+            "Numpad9": "northeast",
+            // Fkeys to macros
+            "F1": "=1",
+            "F2": "=2",
+            "F3": "=3",
+            "F4": "=4",
+            "F5": "=5",
+            "F6": "=6",
+            "F7": "=7",
+            "F8": "=8",
+            "F9": "=9",
+            "F10": "=10",
+            // Arrow keys
+            "ArrowUp": "north",
+            "ArrowDown": "south",
+            "ArrowLeft": "west",
+            "ArrowRight": "east",
+        };
 
         function escapeHtml(str) {
             var map = {
@@ -777,11 +805,18 @@ Type your commands below.
 
         textInput.addEventListener('keydown', function(event) {
             
+            if ( codeShortcuts[event.code] ) {
+                SendData(codeShortcuts[event.code]);
+                if (event.preventDefault) event.preventDefault();
+                return false;
+            }
+
             // Macro support
             if ( event.key.substring(0, 1) == "F" && event.key.length == 2 ) {
                 macroNum = event.key.substring(1, 2)
-                SendData("="+macroNum)
-                return
+                SendData("="+macroNum);
+                if (event.preventDefault) event.preventDefault();
+                return false;
             }
 
             if (event.key == 'ArrowUp' || event.key == 'ArrowDown') {
