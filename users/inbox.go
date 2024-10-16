@@ -33,29 +33,23 @@ func (i *Inbox) Add(msg Message) {
 	(*i) = append(*newInbox, (*i)...)
 }
 
-func (i *Inbox) Count(unread ...bool) int {
-
+func (i *Inbox) CountRead() int {
 	ct := 0
 	for _, msg := range *i {
-		if len(unread) > 0 && unread[0] {
-			if !msg.Read {
-				ct++
-			}
-		} else {
+		if msg.Read {
 			ct++
 		}
 	}
 	return ct
 }
-
-func (i *Inbox) CountRead() int {
-	readCt := 0
+func (i *Inbox) CountUnread() int {
+	ct := 0
 	for _, msg := range *i {
-		if msg.Read {
-			readCt++
+		if !msg.Read {
+			ct++
 		}
 	}
-	return readCt
+	return ct
 }
 
 func (i *Inbox) Empty() {

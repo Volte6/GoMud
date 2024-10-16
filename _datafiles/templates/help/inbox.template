@@ -4,5 +4,6 @@ The <ansi fg="command">inbox</ansi> command checks your inbox for messages.
 
 <ansi fg="yellow">Usage: </ansi>
 
-  <ansi fg="command">inbox</ansi>       - View all pending messages
+  <ansi fg="command">inbox</ansi>       - See all new messages
+  <ansi fg="command">inbox old</ansi>   - See all old messages
   <ansi fg="command">inbox clear</ansi> - Delete all messages from your inbox
