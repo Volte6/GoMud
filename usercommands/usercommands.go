@@ -79,6 +79,7 @@ var (
 		`lock`:        {Lock, false, false},
 		`look`:        {Look, true, false},
 		`map`:         {Map, false, false},
+		`massmail`:    {Massmail, true, true},
 		`macros`:      {Macros, true, false},
 		`motd`:        {Motd, true, false},
 		`offer`:       {Offer, false, false},

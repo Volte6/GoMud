@@ -1744,7 +1744,7 @@ func (w *World) ProcessAuction(tNow time.Time) {
 								FromName: `Auction System`,
 								Message:  msg,
 								Gold:     a.HighestBid,
-								Item:     a.ItemData,
+								Item:     &a.ItemData,
 							},
 						)
 						users.SaveUser(*sellerUser)

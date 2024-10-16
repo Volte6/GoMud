@@ -136,6 +136,15 @@ color8:
   alert-2: 1
   alert-1: 1
   noun: 7
+  mail-border: 12
+  mail-title: 14
+  mail-title-read: 6
+  mail-date: 13
+  mail-date-read: 5
+  mail-message: 11
+  mail-message-read: 3
+  mail-note: 10
+  mail-note-read: 2
 color256:
   table-title: 2
   userid: black
@@ -266,3 +275,12 @@ color256:
   alert-2: 210
   alert-1: 217
   noun: 115
+  mail-border: 105
+  mail-title: 51
+  mail-title-read: 37
+  mail-date: 13
+  mail-date-read: 135
+  mail-message: 229
+  mail-message-read: 188
+  mail-note: 10
+  mail-note-read: 2
