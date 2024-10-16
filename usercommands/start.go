@@ -100,6 +100,12 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 			return true, nil
 		}
 
+		if foundUserId, _ := users.CharacterNameSearch(question.Response); foundUserId > 0 {
+			user.SendText(`that character name is already in use.`)
+			question.RejectResponse()
+			return true, nil
+		}
+
 		if err := user.SetCharacterName(question.Response); err != nil {
 			user.SendText(err.Error())
 			question.RejectResponse()

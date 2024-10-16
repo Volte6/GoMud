@@ -39,27 +39,28 @@ type RenderSettings struct {
 }
 
 type UserRecord struct {
+	UserId         int                   `yaml:"userid"`
+	Permission     string                `yaml:"permission"`
+	Username       string                `yaml:"username"`
+	Password       string                `yaml:"password"`
+	Joined         time.Time             `yaml:"joined"`
+	Macros         map[string]string     `yaml:"macros,omitempty"` // Up to 10 macros, just string commands.
+	Character      *characters.Character `yaml:"character,omitempty"`
+	ItemStorage    Storage               `yaml:"itemstorage,omitempty"`
+	AdminCommands  []string              `yaml:"admincommands,omitempty"`
+	RoomMemoryBlob string                `yaml:"roommemoryblob,omitempty"`
+	ConfigOptions  map[string]any        `yaml:"configoptions,omitempty"`
+	Inbox          Inbox                 `yaml:"inbox,omitempty"`
+	RenderSettings RenderSettings        `yaml:"-"`
 	connectionId   uint64
-	UserId         int
-	Permission     string
-	Username       string
-	Password       string
-	Macros         map[string]string `yaml:"macros,omitempty"` // Up to 10 macros, just string commands.
-	Character      *characters.Character
-	ItemStorage    Storage `yaml:"itemstorage,omitempty"`
 	unsentText     string
 	suggestText    string
-	AdminCommands  []string `yaml:"admincommands,omitempty"`
-	RoomMemoryBlob string   `yaml:"roommemoryblob,omitempty"`
-	ConfigOptions  map[string]any
 	connectionTime time.Time
 	lastInputRound uint64
 	lock           sync.RWMutex
 	tempDataStore  map[string]any
 	activePrompt   *prompt.Prompt
-	isZombie       bool           // are they a zombie currently?
-	RenderSettings RenderSettings `yaml:"-"`
-	Inbox          Inbox          `yaml:"inbox,omitempty"`
+	isZombie       bool // are they a zombie currently?
 }
 
 func NewUserRecord(userId int, connectionId uint64) *UserRecord {
@@ -75,6 +76,7 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 		Macros:         make(map[string]string),
 		Character:      characters.New(),
 		ConfigOptions:  map[string]any{},
+		Joined:         time.Now(),
 		connectionTime: time.Now(),
 		lock:           sync.RWMutex{},
 		tempDataStore:  make(map[string]any),

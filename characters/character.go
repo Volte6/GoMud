@@ -5,6 +5,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"log/slog"
 
@@ -79,6 +80,7 @@ type Character struct {
 	ExtraLives      int               `yaml:"extralives,omitempty"`    // How many lives remain. If enabled, players can perma-die if they die at zero
 	MobMastery      MobMasteries      `yaml:"mobmastery,omitempty"`    // Tracks particular masteries around a given mob
 	Pet             pets.Pet          `yaml:"pet,omitempty"`           // Do they have a pet?
+	Created         time.Time         `yaml:"created"`                 // When this character was created
 	roomHistory     []int             // A stack FILO of the last X rooms the character has been in
 	followers       []int             // everyone following this user
 	permaBuffIds    []int             // Buff Id's that are always present for this character
@@ -119,6 +121,7 @@ func New() *Character {
 		MiscData:       make(map[string]any),
 		roomHistory:    make([]int, 0, 10),
 		KeyRing:        make(map[string]string),
+		Created:        time.Now(),
 	}
 }
 
@@ -1411,6 +1414,10 @@ func (c *Character) Validate(recalcPermaBuffs ...bool) error {
 
 	if len(c.Description) == 0 {
 		c.Description = "They seem thoroughly uninteresting."
+	}
+
+	if c.Created.IsZero() {
+		c.Created = time.Now()
 	}
 
 	if c.Pet.Exists() {
