@@ -36,6 +36,12 @@ func Inbox(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 		user.SendText(border)
 
+		if msg.Gold > 0 {
+			user.Character.Bank += msg.Gold
+		}
+		if msg.Item != nil {
+			user.Character.StoreItem(*msg.Item)
+		}
 		user.Inbox[idx].Read = true
 	}
 
