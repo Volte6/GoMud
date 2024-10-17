@@ -127,6 +127,26 @@ func (w *World) LeaveWorld(userId int) {
 		w.connectionPool.SendTo([]byte(tplTxt), connectionIds...)
 	}
 
+	//
+	// Send GMCP Updates for players leaving
+	//
+	for _, uid := range room.GetPlayers() {
+
+		if uid == user.UserId {
+			continue
+		}
+
+		if u := users.GetByUserId(uid); u != nil {
+			if _, ok := connection.GetSettings(u.ConnectionId()).GMCPModules[`Room`]; ok {
+
+				bytesOut := []byte(fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name))
+				connection.GetPool().SendTo(
+					term.GmcpPayload.BytesWithPayload(bytesOut),
+					user.ConnectionId(),
+				)
+			}
+		}
+	}
 }
 
 func (w *World) GetAutoComplete(userId int, inputText string) []string {
