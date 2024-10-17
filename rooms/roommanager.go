@@ -377,7 +377,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 
 				if _, ok := connection.GetSettings(u.ConnectionId()).GMCPModules[`Room`]; ok {
 
-					bytesOut := []byte(fmt.Sprintf(`Room.AddPlayer {"name":	"%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
+					bytesOut := []byte(fmt.Sprintf(`Room.AddPlayer {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
 					connection.GetPool().SendTo(
 						term.GmcpPayload.BytesWithPayload(bytesOut),
 						user.ConnectionId(),

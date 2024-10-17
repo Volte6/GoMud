@@ -97,6 +97,18 @@ func (w *World) EnterWorld(roomId int, zone string, userId int) {
 
 	}
 
+	//
+	// Send GMCP for their char name
+	//
+	if _, ok := connection.GetSettings(user.ConnectionId()).GMCPModules[`Room`]; ok {
+
+		bytesOut := []byte(fmt.Sprintf(`Char.Name {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
+		connection.GetPool().SendTo(
+			term.GmcpPayload.BytesWithPayload(bytesOut),
+			user.ConnectionId(),
+		)
+	}
+
 	// Pu thtme in the room
 	rooms.MoveToRoom(userId, roomId, true)
 }
