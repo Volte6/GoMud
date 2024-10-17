@@ -97,6 +97,18 @@ func (w *World) EnterWorld(roomId int, zone string, userId int) {
 
 	}
 
+	//
+	// Send GMCP for their char name
+	//
+	if _, ok := connection.GetSettings(user.ConnectionId()).GMCPModules[`Room`]; ok {
+
+		bytesOut := []byte(fmt.Sprintf(`Char.Name {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
+		connection.GetPool().SendTo(
+			term.GmcpPayload.BytesWithPayload(bytesOut),
+			user.ConnectionId(),
+		)
+	}
+
 	// Pu thtme in the room
 	rooms.MoveToRoom(userId, roomId, true)
 }
@@ -127,6 +139,26 @@ func (w *World) LeaveWorld(userId int) {
 		w.connectionPool.SendTo([]byte(tplTxt), connectionIds...)
 	}
 
+	//
+	// Send GMCP Updates for players leaving
+	//
+	for _, uid := range room.GetPlayers() {
+
+		if uid == user.UserId {
+			continue
+		}
+
+		if u := users.GetByUserId(uid); u != nil {
+			if _, ok := connection.GetSettings(u.ConnectionId()).GMCPModules[`Room`]; ok {
+
+				bytesOut := []byte(fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name))
+				connection.GetPool().SendTo(
+					term.GmcpPayload.BytesWithPayload(bytesOut),
+					user.ConnectionId(),
+				)
+			}
+		}
+	}
 }
 
 func (w *World) GetAutoComplete(userId int, inputText string) []string {
@@ -550,7 +582,6 @@ func (w *World) GameTickWorker(shutdown chan bool, wg *sync.WaitGroup) {
 
 	c := configs.GetConfig()
 
-	configTimer := time.NewTimer(30 * time.Millisecond)
 	messageTimer := time.NewTimer(time.Millisecond)
 	turnTimer := time.NewTimer(time.Duration(c.TurnMs) * time.Millisecond)
 
@@ -569,9 +600,6 @@ loop:
 			turnTimer.Reset(time.Duration(c.TurnMs) * time.Millisecond)
 			w.TurnTick()
 
-		case <-configTimer.C:
-			configTimer.Reset(30 * time.Millisecond)
-			w.ConfigTick()
 		}
 		c = configs.GetConfig()
 	}
@@ -794,48 +822,20 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 }
 
-// Handles system/config events
-func (w *World) ConfigTick() {
-
-	eq := events.GetQueue(events.ClientSettings{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		config, typeOk := e.(events.ClientSettings)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "ClientSettings", "Actual Type", e.Type())
-			continue
-		}
-
-		if u := users.GetByConnectionId(config.ConnectionId); u != nil {
-
-			if config.ScreenWidth != 0 {
-				u.RenderSettings.ScreenWidth = config.ScreenWidth
-			}
-
-			if config.ScreenWidth != 0 {
-				u.RenderSettings.ScreenHeight = config.ScreenHeight
-			}
-
-		}
-
-	}
-
-}
-
 // Handles sending out queued up messaged to users
 func (w *World) MessageTick() {
 
+	//
 	// Dispatch GMCP events
-	eq := events.GetQueue(events.GMCP{})
+	//
+	eq := events.GetQueue(events.GMCPOut{})
 	for eq.Len() > 0 {
 
 		e := eq.Poll().(events.Event)
 
-		gmcp, typeOk := e.(events.GMCP)
+		gmcp, typeOk := e.(events.GMCPOut)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "GMCP", "Actual Type", e.Type())
+			slog.Error("Event", "Expected Type", "GMCPOut", "Actual Type", e.Type())
 			continue
 		}
 
@@ -846,7 +846,7 @@ func (w *World) MessageTick() {
 		if user := users.GetByUserId(gmcp.UserId); user != nil {
 			payload, err := json.Marshal(gmcp.Payload)
 			if err != nil {
-				slog.Error("Event", "Type", "GMCP", "data", gmcp.Payload, "error", err)
+				slog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
 				continue
 			}
 			w.connectionPool.SendTo([]byte(payload), user.ConnectionId())
@@ -854,7 +854,9 @@ func (w *World) MessageTick() {
 
 	}
 
+	//
 	// System-wide broadcasts
+	//
 	eq = events.GetQueue(events.Broadcast{})
 	for eq.Len() > 0 {
 
@@ -900,6 +902,9 @@ func (w *World) MessageTick() {
 
 	}
 
+	//
+	// Outbound text strings
+	//
 	eq = events.GetQueue(events.Message{})
 	for eq.Len() > 0 {
 
@@ -1620,10 +1625,12 @@ func (w *World) Kick(userId int) {
 func NewWorld(osSignalChan chan os.Signal) *World {
 
 	w := &World{
-		connectionPool: connection.New(osSignalChan),
+		connectionPool: connection.GetPool(),
 		users:          users.NewUserManager(),
 		worldInput:     make(chan WorldInput),
 	}
+
+	w.connectionPool.SetShutdownChan(osSignalChan)
 
 	return w
 }

@@ -1,6 +1,7 @@
 package rooms
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -20,6 +21,7 @@ import (
 	"github.com/volte6/mud/fileloader"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/templates"
+	"github.com/volte6/mud/term"
 	"github.com/volte6/mud/users"
 	"github.com/volte6/mud/util"
 
@@ -352,6 +354,106 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	for _, buffId := range newRoom.GetBiome().BuffIds() {
 		if !user.Character.HasBuff(buffId) {
 			user.AddBuff(buffId)
+		}
+	}
+
+	//
+	// Send GMCP Updates
+	//
+	if _, ok := connection.GetSettings(user.ConnectionId()).GMCPModules[`Room`]; ok {
+
+		newRoomPlayerData := map[string]any{}
+
+		// Send to everyone in the new room that a player arrived
+		for _, uid := range newRoom.GetPlayers() {
+
+			if uid == user.UserId {
+				continue
+			}
+
+			if u := users.GetByUserId(uid); u != nil {
+
+				newRoomPlayerData[u.Character.Name] = u.Character.Name
+
+				if _, ok := connection.GetSettings(u.ConnectionId()).GMCPModules[`Room`]; ok {
+
+					bytesOut := []byte(fmt.Sprintf(`Room.AddPlayer {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
+					connection.GetPool().SendTo(
+						term.GmcpPayload.BytesWithPayload(bytesOut),
+						user.ConnectionId(),
+					)
+				}
+			}
+		}
+
+		// Send to everyone in the old room that a player left
+		for _, uid := range currentRoom.GetPlayers() {
+
+			if uid == user.UserId {
+				continue
+			}
+
+			if u := users.GetByUserId(uid); u != nil {
+				if _, ok := connection.GetSettings(u.ConnectionId()).GMCPModules[`Room`]; ok {
+
+					bytesOut := []byte(fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name))
+					connection.GetPool().SendTo(
+						term.GmcpPayload.BytesWithPayload(bytesOut),
+						user.ConnectionId(),
+					)
+				}
+			}
+		}
+
+		// build exits info
+		exits := map[string]int{}
+		for name, exitInfo := range newRoom.Exits {
+			if !exitInfo.Secret {
+				exits[name] = exitInfo.RoomId
+			}
+		}
+
+		roomData := map[string]any{
+			"num":         newRoom.RoomId,
+			"name":        newRoom.Title,
+			"area":        newRoom.Zone,
+			"environment": newRoom.GetBiome().Name(),
+			"exits":       exits,
+			//"coords":      "X,Y,Z",
+			//"map":         "http://www.link-to-map.png",
+		}
+
+		details := []string{}
+
+		if len(newRoom.GetMobs(FindMerchant)) > 0 || len(newRoom.GetPlayers(FindMerchant)) > 0 {
+			details = append(details, "shop")
+		}
+		if len(newRoom.SkillTraining) > 0 {
+			details = append(details, "trainer")
+		}
+		if newRoom.IsBank {
+			details = append(details, "bank")
+		}
+		if newRoom.IsStorage {
+			details = append(details, "storage")
+		}
+
+		roomData["details"] = details
+
+		// send big 'ol room info object
+		if bytesOut, err := json.Marshal(roomData); err == nil {
+			connection.GetPool().SendTo(
+				term.GmcpPayload.BytesWithPayload(append([]byte("Room.Info "), bytesOut...)),
+				user.ConnectionId(),
+			)
+		}
+
+		// send player list for room
+		if bytesOut, err := json.Marshal(newRoomPlayerData); err == nil {
+			connection.GetPool().SendTo(
+				term.GmcpPayload.BytesWithPayload(append([]byte("Room.Players "), bytesOut...)),
+				user.ConnectionId(),
+			)
 		}
 	}
 

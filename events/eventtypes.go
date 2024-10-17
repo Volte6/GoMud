@@ -56,15 +56,6 @@ type Message struct {
 
 func (m Message) Type() string { return `Message` }
 
-type ClientSettings struct {
-	ConnectionId uint64
-	ScreenWidth  uint32
-	ScreenHeight uint32
-	Monochrome   bool
-}
-
-func (c ClientSettings) Type() string { return `ClientSettings` }
-
 // Messages that are intended to reach all users on the system
 type WebClientCommand struct {
 	ConnectionId uint64
@@ -74,9 +65,19 @@ type WebClientCommand struct {
 func (b WebClientCommand) Type() string { return `WebClientCommand` }
 
 // Messages that are intended to reach all users on the system
-type GMCP struct {
-	UserId  int
-	Payload any
+type GMCPIn struct {
+	ConnectionId uint64
+	Command      string
+	Json         []byte
 }
 
-func (b GMCP) Type() string { return `GMCP` }
+func (b GMCPIn) Type() string { return `GMCP` }
+
+// Messages that are intended to reach all users on the system
+type GMCPOut struct {
+	ConnectionId uint64
+	UserId       int
+	Payload      any
+}
+
+func (b GMCPOut) Type() string { return `GMCP` }

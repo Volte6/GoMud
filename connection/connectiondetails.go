@@ -120,6 +120,7 @@ type ConnectionDetails struct {
 	inputHandlerNames []string
 	inputHandlers     []InputHandler
 	inputDisabled     bool
+	ClientSettings    ClientSettings
 }
 
 func (cd *ConnectionDetails) IsWebsocket() bool {
@@ -260,5 +261,9 @@ func NewConnectionDetails(connId ConnectionId, c net.Conn, wsC *websocket.Conn) 
 		conn:          c,
 		wsConn:        wsC,
 		wsLock:        sync.Mutex{},
+		// Track client settings
+		ClientSettings: ClientSettings{
+			Display: DisplaySettings{ScreenWidth: 80, ScreenHeight: 40}, // Default to 80x40
+		},
 	}
 }

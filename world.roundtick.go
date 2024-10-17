@@ -13,6 +13,7 @@ import (
 	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/combat"
 	"github.com/volte6/mud/configs"
+	"github.com/volte6/mud/connection"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/items"
@@ -1562,6 +1563,26 @@ func (w *World) HandleAutoHealing(roundNumber uint64) {
 			w.connectionPool.SendTo([]byte(newcmdprompt), user.ConnectionId())
 		} else {
 			w.connectionPool.SendTo([]byte(templates.AnsiParse(newcmdprompt)), user.ConnectionId())
+		}
+
+		//
+		// Send GMCP status update
+		//
+		if _, ok := connection.GetSettings(user.ConnectionId()).GMCPModules[`Room`]; ok {
+
+			realXPNow, realXPTNL := user.Character.XPTNLActual()
+
+			bytesOut := []byte(fmt.Sprintf(`Char.Vitals { "hp": "%d", "maxhp": "%d", "mp": "%d", "maxmp": "%d", "xp": "%d", "xptnl": "%d", "energy": "%d", "maxenergy": "%d" }`,
+				user.Character.Health, user.Character.HealthMax.Value,
+				user.Character.Mana, user.Character.ManaMax.Value,
+				realXPNow, realXPTNL,
+				user.Character.ActionPoints, user.Character.ActionPointsMax.Value,
+			))
+
+			connection.GetPool().SendTo(
+				term.GmcpPayload.BytesWithPayload(bytesOut),
+				user.ConnectionId(),
+			)
 		}
 
 	}
