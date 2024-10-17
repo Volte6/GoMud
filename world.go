@@ -748,13 +748,6 @@ func (w *World) processInput(userId int, inputText string) {
 		worldManager.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
 	}
 
-	if r := rooms.LoadRoom(user.Character.RoomId); r != nil {
-		worldManager.connectionPool.SendTo(
-			term.GmcpPayload.BytesWithPayload([]byte(fmt.Sprintf(`Room.Info {"num": %d, "name": "%s"}`, r.RoomId, r.Title))),
-			connId,
-		)
-	}
-
 }
 
 func (w *World) processMobInput(mobInstanceId int, inputText string) {
