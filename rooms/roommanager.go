@@ -1,7 +1,6 @@
 package rooms
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -360,9 +359,9 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	//
 	// Send GMCP Updates
 	//
-	if _, ok := connection.GetSettings(user.ConnectionId()).GMCPModules[`Room`]; ok {
+	if connection.GetSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
 
-		newRoomPlayerData := map[string]any{}
+		newRoomPlayers := strings.Builder{}
 
 		// Send to everyone in the new room that a player arrived
 		for _, uid := range newRoom.GetPlayers() {
@@ -373,9 +372,13 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 
 			if u := users.GetByUserId(uid); u != nil {
 
-				newRoomPlayerData[u.Character.Name] = u.Character.Name
+				if newRoomPlayers.Len() > 0 {
+					newRoomPlayers.WriteString(`, `)
+				}
 
-				if _, ok := connection.GetSettings(u.ConnectionId()).GMCPModules[`Room`]; ok {
+				newRoomPlayers.WriteString(`"` + u.Character.Name + `": ` + `"` + u.Character.Name + `"`)
+
+				if connection.GetSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
 
 					bytesOut := []byte(fmt.Sprintf(`Room.AddPlayer {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
 					connection.GetPool().SendTo(
@@ -394,7 +397,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 			}
 
 			if u := users.GetByUserId(uid); u != nil {
-				if _, ok := connection.GetSettings(u.ConnectionId()).GMCPModules[`Room`]; ok {
+				if connection.GetSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
 
 					bytesOut := []byte(fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name))
 					connection.GetPool().SendTo(
@@ -405,56 +408,80 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 			}
 		}
 
-		// build exits info
-		exits := map[string]int{}
+		roomInfoStr := strings.Builder{}
+		roomInfoStr.WriteString(`{ `)
+		roomInfoStr.WriteString(`"num": ` + strconv.Itoa(newRoom.RoomId) + `, `)
+		roomInfoStr.WriteString(`"name": "` + newRoom.Title + `", `)
+		roomInfoStr.WriteString(`"area": "` + newRoom.Zone + `", `)
+		roomInfoStr.WriteString(`"environment": "` + newRoom.GetBiome().Name() + `", `)
+
+		// build exits
+		roomInfoStr.WriteString(`"exits": {`)
+		exitCt := 0
 		for name, exitInfo := range newRoom.Exits {
-			if !exitInfo.Secret {
-				exits[name] = exitInfo.RoomId
+			if exitInfo.Secret {
+				continue
 			}
+			if exitCt > 0 {
+				roomInfoStr.WriteString(`, `)
+			}
+
+			roomInfoStr.WriteString(`"` + name + `": ` + strconv.Itoa(exitInfo.RoomId))
+
+			exitCt++
 		}
+		roomInfoStr.WriteString(`}, `)
+		// End exits
 
-		roomData := map[string]any{
-			"num":         newRoom.RoomId,
-			"name":        newRoom.Title,
-			"area":        newRoom.Zone,
-			"environment": newRoom.GetBiome().Name(),
-			"exits":       exits,
-			//"coords":      "X,Y,Z",
-			//"map":         "http://www.link-to-map.png",
-		}
+		// build details
+		roomInfoStr.WriteString(`"details": [`)
 
-		details := []string{}
-
+		detailCt := 0
 		if len(newRoom.GetMobs(FindMerchant)) > 0 || len(newRoom.GetPlayers(FindMerchant)) > 0 {
-			details = append(details, "shop")
+			if detailCt > 0 {
+				roomInfoStr.WriteString(`, `)
+			}
+			detailCt++
+			roomInfoStr.WriteString(`"shop"`)
 		}
 		if len(newRoom.SkillTraining) > 0 {
-			details = append(details, "trainer")
+			if detailCt > 0 {
+				roomInfoStr.WriteString(`, `)
+			}
+			detailCt++
+			roomInfoStr.WriteString(`"trainer"`)
 		}
 		if newRoom.IsBank {
-			details = append(details, "bank")
+			if detailCt > 0 {
+				roomInfoStr.WriteString(`, `)
+			}
+			detailCt++
+			roomInfoStr.WriteString(`"bank"`)
 		}
 		if newRoom.IsStorage {
-			details = append(details, "storage")
+			if detailCt > 0 {
+				roomInfoStr.WriteString(`, `)
+			}
+			detailCt++
+			roomInfoStr.WriteString(`"storage"`)
 		}
+		roomInfoStr.WriteString(`]`)
+		// end details
 
-		roomData["details"] = details
+		roomInfoStr.WriteString(` }`)
+		// End room info
 
 		// send big 'ol room info object
-		if bytesOut, err := json.Marshal(roomData); err == nil {
-			connection.GetPool().SendTo(
-				term.GmcpPayload.BytesWithPayload(append([]byte("Room.Info "), bytesOut...)),
-				user.ConnectionId(),
-			)
-		}
+		connection.GetPool().SendTo(
+			term.GmcpPayload.BytesWithPayload([]byte("Room.Info "+roomInfoStr.String())),
+			user.ConnectionId(),
+		)
 
 		// send player list for room
-		if bytesOut, err := json.Marshal(newRoomPlayerData); err == nil {
-			connection.GetPool().SendTo(
-				term.GmcpPayload.BytesWithPayload(append([]byte("Room.Players "), bytesOut...)),
-				user.ConnectionId(),
-			)
-		}
+		connection.GetPool().SendTo(
+			term.GmcpPayload.BytesWithPayload([]byte("Room.Players {"+newRoomPlayers.String()+`}`)),
+			user.ConnectionId(),
+		)
 	}
 
 	return nil

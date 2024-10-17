@@ -1568,7 +1568,7 @@ func (w *World) HandleAutoHealing(roundNumber uint64) {
 		//
 		// Send GMCP status update
 		//
-		if _, ok := connection.GetSettings(user.ConnectionId()).GMCPModules[`Room`]; ok {
+		if connection.GetSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
 
 			realXPNow, realXPTNL := user.Character.XPTNLActual()
 
@@ -1740,6 +1740,29 @@ func (w *World) ProcessAuction(tNow time.Time) {
 					msg := fmt.Sprintf(`<ansi fg="yellow">You have won the auction for the <ansi fg="item">%s</ansi>! It has been added to your backpack.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr)
 					user.SendText(msg)
 				}
+			} else {
+
+				msg := fmt.Sprintf(`Your won the auction for the <ansi fg="item">%s</ansi> while you were offline.%s`, a.ItemData.DisplayName(), term.CRLFStr)
+
+				users.SearchOfflineUsers(func(u *users.UserRecord) bool {
+					if u.UserId == a.HighestBidUserId {
+						user = u
+						return false
+					}
+					return true
+				})
+
+				if user != nil {
+					user.Inbox.Add(
+						users.Message{
+							FromName: `Auction System`,
+							Message:  msg,
+							Item:     &a.ItemData,
+						},
+					)
+					users.SaveUser(*user)
+				}
+
 			}
 
 			if a.SellerUserId > 0 {

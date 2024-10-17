@@ -18,6 +18,23 @@ type DiscordSettings struct {
 }
 
 type ClientType struct {
-	Name    string
-	Version string
+	Name     string
+	Version  string
+	IsMudlet bool // Knowing whether is a mudlet client can be useful, since Mudlet hates certain ANSI/Escape codes.
+}
+
+// Check whether the client is Mudlet
+func (c ClientSettings) IsMudlet() bool {
+	return c.Client.IsMudlet
+}
+
+// Check whether a GMCP module is enabled on the client
+func (c ClientSettings) GmcpEnabled(moduleName string) bool {
+	if len(c.GMCPModules) == 0 {
+		return false
+	}
+
+	_, ok := c.GMCPModules[moduleName]
+
+	return ok
 }

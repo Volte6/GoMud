@@ -3,6 +3,7 @@ package inputhandlers
 import (
 	"encoding/json"
 	"log/slog"
+	"strings"
 
 	"github.com/volte6/mud/connection"
 	"github.com/volte6/mud/term"
@@ -96,6 +97,9 @@ func TelnetIACHandler(clientInput *connection.ClientInput, connectionPool *conne
 						c := connectionPool.Get(clientInput.ConnectionId)
 						c.ClientSettings.Client.Name = decoded.Client
 						c.ClientSettings.Client.Version = decoded.Version
+						if strings.EqualFold(decoded.Client, `mudlet`) {
+							c.ClientSettings.Client.IsMudlet = true
+						}
 					}
 				case `Core.Supports.Set`:
 					decoded := term.GMCPSupportsSet{}
