@@ -100,7 +100,7 @@ func (w *World) EnterWorld(roomId int, zone string, userId int) {
 	//
 	// Send GMCP for their char name
 	//
-	if _, ok := connection.GetSettings(user.ConnectionId()).GMCPModules[`Room`]; ok {
+	if connection.GetSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
 
 		bytesOut := []byte(fmt.Sprintf(`Char.Name {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
 		connection.GetPool().SendTo(
@@ -149,7 +149,7 @@ func (w *World) LeaveWorld(userId int) {
 		}
 
 		if u := users.GetByUserId(uid); u != nil {
-			if _, ok := connection.GetSettings(u.ConnectionId()).GMCPModules[`Room`]; ok {
+			if connection.GetSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
 
 				bytesOut := []byte(fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name))
 				connection.GetPool().SendTo(

@@ -214,3 +214,8 @@ func GetPool() *ConnectionTracker {
 func GetSettings(id ConnectionId) ClientSettings {
 	return connectionPool.Get(id).ClientSettings
 }
+
+func OverwriteSettings(id ConnectionId, cs ClientSettings) {
+	conn := connectionPool.Get(id)
+	conn.ClientSettings = cs
+}
