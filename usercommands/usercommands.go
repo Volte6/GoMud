@@ -52,6 +52,7 @@ var (
 		`command`:     {Command, false, true}, // Admin only
 		`conditions`:  {Conditions, true, false},
 		`consider`:    {Consider, true, false},
+		`deafen`:      {Deafen, true, true},
 		`default`:     {Default, false, false},
 		`disarm`:      {Disarm, false, false},
 		`drop`:        {Drop, true, false},
@@ -83,6 +84,7 @@ var (
 		`massmail`:    {Massmail, true, true},
 		`macros`:      {Macros, true, false},
 		`motd`:        {Motd, true, false},
+		`mute`:        {Mute, true, true},
 		`offer`:       {Offer, false, false},
 		`online`:      {Online, true, false},
 		`party`:       {Party, true, false},
@@ -134,6 +136,8 @@ var (
 		`unenchant`:   {Unenchant, false, false},
 		`uncurse`:     {Uncurse, false, false},
 		`unlock`:      {Unlock, false, false},
+		`undeafen`:    {UnDeafen, true, true},
+		`unmute`:      {UnMute, true, true},
 		`use`:         {Use, false, false},
 		`dual-wield`:  {DualWield, true, false},
 		`whisper`:     {Whisper, true, false},
@@ -296,8 +300,8 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 	}
 	// end "go" attempt
 
-	if emoteText, ok := emoteAliases[cmd]; ok {
-		handled, err := Emote(emoteText, user, room)
+	if _, ok := emoteAliases[cmd]; ok {
+		handled, err := Emote(cmd, user, room)
 		return handled, err
 	}
 

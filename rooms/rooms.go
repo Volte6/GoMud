@@ -120,6 +120,18 @@ func NewRoom(zone string) *Room {
 	return r
 }
 
+func (r *Room) SendTextCommunication(txt string, excludeUserIds ...int) {
+
+	events.AddToQueue(events.Message{
+		RoomId:          r.RoomId,
+		Text:            txt + "\n",
+		ExcludeUserIds:  excludeUserIds,
+		IsQuiet:         false,
+		IsCommunication: true,
+	})
+
+}
+
 func (r *Room) SendText(txt string, excludeUserIds ...int) {
 
 	events.AddToQueue(events.Message{

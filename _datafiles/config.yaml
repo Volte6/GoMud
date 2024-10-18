@@ -130,8 +130,12 @@ ExitRoomMessageWrapper: "   <ansi fg=\"leaves-message\"> >>> </ansi>%s"
 # - MaxIdleSeconds -
 #   How long players can go without any input, before being kicked.
 #   A value of 0 (zero) means never kick inactive players.
-#   900 seconds = 15 minutes
-MaxIdleSeconds: 900
+#   1800 seconds = 30 minutes
+MaxIdleSeconds: 1800
+# - AfkSeconds -
+#   If this many seconds pass without player input, they are flagged as afk
+#   Set to zero to never mark anyone as AFK
+AfkSeconds: 120
 # - ZombieSeconds -
 #   How many seconds a character stays active/in game after a network connection
 #   is lost. Set to 0 to instantly log out characters (exploitable).
@@ -181,6 +185,14 @@ MaxAltCharacters: 3
 #   This uses a Go time format string, which is kinda weird.
 #   See: https://go.dev/src/time/format.go
 TimeFormat: 'Monday, 02-Jan-2006 03:04:05PM'
+# - RoundsPerDay -
+#   How many rounds are in a day? This is used to calculate the time of day.
+#   The lower this number, the faster the day/night cycle will be.
+#   A 4 second round and a 900 round day means the day/night cycle is 1 hour.
+RoundsPerDay: 900
+# - NightHours -
+#   How many hours of each 24 hour day will be nighttime?
+NightHours: 8
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS
@@ -203,14 +215,6 @@ RoundsPerAutoSave: 900
 #   bogged down with too many mobs in memory. If you want mobs to stick around 
 #   indefinitely, set this to 0. Certain mobs may never despawn, however.
 MaxMobBoredom: 150
-# - RoundsPerDay -
-#   How many rounds are in a day? This is used to calculate the time of day.
-#   The lower this number, the faster the day/night cycle will be.
-#   A 4 second round and a 900 round day means the day/night cycle is 1 hour.
-RoundsPerDay: 900
-# - NightHours -
-#   How many hours of each 24 hour day will be nighttime?
-NightHours: 8
 # - ScriptLoadTimeoutMs -
 #   When a script is first loaded, compiled, and run, it is given this long to
 #   complete. If it takes longer, it is killed. This includes the onLoad() function
@@ -232,8 +236,8 @@ ScriptRoomTimeoutMs: 10
 MaxTelnetConnections: 50
 # - TelnetPort -
 #   The port the server listens on for telnet connections. Listen on multiple 
-#   ports by separating them with commas. For example, "33333,33334,33335"
-TelnetPort: 33333,44444
+#   ports by separating them with commas. For example, [33333, 33334, 33335]
+TelnetPort: [33333, 44444]
 # - LocalPort -
 #   A port that can only be accessed via localhost, but will not limit based on connection count
 LocalPort: 9999

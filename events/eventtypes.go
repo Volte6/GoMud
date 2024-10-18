@@ -47,11 +47,12 @@ type Broadcast struct {
 func (b Broadcast) Type() string { return `Broadcast` }
 
 type Message struct {
-	UserId         int
-	ExcludeUserIds []int
-	RoomId         int
-	Text           string
-	IsQuiet        bool // whether it can only be heard by superior "hearing"
+	UserId          int
+	ExcludeUserIds  []int
+	RoomId          int
+	Text            string
+	IsQuiet         bool // whether it can only be heard by superior "hearing"
+	IsCommunication bool // If true, this is a communication such as "say" or "emote"
 }
 
 func (m Message) Type() string { return `Message` }

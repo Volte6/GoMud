@@ -12,6 +12,11 @@ import (
 
 func Say(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
+	if user.Muted {
+		user.SendText(`You are <ansi fg="alert-5">MUTED</ansi>. You can only send <ansi fg="command">whisper</ansi>'s to Admins and Moderators.`)
+		return true, nil
+	}
+
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 	isDrunk := user.Character.HasBuffFlag(buffs.Drunk)
 
@@ -19,10 +24,11 @@ func Say(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		// modify the text to look like it's the speech of a drunk person
 		rest = drunkify(rest)
 	}
+
 	if isSneaking {
-		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="saytext">%s</ansi>"`, rest), user.UserId)
+		room.SendTextCommunication(fmt.Sprintf(`someone says, "<ansi fg="saytext">%s</ansi>"`, rest), user.UserId)
 	} else {
-		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> says, "<ansi fg="saytext">%s</ansi>"`, user.Character.Name, rest), user.UserId)
+		room.SendTextCommunication(fmt.Sprintf(`<ansi fg="username">%s</ansi> says, "<ansi fg="saytext">%s</ansi>"`, user.Character.Name, rest), user.UserId)
 	}
 
 	user.SendText(fmt.Sprintf(`You say, "<ansi fg="saytext">%s</ansi>"`, rest))
