@@ -60,7 +60,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 	strB := strings.Builder{}
 
-	strB.WriteString("<html><head><style>\n")
+	strB.WriteString("<html><head><title>GoMud Configuration</title><style>\n")
 
 	strB.WriteString(
 		"body {\n" +

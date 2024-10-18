@@ -6,10 +6,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/volte6/mud/configs"
 	"github.com/volte6/mud/rooms"
 	"github.com/volte6/mud/skills"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
+	"github.com/volte6/mud/util"
 )
 
 func Online(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
@@ -23,6 +25,10 @@ func Online(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 	rowsAdmin := [][]string{}
 	rowsMod := [][]string{}
 	rowsUser := [][]string{}
+
+	c := configs.GetConfig()
+	afkRounds := uint64(c.SecondsToRounds(int(c.AfkSeconds)))
+	roundNow := util.GetRoundCount()
 
 	userCt := 0
 	for _, uid := range users.GetOnlineUserIds() {
@@ -50,6 +56,10 @@ func Online(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 				timeStr = fmt.Sprintf(`%dm`, m)
 			} else {
 				timeStr = fmt.Sprintf(`%ds`, s)
+			}
+
+			if afkRounds > 0 && roundNow-u.GetLastInputRound() >= afkRounds {
+				timeStr += ` <ansi fg="8">(afk)</ansi>`
 			}
 
 			userCt++

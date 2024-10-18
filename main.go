@@ -158,10 +158,8 @@ func main() {
 
 	webclient.Listen(int(c.WebPort), &wg, HandleWebSocketConnection)
 
-	allTelnetPorts := strings.Split(string(c.TelnetPort), `,`)
-
-	allServerListeners := make([]net.Listener, 0, len(allTelnetPorts))
-	for _, port := range allTelnetPorts {
+	allServerListeners := make([]net.Listener, 0, len(c.TelnetPort))
+	for _, port := range c.TelnetPort {
 		if p, err := strconv.Atoi(port); err == nil {
 			if s := TelnetListenOnPort(``, p, &wg, int(c.MaxTelnetConnections)); s != nil {
 				allServerListeners = append(allServerListeners, s)

@@ -44,7 +44,7 @@ type Config struct {
 	ScriptLoadTimeoutMs          ConfigInt         `yaml:"ScriptLoadTimeoutMs"`          // How long to spend the first time a script is loaded into memory
 	ScriptRoomTimeoutMs          ConfigInt         `yaml:"ScriptRoomTimeoutMs"`          // How many milliseconds to allow a script to run before it is interrupted
 	MaxTelnetConnections         ConfigInt         `yaml:"MaxTelnetConnections"`         // Maximum number of telnet connections to accept
-	TelnetPort                   ConfigString      `yaml:"TelnetPort"`                   // One or more Ports used to accept telnet connections
+	TelnetPort                   ConfigSliceString `yaml:"TelnetPort"`                   // One or more Ports used to accept telnet connections
 	LocalPort                    ConfigInt         `yaml:"LocalPort"`                    // Port used for admin connections, localhost only
 	WebPort                      ConfigInt         `yaml:"WebPort"`                      // Port used for web requests
 	NextRoomId                   ConfigInt         `yaml:"NextRoomId"`                   // The next room id to use when creating a new room
@@ -82,6 +82,7 @@ type Config struct {
 	ShopRestockRounds        ConfigInt  `yaml:"ShopRestockRounds"`        // Default time it takes to restock 1 quantity in shops
 	ConsistentAttackMessages ConfigBool `yaml:"ConsistentAttackMessages"` // Whether each weapon has consistent attack messages
 	MaxAltCharacters         ConfigInt  `yaml:"MaxAltCharacters"`         // How many characters beyond the default character can they create?
+	AfkSeconds               ConfigInt  `yaml:"AfkSeconds"`               // How long until a player is marked as afk?
 
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.
@@ -236,16 +237,23 @@ func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
 		if itm.Type().Kind() == reflect.Slice {
 
 			v := reflect.Indirect(itm)
+			list := []string{}
 			for j := 0; j < v.Len(); j++ {
 
 				cmd := itm.Index(j).Interface().(string)
 
-				if len(cmd) > 27 {
-					cmd = cmd[0:27]
-				}
+				if len(excludeStrings) > 0 {
 
-				output[fmt.Sprintf(`%s.%d`, name, j)] = cmd
+				}
+				/*
+					if len(cmd) > 27 {
+						cmd = cmd[0:27]
+					}
+				*/
+				list = append(list, cmd)
+				//output[fmt.Sprintf(`%s.%d`, name, j)] = cmd
 			}
+			output[name] = strings.Join(list, `; `)
 
 		} else if itm.Type().Kind() == reflect.Map {
 			// iterate the map
@@ -457,10 +465,6 @@ func (c *Config) Validate() {
 
 	if c.MaxTelnetConnections < 1 {
 		c.MaxTelnetConnections = 50 // default
-	}
-
-	if c.TelnetPort == `` {
-		c.TelnetPort = `33333` // default
 	}
 
 	if c.WebPort < 1 {
