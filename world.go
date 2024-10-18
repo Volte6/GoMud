@@ -913,11 +913,16 @@ func (w *World) MessageTick() {
 
 		messageColorized := templates.AnsiParse(message.Text)
 
-		slog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(messageColorized))
+		slog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(messageColorized), "IsCommunication", message.IsCommunication)
 
 		if message.UserId > 0 {
 
 			if user := users.GetByUserId(message.UserId); user != nil {
+
+				// If they are deafened, they cannot hear user communications
+				if message.IsCommunication && user.Deafened {
+					continue
+				}
 
 				if connections.IsWebsocket(user.ConnectionId()) {
 					connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+message.Text), user.ConnectionId())
@@ -963,6 +968,11 @@ func (w *World) MessageTick() {
 				}
 
 				if user := users.GetByUserId(userId); user != nil {
+
+					// If they are deafened, they cannot hear user communications
+					if message.IsCommunication && user.Deafened {
+						continue
+					}
 
 					// If this is a quiet message, make sure the player can hear it
 					if message.IsQuiet {

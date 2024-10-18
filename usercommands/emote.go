@@ -103,13 +103,29 @@ func Emote(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 		return true, nil
 	}
 
+	// emoteAliases are sent without regard to Mute/Deafened (Not marked as a communication)
+	// This is because they are pre-written.
+	if emoteText, ok := emoteAliases[rest]; ok {
+		user.SendText(fmt.Sprintf(`You Emote: <ansi fg="username">%s</ansi> <ansi fg="20">%s</ansi>`, user.Character.Name, emoteText))
+		room.SendText(
+			fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="20">%s</ansi>`, user.Character.Name, emoteText),
+			user.UserId,
+		)
+		return true, nil
+	}
+
+	if user.Muted {
+		user.SendText(`You are <ansi fg="alert-5">MUTED</ansi>. You can only send <ansi fg="command">whisper</ansi>'s to Admins and Moderators.`)
+		return true, nil
+	}
+
 	if rest[0] == '@' && len(rest) > 1 {
 		rest = rest[1:]
 	} else {
 		user.SendText(fmt.Sprintf(`You Emote: <ansi fg="username">%s</ansi> <ansi fg="20">%s</ansi>`, user.Character.Name, rest))
 	}
 
-	room.SendText(
+	room.SendTextCommunication(
 		fmt.Sprintf(`<ansi fg="username">%s</ansi> <ansi fg="20">%s</ansi>`, user.Character.Name, rest),
 		user.UserId,
 	)

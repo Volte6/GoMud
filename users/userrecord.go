@@ -47,6 +47,8 @@ type UserRecord struct {
 	RoomMemoryBlob string                `yaml:"roommemoryblob,omitempty"`
 	ConfigOptions  map[string]any        `yaml:"configoptions,omitempty"`
 	Inbox          Inbox                 `yaml:"inbox,omitempty"`
+	Muted          bool                  `yaml:"muted,omitempty"`    // Cannot SEND custom communications to anyone but admin/mods
+	Deafened       bool                  `yaml:"deafened,omitempty"` // Cannot HEAR custom communications from anyone but admin/mods
 	connectionId   uint64
 	unsentText     string
 	suggestText    string

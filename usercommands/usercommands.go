@@ -296,8 +296,8 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 	}
 	// end "go" attempt
 
-	if emoteText, ok := emoteAliases[cmd]; ok {
-		handled, err := Emote(emoteText, user, room)
+	if _, ok := emoteAliases[cmd]; ok {
+		handled, err := Emote(cmd, user, room)
 		return handled, err
 	}
 
