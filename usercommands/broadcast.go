@@ -22,7 +22,9 @@ func Broadcast(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 	for _, u := range users.GetAllActiveUsers() {
 
 		if u.Deafened && !sourceIsMod {
-			continue
+			if u.UserId != user.UserId {
+				continue
+			}
 		}
 
 		u.SendText(msg)
