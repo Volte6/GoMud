@@ -3,11 +3,11 @@ package inputhandlers
 import (
 	"log/slog"
 
-	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/connections"
 	"github.com/volte6/mud/term"
 )
 
-func AnsiHandler(clientInput *connection.ClientInput, connectionPool *connection.ConnectionTracker, sharedState map[string]any) (nextHandler bool) {
+func AnsiHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
 
 	// Check for ANSI commands
 	if !term.IsAnsiCommand(clientInput.DataIn) {
@@ -42,9 +42,10 @@ func AnsiHandler(clientInput *connection.ClientInput, connectionPool *connection
 
 				if err != nil {
 
-					c := connectionPool.Get(clientInput.ConnectionId)
-					c.ClientSettings.Display.ScreenWidth = uint32(w)
-					c.ClientSettings.Display.ScreenHeight = uint32(h)
+					cs := connections.GetClientSettings(clientInput.ConnectionId)
+					cs.Display.ScreenWidth = uint32(w)
+					cs.Display.ScreenHeight = uint32(h)
+					connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
 
 				}
 			}
@@ -108,9 +109,9 @@ func AnsiHandler(clientInput *connection.ClientInput, connectionPool *connection
 
 			slog.Info("Received", "type", "ANSI (MoveCursorUp)", "bsSequence", len(bsSequence), "spaceSequence", len(spaceSequence))
 
-			connectionPool.SendTo(bsSequence, clientInput.ConnectionId)
-			connectionPool.SendTo(spaceSequence, clientInput.ConnectionId)
-			connectionPool.SendTo(bsSequence, clientInput.ConnectionId)
+			connections.SendTo(bsSequence, clientInput.ConnectionId)
+			connections.SendTo(spaceSequence, clientInput.ConnectionId)
+			connections.SendTo(bsSequence, clientInput.ConnectionId)
 
 			clientInput.History.Previous()
 			historicInput := clientInput.History.Get()
@@ -142,9 +143,9 @@ func AnsiHandler(clientInput *connection.ClientInput, connectionPool *connection
 
 			slog.Info("Received", "type", "ANSI (MoveCursorUp)", "bsSequence", len(bsSequence), "spaceSequence", len(spaceSequence))
 
-			connectionPool.SendTo(bsSequence, clientInput.ConnectionId)
-			connectionPool.SendTo(spaceSequence, clientInput.ConnectionId)
-			connectionPool.SendTo(bsSequence, clientInput.ConnectionId)
+			connections.SendTo(bsSequence, clientInput.ConnectionId)
+			connections.SendTo(spaceSequence, clientInput.ConnectionId)
+			connections.SendTo(bsSequence, clientInput.ConnectionId)
 
 			clientInput.History.Next()
 			historicInput := clientInput.History.Get()

@@ -1,4 +1,4 @@
-package connection
+package connections
 
 type ClientSettings struct {
 	Display DisplaySettings

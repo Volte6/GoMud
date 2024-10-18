@@ -1,9 +1,9 @@
 package inputhandlers
 
-import "github.com/volte6/mud/connection"
+import "github.com/volte6/mud/connections"
 
 // All this does is manage the input history stack
-func HistoryInputHandler(clientInput *connection.ClientInput, connectionPool *connection.ConnectionTracker, sharedState map[string]any) (nextHandler bool) {
+func HistoryInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
 	// Save whatever was in the buffer when enter was hit as the last submitted
 	if clientInput.EnterPressed {
 		// copy the bytes over (If not just an enter press)

@@ -1,6 +1,8 @@
 package inputhandlers
 
-import "github.com/volte6/mud/connection"
+import (
+	"github.com/volte6/mud/connections"
+)
 
 //
 // The purpose of this handler is to convert ctrl codes into text commands, when applicable
@@ -31,7 +33,7 @@ const (
 
 // This should be the first handler in the chain
 // It will convert any special signals like CTRL-C into a /quit command
-func SignalHandler(clientInput *connection.ClientInput, ct *connection.ConnectionTracker, sharedState map[string]any) (nextHandler bool) {
+func SignalHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
 
 	if len(clientInput.DataIn) < 1 {
 		return true

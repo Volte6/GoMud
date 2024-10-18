@@ -15,7 +15,7 @@ import (
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/connections"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/fileloader"
 	"github.com/volte6/mud/mobs"
@@ -104,7 +104,7 @@ func GetAllRoomIds() []int {
 	return roomIds
 }
 
-func RoomMaintenance(out *connection.ConnectionTracker) bool {
+func RoomMaintenance() bool {
 	start := time.Now()
 	defer func() {
 		util.TrackTime(`RoomMaintenance()`, time.Since(start).Seconds())
@@ -359,7 +359,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	//
 	// Send GMCP Updates
 	//
-	if connection.GetSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
+	if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
 
 		newRoomPlayers := strings.Builder{}
 
@@ -378,10 +378,10 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 
 				newRoomPlayers.WriteString(`"` + u.Character.Name + `": ` + `"` + u.Character.Name + `"`)
 
-				if connection.GetSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
+				if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
 
 					bytesOut := []byte(fmt.Sprintf(`Room.AddPlayer {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
-					connection.GetPool().SendTo(
+					connections.SendTo(
 						term.GmcpPayload.BytesWithPayload(bytesOut),
 						user.ConnectionId(),
 					)
@@ -397,10 +397,10 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 			}
 
 			if u := users.GetByUserId(uid); u != nil {
-				if connection.GetSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
+				if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
 
 					bytesOut := []byte(fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name))
-					connection.GetPool().SendTo(
+					connections.SendTo(
 						term.GmcpPayload.BytesWithPayload(bytesOut),
 						user.ConnectionId(),
 					)
@@ -472,13 +472,13 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		// End room info
 
 		// send big 'ol room info object
-		connection.GetPool().SendTo(
+		connections.SendTo(
 			term.GmcpPayload.BytesWithPayload([]byte("Room.Info "+roomInfoStr.String())),
 			user.ConnectionId(),
 		)
 
 		// send player list for room
-		connection.GetPool().SendTo(
+		connections.SendTo(
 			term.GmcpPayload.BytesWithPayload([]byte("Room.Players {"+newRoomPlayers.String()+`}`)),
 			user.ConnectionId(),
 		)
