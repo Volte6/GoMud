@@ -5,11 +5,11 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/connections"
 	"github.com/volte6/mud/term"
 )
 
-func TelnetIACHandler(clientInput *connection.ClientInput, connectionPool *connection.ConnectionTracker, sharedState map[string]any) (nextHandler bool) {
+func TelnetIACHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
 
 	// Check for Telnet IAC commands
 	// If not, pass it on to next handler
@@ -87,35 +87,39 @@ func TelnetIACHandler(clientInput *connection.ClientInput, connectionPool *conne
 				case `External.Discord.Hello`:
 					decoded := term.GMCPDiscord{}
 					if err := json.Unmarshal(payload, &decoded); err == nil {
-						c := connectionPool.Get(clientInput.ConnectionId)
-						c.ClientSettings.Discord.User = decoded.User
-						c.ClientSettings.Discord.Private = decoded.Private
+						cs := connections.GetClientSettings(clientInput.ConnectionId)
+						cs.Discord.User = decoded.User
+						cs.Discord.Private = decoded.Private
+						connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
 					}
 				case `Core.Hello`:
 					decoded := term.GMCPHello{}
 					if err := json.Unmarshal(payload, &decoded); err == nil {
-						c := connectionPool.Get(clientInput.ConnectionId)
-						c.ClientSettings.Client.Name = decoded.Client
-						c.ClientSettings.Client.Version = decoded.Version
+						cs := connections.GetClientSettings(clientInput.ConnectionId)
+						cs.Client.Name = decoded.Client
+						cs.Client.Version = decoded.Version
 						if strings.EqualFold(decoded.Client, `mudlet`) {
-							c.ClientSettings.Client.IsMudlet = true
+							cs.Client.IsMudlet = true
 						}
+						connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
 					}
 				case `Core.Supports.Set`:
 					decoded := term.GMCPSupportsSet{}
 					if err := json.Unmarshal(payload, &decoded); err == nil {
-						c := connectionPool.Get(clientInput.ConnectionId)
-						c.ClientSettings.GMCPModules = decoded.GetSupportedModules()
+						cs := connections.GetClientSettings(clientInput.ConnectionId)
+						cs.GMCPModules = decoded.GetSupportedModules()
+						connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
 					}
 				case `Core.Supports.Remove`:
 					decoded := term.GMCPSupportsRemove{}
 					if err := json.Unmarshal(payload, &decoded); err == nil {
-						c := connectionPool.Get(clientInput.ConnectionId)
-						if len(c.ClientSettings.GMCPModules) > 0 {
+						cs := connections.GetClientSettings(clientInput.ConnectionId)
+						if len(cs.GMCPModules) > 0 {
 							for _, name := range decoded {
-								delete(c.ClientSettings.GMCPModules, name)
+								delete(cs.GMCPModules, name)
 							}
 						}
+						connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
 					}
 				case `Char.Login`:
 					decoded := term.GMCPLogin{}
@@ -145,7 +149,7 @@ func TelnetIACHandler(clientInput *connection.ClientInput, connectionPool *conne
 
 		if ok, _ := term.Matches(iacCmd, term.TelnetAgreeChangeCharset); ok {
 			slog.Info("Received", "type", "IAC (TelnetAgreeChangeCharset)")
-			connectionPool.SendTo(
+			connections.SendTo(
 				term.TelnetCharset.BytesWithPayload([]byte(" UTF-8")),
 				clientInput.ConnectionId,
 			)
@@ -163,9 +167,10 @@ func TelnetIACHandler(clientInput *connection.ClientInput, connectionPool *conne
 
 				if err == nil {
 
-					c := connectionPool.Get(clientInput.ConnectionId)
-					c.ClientSettings.Display.ScreenWidth = uint32(w)
-					c.ClientSettings.Display.ScreenHeight = uint32(h)
+					cs := connections.GetClientSettings(clientInput.ConnectionId)
+					cs.Display.ScreenWidth = uint32(w)
+					cs.Display.ScreenHeight = uint32(h)
+					connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
 
 				}
 

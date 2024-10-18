@@ -16,7 +16,7 @@ import (
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/connections"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/items"
 	"github.com/volte6/mud/keywords"
@@ -46,17 +46,12 @@ func (wi WorldInput) Id() int {
 }
 
 type World struct {
-	connectionPool *connection.ConnectionTracker
-	users          *users.ActiveUsers
-	worldInput     chan WorldInput
+	users      *users.ActiveUsers
+	worldInput chan WorldInput
 }
 
 func (w *World) GetUsers() *users.ActiveUsers {
 	return w.users
-}
-
-func (w *World) GetConnectionPool() *connection.ConnectionTracker {
-	return w.connectionPool
 }
 
 // Send input to the world.
@@ -100,10 +95,10 @@ func (w *World) EnterWorld(roomId int, zone string, userId int) {
 	//
 	// Send GMCP for their char name
 	//
-	if connection.GetSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
+	if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
 
 		bytesOut := []byte(fmt.Sprintf(`Char.Name {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
-		connection.GetPool().SendTo(
+		connections.SendTo(
 			term.GmcpPayload.BytesWithPayload(bytesOut),
 			user.ConnectionId(),
 		)
@@ -136,7 +131,7 @@ func (w *World) LeaveWorld(userId int) {
 	if _, ok := room.RemovePlayer(userId); ok {
 		connectionIds := users.GetConnectionIds(room.GetPlayers())
 		tplTxt, _ := templates.Process("player-despawn", user.Character.Name)
-		w.connectionPool.SendTo([]byte(tplTxt), connectionIds...)
+		connections.SendTo([]byte(tplTxt), connectionIds...)
 	}
 
 	//
@@ -149,10 +144,10 @@ func (w *World) LeaveWorld(userId int) {
 		}
 
 		if u := users.GetByUserId(uid); u != nil {
-			if connection.GetSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
+			if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
 
 				bytesOut := []byte(fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name))
-				connection.GetPool().SendTo(
+				connections.SendTo(
 					term.GmcpPayload.BytesWithPayload(bytesOut),
 					user.ConnectionId(),
 				)
@@ -634,7 +629,7 @@ loop:
 
 		case <-roomUpdateTimer.C:
 			slog.Debug(`MaintenanceWorker`, `action`, `rooms.RoomMaintenance()`)
-			rooms.RoomMaintenance(w.connectionPool)
+			rooms.RoomMaintenance()
 			roomUpdateTimer.Reset(roomMaintenancePeriod)
 
 		case <-ansiAliasTimer.C:
@@ -774,10 +769,10 @@ func (w *World) processInput(userId int, inputText string) {
 		}
 	}
 
-	if worldManager.connectionPool.IsWebsocket(connId) {
-		worldManager.connectionPool.SendTo([]byte(user.GetCommandPrompt(true)), connId)
+	if connections.IsWebsocket(connId) {
+		connections.SendTo([]byte(user.GetCommandPrompt(true)), connId)
 	} else {
-		worldManager.connectionPool.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
+		connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
 	}
 
 }
@@ -849,7 +844,7 @@ func (w *World) MessageTick() {
 				slog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
 				continue
 			}
-			w.connectionPool.SendTo([]byte(payload), user.ConnectionId())
+			connections.SendTo([]byte(payload), user.ConnectionId())
 		}
 
 	}
@@ -871,11 +866,11 @@ func (w *World) MessageTick() {
 		messageColorized := templates.AnsiParse(broadcast.Text)
 
 		if broadcast.SkipLineRefresh {
-			w.connectionPool.Broadcast([]byte(messageColorized), []byte(broadcast.Text))
+			connections.Broadcast([]byte(messageColorized), []byte(broadcast.Text))
 			return
 		}
 
-		w.connectionPool.Broadcast(
+		connections.Broadcast(
 			[]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized),
 			[]byte(broadcast.Text),
 		)
@@ -894,11 +889,11 @@ func (w *World) MessageTick() {
 			continue
 		}
 
-		if !w.connectionPool.IsWebsocket(cmd.ConnectionId) {
+		if !connections.IsWebsocket(cmd.ConnectionId) {
 			continue
 		}
 
-		w.connectionPool.SendTo([]byte(cmd.Text), cmd.ConnectionId)
+		connections.SendTo([]byte(cmd.Text), cmd.ConnectionId)
 
 	}
 
@@ -924,13 +919,13 @@ func (w *World) MessageTick() {
 
 			if user := users.GetByUserId(message.UserId); user != nil {
 
-				if w.connectionPool.IsWebsocket(user.ConnectionId()) {
-					w.connectionPool.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+message.Text), user.ConnectionId())
+				if connections.IsWebsocket(user.ConnectionId()) {
+					connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+message.Text), user.ConnectionId())
 					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
 						redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
 					}
 				} else {
-					w.connectionPool.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized), user.ConnectionId())
+					connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized), user.ConnectionId())
 					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
 						redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
 					}
@@ -976,13 +971,13 @@ func (w *World) MessageTick() {
 						}
 					}
 
-					if w.connectionPool.IsWebsocket(user.ConnectionId()) {
-						w.connectionPool.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+message.Text), user.ConnectionId())
+					if connections.IsWebsocket(user.ConnectionId()) {
+						connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+message.Text), user.ConnectionId())
 						if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
 							redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
 						}
 					} else {
-						w.connectionPool.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized), user.ConnectionId())
+						connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized), user.ConnectionId())
 						if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
 							redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
 						}
@@ -997,7 +992,7 @@ func (w *World) MessageTick() {
 	}
 
 	for connectionId, prompt := range redrawPrompts {
-		w.connectionPool.SendTo([]byte(prompt), connectionId)
+		connections.SendTo([]byte(prompt), connectionId)
 	}
 }
 
@@ -1619,18 +1614,17 @@ func (w *World) Kick(userId int) {
 		return
 	}
 	users.SetZombieUser(userId)
-	w.connectionPool.Kick(user.ConnectionId())
+	connections.Kick(user.ConnectionId())
 }
 
 func NewWorld(osSignalChan chan os.Signal) *World {
 
 	w := &World{
-		connectionPool: connection.GetPool(),
-		users:          users.NewUserManager(),
-		worldInput:     make(chan WorldInput),
+		users:      users.NewUserManager(),
+		worldInput: make(chan WorldInput),
 	}
 
-	w.connectionPool.SetShutdownChan(osSignalChan)
+	connections.SetShutdownChan(osSignalChan)
 
 	return w
 }

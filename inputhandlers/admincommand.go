@@ -9,13 +9,13 @@ import (
 
 	"log/slog"
 
-	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/connections"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
 
-func AdminCommandInputHandler(clientInput *connection.ClientInput, connectionPool *connection.ConnectionTracker, sharedState map[string]any) (nextHandler bool) {
+func AdminCommandInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
 
 	// if they didn't hit enter, just keep buffering, go next.
 	if !clientInput.EnterPressed {
@@ -37,7 +37,7 @@ func AdminCommandInputHandler(clientInput *connection.ClientInput, connectionPoo
 
 	// If logged in and of appropraite privs, try to run a admin command
 	// If successful, we're done.
-	if tryAdminCommand(message, connectionPool, clientInput.ConnectionId) {
+	if tryAdminCommand(message, clientInput.ConnectionId) {
 		// zero out the current buffer
 		clientInput.Buffer = clientInput.Buffer[:0]
 		return false
@@ -95,7 +95,7 @@ func commandParts(cmd string) (adminCmd string, cmdArg string) {
 	return adminCmd, cmdArg
 }
 
-func tryAdminCommand(cmd string, connectionPool *connection.ConnectionTracker, connectionId connection.ConnectionId) bool {
+func tryAdminCommand(cmd string, connectionId connections.ConnectionId) bool {
 
 	if len(cmd) < 1 {
 		return false
@@ -127,7 +127,7 @@ func tryAdminCommand(cmd string, connectionPool *connection.ConnectionTracker, c
 
 		onlineTableData := templates.GetTable("Online Users", headers, rows)
 		tplTxt, _ := templates.Process("tables/generic", onlineTableData)
-		connectionPool.SendTo([]byte(tplTxt), connectionId)
+		connections.SendTo([]byte(tplTxt), connectionId)
 		return true
 	}
 
@@ -168,7 +168,7 @@ func tryAdminCommand(cmd string, connectionPool *connection.ConnectionTracker, c
 
 				time.Sleep(time.Second)
 			}
-			connectionPool.Signal(syscall.SIGTERM)
+			connections.SignalShutdown(syscall.SIGTERM)
 
 		}()
 		return true
@@ -177,7 +177,7 @@ func tryAdminCommand(cmd string, connectionPool *connection.ConnectionTracker, c
 	if cmd == "adminhelp" {
 
 		tplTxt, _ := templates.Process("admincommands/help", adminCommandList)
-		connectionPool.SendTo([]byte(tplTxt), connectionId)
+		connections.SendTo([]byte(tplTxt), connectionId)
 		return true
 	}
 

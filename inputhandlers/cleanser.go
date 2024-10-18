@@ -1,14 +1,14 @@
 package inputhandlers
 
 import (
-	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/connections"
 	"github.com/volte6/mud/term"
 )
 
 // CleanserInputHandler's job is to remove any bad characters from the input stream
 // before passing it down the chain.
 // For this reason, it's important it happen before other text processing handlers
-func CleanserInputHandler(clientInput *connection.ClientInput, connectionPool *connection.ConnectionTracker, sharedState map[string]any) (nextHandler bool) {
+func CleanserInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
 
 	if len(clientInput.DataIn) < 1 {
 		return true
@@ -21,10 +21,10 @@ func CleanserInputHandler(clientInput *connection.ClientInput, connectionPool *c
 
 		clientInput.BSPressed = true
 
-		//connectionPool.SendTo([]byte(term.AnsiMoveCursorBackward.String()+" "+term.AnsiMoveCursorBackward.String()), connDetails.UniqueId())
+		//connections.SendTo([]byte(term.AnsiMoveCursorBackward.String()+" "+term.AnsiMoveCursorBackward.String()), connDetails.UniqueId())
 		// send backspace, space, backspace
 		if len(clientInput.Buffer) > 0 {
-			connectionPool.SendTo([]byte{term.ASCII_BACKSPACE, term.ASCII_SPACE, term.ASCII_BACKSPACE}, clientInput.ConnectionId)
+			connections.SendTo([]byte{term.ASCII_BACKSPACE, term.ASCII_SPACE, term.ASCII_BACKSPACE}, clientInput.ConnectionId)
 			clientInput.Buffer = clientInput.Buffer[:len(clientInput.Buffer)-1]
 		}
 		clientInput.DataIn = clientInput.DataIn[:len(clientInput.DataIn)-1]

@@ -3,7 +3,7 @@ package inputhandlers
 import (
 	"log/slog"
 
-	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/connections"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/term"
@@ -16,13 +16,13 @@ type LoginState struct {
 	UserObject       *users.UserRecord
 }
 
-func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *connection.ConnectionTracker, sharedState map[string]any) (nextHandler bool) {
+func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
 
 	usernamePrompt, _ := templates.Process("login/username.prompt", nil)
 	passwordPrompt, _ := templates.Process("login/password.prompt", nil)
 	passwordMask, _ := templates.Process("login/password.mask", nil)
 
-	if !connectionPool.IsWebsocket(clientInput.ConnectionId) {
+	if !connections.IsWebsocket(clientInput.ConnectionId) {
 		usernamePrompt = templates.AnsiParse(usernamePrompt)
 		passwordPrompt = templates.AnsiParse(passwordPrompt)
 		passwordMask = templates.AnsiParse(passwordMask)
@@ -45,22 +45,22 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 		state.SentWelcome = true
 		splashTxt, _ := templates.Process("login/connect-splash", nil)
 
-		if !connectionPool.IsWebsocket(clientInput.ConnectionId) {
+		if !connections.IsWebsocket(clientInput.ConnectionId) {
 			splashTxt = templates.AnsiParse(splashTxt)
 		}
 
-		connectionPool.SendTo([]byte(splashTxt), clientInput.ConnectionId)
-		connectionPool.SendTo([]byte(usernamePrompt), clientInput.ConnectionId)
+		connections.SendTo([]byte(splashTxt), clientInput.ConnectionId)
+		connections.SendTo([]byte(usernamePrompt), clientInput.ConnectionId)
 	}
 
 	if len(state.UserObject.Username) > 0 && len(state.UserObject.Password) < 1 {
 		// passwords we only sent back a * for each character
 		for i := 0; i < len(clientInput.DataIn); i++ {
-			connectionPool.SendTo([]byte(passwordMask), clientInput.ConnectionId)
+			connections.SendTo([]byte(passwordMask), clientInput.ConnectionId)
 		}
 	} else {
 		// Everything else gets echoed back normally.
-		connectionPool.SendTo(clientInput.DataIn, clientInput.ConnectionId)
+		connections.SendTo(clientInput.DataIn, clientInput.ConnectionId)
 	}
 	// We only care about processing input after they hit enter.
 	if !clientInput.EnterPressed {
@@ -77,11 +77,11 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 	if len(state.UserObject.Username) > 0 && len(state.UserObject.Password) > 0 && state.UserObject.UserId == 0 {
 		if len(clientInput.Buffer) < 1 {
 			clientInput.DataIn = []byte("no")
-			connectionPool.SendTo(clientInput.DataIn, clientInput.ConnectionId)
+			connections.SendTo(clientInput.DataIn, clientInput.ConnectionId)
 		}
 	}
 
-	connectionPool.SendTo(term.CRLF, clientInput.ConnectionId)
+	connections.SendTo(term.CRLF, clientInput.ConnectionId)
 
 	submittedText := make([]byte, len(clientInput.Buffer))
 	copy(submittedText, clientInput.Buffer)
@@ -90,14 +90,14 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 	// If they haven't submitted a username yet, we need to process that.
 	if len(state.UserObject.Username) < 1 {
 		if err := state.UserObject.SetUsername(string(submittedText)); err != nil {
-			connectionPool.SendTo([]byte(err.Error()), clientInput.ConnectionId)    // error message
-			connectionPool.SendTo(term.CRLF, clientInput.ConnectionId)              // Newline
-			connectionPool.SendTo([]byte(usernamePrompt), clientInput.ConnectionId) // prompt
+			connections.SendTo([]byte(err.Error()), clientInput.ConnectionId)    // error message
+			connections.SendTo(term.CRLF, clientInput.ConnectionId)              // Newline
+			connections.SendTo([]byte(usernamePrompt), clientInput.ConnectionId) // prompt
 			return false
 		}
 
 		// Setting username was a success, send the password prompt
-		connectionPool.SendTo([]byte(passwordPrompt), clientInput.ConnectionId)
+		connections.SendTo([]byte(passwordPrompt), clientInput.ConnectionId)
 
 		events.AddToQueue(events.WebClientCommand{
 			ConnectionId: clientInput.ConnectionId,
@@ -110,9 +110,9 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 	if len(state.UserObject.Password) < 1 {
 
 		if err := state.UserObject.SetPassword(string(submittedText)); err != nil {
-			connectionPool.SendTo([]byte(err.Error()), clientInput.ConnectionId)    // error message
-			connectionPool.SendTo(term.CRLF, clientInput.ConnectionId)              // Newline
-			connectionPool.SendTo([]byte(passwordPrompt), clientInput.ConnectionId) // prompt
+			connections.SendTo([]byte(err.Error()), clientInput.ConnectionId)    // error message
+			connections.SendTo(term.CRLF, clientInput.ConnectionId)              // Newline
+			connections.SendTo([]byte(passwordPrompt), clientInput.ConnectionId) // prompt
 			return false
 		}
 
@@ -122,9 +122,9 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 			if err != nil {
 				panic(err)
 			} else if !tmpUser.PasswordMatches(state.UserObject.Password) {
-				connectionPool.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
-				connectionPool.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
-				connectionPool.Remove(clientInput.ConnectionId)
+				connections.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
+				connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
+				connections.Remove(clientInput.ConnectionId)
 			} else {
 
 				events.AddToQueue(events.WebClientCommand{
@@ -140,12 +140,12 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 				}
 
 				if len(msg) > 0 {
-					connectionPool.SendTo([]byte(msg), clientInput.ConnectionId)
-					connectionPool.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
+					connections.SendTo([]byte(msg), clientInput.ConnectionId)
+					connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
 				}
 
 				if err != nil {
-					connectionPool.Remove(clientInput.ConnectionId)
+					connections.Remove(clientInput.ConnectionId)
 					return false
 				}
 
@@ -165,10 +165,10 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 				"default": "n",
 			})
 
-			if !connectionPool.IsWebsocket(clientInput.ConnectionId) {
+			if !connections.IsWebsocket(clientInput.ConnectionId) {
 				newUserPromptPrompt = templates.AnsiParse(newUserPromptPrompt)
 			}
-			connectionPool.SendTo([]byte(newUserPromptPrompt), clientInput.ConnectionId)
+			connections.SendTo([]byte(newUserPromptPrompt), clientInput.ConnectionId)
 		}
 
 		return false
@@ -181,17 +181,17 @@ func LoginInputHandler(clientInput *connection.ClientInput, connectionPool *conn
 
 	}
 	if submittedText[0] != 'y' && submittedText[0] != 'Y' {
-		connectionPool.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
-		connectionPool.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
-		connectionPool.Remove(clientInput.ConnectionId)
+		connections.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
+		connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
+		connections.Remove(clientInput.ConnectionId)
 		return false
 	}
 
 	if err := users.CreateUser(state.UserObject); err != nil {
 		slog.Error("Could not create user", "error", err.Error())
-		connectionPool.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
-		connectionPool.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
-		connectionPool.Remove(clientInput.ConnectionId)
+		connections.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
+		connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
+		connections.Remove(clientInput.ConnectionId)
 		return false
 	}
 

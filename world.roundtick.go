@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/combat"
 	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/connections"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/items"
@@ -327,13 +327,13 @@ func (w *World) LogOff(userId int) {
 
 	tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
 
-	worldManager.GetConnectionPool().SendTo([]byte(tplTxt), connId)
+	connections.SendTo([]byte(tplTxt), connId)
 
 	if err := users.LogOutUserByConnectionId(connId); err != nil {
 		slog.Error("Log Out Error", "connectionId", connId, "error", err)
 	}
 
-	worldManager.GetConnectionPool().Remove(connId)
+	connections.Remove(connId)
 
 }
 
@@ -1559,16 +1559,16 @@ func (w *World) HandleAutoHealing(roundNumber uint64) {
 		// save the new prompt for next time we want to check
 		user.SetTempData(`cmdprompt`, newcmdprompt)
 
-		if w.connectionPool.IsWebsocket(user.ConnectionId()) {
-			w.connectionPool.SendTo([]byte(newcmdprompt), user.ConnectionId())
+		if connections.IsWebsocket(user.ConnectionId()) {
+			connections.SendTo([]byte(newcmdprompt), user.ConnectionId())
 		} else {
-			w.connectionPool.SendTo([]byte(templates.AnsiParse(newcmdprompt)), user.ConnectionId())
+			connections.SendTo([]byte(templates.AnsiParse(newcmdprompt)), user.ConnectionId())
 		}
 
 		//
 		// Send GMCP status update
 		//
-		if connection.GetSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
+		if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
 
 			realXPNow, realXPTNL := user.Character.XPTNLActual()
 
@@ -1579,7 +1579,7 @@ func (w *World) HandleAutoHealing(roundNumber uint64) {
 				user.Character.ActionPoints, user.Character.ActionPointsMax.Value,
 			))
 
-			connection.GetPool().SendTo(
+			connections.SendTo(
 				term.GmcpPayload.BytesWithPayload(bytesOut),
 				user.ConnectionId(),
 			)

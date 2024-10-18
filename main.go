@@ -26,7 +26,7 @@ import (
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/colorpatterns"
 	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/connections"
 	"github.com/volte6/mud/events"
 	"github.com/volte6/mud/gametime"
 	"github.com/volte6/mud/inputhandlers"
@@ -192,7 +192,7 @@ func main() {
 	serverAlive.Store(false) // immediately stop processing incoming connections
 
 	// some last minute stats reporting
-	totalConnections, totalDisconnections := worldManager.GetConnectionPool().Stats()
+	totalConnections, totalDisconnections := connections.Stats()
 	slog.Error(
 		"shutting down server",
 		"LifetimeConnections", totalConnections,
@@ -201,7 +201,7 @@ func main() {
 	)
 
 	// cleanup all connections
-	worldManager.GetConnectionPool().Cleanup()
+	connections.Cleanup()
 
 	for _, s := range allServerListeners {
 		s.Close()
@@ -229,7 +229,7 @@ func main() {
 
 }
 
-func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.WaitGroup) {
+func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync.WaitGroup) {
 	defer func() {
 		wg.Done()
 	}()
@@ -247,12 +247,12 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 	connDetails.AddInputHandler("LoginInputHandler", inputhandlers.LoginInputHandler)
 
 	// Turn off "line at a time", send chars as typed
-	worldManager.GetConnectionPool().SendTo(
+	connections.SendTo(
 		term.TelnetWILL(term.TELNET_OPT_SUP_GO_AHD),
 		connDetails.ConnectionId(),
 	)
 	// Tell the client we expect chars as they are typed
-	worldManager.GetConnectionPool().SendTo(
+	connections.SendTo(
 		term.TelnetWONT(term.TELNET_OPT_LINE_MODE),
 		connDetails.ConnectionId(),
 	)
@@ -260,24 +260,24 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 	// Tell the client we intend to echo back what they type
 	// So they shouldn't locally echo it
 
-	worldManager.GetConnectionPool().SendTo(
+	connections.SendTo(
 		term.TelnetWILL(term.TELNET_OPT_ECHO),
 		connDetails.ConnectionId(),
 	)
 	// Request that the client report window size changes as they happen
-	worldManager.GetConnectionPool().SendTo(
+	connections.SendTo(
 		term.TelnetDO(term.TELNET_OPT_NAWS),
 		connDetails.ConnectionId(),
 	)
 
 	// Send request to change charset
-	worldManager.GetConnectionPool().SendTo(
+	connections.SendTo(
 		term.TelnetRequestChangeCharset.BytesWithPayload(nil),
 		connDetails.ConnectionId(),
 	)
 
 	// Send request to enable GMCP
-	worldManager.GetConnectionPool().SendTo(
+	connections.SendTo(
 		term.GmcpEnable.BytesWithPayload(nil),
 		connDetails.ConnectionId(),
 	)
@@ -289,29 +289,29 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 		term.AnsiRequestResolution.String() // Request resolution
 		//""
 
-	worldManager.GetConnectionPool().SendTo(
+	connections.SendTo(
 		[]byte(clientSetupCommands),
 		connDetails.ConnectionId(),
 	)
 
 	// an input buffer for reading data sent over the network
-	inputBuffer := make([]byte, connection.ReadBufferSize)
+	inputBuffer := make([]byte, connections.ReadBufferSize)
 
 	// Describes whatever the client sent us
-	clientInput := &connection.ClientInput{
+	clientInput := &connections.ClientInput{
 		ConnectionId: connDetails.ConnectionId(),
 		DataIn:       []byte{},
-		Buffer:       make([]byte, 0, connection.ReadBufferSize), // DataIn is appended to this buffer after processing
+		Buffer:       make([]byte, 0, connections.ReadBufferSize), // DataIn is appended to this buffer after processing
 		EnterPressed: false,
 		Clipboard:    []byte{},
-		History:      connection.InputHistory{},
+		History:      connections.InputHistory{},
 	}
 
 	var sharedState map[string]any = make(map[string]any)
 
 	// Invoke the login handler for the first time
 	// The default behavior is to just send a welcome screen first
-	inputhandlers.LoginInputHandler(clientInput, worldManager.GetConnectionPool(), sharedState)
+	inputhandlers.LoginInputHandler(clientInput, sharedState)
 
 	var userObject *users.UserRecord
 	var suggestions Suggestions
@@ -332,7 +332,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 				if c.ZombieSeconds > 0 {
 
-					connDetails.SetState(connection.Zombie)
+					connDetails.SetState(connections.Zombie)
 					users.SetZombieUser(userObject.UserId)
 
 				} else {
@@ -347,7 +347,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 			}
 
 			if err == io.EOF {
-				worldManager.GetConnectionPool().Remove(connDetails.ConnectionId())
+				connections.Remove(connDetails.ConnectionId())
 			} else {
 				slog.Warn("Conn Read Error", "error", err)
 			}
@@ -362,7 +362,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 		clientInput.DataIn = inputBuffer[:n]
 
 		// Input handler processes any special commands, transforms input, sets flags from input, etc
-		okContinue, lastHandler, err := connDetails.HandleInput(clientInput, worldManager.GetConnectionPool(), sharedState)
+		okContinue, lastHandler, err := connDetails.HandleInput(clientInput, sharedState)
 
 		// Was there an error? If so, we should probably just stop processing input
 		if err != nil {
@@ -425,10 +425,10 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 				}
 
 				if redrawPrompt {
-					if worldManager.connectionPool.IsWebsocket(clientInput.ConnectionId) {
-						worldManager.connectionPool.SendTo([]byte(userObject.GetCommandPrompt(true)), clientInput.ConnectionId)
+					if connections.IsWebsocket(clientInput.ConnectionId) {
+						connections.SendTo([]byte(userObject.GetCommandPrompt(true)), clientInput.ConnectionId)
 					} else {
-						worldManager.connectionPool.SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
+						connections.SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
 					}
 				}
 
@@ -460,7 +460,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 			// This captures signals and replaces user input so should happen after AnsiHandler to ensure it happens before other processes.
 			connDetails.AddInputHandler("SignalHandler", inputhandlers.SignalHandler, "AnsiHandler")
 
-			connDetails.SetState(connection.LoggedIn)
+			connDetails.SetState(connections.LoggedIn)
 
 			worldManager.EnterWorld(userObject.Character.RoomId, userObject.Character.Zone, userObject.UserId)
 		}
@@ -470,7 +470,7 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 
 			if time.Since(lastInput) < time.Duration(c.TurnMs)*time.Millisecond {
 				/*
-					worldManager.GetConnectionPool().SendTo(
+					connections.SendTo(
 						[]byte("Slow down! You're typing too fast! "+time.Since(lastInput).String()+"\n"),
 						connDetails.ConnectionId(),
 					)
@@ -494,10 +494,10 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 					suggestions.Clear()
 					userObject.SetUnsentText(string(clientInput.Buffer), ``)
 
-					if worldManager.connectionPool.IsWebsocket(clientInput.ConnectionId) {
-						worldManager.connectionPool.SendTo([]byte(userObject.GetCommandPrompt(true)), clientInput.ConnectionId)
+					if connections.IsWebsocket(clientInput.ConnectionId) {
+						connections.SendTo([]byte(userObject.GetCommandPrompt(true)), clientInput.ConnectionId)
 					} else {
-						worldManager.connectionPool.SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
+						connections.SendTo([]byte(templates.AnsiParse(userObject.GetCommandPrompt(true))), clientInput.ConnectionId)
 					}
 
 				}
@@ -530,24 +530,24 @@ func handleTelnetConnection(connDetails *connection.ConnectionDetails, wg *sync.
 func HandleWebSocketConnection(conn *websocket.Conn) {
 
 	var userObject *users.UserRecord
-	connDetails := worldManager.GetConnectionPool().Add(nil, conn)
+	connDetails := connections.Add(nil, conn)
 	connDetails.AddInputHandler("LoginInputHandler", inputhandlers.LoginInputHandler)
 
 	// Describes whatever the client sent us
-	clientInput := &connection.ClientInput{
+	clientInput := &connections.ClientInput{
 		ConnectionId: connDetails.ConnectionId(),
 		DataIn:       []byte{},
-		Buffer:       make([]byte, 0, connection.ReadBufferSize), // DataIn is appended to this buffer after processing
+		Buffer:       make([]byte, 0, connections.ReadBufferSize), // DataIn is appended to this buffer after processing
 		EnterPressed: false,
 		Clipboard:    []byte{},
-		History:      connection.InputHistory{},
+		History:      connections.InputHistory{},
 	}
 
 	var sharedState map[string]any = make(map[string]any)
 
 	// Invoke the login handler for the first time
 	// The default behavior is to just send a welcome screen first
-	inputhandlers.LoginInputHandler(clientInput, worldManager.GetConnectionPool(), sharedState)
+	inputhandlers.LoginInputHandler(clientInput, sharedState)
 
 	for {
 		_, message, err := conn.ReadMessage()
@@ -561,7 +561,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 				if c.ZombieSeconds > 0 {
 
-					connDetails.SetState(connection.Zombie)
+					connDetails.SetState(connections.Zombie)
 					users.SetZombieUser(userObject.UserId)
 
 				} else {
@@ -584,7 +584,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		clientInput.EnterPressed = true
 
 		// Input handler processes any special commands, transforms input, sets flags from input, etc
-		okContinue, lastHandler, err := connDetails.HandleInput(clientInput, worldManager.GetConnectionPool(), sharedState)
+		okContinue, lastHandler, err := connDetails.HandleInput(clientInput, sharedState)
 		if !okContinue {
 			continue
 		}
@@ -612,7 +612,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 			// This captures signals and replaces user input so should happen after AnsiHandler to ensure it happens before other processes.
 			connDetails.AddInputHandler("SignalHandler", inputhandlers.SignalHandler, "AnsiHandler")
 
-			connDetails.SetState(connection.LoggedIn)
+			connDetails.SetState(connections.LoggedIn)
 
 			worldManager.EnterWorld(userObject.Character.RoomId, userObject.Character.Zone, userObject.UserId)
 
@@ -664,8 +664,8 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 			}
 
 			if maxConnections > 0 {
-				if worldManager.GetConnectionPool().ActiveConnectionCount() >= maxConnections {
-					conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", worldManager.GetConnectionPool().ActiveConnectionCount())))
+				if connections.ActiveConnectionCount() >= maxConnections {
+					conn.Write([]byte(fmt.Sprintf("\n\n\n!!! Server is full (%d connections). Try again later. !!!\n\n\n", connections.ActiveConnectionCount())))
 					conn.Close()
 					continue
 				}
@@ -674,7 +674,7 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 			wg.Add(1)
 			// hand off the connection to a handler goroutine so that we can continue handling new connections
 			go handleTelnetConnection(
-				worldManager.GetConnectionPool().Add(conn, nil),
+				connections.Add(conn, nil),
 				wg,
 			)
 

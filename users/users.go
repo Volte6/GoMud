@@ -13,7 +13,7 @@ import (
 
 	"github.com/volte6/mud/characters"
 	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/connections"
 	"github.com/volte6/mud/mobs"
 	"github.com/volte6/mud/util"
 
@@ -32,11 +32,11 @@ var (
 
 type ActiveUsers struct {
 	sync.RWMutex
-	Users             map[int]*UserRecord                // userId to UserRecord
-	Usernames         map[string]int                     // username to userId
-	Connections       map[connection.ConnectionId]int    // connectionId to userId
-	UserConnections   map[int]connection.ConnectionId    // userId to connectionId
-	ZombieConnections map[connection.ConnectionId]uint64 // connectionId to turn they became a zombie
+	Users             map[int]*UserRecord                 // userId to UserRecord
+	Usernames         map[string]int                      // username to userId
+	Connections       map[connections.ConnectionId]int    // connectionId to userId
+	UserConnections   map[int]connections.ConnectionId    // userId to connectionId
+	ZombieConnections map[connections.ConnectionId]uint64 // connectionId to turn they became a zombie
 }
 
 type Online struct {
@@ -53,9 +53,9 @@ func NewUserManager() *ActiveUsers {
 	return &ActiveUsers{
 		Users:             make(map[int]*UserRecord),
 		Usernames:         make(map[string]int),
-		Connections:       make(map[connection.ConnectionId]int),
-		UserConnections:   make(map[int]connection.ConnectionId),
-		ZombieConnections: make(map[connection.ConnectionId]uint64),
+		Connections:       make(map[connections.ConnectionId]int),
+		UserConnections:   make(map[int]connections.ConnectionId),
+		ZombieConnections: make(map[connections.ConnectionId]uint64),
 	}
 }
 
@@ -70,7 +70,7 @@ func RemoveZombieUser(userId int) {
 	delete(userManager.ZombieConnections, connId)
 }
 
-func RemoveZombieConnection(connectionId connection.ConnectionId) {
+func RemoveZombieConnection(connectionId connections.ConnectionId) {
 	userManager.Lock()
 	defer userManager.Unlock()
 
@@ -92,11 +92,11 @@ func GetExpiredZombies(expirationTurn uint64) []int {
 	return expiredUsers
 }
 
-func GetConnectionIds(userIds []int) []connection.ConnectionId {
+func GetConnectionIds(userIds []int) []connections.ConnectionId {
 	userManager.RLock()
 	defer userManager.RUnlock()
 
-	connectionIds := make([]connection.ConnectionId, 0, len(userIds))
+	connectionIds := make([]connections.ConnectionId, 0, len(userIds))
 	for _, userId := range userIds {
 		if user, ok := userManager.Users[userId]; ok {
 			connectionIds = append(connectionIds, user.connectionId)
@@ -184,7 +184,7 @@ func GetByUserId(userId int) *UserRecord {
 	return nil
 }
 
-func GetByConnectionId(connectionId connection.ConnectionId) *UserRecord {
+func GetByConnectionId(connectionId connections.ConnectionId) *UserRecord {
 	userManager.RLock()
 	defer userManager.RUnlock()
 
@@ -196,7 +196,7 @@ func GetByConnectionId(connectionId connection.ConnectionId) *UserRecord {
 }
 
 // First time creating a user.
-func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (*UserRecord, string, error) {
+func LoginUser(u *UserRecord, connectionId connections.ConnectionId) (*UserRecord, string, error) {
 
 	slog.Info("Logging in user", "username", u.Username, "connectionId", connectionId)
 
@@ -265,7 +265,7 @@ func LoginUser(u *UserRecord, connectionId connection.ConnectionId) (*UserRecord
 	return u, "", nil
 }
 
-func SetZombieConnection(connId connection.ConnectionId) {
+func SetZombieConnection(connId connections.ConnectionId) {
 
 	userManager.Lock()
 	defer userManager.Unlock()
@@ -317,7 +317,7 @@ func SaveAllUsers() {
 
 }
 
-func LogOutUserByConnectionId(connectionId connection.ConnectionId) error {
+func LogOutUserByConnectionId(connectionId connections.ConnectionId) error {
 
 	u := GetByConnectionId(connectionId)
 

@@ -1,4 +1,4 @@
-package connection
+package connections
 
 import (
 	"errors"
@@ -107,7 +107,7 @@ func (ci *ClientInput) Reset() {
 	ci.EnterPressed = false
 }
 
-type InputHandler func(ci *ClientInput, ct *ConnectionTracker, handlerState map[string]any) (doNextHandler bool)
+type InputHandler func(ci *ClientInput, handlerState map[string]any) (doNextHandler bool)
 
 type ConnectionDetails struct {
 	connectionId      ConnectionId
@@ -120,7 +120,7 @@ type ConnectionDetails struct {
 	inputHandlerNames []string
 	inputHandlers     []InputHandler
 	inputDisabled     bool
-	ClientSettings    ClientSettings
+	clientSettings    ClientSettings
 }
 
 func (cd *ConnectionDetails) IsWebsocket() bool {
@@ -128,7 +128,7 @@ func (cd *ConnectionDetails) IsWebsocket() bool {
 }
 
 // If HandleInput receives an error, we shouldn't pass input to the game logic
-func (cd *ConnectionDetails) HandleInput(ci *ClientInput, ct *ConnectionTracker, handlerState map[string]any) (doNextHandler bool, lastHandler string, err error) {
+func (cd *ConnectionDetails) HandleInput(ci *ClientInput, handlerState map[string]any) (doNextHandler bool, lastHandler string, err error) {
 	cd.handlerMutex.Lock()
 	defer cd.handlerMutex.Unlock()
 
@@ -141,7 +141,7 @@ func (cd *ConnectionDetails) HandleInput(ci *ClientInput, ct *ConnectionTracker,
 
 	for i, inputHandler := range cd.inputHandlers {
 		lastHandler = cd.inputHandlerNames[i]
-		if runNextHandler := inputHandler(ci, ct, handlerState); !runNextHandler {
+		if runNextHandler := inputHandler(ci, handlerState); !runNextHandler {
 			// If it's the last one in the chain, ignore any aborts
 			// if i == handlerCt-1 {
 			// 	return false, lastHandler, nil
@@ -262,7 +262,7 @@ func NewConnectionDetails(connId ConnectionId, c net.Conn, wsC *websocket.Conn) 
 		wsConn:        wsC,
 		wsLock:        sync.Mutex{},
 		// Track client settings
-		ClientSettings: ClientSettings{
+		clientSettings: ClientSettings{
 			Display: DisplaySettings{ScreenWidth: 80, ScreenHeight: 40}, // Default to 80x40
 		},
 	}

@@ -6,12 +6,12 @@ import (
 
 	"log/slog"
 
-	"github.com/volte6/mud/connection"
+	"github.com/volte6/mud/connections"
 	"github.com/volte6/mud/templates"
 	"github.com/volte6/mud/users"
 )
 
-func SystemCommandInputHandler(clientInput *connection.ClientInput, connectionPool *connection.ConnectionTracker, sharedState map[string]any) (nextHandler bool) {
+func SystemCommandInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
 
 	// if they didn't hit enter, just keep buffering, go next.
 	if !clientInput.EnterPressed {
@@ -32,7 +32,7 @@ func SystemCommandInputHandler(clientInput *connection.ClientInput, connectionPo
 	}
 
 	// If successful, we're done.
-	if trySystemCommand(message, connectionPool, clientInput.ConnectionId) {
+	if trySystemCommand(message, clientInput.ConnectionId) {
 		// zero out the current buffer
 		clientInput.Buffer = clientInput.Buffer[:0]
 		return false
@@ -89,7 +89,7 @@ func systemCommandParts(cmd string) (systemCmd string, cmdArg string) {
 	return systemCmd, cmdArg
 }
 
-func trySystemCommand(cmd string, connectionPool *connection.ConnectionTracker, connectionId connection.ConnectionId) bool {
+func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 
 	if len(cmd) < 1 {
 		return false
@@ -113,13 +113,13 @@ func trySystemCommand(cmd string, connectionPool *connection.ConnectionTracker, 
 		// Not building complex output, so just preparse the ansi in the template and cache that
 		tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
 
-		if connectionPool.IsWebsocket(connectionId) {
-			connectionPool.SendTo([]byte(tplTxt), connectionId)
+		if connections.IsWebsocket(connectionId) {
+			connections.SendTo([]byte(tplTxt), connectionId)
 		} else {
-			connectionPool.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
+			connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
 		}
 
-		connectionPool.Kick(connectionId)
+		connections.Kick(connectionId)
 		return true
 	}
 
@@ -136,15 +136,15 @@ func trySystemCommand(cmd string, connectionPool *connection.ConnectionTracker, 
 		onlineTableData := templates.GetTable("Online Users", headers, rows)
 		tplTxt, _ := templates.Process("tables/generic", onlineTableData)
 
-		if connectionPool.IsWebsocket(connectionId) {
-			connectionPool.SendTo([]byte(tplTxt), connectionId)
+		if connections.IsWebsocket(connectionId) {
+			connections.SendTo([]byte(tplTxt), connectionId)
 		} else {
-			connectionPool.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
+			connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
 		}
 
 		// Not building complex output, so just preparse the ansi in the template and cache that
 		//tplTxt, _ := templates.Process("systemcommands/who", onlineUsers)
-		//connectionPool.SendTo([]byte(tplTxt), connectionId)
+		//connections.SendTo([]byte(tplTxt), connectionId)
 		return true
 	}
 
@@ -152,10 +152,10 @@ func trySystemCommand(cmd string, connectionPool *connection.ConnectionTracker, 
 
 		tplTxt, _ := templates.Process("systemcommands/help", systemCommandList)
 
-		if connectionPool.IsWebsocket(connectionId) {
-			connectionPool.SendTo([]byte(tplTxt), connectionId)
+		if connections.IsWebsocket(connectionId) {
+			connections.SendTo([]byte(tplTxt), connectionId)
 		} else {
-			connectionPool.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
+			connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
 		}
 
 		return true
