@@ -1064,7 +1064,6 @@ func (w *World) TurnTick() {
 
 		expZombies := users.GetExpiredZombies(turnCt - expTurns)
 		if len(expZombies) > 0 {
-			slog.Debug("TURNTICK", "len(expZombies)", len(expZombies))
 			connIds := users.GetConnectionIds(expZombies)
 
 			for _, userId := range expZombies {
