@@ -3,11 +3,11 @@ package mobcommands
 import (
 	"fmt"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/util"
 )
 
 func Equip(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {

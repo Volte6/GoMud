@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/volte6/mud/configs"
+	"github.com/volte6/gomud/configs"
 )
 
 var (

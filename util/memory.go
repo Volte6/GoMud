@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/volte6/mud/term"
+	"github.com/volte6/gomud/term"
 )
 
 type MemReport func() map[string]MemoryResult

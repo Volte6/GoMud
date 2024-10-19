@@ -2,7 +2,6 @@ package prompt
 
 import (
 	"strings"
-	"sync"
 )
 
 /*
@@ -31,7 +30,6 @@ if cmdPrompt := prompt.Get(userId); cmdPrompt != nil {
 */
 
 type Question struct {
-	lock            sync.RWMutex
 	Question        string   // What's the prompt?
 	Options         []string // What options (if any) are available? None = freeform
 	DefaultResponse string   // What is the default response?
@@ -41,7 +39,6 @@ type Question struct {
 }
 
 type Prompt struct {
-	lock      sync.RWMutex
 	Command   string      // Where does it call when complete?
 	Rest      string      // What is the 'rest' of the command
 	Questions []*Question // All questions so far
@@ -61,9 +58,6 @@ func (p *Prompt) Ask(question string, responseOptions []string, defaultOption ..
 	if question == `` {
 		question = `?`
 	}
-
-	p.lock.RLock()
-	defer p.lock.RUnlock()
 
 	qCt := len(p.Questions)
 	for i := 0; i < qCt; i++ {
@@ -91,9 +85,6 @@ func (p *Prompt) Ask(question string, responseOptions []string, defaultOption ..
 // Returns the next pending question.
 func (p *Prompt) GetNextQuestion() *Question {
 
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-
 	qCt := len(p.Questions)
 	for i := 0; i < qCt; i++ {
 		if !p.Questions[i].Done {
@@ -105,18 +96,10 @@ func (p *Prompt) GetNextQuestion() *Question {
 }
 
 func (q *Question) Reset() {
-
-	q.lock.Lock()
-	defer q.lock.Unlock()
-
 	q.Done = false
 }
 
 func (q *Question) Answer(answer string) {
-
-	q.lock.Lock()
-	defer q.lock.Unlock()
-
 	// If an empty string, failover to default (if any)
 	// Otherwise, just abort and wait for a valid response
 	answer = strings.TrimSpace(answer)
@@ -174,17 +157,11 @@ func (q *Question) Answer(answer string) {
 
 func (q *Question) RejectResponse() {
 
-	q.lock.Lock()
-	defer q.lock.Unlock()
-
 	q.Response = `` // Clear the response
 	q.Done = false  // Mark as not done
 }
 
 func (q *Question) String() string {
-
-	q.lock.Lock()
-	defer q.lock.Unlock()
 
 	ret := strings.Builder{}
 	ret.WriteString(`<ansi fg="black-bold">.:</ansi> `) // Prompt prefix

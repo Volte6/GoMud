@@ -1,6 +1,6 @@
 package items
 
-import "github.com/volte6/mud/util"
+import "github.com/volte6/gomud/util"
 
 func GetMemoryUsage() map[string]util.MemoryResult {
 	ret := map[string]util.MemoryResult{}

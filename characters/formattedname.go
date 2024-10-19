@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/volte6/mud/colorpatterns"
+	"github.com/volte6/gomud/colorpatterns"
 )
 
 var (

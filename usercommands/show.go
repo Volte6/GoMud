@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/scripting"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/scripting"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
 )
 
 func Show(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {

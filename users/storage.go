@@ -1,6 +1,6 @@
 package users
 
-import "github.com/volte6/mud/items"
+import "github.com/volte6/gomud/items"
 
 type Storage struct {
 	Items []items.Item

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/skills"
+	"github.com/volte6/gomud/users"
 )
 
 var (

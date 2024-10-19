@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/util"
 	"gopkg.in/yaml.v2"
 )
 

@@ -1,8 +1,8 @@
 package usercommands
 
 import (
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/users"
 )
 
 // Default is a special command that tries to contextually pick a default action for a room.

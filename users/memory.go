@@ -1,11 +1,8 @@
 package users
 
-import "github.com/volte6/mud/util"
+import "github.com/volte6/gomud/util"
 
 func GetMemoryUsage() map[string]util.MemoryResult {
-
-	userManager.RLock()
-	defer userManager.RUnlock()
 
 	ret := map[string]util.MemoryResult{}
 

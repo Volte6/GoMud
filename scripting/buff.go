@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
-	"github.com/volte6/mud/buffs"
+	"github.com/volte6/gomud/buffs"
 )
 
 var (

@@ -1,11 +1,11 @@
 package usercommands
 
 import (
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/events"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/events"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/skills"
+	"github.com/volte6/gomud/users"
 )
 
 /*

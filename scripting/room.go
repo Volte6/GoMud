@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/users"
 )
 
 var (

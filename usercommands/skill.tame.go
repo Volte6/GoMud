@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/scripting"
-	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/spells"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/scripting"
+	"github.com/volte6/gomud/skills"
+	"github.com/volte6/gomud/spells"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/users"
 )
 
 /*

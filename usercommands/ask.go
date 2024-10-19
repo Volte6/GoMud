@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/keywords"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/scripting"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/keywords"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/scripting"
+	"github.com/volte6/gomud/util"
 
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/users"
 )
 
 func Ask(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {

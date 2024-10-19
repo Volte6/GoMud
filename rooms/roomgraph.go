@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/users"
 )
 
 type roomNode struct {

@@ -3,9 +3,9 @@ package usercommands
 import (
 	"fmt"
 
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/users"
 )
 
 func Gearup(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {

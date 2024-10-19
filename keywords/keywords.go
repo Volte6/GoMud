@@ -4,8 +4,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/fileloader"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/fileloader"
 )
 
 type HelpTopic struct {

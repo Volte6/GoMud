@@ -3,8 +3,8 @@ package mobcommands
 import (
 	"fmt"
 
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
 )
 
 func Break(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {

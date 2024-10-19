@@ -1,6 +1,6 @@
 package rooms
 
-import "github.com/volte6/mud/util"
+import "github.com/volte6/gomud/util"
 
 type ZoneConfig struct {
 	RoomId       int `yaml:"roomid,omitempty"`

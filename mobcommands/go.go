@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/util"
 )
 
 func Go(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
@@ -97,7 +97,7 @@ func Go(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 				// For now, mobs won't go through doors if it unlocks them.
 				return true, nil
-				//exitInfo.Unlock()
+
 				//destRoom.Exits[enterFromExit] = exitInfo
 			}
 

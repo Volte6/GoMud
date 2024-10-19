@@ -6,16 +6,15 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"log/slog"
 
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/connections"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/connections"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/util"
 
 	//
 	"gopkg.in/yaml.v2"
@@ -27,11 +26,10 @@ const minimumPasswordLength = 4
 const maximumPasswordLength = 16
 
 var (
-	userManager *ActiveUsers = NewUserManager()
+	userManager *ActiveUsers = newUserManager()
 )
 
 type ActiveUsers struct {
-	sync.RWMutex
 	Users             map[int]*UserRecord                 // userId to UserRecord
 	Usernames         map[string]int                      // username to userId
 	Connections       map[connections.ConnectionId]int    // connectionId to userId
@@ -49,7 +47,7 @@ type Online struct {
 	RoomId         int
 }
 
-func NewUserManager() *ActiveUsers {
+func newUserManager() *ActiveUsers {
 	return &ActiveUsers{
 		Users:             make(map[int]*UserRecord),
 		Usernames:         make(map[string]int),
@@ -60,8 +58,6 @@ func NewUserManager() *ActiveUsers {
 }
 
 func RemoveZombieUser(userId int) {
-	userManager.Lock()
-	defer userManager.Unlock()
 
 	if u := userManager.Users[userId]; u != nil {
 		u.Character.SetAdjective(`zombie`, false)
@@ -71,15 +67,11 @@ func RemoveZombieUser(userId int) {
 }
 
 func RemoveZombieConnection(connectionId connections.ConnectionId) {
-	userManager.Lock()
-	defer userManager.Unlock()
 
 	delete(userManager.ZombieConnections, connectionId)
 }
 
 func GetExpiredZombies(expirationTurn uint64) []int {
-	userManager.Lock()
-	defer userManager.Unlock()
 
 	expiredUsers := make([]int, 0)
 
@@ -93,8 +85,6 @@ func GetExpiredZombies(expirationTurn uint64) []int {
 }
 
 func GetConnectionIds(userIds []int) []connections.ConnectionId {
-	userManager.RLock()
-	defer userManager.RUnlock()
 
 	connectionIds := make([]connections.ConnectionId, 0, len(userIds))
 	for _, userId := range userIds {
@@ -109,9 +99,6 @@ func GetConnectionIds(userIds []int) []connections.ConnectionId {
 func GetAllActiveUsers() []*UserRecord {
 	ret := []*UserRecord{}
 
-	userManager.RLock()
-	defer userManager.RUnlock()
-
 	for _, userPtr := range userManager.Users {
 		if !userPtr.isZombie {
 			ret = append(ret, userPtr)
@@ -122,8 +109,6 @@ func GetAllActiveUsers() []*UserRecord {
 }
 
 func GetOnlineUserIds() []int {
-	userManager.RLock()
-	defer userManager.RUnlock()
 
 	onlineList := make([]int, 0, len(userManager.Users))
 	for _, user := range userManager.Users {
@@ -133,9 +118,6 @@ func GetOnlineUserIds() []int {
 }
 
 func GetOnlineList() []Online {
-
-	userManager.RLock()
-	defer userManager.RUnlock()
 
 	onlineList := make([]Online, 0, len(userManager.Users))
 	for _, user := range userManager.Users {
@@ -154,8 +136,6 @@ func GetOnlineList() []Online {
 }
 
 func GetByCharacterName(name string) *UserRecord {
-	userManager.RLock()
-	defer userManager.RUnlock()
 
 	var closeMatch *UserRecord = nil
 
@@ -174,8 +154,6 @@ func GetByCharacterName(name string) *UserRecord {
 }
 
 func GetByUserId(userId int) *UserRecord {
-	userManager.RLock()
-	defer userManager.RUnlock()
 
 	if user, ok := userManager.Users[userId]; ok {
 		return user
@@ -185,8 +163,6 @@ func GetByUserId(userId int) *UserRecord {
 }
 
 func GetByConnectionId(connectionId connections.ConnectionId) *UserRecord {
-	userManager.RLock()
-	defer userManager.RUnlock()
 
 	if userId, ok := userManager.Connections[connectionId]; ok {
 		return userManager.Users[userId]
@@ -198,10 +174,7 @@ func GetByConnectionId(connectionId connections.ConnectionId) *UserRecord {
 // First time creating a user.
 func LoginUser(u *UserRecord, connectionId connections.ConnectionId) (*UserRecord, string, error) {
 
-	slog.Info("Logging in user", "username", u.Username, "connectionId", connectionId)
-
-	userManager.Lock()
-	defer userManager.Unlock()
+	slog.Info("LoginUser()", "username", u.Username, "connectionId", connectionId)
 
 	u.Character.SetAdjective(`zombie`, false)
 
@@ -210,6 +183,8 @@ func LoginUser(u *UserRecord, connectionId connections.ConnectionId) (*UserRecor
 		if otherConnId, ok := userManager.UserConnections[userId]; ok {
 
 			if _, ok := userManager.ZombieConnections[otherConnId]; ok {
+
+				slog.Info("LoginUser()", "Zombie", true)
 
 				if zombieUser, ok := userManager.Users[u.UserId]; ok {
 					u = zombieUser
@@ -246,6 +221,8 @@ func LoginUser(u *UserRecord, connectionId connections.ConnectionId) (*UserRecor
 		u.Permission = PermissionMod
 	}
 
+	slog.Info("LoginUser()", "Zombie", false)
+
 	// Set their input round to current to track idle time fresh
 	u.SetLastInputRound(util.GetRoundCount())
 
@@ -267,9 +244,6 @@ func LoginUser(u *UserRecord, connectionId connections.ConnectionId) (*UserRecor
 
 func SetZombieConnection(connId connections.ConnectionId) {
 
-	userManager.Lock()
-	defer userManager.Unlock()
-
 	if _, ok := userManager.ZombieConnections[connId]; ok {
 		return
 	}
@@ -278,9 +252,6 @@ func SetZombieConnection(connId connections.ConnectionId) {
 }
 
 func SetZombieUser(userId int) {
-
-	userManager.Lock()
-	defer userManager.Unlock()
 
 	if u, ok := userManager.Users[userId]; ok {
 
@@ -306,8 +277,6 @@ func SetZombieUser(userId int) {
 }
 
 func SaveAllUsers() {
-	userManager.Lock()
-	defer userManager.Unlock()
 
 	for _, u := range userManager.Users {
 		if err := SaveUser(*u); err != nil {
@@ -320,9 +289,6 @@ func SaveAllUsers() {
 func LogOutUserByConnectionId(connectionId connections.ConnectionId) error {
 
 	u := GetByConnectionId(connectionId)
-
-	userManager.Lock()
-	defer userManager.Unlock()
 
 	if _, ok := userManager.Connections[connectionId]; ok {
 
@@ -369,9 +335,6 @@ func CreateUser(u *UserRecord) error {
 	//if err := SaveUser(*u); err != nil {
 	//return err
 	//}
-
-	userManager.Lock()
-	defer userManager.Unlock()
 
 	userManager.Users[u.UserId] = u
 	userManager.Usernames[u.Username] = u.UserId
@@ -428,9 +391,6 @@ func LoadUser(username string) (*UserRecord, error) {
 // Loads all user recvords and runs against a function.
 // Stops searching if false is returned.
 func SearchOfflineUsers(searchFunc func(u *UserRecord) bool) {
-
-	userManager.Lock()
-	defer userManager.Unlock()
 
 	basePath := util.FilePath(string(configs.GetConfig().FolderUserData))
 

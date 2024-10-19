@@ -6,28 +6,26 @@ import (
 	"math"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/events"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/events"
 
-	"github.com/volte6/mud/fileloader"
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/races"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/fileloader"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/races"
+	"github.com/volte6/gomud/util"
 	"gopkg.in/yaml.v2"
 )
 
 var (
 	instanceCounter int = 0
-	mobMutex        sync.RWMutex
-	mobs            = map[int]*Mob{}
-	allMobNames     = []string{}
-	mobInstances    = map[int]*Mob{}
-	mobsHatePlayers = map[string]map[int]int{}
-	mobNameCache    = map[MobId]string{}
+	mobs                = map[int]*Mob{}
+	allMobNames         = []string{}
+	mobInstances        = map[int]*Mob{}
+	mobsHatePlayers     = map[string]map[int]int{}
+	mobNameCache        = map[MobId]string{}
 )
 
 const (
@@ -82,8 +80,6 @@ type Mob struct {
 }
 
 func MobInstanceExists(instanceId int) bool {
-	mobMutex.RLock()
-	defer mobMutex.RUnlock()
 
 	_, ok := mobInstances[instanceId]
 	return ok
@@ -94,9 +90,6 @@ func GetAllMobNames() []string {
 }
 
 func MobIdByName(mobName string) MobId {
-
-	mobMutex.Lock()
-	defer mobMutex.Unlock()
 
 	match, partial := util.FindMatchIn(mobName, allMobNames...)
 	if match == "" {
@@ -128,9 +121,6 @@ func MobIdByName(mobName string) MobId {
 }
 
 func NewMobById(mobId MobId, homeRoomId int, forceLevel ...int) *Mob {
-
-	mobMutex.Lock()
-	defer mobMutex.Unlock()
 
 	if m, ok := mobs[int(mobId)]; ok {
 
@@ -205,9 +195,6 @@ func GetMobSpec(mobId MobId) *Mob {
 
 func GetInstance(instanceId int) *Mob {
 
-	mobMutex.RLock()
-	defer mobMutex.RUnlock()
-
 	if m, ok := mobInstances[instanceId]; ok {
 		return m
 	}
@@ -215,9 +202,6 @@ func GetInstance(instanceId int) *Mob {
 }
 
 func GetAllMobInstanceIds() []int {
-
-	mobMutex.RLock()
-	defer mobMutex.RUnlock()
 
 	ids := make([]int, 0)
 	for id := range mobInstances {
@@ -227,8 +211,6 @@ func GetAllMobInstanceIds() []int {
 }
 
 func DestroyInstance(instanceId int) {
-	mobMutex.Lock()
-	defer mobMutex.Unlock()
 
 	delete(mobInstances, instanceId)
 }
@@ -579,9 +561,6 @@ func (m *Mob) GetScriptPath() string {
 
 func ReduceHostility() {
 
-	mobMutex.Lock()
-	defer mobMutex.Unlock()
-
 	for groupName, group := range mobsHatePlayers {
 		for userId, rounds := range group {
 			rounds--
@@ -599,9 +578,6 @@ func ReduceHostility() {
 
 func IsHostile(groupName string, userId int) bool {
 
-	mobMutex.RLock()
-	defer mobMutex.RUnlock()
-
 	if _, ok := mobsHatePlayers[groupName]; !ok {
 		return false
 	}
@@ -614,9 +590,6 @@ func IsHostile(groupName string, userId int) bool {
 }
 
 func MakeHostile(groupName string, userId int, rounds int) {
-
-	mobMutex.Lock()
-	defer mobMutex.Unlock()
 
 	if _, ok := mobsHatePlayers[groupName]; !ok {
 		mobsHatePlayers[groupName] = make(map[int]int)

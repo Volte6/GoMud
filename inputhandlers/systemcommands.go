@@ -6,9 +6,9 @@ import (
 
 	"log/slog"
 
-	"github.com/volte6/mud/connections"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/connections"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/users"
 )
 
 func SystemCommandInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {

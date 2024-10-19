@@ -5,12 +5,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/keywords"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/scripting"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/keywords"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/scripting"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
 )
 
 type CommandHelpItem struct {

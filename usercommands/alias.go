@@ -3,10 +3,10 @@ package usercommands
 import (
 	"sort"
 
-	"github.com/volte6/mud/keywords"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/keywords"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/users"
 )
 
 func Alias(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {

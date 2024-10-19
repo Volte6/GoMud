@@ -4,11 +4,11 @@ import (
 	"strings"
 
 	"github.com/dop251/goja"
-	"github.com/volte6/mud/colorpatterns"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/gametime"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/colorpatterns"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/gametime"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
 )
 
 func setUtilFunctions(vm *goja.Runtime) {
