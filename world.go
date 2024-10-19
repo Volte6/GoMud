@@ -630,8 +630,6 @@ func (w *World) MainWorker(shutdown chan bool, wg *sync.WaitGroup) {
 	messageTimer := time.NewTimer(time.Millisecond)
 	turnTimer := time.NewTimer(time.Duration(c.TurnMs) * time.Millisecond)
 
-	totalTurnTime := int64(0)
-	totalTurns := int64(0)
 loop:
 	for {
 		select {
@@ -666,22 +664,12 @@ loop:
 		case <-turnTimer.C:
 			//slog.Debug(`MainWorker`, `action`, `world.TurnTick()`)
 			turnTimer.Reset(time.Duration(c.TurnMs) * time.Millisecond)
-			tStart := time.Now()
 			w.TurnTick()
-			totalTurnTime += int64(time.Since(tStart))
-			totalTurns += 1
-			if totalTurns%10 == 0 {
-				slog.Debug("TurnTick", "time", time.Duration(totalTurnTime/totalTurns))
-			}
-			if totalTurns%1000 == 0 {
-				totalTurns = 0
-				totalTurnTime = 0
-			}
 
 		case enterWorldUserId := <-w.enterWorldUserId: // [2]int
 			w.enterWorld(enterWorldUserId[0], enterWorldUserId[1])
 		case leaveWorldUserId := <-w.leaveWorldUserId: // int
-			w.SendLeaveWorld(leaveWorldUserId)
+			w.leaveWorld(leaveWorldUserId)
 		case logoutConnectionId := <-w.logoutConnectionId: //  connections.ConnectionId
 			w.logOutUserByConnectionId(logoutConnectionId)
 		case zombieFlag := <-w.zombieFlag: //  [2]int
@@ -1070,16 +1058,17 @@ func (w *World) TurnTick() {
 	// Cleanup any zombies
 	//
 
-	expTurns := (uint64(c.ZombieSeconds) * uint64(c.TurnsPerSecond()))
+	expTurns := uint64(c.SecondsToTurns(int(c.ZombieSeconds)))
 
 	if expTurns < turnCt {
+
 		expZombies := users.GetExpiredZombies(turnCt - expTurns)
 		if len(expZombies) > 0 {
-
+			slog.Debug("TURNTICK", "len(expZombies)", len(expZombies))
 			connIds := users.GetConnectionIds(expZombies)
 
 			for _, userId := range expZombies {
-				worldManager.SendLeaveWorld(userId)
+				worldManager.leaveWorld(userId)
 				users.RemoveZombieUser(userId)
 			}
 			for _, connId := range connIds {
