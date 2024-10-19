@@ -70,23 +70,23 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 
 // Send input to the world.
 // Just sends via a channel. Will block until read.
-func (w *World) Input(i WorldInput) {
+func (w *World) SendInput(i WorldInput) {
 	w.worldInput <- i
 }
 
-func (w *World) EnterWorld(userId int, roomId int) {
+func (w *World) SendEnterWorld(userId int, roomId int) {
 	w.enterWorldUserId <- [2]int{userId, roomId}
 }
 
-func (w *World) LeaveWorld(userId int) {
+func (w *World) SendLeaveWorld(userId int) {
 	w.leaveWorldUserId <- userId
 }
 
-func (w *World) LogoutConnectionId(connId connections.ConnectionId) {
+func (w *World) SendLogoutConnectionId(connId connections.ConnectionId) {
 	w.logoutConnectionId <- connId
 }
 
-func (w *World) SetZombie(userId int, on bool) {
+func (w *World) SendSetZombie(userId int, on bool) {
 	if on {
 		w.zombieFlag <- [2]int{userId, 1}
 	} else {
@@ -681,7 +681,7 @@ loop:
 		case enterWorldUserId := <-w.enterWorldUserId: // [2]int
 			w.enterWorld(enterWorldUserId[0], enterWorldUserId[1])
 		case leaveWorldUserId := <-w.leaveWorldUserId: // int
-			w.LeaveWorld(leaveWorldUserId)
+			w.SendLeaveWorld(leaveWorldUserId)
 		case logoutConnectionId := <-w.logoutConnectionId: //  connections.ConnectionId
 			w.logOutUserByConnectionId(logoutConnectionId)
 		case zombieFlag := <-w.zombieFlag: //  [2]int
@@ -1079,7 +1079,7 @@ func (w *World) TurnTick() {
 			connIds := users.GetConnectionIds(expZombies)
 
 			for _, userId := range expZombies {
-				worldManager.LeaveWorld(userId)
+				worldManager.SendLeaveWorld(userId)
 				users.RemoveZombieUser(userId)
 			}
 			for _, connId := range connIds {

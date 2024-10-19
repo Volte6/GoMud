@@ -332,12 +332,12 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 				if c.ZombieSeconds > 0 {
 
 					connDetails.SetState(connections.Zombie)
-					worldManager.SetZombie(userObject.UserId, true)
+					worldManager.SendSetZombie(userObject.UserId, true)
 
 				} else {
 
-					worldManager.LeaveWorld(userObject.UserId)
-					worldManager.LogoutConnectionId(connDetails.ConnectionId())
+					worldManager.SendLeaveWorld(userObject.UserId)
+					worldManager.SendLogoutConnectionId(connDetails.ConnectionId())
 
 				}
 			}
@@ -458,7 +458,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 			connDetails.SetState(connections.LoggedIn)
 
-			worldManager.EnterWorld(userObject.UserId, userObject.Character.RoomId)
+			worldManager.SendEnterWorld(userObject.UserId, userObject.Character.RoomId)
 		}
 
 		// If they have pressed enter (submitted their input), and nothing else has handled/aborted
@@ -504,7 +504,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 				}
 
 				// Buffer should be processed as an in-game command
-				worldManager.Input(wi)
+				worldManager.SendInput(wi)
 				// Reset the buffer for future commands.
 				clientInput.Reset()
 
@@ -558,12 +558,12 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 				if c.ZombieSeconds > 0 {
 
 					connDetails.SetState(connections.Zombie)
-					worldManager.SetZombie(userObject.UserId, true)
+					worldManager.SendSetZombie(userObject.UserId, true)
 
 				} else {
 
-					worldManager.LeaveWorld(userObject.UserId)
-					worldManager.LogoutConnectionId(connDetails.ConnectionId())
+					worldManager.SendLeaveWorld(userObject.UserId)
+					worldManager.SendLogoutConnectionId(connDetails.ConnectionId())
 
 				}
 			}
@@ -607,7 +607,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 			connDetails.SetState(connections.LoggedIn)
 
-			worldManager.EnterWorld(userObject.UserId, userObject.Character.RoomId)
+			worldManager.SendEnterWorld(userObject.UserId, userObject.Character.RoomId)
 
 			continue
 		}
@@ -618,7 +618,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		}
 
 		// Buffer should be processed as an in-game command
-		worldManager.Input(wi)
+		worldManager.SendInput(wi)
 
 	}
 }
