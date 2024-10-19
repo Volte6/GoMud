@@ -214,13 +214,15 @@ func SendTo(b []byte, ids ...ConnectionId) {
 
 	for _, id := range ids {
 
-		cd := netConnections[id]
+		if cd, ok := netConnections[id]; ok {
 
-		if _, err := cd.Write(b); err != nil {
-			slog.Error("could not write to connection", "connectionId", id, "remoteAddr", cd.RemoteAddr().String(), "error", err)
-			// Remove from the connections
-			removeIds = append(removeIds, id)
-			continue
+			if _, err := cd.Write(b); err != nil {
+				slog.Error("could not write to connection", "connectionId", id, "remoteAddr", cd.RemoteAddr().String(), "error", err)
+				// Remove from the connections
+				removeIds = append(removeIds, id)
+				continue
+			}
+
 		}
 
 		sentCt++

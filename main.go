@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -326,6 +325,8 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		n, err := connDetails.Read(inputBuffer)
 		if err != nil {
 
+			slog.Error("TELNET", "ReadERR", err)
+
 			// If failed to read from the connection, switch to zombie state
 			if userObject != nil {
 
@@ -568,7 +569,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 				}
 			}
 
-			log.Println("WS Read error:", err)
+			slog.Error("WS Read", "error", err)
 			break
 		}
 
