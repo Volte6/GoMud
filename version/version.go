@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/volte6/mud/configs"
+	"github.com/volte6/gomud/configs"
 )
 
 // Responsible for version relate operations such as

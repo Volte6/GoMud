@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
-	"github.com/volte6/mud/items"
+	"github.com/volte6/gomud/items"
 )
 
 var (

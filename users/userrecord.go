@@ -7,18 +7,17 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/connections"
-	"github.com/volte6/mud/events"
-	"github.com/volte6/mud/gametime"
-	"github.com/volte6/mud/prompt"
-	"github.com/volte6/mud/term"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/connections"
+	"github.com/volte6/gomud/events"
+	"github.com/volte6/gomud/gametime"
+	"github.com/volte6/gomud/prompt"
+	"github.com/volte6/gomud/term"
+	"github.com/volte6/gomud/util"
 	//
 )
 
@@ -54,7 +53,6 @@ type UserRecord struct {
 	suggestText    string
 	connectionTime time.Time
 	lastInputRound uint64
-	lock           sync.RWMutex
 	tempDataStore  map[string]any
 	activePrompt   *prompt.Prompt
 	isZombie       bool // are they a zombie currently?
@@ -75,7 +73,6 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 		ConfigOptions:  map[string]any{},
 		Joined:         time.Now(),
 		connectionTime: time.Now(),
-		lock:           sync.RWMutex{},
 		tempDataStore:  make(map[string]any),
 	}
 
@@ -163,8 +160,6 @@ func (u *UserRecord) SendWebClientCommand(txt string) {
 }
 
 func (u *UserRecord) SetTempData(key string, value any) {
-	u.lock.Lock()
-	defer u.lock.Unlock()
 
 	if u.tempDataStore == nil {
 		u.tempDataStore = make(map[string]any)
@@ -178,8 +173,6 @@ func (u *UserRecord) SetTempData(key string, value any) {
 }
 
 func (u *UserRecord) GetTempData(key string) any {
-	u.lock.RLock()
-	defer u.lock.RUnlock()
 
 	if u.tempDataStore == nil {
 		u.tempDataStore = make(map[string]any)
@@ -230,9 +223,6 @@ func (u *UserRecord) GetConnectTime() time.Time {
 }
 
 func (u *UserRecord) GetCommandPrompt(fullRedraw bool, forcePromptType ...string) string {
-
-	u.lock.RLock()
-	defer u.lock.RUnlock()
 
 	promptOut := ``
 
@@ -470,16 +460,12 @@ func (u *UserRecord) RoundTick() {
 // I don't like the idea of capturing it every time they hit a key though
 // There is probably a better way.
 func (u *UserRecord) SetUnsentText(t string, suggest string) {
-	u.lock.Lock()
-	defer u.lock.Unlock()
 
 	u.unsentText = t
 	u.suggestText = suggest
 }
 
 func (u *UserRecord) GetUnsentText() (unsent string, suggestion string) {
-	u.lock.RLock()
-	defer u.lock.RUnlock()
 
 	return u.unsentText, u.suggestText
 }
@@ -549,9 +535,6 @@ func (u *UserRecord) ConnectionId() uint64 {
 // Prompt related functionality
 func (u *UserRecord) StartPrompt(command string, rest string) (*prompt.Prompt, bool) {
 
-	u.lock.RLock()
-	defer u.lock.RUnlock()
-
 	if u.activePrompt != nil {
 		// If it's the same prompt, return the existing one
 		if u.activePrompt.Command == command && u.activePrompt.Rest == rest {
@@ -566,15 +549,11 @@ func (u *UserRecord) StartPrompt(command string, rest string) (*prompt.Prompt, b
 }
 
 func (u *UserRecord) GetPrompt() *prompt.Prompt {
-	u.lock.RLock()
-	defer u.lock.RUnlock()
 
 	return u.activePrompt
 }
 
 func (u *UserRecord) ClearPrompt() {
-	u.lock.Lock()
-	defer u.lock.Unlock()
 
 	u.activePrompt = nil
 }

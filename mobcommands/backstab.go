@@ -1,11 +1,11 @@
 package mobcommands
 
 import (
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/users"
 )
 
 func Backstab(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {

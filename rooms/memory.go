@@ -1,13 +1,10 @@
 package rooms
 
 import (
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/util"
 )
 
 func GetMemoryUsage() map[string]util.MemoryResult {
-
-	roomManager.RLock()
-	defer roomManager.RUnlock()
 
 	ret := map[string]util.MemoryResult{}
 

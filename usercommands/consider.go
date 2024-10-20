@@ -3,11 +3,11 @@ package usercommands
 import (
 	"fmt"
 
-	"github.com/volte6/mud/combat"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/combat"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
 )
 
 func Consider(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {

@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/gametime"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/gametime"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/skills"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
 )
 
 /*

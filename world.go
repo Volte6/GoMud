@@ -11,28 +11,29 @@ import (
 	"sync"
 	"time"
 
-	"github.com/volte6/mud/badinputtracker"
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/colorpatterns"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/connections"
-	"github.com/volte6/mud/events"
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/keywords"
-	"github.com/volte6/mud/mobcommands"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/parties"
-	"github.com/volte6/mud/prompt"
-	"github.com/volte6/mud/quests"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/scripting"
-	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/term"
-	"github.com/volte6/mud/usercommands"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/badinputtracker"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/colorpatterns"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/connections"
+	"github.com/volte6/gomud/events"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/keywords"
+	"github.com/volte6/gomud/mobcommands"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/parties"
+	"github.com/volte6/gomud/prompt"
+	"github.com/volte6/gomud/quests"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/scripting"
+	"github.com/volte6/gomud/skills"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/term"
+	"github.com/volte6/gomud/usercommands"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
+	"github.com/volte6/gomud/webclient"
 )
 
 type WorldInput struct {
@@ -46,23 +47,69 @@ func (wi WorldInput) Id() int {
 }
 
 type World struct {
-	users      *users.ActiveUsers
-	worldInput chan WorldInput
+	worldInput         chan WorldInput
+	enterWorldUserId   chan [2]int
+	leaveWorldUserId   chan int
+	logoutConnectionId chan connections.ConnectionId
+	zombieFlag         chan [2]int
 }
 
-func (w *World) GetUsers() *users.ActiveUsers {
-	return w.users
+func NewWorld(osSignalChan chan os.Signal) *World {
+
+	w := &World{
+		worldInput:         make(chan WorldInput),
+		enterWorldUserId:   make(chan [2]int),
+		leaveWorldUserId:   make(chan int),
+		logoutConnectionId: make(chan connections.ConnectionId),
+		zombieFlag:         make(chan [2]int),
+	}
+
+	connections.SetShutdownChan(osSignalChan)
+
+	return w
 }
 
 // Send input to the world.
 // Just sends via a channel. Will block until read.
-func (w *World) Input(i WorldInput) {
+func (w *World) SendInput(i WorldInput) {
 	w.worldInput <- i
 }
 
-func (w *World) EnterWorld(roomId int, zone string, userId int) {
+func (w *World) SendEnterWorld(userId int, roomId int) {
+	w.enterWorldUserId <- [2]int{userId, roomId}
+}
+
+func (w *World) SendLeaveWorld(userId int) {
+	w.leaveWorldUserId <- userId
+}
+
+func (w *World) SendLogoutConnectionId(connId connections.ConnectionId) {
+	w.logoutConnectionId <- connId
+}
+
+func (w *World) SendSetZombie(userId int, on bool) {
+	if on {
+		w.zombieFlag <- [2]int{userId, 1}
+	} else {
+		w.zombieFlag <- [2]int{userId, 0}
+	}
+}
+
+func (w *World) logOutUserByConnectionId(connectionId connections.ConnectionId) {
+
+	if err := users.LogOutUserByConnectionId(connectionId); err != nil {
+		slog.Error("Log Out Error", "connectionId", connectionId, "error", err)
+	}
+}
+
+func (w *World) enterWorld(userId int, roomId int) {
 
 	user := users.GetByUserId(userId)
+	if user == nil {
+		slog.Error("EnterWorld", "error", fmt.Sprintf(`user %d not found`, user.Character.RoomId))
+		return
+	}
+
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
 
@@ -108,7 +155,8 @@ func (w *World) EnterWorld(roomId int, zone string, userId int) {
 	rooms.MoveToRoom(userId, roomId, true)
 }
 
-func (w *World) LeaveWorld(userId int) {
+func (w *World) leaveWorld(userId int) {
+
 	user := users.GetByUserId(userId)
 	if user == nil {
 		return
@@ -566,86 +614,84 @@ const (
 	ansiAliasReloadPeriod = time.Second * 4  // Every 4 seconds reload ansi aliases.
 )
 
-func (w *World) GameTickWorker(shutdown chan bool, wg *sync.WaitGroup) {
+func (w *World) MainWorker(shutdown chan bool, wg *sync.WaitGroup) {
+
 	wg.Add(1)
 
-	slog.Info("GameTickWorker", "state", "Started")
+	slog.Info("MainWorker", "state", "Started")
 	defer func() {
-		slog.Error("GameTickWorker", "state", "Stopped")
+		slog.Error("MainWorker", "state", "Stopped")
 		wg.Done()
 	}()
 
 	c := configs.GetConfig()
 
+	roomUpdateTimer := time.NewTimer(roomMaintenancePeriod)
+	ansiAliasTimer := time.NewTimer(ansiAliasReloadPeriod)
 	messageTimer := time.NewTimer(time.Millisecond)
 	turnTimer := time.NewTimer(time.Duration(c.TurnMs) * time.Millisecond)
+	statsTimer := time.NewTimer(time.Duration(10) * time.Second)
 
 loop:
 	for {
 		select {
 		case <-shutdown:
-			slog.Error(`GameTickWorker`, `action`, `shutdown received`)
+
+			slog.Error(`MainWorker`, `action`, `shutdown received`)
+
+			if err := rooms.SaveAllRooms(); err != nil {
+				slog.Error("rooms.SaveAllRooms()", "error", err.Error())
+			}
+
+			// Save all user data too.
+			users.SaveAllUsers()
+
 			break loop
+		case <-statsTimer.C:
+
+			s := webclient.GetStats()
+			s.OnlineNow = len(users.GetOnlineUserIds())
+			webclient.UpdateStats(s)
+			statsTimer.Reset(time.Duration(10) * time.Second)
+
+		case <-roomUpdateTimer.C:
+			slog.Debug(`MainWorker`, `action`, `rooms.RoomMaintenance()`)
+			rooms.RoomMaintenance()
+			roomUpdateTimer.Reset(roomMaintenancePeriod)
+
+		case <-ansiAliasTimer.C:
+			//slog.Debug(`MainWorker`, `action`, `templates.LoadAliases()`)
+			templates.LoadAliases()
+			ansiAliasTimer.Reset(ansiAliasReloadPeriod)
 
 		case <-messageTimer.C:
+			//slog.Debug(`MainWorker`, `action`, `world.MessageTick()`)
 			messageTimer.Reset(time.Millisecond)
 			w.MessageTick()
 
 		case <-turnTimer.C:
+			//slog.Debug(`MainWorker`, `action`, `world.TurnTick()`)
 			turnTimer.Reset(time.Duration(c.TurnMs) * time.Millisecond)
 			w.TurnTick()
 
+		case enterWorldUserId := <-w.enterWorldUserId: // [2]int
+			w.enterWorld(enterWorldUserId[0], enterWorldUserId[1])
+		case leaveWorldUserId := <-w.leaveWorldUserId: // int
+			w.leaveWorld(leaveWorldUserId)
+		case logoutConnectionId := <-w.logoutConnectionId: //  connections.ConnectionId
+			w.logOutUserByConnectionId(logoutConnectionId)
+		case zombieFlag := <-w.zombieFlag: //  [2]int
+			if zombieFlag[1] == 1 {
+				users.SetZombieUser(zombieFlag[0])
+			}
 		}
 		c = configs.GetConfig()
 	}
 
 }
 
-func (w *World) MaintenanceWorker(shutdown chan bool, wg *sync.WaitGroup) {
-	wg.Add(1)
-
-	slog.Info("MaintenanceWorker", "state", "Started")
-	defer func() {
-		slog.Error("MaintenanceWorker", "state", "Stopped")
-		wg.Done()
-	}()
-
-	roomUpdateTimer := time.NewTimer(roomMaintenancePeriod)
-	ansiAliasTimer := time.NewTimer(ansiAliasReloadPeriod)
-	//serverStatsLogTimer := time.NewTimer(serverStatsLogPeriod)
-
-loop:
-	for {
-		select {
-		case <-shutdown:
-			slog.Error(`MaintenanceWorker`, `action`, `shutdown received`)
-			if err := rooms.SaveAllRooms(); err != nil {
-				slog.Error("rooms.SaveAllRooms()", "error", err.Error())
-			}
-			// Save all user data too.
-			users.SaveAllUsers()
-
-			break loop
-
-		case <-roomUpdateTimer.C:
-			slog.Debug(`MaintenanceWorker`, `action`, `rooms.RoomMaintenance()`)
-			rooms.RoomMaintenance()
-			roomUpdateTimer.Reset(roomMaintenancePeriod)
-
-		case <-ansiAliasTimer.C:
-			templates.LoadAliases()
-			ansiAliasTimer.Reset(ansiAliasReloadPeriod)
-
-			//case <-serverStatsLogTimer.C:
-			//serverStats := util.ServerStats()
-			//fmt.Println(templates.AnsiParse(serverStats))
-			//serverStatsLogTimer.Reset(serverStatsLogPeriod)
-
-		}
-	}
-
-}
-
+// Should be goroutine/threadsafe
+// Only reads from world channel
 func (w *World) InputWorker(shutdown chan bool, wg *sync.WaitGroup) {
 	wg.Add(1)
 
@@ -1020,16 +1066,17 @@ func (w *World) TurnTick() {
 	// Cleanup any zombies
 	//
 
-	expTurns := (uint64(c.ZombieSeconds) * uint64(c.TurnsPerSecond()))
+	expTurns := uint64(c.SecondsToTurns(int(c.ZombieSeconds)))
 
 	if expTurns < turnCt {
+
 		expZombies := users.GetExpiredZombies(turnCt - expTurns)
 		if len(expZombies) > 0 {
-
+			slog.Info("Expired Zombies", "count", len(expZombies))
 			connIds := users.GetConnectionIds(expZombies)
 
 			for _, userId := range expZombies {
-				worldManager.LeaveWorld(userId)
+				worldManager.leaveWorld(userId)
 				users.RemoveZombieUser(userId)
 			}
 			for _, connId := range connIds {
@@ -1625,16 +1672,4 @@ func (w *World) Kick(userId int) {
 	}
 	users.SetZombieUser(userId)
 	connections.Kick(user.ConnectionId())
-}
-
-func NewWorld(osSignalChan chan os.Signal) *World {
-
-	w := &World{
-		users:      users.NewUserManager(),
-		worldInput: make(chan WorldInput),
-	}
-
-	connections.SetShutdownChan(osSignalChan)
-
-	return w
 }

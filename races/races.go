@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/mud/fileloader"
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/stats"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/fileloader"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/stats"
+	"github.com/volte6/gomud/util"
 	"gopkg.in/yaml.v2"
 )
 

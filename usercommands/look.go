@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/gametime"
-	"github.com/volte6/mud/keywords"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/gametime"
+	"github.com/volte6/gomud/keywords"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/users"
 )
 
 func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {

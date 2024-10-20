@@ -7,24 +7,24 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/mud/auctions"
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/colorpatterns"
-	"github.com/volte6/mud/combat"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/connections"
-	"github.com/volte6/mud/events"
-	"github.com/volte6/mud/gametime"
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/scripting"
-	"github.com/volte6/mud/spells"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/term"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/auctions"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/colorpatterns"
+	"github.com/volte6/gomud/combat"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/connections"
+	"github.com/volte6/gomud/events"
+	"github.com/volte6/gomud/gametime"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/scripting"
+	"github.com/volte6/gomud/spells"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/term"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
 )
 
 func (w *World) roundTick() {
@@ -60,12 +60,12 @@ func (w *World) roundTick() {
 	//
 	// Disconnect players that have been inactive too long
 	//
-	w.HandleInactivePlayers(c.SecondsToRounds(int(c.MaxIdleSeconds)))
+	w.handleInactivePlayers(c.SecondsToRounds(int(c.MaxIdleSeconds)))
 
 	//
 	// Do auction maintenance
 	//
-	w.ProcessAuction(tStart)
+	w.processAuction(tStart)
 
 	if roundNumber%100 == 0 {
 		scripting.PruneVMs()
@@ -90,46 +90,46 @@ func (w *World) roundTick() {
 	//
 	// Player round ticks
 	//
-	w.HandlePlayerRoundTicks()
+	w.handlePlayerRoundTicks()
 	//
 	// Player round ticks
 	//
-	w.HandleMobRoundTicks()
+	w.handleMobRoundTicks()
 
 	//
 	// Respawn any enemies that have been missing for too long
 	//
-	w.HandleRespawns()
+	w.handleRespawns()
 
 	//
 	// Combat rounds
 	//
-	affectedPlayers1, affectedMobs1 := w.HandlePlayerCombat()
+	affectedPlayers1, affectedMobs1 := w.handlePlayerCombat()
 
-	affectedPlayers2, affectedMobs2 := w.HandleMobCombat()
+	affectedPlayers2, affectedMobs2 := w.handleMobCombat()
 
 	// Do any resolution or extra checks based on everyone that has been involved in combat this round.
-	w.HandleAffected(append(affectedPlayers1, affectedPlayers2...), append(affectedMobs1, affectedMobs2...))
+	w.handleAffected(append(affectedPlayers1, affectedPlayers2...), append(affectedMobs1, affectedMobs2...))
 
 	//
 	// Healing
 	//
-	w.HandleAutoHealing(roundNumber)
+	w.handleAutoHealing(roundNumber)
 
 	//
 	// Idle mobs
 	//
-	w.HandleIdleMobs()
+	w.handleIdleMobs()
 
 	//
 	// Shadow/death realm
 	//
-	w.HandleShadowRealm(roundNumber)
+	w.handleShadowRealm(roundNumber)
 
 	util.TrackTime(`World::RoundTick()`, time.Since(tStart).Seconds())
 }
 
-func (w *World) HandleInactivePlayers(maxIdleRounds int) {
+func (w *World) handleInactivePlayers(maxIdleRounds int) {
 
 	if maxIdleRounds == 0 {
 		return
@@ -145,7 +145,7 @@ func (w *World) HandleInactivePlayers(maxIdleRounds int) {
 	for _, user := range users.GetAllActiveUsers() {
 		li := user.GetLastInputRound()
 
-		//slog.Info("HandleInactivePlayers", "roundNumber", roundNumber, "maxIdleRounds", maxIdleRounds, "cutoffRound", cutoffRound, "GetLastInputRound", li)
+		//slog.Info("handleInactivePlayers", "roundNumber", roundNumber, "maxIdleRounds", maxIdleRounds, "cutoffRound", cutoffRound, "GetLastInputRound", li)
 
 		if li == 0 {
 			continue
@@ -165,7 +165,7 @@ func (w *World) HandleInactivePlayers(maxIdleRounds int) {
 }
 
 // Round ticks for players
-func (w *World) HandlePlayerRoundTicks() {
+func (w *World) handlePlayerRoundTicks() {
 
 	roomsWithPlayers := rooms.GetRoomsWithPlayers()
 	for _, roomId := range roomsWithPlayers {
@@ -256,7 +256,7 @@ func (w *World) HandlePlayerRoundTicks() {
 }
 
 // Round ticks for players
-func (w *World) HandleMobRoundTicks() {
+func (w *World) handleMobRoundTicks() {
 
 	for _, mobInstanceId := range mobs.GetAllMobInstanceIds() {
 
@@ -314,14 +314,13 @@ func (w *World) HandleMobRoundTicks() {
 	}
 
 }
-
-func (w *World) LogOff(userId int) {
+func (w *World) logOff(userId int) {
 
 	user := users.GetByUserId(userId)
 
 	users.SaveUser(*user)
 
-	worldManager.LeaveWorld(userId)
+	worldManager.leaveWorld(userId)
 
 	connId := user.ConnectionId()
 
@@ -356,15 +355,17 @@ func (w *World) PruneBuffs() {
 						scripting.TryBuffScriptEvent(`onEnd`, uId, 0, buffInfo.BuffId)
 
 						if buffInfo.BuffId == 0 { // Log them out // logoff // logout
-							logOff = true
+							if !user.Character.HasAdjective(`zombie`) { // if they are currently a zombie, we don't log them out from this buff being removed
+								logOff = true
+							}
 						}
 					}
 
 					user.Character.Validate()
 
 					if logOff {
-						slog.Info("DOING LOGOFF")
-						w.LogOff(uId)
+						slog.Info("MEDITATION LOGOFF")
+						w.logOff(uId)
 					}
 				}
 
@@ -389,7 +390,7 @@ func (w *World) PruneBuffs() {
 
 }
 
-func (w *World) HandleRespawns() {
+func (w *World) handleRespawns() {
 
 	//
 	// Handle any respawns pending
@@ -429,7 +430,7 @@ func (w *World) HandleRespawns() {
 }
 
 // WHere combat happens
-func (w *World) HandlePlayerCombat() (affectedPlayerIds []int, affectedMobInstanceIds []int) {
+func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstanceIds []int) {
 
 	tStart := time.Now()
 
@@ -941,13 +942,13 @@ func (w *World) HandlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 
 	}
 
-	util.TrackTime(`World::HandlePlayerCombat()`, time.Since(tStart).Seconds())
+	util.TrackTime(`World::handlePlayerCombat()`, time.Since(tStart).Seconds())
 
 	return affectedPlayerIds, affectedMobInstanceIds
 }
 
 // Mob combat operations may happen when players are not present.
-func (w *World) HandleMobCombat() (affectedPlayerIds []int, affectedMobInstanceIds []int) {
+func (w *World) handleMobCombat() (affectedPlayerIds []int, affectedMobInstanceIds []int) {
 
 	c := configs.GetConfig()
 
@@ -1357,12 +1358,12 @@ func (w *World) HandleMobCombat() (affectedPlayerIds []int, affectedMobInstanceI
 
 	}
 
-	util.TrackTime(`World::HandleMobCombat()`, time.Since(tStart).Seconds())
+	util.TrackTime(`World::handleMobCombat()`, time.Since(tStart).Seconds())
 
 	return affectedPlayerIds, affectedMobInstanceIds
 }
 
-func (w *World) HandleAffected(affectedPlayerIds []int, affectedMobInstanceIds []int) {
+func (w *World) handleAffected(affectedPlayerIds []int, affectedMobInstanceIds []int) {
 
 	playersHandled := map[int]struct{}{}
 	for _, userId := range affectedPlayerIds {
@@ -1409,7 +1410,7 @@ func (w *World) HandleAffected(affectedPlayerIds []int, affectedMobInstanceIds [
 }
 
 // Idle Mobs
-func (w *World) HandleIdleMobs() {
+func (w *World) handleIdleMobs() {
 
 	// c := configs.GetConfig()
 
@@ -1492,12 +1493,12 @@ func (w *World) HandleIdleMobs() {
 
 	}
 
-	util.TrackTime(`HandleIdleMobs()`, time.Since(tStart).Seconds())
+	util.TrackTime(`handleIdleMobs()`, time.Since(tStart).Seconds())
 
 }
 
 // Healing
-func (w *World) HandleAutoHealing(roundNumber uint64) {
+func (w *World) handleAutoHealing(roundNumber uint64) {
 
 	// Every 3 rounds.
 	if roundNumber%3 != 0 {
@@ -1590,7 +1591,7 @@ func (w *World) HandleAutoHealing(roundNumber uint64) {
 }
 
 // Special shadow realm stuff
-func (w *World) HandleShadowRealm(roundNumber uint64) {
+func (w *World) handleShadowRealm(roundNumber uint64) {
 
 	if roundNumber%uint64(configs.GetConfig().MinutesToRounds(1)) == 0 {
 
@@ -1707,7 +1708,7 @@ func (w *World) CheckForLevelUps() {
 }
 
 // Checks for current auction and handles updates/communication
-func (w *World) ProcessAuction(tNow time.Time) {
+func (w *World) processAuction(tNow time.Time) {
 
 	a := auctions.GetCurrentAuction()
 	if a == nil {

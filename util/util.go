@@ -21,7 +21,7 @@ import (
 
 	"crypto/md5"
 
-	"github.com/volte6/mud/term"
+	"github.com/volte6/gomud/term"
 )
 
 var (

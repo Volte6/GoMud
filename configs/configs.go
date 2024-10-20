@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/util"
 	"gopkg.in/yaml.v2"
 )
 

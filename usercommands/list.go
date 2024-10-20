@@ -6,17 +6,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/colorpatterns"
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/pets"
-	"github.com/volte6/mud/races"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/term"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/colorpatterns"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/pets"
+	"github.com/volte6/gomud/races"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/term"
+	"github.com/volte6/gomud/users"
 )
 
 func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {

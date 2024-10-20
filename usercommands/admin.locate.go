@@ -6,10 +6,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/users"
 )
 
 func Locate(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {

@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/volte6/mud/connections"
-	"github.com/volte6/mud/term"
+	"github.com/volte6/gomud/connections"
+	"github.com/volte6/gomud/term"
 )
 
 func TelnetIACHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {

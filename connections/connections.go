@@ -9,9 +9,9 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/events"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/events"
+	"github.com/volte6/gomud/util"
 	"gopkg.in/yaml.v2"
 )
 
@@ -214,13 +214,15 @@ func SendTo(b []byte, ids ...ConnectionId) {
 
 	for _, id := range ids {
 
-		cd := netConnections[id]
+		if cd, ok := netConnections[id]; ok {
 
-		if _, err := cd.Write(b); err != nil {
-			slog.Error("could not write to connection", "connectionId", id, "remoteAddr", cd.RemoteAddr().String(), "error", err)
-			// Remove from the connections
-			removeIds = append(removeIds, id)
-			continue
+			if _, err := cd.Write(b); err != nil {
+				slog.Error("could not write to connection", "connectionId", id, "remoteAddr", cd.RemoteAddr().String(), "error", err)
+				// Remove from the connections
+				removeIds = append(removeIds, id)
+				continue
+			}
+
 		}
 
 		sentCt++

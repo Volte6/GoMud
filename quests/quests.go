@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/mud/fileloader"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/fileloader"
+	"github.com/volte6/gomud/util"
 )
 
 const (

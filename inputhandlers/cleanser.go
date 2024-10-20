@@ -1,8 +1,8 @@
 package inputhandlers
 
 import (
-	"github.com/volte6/mud/connections"
-	"github.com/volte6/mud/term"
+	"github.com/volte6/gomud/connections"
+	"github.com/volte6/gomud/term"
 )
 
 // CleanserInputHandler's job is to remove any bad characters from the input stream

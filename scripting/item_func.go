@@ -2,8 +2,8 @@ package scripting
 
 import (
 	"github.com/dop251/goja"
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/util"
 )
 
 func setItemFunctions(vm *goja.Runtime) {

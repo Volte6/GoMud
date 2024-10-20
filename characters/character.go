@@ -9,16 +9,16 @@ import (
 
 	"log/slog"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/pets"
-	"github.com/volte6/mud/quests"
-	"github.com/volte6/mud/races"
-	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/spells"
-	"github.com/volte6/mud/stats"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/pets"
+	"github.com/volte6/gomud/quests"
+	"github.com/volte6/gomud/races"
+	"github.com/volte6/gomud/skills"
+	"github.com/volte6/gomud/spells"
+	"github.com/volte6/gomud/stats"
+	"github.com/volte6/gomud/util"
 	//
 )
 
@@ -575,6 +575,15 @@ func (c *Character) GetMobName(viewingUserId int, renderFlags ...NameRenderFlag)
 
 func (c *Character) GetPlayerName(viewingUserId int, renderFlags ...NameRenderFlag) FormattedName {
 	return c.getFormattedName(viewingUserId, `username`, renderFlags...)
+}
+
+func (c *Character) HasAdjective(adj string) bool {
+	for _, a := range c.Adjectives {
+		if a == adj {
+			return true
+		}
+	}
+	return false
 }
 
 func (c *Character) SetAdjective(adj string, addToList bool) {
@@ -1865,7 +1874,6 @@ func (c *Character) reapplyPermabuffs(removedItems ...items.Item) {
 	// Apply any buffs from pet
 	if c.Pet.Exists() {
 		for _, buffId := range c.Pet.GetBuffs() {
-			slog.Error("TEST", "buffId", buffId)
 			buffIdCount[buffId] = 100 // Don't allow pet buffs to be removed, keep this number high
 		}
 	}

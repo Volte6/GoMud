@@ -3,7 +3,7 @@ package gametime
 import (
 	"testing"
 
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/util"
 )
 
 func Benchmark_GetDate_Uncached(b *testing.B) {

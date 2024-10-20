@@ -3,10 +3,10 @@ package combat
 import (
 	"math"
 
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/races"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/races"
+	"github.com/volte6/gomud/users"
 )
 
 func PowerRanking(atkChar characters.Character, defChar characters.Character) float64 {

@@ -3,14 +3,14 @@ package mobcommands
 import (
 	"strings"
 
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/parties"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/scripting"
-	"github.com/volte6/mud/spells"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/parties"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/scripting"
+	"github.com/volte6/gomud/spells"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
 )
 
 func Cast(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {

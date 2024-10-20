@@ -40,7 +40,9 @@ Information on scripting in GoMud can be found in the [scripting README](scripti
 
 A youtube playlist to getting started has been set up here:
 
-[Getting Started Videos](https://i.ytimg.com/vi/OOZqX01aHt8/hqdefault.jpg)
+
+[![Getting Started Videos](https://i.ytimg.com/vi/OOZqX01aHt8/hqdefault.jpg 'Getting Started Playlist')](https://www.youtube.com/watch?v=OOZqX01aHt8&list=PL20JEmG_bxBuaOE9oFziAhAmx1pyXhQ1p)
+
 
 You can compile and run it locally with:
 > `go run .`

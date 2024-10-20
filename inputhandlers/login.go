@@ -3,11 +3,11 @@ package inputhandlers
 import (
 	"log/slog"
 
-	"github.com/volte6/mud/connections"
-	"github.com/volte6/mud/events"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/term"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/connections"
+	"github.com/volte6/gomud/events"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/term"
+	"github.com/volte6/gomud/users"
 )
 
 type LoginState struct {

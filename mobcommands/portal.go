@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/volte6/mud/colorpatterns"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/rooms"
+	"github.com/volte6/gomud/colorpatterns"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/rooms"
 )
 
 // Mob portaling is different than player portaling.

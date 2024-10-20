@@ -9,20 +9,19 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/colorpatterns"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/connections"
-	"github.com/volte6/mud/events"
-	"github.com/volte6/mud/fileloader"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/term"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/colorpatterns"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/connections"
+	"github.com/volte6/gomud/events"
+	"github.com/volte6/gomud/fileloader"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/term"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
 
 	"log/slog"
 
@@ -41,7 +40,6 @@ var (
 )
 
 type RoomManager struct {
-	sync.RWMutex
 	rooms                map[int]*Room
 	zones                map[string]ZoneInfo // a map of zone name to room id
 	roomsWithUsers       map[int]int         // key is roomId to # players
@@ -91,8 +89,6 @@ func SetNextRoomId(nextRoomId int) {
 }
 
 func GetAllRoomIds() []int {
-	roomManager.RLock()
-	defer roomManager.RUnlock()
 
 	var roomIds []int = make([]int, len(roomManager.roomIdToFileCache))
 	i := 0
@@ -109,8 +105,6 @@ func RoomMaintenance() bool {
 	defer func() {
 		util.TrackTime(`RoomMaintenance()`, time.Since(start).Seconds())
 	}()
-
-	roomManager.Lock()
 
 	roundCount := util.GetRoundCount()
 	// Get the current round count
@@ -236,8 +230,6 @@ func RoomMaintenance() bool {
 
 	}
 
-	roomManager.Unlock()
-
 	if len(unloadRooms) > 0 {
 		for _, room := range unloadRooms {
 			removeRoomFromMemory(room)
@@ -249,8 +241,6 @@ func RoomMaintenance() bool {
 }
 
 func GetAllZoneNames() []string {
-	roomManager.RLock()
-	defer roomManager.RUnlock()
 
 	var zoneNames []string = make([]string, len(roomManager.zones))
 	i := 0
@@ -281,8 +271,6 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		newRoom.Prepare(true)
 	}
 
-	roomManager.Lock()
-
 	currentRoom.MarkVisited(userId, VisitorUser, 1)
 
 	if len, _ := currentRoom.RemovePlayer(userId); len < 1 {
@@ -293,8 +281,6 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 
 	playerCt := newRoom.addPlayer(userId)
 	roomManager.roomsWithUsers[newRoom.RoomId] = playerCt
-
-	roomManager.Unlock()
 
 	formerRoomId := user.Character.RoomId
 	user.Character.RoomId = newRoom.RoomId
@@ -490,8 +476,6 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 // skipRecentlyVisited means ignore rooms with recent visitors
 // minimumItemCt is the minimum items in the room to care about it
 func GetRoomWithMostItems(skipRecentlyVisited bool, minimumItemCt int, minimumGoldCt int) (roomId int, itemCt int) {
-	roomManager.Lock()
-	defer roomManager.Unlock()
 
 	topItemRoomId, topItemCt := 0, 0
 	topGoldRoomId, topGoldCt := 0, 0
@@ -537,11 +521,9 @@ func GetRoomsWithPlayers() []int {
 	deleteKeys := []int{}
 	roomsWithPlayers := []int{}
 
-	roomManager.RLock()
 	for roomId, _ := range roomManager.roomsWithUsers {
 		roomsWithPlayers = append(roomsWithPlayers, roomId)
 	}
-	roomManager.RUnlock() // unlock here since LoadRoom() locks
 
 	for i := len(roomsWithPlayers) - 1; i >= 0; i-- {
 		roomId := roomsWithPlayers[i]
@@ -555,19 +537,17 @@ func GetRoomsWithPlayers() []int {
 	}
 
 	if len(deleteKeys) > 0 {
-		roomManager.Lock()
+
 		for _, roomId := range deleteKeys {
 			delete(roomManager.roomsWithUsers, roomId)
 		}
-		roomManager.Unlock()
+
 	}
 
 	return roomsWithPlayers
 }
 
 func GetRoomsWithMobs() []int {
-	roomManager.Lock()
-	defer roomManager.Unlock()
 
 	var roomsWithMobs []int = make([]int, len(roomManager.roomsWithMobs))
 	i := 0
@@ -580,8 +560,6 @@ func GetRoomsWithMobs() []int {
 }
 
 func SaveAllRooms() error {
-	roomManager.Lock()
-	defer roomManager.Unlock()
 
 	// Unhash the descriptions before saving
 	for _, loadedRoom := range roomManager.rooms {
@@ -817,8 +795,6 @@ func loadRoomFromFile(roomFilePath string) (*Room, error) {
 }
 
 func GetZoneRoot(zone string) (int, error) {
-	roomManager.Lock()
-	defer roomManager.Unlock()
 
 	if zoneInfo, ok := roomManager.zones[zone]; ok {
 		return zoneInfo.RootRoomId, nil
@@ -829,9 +805,7 @@ func GetZoneRoot(zone string) (int, error) {
 
 func GetZoneConfig(zone string) *ZoneConfig {
 
-	roomManager.Lock()
 	zoneInfo, ok := roomManager.zones[zone]
-	roomManager.Unlock()
 
 	if ok {
 		if r := LoadRoom(zoneInfo.RootRoomId); r != nil {
@@ -842,8 +816,6 @@ func GetZoneConfig(zone string) *ZoneConfig {
 }
 
 func IsRoomLoaded(roomId int) bool {
-	roomManager.RLock()
-	defer roomManager.RUnlock()
 
 	_, ok := roomManager.rooms[roomId]
 	return ok
@@ -853,18 +825,14 @@ func IsRoomLoaded(roomId int) bool {
 // If the room hasn't been loaded yet, it loads it into memory
 func LoadRoom(roomId int) *Room {
 
-	roomManager.RLock()
 	room, ok := roomManager.rooms[roomId]
-	roomManager.RUnlock()
 
 	if ok {
 		return room
 	}
 
-	roomManager.Lock()
 	filename := findRoomFile(roomId)
 	retRoom, _ := loadRoomFromFile(util.FilePath(roomDataFilesPath, `/`, filename))
-	roomManager.Unlock()
 
 	return retRoom
 }
@@ -897,8 +865,6 @@ func SaveRoom(r Room) error {
 }
 
 func ZoneStats(zone string) (rootRoomId int, totalRooms int, err error) {
-	roomManager.Lock()
-	defer roomManager.Unlock()
 
 	if zoneInfo, ok := roomManager.zones[zone]; ok {
 		return zoneInfo.RootRoomId, len(zoneInfo.RoomIds), nil
@@ -936,8 +902,6 @@ func ValidateZoneName(zone string) error {
 }
 
 func FindZoneName(zone string) string {
-	roomManager.Lock()
-	defer roomManager.Unlock()
 
 	if _, ok := roomManager.zones[zone]; ok {
 		return zone
@@ -953,8 +917,6 @@ func FindZoneName(zone string) string {
 }
 
 func GetZoneBiome(zone string) string {
-	roomManager.Lock()
-	defer roomManager.Unlock()
 
 	if z, ok := roomManager.zones[zone]; ok {
 		return z.DefaultBiome
@@ -964,8 +926,6 @@ func GetZoneBiome(zone string) string {
 }
 
 func MoveToZone(roomId int, newZoneName string) error {
-	roomManager.Lock()
-	defer roomManager.Unlock()
 
 	room, ok := roomManager.rooms[roomId]
 
@@ -1017,12 +977,10 @@ func CreateZone(zoneName string) (roomId int, err error) {
 		return 0, errors.New("zone name must be at least 2 characters")
 	}
 
-	roomManager.Lock()
 	if zoneInfo, ok := roomManager.zones[zoneName]; ok {
-		roomManager.Unlock()
+
 		return zoneInfo.RootRoomId, errors.New("zone already exists")
 	}
-	roomManager.Unlock()
 
 	zoneFolder := util.FilePath(roomDataFilesPath, "/", zoneToFolder(zoneName))
 	if err := os.Mkdir(zoneFolder, 0755); err != nil {
@@ -1087,9 +1045,6 @@ func BuildRoom(fromRoomId int, exitName string, mapDirection ...string) (room *R
 		//newRoom.IdleMessages = fromRoom.IdleMessages
 	}
 
-	//roomManager.Lock()
-	//defer roomManager.Unlock()
-
 	slog.Info("Connection room", "fromRoom", fromRoom.RoomId, "newRoom", newRoom.RoomId, "exitName", exitName)
 
 	// connect the old room to the new room
@@ -1132,9 +1087,6 @@ func ConnectRoom(fromRoomId int, toRoomId int, exitName string, mapDirection ...
 	if toRoom == nil {
 		return fmt.Errorf(`room %d not found`, toRoomId)
 	}
-
-	roomManager.Lock()
-	defer roomManager.Unlock()
 
 	// connect the old room to the new room
 	newExit := RoomExit{RoomId: toRoom.RoomId, Secret: false}
@@ -1362,9 +1314,6 @@ func GetSpecificMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, 
 }
 
 func GetRoomCount(zoneName string) int {
-
-	roomManager.RLock()
-	defer roomManager.RUnlock()
 
 	zoneInfo, ok := roomManager.zones[zoneName]
 	if !ok {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/util"
 )
 
 var (

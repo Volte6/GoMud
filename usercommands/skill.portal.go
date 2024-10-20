@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/mud/colorpatterns"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/users"
+	"github.com/volte6/gomud/colorpatterns"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/skills"
+	"github.com/volte6/gomud/users"
 )
 
 /*

@@ -6,20 +6,19 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/colorpatterns"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/events"
-	"github.com/volte6/mud/gametime"
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/skills"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/colorpatterns"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/events"
+	"github.com/volte6/gomud/gametime"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/skills"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
 )
 
 const roomDataFilesPath = "_datafiles/rooms"
@@ -63,7 +62,7 @@ const (
 )
 
 type Room struct {
-	mutex             sync.RWMutex
+	//mutex
 	RoomId            int        // a unique numeric index of the room. Also the filename.
 	Zone              string     // zone is a way to partition rooms into groups. Also into folders.
 	ZoneConfig        ZoneConfig `yaml:"zoneconfig,omitempty"`      // If non-null is a root room.
@@ -182,8 +181,6 @@ func (r *Room) IsBurning() bool {
 }
 
 func (r *Room) SetLongTermData(key string, value any) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	if r.LongTermDataStore == nil {
 		r.LongTermDataStore = make(map[string]any)
@@ -197,8 +194,6 @@ func (r *Room) SetLongTermData(key string, value any) {
 }
 
 func (r *Room) GetLongTermData(key string) any {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	if r.LongTermDataStore == nil {
 		r.LongTermDataStore = make(map[string]any)
@@ -211,8 +206,6 @@ func (r *Room) GetLongTermData(key string) any {
 }
 
 func (r *Room) SetTempData(key string, value any) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	if r.tempDataStore == nil {
 		r.tempDataStore = make(map[string]any)
@@ -226,8 +219,6 @@ func (r *Room) SetTempData(key string, value any) {
 }
 
 func (r *Room) GetTempData(key string) any {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	if r.tempDataStore == nil {
 		r.tempDataStore = make(map[string]any)
@@ -243,9 +234,6 @@ func (r *Room) GetScript() string {
 
 	scriptPath := r.GetScriptPath()
 
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
 	// Load the script into a string
 	if _, err := os.Stat(scriptPath); err == nil {
 		if bytes, err := os.ReadFile(scriptPath); err == nil {
@@ -257,16 +245,12 @@ func (r *Room) GetScript() string {
 }
 
 func (r *Room) GetScriptPath() string {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	// Load any script for the room
 	return strings.Replace(roomDataFilesPath+`/`+r.Filepath(), `.yaml`, `.js`, 1)
 }
 
 func (r *Room) FindTemporaryExitByUserId(userId int) (TemporaryRoomExit, bool) {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	if r.ExitsTemp != nil {
 		for _, v := range r.ExitsTemp {
@@ -280,8 +264,6 @@ func (r *Room) FindTemporaryExitByUserId(userId int) (TemporaryRoomExit, bool) {
 }
 
 func (r *Room) RemoveTemporaryExit(t TemporaryRoomExit) bool {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	if r.ExitsTemp == nil {
 		return false
@@ -300,8 +282,6 @@ func (r *Room) RemoveTemporaryExit(t TemporaryRoomExit) bool {
 // Can't add twoof the same exitName
 // Will return false if it already exists
 func (r *Room) AddTemporaryExit(exitName string, t TemporaryRoomExit) bool {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	if r.ExitsTemp == nil {
 		r.ExitsTemp = make(map[string]TemporaryRoomExit)
@@ -322,7 +302,6 @@ func (r *Room) AddTemporaryExit(exitName string, t TemporaryRoomExit) bool {
 // For example, mobs shouldn't ENTER the room right as the player arrives, they should already be there.
 func (r *Room) Prepare(checkAdjacentRooms bool) {
 
-	r.mutex.Lock()
 	// First ensure any mobs that should be here are spawned
 	for idx, spawnInfo := range r.SpawnInfo {
 
@@ -453,8 +432,6 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 		r.SpawnInfo[idx] = spawnInfo
 	}
 
-	r.mutex.Unlock() // Unlock the mutex before we possible end up doing another prepare on this room. (Some exits loop back to the same room)
-
 	// Reach out one more room to prepare those exit rooms
 	if checkAdjacentRooms {
 
@@ -481,8 +458,6 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 }
 
 func (r *Room) CleanupMobSpawns(noCooldown bool) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	// First ensure any mobs that should be here are spawned
 	for idx, spawnInfo := range r.SpawnInfo {
@@ -511,9 +486,6 @@ func (r *Room) AddMob(mobInstanceId int) {
 	// Do before lock
 	r.MarkVisited(mobInstanceId, VisitorMob)
 
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
 	if mob := mobs.GetInstance(mobInstanceId); mob != nil {
 		mob.Character.RoomId = r.RoomId
 		mob.Character.Zone = r.Zone
@@ -529,9 +501,6 @@ func (r *Room) RemoveMob(mobInstanceId int) {
 	// Do before lock
 	r.MarkVisited(mobInstanceId, VisitorMob, 1)
 
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
 	mobLen := len(r.mobs)
 	for i := 0; i < mobLen; i++ {
 		if r.mobs[i] == mobInstanceId {
@@ -546,8 +515,6 @@ func (r *Room) RemoveMob(mobInstanceId int) {
 }
 
 func (r *Room) AddItem(item items.Item, stash bool) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	item.Validate()
 
@@ -592,8 +559,6 @@ func (r *Room) GetRandomExit() (exitName string, roomId int) {
 }
 
 func (r *Room) RemoveItem(i items.Item, stash bool) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	if stash {
 		for j := len(r.Stash) - 1; j >= 0; j-- {
@@ -614,8 +579,6 @@ func (r *Room) RemoveItem(i items.Item, stash bool) {
 }
 
 func (r *Room) GetAllFloorItems(stash bool) []items.Item {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	found := []items.Item{}
 
@@ -660,8 +623,6 @@ func (r *Room) FindOnFloor(itemName string, stash bool) (items.Item, bool) {
 }
 
 func (r *Room) MarkVisited(id int, vType VisitorType, subtrackTurns ...int) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	if r.visitors == nil {
 		r.visitors = make(map[VisitorType]map[int]uint64)
@@ -686,21 +647,16 @@ func (r *Room) MarkVisited(id int, vType VisitorType, subtrackTurns ...int) {
 }
 
 func (r *Room) MobCt() int {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	return len(r.mobs)
 }
 
 func (r *Room) PlayerCt() int {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
+
 	return len(r.players)
 }
 
 func (r *Room) GetMobs(findTypes ...FindFlag) []int {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	var typeFlag FindFlag = 0
 	if len(findTypes) < 1 {
@@ -793,8 +749,6 @@ func (r *Room) GetMobs(findTypes ...FindFlag) []int {
 }
 
 func (r *Room) GetPlayers(findTypes ...FindFlag) []int {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	var typeFlag FindFlag = 0
 	if len(findTypes) < 1 {
@@ -885,8 +839,6 @@ func (r *Room) IsCalm() bool {
 }
 
 func (r *Room) ArePlayersAttacking(userId int) bool {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	for _, playerId := range r.players {
 		if playerId == userId {
@@ -903,8 +855,6 @@ func (r *Room) ArePlayersAttacking(userId int) bool {
 }
 
 func (r *Room) AreMobsAttacking(userId int) bool {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	for _, mobId := range r.mobs {
 		mob := mobs.GetInstance(mobId)
@@ -923,9 +873,6 @@ func (r *Room) Visitors(vType VisitorType) map[int]float64 {
 
 	ret := make(map[int]float64)
 
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
 	if _, ok := r.visitors[vType]; ok {
 		for userId, expires := range r.visitors[vType] {
 			ret[userId] = float64(expires-util.GetTurnCount()) / float64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
@@ -938,8 +885,6 @@ func (r *Room) Visitors(vType VisitorType) map[int]float64 {
 
 func (r *Room) HasVisited(id int, vType VisitorType) bool {
 	//	r.PruneVisitors()
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	if _, ok := r.visitors[vType]; !ok {
 		return false
@@ -964,8 +909,6 @@ func (r *Room) GetDescriptionFormatted(lineSplit int, highlightNouns bool) strin
 }
 
 func (r *Room) GetDescription() string {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	if !strings.HasPrefix(r.Description, `h:`) {
 		return r.Description
@@ -976,15 +919,11 @@ func (r *Room) GetDescription() string {
 }
 
 func (r *Room) HasRecentVisitors() bool {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	return r.visitors != nil && len(r.visitors) > 0
 }
 
 func (r *Room) GetPublicSigns() []Sign {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	visibleSigns := []Sign{}
 	for _, sign := range r.Signs {
@@ -997,8 +936,6 @@ func (r *Room) GetPublicSigns() []Sign {
 }
 
 func (r *Room) GetPrivateSigns() []Sign {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	privateSigns := []Sign{}
 	for _, sign := range r.Signs {
@@ -1012,8 +949,6 @@ func (r *Room) GetPrivateSigns() []Sign {
 
 // Returns true if a sign was replaced
 func (r *Room) AddSign(displayText string, visibleUserId int, daysBeforeDecay int) bool {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	s := Sign{
 		VisibleUserId: visibleUserId,
@@ -1067,8 +1002,6 @@ func (r *Room) FindByPetName(searchName string) (playerId int) {
 }
 
 func (r *Room) findPlayerByName(searchName string, findTypes ...FindFlag) (int, error) {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	if len(searchName) > 1 {
 		if searchName[0] == '#' {
@@ -1162,8 +1095,6 @@ func (r *Room) RemoveEffect(eType EffectType) {
 }
 
 func (r *Room) findMobByName(searchName string, findTypes ...FindFlag) (int, error) {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	if len(searchName) > 1 {
 		if searchName[0] == '@' {
@@ -1227,8 +1158,6 @@ func (r *Room) findMobByName(searchName string, findTypes ...FindFlag) (int, err
 
 // Returns exitName, RoomExit
 func (r *Room) FindExitTo(roomId int) string {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	for exitName, exit := range r.Exits {
 		if exit.RoomId == roomId {
@@ -1411,8 +1340,6 @@ func (r *Room) FindExitByName(exitNameSearch string) (exitName string, exitRoomI
 }
 
 func (r *Room) PruneTemporaryExits() []TemporaryRoomExit {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	prunedExits := []TemporaryRoomExit{}
 
@@ -1426,8 +1353,6 @@ func (r *Room) PruneTemporaryExits() []TemporaryRoomExit {
 }
 
 func (r *Room) PruneSigns() []Sign {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	prunedSigned := []Sign{}
 
@@ -1448,8 +1373,6 @@ func (r *Room) PruneSigns() []Sign {
 }
 
 func (r *Room) PruneVisitors() int {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	if r.visitors == nil {
 		r.visitors = make(map[VisitorType]map[int]uint64)
@@ -1490,9 +1413,6 @@ func (r *Room) PruneVisitors() int {
 }
 
 func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
-
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
 
 	var roomSymbol string = r.MapSymbol
 	var roomLegend string = r.MapLegend
@@ -1870,8 +1790,6 @@ func (r *Room) findUserExit(userId int, userName string) string {
 }
 
 func (r *Room) RoundTick() {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	for idx, spawnInfo := range r.SpawnInfo {
 
@@ -1903,9 +1821,6 @@ func (r *Room) RoundTick() {
 
 func (r *Room) addPlayer(userId int) int {
 
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
 	r.players = append(r.players, userId)
 
 	return len(r.players)
@@ -1913,8 +1828,6 @@ func (r *Room) addPlayer(userId int) int {
 
 // true if found
 func (r *Room) RemovePlayer(userId int) (int, bool) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
 	for i, v := range r.players {
 		if v == userId {
@@ -1941,8 +1854,6 @@ func (r *Room) RepeatSpawnItem(itemId int, roundFrequency int, containerName ...
 		spawnKey = cName + `-` + spawnKey
 	}
 
-	r.mutex.Lock()
-
 	// Are we detailing with a container?
 	if cName != `` {
 
@@ -1950,14 +1861,14 @@ func (r *Room) RepeatSpawnItem(itemId int, roundFrequency int, containerName ...
 
 		// Container doesn't exist? Abort.
 		if !ok {
-			r.mutex.Unlock()
+
 			return false
 		}
 
 		// Item in the container? Abort.
 		for _, item := range c.Items {
 			if item.ItemId == itemId {
-				r.mutex.Unlock()
+
 				return false
 			}
 		}
@@ -1967,7 +1878,7 @@ func (r *Room) RepeatSpawnItem(itemId int, roundFrequency int, containerName ...
 	// Check if item is already in the room
 	for _, item := range r.Items {
 		if item.ItemId == itemId {
-			r.mutex.Unlock()
+
 			return false
 		}
 	}
@@ -1975,13 +1886,12 @@ func (r *Room) RepeatSpawnItem(itemId int, roundFrequency int, containerName ...
 	// Check hidden as well
 	for _, item := range r.Stash {
 		if item.ItemId == itemId {
-			r.mutex.Unlock()
+
 			return false
 		}
 	}
 
 	// unlock for further processing that will require locks
-	r.mutex.Unlock()
 
 	// Check whether enough time has passed since last spawn
 	if lastSpawn := r.GetTempData(spawnKey); lastSpawn != nil {

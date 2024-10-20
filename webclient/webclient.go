@@ -12,7 +12,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/volte6/mud/configs"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/users"
 )
 
 var (
@@ -84,6 +85,10 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 	strB.WriteString("</style></head><body>\n")
 	strB.WriteString("<h1>GoMud</h1>\n")
+
+	stats := GetStats()
+	strB.WriteString(fmt.Sprintf("<h3>Players Online Now: %d</h1>\n", stats.OnlineNow))
+	users.GetAllActiveUsers()
 
 	// exclude port, seed, and filepath info from webpage
 	allConfigData := configs.GetConfig().AllConfigData(`*port`, `seed`, `folder*`, `file*`)

@@ -1,13 +1,10 @@
 package mobs
 
 import (
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/util"
 )
 
 func GetMemoryUsage() map[string]util.MemoryResult {
-
-	mobMutex.Lock()
-	defer mobMutex.Unlock()
 
 	ret := map[string]util.MemoryResult{}
 

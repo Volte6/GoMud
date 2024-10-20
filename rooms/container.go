@@ -1,6 +1,6 @@
 package rooms
 
-import "github.com/volte6/mud/items"
+import "github.com/volte6/gomud/items"
 
 type Container struct {
 	Lock  GameLock     `yaml:"lock,omitempty"` // 0 - no lock. greater than zero = difficulty to unlock.

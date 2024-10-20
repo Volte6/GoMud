@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/races"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/races"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
 )
 
 func Inventory(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {

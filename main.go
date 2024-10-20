@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -22,29 +21,29 @@ import (
 	"github.com/Volte6/ansitags"
 	"github.com/gorilla/websocket"
 	"github.com/natefinch/lumberjack"
-	"github.com/volte6/mud/buffs"
-	"github.com/volte6/mud/characters"
-	"github.com/volte6/mud/colorpatterns"
-	"github.com/volte6/mud/configs"
-	"github.com/volte6/mud/connections"
-	"github.com/volte6/mud/events"
-	"github.com/volte6/mud/gametime"
-	"github.com/volte6/mud/inputhandlers"
-	"github.com/volte6/mud/items"
-	"github.com/volte6/mud/keywords"
-	"github.com/volte6/mud/mobs"
-	"github.com/volte6/mud/pets"
-	"github.com/volte6/mud/quests"
-	"github.com/volte6/mud/races"
-	"github.com/volte6/mud/rooms"
-	"github.com/volte6/mud/scripting"
-	"github.com/volte6/mud/spells"
-	"github.com/volte6/mud/templates"
-	"github.com/volte6/mud/term"
-	"github.com/volte6/mud/users"
-	"github.com/volte6/mud/util"
-	"github.com/volte6/mud/version"
-	"github.com/volte6/mud/webclient"
+	"github.com/volte6/gomud/buffs"
+	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/colorpatterns"
+	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/connections"
+	"github.com/volte6/gomud/events"
+	"github.com/volte6/gomud/gametime"
+	"github.com/volte6/gomud/inputhandlers"
+	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/keywords"
+	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/pets"
+	"github.com/volte6/gomud/quests"
+	"github.com/volte6/gomud/races"
+	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/scripting"
+	"github.com/volte6/gomud/spells"
+	"github.com/volte6/gomud/templates"
+	"github.com/volte6/gomud/term"
+	"github.com/volte6/gomud/users"
+	"github.com/volte6/gomud/util"
+	"github.com/volte6/gomud/version"
+	"github.com/volte6/gomud/webclient"
 )
 
 const (
@@ -172,8 +171,9 @@ func main() {
 	}
 
 	go worldManager.InputWorker(workerShutdownChan, &wg)
-	go worldManager.MaintenanceWorker(workerShutdownChan, &wg)
-	go worldManager.GameTickWorker(workerShutdownChan, &wg)
+	go worldManager.MainWorker(workerShutdownChan, &wg)
+	//go worldManager.MaintenanceWorker(workerShutdownChan, &wg)
+	//go worldManager.GameTickWorker(workerShutdownChan, &wg)
 
 	// block until a signal comes in
 	<-sigChan
@@ -325,21 +325,20 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		n, err := connDetails.Read(inputBuffer)
 		if err != nil {
 
+			slog.Error("TELNET", "ReadERR", err)
+
 			// If failed to read from the connection, switch to zombie state
 			if userObject != nil {
 
 				if c.ZombieSeconds > 0 {
 
 					connDetails.SetState(connections.Zombie)
-					users.SetZombieUser(userObject.UserId)
+					worldManager.SendSetZombie(userObject.UserId, true)
 
 				} else {
 
-					worldManager.LeaveWorld(userObject.UserId)
-
-					if err := users.LogOutUserByConnectionId(connDetails.ConnectionId()); err != nil {
-						slog.Error("Log Out Error", "connectionId", connDetails.ConnectionId(), "error", err)
-					}
+					worldManager.SendLeaveWorld(userObject.UserId)
+					worldManager.SendLogoutConnectionId(connDetails.ConnectionId())
 
 				}
 			}
@@ -460,7 +459,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 			connDetails.SetState(connections.LoggedIn)
 
-			worldManager.EnterWorld(userObject.Character.RoomId, userObject.Character.Zone, userObject.UserId)
+			worldManager.SendEnterWorld(userObject.UserId, userObject.Character.RoomId)
 		}
 
 		// If they have pressed enter (submitted their input), and nothing else has handled/aborted
@@ -506,7 +505,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 				}
 
 				// Buffer should be processed as an in-game command
-				worldManager.Input(wi)
+				worldManager.SendInput(wi)
 				// Reset the buffer for future commands.
 				clientInput.Reset()
 
@@ -560,20 +559,17 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 				if c.ZombieSeconds > 0 {
 
 					connDetails.SetState(connections.Zombie)
-					users.SetZombieUser(userObject.UserId)
+					worldManager.SendSetZombie(userObject.UserId, true)
 
 				} else {
 
-					worldManager.LeaveWorld(userObject.UserId)
-
-					if err := users.LogOutUserByConnectionId(connDetails.ConnectionId()); err != nil {
-						slog.Error("Log Out Error", "connectionId", connDetails.ConnectionId(), "error", err)
-					}
+					worldManager.SendLeaveWorld(userObject.UserId)
+					worldManager.SendLogoutConnectionId(connDetails.ConnectionId())
 
 				}
 			}
 
-			log.Println("WS Read error:", err)
+			slog.Error("WS Read", "error", err)
 			break
 		}
 
@@ -612,18 +608,10 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 			connDetails.SetState(connections.LoggedIn)
 
-			worldManager.EnterWorld(userObject.Character.RoomId, userObject.Character.Zone, userObject.UserId)
+			worldManager.SendEnterWorld(userObject.UserId, userObject.Character.RoomId)
 
 			continue
 		}
-
-		//c := configs.GetConfig()
-		/*
-			if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
-				log.Println("Write error:", err)
-				break
-			}
-		*/
 
 		wi := WorldInput{
 			FromId:    userObject.UserId,
@@ -631,7 +619,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		}
 
 		// Buffer should be processed as an in-game command
-		worldManager.Input(wi)
+		worldManager.SendInput(wi)
 
 	}
 }
