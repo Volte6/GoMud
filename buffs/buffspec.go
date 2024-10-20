@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/fileloader"
+	"github.com/volte6/gomud/statmods"
 	"github.com/volte6/gomud/util"
 )
 
@@ -70,15 +71,15 @@ var (
 )
 
 type BuffSpec struct {
-	BuffId        int            // Unique identifier for this buff spec
-	Name          string         // The name of the buff
-	Description   string         // A description of the buff
-	Secret        bool           // Whether or not the buff is secret (not displayed to the user)
-	TriggerNow    bool           `yaml:"triggernow,omitempty"`    // if true, buff triggers once right when it is applied
-	RoundInterval int            `yaml:"roundinterval,omitempty"` // triggers every x rounds
-	TriggerCount  int            `yaml:"triggercount,omitempty"`  // How many times it triggers before it is removed
-	StatMods      map[string]int `yaml:"statmods,omitempty"`      // stat mods for the duration of the buff
-	Flags         []Flag         `yaml:"flags,omitempty"`         // A list of actions and such that this buff prevents or enables
+	BuffId        int               // Unique identifier for this buff spec
+	Name          string            // The name of the buff
+	Description   string            // A description of the buff
+	Secret        bool              // Whether or not the buff is secret (not displayed to the user)
+	TriggerNow    bool              `yaml:"triggernow,omitempty"`    // if true, buff triggers once right when it is applied
+	RoundInterval int               `yaml:"roundinterval,omitempty"` // triggers every x rounds
+	TriggerCount  int               `yaml:"triggercount,omitempty"`  // How many times it triggers before it is removed
+	StatMods      statmods.StatMods `yaml:"statmods,omitempty"`      // stat mods for the duration of the buff
+	Flags         []Flag            `yaml:"flags,omitempty"`         // A list of actions and such that this buff prevents or enables
 }
 
 // Calculates the value of this buff

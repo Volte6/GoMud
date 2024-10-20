@@ -17,6 +17,7 @@ import (
 	"github.com/volte6/gomud/races"
 	"github.com/volte6/gomud/skills"
 	"github.com/volte6/gomud/spells"
+	"github.com/volte6/gomud/statmods"
 	"github.com/volte6/gomud/stats"
 	"github.com/volte6/gomud/util"
 	//
@@ -182,7 +183,7 @@ func (c *Character) GetBaseCastSuccessChance(spellId string) int {
 
 	// add by any stat mods for casting, or casting school
 	// 0-xx
-	targetNumber += c.StatMod(`casting`) + c.StatMod(`casting-`+string(sp.School))
+	targetNumber += c.StatMod(string(statmods.Casting)) + c.StatMod(string(statmods.CastingPrefix)+string(sp.School))
 
 	if targetNumber < 0 {
 		targetNumber = 0
@@ -403,7 +404,7 @@ func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
 		return 0, 100
 	}
 
-	xpScale = c.StatMod("xpscale") + 100
+	xpScale = c.StatMod(string(statmods.XPScale)) + 100
 
 	if xpScale == 100 {
 		actualXP = xp
@@ -1282,7 +1283,7 @@ func (c *Character) Heal(hp int, mana int) {
 }
 
 func (c *Character) HealthPerRound() int {
-	return 1 + c.StatMod(`healthrecovery`)
+	return 1 + c.StatMod(string(statmods.HealthRecovery))
 	/*
 		healAmt := math.Round(float64(c.Stats.Vitality.ValueAdj)/8) +
 			math.Round(float64(c.Level)/12) +
@@ -1293,7 +1294,7 @@ func (c *Character) HealthPerRound() int {
 }
 
 func (c *Character) ManaPerRound() int {
-	return 1 + c.StatMod(`manarecovery`)
+	return 1 + c.StatMod(string(statmods.ManaRecovery))
 	/*
 		healAmt := math.Round(float64(c.Stats.Mysticism.ValueAdj)/8) +
 			math.Round(float64(c.Level)/12) +
@@ -1330,12 +1331,12 @@ func (c *Character) RecalculateStats() {
 	}
 
 	// Add any mods for equipment
-	c.Stats.Strength.Mods = c.StatMod("strength")
-	c.Stats.Speed.Mods = c.StatMod("speed")
-	c.Stats.Smarts.Mods = c.StatMod("smarts")
-	c.Stats.Vitality.Mods = c.StatMod("vitality")
-	c.Stats.Mysticism.Mods = c.StatMod("mysticism")
-	c.Stats.Perception.Mods = c.StatMod("perception")
+	c.Stats.Strength.Mods = c.StatMod(string(statmods.Strength))
+	c.Stats.Speed.Mods = c.StatMod(string(statmods.Speed))
+	c.Stats.Smarts.Mods = c.StatMod(string(statmods.Smarts))
+	c.Stats.Vitality.Mods = c.StatMod(string(statmods.Vitality))
+	c.Stats.Mysticism.Mods = c.StatMod(string(statmods.Mysticism))
+	c.Stats.Perception.Mods = c.StatMod(string(statmods.Perception))
 
 	// Recalculate stats
 	// Stats are basically:
@@ -1350,12 +1351,12 @@ func (c *Character) RecalculateStats() {
 	// Set HP/MP maxes
 	// This relies on the above stats so has to be calculated afterwards
 	c.HealthMax.Mods = 5 +
-		c.StatMod("healthmax") + // Any sort of spell buffs etc. are just direct modifiers
+		c.StatMod(string(statmods.HealthMax)) + // Any sort of spell buffs etc. are just direct modifiers
 		c.Level + // For every level you get 1 hp
 		c.Stats.Vitality.ValueAdj*4 // for every vitality you get 3hp
 
 	c.ManaMax.Mods = 4 +
-		c.StatMod("manamax") + // Any sort of spell buffs etc. are just direct modifiers
+		c.StatMod(string(statmods.ManaMax)) + // Any sort of spell buffs etc. are just direct modifiers
 		c.Level + // For every level you get 1 mp
 		c.Stats.Mysticism.ValueAdj*3 // for every Mysticism you get 2mp
 

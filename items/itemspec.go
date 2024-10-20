@@ -11,6 +11,7 @@ import (
 	"github.com/volte6/gomud/buffs"
 	"github.com/volte6/gomud/configs"
 	"github.com/volte6/gomud/fileloader"
+	"github.com/volte6/gomud/statmods"
 	"github.com/volte6/gomud/util"
 )
 
@@ -153,10 +154,10 @@ type ItemSpec struct {
 	Subtype         ItemSubType
 	Damage          Damage
 	Element         Element
-	StatMods        map[string]int `yaml:"statmods,omitempty"`    // What stats it modifies when equipped
-	BreakChance     uint8          `yaml:"breakchance,omitempty"` // Chance in 100 that the item will break when used, or when the character is hit with it equipped, or if it is in the characters inventory during an explosion, etc.
-	Cursed          bool           `yaml:"cursed,omitempty"`      // Can't be removed once equipped
-	KeyLockId       string         `yaml:"keylockid,omitempty"`   // Example: `778-north` - If it's a key, what lock does it open? roomid-exitname etc.
+	StatMods        statmods.StatMods `yaml:"statmods,omitempty"`    // What stats it modifies when equipped
+	BreakChance     uint8             `yaml:"breakchance,omitempty"` // Chance in 100 that the item will break when used, or when the character is hit with it equipped, or if it is in the characters inventory during an explosion, etc.
+	Cursed          bool              `yaml:"cursed,omitempty"`      // Can't be removed once equipped
+	KeyLockId       string            `yaml:"keylockid,omitempty"`   // Example: `778-north` - If it's a key, what lock does it open? roomid-exitname etc.
 }
 
 func (i Element) String() string {
