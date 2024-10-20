@@ -110,6 +110,8 @@ func (w *World) enterWorld(userId int, roomId int) {
 		return
 	}
 
+	users.RemoveZombieUser(userId)
+
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
 
@@ -177,9 +179,8 @@ func (w *World) leaveWorld(userId int) {
 	}
 
 	if _, ok := room.RemovePlayer(userId); ok {
-		connectionIds := users.GetConnectionIds(room.GetPlayers())
 		tplTxt, _ := templates.Process("player-despawn", user.Character.Name)
-		connections.SendTo([]byte(tplTxt), connectionIds...)
+		room.SendText(tplTxt)
 	}
 
 	//
