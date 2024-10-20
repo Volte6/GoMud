@@ -355,14 +355,16 @@ func (w *World) PruneBuffs() {
 						scripting.TryBuffScriptEvent(`onEnd`, uId, 0, buffInfo.BuffId)
 
 						if buffInfo.BuffId == 0 { // Log them out // logoff // logout
-							logOff = true
+							if !user.Character.HasAdjective(`zombie`) { // if they are currently a zombie, we don't log them out from this buff being removed
+								logOff = true
+							}
 						}
 					}
 
 					user.Character.Validate()
 
 					if logOff {
-						slog.Info("DOING LOGOFF")
+						slog.Info("MEDITATION LOGOFF")
 						w.logOff(uId)
 					}
 				}

@@ -71,6 +71,8 @@ func RemoveZombieConnection(connectionId connections.ConnectionId) {
 	delete(userManager.ZombieConnections, connectionId)
 }
 
+// Returns a slice of userId's
+// These userId's are zombies that have reached expiration
 func GetExpiredZombies(expirationTurn uint64) []int {
 
 	expiredUsers := make([]int, 0)
@@ -233,6 +235,7 @@ func LoginUser(u *UserRecord, connectionId connections.ConnectionId) (*UserRecor
 	userManager.Connections[u.connectionId] = u.UserId
 	userManager.UserConnections[u.UserId] = u.connectionId
 
+	slog.Info("LOGIN", "userId", u.UserId)
 	for _, mobInstId := range u.Character.GetCharmIds() {
 		if !mobs.MobInstanceExists(mobInstId) {
 			u.Character.TrackCharmed(mobInstId, false)
@@ -240,15 +243,6 @@ func LoginUser(u *UserRecord, connectionId connections.ConnectionId) (*UserRecor
 	}
 
 	return u, "", nil
-}
-
-func SetZombieConnection(connId connections.ConnectionId) {
-
-	if _, ok := userManager.ZombieConnections[connId]; ok {
-		return
-	}
-
-	userManager.ZombieConnections[connId] = util.GetTurnCount()
 }
 
 func SetZombieUser(userId int) {

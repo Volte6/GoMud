@@ -577,6 +577,15 @@ func (c *Character) GetPlayerName(viewingUserId int, renderFlags ...NameRenderFl
 	return c.getFormattedName(viewingUserId, `username`, renderFlags...)
 }
 
+func (c *Character) HasAdjective(adj string) bool {
+	for _, a := range c.Adjectives {
+		if a == adj {
+			return true
+		}
+	}
+	return false
+}
+
 func (c *Character) SetAdjective(adj string, addToList bool) {
 	if c.Adjectives == nil {
 		c.Adjectives = []string{}
