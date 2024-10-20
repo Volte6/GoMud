@@ -110,6 +110,8 @@ func (w *World) enterWorld(userId int, roomId int) {
 		return
 	}
 
+	users.RemoveZombieUser(userId)
+
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
 
@@ -151,6 +153,8 @@ func (w *World) enterWorld(userId int, roomId int) {
 		)
 	}
 
+	w.UpdateStats()
+
 	// Pu thtme in the room
 	rooms.MoveToRoom(userId, roomId, true)
 }
@@ -177,9 +181,8 @@ func (w *World) leaveWorld(userId int) {
 	}
 
 	if _, ok := room.RemovePlayer(userId); ok {
-		connectionIds := users.GetConnectionIds(room.GetPlayers())
 		tplTxt, _ := templates.Process("player-despawn", user.Character.Name)
-		connections.SendTo([]byte(tplTxt), connectionIds...)
+		room.SendText(tplTxt)
 	}
 
 	//
@@ -649,9 +652,8 @@ loop:
 			break loop
 		case <-statsTimer.C:
 
-			s := webclient.GetStats()
-			s.OnlineNow = len(users.GetOnlineUserIds())
-			webclient.UpdateStats(s)
+			w.UpdateStats()
+
 			statsTimer.Reset(time.Duration(10) * time.Second)
 
 		case <-roomUpdateTimer.C:
@@ -1050,6 +1052,38 @@ func (w *World) MessageTick() {
 	for connectionId, prompt := range redrawPrompts {
 		connections.SendTo([]byte(prompt), connectionId)
 	}
+}
+
+func (w *World) UpdateStats() {
+	s := webclient.GetStats()
+	s.Reset()
+
+	c := configs.GetConfig()
+
+	for _, u := range users.GetAllActiveUsers() {
+		s.OnlineUsers = append(s.OnlineUsers, u.GetOnlineInfo())
+	}
+
+	sort.Slice(s.OnlineUsers, func(i, j int) bool {
+		if s.OnlineUsers[i].Permission == users.PermissionAdmin {
+			return true
+		}
+		if s.OnlineUsers[j].Permission == users.PermissionAdmin {
+			return false
+		}
+		return s.OnlineUsers[i].OnlineTime > s.OnlineUsers[j].OnlineTime
+	})
+
+	for _, t := range c.TelnetPort {
+		p, _ := strconv.Atoi(t)
+		if p > 0 {
+			s.TelnetPorts = append(s.TelnetPorts, p)
+		}
+	}
+
+	s.WebSocketPort = int(c.WebPort)
+
+	webclient.UpdateStats(s)
 }
 
 // Turns are much finer resolution than rounds...

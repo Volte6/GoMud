@@ -324,15 +324,9 @@ func (i *Item) Enchant(damageBonus int, defenseBonus int, statBonus map[string]i
 	newSpec.Damage.BonusDamage += damageBonus
 	newSpec.DamageReduction += defenseBonus
 
-	if newSpec.StatMods == nil {
-		newSpec.StatMods = make(map[string]int)
-	}
-
+	// Permanently add new statmods
 	for statName, statBonusAmt := range statBonus {
-		if _, ok := newSpec.StatMods[statName]; !ok {
-			newSpec.StatMods[statName] = 0
-		}
-		newSpec.StatMods[statName] += statBonusAmt
+		newSpec.StatMods.Add(statName, statBonusAmt)
 	}
 
 	i.Enchantments++
@@ -589,20 +583,9 @@ func (i *Item) StatMod(statName ...string) int {
 		return 0
 	}
 
-	retAmt := 0
-
 	itemInfo := i.GetSpec()
-	if len(itemInfo.StatMods) == 0 {
-		return retAmt
-	}
 
-	for _, stat := range statName {
-		if modAmt, ok := itemInfo.StatMods[stat]; ok {
-			retAmt += modAmt
-		}
-	}
-
-	return retAmt
+	return itemInfo.StatMods.Get(statName...)
 }
 
 func startsWithVowel(s string) bool {

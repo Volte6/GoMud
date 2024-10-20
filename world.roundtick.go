@@ -140,9 +140,16 @@ func (w *World) handleInactivePlayers(maxIdleRounds int) {
 		return
 	}
 
+	kickMods := bool(configs.GetConfig().TimeoutMods)
+
 	cutoffRound := roundNumber - uint64(maxIdleRounds)
 
 	for _, user := range users.GetAllActiveUsers() {
+
+		if !kickMods && user.Permission == users.PermissionAdmin || user.Permission == users.PermissionMod {
+			continue
+		}
+
 		li := user.GetLastInputRound()
 
 		//slog.Info("handleInactivePlayers", "roundNumber", roundNumber, "maxIdleRounds", maxIdleRounds, "cutoffRound", cutoffRound, "GetLastInputRound", li)

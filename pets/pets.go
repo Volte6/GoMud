@@ -10,21 +10,22 @@ import (
 	"github.com/volte6/gomud/colorpatterns"
 	"github.com/volte6/gomud/fileloader"
 	"github.com/volte6/gomud/items"
+	"github.com/volte6/gomud/statmods"
 	"github.com/volte6/gomud/util"
 	"gopkg.in/yaml.v2"
 )
 
 type Pet struct {
-	Name          string         `yaml:"name,omitempty"`          // Name of the pet (player provided hopefully)
-	NameStyle     string         `yaml:"namestyle,omitempty"`     // Optional color pattern to apply
-	Type          string         `yaml:"type"`                    // type of pet
-	Food          Food           `yaml:"food,omitempty"`          // how much food the pet has
-	LastMealRound uint8          `yaml:"lastmealround,omitempty"` // When the pet was last fed
-	Damage        items.Damage   `yaml:"damage,omitempty"`        // When the pet was last fed
-	StatMods      map[string]int `yaml:"statmods,omitempty"`      // stat mods the pet provides
-	BuffIds       []int          `yaml:"buffids,omitempty"`       // Permabuffs this pet affords the player
-	Capacity      int            `yaml:"capacity,omitempty"`      // How many items this mob can carry
-	Items         []items.Item   `yaml:"items,omitempty"`         // Items held by this pet
+	Name          string            `yaml:"name,omitempty"`          // Name of the pet (player provided hopefully)
+	NameStyle     string            `yaml:"namestyle,omitempty"`     // Optional color pattern to apply
+	Type          string            `yaml:"type"`                    // type of pet
+	Food          Food              `yaml:"food,omitempty"`          // how much food the pet has
+	LastMealRound uint8             `yaml:"lastmealround,omitempty"` // When the pet was last fed
+	Damage        items.Damage      `yaml:"damage,omitempty"`        // When the pet was last fed
+	StatMods      statmods.StatMods `yaml:"statmods,omitempty"`      // stat mods the pet provides
+	BuffIds       []int             `yaml:"buffids,omitempty"`       // Permabuffs this pet affords the player
+	Capacity      int               `yaml:"capacity,omitempty"`      // How many items this mob can carry
+	Items         []items.Item      `yaml:"items,omitempty"`         // Items held by this pet
 }
 
 var (
@@ -34,10 +35,7 @@ var (
 )
 
 func (p *Pet) StatMod(statName string) int {
-	if p.StatMods == nil {
-		return 0
-	}
-	return p.StatMods[statName]
+	return p.StatMods.Get(statName)
 }
 
 func (p *Pet) Exists() bool {
@@ -160,10 +158,6 @@ func (p *Pet) Id() string {
 }
 
 func (p *Pet) Validate() error {
-
-	if p.StatMods == nil {
-		p.StatMods = map[string]int{}
-	}
 
 	if p.BuffIds == nil {
 		p.BuffIds = []int{}

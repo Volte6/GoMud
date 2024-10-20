@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/volte6/gomud/buffs"
 	"github.com/volte6/gomud/characters"
@@ -14,6 +15,7 @@ import (
 	"github.com/volte6/gomud/races"
 	"github.com/volte6/gomud/rooms"
 	"github.com/volte6/gomud/skills"
+	"github.com/volte6/gomud/statmods"
 	"github.com/volte6/gomud/users"
 	"github.com/volte6/gomud/util"
 )
@@ -295,6 +297,8 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 				weaponSubType = itemSpec.Subtype
 				attacks, dCount, dSides, dBonus, critBuffs = weapon.GetDiceRoll()
 
+				// If there is a bonus vs. a specific race, apply it
+				dBonus += weapon.StatMod(string(statmods.RacialBonusPrefix) + strings.ToLower(targetChar.Race()))
 			}
 
 			// zero means randomly selected, otherwise use the ItemId to consistently choose a message

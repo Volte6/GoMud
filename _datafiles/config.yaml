@@ -132,6 +132,10 @@ ExitRoomMessageWrapper: "   <ansi fg=\"leaves-message\"> >>> </ansi>%s"
 #   A value of 0 (zero) means never kick inactive players.
 #   1800 seconds = 30 minutes
 MaxIdleSeconds: 1800
+# - TimeoutMods -
+#   Whether Admin/Mod users get timed out when reaching MaxIdleSeconds
+#   If set to false, Admins & Mods never get force disconnected.
+TimeoutMods: false
 # - AfkSeconds -
 #   If this many seconds pass without player input, they are flagged as afk
 #   Set to zero to never mark anyone as AFK

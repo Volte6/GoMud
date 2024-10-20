@@ -19,9 +19,7 @@ func (b *Buff) StatMod(statName string) int {
 		return 0
 	}
 	if buffInfo := GetBuffSpec(b.BuffId); buffInfo != nil {
-		if modAmt, ok := buffInfo.StatMods[statName]; ok {
-			return modAmt
-		}
+		return buffInfo.StatMods.Get(statName)
 	}
 	return 0
 }

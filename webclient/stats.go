@@ -1,14 +1,24 @@
 package webclient
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/volte6/gomud/users"
+)
 
 type Stats struct {
-	OnlineNow int
+	OnlineUsers   []users.OnlineInfo
+	TelnetPorts   []int
+	WebSocketPort int
 }
 
 var (
 	statsLock   = sync.RWMutex{}
-	serverStats = Stats{}
+	serverStats = Stats{
+		WebSocketPort: 0,
+		OnlineUsers:   []users.OnlineInfo{},
+		TelnetPorts:   []int{},
+	}
 )
 
 // Returns a copy of the server stats
@@ -25,4 +35,10 @@ func UpdateStats(s Stats) {
 	defer statsLock.RUnlock()
 
 	serverStats = s
+}
+
+func (s *Stats) Reset() {
+	s.WebSocketPort = 0
+	s.OnlineUsers = []users.OnlineInfo{}
+	s.TelnetPorts = []int{}
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/volte6/gomud/events"
 	"github.com/volte6/gomud/gametime"
 	"github.com/volte6/gomud/prompt"
+	"github.com/volte6/gomud/skills"
 	"github.com/volte6/gomud/term"
 	"github.com/volte6/gomud/util"
 	//
@@ -556,4 +557,45 @@ func (u *UserRecord) GetPrompt() *prompt.Prompt {
 func (u *UserRecord) ClearPrompt() {
 
 	u.activePrompt = nil
+}
+
+func (u *UserRecord) GetOnlineInfo() OnlineInfo {
+
+	c := configs.GetConfig()
+	afkRounds := uint64(c.SecondsToRounds(int(c.AfkSeconds)))
+	roundNow := util.GetRoundCount()
+
+	connTime := u.GetConnectTime()
+
+	oTime := time.Since(connTime)
+
+	h := int(math.Floor(oTime.Hours()))
+	m := int(math.Floor(oTime.Minutes())) - (h * 60)
+	s := int(math.Floor(oTime.Seconds())) - (h * 60 * 60) - (m * 60)
+
+	timeStr := ``
+	if h > 0 {
+		timeStr = fmt.Sprintf(`%dh%dm`, h, m)
+	} else if m > 0 {
+		timeStr = fmt.Sprintf(`%dm`, m)
+	} else {
+		timeStr = fmt.Sprintf(`%ds`, s)
+	}
+
+	isAfk := false
+	if afkRounds > 0 && roundNow-u.GetLastInputRound() >= afkRounds {
+		isAfk = true
+	}
+
+	return OnlineInfo{
+		u.Username,
+		u.Character.Name,
+		u.Character.Level,
+		u.Character.AlignmentName(),
+		skills.GetProfession(u.Character.GetAllSkillRanks()),
+		int64(oTime.Seconds()),
+		timeStr,
+		isAfk,
+		u.Permission,
+	}
 }
