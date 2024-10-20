@@ -87,23 +87,8 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	strB.WriteString("</style></head><body>\n")
 	strB.WriteString("<h1>GoMud</h1>\n")
 
-	strB.WriteString("<h3>Access: </h1>\n")
-
-	if len(stats.TelnetPorts) > 0 {
-
-		strB.WriteString("<p><b>Telnet Ports:</b> ")
-		for i, p := range stats.TelnetPorts {
-			if i > 0 {
-				strB.WriteString(`, `)
-			}
-			strB.WriteString(fmt.Sprintf("%d", p))
-		}
-
-		strB.WriteString("</p>\n")
-	}
-
 	if stats.WebSocketPort > 0 {
-		strB.WriteString("<p><b>Web Terminal:</b> <a href=\"/client\">Link</a></p>\n")
+		strB.WriteString("<p><b>Access Web Terminal:</b> <a href=\"/client\">Link</a></p>\n")
 	}
 
 	strB.WriteString("<p>&nbsp;</p>\n")
