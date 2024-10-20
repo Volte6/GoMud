@@ -33,6 +33,7 @@ import (
 	"github.com/volte6/gomud/usercommands"
 	"github.com/volte6/gomud/users"
 	"github.com/volte6/gomud/util"
+	"github.com/volte6/gomud/webclient"
 )
 
 type WorldInput struct {
@@ -629,6 +630,7 @@ func (w *World) MainWorker(shutdown chan bool, wg *sync.WaitGroup) {
 	ansiAliasTimer := time.NewTimer(ansiAliasReloadPeriod)
 	messageTimer := time.NewTimer(time.Millisecond)
 	turnTimer := time.NewTimer(time.Duration(c.TurnMs) * time.Millisecond)
+	statsTimer := time.NewTimer(time.Duration(10) * time.Second)
 
 loop:
 	for {
@@ -645,6 +647,12 @@ loop:
 			users.SaveAllUsers()
 
 			break loop
+		case <-statsTimer.C:
+
+			s := webclient.GetStats()
+			s.OnlineNow = len(users.GetOnlineUserIds())
+			webclient.UpdateStats(s)
+			statsTimer.Reset(time.Duration(10) * time.Second)
 
 		case <-roomUpdateTimer.C:
 			slog.Debug(`MainWorker`, `action`, `rooms.RoomMaintenance()`)
