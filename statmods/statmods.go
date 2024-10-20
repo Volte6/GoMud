@@ -9,15 +9,19 @@ type StatMods map[string]int
 type StatName string
 
 var (
-	// Not an exhaustive list, but ideally keep track of
+	// specific skills
+	Tame StatName = `tame`
 
+	// Not an exhaustive list, but ideally keep track of
 	RacialBonusPrefix StatName = `racial-bonus-`
+
 	// any statnames/prefixes here
 	Casting        StatName = `casting`        // also used for `casting-` prefix followed by spell School
 	CastingPrefix  StatName = `casting-`       // followed by spell School
 	XPScale        StatName = `xpscale`        // Used for scaling xp after kills
 	HealthRecovery StatName = `healthrecovery` // Augments HP recovery speed
 	ManaRecovery   StatName = `manarecovery`   // Augments MP recovery speed
+
 	// Stat based
 	Strength   StatName = `strength`
 	Speed      StatName = `speed`
