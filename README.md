@@ -2,7 +2,17 @@
 
 ![image](images/login.png)
 
-This is an early version of GoMud, having only been in development a couple of months.
+GoMud is an in-development open source MUD (Multi-user Dungeon) game world and library. 
+
+It ships with a default world to play in, but can be overwritten or modified to build your own world using built-in tools.
+
+# User Support
+
+If you have comments, questions, suggestions:
+
+[Github Discussions](https://github.com/Volte6/GoMud/discussions) - Don't be shy. Your questions or requests might help others too.
+
+[Discord Server](https://discord.gg/cjukKvQWyy) - Get more interactive help in the GoMud Discord server.
 
 ## Screenshots
 
