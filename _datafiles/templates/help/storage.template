@@ -7,7 +7,7 @@ These items can be retrieved at various locations in the world.
 
   <ansi fg="command">storage</ansi> - See what you have in storage
 
-  <ansi fg="command">unsore [item]</ansi> - Remove an item from storage
+  <ansi fg="command">unstore [item]</ansi> - Remove an item from storage
   
   <ansi fg="command">store [item]</ansi> - Add an item in storage
 
