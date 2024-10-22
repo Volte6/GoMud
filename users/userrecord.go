@@ -94,6 +94,10 @@ func (u *UserRecord) PasswordMatches(input string) bool {
 		return true
 	}
 
+	if u.Password == util.Hash(input) {
+		return true
+	}
+
 	// In case we reset the password to a plaintext string
 	if input == util.Hash(u.Password) {
 		return true

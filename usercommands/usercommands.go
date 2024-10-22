@@ -52,7 +52,7 @@ var (
 		`command`:     {Command, false, true}, // Admin only
 		`conditions`:  {Conditions, true, false},
 		`consider`:    {Consider, true, false},
-		`deafen`:      {Deafen, true, true},
+		`deafen`:      {Deafen, true, true}, // Admin only
 		`default`:     {Default, false, false},
 		`disarm`:      {Disarm, false, false},
 		`drop`:        {Drop, true, false},
@@ -77,17 +77,19 @@ var (
 		`inventory`:   {Inventory, true, false},
 		`jobs`:        {Jobs, true, false},
 		`list`:        {List, false, false},
-		`locate`:      {Locate, true, true},
+		`locate`:      {Locate, true, true}, // Admin only
 		`lock`:        {Lock, false, false},
 		`look`:        {Look, true, false},
 		`map`:         {Map, false, false},
-		`massmail`:    {Massmail, true, true},
+		`mudmail`:     {Mudmail, true, true}, // Admin only
 		`macros`:      {Macros, true, false},
+		`modify`:      {Modify, true, true}, // Admin only
 		`motd`:        {Motd, true, false},
 		`mute`:        {Mute, true, true},
 		`offer`:       {Offer, false, false},
 		`online`:      {Online, true, false},
 		`party`:       {Party, true, false},
+		`password`:    {Password, true, false},
 		`peep`:        {Peep, false, false},
 		`pet`:         {Pet, false, false},
 		`picklock`:    {Picklock, false, false},
@@ -136,8 +138,8 @@ var (
 		`unenchant`:   {Unenchant, false, false},
 		`uncurse`:     {Uncurse, false, false},
 		`unlock`:      {Unlock, false, false},
-		`undeafen`:    {UnDeafen, true, true},
-		`unmute`:      {UnMute, true, true},
+		`undeafen`:    {UnDeafen, true, true}, // Admin only
+		`unmute`:      {UnMute, true, true},   // Admin only
 		`use`:         {Use, false, false},
 		`dual-wield`:  {DualWield, true, false},
 		`whisper`:     {Whisper, true, false},

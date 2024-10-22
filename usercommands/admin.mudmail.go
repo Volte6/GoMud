@@ -11,22 +11,22 @@ import (
 	"github.com/volte6/gomud/users"
 )
 
-func Massmail(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Mudmail(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	/*
 		args := util.SplitButRespectQuotes(rest)
 		if len(args) < 2 {
 			// send some sort of help info?
-			infoOutput, _ := templates.Process("admincommands/help/command.massmail", nil)
+			infoOutput, _ := templates.Process("admincommands/help/command.mudmail", nil)
 			user.SendText(infoOutput)
 			return true, nil
 		}
 	*/
 
 	// Get if already exists, otherwise create new
-	cmdPrompt, isNew := user.StartPrompt(`massmail`, rest)
+	cmdPrompt, isNew := user.StartPrompt(`mudmail`, rest)
 	if isNew {
-		user.SendText(fmt.Sprintf(`Starting a new mass mail...%s`, term.CRLFStr))
+		user.SendText(fmt.Sprintf(`Starting a new mud mail...%s`, term.CRLFStr))
 	}
 
 	msg := users.Message{
