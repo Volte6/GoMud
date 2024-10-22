@@ -1,0 +1,4 @@
+The <ansi fg="command">modify</ansi> command modifies player records:
+
+<ansi fg="command">modify permission [username] [user/mod/admin]</ansi> - Changes a users permission level.
+Note: Cannot downgrade an admin to a lower permission.

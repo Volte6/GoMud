@@ -8,6 +8,7 @@ help:
       - alias
       - macros
       - set
+      - password
     character:
       - actionpoints
       - alignment
@@ -119,15 +120,22 @@ help:
       - uncurse
   admin:
     all:
+      - badcommands
       - build
       - buff
       - command
+      - deafen
       - locate
+      - massmail
+      - modify
+      - mute
       - prepare
       - questtoken
+      - redescribe
       - reload
       - rename
       - room
+      - questtoken
       - server
       - skillset
       - spawn
