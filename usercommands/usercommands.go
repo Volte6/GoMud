@@ -81,7 +81,7 @@ var (
 		`lock`:        {Lock, false, false},
 		`look`:        {Look, true, false},
 		`map`:         {Map, false, false},
-		`massmail`:    {Massmail, true, true}, // Admin only
+		`mudmail`:     {Mudmail, true, true}, // Admin only
 		`macros`:      {Macros, true, false},
 		`modify`:      {Modify, true, true}, // Admin only
 		`motd`:        {Motd, true, false},

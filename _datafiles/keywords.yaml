@@ -126,7 +126,7 @@ help:
       - command
       - deafen
       - locate
-      - massmail
+      - mudmail
       - modify
       - mute
       - prepare
