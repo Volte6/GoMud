@@ -1,6 +1,7 @@
 package usercommands
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/volte6/gomud/rooms"
@@ -36,6 +37,9 @@ func Modify(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 			return true, nil
 		}
 
+		foundUsername := ``
+		foundCharacterName := ``
+
 		for _, u := range users.GetAllActiveUsers() {
 			if strings.EqualFold(searchUser, u.Username) {
 				if u.Permission == users.PermissionAdmin {
@@ -43,45 +47,57 @@ func Modify(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 					return true, nil
 				}
 
+				if u.Permission == newPerms {
+					user.SendText(`<ansi fg="alert-4">That permission is already set for this user.</ansi>`)
+					return true, nil
+				}
+
+				foundCharacterName = u.Character.Name
+				foundUsername = u.Username
+
 				u.Permission = newPerms
 
 				users.SaveUser(*u)
 
 				u.SendText(`<ansi fg="alert-3">Your permission has been set to: ` + newPerms + `</ansi>`)
-				user.SendText("Permissions changed.")
-
-				return true, nil
+				break
 			}
 		}
 
-		found := false
-		users.SearchOfflineUsers(func(u *users.UserRecord) bool {
+		if len(foundUsername) == 0 {
+			users.SearchOfflineUsers(func(u *users.UserRecord) bool {
 
-			if strings.EqualFold(searchUser, u.Username) {
+				if strings.EqualFold(searchUser, u.Username) {
 
-				if u.Permission == users.PermissionAdmin {
-					user.SendText(`<ansi fg="alert-4">Admin permissions cannot be removed this way.</ansi>`)
+					if u.Permission == users.PermissionAdmin {
+						user.SendText(`<ansi fg="alert-4">Admin permissions cannot be removed this way.</ansi>`)
+						return false
+					}
+
+					if u.Permission == newPerms {
+						user.SendText(`<ansi fg="alert-4">That permission is already set for this user.</ansi>`)
+						return false
+					}
+
+					foundCharacterName = u.Character.Name
+					foundUsername = u.Username
+
+					u.Permission = newPerms
+
+					users.SaveUser(*u)
+
 					return false
 				}
 
-				found = true
+				return true
+			})
+		}
 
-				u.Permission = newPerms
-
-				users.SaveUser(*u)
-
-				return false
-			}
-
-			return true
-		})
-
-		if found {
-			user.SendText("Permissions changed.")
+		if len(foundUsername) > 0 {
+			user.SendText(fmt.Sprintf(`Permissions changed for user <ansi fg="username">%s</ansi> (Character name: <ansi fg="username">%s</ansi>).`, foundUsername, foundCharacterName))
 			return true, nil
 		}
 
-		user.SendText("Could not find user.")
 	}
 
 	return true, nil
