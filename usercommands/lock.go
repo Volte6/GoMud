@@ -20,7 +20,7 @@ func Lock(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	}
 
 	containerName := room.FindContainerByName(args[0])
-	exitName, exitRoomId := room.FindExitByName(args[0])
+	exitName, _ := room.FindExitByName(args[0])
 
 	if containerName != `` {
 
@@ -68,7 +68,7 @@ func Lock(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		return true, nil
 
-	} else if exitRoomId > 0 {
+	} else if exitName != `` {
 
 		exitInfo := room.Exits[exitName]
 

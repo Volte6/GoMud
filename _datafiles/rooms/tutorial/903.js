@@ -62,7 +62,7 @@ function onCommand(cmd, rest, user, room) {
             exits = room.GetExits();
             if ( !exits['portal'] ) {
                 teacherMob.Command('emote glows intensely, and a ' + UtilApplyColorPattern('swirling portal', 'pink') + ' appears!');
-                room.AddTemporaryExit('swirling portal', ':pink', 1, 9000);
+                room.AddTemporaryExit('swirling portal', ':pink', 0, 9000); // RoomId 0 is an alias for start room
             }
 
             teacherMob.Command('say Enter the portal when you are ready.');

@@ -33,7 +33,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	exitName, goRoomId := room.FindExitByName(rest)
 
-	if goRoomId > 0 || exitName != `` {
+	if exitName != `` {
 
 		if user.Character.IsDisabled() {
 			user.SendText("You are unable to do that while downed.")

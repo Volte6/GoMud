@@ -36,7 +36,7 @@ func Shoot(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	// Only shooting weapons can target adjacent rooms
 	// "attack goblin east"
 	exitName, attackRoomId := room.FindExitByName(direction)
-	if attackRoomId > 0 {
+	if exitName != `` {
 
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
@@ -46,9 +46,7 @@ func Shoot(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		if adjacentRoom := rooms.LoadRoom(attackRoomId); adjacentRoom != nil {
 			attackPlayerId, attackMobInstanceId = adjacentRoom.FindByName(strings.Join(args, ` `))
 		}
-	}
-
-	if attackRoomId == 0 {
+	} else {
 		return true, nil
 	}
 

@@ -50,8 +50,9 @@ type RoomManager struct {
 }
 
 const (
-	GoblinZone = `Endless Trashheap`
-	GoblinRoom = 139
+	GoblinZone       = `Endless Trashheap`
+	GoblinRoom       = 139
+	StartRoomIdAlias = 0
 )
 
 type ZoneInfo struct {
@@ -261,6 +262,28 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		return fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
+	cfg := configs.GetConfig()
+
+	if toRoomId == StartRoomIdAlias {
+
+		// If "StartRoom" is set for MiscData on the char, use that.
+		if charStartRoomId := user.Character.GetMiscData(`StartRoom`); charStartRoomId != nil {
+			if rId, ok := charStartRoomId.(int); ok {
+				toRoomId = rId
+			}
+		}
+
+		// If still StartRoomIdAlias, use config value
+		if toRoomId == StartRoomIdAlias && cfg.StartRoom != 0 {
+			toRoomId = int(cfg.StartRoom)
+		}
+
+		// If toRomoId is zero after all this, default to 1
+		if toRoomId == 0 {
+			toRoomId = 1
+		}
+	}
+
 	newRoom := LoadRoom(toRoomId)
 	if newRoom == nil {
 		return fmt.Errorf(`room %d not found`, toRoomId)
@@ -300,7 +323,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 			}
 
 			spawnGuide := false
-			if (roundNow - lastGuideRound) > uint64(configs.GetConfig().SecondsToRounds(300)) {
+			if (roundNow - lastGuideRound) > uint64(cfg.SecondsToRounds(300)) {
 				spawnGuide = true
 			}
 
@@ -824,6 +847,13 @@ func IsRoomLoaded(roomId int) bool {
 // Load room grabs the room from memory and returns a pointer to it.
 // If the room hasn't been loaded yet, it loads it into memory
 func LoadRoom(roomId int) *Room {
+
+	// Room 0 aliases to start room
+	if roomId == StartRoomIdAlias {
+		if roomId = int(configs.GetConfig().StartRoom); roomId == 0 {
+			roomId = 1
+		}
+	}
 
 	room, ok := roomManager.rooms[roomId]
 

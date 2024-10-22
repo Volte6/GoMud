@@ -54,7 +54,7 @@ func Wander(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		}
 	}
 
-	if exitName, roomId := room.GetRandomExit(); roomId > 0 {
+	if exitName, roomId := room.GetRandomExit(); exitName != `` {
 		if r := rooms.LoadRoom(roomId); r != nil {
 			if !restrictZone || r.Zone == mob.Character.Zone {
 

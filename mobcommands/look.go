@@ -54,7 +54,7 @@ func Look(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	// Check room exits
 	//
 	exitName, lookRoomId := room.FindExitByName(lookAt)
-	if lookRoomId > 0 {
+	if exitName != `` {
 
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {
@@ -65,12 +65,9 @@ func Look(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 			room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> peers toward the %s.`, mob.Character.Name, exitName))
 		}
 
-		if lookRoomId > 0 {
+		lookRoom(mob, lookRoomId, secretLook || isSneaking)
 
-			lookRoom(mob, lookRoomId, secretLook || isSneaking)
-
-			return true, nil
-		}
+		return true, nil
 	}
 
 	//

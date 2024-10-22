@@ -71,6 +71,7 @@ type Config struct {
 	TimeoutMods        ConfigBool        `yaml:"TimeoutMods"`        // Whether to kick admin/mods when idle too long.
 	ZombieSeconds      ConfigInt         `yaml:"ZombieSeconds"`      // How many seconds a player will be a zombie allowing them to reconnect.
 	LogoutRounds       ConfigInt         `yaml:"LogoutRounds"`       // How many rounds of uninterrupted meditation must be completed to log out.
+	StartRoom          ConfigInt         `yaml:"StartRoom"`          // Default starting room.
 	TutorialStartRooms ConfigSliceString `yaml:"TutorialStartRooms"` // List of all rooms that can be used to begin the tutorial process
 
 	// Perma-death related configs

@@ -43,7 +43,7 @@ func Portal(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 		// Only interest in rooms where players haven't visited in a while and have at least 1
 		mostItemRoomId, qty := rooms.GetRoomWithMostItems(bool(config.LootGoblinIncludeRecentRooms), int(config.LootGoblinMinimumItems), int(config.LootGoblinMinimumGold))
-		if portalTargetRoomId == 0 && qty == 0 { // could't find any
+		if qty == 0 { // could't find any
 			// No more rooms with items? Our job is done i guess.
 
 			mob.Command(`portal home;drop all`)

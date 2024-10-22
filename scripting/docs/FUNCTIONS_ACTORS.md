@@ -175,6 +175,8 @@ Sets permanent data for the ActorObject.
 
 _Note: This miscellaneous data is attached to the character data, not the user data. If the user changes characters, it will not follow._
 
+_Note: There is a special key: `StartRoom` that will override the Start RoomId for the character if set._
+
 |  Argument | Explanation |
 | --- | --- |
 | key | A unique identifier for the data. |
