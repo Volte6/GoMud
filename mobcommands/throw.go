@@ -33,17 +33,17 @@ func Throw(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	exitName, throwRoomId := room.FindExitByName(throwWhere)
 
 	// If nothing found, consider directional aliases
-	if throwRoomId == 0 {
+	if exitName == `` {
 
 		if alias := keywords.TryDirectionAlias(throwWhere); alias != throwWhere {
 			exitName, throwRoomId = room.FindExitByName(alias)
-			if throwRoomId != 0 {
+			if exitName != `` {
 				throwWhere = alias
 			}
 		}
 	}
 
-	if throwRoomId > 0 {
+	if exitName != `` {
 
 		exitInfo := room.Exits[exitName]
 		if exitInfo.Lock.IsLocked() {

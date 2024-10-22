@@ -7,7 +7,7 @@ Each skill is improved by your stats and level as well.
 <ansi fg="yellow">Usage: </ansi>
 
 (Lvl 1) <ansi fg="skill">sneak [direction/exit]</ansi> Remain hidden for a period of time, even when moving between areas.
-(Lvl 2) <ansi fg="skill">bump</ansi> Bump into a player or NPC, causing a fraction of their coins to drop to the ground.
+(Lvl 2) <ansi fg="skill">bump [enemy]</ansi> Bump into a player or NPC, causing a fraction of their coins to drop to the ground.
 (Lvl 3) <ansi fg="skill">backstab [enemy]</ansi> Guarenteed critical on successful attack.
 (Lvl 4) <ansi fg="skill">pickpocket [enemy]</ansi> Gain ability to steal from players and NPC's while hidden.
 

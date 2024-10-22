@@ -153,7 +153,7 @@ function onAsk(mob, room, eventDetails) {
         mob.Command(`sayto @`+String(eventDetails.sourceId)+` back to <ansi fg="room-title">Town Square</ansi>? Sure thing, lets go!`);
         mob.Command(`emote whispers a soft incantation and summons a ` + UtilApplyColorPattern(`glowing portal`, `cyan`) + `.`);
 
-        room.AddTemporaryExit(`glowing portal`, `:cyan`, 1, 3);
+        room.AddTemporaryExit(`glowing portal`, `:cyan`, 0, 3); // roomId zero is start room alias
 
         return true;
     }

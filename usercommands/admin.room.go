@@ -122,13 +122,14 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		direction := strings.ToLower(args[1])
 		roomId = 0
+		var numError error = nil
 
 		if len(args) > 2 {
-			roomId, _ = strconv.Atoi(args[2])
+			roomId, numError = strconv.Atoi(args[2])
 		}
 
 		// Will be erasing it.
-		if roomId == 0 {
+		if numError != nil || len(args) < 3 { // If a bad room number or NO room number supplied, delete
 			if _, ok := room.Exits[direction]; !ok {
 				user.SendText(fmt.Sprintf("Exit %s does not exist.", direction))
 				return handled, nil
@@ -233,6 +234,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	} else {
 
 		var gotoRoomId int = 0
+		var numError error = nil
 
 		if deltaD, ok := rooms.DirectionDeltas[roomCmd]; ok {
 
@@ -266,10 +268,10 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			//dirDelta.Dy
 		} else {
 			// move to a new room
-			gotoRoomId, _ = strconv.Atoi(args[0])
+			gotoRoomId, numError = strconv.Atoi(args[0])
 		}
 
-		if gotoRoomId != 0 {
+		if numError == nil {
 
 			previousRoomId := user.Character.RoomId
 

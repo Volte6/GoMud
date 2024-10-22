@@ -148,6 +148,11 @@ ZombieSeconds: 30
 #   How many rounds of meditation a player must complete before they are
 #   logged out. If interrupted, they must start over.
 LogoutRounds: 3
+# - StartRoom -
+#   This is the default starting room for the game. It only matters when there
+#   is code that explicitely tries to send the player to the "starting room"
+#   The default of 1 is Town Square in Frostfang
+StartRoom: 1
 # - TutorialStartRooms - 
 #   RoomIds players will be put in when starting the game/tutorial
 #   RoomIds 900-999 are reserved for Tutorial rooms.

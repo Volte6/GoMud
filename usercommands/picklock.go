@@ -38,7 +38,7 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 	lockStrength := 0
 
 	containerName := room.FindContainerByName(args[0])
-	exitName, exitRoomId := room.FindExitByName(args[0])
+	exitName, _ := room.FindExitByName(args[0])
 
 	if containerName != `` {
 
@@ -58,7 +58,7 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 		lockStrength = int(container.Lock.Difficulty)
 		lockId = fmt.Sprintf(`%d-%s`, room.RoomId, containerName)
 
-	} else if exitRoomId > 0 {
+	} else if exitName != `` {
 
 		// get the first entry int he slice and shorten the slice
 		args = args[1:]

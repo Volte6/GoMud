@@ -36,6 +36,11 @@ func Bump(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, nil
 	}
 
+	if len(rest) == 0 {
+		user.SendText("Who do you wanna bump?")
+		return true, nil
+	}
+
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	pickPlayerId, pickMobInstanceId := room.FindByName(args[0])

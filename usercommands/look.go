@@ -206,17 +206,17 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	exitName, lookRoomId := room.FindExitByName(lookAt)
 
 	// If nothing found, consider directional aliases
-	if lookRoomId == 0 {
+	if exitName == `` {
 
 		if alias := keywords.TryDirectionAlias(lookAt); alias != lookAt {
 			exitName, lookRoomId = room.FindExitByName(alias)
-			if lookRoomId != 0 {
+			if exitName != `` {
 				lookAt = alias
 			}
 		}
 	}
 
-	if lookRoomId > 0 {
+	if exitName != `` {
 
 		if visibility < 2 {
 
@@ -241,12 +241,10 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> peers toward the %s.`, user.Character.Name, exitName), user.UserId)
 		}
 
-		if lookRoomId > 0 {
+		lookRoom(user, lookRoomId, secretLook || isSneaking)
 
-			lookRoom(user, lookRoomId, secretLook || isSneaking)
+		return true, nil
 
-			return true, nil
-		}
 	}
 
 	//

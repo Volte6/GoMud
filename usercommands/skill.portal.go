@@ -37,7 +37,7 @@ func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 	}
 
 	// Establish the default portal location
-	portalTargetRoomId := 1 // Defaults to Town Square of Frostfang
+	portalTargetRoomId := rooms.StartRoomIdAlias // Defaults to Start Room
 
 	if skillLevel >= 2 { // Defaults to root of current zone
 		portalTargetRoomId, _ = rooms.GetZoneRoot(user.Character.Zone)
@@ -56,11 +56,6 @@ func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 	}
 
 	portalLifeInSeconds := 30 + (user.Character.Stats.Mysticism.ValueAdj * 10) // 0 mysticism = 30 seconds, 100 mysticism = 1030 seconds
-
-	// Make sure we haven't borked anything
-	if portalTargetRoomId < 1 {
-		portalTargetRoomId = 1
-	}
 
 	// If no argument supplied, is a direct teleport.
 	if rest == "" {

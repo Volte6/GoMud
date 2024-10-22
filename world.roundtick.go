@@ -528,7 +528,7 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 			// Success!
 			exitName, exitRoomId := uRoom.GetRandomExit()
 
-			if exitRoomId == 0 {
+			if exitName == `` {
 				user.SendText(`You can't find an exit!`)
 				continue
 			}
@@ -1616,7 +1616,7 @@ func (w *World) handleShadowRealm(roundNumber uint64) {
 			}
 
 			tmpExit := rooms.TemporaryRoomExit{
-				RoomId:  1,
+				RoomId:  rooms.StartRoomIdAlias,
 				Title:   colorpatterns.ApplyColorPattern(`shimmering portal`, `cyan`),
 				UserId:  0,
 				Expires: time.Now().Add(time.Second * 10),

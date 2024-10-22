@@ -75,7 +75,7 @@ func Go(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	}
 
-	if goRoomId > 0 {
+	if exitName != `` {
 
 		// Load current room details
 		destRoom := rooms.LoadRoom(goRoomId)
