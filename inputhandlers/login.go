@@ -190,7 +190,7 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 	if err := users.CreateUser(state.UserObject); err != nil {
 		slog.Error("Could not create user", "error", err.Error())
 
-		connections.SendTo([]byte("Could not create user: "+err.Error()), clientInput.ConnectionId)
+		connections.SendTo([]byte("Could not create user: "+err.Error()+"\n"), clientInput.ConnectionId)
 
 		connections.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
 		connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
