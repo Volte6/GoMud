@@ -309,18 +309,18 @@ func CreateUser(u *UserRecord) error {
 		return errors.New("that username is not allowed: " + err.Error())
 	}
 
-	if configs.GetConfig().IsBannedName(u.Username) {
-		return errors.New(`that username is prohibited`)
+	if bannedPattern, ok := configs.GetConfig().IsBannedName(u.Username); ok {
+		return errors.New(`that username matched the prohibited name pattern: "` + bannedPattern + `"`)
 	}
 
 	for _, name := range mobs.GetAllMobNames() {
 		if strings.EqualFold(name, u.Username) {
-			return errors.New("that username is not allowed")
+			return errors.New("that username is in use")
 		}
 	}
 
 	if Exists(u.Username) {
-		return errors.New("user already exists")
+		return errors.New("that username is in use")
 	}
 
 	u.UserId = GetUniqueUserId()

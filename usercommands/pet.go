@@ -39,8 +39,8 @@ func Pet(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			return true, nil
 		}
 
-		if configs.GetConfig().IsBannedName(newName) {
-			user.SendText(`That name is prohibited.`)
+		if bannedPattern, ok := configs.GetConfig().IsBannedName(newName); ok {
+			user.SendText(`that username matched the prohibited name pattern: "` + bannedPattern + `"`)
 			return true, nil
 		}
 

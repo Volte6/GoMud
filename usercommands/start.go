@@ -8,6 +8,7 @@ import (
 
 	"github.com/volte6/gomud/characters"
 	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/mobs"
 	"github.com/volte6/gomud/races"
 	"github.com/volte6/gomud/rooms"
 	"github.com/volte6/gomud/scripting"
@@ -94,8 +95,8 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 			return true, nil
 		}
 
-		if configs.GetConfig().IsBannedName(question.Response) {
-			user.SendText(`that username is prohibited`)
+		if bannedPattern, ok := configs.GetConfig().IsBannedName(question.Response); ok {
+			user.SendText(`that username matched the prohibited name pattern: "` + bannedPattern + `"`)
 			question.RejectResponse()
 			return true, nil
 		}
@@ -110,6 +111,14 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 			user.SendText(err.Error())
 			question.RejectResponse()
 			return true, nil
+		}
+
+		for _, name := range mobs.GetAllMobNames() {
+			if strings.EqualFold(name, question.Response) {
+				user.SendText("that name is in use")
+				question.RejectResponse()
+				return true, nil
+			}
 		}
 
 		user.ClearPrompt()

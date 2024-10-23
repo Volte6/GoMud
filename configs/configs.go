@@ -561,17 +561,17 @@ func (c Config) RoundsToSeconds(rounds int) int {
 	return int(math.Ceil(float64(rounds) * float64(c.RoundSeconds)))
 }
 
-func (c Config) IsBannedName(name string) bool {
+func (c Config) IsBannedName(name string) (string, bool) {
 
 	name = strings.ToLower(strings.TrimSpace(name))
 
 	for _, bannedName := range c.BannedNames {
 		if util.StringWildcardMatch(name, strings.ToLower(bannedName)) {
-			return true
+			return bannedName, true
 		}
 	}
 
-	return false
+	return "", false
 }
 
 func GetConfig() Config {
