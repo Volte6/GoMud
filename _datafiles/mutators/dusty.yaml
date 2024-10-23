@@ -1,0 +1,15 @@
+	Id                  string // Short text that will uniquely identify this modifier ("dusty")
+	NameModifier        string // Text that will replace or append to existing name information (Title of a room for example) ("Dusty")
+	DescriptionModifier string // Text that will replace or append to existing descriptive information (Room description) ("The floors are covered in a thick layer of dust")
+	RespawnRate         uint32 // how long until it comes back. If 0, never comes back, is removed from the parent containing it.
+	DecayRounds         uint32 // how many rounds until this despawns. 0 means doesn't decay.
+	DecayIntoId         string // Id of another Mutator that replaces this one when it decays. This can be a circular behavior.
+	BuffIds             []int  // buffId's that apply conditionally (For rooms, anyone that enters the room gets the buff applied)
+	SpawnedRound        uint64 // tracks when this mutator was created (useful for decay)
+}
+
+
+id: dusty-floors
+namemodifier: Dusty
+descriptionmodifier: The floors are covered in a thick layer of dust.
+respawnrate: 
