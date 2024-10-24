@@ -14,5 +14,5 @@ exits:
     roomid: 55
 spawninfo:
 - mobid: 10
-  respawnrate: '2 real minutes'
   message: A Ivar Froststeel enters from a back room.
+  respawnrate: 2 real minutes

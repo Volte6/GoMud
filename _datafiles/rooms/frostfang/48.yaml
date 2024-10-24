@@ -15,7 +15,6 @@ exits:
     roomid: 41
 spawninfo:
 - mobid: 39
-  respawnrate: '10 real minutes'
   message: The librarian Elara enters the room, her eyes scanning the shelves with
     a thoughtful expression.
   idlecommands:
@@ -25,3 +24,4 @@ spawninfo:
   - emote conjures a glowing orb of light, using it to illuminate the pages of a book.
   questflags: [6-return]
   level: 40
+  respawnrate: 10 real minutes

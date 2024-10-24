@@ -15,4 +15,4 @@ exits:
     roomid: 780
 spawninfo:
 - mobid: 26
-  respawnrate: '5 real minutes'
+  respawnrate: 5 real minutes

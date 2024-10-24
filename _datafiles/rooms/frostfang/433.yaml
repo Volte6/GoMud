@@ -19,4 +19,4 @@ items:
 - itemid: 5
 spawninfo:
 - itemid: 5
-  respawnrate: '1 real day'
+  respawnrate: 1 real day

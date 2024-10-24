@@ -19,8 +19,8 @@ exits:
     roomid: 778
 spawninfo:
 - mobid: 26
-  respawnrate: '5 real minutes'
+  respawnrate: 5 real minutes
 - container: chest
   itemid: 30002
   gold: 75
-  respawnrate: '1 real day'
+  respawnrate: 1 real day

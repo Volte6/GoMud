@@ -11,10 +11,10 @@ exits:
     roomid: 187
 spawninfo:
 - mobid: 54
-  respawnrate: '5 real minutes'
+  respawnrate: 5 real minutes
 - mobid: 54
-  respawnrate: '5 real minutes'
+  respawnrate: 5 real minutes
 - mobid: 54
-  respawnrate: '2 real minutes'
+  respawnrate: 2 real minutes
 idlemessages:
 - The wind howls from every direction

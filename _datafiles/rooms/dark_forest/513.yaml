@@ -14,8 +14,8 @@ exits:
     roomid: 514
 spawninfo:
 - mobid: 32
-  respawnrate: '2 real minutes'
   message: A fungal growth emerges from the ground.
+  respawnrate: 2 real minutes
 - mobid: 33
-  respawnrate: '6 real minutes'
   message: A branch is pushed aside as an Imp enters the area.
+  respawnrate: 6 real minutes

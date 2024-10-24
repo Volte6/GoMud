@@ -19,7 +19,7 @@ exits:
     roomid: 435
 spawninfo:
 - mobid: 12
-  respawnrate: '2 real minutes'
   message: A massive rat saunters out from the shadows.
   forcehostile: true
   level: 5
+  respawnrate: 2 real minutes

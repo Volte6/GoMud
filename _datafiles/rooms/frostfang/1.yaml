@@ -27,7 +27,6 @@ exits:
     roomid: 7
 spawninfo:
 - mobid: 2
-  respawnrate: '5 real minutes'
   message: A town guard emerges from a nearby building.
   idlecommands:
   - say did you know there's a sign in the Townsquare with a map of the area?
@@ -35,6 +34,7 @@ spawninfo:
   - ""
   - ""
   - wander
+  respawnrate: 5 real minutes
 idlemessages:
 - A <ansi fg="mobname">citizen</ansi> walks up and examines the <ansi fg="itemname">map</ansi>
   posted to the <ansi fg="itemname">sign</ansi>.

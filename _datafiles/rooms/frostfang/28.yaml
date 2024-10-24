@@ -20,6 +20,6 @@ exits:
     roomid: 29
 spawninfo:
 - mobid: 1
-  respawnrate: '3 real minutes'
   message: A rat falls from the sky.
   level: 1
+  respawnrate: 3 real minutes

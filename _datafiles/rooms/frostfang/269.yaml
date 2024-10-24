@@ -15,5 +15,5 @@ exits:
     roomid: 259
 spawninfo:
 - mobid: 26
-  respawnrate: '5 real minutes'
   levelmod: 10
+  respawnrate: 5 real minutes

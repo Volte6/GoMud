@@ -16,8 +16,8 @@ exits:
     roomid: 4
 spawninfo:
 - mobid: 6
-  respawnrate: '2 real minutes'
   message: A trainer enters from a back room.
+  respawnrate: 2 real minutes
 skilltraining:
   map:
     min: 1
