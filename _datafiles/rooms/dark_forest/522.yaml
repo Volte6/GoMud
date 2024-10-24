@@ -14,5 +14,5 @@ exits:
     roomid: 520
 spawninfo:
 - mobid: 32
-  respawnrate: '1 real minute`3
+  respawnrate: '1 real minute'
   message: A fungal growth emerges from the ground.

@@ -19,5 +19,5 @@ spawninfo:
   respawnrate: '10 real minutes'
   message: A giant spider descends from a web.
 - mobid: 37
-  respawnrate: '10 real minutes'00
+  respawnrate: '10 real minutes'
   message: The queen has arrived.
