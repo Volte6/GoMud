@@ -21,12 +21,13 @@ func Time(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		gd = gametime.GetDate(gd.AddPeriod(rest))
 	}
 
-	user.SendText(fmt.Sprintf(`It is now %s. It is <ansi fg="230">%s</ansi> on <ansi fg="230">day %d</ansi> of <ansi fg="230">month %d</ansi> of the <ansi fg="230">year %d</ansi>. It is the year of the <ansi fg="230">%s</ansi>`,
+	user.SendText(fmt.Sprintf(`It is now %s. It is <ansi fg="%s">%stime</ansi> on <ansi fg="230">day %d</ansi> of the <ansi fg="230">year %d</ansi>. The month is <ansi fg="230">%s</ansi>, and it is the year of the <ansi fg="230">%s</ansi>`,
 		gd.String(),
 		dayNight,
+		dayNight,
 		gd.Day,
-		gd.Month,
 		gd.Year,
+		gametime.MonthName(gd.Month),
 		gametime.GetZodiac(gd.Year),
 	))
 

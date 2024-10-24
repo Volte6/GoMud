@@ -48,8 +48,7 @@ func (w *World) roundTick() {
 			})
 
 		} else {
-			sunriseTxt, _ := templates.Process("generic/sunrise", nil)
-
+			sunriseTxt, _ := templates.Process("generic/sunrise", gdNow)
 			events.AddToQueue(events.Broadcast{
 				Text: sunriseTxt,
 			})
