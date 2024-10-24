@@ -16,11 +16,11 @@ exits:
     roomid: 402
 spawninfo:
 - mobid: 34
-  respawnrate: '15 real minutes`
+  respawnrate: '15 real minutes'
   message: A massive tree suddenly begins to move.
 - mobid: 32
   respawnrate: '5 real minutes'
   message: A fungal growth emerges from the ground.
 - mobid: 32
-  respawnrate: '4 real minutes`
+  respawnrate: '4 real minutes'
   message: A fungal growth emerges from the ground.

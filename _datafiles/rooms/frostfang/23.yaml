@@ -26,6 +26,6 @@ spawninfo:
   message: A rat scurries out from a dark hole and wiggles its whiskers.
   level: 1
 - mobid: 1
-  respawnrate: '3 real minutes`
+  respawnrate: '3 real minutes'
   message: A rat wanders out from nowhere and looks at you.
   level: 1

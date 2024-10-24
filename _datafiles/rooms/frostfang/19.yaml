@@ -15,6 +15,6 @@ exits:
     roomid: 16
 spawninfo:
 - mobid: 1
-  respawnrate: '1 real minutes`
+  respawnrate: '1 real minutes'
   message: A rat wanders out from nowhere and looks at you.
   level: 1

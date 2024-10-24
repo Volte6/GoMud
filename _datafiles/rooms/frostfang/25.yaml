@@ -25,10 +25,10 @@ items:
 - itemid: 20011
 spawninfo:
 - mobid: 1
-  respawnrate: '1 real minutes`
+  respawnrate: '1 real minutes'
   message: A rat scurries out from a dark hole and wiggles its whiskers.
   level: 1
 - mobid: 1
-  respawnrate: '1 real minutes`
+  respawnrate: '1 real minutes'
   message: A rat falls from the sky.
   level: 1

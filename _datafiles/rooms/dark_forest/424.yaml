@@ -17,5 +17,5 @@ spawninfo:
   respawnrate: '15 real minutes'
   message: A fungal growth emerges from the ground.
 - mobid: 32
-  respawnrate: '1 real minutes`
+  respawnrate: '1 real minutes'
   message: A fungal growth emerges from the ground.

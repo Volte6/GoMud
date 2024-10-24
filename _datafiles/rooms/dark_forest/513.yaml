@@ -17,5 +17,5 @@ spawninfo:
   respawnrate: '2 real minutes'
   message: A fungal growth emerges from the ground.
 - mobid: 33
-  respawnrate: '6 real minutes`
+  respawnrate: '6 real minutes'
   message: A branch is pushed aside as an Imp enters the area.

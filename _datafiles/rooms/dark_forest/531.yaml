@@ -14,5 +14,5 @@ exits:
     roomid: 530
 spawninfo:
 - mobid: 33
-  respawnrate: '3 real minutes`
+  respawnrate: '3 real minutes'
   message: A branch is pushed aside as an Imp enters the area.
