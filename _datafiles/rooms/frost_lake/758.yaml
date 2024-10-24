@@ -26,7 +26,7 @@ exits:
     roomid: 757
 spawninfo:
 - mobid: 44
-  cooldown: 30
+  respawnrate: '2 real minutes'
   message: An old fisherman enters the house
 skilltraining:
   dual-wield:

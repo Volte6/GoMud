@@ -16,8 +16,8 @@ exits:
     roomid: 551
 spawninfo:
 - mobid: 34
-  cooldown: 225
+  respawnrate: '15 real minutes`
   message: A massive tree suddenly begins to move.
 - mobid: 32
-  cooldown: 65527
+  respawnrate: '15 real minutes'
   message: A fungal growth emerges from the ground.

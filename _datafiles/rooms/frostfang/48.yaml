@@ -15,7 +15,7 @@ exits:
     roomid: 41
 spawninfo:
 - mobid: 39
-  cooldown: 120
+  respawnrate: '10 real minutes'
   message: The librarian Elara enters the room, her eyes scanning the shelves with
     a thoughtful expression.
   idlecommands:

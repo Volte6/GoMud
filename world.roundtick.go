@@ -399,6 +399,7 @@ func (w *World) PruneBuffs() {
 
 func (w *World) handleRespawns() {
 
+	roundNow := util.GetRoundCount()
 	//
 	// Handle any respawns pending
 	//
@@ -412,24 +413,31 @@ func (w *World) handleRespawns() {
 
 		for idx, spawnInfo := range room.SpawnInfo {
 
-			if spawnInfo.InstanceId == 0 {
+			if spawnInfo.MobId == 0 { // not a mob spawn.
+				continue
+			}
 
-				if spawnInfo.CooldownLeft < 1 {
-					// Spawn a new one.
-					if spawnInfo.MobId > 0 {
+			if spawnInfo.InstanceId > 0 { // Still exists (alive)
+				continue
+			}
 
-						if mob := mobs.NewMobById(mobs.MobId(spawnInfo.MobId), room.RoomId); mob != nil {
-							spawnInfo.InstanceId = mob.InstanceId
-							room.AddMob(mob.InstanceId)
-							room.SpawnInfo[idx] = spawnInfo
-
-							if len(spawnInfo.Message) > 0 {
-								room.SendText(spawnInfo.Message)
-							}
-						}
-					}
+			if spawnInfo.DespawnedRound > 0 {
+				if roundNow < gametime.GetDate(spawnInfo.DespawnedRound).AddPeriod(spawnInfo.RespawnRate) { // Not yet ready to respawn.
+					continue
 				}
+			}
 
+			if mob := mobs.NewMobById(mobs.MobId(spawnInfo.MobId), room.RoomId); mob != nil {
+
+				spawnInfo.InstanceId = mob.InstanceId
+				spawnInfo.DespawnedRound = 0
+
+				room.AddMob(mob.InstanceId)
+				room.SpawnInfo[idx] = spawnInfo
+
+				if len(spawnInfo.Message) > 0 {
+					room.SendText(spawnInfo.Message)
+				}
 			}
 		}
 	}

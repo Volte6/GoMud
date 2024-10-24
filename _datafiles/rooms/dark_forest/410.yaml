@@ -14,8 +14,8 @@ exits:
     roomid: 409
 spawninfo:
 - mobid: 32
-  cooldown: 176
+  respawnrate: '9 real minutes`
   message: A fungal growth emerges from the ground.
 - mobid: 32
-  cooldown: 180
+  respawnrate: '12 real minutes'
   message: A fungal growth emerges from the ground.

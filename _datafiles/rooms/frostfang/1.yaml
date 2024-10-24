@@ -27,7 +27,7 @@ exits:
     roomid: 7
 spawninfo:
 - mobid: 2
-  cooldown: 85
+  respawnrate: '5 real minutes'
   message: A town guard emerges from a nearby building.
   idlecommands:
   - say did you know there's a sign in the Townsquare with a map of the area?

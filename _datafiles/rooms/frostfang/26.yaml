@@ -28,14 +28,14 @@ nouns:
     are clean and clear, as if polished.
 spawninfo:
 - mobid: 1
-  cooldown: 10
+  respawnrate: '1 real minutes`
   message: A rat scurries out from a dark hole and wiggles its whiskers.
   level: 1
 - mobid: 12
-  cooldown: 20
+  respawnrate: '2 real minutes'
   message: A massive rat saunters out from the shadows.
   level: 4
 - mobid: 1
-  cooldown: 14
+  respawnrate: '1 real minutes`
   message: A rat falls from the sky.
   level: 1

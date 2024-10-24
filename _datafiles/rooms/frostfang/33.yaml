@@ -20,10 +20,10 @@ exits:
     roomid: 23
 spawninfo:
 - mobid: 1
-  cooldown: 13
+  respawnrate: '1 real minute`
   message: A rat scurries out from a dark hole and wiggles its whiskers.
   level: 1
 - mobid: 1
-  cooldown: 20
+  respawnrate: '2 real minutes'
   message: A rat falls from the sky.
   level: 1

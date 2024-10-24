@@ -13,11 +13,11 @@ exits:
     roomid: 490
 spawninfo:
 - mobid: 30
-  cooldown: 300
+  respawnrate: '2 real minutes'
   message: A sneaky fellow enters from a back room.
   levelmod: 15
 - mobid: 41
-  cooldown: 300
+  respawnrate: '2 real minutes'
   message: A student of the guild enters the room.
   levelmod: 5
 skilltraining:

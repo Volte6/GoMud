@@ -55,7 +55,7 @@ func (m *Mutator) Update(currentRound uint64) bool {
 	if m.DespawnedRound != 0 {
 
 		gd := gametime.GetDate(m.DespawnedRound)
-		respawnRound := gd.NextRoundNumber(spec.RespawnRate)
+		respawnRound := gd.AddPeriod(spec.RespawnRate)
 
 		// Has enough time passed to do the respawn?
 		if currentRound >= respawnRound {
@@ -72,7 +72,7 @@ func (m *Mutator) Update(currentRound uint64) bool {
 	// It isn't despawned, so check whether we should despawn it.
 	//
 	gd := gametime.GetDate(m.SpawnedRound)
-	despawnRound := gd.NextRoundNumber(spec.DecayRate)
+	despawnRound := gd.AddPeriod(spec.DecayRate)
 
 	// Has enough time passed to do the despawn?
 	if currentRound >= despawnRound {

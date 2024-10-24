@@ -17,7 +17,7 @@ exits:
     roomid: 110
 spawninfo:
 - mobid: 6
-  cooldown: 180
+  respawnrate: '12 real minutes'
   message: A dark acolyte steps into the room.
   name: dark acolyte trainer
 skilltraining:

@@ -24,8 +24,8 @@ exits:
     roomid: 165
 spawninfo:
 - mobid: 20
-  cooldown: 160
+  respawnrate: '10 real minutes'
   message: The webs hum as a spider descends into the room.
 - mobid: 20
-  cooldown: 70
+  respawnrate: '5 real minutes'
   message: The webs hum as a spider descends into the room.

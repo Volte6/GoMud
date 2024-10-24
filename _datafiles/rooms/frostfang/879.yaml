@@ -16,7 +16,7 @@ exits:
     roomid: 5
 spawninfo:
 - mobid: 50
-  cooldown: 20
+  respawnrate: '2 real minutes'
   message: A mage enters the room.
 skilltraining:
   cast:

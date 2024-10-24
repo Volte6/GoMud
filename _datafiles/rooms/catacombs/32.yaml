@@ -28,5 +28,5 @@ exits:
     roomid: 81
 spawninfo:
 - mobid: 21
-  cooldown: 120
+  respawnrate: '10 real minutes'
   message: A dark robed figure slinks into view.

@@ -15,6 +15,6 @@ exits:
     roomid: 777
 spawninfo:
 - mobid: 26
-  cooldown: 60
+  respawnrate: '5 real minutes'
   scripttag: rattrap
   questflags: [7-gettrap]

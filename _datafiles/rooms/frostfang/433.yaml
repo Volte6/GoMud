@@ -19,4 +19,4 @@ items:
 - itemid: 5
 spawninfo:
 - itemid: 5
-  cooldown: 21600
+  respawnrate: '1 real day'

@@ -17,7 +17,7 @@ exits:
     roomid: 467
 spawninfo:
 - mobid: 31
-  cooldown: 50
+  respawnrate: '5 real minutes'
   message: A dog walks up and sits.
   forcehostile: true
   maxwander: -1

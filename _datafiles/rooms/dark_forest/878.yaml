@@ -25,4 +25,4 @@ spawninfo:
 - container: ornate chest
   itemid: 25
   gold: 1
-  cooldown: 21600
+  respawnrate: '1 real day'

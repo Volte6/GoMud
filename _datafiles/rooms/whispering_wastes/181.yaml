@@ -20,6 +20,6 @@ exits:
     roomid: 180
 spawninfo:
 - mobid: 27
-  cooldown: 225
+  respawnrate: '15 real minutes`
 idlemessages:
 - The wind howls from every direction

@@ -35,7 +35,7 @@ nouns:
   walls: :tapestry
 spawninfo:
 - mobid: 4
-  cooldown: 25
+  respawnrate: '3 real minutes'
   message: A priest emerges from a confession booth
   scripttag: sanctuary
   questflags: [2-start]

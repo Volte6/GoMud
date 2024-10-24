@@ -17,6 +17,6 @@ exits:
     roomid: 471
 spawninfo:
 - mobid: 29
-  cooldown: 59
+  respawnrate: '5 real minutes'
   message: A dangerous figure appears from the shadows.
   forcehostile: true

@@ -274,10 +274,10 @@ func (g GameDate) AdjustTo(quantizeTo string, adjustHours int, adjustDays int, a
 
 // Example:
 // gd := gametime.GetDate()
-// nextPeriodRound := gd.NextRoundNumber(`10 days`)
+// nextPeriodRound := gd.AddPeriod(`10 days`)
 // Accepts: x years, x months, x weeks, x days, x hours, x rounds
 // If `IRL` or `real` are in the mix, such as `x irl days` or `x days irl`, then it will use real world time
-func (g GameDate) NextRoundNumber(str string) uint64 {
+func (g GameDate) AddPeriod(str string) uint64 {
 
 	qty := 1
 	timeStr := ``

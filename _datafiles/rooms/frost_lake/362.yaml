@@ -12,7 +12,7 @@ exits:
     roomid: 363
 spawninfo:
 - mobid: 26
-  cooldown: 50
+  respawnrate: '5 real minutes'
   message: An old lake worker shuffles along the dock, muttering to himself.
   name: lake worker
   scripttag: lakeworker

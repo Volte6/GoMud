@@ -19,6 +19,6 @@ exits:
     roomid: 446
 spawninfo:
 - mobid: 12
-  cooldown: 20
+  respawnrate: '2 real minutes'
   message: A massive rat saunters out from the shadows.
   forcehostile: true
