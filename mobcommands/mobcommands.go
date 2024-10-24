@@ -46,6 +46,7 @@ var (
 		"look":           {Look, false},
 		"lookforaid":     {LookForAid, false},
 		"lookfortrouble": {LookForTrouble, false},
+		"noop":           {Noop, true},
 		"portal":         {Portal, false},
 		"remove":         {Remove, false},
 		"say":            {Say, true},

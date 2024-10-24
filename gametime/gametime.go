@@ -13,8 +13,7 @@ import (
 var (
 	dayResetOffset int = 0
 
-	cachedRound uint64
-	dateCache   GameDate
+	roundDateCache = map[uint64]GameDate{}
 )
 
 type GameDate struct {
@@ -24,6 +23,8 @@ type GameDate struct {
 	NightHoursPerDay int
 
 	Year        int
+	Month       int
+	Week        int
 	Day         int
 	Hour        int
 	Hour24      int
@@ -77,7 +78,7 @@ func SetToNight(roundAdjustment ...int) {
 	}
 
 	// Reset the cache
-	cachedRound = 0
+	clear(roundDateCache)
 }
 
 // Jumps the clock forward to the next day
@@ -98,7 +99,7 @@ func SetToDay(roundAdjustment ...int) {
 	}
 
 	// Reset the cache
-	cachedRound = 0
+	clear(roundDateCache)
 }
 
 // Jumps the clock forward a specific hour/minutes
@@ -118,7 +119,7 @@ func SetTime(setToHour int, setToMinutes ...int) {
 	dayResetOffset -= roundOfDay
 
 	// Reset the cache
-	cachedRound = 0
+	clear(roundDateCache)
 }
 
 func IsNight() bool {
@@ -127,17 +128,27 @@ func IsNight() bool {
 }
 
 // Gets the details of the current date
-func GetDate() GameDate {
+func GetDate(forceRound ...uint64) GameDate {
 
-	currentRound := util.GetRoundCount()
-
-	if cachedRound == 0 || currentRound != cachedRound {
-		// Update the cache info
-		dateCache = getDate(currentRound)
-		cachedRound = currentRound
+	currentRound := uint64(0)
+	if len(forceRound) > 0 {
+		currentRound = forceRound[0]
+	} else {
+		currentRound = util.GetRoundCount()
 	}
 
-	return dateCache
+	if d, ok := roundDateCache[currentRound]; ok {
+		return d
+	}
+
+	// Do a reset when it fills up too much
+	if len(roundDateCache) > 20 {
+		clear(roundDateCache)
+	}
+
+	roundDateCache[currentRound] = getDate(currentRound)
+
+	return roundDateCache[currentRound]
 }
 
 func getDate(currentRound uint64) GameDate {
@@ -188,9 +199,14 @@ func (g *GameDate) ReCalculate() {
 	day := 1 + math.Floor(float64(currentRoundAdjusted)/float64(g.RoundsPerDay))
 	year := math.Floor(float64(day) / 365)
 	day -= math.Floor(year * 365)
+	week := math.Floor(float64(day) / 7)
+
+	month := 1 + math.Floor((day*24)/730) // 730 hours in a "month" (24 hours * 365 days / 12 months)
 
 	g.Day = int(day)
 	g.Year = int(year)
+	g.Month = int(month)
+	g.Week = int(week)
 	g.Hour = hour
 	g.Hour24 = hour24
 	g.Minute = int(minute)
@@ -202,23 +218,23 @@ func (g *GameDate) ReCalculate() {
 	g.DayStart = nightEnd
 }
 
-func (g GameDate) AdjustTo(str string, adjustHours int, adjustDays int, adjustYears int) GameDate {
+func (g GameDate) AdjustTo(quantizeTo string, adjustHours int, adjustDays int, adjustYears int) GameDate {
 
-	if str == `hour` { // Start of the current hour
+	if quantizeTo == `hour` { // Start of the current hour
 
 		g.RoundNumber -= uint64(math.Ceil(float64(g.MinuteFloat) * (float64(g.RoundsPerDay) / 24 / 60)))
 
-	} else if str == `day` { // Start of current day
+	} else if quantizeTo == `day` { // Start of current day
 
 		g.RoundNumber -= uint64(math.Floor(float64(g.Hour24) * (float64(g.RoundsPerDay) / 24)))
 		g.RoundNumber -= uint64(math.Ceil(float64(g.MinuteFloat) * (float64(g.RoundsPerDay) / 24 / 60)))
 
-	} else if str == `week` { // Start of current week
+	} else if quantizeTo == `week` { // Start of current week
 
 		g.RoundNumber -= uint64(math.Floor(float64(g.Hour24) * (float64(g.RoundsPerDay) / 24)))
 		g.RoundNumber -= uint64(math.Ceil(float64(g.MinuteFloat) * (float64(g.RoundsPerDay) / 24 / 60)))
 
-	} else if str == `noon` { // 12pm of current day
+	} else if quantizeTo == `noon` { // 12pm of current day
 
 		g.RoundNumber -= uint64(math.Floor(float64(g.Hour24) * (float64(g.RoundsPerDay) / 24)))
 		g.RoundNumber -= uint64(math.Ceil(float64(g.MinuteFloat) * (float64(g.RoundsPerDay) / 24 / 60)))
@@ -245,9 +261,9 @@ func (g GameDate) AdjustTo(str string, adjustHours int, adjustDays int, adjustYe
 
 	if adjustHours != 0 {
 		if adjustHours < 1 {
-			g.RoundNumber -= uint64(-1 * adjustHours * g.RoundsPerDay)
+			g.RoundNumber -= uint64(math.Floor(-1 * float64(adjustHours) * (float64(g.RoundsPerDay) / 24)))
 		} else {
-			g.RoundNumber += uint64(adjustHours * g.RoundsPerDay)
+			g.RoundNumber += uint64(math.Floor(float64(adjustHours) * (float64(g.RoundsPerDay) / 24)))
 		}
 	}
 
@@ -256,46 +272,131 @@ func (g GameDate) AdjustTo(str string, adjustHours int, adjustDays int, adjustYe
 	return g
 }
 
-func StringToPeriods(currentRound uint64, str string) (lastRoundNum uint64, nextRoundNum uint64) {
+// Example:
+// gd := gametime.GetDate()
+// nextPeriodRound := gd.NextRoundNumber(`10 days`)
+// Accepts: x years, x months, x weeks, x days, x hours, x rounds
+// If `IRL` or `real` are in the mix, such as `x irl days` or `x days irl`, then it will use real world time
+func (g GameDate) NextRoundNumber(str string) uint64 {
 
 	qty := 1
 	timeStr := ``
+	realTime := false
+	roundsPerRealDay := 0
+	roundsPerRealHour := 0
 
-	parts := strings.Split(str, ` `)
-	if len(parts) == 1 {
-		timeStr = parts[0]
-	} else {
-		if qty, _ = strconv.Atoi(parts[0]); qty == 0 {
+	parts := strings.Split(strings.ToLower(str), ` `)
+	if len(parts) == 1 { // e.g. 2
+
+		// try and parse a number, if not a number, must be a str
+		if qty, _ = strconv.Atoi(parts[0]); qty < 1 {
+			qty = 1
+			timeStr = parts[0]
+		}
+
+	} else if len(parts) == 2 { // e.g. - 2 days
+		// first arg is quantity, second is unit
+		if qty, _ = strconv.Atoi(parts[0]); qty < 1 {
 			qty = 1
 		}
 		timeStr = parts[1]
+
+	} else if len(parts) == 3 {
+
+		// first arg is quantity, second should be `real` and the last is the unit
+		if qty, _ = strconv.Atoi(parts[0]); qty < 1 {
+			qty = 1
+		}
+
+		if parts[1] == `real` || parts[1] == `irl` { // e.g. - 2 irl days
+			realTime = true
+			roundsPerRealDay = 84600 / int(configs.GetConfig().RoundSeconds)
+			roundsPerRealHour = 3600 / int(configs.GetConfig().RoundSeconds)
+
+			timeStr = parts[2]
+		} else if parts[2] == `real` || parts[2] == `irl` { // e.g. - 2 days irl
+			realTime = true
+			roundsPerRealDay = 84600 / int(configs.GetConfig().RoundSeconds)
+			roundsPerRealHour = 3600 / int(configs.GetConfig().RoundSeconds)
+
+			timeStr = parts[1]
+		}
+
 	}
 
-	g := getDate(currentRound)
+	if len(timeStr) >= 2 {
 
-	if timeStr == `year` || timeStr == `years` || timeStr == `yearly` {
+		strShort := timeStr[0:2]
 
-		gLast := g.AdjustTo(`day`, 0, 0, -1)
-		gNext := g.AdjustTo(`day`, 0, 0, 1)
+		if strShort == `ye` { // timeStr == `year` || timeStr == `years` || timeStr == `yearly` {
 
-		return gLast.RoundNumber, gNext.RoundNumber
+			if realTime {
+				adjustment := uint64(qty * roundsPerRealDay * 365)
+				return g.RoundNumber + adjustment
+			}
 
-	} else if timeStr == `week` || timeStr == `weeks` || timeStr == `weekly` {
+			gNext := g.AdjustTo(``, 0, 0, 1*qty)
 
-		gLast := g.AdjustTo(`day`, 0, 0, -1)
-		gNext := g.AdjustTo(`day`, 0, 0, 1)
+			return gNext.RoundNumber
 
-		return gLast.RoundNumber, gNext.RoundNumber
+		} else if strShort == `mo` { // else if timeStr == `month` || timeStr == `months` || timeStr == `monthly` {
 
-	} else if timeStr == `day` || timeStr == `days` || timeStr == `daily` {
+			if realTime {
+				adjustment := uint64(qty * roundsPerRealHour * 730)
+				return g.RoundNumber + adjustment
+			}
+
+			gNext := g.AdjustTo(``, 730*qty, 0, 0)
+
+			return gNext.RoundNumber
+
+		} else if strShort == `we` { //  else if timeStr == `week` || timeStr == `weeks` || timeStr == `weekly` {
+
+			if realTime {
+				adjustment := uint64(qty * roundsPerRealDay * 7)
+				return g.RoundNumber + adjustment
+			}
+
+			gNext := g.AdjustTo(``, 0, 7*qty, 0)
+
+			return gNext.RoundNumber
+
+		} else if strShort == `da` { //  else if timeStr == `day` || timeStr == `days` || timeStr == `daily` {
+
+			if realTime {
+				adjustment := uint64(qty * roundsPerRealDay)
+				return g.RoundNumber + adjustment
+			}
+
+			gNext := g.AdjustTo(``, 0, 1*qty, 0)
+
+			return gNext.RoundNumber
+
+		} else if strShort == `ho` { // if timeStr == `hour` || timeStr == `hours` || timeStr == `hourly` {
+
+			if realTime {
+				adjustment := uint64(qty * roundsPerRealHour)
+				return g.RoundNumber + adjustment
+			}
+
+			gNext := g.AdjustTo(``, 1*qty, 0, 0)
+
+			return gNext.RoundNumber
+
+		}
+
+		// Failover to rounds
+		return g.RoundNumber + uint64(qty)
 
 	}
 
-	// assume hour/hours
+	// Assume rounds?
+	//if timeStr == `hour` || timeStr == `hours` || timeStr == `hourly` {
 
-	gLast := g.AdjustTo(`day`, 0, 0, -1)
-	gNext := g.AdjustTo(`day`, 0, 0, 1)
+	gNext := g.AdjustTo(``, 1*qty, 0, 0)
 
-	return gLast.RoundNumber, gNext.RoundNumber
+	return gNext.RoundNumber
+
+	//}
 
 }
