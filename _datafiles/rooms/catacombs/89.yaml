@@ -19,5 +19,5 @@ items:
 gold: 6
 spawninfo:
 - mobid: 15
-  cooldown: 160
+  respawnrate: '10 real minutes'
   message: The bones in the room stir, and a skeleton rises from the dirt.

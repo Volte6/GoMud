@@ -16,8 +16,8 @@ exits:
     roomid: 633
 spawninfo:
 - mobid: 36
-  cooldown: 120
+  respawnrate: '10 real minutes'
   message: A giant spider descends from a web.
 - mobid: 37
-  cooldown: 16000
+  respawnrate: '10 real minutes'
   message: The queen has arrived.

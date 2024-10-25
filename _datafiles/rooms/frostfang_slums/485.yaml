@@ -17,10 +17,10 @@ exits:
     roomid: 486
 spawninfo:
 - mobid: 28
-  cooldown: 55
   message: A dark figure appears from the shadows.
   forcehostile: true
+  respawnrate: 5 real minutes
 - mobid: 28
-  cooldown: 70
   message: A dark figure appears from the shadows.
   forcehostile: true
+  respawnrate: 5 real minutes

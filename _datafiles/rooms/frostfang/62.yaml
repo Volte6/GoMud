@@ -17,6 +17,6 @@ exits:
     roomid: 57
 spawninfo:
 - mobid: 11
-  cooldown: 20
   message: Brynja Snowdeal enters from a back room.
   levelmod: 40
+  respawnrate: 2 real minutes

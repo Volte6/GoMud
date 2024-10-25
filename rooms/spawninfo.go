@@ -3,11 +3,9 @@ package rooms
 type SpawnInfo struct {
 	MobId        int      `yaml:"mobid,omitempty"`           // Mob template Id to spawn
 	InstanceId   int      `yaml:"-"`                         // Mob instance Id that was spawned (tracks whether exists currently)
-	Container    string   `yaml:"container,omitempty"`       // If set, any item spawned will go into the container.
+	Container    string   `yaml:"container,omitempty"`       // If set, any item or gold spawned will go into the container.
 	ItemId       int      `yaml:"itemid,omitempty"`          // Item template Id to spawn on the floor
 	Gold         int      `yaml:"gold,omitempty"`            // How much gold to spawn on the floor
-	CooldownLeft uint16   `yaml:"-"`                         // How many rounds remain before it can spawn again. Only decrements if mob no longer exists.
-	Cooldown     uint16   `yaml:"cooldown,omitempty"`        // How many rounds to wait before spawning again after it is killed.
 	Message      string   `yaml:"message,omitempty"`         // (optional) message to display to the room when this creature spawns, instead of a default
 	Name         string   `yaml:"name,omitempty"`            // (optional) if set, will override the mob's name
 	ForceHostile bool     `yaml:"forcehostile,omitempty"`    // (optional) if true, forces the mob to be hostile.
@@ -18,4 +16,7 @@ type SpawnInfo struct {
 	BuffIds      []int    `yaml:"buffids,omitempty,flow"`    // (optional) list of buffs the mob always has active
 	Level        int      `yaml:"level,omitempty"`           // (optional) force this mob to a specific level
 	LevelMod     int      `yaml:"levelmod,omitempty"`        // (optional) modify this mobs level by this amount
+	// spawn tracking and rate
+	DespawnedRound uint64 `-`                          // When this mob was last despawned (killed)
+	RespawnRate    string `yaml:respawnrate:omitempty` // How long until it respawns when not present?
 }

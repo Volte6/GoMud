@@ -22,6 +22,6 @@ exits:
     roomid: 15
 spawninfo:
 - mobid: 1
-  cooldown: 14
   message: A rat falls from the sky.
   level: 1
+  respawnrate: 1 real minutes

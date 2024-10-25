@@ -16,9 +16,9 @@ exits:
     roomid: 270
 spawninfo:
 - mobid: 2
-  cooldown: 100
   message: A soldier walks into the barracks.
   maxwander: 2
   scripttag: hungry
   questflags: [4-return]
   levelmod: 55
+  respawnrate: 7 real minutes

@@ -24,8 +24,8 @@ nouns:
     air of timeless dominion and whispered dread.
 spawninfo:
 - mobid: 17
-  cooldown: 90
+  respawnrate: '6 real minutes'
   message: A dark acolyte steps into the room.
 - mobid: 18
-  cooldown: 90
+  respawnrate: '6 real minutes'
   message: A dark acolyte steps into the room.

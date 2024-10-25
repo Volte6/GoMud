@@ -15,11 +15,11 @@ exits:
     roomid: 5
 spawninfo:
 - mobid: 2
-  cooldown: 85
   message: A town guard emerges from a nearby building.
+  respawnrate: 5 real minutes
 - mobid: 3
-  cooldown: 85
   message: The captain of the guard arrives.
+  respawnrate: 5 real minutes
 - mobid: 2
-  cooldown: 85
   message: A guard has returned from his break.
+  respawnrate: 5 real minutes

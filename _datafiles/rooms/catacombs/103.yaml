@@ -20,5 +20,5 @@ exits:
     roomid: 104
 spawninfo:
 - mobid: 18
-  cooldown: 90
+  respawnrate: '6 real minutes'
   message: A dark acolyte steps into the room.

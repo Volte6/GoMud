@@ -17,7 +17,7 @@ exits:
     roomid: 244
 spawninfo:
 - mobid: 23
-  cooldown: 40
+  respawnrate: '3 real minutes'
   message: A bat flies into the room and hangs from the ceiling.
 idlemessages:
 - A gentle breeze blows through the cave from the east

@@ -17,10 +17,10 @@ exits:
     roomid: 557
 spawninfo:
 - mobid: 43
-  cooldown: 15
   message: A small faerie enters the clearing.
   idlecommands:
   - emote procures a piece of a mushrom, and with a wave of their hand, restore it
     to a new mushroom.
   - emote nods to themselves, pleased with their work.
   scripttag: clearing
+  respawnrate: 1 real minutes

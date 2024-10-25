@@ -28,6 +28,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GetPartyMembers() \[\]Actor](#actorobjectgetpartymembers-actor)
   - [ActorObject.AddGold(amt int \[, bankAmt int\])](#actorobjectaddgoldamt-int--bankamt-int)
   - [ActorObject.AddHealth(amt int) int](#actorobjectaddhealthamt-int-int)
+  - [ActorObject.Sleep(seconds int)](#actorobjectsleepseconds-int)
   - [ActorObject.Command(cmd string, waitTurns ...int)](#actorobjectcommandcmd-string-waitturns-int)
   - [ActorObject.IsTameable() bool](#actorobjectistameable-bool)
   - [ActorObject.TrainSkill(skillName string, skillLevel int)](#actorobjecttrainskillskillname-string-skilllevel-int)
@@ -247,6 +248,15 @@ Update how much health an ActorObject has, and returns the actual amount their h
 | --- | --- |
 | amt | A positive or negative amount of health to alter the actors health by. |
 
+
+## [ActorObject.Sleep(seconds int)](/scripting/actor_func.go)
+Force a mob to wait this many seconds before executing any additional behaviors
+
+_Note: Only works on mobs._
+
+|  Argument | Explanation |
+| --- | --- |
+| seconds | How many seconds to wait. |
 
 ## [ActorObject.Command(cmd string, waitTurns ...int)](/scripting/actor_func.go)
 Forces an ActorObject to execute a command as if they entered it

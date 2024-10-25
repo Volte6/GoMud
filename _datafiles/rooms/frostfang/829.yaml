@@ -19,8 +19,8 @@ exits:
     roomid: 270
 spawninfo:
 - mobid: 42
-  cooldown: 20
   message: The master-at-arms enters the training yard.
+  respawnrate: 2 real minutes
 skilltraining:
   brawling:
     min: 1

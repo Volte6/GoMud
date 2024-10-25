@@ -14,5 +14,5 @@ exits:
     roomid: 855
 spawninfo:
 - mobid: 49
-  cooldown: 20
+  respawnrate: '2 real minutes'
   message: The shop owner enters the room.

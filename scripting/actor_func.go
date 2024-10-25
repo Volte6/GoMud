@@ -289,6 +289,12 @@ func (a ScriptActor) AddMana(amt int) int {
 	return a.characterRecord.ApplyManaChange(amt)
 }
 
+func (a ScriptActor) Sleep(seconds int) {
+	if a.userId == 0 {
+		a.mobRecord.Sleep(seconds)
+	}
+}
+
 func (a ScriptActor) Command(cmd string, waitTurns ...int) {
 	if len(waitTurns) < 1 {
 		waitTurns = append(waitTurns, 0)

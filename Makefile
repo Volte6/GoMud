@@ -67,15 +67,29 @@ shell:
 .PHONY: validate
 validate: fmtcheck vet
 
+#
+#
+# For a complete list of GOOS/GOARCH combinations:
+# Run: go tool dist list
+#
+#
 .PHONY: build_rpi
 build_rpi: ### Build a binary for a raspberry pi
 	env GOOS=linux GOARCH=arm GOARM=5 go build -o $(BIN)-rpi
 
-.PHONY: build_only
-build: validate build_only  ### Validate the code and build the binary.
+.PHONY: build_win64
+build_win64: ### Build a binary for 64bit windows
+	env GOOS=windows GOARCH=amd64 go build -o $(BIN)-win64.exe
 
-.PHONY: build_only
-build_only:
+.PHONY: build_linux64
+build_linux64: ### Build a binary for linux
+	env GOOS=linux GOARCH=amd64 go build -o $(BIN)-linux64
+
+.PHONY: build
+build: validate build_local  ### Validate the code and build the binary.
+
+.PHONY: build_local
+build_local:
 	CGO_ENABLED=0 go build -trimpath -a -o $(BIN) 
 
 # Go targets

@@ -13,9 +13,9 @@ exits:
     roomid: 263
 spawninfo:
 - mobid: 26
-  cooldown: 60
   message: sophie steps out from another room.
   name: sophie
   scripttag: locketsadness
   questflags: [1-return]
   levelmod: 10
+  respawnrate: 5 real minutes

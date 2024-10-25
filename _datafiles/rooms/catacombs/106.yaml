@@ -18,8 +18,8 @@ exits:
     roomid: 135
 spawninfo:
 - mobid: 15
-  cooldown: 160
+  respawnrate: '10 real minutes'
   message: The bones in the room stir, and a skeleton rises from the dirt.
 - mobid: 15
-  cooldown: 120
+  respawnrate: '10 real minutes'
   message: The bones in the room stir, and a skeleton rises from the dirt.

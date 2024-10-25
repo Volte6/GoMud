@@ -18,6 +18,6 @@ exits:
     roomid: 439
 spawninfo:
 - mobid: 1
-  cooldown: 15
   message: A rat scurries out from a dark hole and wiggles its whiskers.
   level: 1
+  respawnrate: 1 real minutes

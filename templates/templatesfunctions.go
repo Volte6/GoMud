@@ -13,6 +13,7 @@ import (
 	"github.com/volte6/gomud/characters"
 	"github.com/volte6/gomud/colorpatterns"
 	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/gametime"
 	"github.com/volte6/gomud/mobs"
 	"github.com/volte6/gomud/skills"
 	"github.com/volte6/gomud/term"
@@ -206,6 +207,12 @@ var (
 		},
 		"permadeath": func() bool {
 			return bool(configs.GetConfig().PermaDeath)
+		},
+		"zodiac": func(month int) string {
+			return gametime.GetZodiac(month)
+		},
+		"month": func(month int) string {
+			return gametime.MonthName(month)
 		},
 	}
 )

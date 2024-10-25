@@ -222,20 +222,6 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 
 	}
 
-	cmd = strings.ToLower(cmd)
-
-	if alias := keywords.TryCommandAlias(cmd); alias != cmd {
-		if strings.Contains(alias, ` `) {
-			parts := strings.Split(alias, ` `)
-			cmd = parts[0]                                         // grab the first word as the new cmd
-			rest = strings.TrimPrefix(alias, cmd+` `) + ` ` + rest // add the remaining alias to the rest
-		} else {
-			cmd = alias
-		}
-	}
-
-	rest = strings.TrimSpace(rest)
-
 	userDisabled := false
 	isAdmin := false
 	user := users.GetByUserId(userId)
@@ -248,26 +234,47 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
-	// Cancel any buffs they have that get cancelled based on them doing anything at all
-	user.Character.CancelBuffsWithFlag(buffs.CancelOnAction)
+	rest = strings.TrimSpace(rest)
 
-	userDisabled = user.Character.IsDisabled()
-	isAdmin = user.Permission == users.PermissionAdmin
-	isAdmin = isAdmin || user.HasAdminCommand(cmd)
+	// Figure out whether it was an exit entered
+	exitName, _ := room.FindExitByName(cmd)
+	if exitName != `` {
+		rest = cmd
+		cmd = "go"
+	} else {
 
-	// Check if the "rest" is an item the character has
-	matchingItem, found := user.Character.FindInBackpack(rest)
-	if !found {
-		matchingItem, found = user.Character.FindOnBody(rest)
-	}
-
-	if found {
-		// If the item has a script, run it
-		if handled, err := scripting.TryItemCommand(cmd, matchingItem, user.UserId); err == nil {
-			if handled { // For this event, handled represents whether to reject the move.
-				return handled, err
+		if alias := keywords.TryCommandAlias(cmd); alias != cmd {
+			if strings.Contains(alias, ` `) {
+				parts := strings.Split(alias, ` `)
+				cmd = parts[0]                                         // grab the first word as the new cmd
+				rest = strings.TrimPrefix(alias, cmd+` `) + ` ` + rest // add the remaining alias to the rest
+			} else {
+				cmd = alias
 			}
 		}
+
+		// Cancel any buffs they have that get cancelled based on them doing anything at all
+		user.Character.CancelBuffsWithFlag(buffs.CancelOnAction)
+
+		userDisabled = user.Character.IsDisabled()
+		isAdmin = user.Permission == users.PermissionAdmin
+		isAdmin = isAdmin || user.HasAdminCommand(cmd)
+
+		// Check if the "rest" is an item the character has
+		matchingItem, found := user.Character.FindInBackpack(rest)
+		if !found {
+			matchingItem, found = user.Character.FindOnBody(rest)
+		}
+
+		if found {
+			// If the item has a script, run it
+			if handled, err := scripting.TryItemCommand(cmd, matchingItem, user.UserId); err == nil {
+				if handled { // For this event, handled represents whether to reject the move.
+					return handled, err
+				}
+			}
+		}
+
 	}
 
 	if cmdInfo, ok := userCommands[cmd]; ok {
