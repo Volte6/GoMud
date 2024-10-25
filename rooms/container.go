@@ -3,9 +3,9 @@ package rooms
 import "github.com/volte6/gomud/items"
 
 type Container struct {
-	Lock  GameLock     `yaml:"lock,omitempty"` // 0 - no lock. greater than zero = difficulty to unlock.
-	Items []items.Item `yaml:"-"`              // Don't save contents, let room prep handle. What is found inside of the chest.
-	Gold  int          `yaml:"-"`              // Don't save contents, let room prep handle. How much gold is found inside of the chest.
+	Lock  GameLock     `yaml:"lock,omitempty"`  // 0 - no lock. greater than zero = difficulty to unlock.
+	Items []items.Item `yaml:"items,omitempty"` // Save contents now, since players can put new items in there
+	Gold  int          `yaml:"gold,omitempty"`  // Save contents now, since players can put new items in there
 }
 
 func (c Container) HasLock() bool {
