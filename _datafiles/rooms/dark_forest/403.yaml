@@ -16,11 +16,11 @@ exits:
     roomid: 402
 spawninfo:
 - mobid: 34
-  cooldown: 225
   message: A massive tree suddenly begins to move.
+  respawnrate: 15 real minutes
 - mobid: 32
-  cooldown: 60
   message: A fungal growth emerges from the ground.
+  respawnrate: 5 real minutes
 - mobid: 32
-  cooldown: 52
   message: A fungal growth emerges from the ground.
+  respawnrate: 4 real minutes

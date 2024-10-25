@@ -2,4 +2,4 @@
 {{ if ne .RoomSymbol "" -}}
    {{ $mapSymbol = printf `<ansi fg="black-bold">[</ansi><ansi fg="map-%s">%s</ansi><ansi fg="black-bold">]</ansi> ` (lowercase .RoomLegend) .RoomSymbol }}
 {{- end }}
-<ansi fg="black-bold">.:</ansi> {{ $mapSymbol }}{{ if .IsBurning }}{{ colorpattern .Room.Title "flame" }}{{ else }}<ansi fg="room-title">{{ .Room.Title }}</ansi>{{ end }}{{ if ne .Room.Zone ""}} <ansi fg="room-zone">[{{ .Room.Zone }}]</ansi>{{ end }}
+<ansi fg="black-bold">.:</ansi> {{ $mapSymbol }}{{ if .IsBurning }}{{ colorpattern .Room.Title "flame" }}{{ else }}<ansi fg="room-title">{{ .Room.Title }}{{ if gt .Room.Mutators.NameLen 0 }} ({{ .Room.Mutators.NameText }}){{ end }}</ansi>{{ end }}{{ if ne .Room.Zone ""}} <ansi fg="room-zone">[{{ .Room.Zone }}]</ansi>{{ end }}

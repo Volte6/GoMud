@@ -19,19 +19,19 @@ exits:
     roomid: 472
 spawninfo:
 - mobid: 31
-  cooldown: 50
   message: A dog walks up and sits.
   forcehostile: true
   levelmod: 1
+  respawnrate: 5 real minutes
 - mobid: 31
-  cooldown: 60
   message: A dog walks up and sits.
   forcehostile: true
   levelmod: 3
+  respawnrate: 5 real minutes
 - mobid: 31
-  cooldown: 45
   message: A dog walks up and sits.
   forcehostile: true
   levelmod: 5
+  respawnrate: 3 real minutes
 idlemessages:
 - Some movement stirs in the edge of your vision, and then is lost.

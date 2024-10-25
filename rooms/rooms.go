@@ -16,6 +16,7 @@ import (
 	"github.com/volte6/gomud/gametime"
 	"github.com/volte6/gomud/items"
 	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/mutators"
 	"github.com/volte6/gomud/skills"
 	"github.com/volte6/gomud/users"
 	"github.com/volte6/gomud/util"
@@ -87,6 +88,7 @@ type Room struct {
 	IdleMessages      []string                       `yaml:"idlemessages,omitempty"`      // list of messages that can be displayed to players in the room
 	LastIdleMessage   uint8                          `yaml:"-"`                           // index of the last idle message displayed
 	LongTermDataStore map[string]any                 `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
+	Mutators          mutators.MutatorList           `yaml:"mutators,omitempty"`          // mutators this room spawns with.
 	Effects           map[EffectType]AreaEffect      `yaml:"-"`
 	players           []int                          `yaml:"-"` // list of user IDs currently in the room
 	mobs              []int                          `yaml:"-"` // list of mob instance IDs currently in the room. Does not get saved.
@@ -302,163 +304,196 @@ func (r *Room) AddTemporaryExit(exitName string, t TemporaryRoomExit) bool {
 // For example, mobs shouldn't ENTER the room right as the player arrives, they should already be there.
 func (r *Room) Prepare(checkAdjacentRooms bool) {
 
+	roundNow := util.GetRoundCount()
+
+	r.Mutators.Update(roundNow)
+
 	// First ensure any mobs that should be here are spawned
 	for idx, spawnInfo := range r.SpawnInfo {
 
 		// Make sure to clean up any instances that may be dead
 		if spawnInfo.InstanceId > 0 {
+			// Mob gone missing. Reset the spawn info.
 			if mob := mobs.GetInstance(spawnInfo.InstanceId); mob == nil {
 				spawnInfo.InstanceId = 0
+				spawnInfo.DespawnedRound = roundNow
+				r.SpawnInfo[idx] = spawnInfo
+				continue
+			}
+			continue
+		}
+
+		// If a despawn was tracked, check whether the time has been reached, else skip
+		if spawnInfo.DespawnedRound > 0 {
+
+			if roundNow < gametime.GetDate(spawnInfo.DespawnedRound).AddPeriod(spawnInfo.RespawnRate) { // Not yet ready to respawn.
+				continue
 			}
 		}
+
+		//
+		// At this point we are good to attempt respawns
+		//
 
 		// New instances needed? Spawn them
-		if spawnInfo.CooldownLeft < 1 {
+		if spawnInfo.MobId > 0 {
 
-			if spawnInfo.MobId > 0 && spawnInfo.InstanceId == 0 {
+			forceLevel := 0
 
-				forceLevel := 0
+			if spawnInfo.Level > 0 {
+				forceLevel = spawnInfo.Level
+			} else {
 
-				if spawnInfo.Level > 0 {
-					forceLevel = spawnInfo.Level
-				} else {
+				// Get the zone settings, check for scaling
+				if zConfig := GetZoneConfig(r.Zone); zConfig != nil {
 
-					// Get the zone settings, check for scaling
-					if zConfig := GetZoneConfig(r.Zone); zConfig != nil {
+					if zConfig.MobAutoScale.Minimum > 0 {
+						forceLevel = zConfig.GenerateRandomLevel()
+					}
 
-						if zConfig.MobAutoScale.Minimum > 0 {
-							forceLevel = zConfig.GenerateRandomLevel()
+					if forceLevel > 0 {
+						forceLevel += spawnInfo.LevelMod
+						if forceLevel < 1 {
+							forceLevel = 1
 						}
-
-						if forceLevel > 0 {
-							forceLevel += spawnInfo.LevelMod
-							if forceLevel < 1 {
-								forceLevel = 1
-							}
-						}
-
 					}
+
 				}
-
-				if mob := mobs.NewMobById(mobs.MobId(spawnInfo.MobId), r.RoomId, forceLevel); mob != nil {
-
-					// If a merchant, fill up stocks on first time being loaded in
-					if mob.HasShop() {
-						mob.Character.Shop.Restock()
-					}
-
-					if len(spawnInfo.BuffIds) > 0 {
-						mob.Character.SetPermaBuffs(spawnInfo.BuffIds)
-					}
-
-					// If there are idle commands for this spawn, overwrite.
-					if len(spawnInfo.IdleCommands) > 0 {
-						mob.IdleCommands = append([]string{}, spawnInfo.IdleCommands...)
-					}
-
-					if len(spawnInfo.ScriptTag) > 0 {
-						mob.ScriptTag = spawnInfo.ScriptTag
-					}
-
-					if len(spawnInfo.QuestFlags) > 0 {
-						mob.QuestFlags = spawnInfo.QuestFlags
-					}
-
-					// Does this mob have a special name?
-					if len(spawnInfo.Name) > 0 {
-						mob.Character.Name = spawnInfo.Name
-					}
-
-					if spawnInfo.ForceHostile {
-						mob.Hostile = true
-					}
-
-					if spawnInfo.MaxWander != 0 {
-						mob.MaxWander = spawnInfo.MaxWander
-					}
-
-					mob.Character.Zone = r.Zone
-					mob.Validate()
-
-					r.mobs = append(r.mobs, mob.InstanceId)
-					spawnInfo.InstanceId = mob.InstanceId
-				}
-
-				roomManager.roomsWithMobs[r.RoomId] = len(r.mobs)
 			}
 
-			if spawnInfo.ItemId > 0 || spawnInfo.Gold > 0 {
+			if mob := mobs.NewMobById(mobs.MobId(spawnInfo.MobId), r.RoomId, forceLevel); mob != nil {
 
-				// If no container specified, or the container specified exists, then spawn the item
-				if spawnInfo.Container == `` {
-
-					if item := items.New(spawnInfo.ItemId); item.ItemId != 0 {
-						if _, alreadyExists := r.FindOnFloor(fmt.Sprintf(`!%d`, item.ItemId), false); !alreadyExists {
-							r.Items = append(r.Items, item) // just append to avoid a mutex double lock
-							spawnInfo.CooldownLeft = spawnInfo.Cooldown
-						}
-					}
-
-					if spawnInfo.Gold > 0 {
-						if r.Gold < spawnInfo.Gold {
-							r.Gold = spawnInfo.Gold
-						}
-					}
-
-				} else if containerName := r.FindContainerByName(spawnInfo.Container); containerName != `` {
-
-					container := r.Containers[containerName]
-
-					if item := items.New(spawnInfo.ItemId); item.ItemId != 0 {
-						if _, alreadyExists := container.FindItem(fmt.Sprintf(`!%d`, item.ItemId)); !alreadyExists {
-							container.AddItem(item)
-						}
-					}
-
-					if spawnInfo.Gold > 0 {
-						if container.Gold < spawnInfo.Gold {
-							container.Gold = spawnInfo.Gold
-						}
-					}
-
-					r.Containers[containerName] = container
+				// If a merchant, fill up stocks on first time being loaded in
+				if mob.HasShop() {
+					mob.Character.Shop.Restock()
 				}
 
-				spawnInfo.CooldownLeft = spawnInfo.Cooldown
+				if len(spawnInfo.BuffIds) > 0 {
+					mob.Character.SetPermaBuffs(spawnInfo.BuffIds)
+				}
+
+				// If there are idle commands for this spawn, overwrite.
+				if len(spawnInfo.IdleCommands) > 0 {
+					mob.IdleCommands = append([]string{}, spawnInfo.IdleCommands...)
+				}
+
+				if len(spawnInfo.ScriptTag) > 0 {
+					mob.ScriptTag = spawnInfo.ScriptTag
+				}
+
+				if len(spawnInfo.QuestFlags) > 0 {
+					mob.QuestFlags = spawnInfo.QuestFlags
+				}
+
+				// Does this mob have a special name?
+				if len(spawnInfo.Name) > 0 {
+					mob.Character.Name = spawnInfo.Name
+				}
+
+				if spawnInfo.ForceHostile {
+					mob.Hostile = true
+				}
+
+				if spawnInfo.MaxWander != 0 {
+					mob.MaxWander = spawnInfo.MaxWander
+				}
+
+				mob.Character.Zone = r.Zone
+				mob.Validate()
+
+				r.mobs = append(r.mobs, mob.InstanceId)
+
+				spawnInfo.InstanceId = mob.InstanceId
+				spawnInfo.DespawnedRound = 0
+
+				r.SpawnInfo[idx] = spawnInfo
+			}
+
+			roomManager.roomsWithMobs[r.RoomId] = len(r.mobs)
+
+			// Since mob spanws cannot be combined with item/gold spawns, go next loop
+			continue
+		}
+
+		if spawnInfo.ItemId > 0 || spawnInfo.Gold > 0 {
+
+			// If no container specified, or the container specified exists, then spawn the item
+			if spawnInfo.Container == `` {
+
+				if _, alreadyExists := r.FindOnFloor(fmt.Sprintf(`!%d`, spawnInfo.ItemId), false); !alreadyExists {
+
+					if item := items.New(spawnInfo.ItemId); item.ItemId != 0 {
+						r.Items = append(r.Items, item) // just append to avoid a mutex double lock
+					}
+
+				}
+
+				if r.Gold < spawnInfo.Gold {
+					r.Gold = spawnInfo.Gold
+				}
+
+				spawnInfo.DespawnedRound = roundNow
+
+				r.SpawnInfo[idx] = spawnInfo
+
+				continue
+			}
+
+			if containerName := r.FindContainerByName(spawnInfo.Container); containerName != `` {
+
+				container := r.Containers[containerName]
+
+				if _, alreadyExists := container.FindItem(fmt.Sprintf(`!%d`, spawnInfo.ItemId)); !alreadyExists {
+					if item := items.New(spawnInfo.ItemId); item.ItemId != 0 {
+						container.AddItem(item)
+					}
+				}
+
+				if container.Gold < spawnInfo.Gold {
+					container.Gold = spawnInfo.Gold
+				}
+
+				r.Containers[containerName] = container
+
+				spawnInfo.DespawnedRound = roundNow
+
+				r.SpawnInfo[idx] = spawnInfo
+
 			}
 
 		}
 
-		r.SpawnInfo[idx] = spawnInfo
 	}
 
 	// Reach out one more room to prepare those exit rooms
-	if checkAdjacentRooms {
+	if !checkAdjacentRooms {
+		return
+	}
 
-		prepRoomIds := []int{}
-		for _, exit := range r.Exits {
-			if exit.RoomId == r.RoomId {
-				continue
-			}
-			prepRoomIds = append(prepRoomIds, exit.RoomId)
+	prepRoomIds := []int{}
+	for _, exit := range r.Exits {
+		if exit.RoomId == r.RoomId {
+			continue
 		}
+		prepRoomIds = append(prepRoomIds, exit.RoomId)
+	}
 
-		for _, exitRoomId := range prepRoomIds {
+	for _, exitRoomId := range prepRoomIds {
 
-			if exitRoom := LoadRoom(exitRoomId); exitRoom != nil {
+		if exitRoom := LoadRoom(exitRoomId); exitRoom != nil {
 
-				if exitRoom.PlayerCt() < 1 { // Don't prepare rooms that players are already in
-					exitRoom.Prepare(false) // Don't continue checking adjacent rooms or else gets in recursion trouble
-				}
+			if exitRoom.PlayerCt() < 1 { // Don't prepare rooms that players are already in
+				exitRoom.Prepare(false) // Don't continue checking adjacent rooms or else gets in recursion trouble
 			}
-
 		}
 
 	}
+
 }
 
 func (r *Room) CleanupMobSpawns(noCooldown bool) {
 
+	roundNow := util.GetRoundCount()
 	// First ensure any mobs that should be here are spawned
 	for idx, spawnInfo := range r.SpawnInfo {
 
@@ -469,9 +504,9 @@ func (r *Room) CleanupMobSpawns(noCooldown bool) {
 
 				spawnInfo.InstanceId = 0
 				if noCooldown {
-					spawnInfo.CooldownLeft = 0
+					spawnInfo.DespawnedRound = 0
 				} else {
-					spawnInfo.CooldownLeft = spawnInfo.Cooldown
+					spawnInfo.DespawnedRound = roundNow
 				}
 
 			}
@@ -1791,19 +1826,16 @@ func (r *Room) findUserExit(userId int, userName string) string {
 
 func (r *Room) RoundTick() {
 
+	roundNow := util.GetRoundCount()
 	for idx, spawnInfo := range r.SpawnInfo {
 
 		// Make sure to clean up any instances that may be dead
 		if spawnInfo.InstanceId > 0 {
 			if mob := mobs.GetInstance(spawnInfo.InstanceId); mob == nil {
 				spawnInfo.InstanceId = 0
+				spawnInfo.DespawnedRound = roundNow
 				r.SpawnInfo[idx] = spawnInfo
 			}
-		}
-
-		if spawnInfo.CooldownLeft > 0 {
-			spawnInfo.CooldownLeft--
-			r.SpawnInfo[idx] = spawnInfo
 		}
 
 	}
@@ -1955,15 +1987,21 @@ func (r *Room) Validate() error {
 
 	if len(r.SpawnInfo) > 0 {
 
-		defaultCooldown := uint16(configs.GetConfig().MinutesToRounds(15))
 		for idx, sInfo := range r.SpawnInfo {
-			// Spawn periods if left empty default to 15 minutes
-			if sInfo.Cooldown == 0 {
-				if sInfo.MobId > 0 {
-					sInfo.Cooldown = defaultCooldown
-					r.SpawnInfo[idx] = sInfo
+
+			// Make sure that mob spawns remain separately defined from item/gold spawns.
+			if sInfo.MobId > 0 {
+				if sInfo.ItemId > 0 || sInfo.Gold > 0 {
+					return errors.New(`a given spawn info cannot have a mobid if it has gold or an item as well. Theese must be separate spawn info entries.`)
 				}
 			}
+
+			// Spawn periods if left empty default to 15 minutes
+			if sInfo.RespawnRate == `` {
+				sInfo.RespawnRate = `15 real minutes`
+				r.SpawnInfo[idx] = sInfo
+			}
+
 		}
 	}
 

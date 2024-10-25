@@ -1,4 +1,5 @@
-<ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">{{ .Description }}</ansi>
+<ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">{{ .Description }}{{ if gt .Room.Mutators.DescriptionLen 0 }}
+{{ .Room.Mutators.DescriptionText }}{{ end }}</ansi>
 {{- if ne (len .Room.SkillTraining) 0 }}
 
     <ansi fg="red">┌───────────────────────────────────────────────────────────────────┐</ansi>

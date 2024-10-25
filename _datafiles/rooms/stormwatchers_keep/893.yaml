@@ -11,8 +11,8 @@ exits:
     roomid: 892
 spawninfo:
 - mobid: 52
-  cooldown: 250
+  respawnrate: '3 real minutes'
 - mobid: 51
-  cooldown: 85
+  respawnrate: '5 real minutes'
 - mobid: 51
-  cooldown: 85
+  respawnrate: '5 real minutes'

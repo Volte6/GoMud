@@ -15,5 +15,9 @@ exits:
     roomid: 259
 spawninfo:
 - mobid: 26
-  cooldown: 60
   levelmod: 10
+  respawnrate: 5 real minutes
+- itemid: 26
+  respawnrate: 1 week
+mutators:
+- mutatorid: dusty-floors

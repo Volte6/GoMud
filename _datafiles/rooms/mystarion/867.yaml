@@ -12,5 +12,5 @@ exits:
     roomid: 833
 spawninfo:
 - mobid: 46
-  cooldown: 20
+  respawnrate: '2 real minutes'
   message: The herbalist enters the shop.

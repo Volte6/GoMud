@@ -17,11 +17,11 @@ exits:
     roomid: 229
 spawninfo:
 - mobid: 23
-  cooldown: 40
+  respawnrate: '3 real minutes'
   message: A bat flies into the room and hangs from the ceiling.
 - mobid: 23
-  cooldown: 40
+  respawnrate: '3 real minutes'
   message: A bat flies into the room and hangs from the ceiling.
 - mobid: 22
-  cooldown: 80
+  respawnrate: '5 real minutes'
   message: An abyssal creeper crawls out from the shadows.

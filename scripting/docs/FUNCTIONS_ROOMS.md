@@ -21,6 +21,8 @@
   - [RoomObject.SpawnMob(mobId int) Actor](#roomobjectspawnmobmobid-int-actor)
   - [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](#roomobjectaddtemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int-roundttl-int)
   - [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](#roomobjectremovetemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int)
+  - [RoomObject.AddMutator(mutName string](#roomobjectaddmutatormutname-string)
+  - [RoomObject.RemoveMutator(mutName string](#roomobjectremovemutatormutname-string)
   - [RoomObject.RepeatSpawnItem(itemId int, roundInterval int \[, containerName\]](#roomobjectrepeatspawnitemitemid-int-roundinterval-int--containername)
   - [RoomObject.SetLocked(exitName string, lockIt bool)](#roomobjectsetlockedexitname-string-lockit-bool)
 
@@ -179,6 +181,25 @@ _Note: all 3 parameters much match an existing temporary exit for it to be remov
 | exitNameSimple | The simple plain text exit name. |
 | exitNameFancy | Should be the simple name, but can have color tags. |
 | exitRoomId | The roomId the exit should lead to. |
+
+## [RoomObject.AddMutator(mutName string](/scripting/room_func.go)
+Adds a new mutator to a room.
+
+_Note: If the mutator already exists this is ignored._
+
+|  Argument | Explanation |
+| --- | --- |
+| mutName | the MutatorId of the mutator. |
+
+## [RoomObject.RemoveMutator(mutName string](/scripting/room_func.go)
+Removes a mutator from a room.
+
+_Note: This only expires it. It may be a mutator that respawns, in which case this doens't really completely remove it._
+
+|  Argument | Explanation |
+| --- | --- |
+| mutName | the MutatorId of the mutator. |
+
 
 ## [RoomObject.RepeatSpawnItem(itemId int, roundInterval int [, containerName]](/scripting/room_func.go)
 Removes a temporary exit

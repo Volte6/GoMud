@@ -48,8 +48,7 @@ func (w *World) roundTick() {
 			})
 
 		} else {
-			sunriseTxt, _ := templates.Process("generic/sunrise", nil)
-
+			sunriseTxt, _ := templates.Process("generic/sunrise", gdNow)
 			events.AddToQueue(events.Broadcast{
 				Text: sunriseTxt,
 			})
@@ -410,28 +409,7 @@ func (w *World) handleRespawns() {
 			continue
 		}
 
-		for idx, spawnInfo := range room.SpawnInfo {
-
-			if spawnInfo.InstanceId == 0 {
-
-				if spawnInfo.CooldownLeft < 1 {
-					// Spawn a new one.
-					if spawnInfo.MobId > 0 {
-
-						if mob := mobs.NewMobById(mobs.MobId(spawnInfo.MobId), room.RoomId); mob != nil {
-							spawnInfo.InstanceId = mob.InstanceId
-							room.AddMob(mob.InstanceId)
-							room.SpawnInfo[idx] = spawnInfo
-
-							if len(spawnInfo.Message) > 0 {
-								room.SendText(spawnInfo.Message)
-							}
-						}
-					}
-				}
-
-			}
-		}
+		room.Prepare(false)
 	}
 
 }

@@ -16,8 +16,8 @@ exits:
     roomid: 508
 spawninfo:
 - mobid: 56
-  cooldown: 12
+  respawnrate: 1 real minute
 - mobid: 56
-  cooldown: 12
+  respawnrate: 1 real minute
 - mobid: 56
-  cooldown: 12
+  respawnrate: 1 real minute

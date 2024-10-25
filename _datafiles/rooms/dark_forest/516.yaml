@@ -14,5 +14,5 @@ exits:
     roomid: 517
 spawninfo:
 - mobid: 34
-  cooldown: 225
   message: A massive tree suddenly begins to move.
+  respawnrate: 15 real minutes

@@ -20,6 +20,6 @@ exits:
 gold: 10
 spawninfo:
 - mobid: 28
-  cooldown: 59
   message: A dark figure appears from the shadows.
   forcehostile: true
+  respawnrate: 5 real minutes

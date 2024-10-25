@@ -24,10 +24,10 @@ exits:
     roomid: 642
 spawninfo:
 - mobid: 2
-  cooldown: 120
   message: A town guard walks into the bank.
   idlecommands:
   - ""
   - ""
   - emote watches you carefully.
   levelmod: 50
+  respawnrate: 10 real minutes

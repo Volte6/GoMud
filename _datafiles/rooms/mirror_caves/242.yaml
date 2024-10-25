@@ -18,7 +18,7 @@ exits:
     roomid: 241
 spawninfo:
 - mobid: 25
-  cooldown: 30
+  respawnrate: '2 real minutes'
   message: Your head reels for a brief moment and a tentacled creature slithers into
     the light.
   forcehostile: true

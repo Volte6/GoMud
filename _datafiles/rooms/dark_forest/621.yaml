@@ -16,8 +16,8 @@ exits:
     roomid: 620
 spawninfo:
 - mobid: 35
-  cooldown: 100
   message: A small spider hatches from a nearby egg.
+  respawnrate: 7 real minutes
 - mobid: 35
-  cooldown: 100
   message: A small spider hatches from a nearby egg.
+  respawnrate: 7 real minutes

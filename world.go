@@ -961,7 +961,7 @@ func (w *World) MessageTick() {
 
 		messageColorized := templates.AnsiParse(message.Text)
 
-		slog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(messageColorized), "IsCommunication", message.IsCommunication)
+		//slog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(messageColorized), "IsCommunication", message.IsCommunication)
 
 		if message.UserId > 0 {
 

@@ -280,6 +280,14 @@ func (r ScriptRoom) RemoveTemporaryExit(exitNameSimple string, exitNameFancy str
 	return r.roomRecord.RemoveTemporaryExit(tmpExit)
 }
 
+func (r ScriptRoom) AddMutator(mutName string) {
+	r.roomRecord.Mutators.Add(mutName)
+}
+
+func (r ScriptRoom) RemoveMutator(mutName string) {
+	r.roomRecord.Mutators.Remove(mutName)
+}
+
 // ////////////////////////////////////////////////////////
 //
 // # These functions get exported to the scripting engine

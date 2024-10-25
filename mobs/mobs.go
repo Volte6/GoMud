@@ -10,6 +10,7 @@ import (
 
 	"github.com/volte6/gomud/buffs"
 	"github.com/volte6/gomud/characters"
+	"github.com/volte6/gomud/configs"
 	"github.com/volte6/gomud/events"
 
 	"github.com/volte6/gomud/fileloader"
@@ -226,6 +227,12 @@ func (m *Mob) AddBuff(buffId int) {
 		BuffId:        buffId,
 	})
 
+}
+
+// Cause the mob to basically wait and do nothing for x seconds
+func (m *Mob) Sleep(seconds int) {
+	turnCount := seconds * configs.GetConfig().TurnsPerSecond()
+	m.Command(`noop`, turnCount)
 }
 
 func (m *Mob) Command(inputTxt string, waitTurns ...int) {

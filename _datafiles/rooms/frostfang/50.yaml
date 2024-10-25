@@ -18,7 +18,7 @@ exits:
     roomid: 36
 spawninfo:
 - mobid: 8
-  cooldown: 100
   message: The King has decided to make an appearance!
   questflags: [2-inform]
   level: 100
+  respawnrate: 7 real minutes
