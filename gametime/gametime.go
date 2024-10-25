@@ -196,9 +196,12 @@ func (g *GameDate) ReCalculate() {
 
 	minute := math.Floor(minutesFloat * 60)
 
-	day := 1 + math.Floor(float64(currentRoundAdjusted)/float64(g.RoundsPerDay))
-	year := math.Floor(float64(day) / 365)
-	day -= math.Floor(year * 365)
+	day := math.Ceil(float64(currentRoundAdjusted) / float64(g.RoundsPerDay))
+	year := math.Ceil(day / 365)
+
+	if year > 1 {
+		day -= math.Floor((year - 1) * 365)
+	}
 	week := math.Floor(float64(day) / 7)
 
 	month := 1 + math.Floor((day*24)/730) // 730 hours in a "month" (24 hours * 365 days / 12 months)
@@ -314,11 +317,15 @@ func (g GameDate) AddPeriod(str string) uint64 {
 			roundsPerRealHour = 3600 / int(configs.GetConfig().RoundSeconds)
 
 			timeStr = parts[2]
+		} else if parts[1] == `game` || parts[1] == `gametime` { // e.g. - 2 game days
+			timeStr = parts[2]
 		} else if parts[2] == `real` || parts[2] == `irl` { // e.g. - 2 days irl
 			realTime = true
 			roundsPerRealDay = 84600 / int(configs.GetConfig().RoundSeconds)
 			roundsPerRealHour = 3600 / int(configs.GetConfig().RoundSeconds)
 
+			timeStr = parts[1]
+		} else if parts[2] == `game` || parts[2] == `gametime` { // e.g. - 2 days gametime
 			timeStr = parts[1]
 		}
 

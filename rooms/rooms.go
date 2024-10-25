@@ -16,6 +16,7 @@ import (
 	"github.com/volte6/gomud/gametime"
 	"github.com/volte6/gomud/items"
 	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/mutators"
 	"github.com/volte6/gomud/skills"
 	"github.com/volte6/gomud/users"
 	"github.com/volte6/gomud/util"
@@ -87,6 +88,7 @@ type Room struct {
 	IdleMessages      []string                       `yaml:"idlemessages,omitempty"`      // list of messages that can be displayed to players in the room
 	LastIdleMessage   uint8                          `yaml:"-"`                           // index of the last idle message displayed
 	LongTermDataStore map[string]any                 `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
+	Mutators          mutators.MutatorList           `yaml:"mutators,omitempty"`          // mutators this room spawns with.
 	Effects           map[EffectType]AreaEffect      `yaml:"-"`
 	players           []int                          `yaml:"-"` // list of user IDs currently in the room
 	mobs              []int                          `yaml:"-"` // list of mob instance IDs currently in the room. Does not get saved.
@@ -304,6 +306,8 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 
 	roundNow := util.GetRoundCount()
 
+	r.Mutators.Update(roundNow)
+
 	// First ensure any mobs that should be here are spawned
 	for idx, spawnInfo := range r.SpawnInfo {
 
@@ -462,28 +466,29 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 	}
 
 	// Reach out one more room to prepare those exit rooms
-	if checkAdjacentRooms {
+	if !checkAdjacentRooms {
+		return
+	}
 
-		prepRoomIds := []int{}
-		for _, exit := range r.Exits {
-			if exit.RoomId == r.RoomId {
-				continue
-			}
-			prepRoomIds = append(prepRoomIds, exit.RoomId)
+	prepRoomIds := []int{}
+	for _, exit := range r.Exits {
+		if exit.RoomId == r.RoomId {
+			continue
 		}
+		prepRoomIds = append(prepRoomIds, exit.RoomId)
+	}
 
-		for _, exitRoomId := range prepRoomIds {
+	for _, exitRoomId := range prepRoomIds {
 
-			if exitRoom := LoadRoom(exitRoomId); exitRoom != nil {
+		if exitRoom := LoadRoom(exitRoomId); exitRoom != nil {
 
-				if exitRoom.PlayerCt() < 1 { // Don't prepare rooms that players are already in
-					exitRoom.Prepare(false) // Don't continue checking adjacent rooms or else gets in recursion trouble
-				}
+			if exitRoom.PlayerCt() < 1 { // Don't prepare rooms that players are already in
+				exitRoom.Prepare(false) // Don't continue checking adjacent rooms or else gets in recursion trouble
 			}
-
 		}
 
 	}
+
 }
 
 func (r *Room) CleanupMobSpawns(noCooldown bool) {

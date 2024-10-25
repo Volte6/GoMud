@@ -32,6 +32,7 @@ import (
 	"github.com/volte6/gomud/items"
 	"github.com/volte6/gomud/keywords"
 	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/mutators"
 	"github.com/volte6/gomud/pets"
 	"github.com/volte6/gomud/quests"
 	"github.com/volte6/gomud/races"
@@ -127,6 +128,7 @@ func main() {
 	quests.LoadDataFiles()
 	templates.LoadAliases()
 	keywords.LoadAliases()
+	mutators.LoadDataFiles()
 	gametime.SetToDay(-5)
 
 	for _, name := range colorpatterns.GetColorPatternNames() {

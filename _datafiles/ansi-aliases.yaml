@@ -145,6 +145,7 @@ color8:
   mail-message-read: 3
   mail-note: 10
   mail-note-read: 2
+  mutator: 10
 color256:
   table-title: 2
   userid: black
@@ -284,3 +285,4 @@ color256:
   mail-message-read: 188
   mail-note: 10
   mail-note-read: 2
+  mutator: 49
