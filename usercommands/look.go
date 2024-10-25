@@ -173,7 +173,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if container.Lock.IsLocked() {
 			user.SendText(``)
-			user.SendText(`The chest is locked.`)
+			user.SendText(fmt.Sprintf(`The <ansi fg="container">%s</ansi> is locked.`, containerName))
 			user.SendText(``)
 			return true, nil
 		}

@@ -81,6 +81,7 @@ help:
       - trash
       - use
       - read
+      - put
     general:
       - online
       - quit
@@ -207,6 +208,7 @@ command-aliases:
   unlock:           ['open']
   buy:              ['hire']
   trash:            ['junk']
+  put:              ['place']
   'party chat':     ['pchat', 'psay']
   'bank deposit':   ['deposit']
   'bank withdraw':  ['withdraw']

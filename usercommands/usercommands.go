@@ -98,6 +98,7 @@ var (
 		`portal`:      {Portal, false, false},
 		`pray`:        {Pray, false, false},
 		`print`:       {Print, true, false},
+		`put`:         {Put, false, false},
 		`quests`:      {Quests, true, false},
 		`quit`:        {Quit, true, false},
 		`questtoken`:  {QuestToken, false, true}, // Admin only
