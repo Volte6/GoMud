@@ -17,7 +17,18 @@ import (
 func Storage(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if !room.IsStorage {
+
 		user.SendText(`You are not at a storage location.` + term.CRLFStr)
+
+		if len(room.Containers) > 0 {
+			cName := ``
+			for k, _ := range room.Containers {
+				cName = k
+				break
+			}
+			user.SendText(fmt.Sprintf(`Maybe you meant to use the <ansi fg="command">put</ansi> command to <ansi fg="command">put</ansi> something into the <ansi fg="container">%s</ansi>?`, cName) + term.CRLFStr)
+		}
+
 		return true, nil
 	}
 
