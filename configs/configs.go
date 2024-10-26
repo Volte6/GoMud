@@ -81,10 +81,10 @@ type Config struct {
 	LivesOnLevelUp ConfigInt  `yaml:"LivesOnLevelUp"` // # lives gained on level up
 	PricePerLife   ConfigInt  `yaml:"PricePerLife"`   // Price in gold to buy new lives
 
-	ShopRestockRounds        ConfigInt  `yaml:"ShopRestockRounds"`        // Default time it takes to restock 1 quantity in shops
-	ConsistentAttackMessages ConfigBool `yaml:"ConsistentAttackMessages"` // Whether each weapon has consistent attack messages
-	MaxAltCharacters         ConfigInt  `yaml:"MaxAltCharacters"`         // How many characters beyond the default character can they create?
-	AfkSeconds               ConfigInt  `yaml:"AfkSeconds"`               // How long until a player is marked as afk?
+	ShopRestockRate          ConfigString `yaml:"ShopRestockRate"`          // Default time it takes to restock 1 quantity in shops
+	ConsistentAttackMessages ConfigBool   `yaml:"ConsistentAttackMessages"` // Whether each weapon has consistent attack messages
+	MaxAltCharacters         ConfigInt    `yaml:"MaxAltCharacters"`         // How many characters beyond the default character can they create?
+	AfkSeconds               ConfigInt    `yaml:"AfkSeconds"`               // How long until a player is marked as afk?
 
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.

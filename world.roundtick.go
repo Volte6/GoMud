@@ -34,8 +34,15 @@ func (w *World) roundTick() {
 
 	gdBefore := gametime.GetDate()
 
-	util.IncrementRoundCount()
-	roundNumber := util.GetRoundCount()
+	roundNumber := util.IncrementRoundCount()
+
+	// Update all zone based mutators once a round
+	_, mutZoneRoomIds := rooms.GetZonesWithMutators()
+	for _, rid := range mutZoneRoomIds {
+		if r := rooms.LoadRoom(rid); r != nil {
+			r.ZoneConfig.Mutators.Update(roundNumber)
+		}
+	}
 
 	gdNow := gametime.GetDate()
 

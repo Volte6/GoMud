@@ -8,7 +8,7 @@ import (
 
 func Exits(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
-	details := room.GetRoomDetails(user)
+	details := rooms.GetDetails(room, user)
 
 	exitTxt, _ := templates.Process("descriptions/exits", details)
 	user.SendText(exitTxt)

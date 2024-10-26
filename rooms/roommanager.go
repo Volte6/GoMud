@@ -56,29 +56,10 @@ const (
 )
 
 type ZoneInfo struct {
-	RootRoomId   int
-	DefaultBiome string // city, swamp etc. see biomes.go
-	RoomIds      map[int]struct{}
-}
-
-type RoomTemplateDetails struct {
-	Room           *Room
-	VisiblePlayers []string
-	VisibleMobs    []string
-	VisibleExits   map[string]RoomExit
-	TemporaryExits map[string]TemporaryRoomExit
-	UserId         int
-	Character      *characters.Character
-	Permission     string
-	RoomSymbol     string
-	RoomLegend     string
-	Nouns          []string
-	Description    string
-	IsDark         bool
-	IsNight        bool
-	IsBurning      bool
-	TrackingString string
-	ExtraMessages  []string
+	RootRoomId      int
+	DefaultBiome    string // city, swamp etc. see biomes.go
+	HasZoneMutators bool   // does it have any zone mutators assigned?
+	RoomIds         map[int]struct{}
 }
 
 func GetNextRoomId() int {
@@ -99,6 +80,20 @@ func GetAllRoomIds() []int {
 	}
 
 	return roomIds
+}
+
+func GetZonesWithMutators() ([]string, []int) {
+
+	zNames := []string{}
+	rootRoomIds := []int{}
+
+	for zName, zInfo := range roomManager.zones {
+		if zInfo.HasZoneMutators {
+			zNames = append(zNames, zName)
+			rootRoomIds = append(rootRoomIds, zInfo.RootRoomId)
+		}
+	}
+	return zNames, rootRoomIds
 }
 
 func RoomMaintenance() bool {
@@ -681,6 +676,10 @@ func loadAllRoomZones() error {
 		if loadedRoom.ZoneConfig.RoomId == loadedRoom.RoomId {
 			zoneInfo.RootRoomId = loadedRoom.RoomId
 			zoneInfo.DefaultBiome = loadedRoom.Biome
+
+			if len(loadedRoom.ZoneConfig.Mutators) > 0 {
+				zoneInfo.HasZoneMutators = true
+			}
 		}
 
 		roomManager.zones[loadedRoom.Zone] = zoneInfo

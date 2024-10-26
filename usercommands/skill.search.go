@@ -98,7 +98,7 @@ func Search(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 		if len(hiddenPlayers) > 0 {
 
-			details := room.GetRoomDetails(user)
+			details := rooms.GetDetails(room, user)
 			details.VisiblePlayers = []string{}
 
 			for _, name := range hiddenPlayers {
@@ -135,7 +135,7 @@ func Search(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 		if len(hiddenMobs) > 0 {
 
-			details := room.GetRoomDetails(user)
+			details := rooms.GetDetails(room, user)
 			details.VisiblePlayers = []string{}
 
 			for _, name := range hiddenMobs {

@@ -9,7 +9,6 @@ import (
 
 	"github.com/volte6/gomud/fileloader"
 	"github.com/volte6/gomud/gametime"
-	"github.com/volte6/gomud/term"
 	"github.com/volte6/gomud/util"
 	"gopkg.in/yaml.v2"
 )
@@ -19,6 +18,22 @@ var (
 	mutDataFilesFolderPath = "_datafiles/mutators"
 )
 
+type TextBehavior string
+
+const (
+	TextPrepend TextBehavior = `prepend`
+	TextAppend  TextBehavior = `append` // Default behavior is replace
+	TextReplace TextBehavior = `replace`
+	TextDefault TextBehavior = TextReplace
+)
+
+func (tb TextBehavior) IsValid() bool {
+	if tb == TextPrepend || tb == TextAppend || tb == TextReplace {
+		return true
+	}
+	return false
+}
+
 type MutatorList []Mutator
 
 type Mutator struct {
@@ -27,11 +42,20 @@ type Mutator struct {
 	DespawnedRound uint64 `yaml:"-"` // Track when it decayed to nothing.
 }
 
+type TextModifier struct {
+	Behavior     TextBehavior `yaml:"behavior,omitempty"`     // prepend, append or replace?
+	Text         string       `yaml:"text,omitempty"`         // The text that will be injected somehow
+	ColorPattern string       `yaml:"colorpattern,omitempty"` // An optional color pattern name to apply
+}
+
 type MutatorSpec struct {
-	MutatorId           string `yaml:"mutatorid,omitempty"`           // Short text that will uniquely identify this modifier ("dusty")
-	NameModifier        string `yaml:"namemodifier,omitempty"`        // Text that will replace or append to existing name information (Title of a room for example) ("Dusty")
-	DescriptionModifier string `yaml:"descriptionmodifier,omitempty"` // Text that will replace or append to existing descriptive information (Room description) ("The floors are covered in a thick layer of dust")
-	DecayIntoId         string `yaml:"decayintoid,omitempty"`         // Id of another Mutator that replaces this one when it decays. This can be a circular behavior.
+	MutatorId string `yaml:"mutatorid,omitempty"` // Short text that will uniquely identify this modifier ("dusty")
+	// Text based changes
+	NameModifier        *TextModifier `yaml:"namemodifier,omitempty"`
+	DescriptionModifier *TextModifier `yaml:"descriptionmodifier,omitempty"`
+	AlertModifier       *TextModifier `yaml:"alertmodifier,omitempty"` // These can only append.
+	// End text based changes
+	DecayIntoId string `yaml:"decayintoid,omitempty"` // Id of another Mutator that replaces this one when it decays. This can be a circular behavior.
 	//TODO: BuffIds             []int  // buffId's that apply conditionally (For rooms, anyone that enters the room gets the buff applied)
 	DecayRate   string `yaml:"decayrate,omitempty"`   // how long until it is gone
 	RespawnRate string `yaml:"respawnrate,omitempty"` // daily, weekly, 1 day, 3 day, monthly, etc.
@@ -93,68 +117,16 @@ func (ml *MutatorList) Update(roundNow uint64) {
 	}
 }
 
-func (ml *MutatorList) NameLen() int {
-	nmLen := 0
-	for _, m := range *ml {
-		if !m.Live() {
-			continue
-		}
-		if m.GetSpec().NameModifier != `` {
-			nmLen++
-		}
-	}
-	return nmLen
-}
-
-func (ml *MutatorList) DescriptionLen() int {
-	dLen := 0
-	for _, m := range *ml {
-		if !m.Live() {
-			continue
-		}
-		if m.GetSpec().DescriptionModifier != `` {
-			dLen++
-		}
-	}
-	return dLen
-}
-
-func (ml *MutatorList) NameText() string {
-
-	ret := strings.Builder{}
+// Returns a new list containing only active mutators
+func (ml *MutatorList) GetActive() MutatorList {
+	activeMuts := MutatorList{}
 	for _, mut := range *ml {
 		if !mut.Live() {
 			continue
 		}
-		mSpec := mut.GetSpec()
-		if mSpec.NameModifier == `` {
-			continue
-		}
-		if ret.Len() > 0 {
-			ret.WriteString(`, `)
-		}
-		ret.WriteString(mSpec.NameModifier)
+		activeMuts = append(activeMuts, mut)
 	}
-	return ret.String()
-}
-
-func (ml *MutatorList) DescriptionText() string {
-
-	ret := strings.Builder{}
-	for _, mut := range *ml {
-		if !mut.Live() {
-			continue
-		}
-		mSpec := mut.GetSpec()
-		if mSpec.DescriptionModifier == `` {
-			continue
-		}
-		if ret.Len() > 0 {
-			ret.WriteString(term.CRLFStr)
-		}
-		ret.WriteString(mSpec.DescriptionModifier)
-	}
-	return ret.String()
+	return activeMuts
 }
 
 func (m *Mutator) Live() bool {
@@ -268,6 +240,19 @@ func (m *MutatorSpec) Id() string {
 }
 
 func (m *MutatorSpec) Validate() error {
+
+	if m.NameModifier != nil && !m.NameModifier.Behavior.IsValid() {
+		m.NameModifier.Behavior = TextDefault
+	}
+
+	if m.DescriptionModifier != nil && !m.DescriptionModifier.Behavior.IsValid() {
+		m.DescriptionModifier.Behavior = TextDefault
+	}
+
+	if m.AlertModifier != nil && !m.AlertModifier.Behavior.IsValid() {
+		m.AlertModifier.Behavior = TextDefault
+	}
+
 	return nil
 }
 

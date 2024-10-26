@@ -286,6 +286,10 @@ func (r ScriptRoom) AddMutator(mutName string) {
 
 func (r ScriptRoom) RemoveMutator(mutName string) {
 	r.roomRecord.Mutators.Remove(mutName)
+
+	if zoneConfig := rooms.GetZoneConfig(r.roomRecord.Zone); zoneConfig != nil {
+		zoneConfig.Mutators.Remove(mutName)
+	}
 }
 
 // ////////////////////////////////////////////////////////
