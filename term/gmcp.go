@@ -10,6 +10,9 @@ const (
 )
 
 /*
+
+// NOTE: https://www.last-outpost.com/LO/protocols/
+
 Handshake:
 
 When a client connects to a GMCP enabled server the server should send IAC WILL GMCP.
