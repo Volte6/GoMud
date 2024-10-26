@@ -9,15 +9,12 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/buffs"
-	"github.com/volte6/gomud/characters"
-	"github.com/volte6/gomud/colorpatterns"
 	"github.com/volte6/gomud/configs"
 	"github.com/volte6/gomud/events"
 	"github.com/volte6/gomud/gametime"
 	"github.com/volte6/gomud/items"
 	"github.com/volte6/gomud/mobs"
 	"github.com/volte6/gomud/mutators"
-	"github.com/volte6/gomud/skills"
 	"github.com/volte6/gomud/users"
 	"github.com/volte6/gomud/util"
 )
@@ -297,6 +294,44 @@ func (r *Room) AddTemporaryExit(exitName string, t TemporaryRoomExit) bool {
 	}
 	r.ExitsTemp[exitName] = t
 	return true
+}
+
+// applies buffs to any players/mobs in the room that don't
+// already have it
+func (r *Room) ApplyBuffId(buffId ...int) {
+
+	if len(buffId) == 0 {
+		return
+	}
+
+	for _, uid := range r.GetPlayers() {
+
+		if u := users.GetByUserId(uid); u != nil {
+
+			for _, bId := range buffId {
+				if u.Character.HasBuff(bId) {
+					continue
+				}
+				u.AddBuff(bId)
+			}
+		}
+
+	}
+
+	for _, miid := range r.GetMobs() {
+
+		if m := mobs.GetInstance(miid); m != nil {
+
+			for _, bId := range buffId {
+				if m.Character.HasBuff(bId) {
+					continue
+				}
+				m.AddBuff(bId)
+			}
+		}
+
+	}
+
 }
 
 // The purpose of Prepare() is to ensure a room is properly setup before anyone looks into it or enters it
@@ -1447,269 +1482,6 @@ func (r *Room) PruneVisitors() int {
 	return pruneCt
 }
 
-func (r *Room) GetRoomDetails(user *users.UserRecord) *RoomTemplateDetails {
-
-	var roomSymbol string = r.MapSymbol
-	var roomLegend string = r.MapLegend
-
-	b := r.GetBiome()
-
-	if b.symbol != 0 {
-		roomSymbol = string(b.symbol)
-	}
-	if b.name != `` {
-		roomLegend = b.name
-	}
-
-	details := &RoomTemplateDetails{
-		VisiblePlayers: []string{},
-		VisibleMobs:    []string{},
-		VisibleExits:   make(map[string]RoomExit),
-		TemporaryExits: make(map[string]TemporaryRoomExit),
-		Room:           r, // The room being viewed
-		Description:    r.GetDescription(),
-		UserId:         user.UserId,     // Who is viewing the room
-		Character:      user.Character,  // The character of the user viewing the room
-		Permission:     user.Permission, // The permission level of the user viewing the room
-		RoomSymbol:     roomSymbol,
-		RoomLegend:     roomLegend,
-		IsDark:         b.IsDark(),
-		IsNight:        gametime.IsNight(),
-		IsBurning:      r.IsBurning(),
-		TrackingString: ``,
-	}
-
-	tinymap := GetTinyMap(r.RoomId)
-
-	events.AddToQueue(events.WebClientCommand{
-		ConnectionId: user.ConnectionId(),
-		Text:         "MODALADD:tinymap=" + strings.Join(tinymap, "\n"),
-	})
-
-	renderNouns := user.Permission == users.PermissionAdmin
-	if user.Character.Pet.Exists() && user.Character.HasBuffFlag(buffs.SeeNouns) {
-		renderNouns = true
-	}
-
-	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {
-		desclineWidth := 80 - 7 // 7 is the width of the tinymap
-		padding := 1
-		description := util.SplitString(details.Description, desclineWidth-padding)
-
-		for i := 0; i < len(tinymap); i++ {
-			if i > len(description)-1 {
-				description = append(description, strings.Repeat(` `, desclineWidth))
-			}
-
-			description[i] += strings.Repeat(` `, desclineWidth-len(description[i])) + tinymap[i]
-		}
-
-		if renderNouns && len(r.Nouns) > 0 {
-			for i := range description {
-				for noun, _ := range r.Nouns {
-					description[i] = strings.Replace(description[i], noun, `<ansi fg="noun">`+noun+`</ansi>`, 1)
-				}
-			}
-		}
-
-		details.Description = strings.Join(description, "\n")
-	} else {
-
-		roomDesc := util.SplitString(details.Description, 80)
-
-		if renderNouns && len(r.Nouns) > 0 {
-			for i := range roomDesc {
-				for noun, _ := range r.Nouns {
-					roomDesc[i] = strings.Replace(roomDesc[i], noun, `<ansi fg="noun">`+noun+`</ansi>`, 1)
-				}
-			}
-		}
-
-		details.Description = strings.Join(roomDesc, "\n")
-	}
-
-	// If burning, apply burning text effect?
-	if details.IsBurning {
-		details.Description = colorpatterns.ApplyColorPattern(details.Description, `flame`, colorpatterns.Words)
-	}
-
-	nameFlags := []characters.NameRenderFlag{}
-	if user.Character.GetSkillLevel(skills.Peep) > 0 {
-		nameFlags = append(nameFlags, characters.RenderHealth)
-	}
-
-	if useShortAdjectives := user.GetConfigOption(`shortadjectives`); useShortAdjectives != nil && useShortAdjectives.(bool) {
-		nameFlags = append(nameFlags, characters.RenderShortAdjectives)
-	}
-
-	for _, playerId := range r.players {
-		if playerId != user.UserId {
-
-			renderFlags := append([]characters.NameRenderFlag{}, nameFlags...)
-
-			player := users.GetByUserId(playerId)
-			if player != nil {
-
-				if player.Character.HasBuffFlag(buffs.Hidden) { // Don't show them if they are sneaking
-					if !user.Character.Pet.Exists() || !user.Character.HasBuffFlag(buffs.SeeHidden) {
-						continue
-					}
-				}
-
-				pName := player.Character.GetPlayerName(user.UserId, renderFlags...)
-				details.VisiblePlayers = append(details.VisiblePlayers, pName.String())
-			}
-		}
-	}
-
-	if user.Character.Pet.Exists() {
-		details.VisiblePlayers = append(details.VisiblePlayers, fmt.Sprintf(`%s (your pet)`, user.Character.Pet.DisplayName()))
-	}
-
-	visibleFriendlyMobs := []string{}
-
-	for idx, mobInstanceId := range r.mobs {
-		if mob := mobs.GetInstance(mobInstanceId); mob != nil {
-
-			if mob.Character.HasBuffFlag(buffs.Hidden) { // Don't show them if they are sneaking
-				if !user.Character.Pet.Exists() || !user.Character.HasBuffFlag(buffs.SeeHidden) {
-					continue
-				}
-			}
-
-			tmpNameFlags := nameFlags
-
-			mobName := mob.Character.GetMobName(user.UserId, tmpNameFlags...)
-
-			for _, qFlag := range mob.QuestFlags {
-				if user.Character.HasQuest(qFlag) {
-					mobName.QuestAlert = true
-				}
-			}
-
-			if mob.Character.IsCharmed() {
-				visibleFriendlyMobs = append(visibleFriendlyMobs, mobName.String())
-			} else {
-				details.VisibleMobs = append(details.VisibleMobs, mobName.String())
-			}
-		} else {
-			r.mobs = append(r.mobs[:idx], r.mobs[idx+1:]...)
-		}
-	}
-
-	// Add the friendly mobs to the end
-	details.VisibleMobs = append(details.VisibleMobs, visibleFriendlyMobs...)
-
-	for exitStr, exitInfo := range r.ExitsTemp {
-		details.TemporaryExits[exitStr] = exitInfo
-	}
-
-	// Do this twice to ensure secrets are last
-
-	for exitStr, exitInfo := range r.Exits {
-
-		// If it's a secret room we need to make sure the player has recently been there before including it in the exits
-		if exitInfo.Secret { //&& user.Permission != users.PermissionAdmin {
-			if targetRm := LoadRoom(exitInfo.RoomId); targetRm != nil {
-				if targetRm.HasVisited(user.UserId, VisitorUser) {
-					details.VisibleExits[exitStr] = exitInfo
-				}
-			}
-		} else {
-			details.VisibleExits[exitStr] = exitInfo
-		}
-	}
-
-	if searchMobName := user.Character.GetMiscData(`tracking-mob`); searchMobName != nil {
-
-		if searchMobNameStr, ok := searchMobName.(string); ok {
-
-			if r.isInRoom(searchMobNameStr, ``) {
-
-				details.TrackingString = `Tracking <ansi fg="mobname">` + searchMobNameStr + `</ansi>... They are here!`
-				user.Character.RemoveBuff(26)
-
-			} else {
-
-				allNames := []string{}
-
-				for mobInstId, _ := range r.Visitors(VisitorMob) {
-					if mob := mobs.GetInstance(mobInstId); mob != nil {
-						allNames = append(allNames, mob.Character.Name)
-					}
-				}
-
-				match, closeMatch := util.FindMatchIn(searchMobNameStr, allNames...)
-				if match == `` && closeMatch == `` {
-
-					details.TrackingString = `You lost the trail of <ansi fg="mobname">` + searchMobNameStr + `</ansi>`
-					user.Character.RemoveBuff(26)
-
-				} else {
-
-					exitName := r.findMobExit(0, searchMobNameStr)
-					if exitName == `` {
-
-						details.TrackingString = `You lost the trail of <ansi fg="username">` + searchMobNameStr + `</ansi>`
-						user.Character.RemoveBuff(26)
-
-					} else {
-
-						details.TrackingString = `Tracking <ansi fg="mobname">` + searchMobNameStr + `</ansi>... They went <ansi fg="exit">` + exitName + `</ansi>`
-					}
-
-				}
-			}
-		}
-
-	}
-
-	if searchUserName := user.Character.GetMiscData(`tracking-user`); searchUserName != nil {
-		if searchUserNameStr, ok := searchUserName.(string); ok {
-
-			if r.isInRoom(``, searchUserNameStr) {
-
-				details.TrackingString = `Tracking <ansi fg="username">` + searchUserNameStr + `</ansi>... They are here!`
-				user.Character.RemoveBuff(26)
-
-			} else {
-
-				allNames := []string{}
-
-				for userId, _ := range r.Visitors(VisitorUser) {
-					if u := users.GetByUserId(userId); u != nil {
-						allNames = append(allNames, u.Character.Name)
-					}
-				}
-
-				match, closeMatch := util.FindMatchIn(searchUserNameStr, allNames...)
-				if match == `` && closeMatch == `` {
-
-					details.TrackingString = `You lost the trail of <ansi fg="username">` + searchUserNameStr + `</ansi>`
-					user.Character.RemoveBuff(26)
-
-				} else {
-
-					exitName := r.findUserExit(0, searchUserNameStr)
-					if exitName == `` {
-
-						details.TrackingString = `You lost the trail of <ansi fg="username">` + searchUserNameStr + `</ansi>`
-						user.Character.RemoveBuff(26)
-
-					} else {
-
-						details.TrackingString = `Tracking <ansi fg="username">` + searchUserNameStr + `</ansi>... They went <ansi fg="exit">` + exitName + `</ansi>`
-					}
-
-				}
-			}
-
-		}
-	}
-
-	return details
-}
-
 func (r *Room) isInRoom(mobName string, userName string) bool {
 
 	if mobName != `` {
@@ -1827,6 +1599,26 @@ func (r *Room) findUserExit(userId int, userName string) string {
 func (r *Room) RoundTick() {
 
 	roundNow := util.GetRoundCount()
+
+	//
+	// Apply any mutators from the zone or room
+	// This will only add mutators that the player
+	// doesn't already have.
+	//
+	r.Mutators.Update(roundNow)
+
+	var activeMutators mutators.MutatorList
+	if zoneConfig := GetZoneConfig(r.Zone); zoneConfig != nil {
+		activeMutators = append(r.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
+	}
+	for _, mut := range activeMutators {
+		spec := mut.GetSpec()
+		r.ApplyBuffId(spec.BuffIds...)
+	}
+	//
+	// Done adding mutator buffs
+	//
+
 	for idx, spawnInfo := range r.SpawnInfo {
 
 		// Make sure to clean up any instances that may be dead

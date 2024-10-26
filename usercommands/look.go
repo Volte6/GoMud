@@ -381,7 +381,7 @@ func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 		}
 	}
 
-	details := room.GetRoomDetails(user)
+	details := rooms.GetDetails(room, user)
 
 	textOut, _ := templates.Process("descriptions/room-title", details)
 	user.SendText(textOut)

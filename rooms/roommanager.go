@@ -18,6 +18,7 @@ import (
 	"github.com/volte6/gomud/events"
 	"github.com/volte6/gomud/fileloader"
 	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/mutators"
 	"github.com/volte6/gomud/templates"
 	"github.com/volte6/gomud/term"
 	"github.com/volte6/gomud/users"
@@ -56,29 +57,10 @@ const (
 )
 
 type ZoneInfo struct {
-	RootRoomId   int
-	DefaultBiome string // city, swamp etc. see biomes.go
-	RoomIds      map[int]struct{}
-}
-
-type RoomTemplateDetails struct {
-	Room           *Room
-	VisiblePlayers []string
-	VisibleMobs    []string
-	VisibleExits   map[string]RoomExit
-	TemporaryExits map[string]TemporaryRoomExit
-	UserId         int
-	Character      *characters.Character
-	Permission     string
-	RoomSymbol     string
-	RoomLegend     string
-	Nouns          []string
-	Description    string
-	IsDark         bool
-	IsNight        bool
-	IsBurning      bool
-	TrackingString string
-	ExtraMessages  []string
+	RootRoomId      int
+	DefaultBiome    string // city, swamp etc. see biomes.go
+	HasZoneMutators bool   // does it have any zone mutators assigned?
+	RoomIds         map[int]struct{}
 }
 
 func GetNextRoomId() int {
@@ -99,6 +81,20 @@ func GetAllRoomIds() []int {
 	}
 
 	return roomIds
+}
+
+func GetZonesWithMutators() ([]string, []int) {
+
+	zNames := []string{}
+	rootRoomIds := []int{}
+
+	for zName, zInfo := range roomManager.zones {
+		if zInfo.HasZoneMutators {
+			zNames = append(zNames, zName)
+			rootRoomIds = append(rootRoomIds, zInfo.RootRoomId)
+		}
+	}
+	return zNames, rootRoomIds
 }
 
 func RoomMaintenance() bool {
@@ -301,6 +297,30 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	}
 
 	newRoom.MarkVisited(userId, VisitorUser)
+
+	//
+	// Apply any mutators from the zone or room
+	// This will only add mutators that the player
+	// doesn't already have.
+	//
+	var activeMutators mutators.MutatorList
+	if zoneConfig := GetZoneConfig(newRoom.Zone); zoneConfig != nil {
+		activeMutators = append(newRoom.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
+	}
+	for _, mut := range activeMutators {
+		spec := mut.GetSpec()
+		if len(spec.BuffIds) == 0 {
+			continue
+		}
+		for _, buffId := range spec.BuffIds {
+			if !user.Character.HasBuff(buffId) {
+				user.AddBuff(buffId)
+			}
+		}
+	}
+	//
+	// Done adding mutator buffs
+	//
 
 	playerCt := newRoom.addPlayer(userId)
 	roomManager.roomsWithUsers[newRoom.RoomId] = playerCt
@@ -681,6 +701,10 @@ func loadAllRoomZones() error {
 		if loadedRoom.ZoneConfig.RoomId == loadedRoom.RoomId {
 			zoneInfo.RootRoomId = loadedRoom.RoomId
 			zoneInfo.DefaultBiome = loadedRoom.Biome
+
+			if len(loadedRoom.ZoneConfig.Mutators) > 0 {
+				zoneInfo.HasZoneMutators = true
+			}
 		}
 
 		roomManager.zones[loadedRoom.Zone] = zoneInfo

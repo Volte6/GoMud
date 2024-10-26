@@ -143,24 +143,30 @@ func LogRoll(name string, rollResult int, targetNumber int) {
 
 func SplitString(input string, lineWidth int) []string {
 	var result []string
-	words := strings.Fields(input) // Split the input into words
 
-	currentLine := ""
-	for _, word := range words {
-		if len(currentLine)+len(word)+1 <= lineWidth { // +1 for the space
-			if currentLine == "" {
-				currentLine = word
+	parts := strings.Split(input, "\n")
+
+	for _, textLine := range parts {
+
+		words := strings.Fields(textLine) // Split the input into words
+
+		currentLine := ""
+		for _, word := range words {
+			if len(currentLine)+len(word)+1 <= lineWidth { // +1 for the space
+				if currentLine == "" {
+					currentLine = word
+				} else {
+					currentLine += " " + word
+				}
 			} else {
-				currentLine += " " + word
+				result = append(result, currentLine)
+				currentLine = word
 			}
-		} else {
-			result = append(result, currentLine)
-			currentLine = word
 		}
-	}
 
-	if currentLine != "" {
-		result = append(result, currentLine)
+		if currentLine != "" {
+			result = append(result, currentLine)
+		}
 	}
 
 	return result

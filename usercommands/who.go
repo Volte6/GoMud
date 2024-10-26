@@ -8,7 +8,7 @@ import (
 
 func Who(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
-	details := room.GetRoomDetails(user)
+	details := rooms.GetDetails(room, user)
 
 	whoTxt, _ := templates.Process("descriptions/who", details)
 	user.SendText(whoTxt)

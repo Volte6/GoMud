@@ -66,6 +66,9 @@ func GetColorPatternNames() []string {
 }
 
 func ApplyColorPattern(input string, pattern string, method ...ColorizeStyle) string {
+	if pattern == `` {
+		return input
+	}
 	patternValues, ok := numericPatterns[pattern]
 	if !ok {
 		return input

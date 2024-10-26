@@ -172,10 +172,14 @@ LivesOnLevelUp: 1
 # - PricePerLife - 
 #   (Req: PermaDeath) If non-zero, players can buy extra lives for this amount.
 PricePerLife: 1000000
-# - ShopRestockRounds - 
-#   The default number of rounds shops take to restock 1 item. This can still be 
+# - ShopRestockRate - 
+#   The default time for a shops to restock 1 item. This can still be 
 #   overriden in character shop definitions if desired.
-ShopRestockRounds: 75
+#   Should be in the format of: {num} {unit}
+#   Unit can be: rounds, hours, days, weeks, months, years
+#   Default is in-game time, not real time. To use real time, use the following
+#   format: {num} real {unit} - Example: 1 real day
+ShopRestockRate: 6 hours
 # - ConsistentAttackMessages - 
 #   If true, each weapon ID will consistently use the same message for each type
 #   of attack. If false, it will randomize messages. Setting this to true gives

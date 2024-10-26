@@ -2,6 +2,7 @@ package characters
 
 import (
 	"github.com/volte6/gomud/configs"
+	"github.com/volte6/gomud/gametime"
 	"github.com/volte6/gomud/util"
 )
 
@@ -13,14 +14,14 @@ const (
 type Shop []ShopItem
 
 type ShopItem struct {
-	MobId           int    `yaml:"mobid,omitempty"`           // Is it a mercenary for sale?
-	ItemId          int    `yaml:"itemid,omitempty"`          // Is it an item for sale?
-	BuffId          int    `yaml:"buffid,omitempty"`          // Does this shop keeper apply a buff if purchased?
-	PetType         string `yaml:"pettype,omitempty"`         // Does this shop sell pets?
-	Quantity        int    `yaml:"quantity,omitempty"`        // How many currently avilable
-	QuantityMax     int    `yaml:"quantitymax,omitempty"`     // 0 for unlimited, or a maximum that can be stocked at one time
-	RestockInterval int    `yaml:"restockinterval,omitempty"` // how many rounds between restocks?
-	Price           int    `yaml:"price,omitempty"`           // If a price is provided, use it
+	MobId       int    `yaml:"mobid,omitempty"`       // Is it a mercenary for sale?
+	ItemId      int    `yaml:"itemid,omitempty"`      // Is it an item for sale?
+	BuffId      int    `yaml:"buffid,omitempty"`      // Does this shop keeper apply a buff if purchased?
+	PetType     string `yaml:"pettype,omitempty"`     // Does this shop sell pets?
+	Quantity    int    `yaml:"quantity,omitempty"`    // How many currently avilable
+	QuantityMax int    `yaml:"quantitymax,omitempty"` // 0 for unlimited, or a maximum that can be stocked at one time
+	Price       int    `yaml:"price,omitempty"`       // If a price is provided, use it
+	RestockRate string `yaml:"restockrate,omitempty"` // 1 day, 1 week, 1 real month, etc
 
 	lastRestockRound uint64 // When was the last time an item was restocked?
 }
@@ -31,7 +32,7 @@ func (s *Shop) Restock() bool {
 		return false
 	}
 
-	defaultRestockInterval := configs.GetConfig().ShopRestockRounds
+	defaultRestockRate := configs.GetConfig().ShopRestockRate.String()
 	roundNow := util.GetRoundCount()
 	restocked := false
 	pruneItems := []int{}
@@ -49,39 +50,55 @@ func (s *Shop) Restock() bool {
 			continue
 		}
 
-		itemRestockInterval := uint64(fsItem.RestockInterval)
-		if itemRestockInterval == 0 {
-			itemRestockInterval = uint64(defaultRestockInterval)
+		itemRestockRate := fsItem.RestockRate
+		if itemRestockRate == `` {
+			itemRestockRate = defaultRestockRate
 		}
 
-		for roundNow-fsItem.lastRestockRound >= itemRestockInterval {
+		if fsItem.lastRestockRound == 0 {
+
+			if fsItem.QuantityMax != StockUnlimited {
+				if fsItem.Quantity < fsItem.QuantityMax {
+					fsItem.Quantity = fsItem.QuantityMax
+				}
+			}
+
 			restocked = true
 
-			if fsItem.QuantityMax == StockUnlimited { // unlimited? No adjustment needed
-				break
-			}
+		} else {
+			gd := gametime.GetDate(fsItem.lastRestockRound)
 
-			if fsItem.Quantity == fsItem.QuantityMax { // currently at the max qty? No adjustment needed
-				break
-			}
+			restockRnd := gd.AddPeriod(itemRestockRate)
 
-			fsItem.lastRestockRound += itemRestockInterval
+			for roundNow >= restockRnd {
+				restocked = true
 
-			// Non Unlimited, Non temporary
-			if fsItem.Quantity < fsItem.QuantityMax { // increase stock if needed
-				fsItem.Quantity += 1
-				continue
-			}
+				if fsItem.QuantityMax == StockUnlimited { // unlimited? No adjustment needed
+					break
+				}
 
-			// Temp item handling
-			if fsItem.QuantityMax == StockTemporary {
+				if fsItem.Quantity == fsItem.QuantityMax { // currently at the max qty? No adjustment needed
+					break
+				}
 
-				if fsItem.Quantity > 0 { // decrease stock on temp items
-					fsItem.Quantity--
+				restockRnd = gametime.GetDate(restockRnd).AddPeriod(itemRestockRate)
+
+				// Non Unlimited, Non temporary
+				if fsItem.Quantity < fsItem.QuantityMax { // increase stock if needed
+					fsItem.Quantity += 1
+					continue
+				}
+
+				// Temp item handling
+				if fsItem.QuantityMax == StockTemporary {
+
+					if fsItem.Quantity > 0 { // decrease stock on temp items
+						fsItem.Quantity--
+					}
+
 				}
 
 			}
-
 		}
 
 		if restocked {
