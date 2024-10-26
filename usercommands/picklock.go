@@ -7,6 +7,7 @@ import (
 	"github.com/volte6/gomud/configs"
 	"github.com/volte6/gomud/items"
 	"github.com/volte6/gomud/rooms"
+	"github.com/volte6/gomud/statmods"
 	"github.com/volte6/gomud/templates"
 	"github.com/volte6/gomud/users"
 	"github.com/volte6/gomud/util"
@@ -36,6 +37,7 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 
 	lockId := ``
 	lockStrength := 0
+	lockTrap := []int{}
 
 	containerName := room.FindContainerByName(args[0])
 	exitName, _ := room.FindExitByName(args[0])
@@ -56,6 +58,7 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 
 		args = args[1:]
 		lockStrength = int(container.Lock.Difficulty)
+		lockTrap = container.Lock.TrapBuffIds
 		lockId = fmt.Sprintf(`%d-%s`, room.RoomId, containerName)
 
 	} else if exitName != `` {
@@ -76,6 +79,7 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 		}
 
 		lockStrength = int(exitInfo.Lock.Difficulty)
+		lockTrap = exitInfo.Lock.TrapBuffIds
 		lockId = fmt.Sprintf(`%d-%s`, room.RoomId, exitName)
 
 	} else {
@@ -90,6 +94,21 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 	keyring_sequence := user.Character.GetKey(lockId)
 
 	sequence := util.GetLockSequence(lockId, lockStrength, string(configs.GetConfig().Seed))
+
+	// Calculate any presolve from buffs, gear, pet perks, etc.
+	if presolve := user.Character.StatMod(string(statmods.Picklock)); presolve > 0 {
+		// All locks bottom out at 3 pins
+		if presolve > lockStrength-3 {
+			presolve = lockStrength - 3
+			if presolve < 0 {
+				presolve = 0
+			}
+		}
+
+		if len(keyring_sequence) < presolve {
+			keyring_sequence = sequence[0:presolve]
+		}
+	}
 
 	if keyring_sequence == sequence {
 		user.SendText("")
@@ -165,6 +184,19 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 			user.SendText(``)
 			user.SendText(fmt.Sprintf(`<ansi fg="yellow-bold">***</ansi> <ansi fg="red-bold">Oops! Your <ansi fg="item">%s</ansi> break off in the lock, resetting the lock. You'll have to start all over.</ansi> <ansi fg="yellow-bold">***</ansi>`, lockpickItm.GetSpec().NameSimple))
 			user.SendText(``)
+
+			room.SendText(fmt.Sprintf(`<ansi fg="alert-2"><ansi fg="username">%s</ansi> broke their lockpicks trying to pick a lock!</ansi>`, user.Character.Name), user.UserId)
+
+			if len(lockTrap) > 0 {
+
+				user.SendText(`<ansi fg="yellow-bold">***</ansi> <ansi fg="alert-5">A trap was triggered!</ansi> <ansi fg="yellow-bold">***</ansi>`)
+				user.SendText(``)
+				room.SendText(fmt.Sprintf(`<ansi fg="alert-3"><ansi fg="username">%s</ansi> triggered a trap!</ansi>`, user.Character.Name), user.UserId)
+
+				for _, buffId := range lockTrap {
+					user.AddBuff(buffId)
+				}
+			}
 		}
 	}
 
