@@ -296,6 +296,44 @@ func (r *Room) AddTemporaryExit(exitName string, t TemporaryRoomExit) bool {
 	return true
 }
 
+// applies buffs to any players/mobs in the room that don't
+// already have it
+func (r *Room) ApplyBuffId(buffId ...int) {
+
+	if len(buffId) == 0 {
+		return
+	}
+
+	for _, uid := range r.GetPlayers() {
+
+		if u := users.GetByUserId(uid); u != nil {
+
+			for _, bId := range buffId {
+				if u.Character.HasBuff(bId) {
+					continue
+				}
+				u.AddBuff(bId)
+			}
+		}
+
+	}
+
+	for _, miid := range r.GetMobs() {
+
+		if m := mobs.GetInstance(miid); m != nil {
+
+			for _, bId := range buffId {
+				if m.Character.HasBuff(bId) {
+					continue
+				}
+				m.AddBuff(bId)
+			}
+		}
+
+	}
+
+}
+
 // The purpose of Prepare() is to ensure a room is properly setup before anyone looks into it or enters it
 // That way if there should be anything in the room prior, it will already be there.
 // For example, mobs shouldn't ENTER the room right as the player arrives, they should already be there.
@@ -1561,6 +1599,26 @@ func (r *Room) findUserExit(userId int, userName string) string {
 func (r *Room) RoundTick() {
 
 	roundNow := util.GetRoundCount()
+
+	//
+	// Apply any mutators from the zone or room
+	// This will only add mutators that the player
+	// doesn't already have.
+	//
+	r.Mutators.Update(roundNow)
+
+	var activeMutators mutators.MutatorList
+	if zoneConfig := GetZoneConfig(r.Zone); zoneConfig != nil {
+		activeMutators = append(r.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
+	}
+	for _, mut := range activeMutators {
+		spec := mut.GetSpec()
+		r.ApplyBuffId(spec.BuffIds...)
+	}
+	//
+	// Done adding mutator buffs
+	//
+
 	for idx, spawnInfo := range r.SpawnInfo {
 
 		// Make sure to clean up any instances that may be dead

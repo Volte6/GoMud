@@ -12,3 +12,4 @@ alertmodifier:
   text: The floors are very dusty!
   colorpattern: gray
 respawnrate: 1 day # every game-time 24 hours comes back
+buffids: [10] # applies weakness

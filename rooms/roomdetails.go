@@ -52,8 +52,6 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 		roomLegend = b.name
 	}
 
-	zoneConfig := GetZoneConfig(r.Zone)
-
 	details := RoomTemplateDetails{
 		VisiblePlayers: []string{},
 		VisibleMobs:    []string{},
@@ -160,7 +158,12 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 		details.Description = colorpatterns.ApplyColorPattern(details.Description, `flame`, colorpatterns.Words)
 	}
 
-	activeMutators := append(r.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
+	var activeMutators mutators.MutatorList
+
+	if zoneConfig := GetZoneConfig(r.Zone); zoneConfig != nil {
+		activeMutators = append(r.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
+	}
+
 	for _, mut := range activeMutators {
 		mutSpec := mut.GetSpec()
 

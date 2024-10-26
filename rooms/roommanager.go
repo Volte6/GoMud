@@ -18,6 +18,7 @@ import (
 	"github.com/volte6/gomud/events"
 	"github.com/volte6/gomud/fileloader"
 	"github.com/volte6/gomud/mobs"
+	"github.com/volte6/gomud/mutators"
 	"github.com/volte6/gomud/templates"
 	"github.com/volte6/gomud/term"
 	"github.com/volte6/gomud/users"
@@ -296,6 +297,30 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	}
 
 	newRoom.MarkVisited(userId, VisitorUser)
+
+	//
+	// Apply any mutators from the zone or room
+	// This will only add mutators that the player
+	// doesn't already have.
+	//
+	var activeMutators mutators.MutatorList
+	if zoneConfig := GetZoneConfig(newRoom.Zone); zoneConfig != nil {
+		activeMutators = append(newRoom.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
+	}
+	for _, mut := range activeMutators {
+		spec := mut.GetSpec()
+		if len(spec.BuffIds) == 0 {
+			continue
+		}
+		for _, buffId := range spec.BuffIds {
+			if !user.Character.HasBuff(buffId) {
+				user.AddBuff(buffId)
+			}
+		}
+	}
+	//
+	// Done adding mutator buffs
+	//
 
 	playerCt := newRoom.addPlayer(userId)
 	roomManager.roomsWithUsers[newRoom.RoomId] = playerCt
