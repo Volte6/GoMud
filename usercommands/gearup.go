@@ -46,6 +46,7 @@ func Gearup(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 	if len(wearNewItems) == 0 {
 		user.SendText("You have nothing to wear")
+		return true, nil
 	}
 
 	for _, itm := range wearNewItems {
