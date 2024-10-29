@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"slices"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -68,29 +67,6 @@ func Server(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 			return true, nil
 		} else if args[0] == "night" {
 			gametime.SetToNight(-1)
-			gd := gametime.GetDate()
-			user.SendText(`Time set to ` + gd.String())
-			return true, nil
-		} else if args[0] == "time" && len(args) > 1 {
-
-			timeStr := strings.Join(args[1:], ` `)
-
-			if len(timeStr) >= 2 && strings.ToLower(timeStr[len(timeStr)-2:]) == `pm` {
-				timeStr = timeStr[:len(timeStr)-2]
-			}
-
-			timeParts := strings.Split(timeStr, `:`)
-
-			hourStr := timeParts[0]
-			minuteStr := `0`
-			if len(timeParts) > 1 {
-				minuteStr = timeParts[1]
-			}
-
-			hour, _ := strconv.Atoi(hourStr)
-			minutes, _ := strconv.Atoi(minuteStr)
-
-			gametime.SetTime(hour, minutes)
 			gd := gametime.GetDate()
 			user.SendText(`Time set to ` + gd.String())
 			return true, nil

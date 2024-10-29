@@ -33,7 +33,7 @@ import (
 	"github.com/volte6/gomud/usercommands"
 	"github.com/volte6/gomud/users"
 	"github.com/volte6/gomud/util"
-	"github.com/volte6/gomud/webclient"
+	"github.com/volte6/gomud/web"
 )
 
 type WorldInput struct {
@@ -1055,7 +1055,7 @@ func (w *World) MessageTick() {
 }
 
 func (w *World) UpdateStats() {
-	s := webclient.GetStats()
+	s := web.GetStats()
 	s.Reset()
 
 	c := configs.GetConfig()
@@ -1083,7 +1083,7 @@ func (w *World) UpdateStats() {
 
 	s.WebSocketPort = int(c.WebPort)
 
-	webclient.UpdateStats(s)
+	web.UpdateStats(s)
 }
 
 // Turns are much finer resolution than rounds...

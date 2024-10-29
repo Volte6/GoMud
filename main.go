@@ -44,7 +44,7 @@ import (
 	"github.com/volte6/gomud/users"
 	"github.com/volte6/gomud/util"
 	"github.com/volte6/gomud/version"
-	"github.com/volte6/gomud/webclient"
+	"github.com/volte6/gomud/web"
 )
 
 const (
@@ -129,7 +129,7 @@ func main() {
 	templates.LoadAliases()
 	keywords.LoadAliases()
 	mutators.LoadDataFiles()
-	gametime.SetToDay(-5)
+	gametime.SetToDay(-3)
 
 	for _, name := range colorpatterns.GetColorPatternNames() {
 		slog.Info("Color Test (Patterns)", "name", name, "(default)", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name)))
@@ -157,7 +157,7 @@ func main() {
 	// Set the server to be alive
 	serverAlive.Store(true)
 
-	webclient.Listen(int(c.WebPort), &wg, HandleWebSocketConnection)
+	web.Listen(int(c.WebPort), &wg, HandleWebSocketConnection)
 
 	allServerListeners := make([]net.Listener, 0, len(c.TelnetPort))
 	for _, port := range c.TelnetPort {
@@ -207,7 +207,7 @@ func main() {
 		s.Close()
 	}
 
-	webclient.Shutdown()
+	web.Shutdown()
 
 	// Just an ephemeral goroutine that spins its wheels until the program shuts down")
 	go func() {

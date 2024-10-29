@@ -343,8 +343,6 @@ func LoadUser(username string) (*UserRecord, error) {
 		return nil, errors.New("user already exists")
 	}
 
-	slog.Info("Loading user", "username", username)
-
 	userFilePath := util.FilePath(string(configs.GetConfig().FolderUserData), `/`, strings.ToLower(username)+`.yaml`)
 
 	userFileTxt, err := os.ReadFile(userFilePath)
@@ -355,6 +353,10 @@ func LoadUser(username string) (*UserRecord, error) {
 	loadedUser := &UserRecord{}
 	if err := yaml.Unmarshal([]byte(userFileTxt), loadedUser); err != nil {
 		slog.Error("LoadUser", "error", err.Error())
+	}
+
+	if err := loadedUser.Character.Validate(true); err == nil {
+		SaveUser(*loadedUser)
 	}
 
 	rebuiltMemory := []int{}
@@ -370,10 +372,6 @@ func LoadUser(username string) (*UserRecord, error) {
 
 	if loadedUser.Joined.IsZero() {
 		loadedUser.Joined = time.Now()
-	}
-
-	if err := loadedUser.Character.Validate(true); err == nil {
-		SaveUser(*loadedUser)
 	}
 
 	// Set their connection time to now

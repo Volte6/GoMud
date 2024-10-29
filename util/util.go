@@ -26,7 +26,7 @@ import (
 
 var (
 	turnCount     uint64 = 0
-	roundCount    uint64 = 0 // start at 100000000 to avoid complexities of delta comparisons and to allow for date adjustments
+	roundCount    uint64 = 1314000 + 180 // start at 1314000 (approx. 4 years in the future) to avoid complexities of delta comparisons and to allow for date adjustments
 	timeTrackers         = map[string]*Accumulator{}
 	serverAddr    string = `Unknown`
 	serverSeed    string = ``
@@ -62,6 +62,10 @@ func SetServerAddress(addr string) {
 
 func GetServerAddress() string {
 	return serverAddr
+}
+
+func SetRoundCount(newRoundCount uint64) {
+	roundCount = newRoundCount
 }
 
 func IncrementTurnCount() uint64 {

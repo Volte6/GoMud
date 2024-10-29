@@ -219,6 +219,11 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 
 	if sequenceMatches(entered, sequence) {
 
+		if entered != sequence {
+			entered = sequence
+			user.Character.SetKey(lockId, entered)
+		}
+
 		user.SendText(``)
 		user.SendText(`<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You Successfully picked the lock!</ansi> <ansi fg="yellow-bold">***</ansi>`)
 		user.SendText(`<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You can automatically pick this lock any time as long as you carry <ansi fg="item">lockpicks</ansi>!</ansi> <ansi fg="yellow-bold">***</ansi>`)
