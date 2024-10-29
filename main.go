@@ -66,6 +66,12 @@ var (
 
 func main() {
 
+	defer func() {
+		if r := recover(); r != nil {
+			slog.Error("PANIC", "error", r)
+		}
+	}()
+
 	setupLogger()
 
 	configs.ReloadConfig()
