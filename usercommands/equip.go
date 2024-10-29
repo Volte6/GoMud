@@ -14,14 +14,6 @@ func Equip(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 	if rest == "all" {
 		return Gearup(``, user, room)
-		itemCopies := append([]items.Item{}, user.Character.Items...)
-		for _, item := range itemCopies {
-			iSpec := item.GetSpec()
-			if iSpec.Subtype == items.Wearable || iSpec.Type == items.Weapon {
-				Equip(item.Name(), user, room)
-			}
-		}
-		return true, nil
 	}
 
 	// Check whether the user has an item in their inventory that matches
