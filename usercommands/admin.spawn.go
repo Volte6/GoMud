@@ -39,6 +39,21 @@ func Spawn(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 	if len(spawnTarget) > 0 {
 
+		if spawnType == `container` {
+
+			containerName := room.SpawnTempContainer(spawnTarget, "3 rounds", 0)
+
+			user.SendText(
+				fmt.Sprintf(`You wave your hands around and <ansi fg="container">%s</ansi> appears from thin air and falls to the ground.`, containerName),
+			)
+			room.SendText(
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> waves their hands around and <ansi fg="container">%s</ansi> appears from thin air and falls to the ground.`, user.Character.Name, containerName),
+				user.UserId,
+			)
+
+			return true, nil
+		}
+
 		if spawnType == `item` {
 
 			itemId := items.FindItemByName(spawnTarget)

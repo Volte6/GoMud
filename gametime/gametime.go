@@ -64,42 +64,38 @@ func (gd GameDate) String(symbolOnly ...bool) string {
 // If a roundAdjustment is provided, it will be added to the offset
 // This is useful to set to the round right before the rollover
 func SetToNight(roundAdjustment ...int) {
-	c := configs.GetConfig()
 
-	roundsPerHour := float64(c.RoundsPerDay) / 24
-	halfNight := math.Floor(float64(c.NightHours) / 2)
+	dayRound := GetLastPeriod(`sunset`, util.GetRoundCount())
 
-	dayResetOffset = int((24 - halfNight) * roundsPerHour)
-
-	roundOfDay := int(util.GetRoundCount() % uint64(c.RoundsPerDay))
-	dayResetOffset -= roundOfDay
 	if len(roundAdjustment) > 0 {
-		dayResetOffset += roundAdjustment[0]
+		if roundAdjustment[0] < 0 {
+			dayRound -= uint64(-1 * roundAdjustment[0])
+		} else {
+			dayRound += uint64(roundAdjustment[0])
+		}
 	}
 
-	// Reset the cache
-	clear(roundDateCache)
+	gd := GetDate(dayRound).Add(0, 1, 0)
+	util.SetRoundCount(gd.RoundNumber)
 }
 
 // Jumps the clock forward to the next day
 // If a roundAdjustment is provided, it will be added to the offset
 // This is useful to set to the round right before the rollover
 func SetToDay(roundAdjustment ...int) {
-	c := configs.GetConfig()
 
-	roundsPerHour := float64(c.RoundsPerDay) / 24
-	halfNight := int(math.Ceil(float64(c.NightHours) / 2))
+	dayRound := GetLastPeriod(`sunrise`, util.GetRoundCount())
 
-	dayResetOffset = int(float64(halfNight) * roundsPerHour)
-
-	roundOfDay := int(util.GetRoundCount() % uint64(c.RoundsPerDay))
-	dayResetOffset -= roundOfDay
 	if len(roundAdjustment) > 0 {
-		dayResetOffset += roundAdjustment[0]
+		if roundAdjustment[0] < 0 {
+			dayRound -= uint64(-1 * roundAdjustment[0])
+		} else {
+			dayRound += uint64(roundAdjustment[0])
+		}
 	}
 
-	// Reset the cache
-	clear(roundDateCache)
+	gd := GetDate(dayRound).Add(0, 1, 0)
+	util.SetRoundCount(gd.RoundNumber)
 }
 
 // Jumps the clock forward a specific hour/minutes
@@ -196,7 +192,7 @@ func (g *GameDate) ReCalculate() {
 
 	minute := math.Floor(minutesFloat * 60)
 
-	day := math.Ceil(float64(currentRoundAdjusted) / float64(g.RoundsPerDay))
+	day := math.Floor(float64(currentRoundAdjusted)/float64(g.RoundsPerDay)) + 1
 	year := math.Ceil(day / 365)
 
 	if year > 1 {
@@ -221,30 +217,9 @@ func (g *GameDate) ReCalculate() {
 	g.DayStart = nightEnd
 }
 
-func (g GameDate) AdjustTo(quantizeTo string, adjustHours int, adjustDays int, adjustYears int) GameDate {
+func (g GameDate) Add(adjustHours int, adjustDays int, adjustYears int) GameDate {
 
-	if quantizeTo == `hour` { // Start of the current hour
-
-		g.RoundNumber -= uint64(math.Ceil(float64(g.MinuteFloat) * (float64(g.RoundsPerDay) / 24 / 60)))
-
-	} else if quantizeTo == `day` { // Start of current day
-
-		g.RoundNumber -= uint64(math.Floor(float64(g.Hour24) * (float64(g.RoundsPerDay) / 24)))
-		g.RoundNumber -= uint64(math.Ceil(float64(g.MinuteFloat) * (float64(g.RoundsPerDay) / 24 / 60)))
-
-	} else if quantizeTo == `week` { // Start of current week
-
-		g.RoundNumber -= uint64(math.Floor(float64(g.Hour24) * (float64(g.RoundsPerDay) / 24)))
-		g.RoundNumber -= uint64(math.Ceil(float64(g.MinuteFloat) * (float64(g.RoundsPerDay) / 24 / 60)))
-
-	} else if quantizeTo == `noon` { // 12pm of current day
-
-		g.RoundNumber -= uint64(math.Floor(float64(g.Hour24) * (float64(g.RoundsPerDay) / 24)))
-		g.RoundNumber -= uint64(math.Ceil(float64(g.MinuteFloat) * (float64(g.RoundsPerDay) / 24 / 60)))
-
-		g.RoundNumber += uint64(math.Floor(float64(g.RoundsPerDay) / 2))
-
-	}
+	rStart := g.RoundNumber
 
 	if adjustYears != 0 {
 		if adjustYears < 1 {
@@ -270,7 +245,9 @@ func (g GameDate) AdjustTo(quantizeTo string, adjustHours int, adjustDays int, a
 		}
 	}
 
-	g.ReCalculate()
+	if rStart != g.RoundNumber {
+		g.ReCalculate()
+	}
 
 	return g
 }
@@ -342,7 +319,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 				return g.RoundNumber + adjustment
 			}
 
-			gNext := g.AdjustTo(``, 0, 0, 1*qty)
+			gNext := g.Add(0, 0, 1*qty)
 
 			return gNext.RoundNumber
 
@@ -353,7 +330,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 				return g.RoundNumber + adjustment
 			}
 
-			gNext := g.AdjustTo(``, 730*qty, 0, 0)
+			gNext := g.Add(730*qty, 0, 0)
 
 			return gNext.RoundNumber
 
@@ -364,7 +341,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 				return g.RoundNumber + adjustment
 			}
 
-			gNext := g.AdjustTo(``, 0, 7*qty, 0)
+			gNext := g.Add(0, 7*qty, 0)
 
 			return gNext.RoundNumber
 
@@ -375,7 +352,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 				return g.RoundNumber + adjustment
 			}
 
-			gNext := g.AdjustTo(``, 0, 1*qty, 0)
+			gNext := g.Add(0, qty, 0)
 
 			return gNext.RoundNumber
 
@@ -386,7 +363,55 @@ func (g GameDate) AddPeriod(str string) uint64 {
 				return g.RoundNumber + adjustment
 			}
 
-			gNext := g.AdjustTo(``, 1*qty, 0, 0)
+			gNext := g.Add(qty, 0, 0)
+
+			return gNext.RoundNumber
+
+		} else if strShort == `no` { // if timeStr == `noon` || timeStr == `noons` {
+
+			if realTime {
+				panic("REAL TIME NOT SUPPORTED FOR NOON YET")
+			}
+
+			g = getDate(GetLastPeriod(`noon`, g.RoundNumber))
+			// adjusts by days
+			gNext := g.Add(0, qty, 0)
+
+			return gNext.RoundNumber
+
+		} else if strShort == `mi` { // if timeStr == `midnight` || timeStr == `midnights` {
+
+			if realTime {
+				panic("REAL TIME NOT SUPPORTED FOR MIDNIGHT YET")
+			}
+
+			g = getDate(GetLastPeriod(`day`, g.RoundNumber))
+			// adjusts by days
+			gNext := g.Add(0, qty, 0)
+
+			return gNext.RoundNumber
+
+		} else if timeStr == `sunrise` || timeStr == `sunrises` {
+
+			if realTime {
+				panic("REAL TIME NOT SUPPORTED FOR SUNRISE YET")
+			}
+
+			g = getDate(GetLastPeriod(`sunrise`, g.RoundNumber))
+			// adjusts by days
+			gNext := g.Add(0, qty, 0)
+
+			return gNext.RoundNumber
+
+		} else if timeStr == `sunset` || timeStr == `sunsets` {
+
+			if realTime {
+				panic("REAL TIME NOT SUPPORTED FOR SUNSET YET")
+			}
+
+			g = getDate(GetLastPeriod(`sunset`, g.RoundNumber))
+			// adjusts by days
+			gNext := g.Add(0, qty, 0)
 
 			return gNext.RoundNumber
 
@@ -400,10 +425,61 @@ func (g GameDate) AddPeriod(str string) uint64 {
 	// Assume rounds?
 	//if timeStr == `hour` || timeStr == `hours` || timeStr == `hourly` {
 
-	gNext := g.AdjustTo(``, 1*qty, 0, 0)
+	gNext := g.Add(qty, 0, 0)
 
 	return gNext.RoundNumber
 
 	//}
 
+}
+
+func GetLastPeriod(periodName string, roundNumber uint64) uint64 {
+
+	c := configs.GetConfig()
+
+	roundsPerDay := uint64(c.RoundsPerDay)
+	nightHoursPerDay := uint64(c.NightHours)
+
+	roundsPerHour := float64(roundsPerDay) / 24
+
+	// What round started this week?
+	roundOfWeek := roundNumber % (roundsPerDay * 7)
+
+	// What round started this day? (midnight)
+	roundOfDay := roundNumber % roundsPerDay
+
+	// What round started this hour?
+	roundOfHour := roundOfDay % uint64(math.Floor(roundsPerHour))
+
+	if periodName == `hour` { // Start of the current hour (or closest to it)
+
+		roundNumber -= roundOfHour
+
+	} else if periodName == `day` { // Start of current day
+
+		roundNumber -= roundOfDay
+
+	} else if periodName == `week` { // Start of current week
+
+		roundNumber -= roundOfWeek // First go to the start of the day
+
+	} else if periodName == `noon` { // Last time 12pm was hit
+
+		roundNumber -= roundOfDay
+		roundNumber -= uint64(math.Floor(float64(roundsPerDay) / 2))
+
+	} else if periodName == `sunrise` { // last sunrise
+
+		roundNumber -= roundOfDay                                                       // Strip rounds of today off
+		roundNumber -= uint64(roundsPerDay)                                             // Subtract a day
+		roundNumber += uint64(math.Ceil(float64(nightHoursPerDay) / 2 * roundsPerHour)) // add half a night
+
+	} else if periodName == `sunset` { // 12am of next day, minus half of night
+
+		roundNumber -= roundOfDay                                                       // Strip rounds of today off
+		roundNumber -= uint64(math.Ceil(float64(nightHoursPerDay) / 2 * roundsPerHour)) // Subtract half a night
+
+	}
+
+	return roundNumber
 }

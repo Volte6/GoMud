@@ -48,6 +48,7 @@ var (
 		"lookfortrouble": {LookForTrouble, false},
 		"noop":           {Noop, true},
 		"portal":         {Portal, false},
+		"put":            {Put, false},
 		"remove":         {Remove, false},
 		"say":            {Say, true},
 		"sayto":          {SayTo, true},

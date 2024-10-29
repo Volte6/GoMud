@@ -96,21 +96,23 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 	sequence := util.GetLockSequence(lockId, lockStrength, string(configs.GetConfig().Seed))
 
 	// Calculate any presolve from buffs, gear, pet perks, etc.
-	if presolve := user.Character.StatMod(string(statmods.Picklock)); presolve > 0 {
-		// All locks bottom out at 3 pins
-		if presolve > lockStrength-3 {
-			presolve = lockStrength - 3
-			if presolve < 0 {
-				presolve = 0
+	if len(keyring_sequence) == 0 {
+		if presolve := user.Character.StatMod(string(statmods.Picklock)); presolve > 0 {
+			// All locks bottom out at 3 pins
+			if presolve > lockStrength-3 {
+				presolve = lockStrength - 3
+				if presolve < 0 {
+					presolve = 0
+				}
 			}
-		}
 
-		if len(keyring_sequence) < presolve {
-			keyring_sequence = sequence[0:presolve]
+			if len(keyring_sequence) < presolve {
+				keyring_sequence = strings.Repeat(`*`, presolve)
+			}
 		}
 	}
 
-	if keyring_sequence == sequence {
+	if sequenceMatches(keyring_sequence, sequence) {
 		user.SendText("")
 		user.SendText("Your keyring already has this lock on it.")
 
@@ -176,6 +178,9 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 	entered += r
 
 	for i := 0; i < len(entered); i++ {
+		if entered[i] == '*' {
+			continue
+		}
 		if entered[i] != sequence[i] {
 			// Mismatch! BREAKS!
 			entered = ``
@@ -212,7 +217,12 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 
 	user.SendText(GetLockRender(sequence, entered))
 
-	if sequence == entered {
+	if sequenceMatches(entered, sequence) {
+
+		if entered != sequence {
+			entered = sequence
+			user.Character.SetKey(lockId, entered)
+		}
 
 		user.SendText(``)
 		user.SendText(`<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You Successfully picked the lock!</ansi> <ansi fg="yellow-bold">***</ansi>`)
@@ -273,8 +283,13 @@ func GetLockRender(sequence string, entered string) string {
 
 	row = []string{}
 	for i := 0; i < len(sequence); i++ {
-		if i >= len(entered) || entered[i] != sequence[i] {
+		if i < len(entered) && entered[i] == '*' {
+			row = append(row, `FREE!`)
+			formatting[i] = `<ansi fg="green-bold">%s</ansi>`
+		} else if i >= len(entered) || entered[i] != sequence[i] {
+
 			row = append(row, `  ?  `)
+
 			formatting[i] = `<ansi fg="red-bold">%s</ansi>`
 		} else {
 			if entered[i] == 'U' {
@@ -304,4 +319,19 @@ func GetLockRender(sequence string, entered string) string {
 
 	return tplTxt
 
+}
+
+func sequenceMatches(input string, correctSequence string) bool {
+
+	if len(input) != len(correctSequence) {
+		return false
+	}
+
+	for i := 0; i < len(input); i++ {
+		if input[i] != '*' && input[i] != correctSequence[i] {
+			return false
+		}
+	}
+
+	return true
 }

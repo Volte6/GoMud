@@ -334,6 +334,38 @@ func (r *Room) ApplyBuffId(buffId ...int) {
 
 }
 
+func (r *Room) SpawnTempContainer(name string, duration string, lockDifficulty int, trapBuffIds ...int) string {
+
+	c := Container{}
+
+	gd := gametime.GetDate(util.GetRoundCount())
+	c.DespawnRound = gd.AddPeriod(duration)
+
+	c.Lock.Difficulty = uint8(lockDifficulty)
+
+	if len(trapBuffIds) > 0 {
+		c.Lock.TrapBuffIds = trapBuffIds
+	}
+
+	containerName := name
+
+	// make sure name is unique
+	i := 1
+	_, ok := r.Containers[containerName]
+	for ok {
+		containerName = name + `-` + strconv.Itoa(i)
+		i++
+		_, ok = r.Containers[containerName]
+	}
+
+	if r.Containers == nil {
+		r.Containers = make(map[string]Container)
+	}
+	r.Containers[containerName] = c
+
+	return containerName
+}
+
 // The purpose of Prepare() is to ensure a room is properly setup before anyone looks into it or enters it
 // That way if there should be anything in the room prior, it will already be there.
 // For example, mobs shouldn't ENTER the room right as the player arrives, they should already be there.
@@ -342,6 +374,15 @@ func (r *Room) Prepare(checkAdjacentRooms bool) {
 	roundNow := util.GetRoundCount()
 
 	r.Mutators.Update(roundNow)
+
+	if len(r.Containers) > 0 {
+		for k, c := range r.Containers {
+			if c.DespawnRound > 0 && c.DespawnRound <= roundNow {
+				r.SendText(fmt.Sprintf(`The <ansi fg="container">%s</ansi> crumbles to dust, and is gone.`, k))
+				delete(r.Containers, k)
+			}
+		}
+	}
 
 	// First ensure any mobs that should be here are spawned
 	for idx, spawnInfo := range r.SpawnInfo {

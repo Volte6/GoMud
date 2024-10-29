@@ -1,6 +1,6 @@
 module github.com/volte6/gomud
 
-go 1.21
+go 1.22
 
 require (
 	github.com/Volte6/ansitags v0.0.0-20240205002851-61e010ad9511
