@@ -44,6 +44,10 @@ func Gearup(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 		wearNewItems[itmSpec.Type] = itm
 	}
 
+	if len(wearNewItems) == 0 {
+		user.SendText("You have nothing to wear")
+	}
+
 	for _, itm := range wearNewItems {
 		user.Command(fmt.Sprintf(`wear !%d`, itm.ItemId), -1)
 	}
