@@ -559,7 +559,8 @@ func (c *Character) GetDefense() int {
 
 	// If wearing an offhand item like a shield, defense gets a 50% boost
 	// Holdables are not considered "shield" type items.
-	if c.Equipment.Offhand.ItemId != 0 && c.Equipment.Offhand.GetSpec().Type != items.Weapon && c.Equipment.Offhand.GetSpec().Type != items.Holdable {
+	// Anything held in the offhand that provides a damage reduction is considered a shield.
+	if c.Equipment.Offhand.ItemId != 0 && c.Equipment.Offhand.GetSpec().Type != items.Weapon && c.Equipment.Offhand.GetSpec().DamageReduction > 0 {
 		reduction = int(float64(reduction) * 1.5)
 	}
 
@@ -1518,7 +1519,7 @@ func (c *Character) Validate(recalcPermaBuffs ...bool) error {
 						itemFoundInDisabledSlot = c.Equipment.Weapon
 					}
 					c.Equipment.Weapon = items.ItemDisabledSlot
-				case items.Offhand, items.Holdable:
+				case items.Offhand:
 					if c.Equipment.Offhand.ItemId > 0 { // Did we find somethign in a disabled slot?
 						itemFoundInDisabledSlot = c.Equipment.Offhand
 					}
@@ -1746,7 +1747,7 @@ func (c *Character) Wear(i items.Item) (returnItems []items.Item, newItemWorn bo
 
 		returnItems = append(returnItems, c.Equipment.Weapon)
 		c.Equipment.Weapon = i
-	case items.Offhand, items.Holdable:
+	case items.Offhand:
 		if c.Equipment.Offhand.IsDisabled() { // Don't allow equipping on a disabled slot
 			return returnItems, false, `You can't hold things in an offhand.`
 		}

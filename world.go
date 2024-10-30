@@ -637,54 +637,91 @@ func (w *World) MainWorker(shutdown chan bool, wg *sync.WaitGroup) {
 
 loop:
 	for {
+
+		// The reason for
+		// util.LockGame() / util.UnlockGame()
+		// In each of these cases is to lock down the
+		// logic for when other processes need to query data
+		// such as the webserver
+
 		select {
 		case <-shutdown:
 
 			slog.Error(`MainWorker`, `action`, `shutdown received`)
 
+			util.LockGame()
 			if err := rooms.SaveAllRooms(); err != nil {
 				slog.Error("rooms.SaveAllRooms()", "error", err.Error())
 			}
-
-			// Save all user data too.
-			users.SaveAllUsers()
+			users.SaveAllUsers() // Save all user data too.
+			util.UnlockGame()
 
 			break loop
 		case <-statsTimer.C:
 
+			util.LockGame()
 			w.UpdateStats()
+			util.UnlockGame()
 
 			statsTimer.Reset(time.Duration(10) * time.Second)
 
 		case <-roomUpdateTimer.C:
 			slog.Debug(`MainWorker`, `action`, `rooms.RoomMaintenance()`)
+
+			util.LockGame()
 			rooms.RoomMaintenance()
+			util.UnlockGame()
+
 			roomUpdateTimer.Reset(roomMaintenancePeriod)
 
 		case <-ansiAliasTimer.C:
-			//slog.Debug(`MainWorker`, `action`, `templates.LoadAliases()`)
+
+			util.LockGame()
 			templates.LoadAliases()
+			util.UnlockGame()
+
 			ansiAliasTimer.Reset(ansiAliasReloadPeriod)
 
 		case <-messageTimer.C:
-			//slog.Debug(`MainWorker`, `action`, `world.MessageTick()`)
+
 			messageTimer.Reset(time.Millisecond)
+
+			util.LockGame()
 			w.MessageTick()
+			util.UnlockGame()
 
 		case <-turnTimer.C:
-			//slog.Debug(`MainWorker`, `action`, `world.TurnTick()`)
+
+			util.LockGame()
 			turnTimer.Reset(time.Duration(c.TurnMs) * time.Millisecond)
 			w.TurnTick()
+			util.UnlockGame()
 
 		case enterWorldUserId := <-w.enterWorldUserId: // [2]int
+
+			util.LockGame()
 			w.enterWorld(enterWorldUserId[0], enterWorldUserId[1])
+			util.UnlockGame()
+
 		case leaveWorldUserId := <-w.leaveWorldUserId: // int
+
+			util.LockGame()
 			w.leaveWorld(leaveWorldUserId)
+			util.UnlockGame()
+
 		case logoutConnectionId := <-w.logoutConnectionId: //  connections.ConnectionId
+
+			util.LockGame()
 			w.logOutUserByConnectionId(logoutConnectionId)
+			util.UnlockGame()
+
 		case zombieFlag := <-w.zombieFlag: //  [2]int
 			if zombieFlag[1] == 1 {
+
+				util.LockGame()
 				users.SetZombieUser(zombieFlag[0])
+				util.UnlockGame()
+
 			}
 		}
 		c = configs.GetConfig()

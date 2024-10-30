@@ -76,7 +76,7 @@ func Enchant(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 		user.SendText(fmt.Sprintf("You don't have a %s to enchant. Is it still worn, perhaps?", rest))
 	} else {
 
-		if (matchItem.GetSpec().Type != items.Weapon && matchItem.GetSpec().Subtype != items.Wearable) || matchItem.GetSpec().Type == items.Holdable {
+		if matchItem.GetSpec().Type != items.Weapon && matchItem.GetSpec().Subtype != items.Wearable {
 			user.SendText(`Enchant only works on weapons and armor.`)
 			return true, nil
 		}

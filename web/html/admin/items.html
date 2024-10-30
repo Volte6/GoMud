@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Items</title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+    <script src="/static/admin/js/htmx.2.0.3.js"></script>
+    <style>
+        .crosshatch {
+            color: white;
+            background-image: linear-gradient(
+                45deg, 
+                rgba(0,0,0,0.5) 25%, 
+                transparent 25%, 
+                transparent 50%, 
+                rgba(0,0,0,0.5) 50%, 
+                rgba(0,0,0,0.5) 75%, 
+                transparent 75%, 
+                transparent
+            );
+            background-size: 5px 5px;
+        }
+    </style>
+    <script>
+        function HideShowUpdate(fadeTime) {
+
+            iType = $("#type").val();
+            iSubtype = $("#subtype").val();
+
+            selectDataString = '[data-applies-to-types~="'+iType+'"], [data-applies-to-types~="'+iSubtype+'"]';
+
+            // hide anything that has a type requirement that isn't this one, and is currently visible
+            $('[data-applies-to-types]:not('+selectDataString+'):visible').
+                            removeClass('crosshatch').
+                            addClass('crosshatch').
+                            fadeOut(fadeTime);
+
+            // show anything that has a type requirement that is this one, and is currently hidden
+            $(selectDataString+':hidden').
+                            removeClass('crosshatch').
+                            hide().
+                            fadeIn(fadeTime);
+
+        }
+
+        document.addEventListener("htmx:afterOnLoad", function(event) {
+            if (event.detail.target.id === "itemdata-edit") { 
+                HideShowUpdate(0);
+                
+                scriptStr = $("textarea#script").val()
+
+                if (scriptStr.length > 0 ) {
+                    rowCount = scriptStr.split('\n').length + 2
+                    if (rowCount > 25) {
+                        rowCount = 25
+                    }
+                    $('textarea#script').attr('rows', rowCount);
+                } else {
+                    $('textarea#script').attr('rows', 1);
+                }
+            }
+        });
+
+        $(document).on('change', '#type', function(event) {
+            HideShowUpdate(500);
+        });
+
+        $(document).on('change', '#subtype', function(event) {
+            HideShowUpdate(500);
+        });
+
+    </script>
+  </head>
+  <body>
+
+    <div class="container-fluid">
+        
+        <h1>Items</h1>
+
+        <div class="w-50 form-group">
+            <select class="form-control  selectpicker" name="itemid" id="itemid"  data-live-search="true"
+                hx-get="/admin/items/itemdata" 
+                hx-target="#itemdata-edit" 
+                hx-trigger="change" >
+                <option value="">Select an Item to View</option>
+                {{$lastItemType := ""}}
+                {{range $index, $itemspec := .}}
+                    {{ if ne ($itemspec.ItemFolder true) $lastItemType }}
+                    <option data-divider="true">Divider</option>
+                    {{$lastItemType = ($itemspec.ItemFolder true) }}
+                    {{ end }}
+                    <option data-content="<span class='badge badge-secondary'>{{ $itemspec.ItemId }}</span> {{ if ne $itemspec.QuestToken "" }}<span class='text-warning'>&#x2605;</span> {{end}}<span class='font-weight-bold'>{{ $itemspec.Name }}</span>{{ if $itemspec.Cursed }} <span class='badge badge-pill badge-danger'>Cursed</span>{{ end }}{{ if ne $itemspec.GetScript "" }} <span class='badge badge-pill badge-info'>Script</span>{{end}}" value="{{ $itemspec.ItemId }}">{{ rpad 7 $itemspec.ItemId "&nbsp;&nbsp;" }} {{ $itemspec.Name }}</option>
+                {{end}}
+            </select>
+        </div>
+    </div>
+
+    <div class="container-fluid" id="itemdata-edit"></div>
+
+  </body>
+</html>

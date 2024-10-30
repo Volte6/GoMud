@@ -36,17 +36,6 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 	// Routing
 	// Basic homepage
 	http.HandleFunc("/", serveHome)
-
-	// Basic static resources
-	http.Handle("GET /static/public/", http.StripPrefix("/static/public/", http.FileServer(http.Dir("web/html/static/public"))))
-
-	// Static resources that require authentication
-	http.Handle("GET /static/admin/", doBasicAuth(handlerToHandlerFunc(http.StripPrefix("/static/admin/", http.FileServer(http.Dir("web/html/static/admin"))))))
-
-	// Admin tools (requires auth)
-	http.HandleFunc("GET /admin/", doBasicAuth(serveAdmin))
-	http.HandleFunc("GET /admin/{page}", doBasicAuth(serveAdmin))
-	http.HandleFunc("POST /admin/process", doBasicAuth(submitAdminRequest))
 	// websocket client
 	http.HandleFunc("/webclient", serveClient)
 	// websocket upgrade
@@ -61,6 +50,16 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 
 		webSocketHandler(conn)
 	})
+
+	// Static resources
+	http.Handle("GET /static/public/", http.StripPrefix("/static/public/", http.FileServer(http.Dir("web/html/static/public"))))
+	http.Handle("GET /static/admin/", doBasicAuth(handlerToHandlerFunc(http.StripPrefix("/static/admin/", http.FileServer(http.Dir("web/html/static/admin"))))))
+
+	// Admin tools
+	http.HandleFunc("GET /admin/", doBasicAuth(adminIndex))
+	// Item Admin
+	http.HandleFunc("GET /admin/items", doBasicAuth(itemsIndex))
+	http.HandleFunc("GET /admin/items/itemdata", doBasicAuth(itemData))
 
 	go func() {
 		defer wg.Done()

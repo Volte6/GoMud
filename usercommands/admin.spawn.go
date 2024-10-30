@@ -2,6 +2,7 @@ package usercommands
 
 import (
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -38,6 +39,15 @@ func Spawn(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 	}
 
 	if len(spawnTarget) > 0 {
+
+		if rest == `loot goblin` {
+			if gRoom := rooms.LoadRoom(rooms.GoblinRoom); gRoom != nil { // loot goblin room
+				user.SendText(`Somewhere in the realm, a <ansi fg="mobname">loot goblin</ansi> appears!`)
+				slog.Info(`Loot Goblin Spawn`, `roundNumber`, util.GetRoundCount(), `forced`, true)
+				gRoom.Prepare(false) // Make sure the loot goblin spawns.
+			}
+			return true, nil
+		}
 
 		if spawnType == `container` {
 
