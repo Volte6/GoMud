@@ -2,6 +2,7 @@ package gametime
 
 import (
 	"fmt"
+	"log/slog"
 	"math"
 	"strconv"
 	"strings"
@@ -310,9 +311,9 @@ func (g GameDate) AddPeriod(str string) uint64 {
 
 	if len(timeStr) >= 2 {
 
-		strShort := timeStr[0:2]
+		strShort := timeStr[0:3]
 
-		if strShort == `ye` { // timeStr == `year` || timeStr == `years` || timeStr == `yearly` {
+		if strShort == `yea` { // timeStr == `year` || timeStr == `years` || timeStr == `yearly` {
 
 			if realTime {
 				adjustment := uint64(qty * roundsPerRealDay * 365)
@@ -323,7 +324,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 
 			return gNext.RoundNumber
 
-		} else if strShort == `mo` { // else if timeStr == `month` || timeStr == `months` || timeStr == `monthly` {
+		} else if strShort == `mon` { // else if timeStr == `month` || timeStr == `months` || timeStr == `monthly` {
 
 			if realTime {
 				adjustment := uint64(qty * roundsPerRealHour * 730)
@@ -334,7 +335,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 
 			return gNext.RoundNumber
 
-		} else if strShort == `we` { //  else if timeStr == `week` || timeStr == `weeks` || timeStr == `weekly` {
+		} else if strShort == `wee` { //  else if timeStr == `week` || timeStr == `weeks` || timeStr == `weekly` {
 
 			if realTime {
 				adjustment := uint64(qty * roundsPerRealDay * 7)
@@ -345,7 +346,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 
 			return gNext.RoundNumber
 
-		} else if strShort == `da` { //  else if timeStr == `day` || timeStr == `days` || timeStr == `daily` {
+		} else if strShort == `day` || strShort == `dai` { //  else if timeStr == `day` || timeStr == `days` || timeStr == `daily` {
 
 			if realTime {
 				adjustment := uint64(qty * roundsPerRealDay)
@@ -356,7 +357,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 
 			return gNext.RoundNumber
 
-		} else if strShort == `ho` { // if timeStr == `hour` || timeStr == `hours` || timeStr == `hourly` {
+		} else if strShort == `hou` { // if timeStr == `hour` || timeStr == `hours` || timeStr == `hourly` {
 
 			if realTime {
 				adjustment := uint64(qty * roundsPerRealHour)
@@ -367,10 +368,10 @@ func (g GameDate) AddPeriod(str string) uint64 {
 
 			return gNext.RoundNumber
 
-		} else if strShort == `no` { // if timeStr == `noon` || timeStr == `noons` {
+		} else if strShort == `noo` { // if timeStr == `noon` || timeStr == `noons` {
 
 			if realTime {
-				panic("REAL TIME NOT SUPPORTED FOR NOON YET")
+				slog.Error("AddPeriod", "error", "real time not supported for noon yet: "+timeStr)
 			}
 
 			g = getDate(GetLastPeriod(`noon`, g.RoundNumber))
@@ -379,10 +380,10 @@ func (g GameDate) AddPeriod(str string) uint64 {
 
 			return gNext.RoundNumber
 
-		} else if strShort == `mi` { // if timeStr == `midnight` || timeStr == `midnights` {
+		} else if strShort == `mid` { // if timeStr == `midnight` || timeStr == `midnights` {
 
 			if realTime {
-				panic("REAL TIME NOT SUPPORTED FOR MIDNIGHT YET")
+				slog.Error("AddPeriod", "error", "real time not supported for midnight yet: "+timeStr)
 			}
 
 			g = getDate(GetLastPeriod(`day`, g.RoundNumber))
@@ -394,7 +395,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 		} else if timeStr == `sunrise` || timeStr == `sunrises` {
 
 			if realTime {
-				panic("REAL TIME NOT SUPPORTED FOR SUNRISE YET")
+				slog.Error("AddPeriod", "error", "real time not supported for sunrise yet: "+timeStr)
 			}
 
 			g = getDate(GetLastPeriod(`sunrise`, g.RoundNumber))
@@ -406,7 +407,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 		} else if timeStr == `sunset` || timeStr == `sunsets` {
 
 			if realTime {
-				panic("REAL TIME NOT SUPPORTED FOR SUNSET YET")
+				slog.Error("AddPeriod", "error", "real time not supported for sunset yet: "+timeStr)
 			}
 
 			g = getDate(GetLastPeriod(`sunset`, g.RoundNumber))

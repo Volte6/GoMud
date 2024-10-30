@@ -22,7 +22,6 @@ func Inventory(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 	typeSearchTerms := map[string]items.ItemType{
 		`weapons`:   items.Weapon,
 		`offhand`:   items.Offhand,
-		`holdable`:  items.Holdable,
 		`shields`:   items.Offhand,
 		`head`:      items.Head,
 		`neck`:      items.Neck,

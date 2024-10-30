@@ -17,6 +17,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"crypto/md5"
@@ -25,12 +26,10 @@ import (
 )
 
 var (
-	turnCount     uint64 = 0
-	roundCount    uint64 = 1314000 + 180 // start at 1314000 (approx. 4 years in the future) to avoid complexities of delta comparisons and to allow for date adjustments
-	timeTrackers         = map[string]*Accumulator{}
-	serverAddr    string = `Unknown`
-	serverSeed    string = ``
-	dayResetRound uint64 = 0
+	turnCount    uint64 = 0
+	roundCount   uint64 = 1314000 // start at 1314000 (approx. 4 years in the future) to avoid complexities of delta comparisons and to allow for date adjustments
+	timeTrackers        = map[string]*Accumulator{}
+	serverAddr   string = `Unknown`
 
 	strippablePrepositions = []string{
 		`onto`,
@@ -49,12 +48,31 @@ var (
 	}
 
 	colorShortTagRegex = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
+
+	gameLock = sync.RWMutex{}
 )
 
-/*
-type CommandQueue interface {
+// Mutex lock intended for synchronizing at a high level between
+// components that may asyncronously access game data
+func LockGame() {
+	gameLock.Lock()
 }
-*/
+
+func UnlockGame() {
+	gameLock.Unlock()
+}
+
+func RLockGame() {
+	gameLock.RLock()
+}
+
+func RUnlockGame() {
+	gameLock.RUnlock()
+}
+
+//
+// End Mutex
+//
 
 func SetServerAddress(addr string) {
 	serverAddr = addr

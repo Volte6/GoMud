@@ -59,7 +59,7 @@ func Portal(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	}
 
 	if portalTargetRoomId == mob.Character.RoomId {
-		return false, err
+		return true, fmt.Errorf("already in that room")
 	}
 
 	// Load current room details

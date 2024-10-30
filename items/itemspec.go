@@ -28,21 +28,80 @@ var (
 	itemNameCache                   = map[int]string{}
 )
 
+type ItemTypeInfo struct {
+	Type        string
+	Description string
+}
+
+// Returns key=type and value=description
+func ItemTypes() []ItemTypeInfo {
+	return []ItemTypeInfo{
+		// Equipment
+		{string(Weapon), `This can be wielded as a weapon.`},
+		{string(Offhand), `This can be worn in the offhand.`},
+		{string(Head), `This can be worn in the players head equipment slot.`},
+		{string(Neck), `This can be worn in the players neck equipment slot.`},
+		{string(Body), `This can be worn in the players body equipment slot.`},
+		{string(Belt), `This can be worn in the players belt equipment slot.`},
+		{string(Gloves), `This can be worn in the players gloves equipment slot.`},
+		{string(Ring), `This can be worn in the players ring equipment slot.`},
+		{string(Legs), `This can be worn in the players legs equipment slot.`},
+		{string(Feet), `This can be worn in the players feet equipment slot.`},
+		// Consumables
+		{string(Potion), `This is a magic potion.`},
+		{string(Food), `This is food.`},
+		{string(Drink), `This is a drink.`},
+		{string(Scroll), `This is a scroll.`},
+		{string(Grenade), `This is an explosive object.`},
+		{string(Junk), `This is garbage.`},
+		// Other
+		{string(Readable), `This can be read.`},
+		{string(Key), `This is a key that opens a locked container or door.`},
+		{string(Object), `This is a catch-all generic object without pre-defined special behaviors.`},
+		{string(Gemstone), `This is a gemstone.`},
+		{string(Lockpicks), `This allows use of the picklock skill.`},
+		{string(Botanical), `This is an herb.`},
+	}
+}
+
+// Returns key=subtype and value=description
+func ItemSubtypes() []ItemTypeInfo {
+	return []ItemTypeInfo{
+		// Miscellaneous
+		{string(Wearable), `Can be targetted with the equip/wear/wield command.`},
+		{string(Drinkable), `Can be targetted withthe drink command.`},
+		{string(Edible), `Can be targetted with the eat command.`},
+		{string(Usable), `Can be targetted with the use command.`},
+		{string(Throwable), `Can be targetted with the throw command.`},
+		{string(Mundane), `No special behavior built in.`},
+		// Weapons
+		{string(Generic), `Any weapon that doesn't get assigned an actual weapon subcategory.`},
+		{string(Bludgeoning), `A blunt weapon.`},
+		{string(Cleaving), `A hacking/chopping weapon.`},
+		{string(Stabbing), `A piercing weapon.`},
+		{string(Slashing), `A slicing and slashing weapon.`},
+		{string(Shooting), `A ranged weapon.`},
+		{string(Claws), `A slashing weapon worn on the hands.`},
+		{string(Whipping), `A whipping weapon.`},
+		// Miscellaneous data
+		{string(BlobContent), `Can store blob content in the item data.`},
+	}
+}
+
 const (
 	Unknown ItemType = ""
 
 	// Equipment
-	Weapon   ItemType = "weapon"
-	Offhand  ItemType = "offhand"
-	Holdable ItemType = "holdable" // special type that can go into the offhand slot
-	Head     ItemType = "head"
-	Neck     ItemType = "neck"
-	Body     ItemType = "body"
-	Belt     ItemType = "belt"
-	Gloves   ItemType = "gloves"
-	Ring     ItemType = "ring"
-	Legs     ItemType = "legs"
-	Feet     ItemType = "feet"
+	Weapon  ItemType = "weapon"
+	Offhand ItemType = "offhand"
+	Head    ItemType = "head"
+	Neck    ItemType = "neck"
+	Body    ItemType = "body"
+	Belt    ItemType = "belt"
+	Gloves  ItemType = "gloves"
+	Ring    ItemType = "ring"
+	Legs    ItemType = "legs"
+	Feet    ItemType = "feet"
 	// Consumables
 	Potion  ItemType = "potion"
 	Food    ItemType = "food"
@@ -52,9 +111,7 @@ const (
 	Junk    ItemType = "junk"
 
 	// Other
-	Container ItemType = "container"
 	Readable  ItemType = "readable"  // Something with writing to reveal when read
-	Currency  ItemType = "currency"  // it's gold, basically.
 	Key       ItemType = "key"       // A key for a door
 	Object    ItemType = "object"    // A mundane object
 	Gemstone  ItemType = "gemstone"  // A gem
@@ -80,7 +137,6 @@ const (
 	Whipping    ItemSubType = "whipping"
 
 	BlobContent ItemSubType = "blobcontent"
-	Gold        ItemSubType = "gold"
 
 	OneHanded WeaponHands = 1
 	TwoHanded WeaponHands = 2
@@ -219,6 +275,15 @@ func FindItemByName(name string) int {
 	return 0
 }
 
+func GetAllItemSpecs() []ItemSpec {
+
+	itemSpecs := []ItemSpec{}
+	for _, item := range items {
+		itemSpecs = append(itemSpecs, *item)
+	}
+	return itemSpecs
+}
+
 func GetAllItemNames() []string {
 
 	itemNames := []string{}
@@ -282,6 +347,27 @@ func (i *ItemSpec) AutoCalculateValue() {
 	i.Value = val
 }
 
+func (i *ItemSpec) ItemFolder(baseonly ...bool) string {
+	folderName := ``
+	if i.ItemId >= 30000 {
+		folderName = `consumables-30000`
+	} else if i.ItemId >= 20000 {
+
+		if len(baseonly) > 0 && baseonly[0] {
+			folderName = `armor-20000`
+		} else {
+			folderName = `armor-20000/` + string(i.Type)
+		}
+
+	} else if i.ItemId >= 10000 {
+		folderName = `weapons-10000`
+	} else {
+		folderName = `other-0`
+	}
+
+	return folderName
+}
+
 // Presumably to ensure the datafile hasn't messed something up.
 func (i *ItemSpec) Validate() error {
 
@@ -323,19 +409,7 @@ func (i *ItemSpec) Filename() string {
 }
 
 func (i *ItemSpec) Filepath() string {
-
-	folderName := ``
-	if i.ItemId >= 30000 {
-		folderName = `consumables-30000`
-	} else if i.ItemId >= 20000 {
-		folderName = `armor-20000/` + string(i.Type)
-	} else if i.ItemId >= 10000 {
-		folderName = `weapons-10000`
-	} else {
-		folderName = `other-0`
-	}
-
-	return folderName + `/` + i.Filename()
+	return i.ItemFolder() + `/` + i.Filename()
 }
 
 func (i ItemSpec) GetScript() string {

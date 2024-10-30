@@ -805,7 +805,7 @@ Type your commands below.
 
         textInput.addEventListener('keydown', function(event) {
             
-            if ( codeShortcuts[event.code] ) {
+            if ( textInput.value.length == 0 && codeShortcuts[event.code] ) {
                 SendData(codeShortcuts[event.code]);
                 if (event.preventDefault) event.preventDefault();
                 return false;
