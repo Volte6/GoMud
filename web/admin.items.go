@@ -21,7 +21,7 @@ func itemsIndex(w http.ResponseWriter, r *http.Request) {
 		return allItemSpecs[i].ItemId < allItemSpecs[j].ItemId
 	})
 
-	tmpl, err := template.New("items.html").Funcs(funcMap).ParseFiles("web/html/admin/items.html")
+	tmpl, err := template.New("items.html").Funcs(funcMap).ParseFiles("web/html/admin/_header.html", "web/html/admin/items.html", "web/html/admin/_footer.html")
 	if err != nil {
 		slog.Error("HTML ERROR 1", "error", err)
 	}
@@ -66,7 +66,7 @@ func itemData(w http.ResponseWriter, r *http.Request) {
 
 		tplData[`script`] = html.EscapeString(itemSpec.GetScript())
 
-		tmpl, err := template.New("itemdata.html").Funcs(funcMap).ParseFiles("web/html/admin/itemdata.html")
+		tmpl, err := template.New("items.itemdata.html").Funcs(funcMap).ParseFiles("web/html/admin/items.itemdata.html")
 		if err != nil {
 			slog.Error("HTML ERROR 1", "error", err)
 		}

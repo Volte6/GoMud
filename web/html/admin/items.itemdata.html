@@ -144,17 +144,16 @@
     <hr data-applies-to-types="weapon wearable" />
     <h3 data-applies-to-types="weapon wearable">StatMods</h3>
     <div class="row" data-applies-to-types="weapon wearable">
+       
         {{range $name, $value := .itemSpec.StatMods }}
-            <div class="form-group col-sm">
-                <label for="{{$name}}">{{$name}}</label>
-                <input type="text" class="form-control form-control-sm" id="{{$name}}" aria-describedby="{{$name}}-help" value="{{ $value }}">
+            <div class="input-group col-md-2">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="statmod-{{$name}}">{{$name}}</span>
+                </div>
+                <input type="text" name="statmod[{{$name}}]" class="form-control" value="{{$value}}">
             </div>
         {{end}}
-        <div class="form-group col-sm">
-            <label for="newstatmod">Add New</label>
-            <input type="text" class="form-control form-control-sm" id="newstatmod-name" aria-describedby="newstatmod-help" value="">
-            <input type="text" class="form-control form-control-sm" id="newstatmod" aria-describedby="newstatmod-help" value="">
-        </div>
+
     </div>
 
     <hr data-applies-to-types="weapon" />

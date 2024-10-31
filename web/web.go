@@ -58,7 +58,7 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 	// Admin tools
 	http.HandleFunc("GET /admin/", doBasicAuth(adminIndex))
 	// Item Admin
-	http.HandleFunc("GET /admin/items", doBasicAuth(itemsIndex))
+	http.HandleFunc("GET /admin/items/", doBasicAuth(itemsIndex))
 	http.HandleFunc("GET /admin/items/itemdata", doBasicAuth(itemData))
 
 	go func() {

@@ -86,7 +86,7 @@ var (
 
 func adminIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles("web/html/admin/index.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles("web/html/admin/_header.html", "web/html/admin/index.html", "web/html/admin/_footer.html")
 	if err != nil {
 		slog.Error("HTML ERROR", "error", err)
 	}
