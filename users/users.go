@@ -338,7 +338,7 @@ func CreateUser(u *UserRecord) error {
 	return nil
 }
 
-func LoadUser(username string) (*UserRecord, error) {
+func LoadUser(username string, skipValidation ...bool) (*UserRecord, error) {
 	if !Exists(strings.ToLower(username)) {
 		return nil, errors.New("user already exists")
 	}
@@ -355,8 +355,10 @@ func LoadUser(username string) (*UserRecord, error) {
 		slog.Error("LoadUser", "error", err.Error())
 	}
 
-	if err := loadedUser.Character.Validate(true); err == nil {
-		SaveUser(*loadedUser)
+	if len(skipValidation) == 0 || !skipValidation[0] {
+		if err := loadedUser.Character.Validate(true); err == nil {
+			SaveUser(*loadedUser)
+		}
 	}
 
 	rebuiltMemory := []int{}

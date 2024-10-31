@@ -41,7 +41,7 @@ func doBasicAuth(next http.HandlerFunc) http.HandlerFunc {
 		if ok {
 
 			// Authorize against actual user record
-			uRecord, err := users.LoadUser(username)
+			uRecord, err := users.LoadUser(username, true)
 			if err == nil {
 
 				if uRecord.PasswordMatches(password) {

@@ -31,36 +31,37 @@ var (
 type ItemTypeInfo struct {
 	Type        string
 	Description string
+	Count       int
 }
 
 // Returns key=type and value=description
 func ItemTypes() []ItemTypeInfo {
 	return []ItemTypeInfo{
 		// Equipment
-		{string(Weapon), `This can be wielded as a weapon.`},
-		{string(Offhand), `This can be worn in the offhand.`},
-		{string(Head), `This can be worn in the players head equipment slot.`},
-		{string(Neck), `This can be worn in the players neck equipment slot.`},
-		{string(Body), `This can be worn in the players body equipment slot.`},
-		{string(Belt), `This can be worn in the players belt equipment slot.`},
-		{string(Gloves), `This can be worn in the players gloves equipment slot.`},
-		{string(Ring), `This can be worn in the players ring equipment slot.`},
-		{string(Legs), `This can be worn in the players legs equipment slot.`},
-		{string(Feet), `This can be worn in the players feet equipment slot.`},
+		{string(Weapon), `This can be wielded as a weapon.`, 0},
+		{string(Offhand), `This can be worn in the offhand.`, 0},
+		{string(Head), `This can be worn in the players head equipment slot.`, 0},
+		{string(Neck), `This can be worn in the players neck equipment slot.`, 0},
+		{string(Body), `This can be worn in the players body equipment slot.`, 0},
+		{string(Belt), `This can be worn in the players belt equipment slot.`, 0},
+		{string(Gloves), `This can be worn in the players gloves equipment slot.`, 0},
+		{string(Ring), `This can be worn in the players ring equipment slot.`, 0},
+		{string(Legs), `This can be worn in the players legs equipment slot.`, 0},
+		{string(Feet), `This can be worn in the players feet equipment slot.`, 0},
 		// Consumables
-		{string(Potion), `This is a magic potion.`},
-		{string(Food), `This is food.`},
-		{string(Drink), `This is a drink.`},
-		{string(Scroll), `This is a scroll.`},
-		{string(Grenade), `This is an explosive object.`},
-		{string(Junk), `This is garbage.`},
+		{string(Potion), `This is a magic potion.`, 0},
+		{string(Food), `This is food.`, 0},
+		{string(Drink), `This is a drink.`, 0},
+		{string(Scroll), `This is a scroll.`, 0},
+		{string(Grenade), `This is an explosive object.`, 0},
+		{string(Junk), `This is garbage.`, 0},
 		// Other
-		{string(Readable), `This can be read.`},
-		{string(Key), `This is a key that opens a locked container or door.`},
-		{string(Object), `This is a catch-all generic object without pre-defined special behaviors.`},
-		{string(Gemstone), `This is a gemstone.`},
-		{string(Lockpicks), `This allows use of the picklock skill.`},
-		{string(Botanical), `This is an herb.`},
+		{string(Readable), `This can be read.`, 0},
+		{string(Key), `This is a key that opens a locked container or door.`, 0},
+		{string(Object), `This is a catch-all generic object without pre-defined special behaviors.`, 0},
+		{string(Gemstone), `This is a gemstone.`, 0},
+		{string(Lockpicks), `This allows use of the picklock skill.`, 0},
+		{string(Botanical), `This is an herb.`, 0},
 	}
 }
 
@@ -68,23 +69,23 @@ func ItemTypes() []ItemTypeInfo {
 func ItemSubtypes() []ItemTypeInfo {
 	return []ItemTypeInfo{
 		// Miscellaneous
-		{string(Wearable), `Can be targetted with the equip/wear/wield command.`},
-		{string(Drinkable), `Can be targetted withthe drink command.`},
-		{string(Edible), `Can be targetted with the eat command.`},
-		{string(Usable), `Can be targetted with the use command.`},
-		{string(Throwable), `Can be targetted with the throw command.`},
-		{string(Mundane), `No special behavior built in.`},
+		{string(Wearable), `Can be targetted with the equip/wear/wield command.`, 0},
+		{string(Drinkable), `Can be targetted withthe drink command.`, 0},
+		{string(Edible), `Can be targetted with the eat command.`, 0},
+		{string(Usable), `Can be targetted with the use command.`, 0},
+		{string(Throwable), `Can be targetted with the throw command.`, 0},
+		{string(Mundane), `No special behavior built in.`, 0},
 		// Weapons
-		{string(Generic), `Any weapon that doesn't get assigned an actual weapon subcategory.`},
-		{string(Bludgeoning), `A blunt weapon.`},
-		{string(Cleaving), `A hacking/chopping weapon.`},
-		{string(Stabbing), `A piercing weapon.`},
-		{string(Slashing), `A slicing and slashing weapon.`},
-		{string(Shooting), `A ranged weapon.`},
-		{string(Claws), `A slashing weapon worn on the hands.`},
-		{string(Whipping), `A whipping weapon.`},
+		{string(Generic), `Any weapon that doesn't get assigned an actual weapon subcategory.`, 0},
+		{string(Bludgeoning), `A blunt weapon.`, 0},
+		{string(Cleaving), `A hacking/chopping weapon.`, 0},
+		{string(Stabbing), `A piercing weapon.`, 0},
+		{string(Slashing), `A slicing and slashing weapon.`, 0},
+		{string(Shooting), `A ranged weapon.`, 0},
+		{string(Claws), `A slashing weapon worn on the hands.`, 0},
+		{string(Whipping), `A whipping weapon.`, 0},
 		// Miscellaneous data
-		{string(BlobContent), `Can store blob content in the item data.`},
+		{string(BlobContent), `Can store blob content in the item data.`, 0},
 	}
 }
 

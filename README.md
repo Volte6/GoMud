@@ -16,7 +16,7 @@ If you have comments, questions, suggestions:
 
 ## Screenshots
 
-See some feature screnshots [here](web/images/README.md).
+See some feature screnshots [here](feature-screenshots/README.md).
 
 ## ANSI Colors
 
