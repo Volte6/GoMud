@@ -2,6 +2,7 @@ userid: 1
 permission: admin
 username: admin
 password: password
+joined: 2024-10-31T13:28:45.395873-07:00
 macros:
   =1: e;e;e;e;e;e;e;e
 character:
@@ -39,7 +40,7 @@ character:
   experience: 17470
   trainingpoints: 44
   statpoints: 6
-  health: 57
+  health: 60
   mana: 32
   actionpoints: 202
   alignment: -1
@@ -62,12 +63,12 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 26
+      roundcounter: 11
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 4
+      roundcounter: 19
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
@@ -136,8 +137,8 @@ character:
     items:
     - itemid: 30002
       uses: 1
+  created: 2024-10-31T13:28:45.391415-07:00
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/1TDwQkAIBTD0IVyqb9W3H8x8fBBSV54ExqokNFEwbU/5btbgrPaCQAA//8qwUlYTAAAAA==
-configoptions: {}
+roommemoryblob: H4sIAAAAAAAA/1TDwQ0AEBQE0Ybmsv5a0X9j4iDIzAs3oYYKGXUUXPNT3vtIcMZrBQAA//8oE0RgTgAAAA==

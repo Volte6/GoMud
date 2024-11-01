@@ -15,24 +15,68 @@ import (
 
 func itemsIndex(w http.ResponseWriter, r *http.Request) {
 
-	allItemSpecs := items.GetAllItemSpecs()
-
-	sort.SliceStable(allItemSpecs, func(i, j int) bool {
-		return allItemSpecs[i].ItemId < allItemSpecs[j].ItemId
-	})
-
-	tmpl, err := template.New("items.html").Funcs(funcMap).ParseFiles("web/html/admin/_header.html", "web/html/admin/items.html", "web/html/admin/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles("_datafiles/html/admin/_header.html", "_datafiles/html/admin/items/index.html", "_datafiles/html/admin/_footer.html")
 	if err != nil {
-		slog.Error("HTML ERROR 1", "error", err)
+		slog.Error("HTML Template", "error", err)
 	}
 
-	if err := tmpl.Execute(w, allItemSpecs); err != nil {
-		slog.Error("HTML ERROR 2", "error", err)
+	qsp := r.URL.Query()
+
+	filterType := qsp.Get(`filter-type`)
+
+	itemSpecs := []items.ItemSpec{}
+
+	itemTypes := items.ItemTypes()
+	itemTypes = append(itemTypes, items.ItemSubtypes()...)
+
+	typeCounter := map[string]int{}
+
+	for _, itemSpec := range items.GetAllItemSpecs() {
+
+		typeCounter[itemSpec.Type.String()] += 1
+		typeCounter[itemSpec.Subtype.String()] += 1
+
+		if filterType != `*` && filterType != itemSpec.Type.String() && filterType != itemSpec.Subtype.String() {
+			continue
+		}
+
+		itemSpecs = append(itemSpecs, itemSpec)
+	}
+
+	for i, typeInfo := range itemTypes {
+		itemTypes[i].Count = typeCounter[typeInfo.Type]
+	}
+
+	sort.SliceStable(itemSpecs, func(i, j int) bool {
+		return itemSpecs[i].ItemId < itemSpecs[j].ItemId
+	})
+
+	sort.SliceStable(itemTypes, func(i, j int) bool {
+		return itemTypes[i].Count > itemTypes[j].Count
+	})
+
+	itemIndexData := struct {
+		ItemSpecs  []items.ItemSpec
+		ItemTypes  []items.ItemTypeInfo
+		FilterType string
+	}{
+		itemSpecs,
+		itemTypes,
+		filterType,
+	}
+
+	if err := tmpl.Execute(w, itemIndexData); err != nil {
+		slog.Error("HTML Execute", "error", err)
 	}
 
 }
 
 func itemData(w http.ResponseWriter, r *http.Request) {
+
+	tmpl, err := template.New("item.data.html").Funcs(funcMap).ParseFiles("_datafiles/html/admin/items/item.data.html")
+	if err != nil {
+		slog.Error("HTML Template", "error", err)
+	}
 
 	urlVals := r.URL.Query()
 
@@ -41,42 +85,36 @@ func itemData(w http.ResponseWriter, r *http.Request) {
 	util.LockGame()
 	defer util.UnlockGame()
 
-	if itemSpec := items.GetItemSpec(itemInt); itemSpec != nil {
-
-		tplData := map[string]any{}
-		tplData[`itemSpec`] = *itemSpec
-
-		buffSpecs := []buffs.BuffSpec{}
-		for _, buffId := range buffs.GetAllBuffIds() {
-			if b := buffs.GetBuffSpec(buffId); b != nil {
-				if b.Name == `empty` {
-					continue
-				}
-				buffSpecs = append(buffSpecs, *b)
-			}
-		}
-
-		sort.SliceStable(buffSpecs, func(i, j int) bool {
-			return buffSpecs[i].BuffId < buffSpecs[j].BuffId
-		})
-		tplData[`buffSpecs`] = buffSpecs
-
-		tplData[`itemTypes`] = items.ItemTypes()
-		tplData[`itemSubtypes`] = items.ItemSubtypes()
-
-		tplData[`script`] = html.EscapeString(itemSpec.GetScript())
-
-		tmpl, err := template.New("items.itemdata.html").Funcs(funcMap).ParseFiles("web/html/admin/items.itemdata.html")
-		if err != nil {
-			slog.Error("HTML ERROR 1", "error", err)
-		}
-
-		if err := tmpl.Execute(w, tplData); err != nil {
-			slog.Error("HTML ERROR 2", "error", err)
-		}
-
-		return
-
+	itemSpec := items.GetItemSpec(itemInt)
+	if itemSpec == nil {
+		itemSpec = &items.ItemSpec{}
 	}
-	w.Write([]byte("Not found: " + urlVals.Get(`itemid`)))
+
+	tplData := map[string]any{}
+	tplData[`itemSpec`] = *itemSpec
+
+	buffSpecs := []buffs.BuffSpec{}
+	for _, buffId := range buffs.GetAllBuffIds() {
+		if b := buffs.GetBuffSpec(buffId); b != nil {
+			if b.Name == `empty` {
+				continue
+			}
+			buffSpecs = append(buffSpecs, *b)
+		}
+	}
+
+	sort.SliceStable(buffSpecs, func(i, j int) bool {
+		return buffSpecs[i].BuffId < buffSpecs[j].BuffId
+	})
+	tplData[`buffSpecs`] = buffSpecs
+
+	tplData[`itemTypes`] = items.ItemTypes()
+	tplData[`itemSubtypes`] = items.ItemSubtypes()
+
+	tplData[`script`] = html.EscapeString(itemSpec.GetScript())
+
+	if err := tmpl.Execute(w, tplData); err != nil {
+		slog.Error("HTML Execute", "error", err)
+	}
+
 }

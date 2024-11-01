@@ -96,3 +96,18 @@ func (w *Worn) GetAllItems() []items.Item {
 	}
 	return iList
 }
+
+func GetAllSlotTypes() []string {
+	return []string{
+		string(items.Weapon),
+		string(items.Offhand),
+		string(items.Head),
+		string(items.Neck),
+		string(items.Body),
+		string(items.Belt),
+		string(items.Gloves),
+		string(items.Ring),
+		string(items.Legs),
+		string(items.Feet),
+	}
+}
