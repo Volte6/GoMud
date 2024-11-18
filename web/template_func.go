@@ -81,5 +81,6 @@ var (
 		"lc":  func(s string) string { return strings.ToLower(s) },
 		"add": func(num int, amt int) int { return num + amt },
 		"sub": func(num int, amt int) int { return num - amt },
+		"mul": func(num int, amt int) int { return num * amt },
 	}
 )

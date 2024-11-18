@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/volte6/gomud/util"
 )
 
 var (
@@ -49,17 +50,46 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 	})
 
 	// Static resources
-	http.Handle("GET /static/public/", http.StripPrefix("/static/public/", http.FileServer(http.Dir("_datafiles/html/static/public"))))
-	http.Handle("GET /static/admin/", doBasicAuth(handlerToHandlerFunc(http.StripPrefix("/static/admin/", http.FileServer(http.Dir("_datafiles/html/static/admin"))))))
+	http.Handle("GET /static/public/", handlerToHandlerFunc(
+		http.StripPrefix("/static/public/", http.FileServer(http.Dir("_datafiles/html/static/public"))),
+	))
+
+	http.Handle("GET /static/admin/", RunWithGameLocked(
+		doBasicAuth(
+			handlerToHandlerFunc(
+				http.StripPrefix("/static/admin/", http.FileServer(http.Dir("_datafiles/html/static/admin"))),
+			),
+		),
+	))
 
 	// Admin tools
-	http.HandleFunc("GET /admin/", doBasicAuth(adminIndex))
+	http.HandleFunc("GET /admin/", RunWithGameLocked(
+		doBasicAuth(adminIndex),
+	))
+
 	// Item Admin
-	http.HandleFunc("GET /admin/items/", doBasicAuth(itemsIndex))
-	http.HandleFunc("GET /admin/items/itemdata/", doBasicAuth(itemData))
+	http.HandleFunc("GET /admin/items/", RunWithGameLocked(
+		doBasicAuth(itemsIndex),
+	))
+	http.HandleFunc("GET /admin/items/itemdata/", RunWithGameLocked(
+		doBasicAuth(itemData),
+	))
+
 	// Race Admin
-	http.HandleFunc("GET /admin/races/", doBasicAuth(racesIndex))
-	http.HandleFunc("GET /admin/races/racedata/", doBasicAuth(raceData))
+	http.HandleFunc("GET /admin/races/", RunWithGameLocked(
+		doBasicAuth(racesIndex)),
+	)
+	http.HandleFunc("GET /admin/races/racedata/", RunWithGameLocked(
+		doBasicAuth(raceData)),
+	)
+
+	// Mob Admin
+	http.HandleFunc("GET /admin/mobs/", RunWithGameLocked(
+		doBasicAuth(mobsIndex),
+	))
+	http.HandleFunc("GET /admin/mobs/mobdata/", RunWithGameLocked(
+		doBasicAuth(mobData),
+	))
 
 	go func() {
 		defer wg.Done()
@@ -68,6 +98,18 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 		}
 	}()
 
+}
+
+// This wraps the handler functiojn with a game lock (mutex) to keep the mud from
+// Concurrently accessing the same memory
+func RunWithGameLocked(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		util.LockGame()
+		defer util.UnlockGame()
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func Shutdown() {

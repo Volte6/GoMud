@@ -10,7 +10,6 @@ import (
 
 	"github.com/volte6/gomud/buffs"
 	"github.com/volte6/gomud/items"
-	"github.com/volte6/gomud/util"
 )
 
 func itemsIndex(w http.ResponseWriter, r *http.Request) {
@@ -81,9 +80,6 @@ func itemData(w http.ResponseWriter, r *http.Request) {
 	urlVals := r.URL.Query()
 
 	itemInt, _ := strconv.Atoi(urlVals.Get(`itemid`))
-
-	util.LockGame()
-	defer util.UnlockGame()
 
 	itemSpec := items.GetItemSpec(itemInt)
 	if itemSpec == nil {
