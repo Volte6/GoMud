@@ -1,0 +1,361 @@
+<form>
+
+    <input type="hidden" name="itemid" value="{{ .itemSpec.ItemId }}">
+
+    <hr />
+    <h3>Appearance</h3>
+
+    <div class="row">
+
+        <div class="form-group col-sm">
+            <label for="zone">Zone</label>
+            <select class="form-control form-control-sm" name="zone" id="zone" aria-describedby="zone-help"  rows="10">
+            {{$mobZone := .mobInfo.Zone}}
+            {{range $index, $zoneName := .allZoneNames}}
+                <option value="{{ $zoneName }}" {{if eq $zoneName $mobZone}}SELECTED{{end}}>{{ $zoneName }}</option>
+            {{end}}
+            </select>
+            <small id="zone-help" class="form-text text-muted">What is this mobs natural zone?</small>
+        </div>
+        <div class="form-group col-sm">
+            <label for="activitylevel">Activity Level</label>
+            <select class="form-control form-control-sm" name="activitylevel" id="activitylevel" aria-describedby="activitylevel-help"  rows="10">
+            {{$mobActivityLevel := .mobInfo.ActivityLevel}}
+            {{range $index, $level := .activityLevels}}
+                <option value="{{ $level }}" {{if eq $level $mobActivityLevel}}SELECTED{{end}}>{{ mul $level 10 }}%</option>
+            {{end}}
+            </select>
+            <small id="activitylevel-help" class="form-text text-muted">How active this mob is.</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="dropchance">Drop Chance</label>
+            <select class="form-control form-control-sm" name="dropchance" id="dropchance" aria-describedby="dropchance-help"  rows="10">
+                {{$mobDropChance := .mobInfo.ItemDropChance}}
+                {{range $index, $percent := .dropChances}}
+                    <option value="{{ $percent }}" {{if eq $percent $mobDropChance}}SELECTED{{end}}>{{ $percent }}%</option>
+                {{end}}
+                </select>
+            <small id="dropchance-help" class="form-text text-muted">Odds that this mob will drop something it has equipped.</small>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="form-group col-sm">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="true" name="hostile" id="hostile" {{ if .mobInfo.Hostile }}checked{{end}}>
+                <label class="form-check-label" for="hostile">
+                    Naturally Hostile
+                </label>
+            </div>
+        </div>
+        <div class="form-group col-sm">
+            <label for="maxwander">Max Wander</label>
+            <select class="form-control form-control-sm" name="maxwander" id="maxwander" aria-describedby="maxwander-help"  rows="10">
+                <option value="-1" {{if eq .mobInfo.MaxWander -1}}SELECTED{{end}}>No Limit</option>
+                {{$mobMaxWander := .mobInfo.MaxWander}}
+                {{range $index, $wander := .dropChances}}
+                    {{ if eq $wander 0 }}
+                        <option value="{{ $wander }}" {{if eq $wander $mobMaxWander}}SELECTED{{end}}>Do NOT Wander</option>
+                    {{ else }}
+                        <option value="{{ $wander }}" {{if eq $wander $mobMaxWander}}SELECTED{{end}}>{{ $wander }} Rooms</option>
+                    {{ end }}
+                {{end}}
+                </select>
+            <small id="maxwander-help" class="form-text text-muted">How many rooms from home can this mob wander?</small>
+        </div>
+        <div class="form-group col-sm">
+            <label for="questflags">Quest Flags</label>
+            <textarea class="form-control form-control-sm" id="questflags" aria-describedby="questflags-help">{{ join .mobInfo.QuestFlags "\r\n" }}</textarea>
+            <small id="questflags-help" class="form-text text-muted">Quest flags this mob is involved in (may give them out?). This is a hint to the game engine for a quest star.</small>
+        </div>
+    </div>
+
+    <hr />
+    <h3>Special Commands</h3>
+
+    <div class="row">
+        <div class="form-group col-sm">
+            <label for="idlecommands">Idle Commands</label>
+            <textarea class="form-control form-control-sm" id="idlecommands" aria-describedby="idlecommands-help">{{ join .mobInfo.IdleCommands "\r\n" }}</textarea>
+            <small id="idlecommands-help" class="form-text text-muted">Comand executed at random when this mob is idle.</small>
+        </div>
+        <div class="form-group col-sm">
+            <label for="angrycommands">Angry Commands</label>
+            <textarea class="form-control form-control-sm" id="angrycommands" aria-describedby="angrycommands-help">{{ join .mobInfo.AngryCommands "\r\n" }}</textarea>
+            <small id="angrycommands-help" class="form-text text-muted">Comand executed at random when this mob becomes aggro.</small>
+        </div>
+        <div class="form-group col-sm">
+            <label for="combatcommands">Combat Commands</label>
+            <textarea class="form-control form-control-sm" id="combatcommands" aria-describedby="combatcommands-help">{{ join .mobInfo.CombatCommands "\r\n" }}</textarea>
+            <small id="combatcommands-help" class="form-text text-muted">Comand executed at random when this mob is in combat.</small>
+        </div>
+    </div>
+
+    <hr />
+    <h3>Group Info</h3>
+
+    <div class="row">
+        <div class="form-group col-sm">
+            <label for="groups">Groups</label>
+            <textarea class="form-control form-control-sm" id="groups" aria-describedby="groups-help">{{ join .mobInfo.Groups "\r\n" }}</textarea>
+            <small id="groups-help" class="form-text text-muted">Made up group names for this mob to belong to. Considered friends.</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="hates">Hates</label>
+            <textarea class="form-control form-control-sm" id="hates" aria-describedby="hates-help">{{ join .mobInfo.Hates "\r\n" }}</textarea>
+            <small id="hates-help" class="form-text text-muted">Groups, races, or exact name matches of who this mob hates.</small>
+        </div>
+    </div>
+
+
+    <hr />
+    <h3>Buffs This Mob Has</h3>
+
+    <div class="form-group row form-check container-fluid">
+        {{ $buffIds := .mobInfo.BuffIds }}
+        {{range $i, $buffSpec := .buffSpecs}}
+            <label class="form-check-label col-md-2" for="mob-buff-{{$buffSpec.BuffId}}" title="{{ $buffSpec.Description }}"><input 
+            class="form-check-input"
+            type="checkbox" 
+            name="buffids[]" 
+            id="mob-buff-{{$buffSpec.BuffId}}" 
+            value="{{ $buffSpec.BuffId }}" 
+            {{range $j, $buffId := $buffIds}}{{if eq $buffId $buffSpec.BuffId}}CHECKED{{end}}{{end}}>
+            {{ $buffSpec.BuffId }}. {{ $buffSpec.Name }}</label> 
+        {{end}}
+    </div>
+
+
+    <hr />
+    <h3>Character Data</h3>
+
+    <hr />
+    <h3>Descriptive Info</h3>
+
+    {{ $character := .characterInfo }}
+    <div class="row">
+        <div class="form-group col-sm">
+            <label for="character-name">Name</label>
+            <input type="text" class="form-control form-control-sm" id="character-name" aria-describedby="character-name-help" value="{{ $character.Name }}">
+            <small id="character-name-help" class="form-text text-muted">Name of the character.</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="character-name">Description</label>
+            <textarea class="form-control form-control-sm" id="character-name" aria-describedby="character-name-help">{{ $character.GetDescription }}</textarea>
+            <small id="character-name-help" class="form-text text-muted">Descriptive text when looking at this character.</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="character-raceid">Race</label>
+            <select class="form-control form-control-sm" name="character-raceid" id="character-raceid" aria-describedby="character-raceid-help"  rows="10">
+                <option value="-1" {{if eq .mobInfo.MaxWander -1}}SELECTED{{end}}>No Limit</option>
+                {{range $index, $raceInfo := .allRaces}}
+                    <option value="{{ $raceInfo.RaceId }}" {{if eq $raceInfo.RaceId $character.RaceId}}SELECTED{{end}}>{{ $raceInfo.RaceId }}. {{ $raceInfo.Name }}</option>
+                {{end}}
+            </select>
+            <small id="character-raceid-help" class="form-text text-muted">Race of this mob.</small>
+        </div>
+    </div>
+
+
+    <hr />
+    <h3>Stats</h3>
+
+    <div class="row">
+
+        <div class="form-group col-sm">
+            <label for="character-level">Level</label>
+            <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" value="{{ $character.Level }}">
+            <small id="character-level-help" class="form-text text-muted">Level of the character.</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="alignment">Alignment</label>
+            <input type="text" class="form-control form-control-sm" id="character-alignment" aria-describedby="alignment-help" value="{{ $character.Alignment }}">
+            <small id="alignment-help" class="form-text text-muted">-100(evil) to 100(good)</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="gold">Gold Carried</label>
+            <input type="text" class="form-control form-control-sm" id="character-gold" aria-describedby="gold-help" value="{{ $character.Gold }}">
+            <small id="gold-help" class="form-text text-muted">Gold on hand</small>
+        </div>
+    </div>
+
+    <hr />
+    <h3>Pet</h3>
+
+    <div class="row">
+        ...TODO
+    </div>
+
+    {{range $shopType, $shopItems := .mobShop}}
+        <hr />
+        <h3>{{$shopType}} Shop Info</h3>
+
+        <div class="row grid gap-3">
+            {{ if eq (len $shopItems) 0 }}
+                <div class="form-group col-2 border border-secondary">
+                    None
+                </div>
+            {{ end }}
+            {{range $i, $shopItem := $shopItems}}
+                <div class="form-group col-2 border border-primary">
+
+                    <input type="hidden" name="shop-item-position[]" value="{{$i}}">
+                    <input type="hidden" name="shop-item-type[{{$i}}]" value="{{$shopType}}">
+
+                    <label for="gold">Id For Sale</label>
+                    <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" 
+                        value="
+                        {{- if ne $shopItem.MobId 0 }}{{ $shopItem.MobId }}{{end -}}
+                        {{- if ne $shopItem.ItemId 0 }}{{ $shopItem.ItemId }}{{end -}}
+                        {{- if ne $shopItem.BuffId 0 }}{{ $shopItem.BuffId }}{{end -}}
+                        {{- if ne $shopItem.PetType "" }}{{ $shopItem.PetType }}{{end -}}
+                        ">
+                    
+                    <label for="gold">Max Stock (0 for unlimited)</label>
+                    <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" value="{{ $shopItem.QuantityMax }}">
+        
+                    <label for="gold">Override Price</label>
+                    <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" value="{{ if gt $shopItem.Price 0 }}{{ $shopItem.Price }}{{end}}">
+        
+                    <label for="gold">Override Restock Rate</label> <a href="#" class="badge badge-warning" data-toggle="modal" data-target=".time-strings-modal">example?</a>
+                    <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" value="{{ if ne $shopItem.RestockRate "" }}{{ $shopItem.RestockRate }}{{end}}">
+                </div>
+            {{end}}
+        </div>
+    {{end}}
+
+
+    <hr />
+    <h3>Spells/Proficiency</h3>
+
+    <div class="row">
+        {{range $spellId, $proficiency := $character.SpellBook}}
+        <div class="input-group col">
+            <div class="input-group-prepend w-50">
+                <span class="input-group-text w-100" id="spellbook-{{ $spellId }}">{{ $spellId }}</span>
+            </div>
+            <input type="text" name="spellbook[{{ $spellId }}]" class="form-control" value="{{$proficiency}}">
+        </div>
+        {{end}}
+    </div>
+
+
+    <hr />
+    <h3>Items in Backpack</h3>
+
+    <div class="row">
+        {{range $i, $itemData := $character.Items}}
+        <div class="input-group col">
+            <input type="text" name="items[]" class="form-control" value="{{$itemData.ItemId}}">
+        </div>
+        {{end}}
+    </div>
+
+
+    <hr />
+    <h3>Gear Worn</h3>
+
+    <div class="row">
+        
+        {{ if not $character.Equipment.Weapon.IsDisabled }}
+        <div class="input-group col-3">
+            <div class="input-group-prepend w-50">
+                <span class="input-group-text w-100" id="equipment-weapon">Weapon</span>
+            </div>
+            <input type="text" name="equipment[weapon]" class="form-control" value="{{$character.Equipment.Weapon.ItemId}}">
+        </div>
+        {{ end }}
+
+        {{ if not $character.Equipment.Offhand.IsDisabled }}
+        <div class="input-group col-3">
+            <div class="input-group-prepend w-50">
+                <span class="input-group-text w-100" id="equipment-offhand">Offhand</span>
+            </div>
+            <input type="text" name="equipment[offhand]" class="form-control" value="{{$character.Equipment.Offhand.ItemId}}">
+        </div>
+        {{ end }}
+
+        {{ if not $character.Equipment.Head.IsDisabled }}
+        <div class="input-group col-3">
+            <div class="input-group-prepend w-50">
+                <span class="input-group-text w-100" id="equipment-head">Head</span>
+            </div>
+            <input type="text" name="equipment[head]" class="form-control" value="{{$character.Equipment.Head.ItemId}}">
+        </div>
+        {{ end }}
+
+        {{ if not $character.Equipment.Neck.IsDisabled }}
+        <div class="input-group col-3">
+            <div class="input-group-prepend w-50">
+                <span class="input-group-text w-100" id="equipment-neck">Neck</span>
+            </div>
+            <input type="text" name="equipment[neck]" class="form-control" value="{{$character.Equipment.Neck.ItemId}}">
+        </div>
+        {{ end }}
+
+        {{ if not $character.Equipment.Body.IsDisabled }}
+        <div class="input-group col-3">
+            <div class="input-group-prepend w-50">
+                <span class="input-group-text w-100" id="equipment-body">Body</span>
+            </div>
+            <input type="text" name="equipment[body]" class="form-control" value="{{$character.Equipment.Body.ItemId}}">
+        </div>
+        {{ end }}
+
+        {{ if not $character.Equipment.Belt.IsDisabled }}        
+        <div class="input-group col-3">
+            <div class="input-group-prepend w-50">
+                <span class="input-group-text w-100" id="equipment-belt">Belt</span>
+            </div>
+            <input type="text" name="equipment[belt]" class="form-control" value="{{$character.Equipment.Belt.ItemId}}">
+        </div>
+        {{ end }}
+
+        {{ if not $character.Equipment.Gloves.IsDisabled }}
+        <div class="input-group col-3">
+            <div class="input-group-prepend w-50">
+                <span class="input-group-text w-100" id="equipment-gloves">Gloves</span>
+            </div>
+            <input type="text" name="equipment[gloves]" class="form-control" value="{{$character.Equipment.Gloves.ItemId}}">
+        </div>
+        {{ end }}
+
+        {{ if not $character.Equipment.Ring.IsDisabled }}
+        <div class="input-group col-3">
+            <div class="input-group-prepend w-50">
+                <span class="input-group-text w-100" id="equipment-ring">Ring</span>
+            </div>
+            <input type="text" name="equipment[ring]" class="form-control" value="{{$character.Equipment.Ring.ItemId}}">
+        </div>
+        {{ end }}
+
+        {{ if not $character.Equipment.Legs.IsDisabled }}
+        <div class="input-group col-3">
+            <div class="input-group-prepend w-50">
+                <span class="input-group-text w-100" id="equipment-legs">Legs</span>
+            </div>
+            <input type="text" name="equipment[legs]" class="form-control" value="{{$character.Equipment.Legs.ItemId}}">
+        </div>
+        {{ end }}
+
+        {{ if not $character.Equipment.Feet.IsDisabled }}
+        <div class="input-group col-3">
+            <div class="input-group-prepend w-50">
+                <span class="input-group-text w-100" id="equipment-feet">Feet</span>
+            </div>
+            <input type="text" name="equipment[feet]" class="form-control" value="{{$character.Equipment.Feet.ItemId}}">
+        </div>
+        {{ end }}
+
+    </div>
+
+
+</form>

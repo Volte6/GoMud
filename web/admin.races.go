@@ -10,7 +10,6 @@ import (
 	"github.com/volte6/gomud/buffs"
 	"github.com/volte6/gomud/characters"
 	"github.com/volte6/gomud/races"
-	"github.com/volte6/gomud/util"
 )
 
 func racesIndex(w http.ResponseWriter, r *http.Request) {
@@ -48,9 +47,6 @@ func raceData(w http.ResponseWriter, r *http.Request) {
 	urlVals := r.URL.Query()
 
 	raceIdInt, _ := strconv.Atoi(urlVals.Get(`raceid`))
-
-	util.LockGame()
-	defer util.UnlockGame()
 
 	raceInfo := races.GetRace(raceIdInt)
 	if raceInfo == nil {

@@ -86,6 +86,15 @@ func MobInstanceExists(instanceId int) bool {
 	return ok
 }
 
+// Gets a copy of all mob info
+func GetAllMobInfo() []Mob {
+	ret := []Mob{}
+	for _, m := range mobs {
+		ret = append(ret, *m)
+	}
+	return ret
+}
+
 func GetAllMobNames() []string {
 	return append([]string{}, allMobNames...)
 }
