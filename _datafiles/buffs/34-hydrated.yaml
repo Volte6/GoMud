@@ -2,7 +2,7 @@ buffid: 34
 name: Hydrated
 description: You are well hydrated.
 secret: false
-roundinterval: 15
+triggerrate: 1 real minute
 triggercount: 1
 flags:
   - hydrated

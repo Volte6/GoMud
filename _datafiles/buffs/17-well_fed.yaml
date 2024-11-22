@@ -1,7 +1,7 @@
 buffid: 17
 name: Well fed
 description: You feel full.
-roundinterval: 1
+triggerrate: 1 round
 triggercount: 75 # lasts 5 minutes?
 statmods:
   strength: 1

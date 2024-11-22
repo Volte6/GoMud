@@ -2,7 +2,7 @@ buffid: 3
 name: Cold Tolerant
 description: You are able to withstand harsh winter weather.
 secret: false
-roundinterval: 5
+triggerrate: 5 rounds
 triggercount: 10
 flags:
   - warmed

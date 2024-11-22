@@ -1,7 +1,7 @@
 buffid: 13
 name: Poisoned
 description: You have been poisoned!
-roundinterval: 3
+triggerrate: 3 rounds
 triggercount: 3
 flags:
   - poison

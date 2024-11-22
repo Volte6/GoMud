@@ -2,7 +2,7 @@ buffid: 6
 name: Power leveling
 description: You feel like you've been training in 100x gravity.
 secret: false
-roundinterval: 15 # Every one minute
+triggerrate: 1 real minute
 triggercount: 30 # 30 times = 30 minutes
 statmods:
   xpscale: 200

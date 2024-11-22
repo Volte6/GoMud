@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/internal/fileloader"
+	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/statmods"
 	"github.com/volte6/gomud/internal/util"
 )
@@ -64,10 +65,15 @@ const (
 	// Flags that reveal things
 	SeeHidden Flag = `see-hidden`
 	SeeNouns  Flag = `see-nouns`
+
+	// Arbitrarily chosen round for calculating trigger round counts
+	validationRound = 1000000
 )
 
 var (
 	buffs map[int]*BuffSpec = make(map[int]*BuffSpec)
+
+	validationCalculator = gametime.GetDate(validationRound)
 )
 
 type BuffSpec struct {
@@ -76,6 +82,7 @@ type BuffSpec struct {
 	Description   string            // A description of the buff
 	Secret        bool              // Whether or not the buff is secret (not displayed to the user)
 	TriggerNow    bool              `yaml:"triggernow,omitempty"`    // if true, buff triggers once right when it is applied
+	TriggerRate   string            `yaml:"triggerrate,omitempty"`   // How often should it trigger? (time string)
 	RoundInterval int               `yaml:"roundinterval,omitempty"` // triggers every x rounds
 	TriggerCount  int               `yaml:"triggercount,omitempty"`  // How many times it triggers before it is removed
 	StatMods      statmods.StatMods `yaml:"statmods,omitempty"`      // stat mods for the duration of the buff
@@ -162,11 +169,14 @@ func (b *BuffSpec) Id() int {
 
 // Presumably to ensure the datafile hasn't messed something up.
 func (b *BuffSpec) Validate() error {
+
+	b.RoundInterval = int(validationCalculator.AddPeriod(b.TriggerRate) - validationRound)
+
 	if b.TriggerCount < 1 {
 		return fmt.Errorf("buffId %d (%s) has a TriggersCount of < 1, must be at least 1", b.BuffId, b.Name)
 	}
 	if b.RoundInterval < 1 {
-		return fmt.Errorf("buffId %d (%s) has a RoundInterval of < 1, must be at least 1", b.BuffId, b.Name)
+		return fmt.Errorf("buffId %d (%s) has a RoundInterval of < 1, must be at least 1. Is %s a valid time string?", b.BuffId, b.Name, b.TriggerRate)
 	}
 	return nil
 }

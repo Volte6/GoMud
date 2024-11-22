@@ -1,7 +1,7 @@
 buffid: 16
 name: Well Rested
 description: You feel very well rested.
-roundinterval: 1
+triggerrate: 1 round
 triggercount: 75 # lasts 5 minutes?
 statmods:
   xpscale: 5

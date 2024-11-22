@@ -1,5 +1,5 @@
 buffid: 31
 name: Freezing Snow
 description: You're freezing in the snow!
-roundinterval: 1
+triggerrate: 1 round
 triggercount: 1

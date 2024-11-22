@@ -1,7 +1,7 @@
 buffid: 23
 name: Warriors Respite
 description: You are focused on recovering.
-roundinterval: 1
+triggerrate: 1 round
 triggercount: 20
 flags:
   - cancel-on-combat

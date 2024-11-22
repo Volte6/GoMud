@@ -2,7 +2,7 @@ buffid: 19
 name: Drunk
 description: You're feeling kind tipsy.
 secret: false
-roundinterval: 3
+triggerrate: 3 rounds
 triggercount: 12
 flags:
   - drunk

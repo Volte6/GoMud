@@ -2,7 +2,7 @@ buffid: 39
 name: Keen Awareness
 description: You notice things about your surroundings others miss.
 secret: false
-roundinterval: 15
+triggerrate: 1 real minute
 triggercount: 1
 flags:
   - see-nouns

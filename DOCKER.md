@@ -71,4 +71,3 @@ _Or using docker (localhost connection)_
 _Or using docker (external connection)_
 >  `docker run --rm -u root -it busybox:latest telnet {hostname/ip} 33333`
 >
-[Some Notes](notes.md)

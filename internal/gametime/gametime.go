@@ -265,6 +265,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 	realTime := false
 	roundsPerRealDay := 0
 	roundsPerRealHour := 0
+	roundsPerRealMinute := 0
 
 	parts := strings.Split(strings.ToLower(str), ` `)
 	if len(parts) == 1 { // e.g. 2
@@ -293,6 +294,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 			realTime = true
 			roundsPerRealDay = 84600 / int(configs.GetConfig().RoundSeconds)
 			roundsPerRealHour = 3600 / int(configs.GetConfig().RoundSeconds)
+			roundsPerRealMinute = 60 / int(configs.GetConfig().RoundSeconds)
 
 			timeStr = parts[2]
 		} else if parts[1] == `game` || parts[1] == `gametime` { // e.g. - 2 game days
@@ -301,6 +303,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 			realTime = true
 			roundsPerRealDay = 84600 / int(configs.GetConfig().RoundSeconds)
 			roundsPerRealHour = 3600 / int(configs.GetConfig().RoundSeconds)
+			roundsPerRealMinute = 60 / int(configs.GetConfig().RoundSeconds)
 
 			timeStr = parts[1]
 		} else if parts[2] == `game` || parts[2] == `gametime` { // e.g. - 2 days gametime
@@ -367,6 +370,15 @@ func (g GameDate) AddPeriod(str string) uint64 {
 			gNext := g.Add(qty, 0, 0)
 
 			return gNext.RoundNumber
+
+		} else if strShort == `min` { // if timeStr == `minute` || if timeStr == `minutes` || if timeStr == `minutely`
+
+			if realTime {
+				adjustment := uint64(qty * roundsPerRealMinute)
+				return g.RoundNumber + adjustment
+			}
+
+			return g.RoundNumber + uint64(math.Floor(float64(qty)*(float64(g.RoundsPerDay)/24/60)))
 
 		} else if strShort == `noo` { // if timeStr == `noon` || timeStr == `noons` {
 
