@@ -9,6 +9,8 @@
 <ansi fg="yellow-bold">Exits:</ansi>          {{ if eq (len .Exits) 0 }}None{{ else }}{{- range $command, $exitInfo := .Exits }}[<ansi fg="{{ if $exitInfo.Secret }}secret-{{ end }}exit">{{ $command }}</ansi> ⇒ <ansi fg="red">{{ $exitInfo.RoomId }}</ansi>] {{ end -}}{{ end }}
 <ansi fg="yellow-bold">Training:</ansi>       {{ if eq (len .SkillTraining) 0 }}None{{ else }}{{- range $index, $skill := .SkillTraining }}[{{ $skill }}] {{ end -}}{{ end }}
 <ansi fg="yellow-bold">Script:</ansi>         {{ if gt (len .GetScript) 0 }}<ansi fg="green">Yes</ansi> - <ansi fg="129">{{ .GetScriptPath }}</ansi>{{ else }}<ansi fg="red">No</ansi>{{ end }}
+<ansi fg="yellow-bold">Mutators:</ansi>       {{ range $i, $a := .Mutators }}{{ $a.MutatorId }}
+                {{ end -}}
 {{ if gt (len .IdleMessages) 0 -}}
 <ansi fg="yellow-bold">IdleMessages:</ansi>   {{ range $i, $a := .IdleMessages }}{{ $a }}
                 {{ end -}}{{- end }}
