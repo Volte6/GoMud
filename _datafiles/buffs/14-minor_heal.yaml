@@ -1,6 +1,6 @@
 buffid: 14
 name: Minor Heal
 description: A magical healing aura washes over you.
-roundinterval: 1
+triggerrate: 1 round
 triggercount: 1
 

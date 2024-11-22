@@ -1,7 +1,7 @@
 buffid: 33
 name: Thirsty
 description: You're so thirsty!
-roundinterval: 15
+triggerrate: 1 real minute
 triggercount: 5
 statmods:
   strength: -20

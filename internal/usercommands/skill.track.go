@@ -48,7 +48,7 @@ func Track(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 	//
 	if rest == `` {
 
-		if !user.Character.TryCooldown(skills.Track.String(), 1) {
+		if !user.Character.TryCooldown(skills.Track.String(), "1 round") {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())))
 			return true, errors.New(`you're doing that too often`)
@@ -170,7 +170,7 @@ func Track(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 	}
 
-	if !user.Character.TryCooldown(skills.Track.String(), 1) {
+	if !user.Character.TryCooldown(skills.Track.String(), "1 round") {
 
 		user.SendText(
 			fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Track.String())))

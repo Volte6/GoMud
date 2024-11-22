@@ -56,7 +56,7 @@ func Scribe(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 			user.SendText("You don't know how to create signs yet.")
 
-		} else if !user.Character.TryCooldown(skills.Scribe.String(), 10) {
+		} else if !user.Character.TryCooldown(skills.Scribe.String(), "10 rounds") {
 
 			// There's a cooldown on this skill
 			user.SendText(
@@ -90,7 +90,7 @@ func Scribe(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 			user.SendText("You don't know how to create runes yet.")
 
-		} else if !user.Character.TryCooldown(skills.Scribe.String(), 2) {
+		} else if !user.Character.TryCooldown(skills.Scribe.String(), "2 rounds") {
 
 			// There's a cooldown on this skill
 			user.SendText(

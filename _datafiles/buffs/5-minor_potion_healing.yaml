@@ -1,5 +1,5 @@
 buffid: 5
 name: Minor Potion Healing
 description: A small healing effect is working on you
-roundinterval: 2
+triggerrate: 2 rounds
 triggercount: 3

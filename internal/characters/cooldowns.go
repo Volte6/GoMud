@@ -1,5 +1,9 @@
 package characters
 
+import (
+	"github.com/volte6/gomud/internal/gametime"
+)
+
 type Cooldowns map[string]int
 
 func (cd Cooldowns) RoundTick() {
@@ -16,12 +20,14 @@ func (cd Cooldowns) Prune() {
 	}
 }
 
-func (cd Cooldowns) Try(trackingTag string, cooldownRounds int) bool {
+func (cd Cooldowns) Try(trackingTag string, cooldownPeriod string) bool {
 	if cd == nil {
 		cd = make(Cooldowns)
 	}
 
 	cd.Prune()
+
+	cooldownRounds := int(gametime.GetDate(1000000).AddPeriod(cooldownPeriod) - 1000000)
 
 	if cooldownRounds < 1 {
 		return true

@@ -41,7 +41,7 @@ func Peep(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, errors.New(`at level 1, peep is a passive skill`)
 	}
 
-	if !user.Character.TryCooldown(skills.Peep.String(), 1) {
+	if !user.Character.TryCooldown(skills.Peep.String(), "1 round") {
 		user.SendText(
 			`You're using that skill just a little too fast.`,
 		)

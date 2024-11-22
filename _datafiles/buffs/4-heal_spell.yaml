@@ -1,5 +1,5 @@
 buffid: 4
 name: Heal Spell
 description: A magical healing aura washes over you.
-roundinterval: 2
+triggerrate: 2 rounds
 triggercount: 3

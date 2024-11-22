@@ -1,7 +1,7 @@
 buffid: 36
 name: Alt Character Mob
 description: Gear cannot be removed
-roundinterval: 100
+triggerrate: 1 year
 triggercount: 1000
 flags:
   - perma-gear

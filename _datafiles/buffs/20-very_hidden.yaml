@@ -2,7 +2,7 @@ buffid: 20
 name: Very Hidden
 description: You're very sneaky.
 secret: false
-roundinterval: 15
+triggerrate: 1 real minute
 triggercount: 5
 flags:
   - hidden

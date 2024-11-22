@@ -707,12 +707,12 @@ func (c *Character) GetAllCooldowns() map[string]int {
 	return ret
 }
 
-func (c *Character) TryCooldown(trackingTag string, cooldownRounds int) bool {
+func (c *Character) TryCooldown(trackingTag string, cooldownTime string) bool {
 	if c.Cooldowns == nil {
 		c.Cooldowns = make(Cooldowns)
 	}
 
-	return c.Cooldowns.Try(trackingTag, cooldownRounds)
+	return c.Cooldowns.Try(trackingTag, cooldownTime)
 }
 
 func (c *Character) SetSetting(settingName string, settingValue string) {

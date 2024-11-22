@@ -2,7 +2,7 @@ buffid: 8
 name: Winded
 description: You're too tired to do anything.
 secret: false
-roundinterval: 1
+triggerrate: 1 round
 triggercount: 1
 flags:
   - no-combat

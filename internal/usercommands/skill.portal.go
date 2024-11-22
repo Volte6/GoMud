@@ -65,7 +65,7 @@ func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 			return true, nil
 		}
 
-		if !user.Character.TryCooldown(skills.Portal.String(), 10) {
+		if !user.Character.TryCooldown(skills.Portal.String(), "1 real minute") {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Portal.String())),
 			)
@@ -128,7 +128,7 @@ func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 				return true, nil
 			}
 
-			if !user.Character.TryCooldown(skills.Portal.String(), 10) {
+			if !user.Character.TryCooldown(skills.Portal.String(), "1 real minute") {
 				user.SendText(
 					fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Portal.String())),
 				)

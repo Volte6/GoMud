@@ -1,3 +1,6 @@
+#
+# Helper script to compile/copy binary to test server on raspberry pi
+#
 
 RPI_HOST="mud@mud.local"
 RPI_HOST_PATH="/home/mud"

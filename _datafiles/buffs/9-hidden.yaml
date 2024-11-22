@@ -2,7 +2,7 @@ buffid: 9
 name: Hidden
 description: You're very sneaky.
 secret: false
-roundinterval: 1
+triggerrate: 1 round
 triggercount: 15
 flags:
   - hidden

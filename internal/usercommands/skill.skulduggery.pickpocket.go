@@ -46,7 +46,7 @@ func Pickpocket(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 
 	if pickPlayerId > 0 || pickMobInstanceId > 0 {
 
-		if !user.Character.TryCooldown(skills.Skulduggery.String(`pickpocket`), 15) {
+		if !user.Character.TryCooldown(skills.Skulduggery.String(`pickpocket`), "1 real minute") {
 			user.SendText(fmt.Sprintf("You need to wait %d rounds before you can do that again!", user.Character.GetCooldown(skills.Skulduggery.String(`pickpocket`))))
 			return true, nil
 		}

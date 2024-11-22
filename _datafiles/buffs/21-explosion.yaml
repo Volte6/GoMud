@@ -3,5 +3,5 @@ name: Explosion
 description: A bomb exploded near you!
 secret: false
 triggernow: true
-roundinterval: 1
+triggerrate: 1 round
 triggercount: 1

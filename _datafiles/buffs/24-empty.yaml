@@ -1,7 +1,7 @@
 buffid: 24
 name: empty
 description: Placeholder
-roundinterval: 1
+triggerrate: 1 round
 triggercount: 20
 flags:
   - cancel-on-combat

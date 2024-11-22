@@ -81,6 +81,9 @@ func (w *World) roundTick() {
 		slog.Info("World::RoundTick()", "roundNumber", roundNumber)
 	}
 
+	//
+	// Load the loot goblin room (which should also spawn it), if it's time
+	//
 	if roundNumber%uint64(c.LootGoblinRoundCount) == 0 {
 		if room := rooms.LoadRoom(rooms.GoblinRoom); room != nil { // loot goblin room
 			slog.Info(`Loot Goblin Spawn`, `roundNumber`, roundNumber)
