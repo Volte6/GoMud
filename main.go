@@ -39,6 +39,7 @@ import (
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/spells"
+	"github.com/volte6/gomud/internal/suggestions"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
@@ -320,7 +321,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 	inputhandlers.LoginInputHandler(clientInput, sharedState)
 
 	var userObject *users.UserRecord
-	var suggestions Suggestions
+	var sug suggestions.Suggestions
 	lastInput := time.Now()
 	for {
 
@@ -386,12 +387,12 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 				if clientInput.TabPressed {
 
-					if suggestions.Count() < 1 {
-						suggestions.Set(worldManager.GetAutoComplete(userObject.UserId, string(clientInput.Buffer)))
+					if sug.Count() < 1 {
+						sug.Set(worldManager.GetAutoComplete(userObject.UserId, string(clientInput.Buffer)))
 					}
 
-					if suggestions.Count() > 0 {
-						suggested = suggestions.Next()
+					if sug.Count() > 0 {
+						suggested = sug.Next()
 						userObject.SetUnsentText(string(clientInput.Buffer), suggested)
 						redrawPrompt = true
 					}
@@ -402,7 +403,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 					userObject.SetUnsentText(string(clientInput.Buffer), ``)
 					if suggested != `` {
 						suggested = ``
-						suggestions.Clear()
+						sug.Clear()
 						redrawPrompt = true
 					}
 
@@ -416,10 +417,10 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 							clientInput.Buffer = append(clientInput.Buffer[0:len(clientInput.Buffer)], []byte(` `)...)
 							redrawPrompt = true
 							userObject.SetUnsentText(string(clientInput.Buffer), ``)
-							suggestions.Clear()
+							sug.Clear()
 						} else {
 							suggested = ``
-							suggestions.Clear()
+							sug.Clear()
 							// Otherwise, just keep the suggestion
 							userObject.SetUnsentText(string(clientInput.Buffer), suggested)
 							redrawPrompt = true
@@ -496,7 +497,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 					// solidify it in the render for UX reasons
 
 					clientInput.Buffer = append(clientInput.Buffer, []byte(suggested)...)
-					suggestions.Clear()
+					sug.Clear()
 					userObject.SetUnsentText(string(clientInput.Buffer), ``)
 
 					if connections.IsWebsocket(clientInput.ConnectionId) {
