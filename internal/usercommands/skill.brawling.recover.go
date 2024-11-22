@@ -27,7 +27,7 @@ func Recover(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 		return true, nil
 	}
 
-	if !user.Character.TryCooldown(skills.Brawling.String(`recover`), 25) {
+	if !user.Character.TryCooldown(skills.Brawling.String(`recover`), "2 real minutes") {
 		user.SendText(
 			fmt.Sprintf("You need to wait %d more rounds to do that again.", user.Character.GetCooldown(skills.Brawling.String(`recover`))),
 		)

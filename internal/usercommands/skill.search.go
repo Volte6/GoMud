@@ -35,7 +35,7 @@ func Search(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 		return true, fmt.Errorf("you don't know how to search")
 	}
 
-	if !user.Character.TryCooldown(skills.Search.String(), 2) {
+	if !user.Character.TryCooldown(skills.Search.String(), "2 rounds") {
 		user.SendText(
 			fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Search.String())),
 		)

@@ -29,7 +29,7 @@ func Tackle(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 		return true, nil
 	}
 
-	if !user.Character.TryCooldown(skills.Brawling.String(`tackle`), 5) {
+	if !user.Character.TryCooldown(skills.Brawling.String(`tackle`), "5 rounds") {
 		user.SendText("You are too tired to tackle again so soon!")
 		return true, nil
 	}

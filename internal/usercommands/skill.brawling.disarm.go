@@ -33,7 +33,7 @@ func Disarm(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 	attackPlayerId := user.Character.Aggro.UserId
 
 	if attackMobInstanceId > 0 || attackPlayerId > 0 {
-		if !user.Character.TryCooldown(skills.Brawling.String(`disarm`), 15) {
+		if !user.Character.TryCooldown(skills.Brawling.String(`disarm`), "1 real minute") {
 			user.SendText(fmt.Sprintf("You can try disarming again in %d rounds.", user.Character.GetCooldown(skills.Brawling.String(`disarm`))))
 			return true, nil
 		}

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
@@ -26,7 +25,7 @@ func Pray(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, fmt.Errorf("you don't know how to pray")
 	}
 
-	if !user.Character.TryCooldown(skills.Protection.String(), configs.GetConfig().MinutesToRounds(5)) {
+	if !user.Character.TryCooldown(skills.Protection.String(), "5 real minutes") {
 		user.SendText(
 			`You can only pray once every 5 minutes.`,
 		)

@@ -49,7 +49,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 		return false, nil
 	}
 
-	if !user.Character.TryCooldown(skills.Brawling.String(`throw`), 4) {
+	if !user.Character.TryCooldown(skills.Brawling.String(`throw`), "4 rounds") {
 		user.SendText("You are too tired to throw objects again so soon!")
 		return true, nil
 	}

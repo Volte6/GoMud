@@ -6,7 +6,6 @@ import (
 	"math"
 	"strings"
 
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -154,7 +153,7 @@ func Enchant(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 			return true, nil
 		}
 
-		if !user.Character.TryCooldown(skills.Enchant.String(), configs.GetConfig().MinutesToRounds(15)) {
+		if !user.Character.TryCooldown(skills.Enchant.String(), "15 real minutes") {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Enchant.String())),
 			)

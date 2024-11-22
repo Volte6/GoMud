@@ -44,7 +44,7 @@ func Map(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, errors.New(`you don't know how to create a wide map`)
 	}
 
-	if !user.Character.TryCooldown(skills.Map.String(), 1) {
+	if !user.Character.TryCooldown(skills.Map.String(), "1 round") {
 		user.SendText(
 			`You can only create 1 map per round.`,
 		)

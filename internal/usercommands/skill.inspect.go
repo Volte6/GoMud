@@ -39,7 +39,7 @@ func Inspect(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 		user.SendText(fmt.Sprintf("You don't have a %s to inspect. Is it still worn, perhaps?", rest))
 	} else {
 
-		if !user.Character.TryCooldown(skills.Inspect.String(), 3) {
+		if !user.Character.TryCooldown(skills.Inspect.String(), "3 rounds") {
 			user.SendText(
 				fmt.Sprintf("You need to wait %d more rounds to use that skill again.", user.Character.GetCooldown(skills.Inspect.String())),
 			)

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -47,7 +46,7 @@ func Bump(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if pickPlayerId > 0 || pickMobInstanceId > 0 {
 
-		if !user.Character.TryCooldown(skills.Brawling.String(`bump`), configs.GetConfig().MinutesToRounds(1)) {
+		if !user.Character.TryCooldown(skills.Brawling.String(`bump`), "1 real minute") {
 			user.SendText(fmt.Sprintf("You need to wait %d rounds before you can do that again!", user.Character.GetCooldown(skills.Brawling.String(`bump`))))
 			return true, nil
 		}
