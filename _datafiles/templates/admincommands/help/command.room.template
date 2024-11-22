@@ -23,6 +23,8 @@ Set a property of the room. This updates basic properties of the room you are in
         <ansi fg="command">symbol</ansi> (string)      - e.g. <ansi fg="command">room set symbol "#"</ansi>
         <ansi fg="command">zone</ansi> (string)        - e.g. <ansi fg="command">room set zone "trash"</ansi>
         <ansi fg="command">spawninfo clear</ansi>      <ansi fg="red">CAREFUL! CLEARS SPAWN INFO!</ansi>
+        <ansi fg="command">mutators</ansi>             <ansi fg="red">list mutators for room</ansi>
+        <ansi fg="command">mutator [mutator-id]</ansi> <ansi fg="red">Toggles mutator on or off</ansi>
 
     Nouns:
         Room nouns are extra descriptive tags that can be "looked" at by players.
