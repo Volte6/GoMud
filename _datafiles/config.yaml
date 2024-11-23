@@ -206,6 +206,9 @@ RoundsPerDay: 900
 # - NightHours -
 #   How many hours of each 24 hour day will be nighttime?
 NightHours: 8
+# - LeaderboardSize -
+#   Maximum size of each leaderboard. 0 to disable.
+LeaderboardSize: 10
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS

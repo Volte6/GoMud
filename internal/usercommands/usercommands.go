@@ -76,6 +76,7 @@ var (
 		`inspect`:     {Inspect, false, false},
 		`inventory`:   {Inventory, true, false},
 		`jobs`:        {Jobs, true, false},
+		`leaderboard`: {Leaderboards, true, false},
 		`list`:        {List, false, false},
 		`locate`:      {Locate, true, true}, // Admin only
 		`lock`:        {Lock, false, false},

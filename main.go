@@ -31,6 +31,7 @@ import (
 	"github.com/volte6/gomud/internal/inputhandlers"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
+	"github.com/volte6/gomud/internal/leaderboard"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mutators"
 	"github.com/volte6/gomud/internal/pets"
@@ -153,6 +154,12 @@ func main() {
 
 	//
 	slog.Info(`========================`)
+
+	//
+	// Generate initial leaderboard cache
+	//
+	leaderboard.Update()
+
 	//
 	// Capture OS signals to gracefully shutdown the server
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)

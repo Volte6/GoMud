@@ -22,8 +22,6 @@ func LoadAlts(username string) []Character {
 		return nil
 	}
 
-	slog.Info("Loading alts", "username", username)
-
 	altsFilePath := util.FilePath(string(configs.GetConfig().FolderUserData), `/`, strings.ToLower(username)+`-alts.yaml`)
 
 	altsFileBytes, err := os.ReadFile(altsFilePath)
