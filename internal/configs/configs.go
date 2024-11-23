@@ -86,6 +86,8 @@ type Config struct {
 	MaxAltCharacters         ConfigInt    `yaml:"MaxAltCharacters"`         // How many characters beyond the default character can they create?
 	AfkSeconds               ConfigInt    `yaml:"AfkSeconds"`               // How long until a player is marked as afk?
 
+	LeaderboardSize ConfigInt `yaml:"LeaderboardSize"` // Maximum size of leaderboard
+
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.
 	turnsPerSave    int     // calculated and cached when data is validated.

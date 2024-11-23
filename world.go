@@ -20,6 +20,7 @@ import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
+	"github.com/volte6/gomud/internal/leaderboard"
 	"github.com/volte6/gomud/internal/mobcommands"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/parties"
@@ -1185,6 +1186,22 @@ func (w *World) TurnTick() {
 		})
 
 		util.TrackTime(`Save Game State`, time.Since(tStart).Seconds())
+
+		// Do leaderboard updates here too
+		events.AddToQueue(events.Broadcast{
+			Text: `Updating leaderboards...`,
+		})
+
+		tStart = time.Now()
+
+		leaderboard.Update()
+
+		util.TrackTime(`Leaderboards`, time.Since(tStart).Seconds())
+
+		events.AddToQueue(events.Broadcast{
+			Text:            `Done.` + term.CRLFStr,
+			SkipLineRefresh: true,
+		})
 	}
 
 	tStart := time.Now()
