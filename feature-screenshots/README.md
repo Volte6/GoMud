@@ -162,6 +162,12 @@ _Learn any skill, if you can find the right trainer._
 
 <a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/permadeath.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/permadeath.png" width="600" alt="accessibility text"></a>
 
+## Leaderboards
+
+_Various leaderboards to compete in._
+
+<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/leaderboards.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/leaderboards.png" width="600" alt="accessibility text"></a>
+
 
 ## Beast Taming
 
