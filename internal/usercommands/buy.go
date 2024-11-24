@@ -308,8 +308,10 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 
 		if shopMob != nil {
 
+			user.EventLog.Add(`shop`, fmt.Sprintf(`You bought a <ansi fg="itemname">%s</ansi> from <ansi fg="mobname">%s</ansi> for <ansi fg="gold">%d gold</ansi>`, newItm.DisplayName(), shopMob.Character.Name, price))
+
 			user.SendText(
-				fmt.Sprintf(`You buy a <ansi fg="itemname">%s</ansi> from <ansi fg="mobname">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, newItm.DisplayName(), shopMob.Character.Name, price),
+				fmt.Sprintf(`You buy a <ansi fg="itemname">%s</ansi> from <ansi fg="mobname">%s</ansi> for <ansi fg="gold">%d gold</ansi>.`, newItm.DisplayName(), shopMob.Character.Name, price),
 			)
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> buys a <ansi fg="itemname">%s</ansi> from <ansi fg="mobname">%s</ansi>.`, user.Character.Name, newItm.DisplayName(), shopMob.Character.Name),
@@ -318,8 +320,10 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 
 		} else if shopUser != nil {
 
+			user.EventLog.Add(`shop`, fmt.Sprintf(`You bought a <ansi fg="itemname">%s</ansi> from <ansi fg="username">%s</ansi> for <ansi fg="gold">%d gold</ansi>.`, newItm.DisplayName(), shopUser.Character.Name, price))
+
 			user.SendText(
-				fmt.Sprintf(`You buy a <ansi fg="itemname">%s</ansi> from <ansi fg="username">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, newItm.DisplayName(), shopUser.Character.Name, price),
+				fmt.Sprintf(`You buy a <ansi fg="itemname">%s</ansi> from <ansi fg="username">%s</ansi> for <ansi fg="gold">%d gold</ansi>.`, newItm.DisplayName(), shopUser.Character.Name, price),
 			)
 
 			shopUser.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> purchased the <ansi fg="itemname">%s</ansi> you were selling for <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, newItm.DisplayName(), price))
@@ -344,18 +348,22 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 
 		if shopMob != nil {
 
+			user.EventLog.Add(`shop`, fmt.Sprintf(`You hired <ansi fg="mobname">%s</ansi> from <ansi fg="mobname">%s</ansi> for <ansi fg="gold">%d gold</ansi>.`, newMob.Character.Name, shopMob.Character.Name, price))
+
 			user.SendText(
-				fmt.Sprintf(`You pay <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, price, shopMob.Character.Name),
+				fmt.Sprintf(`You pay <ansi fg="gold">%d gold</ansi> to <ansi fg="mobname">%s</ansi>.`, price, shopMob.Character.Name),
 			)
 
 			room.SendText(
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, price, shopMob.Character.Name),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays <ansi fg="gold">%d gold</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, price, shopMob.Character.Name),
 				user.UserId,
 			)
 		} else if shopUser != nil {
 
+			user.EventLog.Add(`shop`, fmt.Sprintf(`You hired <ansi fg="mobname">%s</ansi> from <ansi fg="username">%s</ansi> for <ansi fg="gold">%d gold</ansi>.`, newMob.Character.Name, shopUser.Character.Name, price))
+
 			user.SendText(
-				fmt.Sprintf(`You hire <ansi fg="mobname">%s</ansi> from <ansi fg="username">%s</ansi> for <ansi fg="gold">%d</ansi> gold.`, newMob.Character.Name, shopUser.Character.Name, price),
+				fmt.Sprintf(`You hire <ansi fg="mobname">%s</ansi> from <ansi fg="username">%s</ansi> for <ansi fg="gold">%d gold</ansi>.`, newMob.Character.Name, shopUser.Character.Name, price),
 			)
 
 			shopUser.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> hired your <ansi fg="mobname">%s</ansi> you were selling for <ansi fg="gold">%d gold</ansi>.`, user.Character.Name, newMob.Character.Name, price))
@@ -373,21 +381,27 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 
 	if matchedShopItem.BuffId > 0 {
 
+		buffSpec := buffs.GetBuffSpec(matchedShopItem.BuffId)
+
 		if shopMob != nil {
 
+			user.EventLog.Add(`shop`, fmt.Sprintf(`You paid <ansi fg="gold">%d gold</ansi> for a <ansi fg="buff">%s</ansi> enchantment from <ansi fg="mobname">%s</ansi>`, price, buffSpec.Name, shopMob.Character.Name))
+
 			user.SendText(
-				fmt.Sprintf(`You pay <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, price, shopMob.Character.Name),
+				fmt.Sprintf(`You pay <ansi fg="gold">%d gold</ansi> to <ansi fg="mobname">%s</ansi>.`, price, shopMob.Character.Name),
 			)
 
 			room.SendText(
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, price, shopMob.Character.Name),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays <ansi fg="gold">%d gold</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, price, shopMob.Character.Name),
 				user.UserId,
 			)
 
 		} else if shopUser != nil {
 
+			user.EventLog.Add(`shop`, fmt.Sprintf(`You paid <ansi fg="gold">%d gold</ansi> for a <ansi fg="buff">%s</ansi> enchantment from <ansi fg="username">%s</ansi>`, price, buffSpec.Name, shopUser.Character.Name))
+
 			user.SendText(
-				fmt.Sprintf(`You pay <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, price, shopUser.Character.Name),
+				fmt.Sprintf(`You pay <ansi fg="gold">%d gold</ansi> to <ansi fg="mobname">%s</ansi>.`, price, shopUser.Character.Name),
 			)
 
 			shopUser.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> pays you <ansi fg="gold">%d gold</ansi> for an enchantment.`, user.Character.Name, price))
@@ -424,19 +438,23 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 
 		if shopMob != nil {
 
+			user.EventLog.Add(`shop`, fmt.Sprintf(`You paid <ansi fg="gold">%d gold</ansi> for a %s pet from <ansi fg="mobname">%s</ansi>`, price, petInfo.DisplayName(), shopMob.Character.Name))
+
 			user.SendText(
-				fmt.Sprintf(`You pay <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, price, shopMob.Character.Name),
+				fmt.Sprintf(`You pay <ansi fg="gold">%d gold</ansi> to <ansi fg="mobname">%s</ansi>.`, price, shopMob.Character.Name),
 			)
 
 			room.SendText(
-				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, price, shopMob.Character.Name),
+				fmt.Sprintf(`<ansi fg="username">%s</ansi> pays <ansi fg="gold">%d gold</ansi> to <ansi fg="mobname">%s</ansi>.`, user.Character.Name, price, shopMob.Character.Name),
 				user.UserId,
 			)
 
 		} else if shopUser != nil {
 
+			user.EventLog.Add(`shop`, fmt.Sprintf(`You paid <ansi fg="gold">%d gold</ansi> for a %s pet from <ansi fg="username">%s</ansi>`, price, petInfo.DisplayName(), shopUser.Character.Name))
+
 			user.SendText(
-				fmt.Sprintf(`You pay <ansi fg="gold">%d</ansi> gold to <ansi fg="mobname">%s</ansi>.`, price, shopUser.Character.Name),
+				fmt.Sprintf(`You pay <ansi fg="gold">%d gold</ansi> to <ansi fg="mobname">%s</ansi>.`, price, shopUser.Character.Name),
 			)
 
 			shopUser.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> pays you <ansi fg="gold">%d gold</ansi> for the %s.`, user.Character.Name, price, petInfo.DisplayName()))

@@ -111,7 +111,7 @@ func (w *World) enterWorld(userId int, roomId int) {
 		return
 	}
 
-	user.EventLog.Add(`connection`, `Entered world`)
+	user.EventLog.Add(`connection`, fmt.Sprintf(`<ansi fg="username">%s</ansi> entered the world`, user.Character.Name))
 
 	users.RemoveZombieUser(userId)
 
