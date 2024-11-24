@@ -121,6 +121,21 @@ func (u *UserRecord) HasShop() bool {
 	return len(u.Character.Shop) > 0
 }
 
+// Grants experience to the user and notifies them
+// Additionally accepts `source` as a short identifier of the XP source
+// Example source: "combat", "quest progress", "trash cleanup", "exploration"
+func (u *UserRecord) GrantXP(amt int, source string) {
+
+	grantXP, xpScale := u.Character.GrantXP(amt)
+
+	if xpScale != 100 {
+		u.SendText(fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi> <ansi fg="yellow">(%d%% scale)</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, xpScale, source))
+	} else {
+		u.SendText(fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source))
+	}
+
+}
+
 func (u *UserRecord) Command(inputTxt string, waitTurns ...int) {
 
 	wt := 0

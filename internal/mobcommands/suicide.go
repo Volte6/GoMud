@@ -95,7 +95,6 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 		attackerCt := len(mob.DamageTaken)
 
-		xpMsg := `You gained <ansi fg="experience">%d experience points</ansi>%s!`
 		for uId, _ := range mob.DamageTaken {
 			if user := users.GetByUserId(uId); user != nil {
 
@@ -128,16 +127,7 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 					slog.Info("XP Calculation", "MobLevel", mob.Character.Level, "XPBase", mobXP, "xpVal", xpVal, "xpVariation", xpVariation, "xpScaler", xpScaler, "finalXPVal", finalXPVal)
 
-					grantXP, xpScale := user.Character.GrantXP(finalXPVal)
-
-					xpMsgExtra := ``
-					if xpScale != 100 {
-						xpMsgExtra = fmt.Sprintf(` <ansi fg="yellow">(%d%% scale)</ansi>`, xpScale)
-					}
-
-					user.SendText(
-						fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
-					)
+					user.GrantXP(finalXPVal, `combat`)
 
 					// Apply alignment changes
 					alignmentBefore := user.Character.AlignmentName()
@@ -201,7 +191,6 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	if len(partyTracker) > 0 {
 
-		xpMsg := `You gained <ansi fg="yellow-bold">%d experience points</ansi>%s!`
 		for leaderId, xp := range partyTracker {
 			if p := parties.Get(leaderId); p != nil {
 
@@ -218,16 +207,7 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 							user.Character.KD.AddMobKill(int(mob.MobId))
 						}
 
-						grantXP, xpScale := user.Character.GrantXP(xpSplit)
-
-						xpMsgExtra := ``
-						if xpScale != 100 {
-							xpMsgExtra = fmt.Sprintf(` <ansi fg="yellow">(%d%% scale)</ansi>`, xpScale)
-						}
-
-						user.SendText(
-							fmt.Sprintf(xpMsg, grantXP, xpMsgExtra),
-						)
+						user.GrantXP(xpSplit, `combat`)
 
 						// Apply alignment changes
 						alignmentBefore := user.Character.AlignmentName()

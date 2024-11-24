@@ -613,6 +613,13 @@ func (a ScriptActor) GetPet() *pets.Pet {
 	return nil
 }
 
+func (a ScriptActor) GrantXP(xpAmt int, reason string) {
+	if a.mobInstanceId > 0 {
+		return
+	}
+	a.userRecord.GrantXP(xpAmt, reason)
+}
+
 // ////////////////////////////////////////////////////////
 //
 // Functions only really useful for mobs

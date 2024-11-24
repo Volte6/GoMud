@@ -1649,15 +1649,7 @@ func (w *World) TurnTick() {
 			}
 			// Experience reward?
 			if questInfo.Rewards.Experience > 0 {
-
-				grantXP, xpScale := questUser.Character.GrantXP(questInfo.Rewards.Experience)
-
-				xpMsgExtra := ``
-				if xpScale != 100 {
-					xpMsgExtra = fmt.Sprintf(` <ansi fg="yellow">(%d%% scale)</ansi>`, xpScale)
-				}
-
-				questUser.SendText(fmt.Sprintf(`You receive <ansi fg="experience">%d experience points</ansi>%s!`, grantXP, xpMsgExtra))
+				questUser.GrantXP(questInfo.Rewards.Experience, `quest progress`)
 			}
 			// Skill reward?
 			if questInfo.Rewards.SkillInfo != `` {
