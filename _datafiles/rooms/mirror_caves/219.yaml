@@ -17,11 +17,11 @@ exits:
     roomid: 243
 spawninfo:
 - mobid: 23
-  respawnrate: '3 real minutes'
   message: A bat flies into the room and hangs from the ceiling.
+  respawnrate: 3 real minutes
 - mobid: 23
-  respawnrate: '3 real minutes'
   message: A bat flies into the room and hangs from the ceiling.
+  respawnrate: 3 real minutes
 - mobid: 23
-  respawnrate: '3 real minutes'
   message: A bat flies into the room and hangs from the ceiling.
+  respawnrate: 3 real minutes

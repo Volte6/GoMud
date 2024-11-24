@@ -17,7 +17,7 @@ exits:
     roomid: 231
 spawninfo:
 - mobid: 24
-  respawnrate: '5 real minutes'
   message: A reptilian creature catches your eye in the darkness.
+  respawnrate: 5 real minutes
 idlemessages:
 - A gentle breeze blows through the cave from the west

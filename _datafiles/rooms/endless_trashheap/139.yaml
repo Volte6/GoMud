@@ -24,9 +24,9 @@ exits:
     roomid: 145
 spawninfo:
 - mobid: 13
-  respawnrate: '10 real minutes'
   message: The trash pile trembles, and as bits and pieces of garbage slide away,
     a goblin emerges.
+  respawnrate: 10 real minutes
 idlemessages:
 - the mountain of trash shifts slightly.
 - the trash heal trembles, threatening to collapse at any moment.

@@ -309,10 +309,10 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	}
 	for _, mut := range activeMutators {
 		spec := mut.GetSpec()
-		if len(spec.BuffIds) == 0 {
+		if len(spec.PlayerBuffIds) == 0 {
 			continue
 		}
-		for _, buffId := range spec.BuffIds {
+		for _, buffId := range spec.PlayerBuffIds {
 			if !user.Character.HasBuff(buffId) {
 				user.AddBuff(buffId)
 			}

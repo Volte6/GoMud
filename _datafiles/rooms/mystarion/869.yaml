@@ -14,5 +14,5 @@ exits:
     roomid: 854
 spawninfo:
 - mobid: 48
-  respawnrate: '2 real minutes'
   message: The gardener enters the shop.
+  respawnrate: 2 real minutes

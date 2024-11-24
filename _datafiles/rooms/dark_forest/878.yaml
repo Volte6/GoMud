@@ -18,6 +18,9 @@ containers:
   ornate chest:
     lock:
       difficulty: 8
+    items:
+    - itemid: 25
+    gold: 1
 exits:
   out:
     roomid: 877
@@ -25,4 +28,4 @@ spawninfo:
 - container: ornate chest
   itemid: 25
   gold: 1
-  respawnrate: '1 real day'
+  respawnrate: 1 real day

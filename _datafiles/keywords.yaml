@@ -174,7 +174,7 @@ help-aliases:
   trading:          [haggle]
   pets:             [pet]
   macros:           [macro]
-  leaderboard:      [leaderboards]
+  leaderboard:      [leaderboards, highscore, topscore]
 # Default aliases for commands
 # For example: inv -> inventory
 # They can be command + argument aliases
@@ -219,7 +219,7 @@ command-aliases:
   'rank back':      ['backrank']
   'rank front':     ['frontrank']
   'auction bid':    ['bid']
-  'leaderboard':    ['leaderboards']
+  'leaderboard':    ['leaderboards', 'highscore', 'topscore']
   
   # Direction aliases
 direction-aliases:

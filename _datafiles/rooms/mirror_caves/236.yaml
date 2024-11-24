@@ -17,5 +17,5 @@ exits:
     roomid: 237
 spawninfo:
 - mobid: 24
-  respawnrate: '5 real minutes'
   message: A reptilian creature catches your eye in the darkness.
+  respawnrate: 5 real minutes

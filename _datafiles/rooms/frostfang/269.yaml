@@ -13,6 +13,8 @@ biome: house
 exits:
   south:
     roomid: 259
+items:
+- itemid: 26
 spawninfo:
 - mobid: 26
   levelmod: 10

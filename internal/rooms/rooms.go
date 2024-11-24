@@ -40,16 +40,18 @@ const (
 	AffectsRoom   = "room"   // Does it affect everyone in the room?
 
 	// Useful for finding mobs/players
-	FindCharmed        FindFlag = 0b0000000001 // charmed
-	FindNeutral        FindFlag = 0b0000000010 // Not aggro, not charmed, not Hostile
-	FindFightingPlayer FindFlag = 0b0000000100 // aggro vs. a player
-	FindFightingMob    FindFlag = 0b0000001000 // aggro vs. a mob
-	FindHostile        FindFlag = 0b0000010000 // will auto-attack players
-	FindMerchant       FindFlag = 0b0000100000 // is a merchant
-	FindDowned         FindFlag = 0b0001000000 // hp < 1
-	FindBuffed         FindFlag = 0b0010000000 // has a buff
-	FindHasLight       FindFlag = 0b0100000000 // has a light source
-	FindHasPet         FindFlag = 0b1000000000 // has a pet
+	FindCharmed        FindFlag = 0b00000000001 // charmed
+	FindNeutral        FindFlag = 0b00000000010 // Not aggro, not charmed, not Hostile
+	FindFightingPlayer FindFlag = 0b00000000100 // aggro vs. a player
+	FindFightingMob    FindFlag = 0b00000001000 // aggro vs. a mob
+	FindHostile        FindFlag = 0b00000010000 // will auto-attack players
+	FindMerchant       FindFlag = 0b00000100000 // is a merchant
+	FindDowned         FindFlag = 0b00001000000 // hp < 1
+	FindBuffed         FindFlag = 0b00010000000 // has a buff
+	FindHasLight       FindFlag = 0b00100000000 // has a light source
+	FindHasPet         FindFlag = 0b01000000000 // has a pet
+	FindNative         FindFlag = 0b10000000000 // spawns in this room
+
 	// Combinatorial flags
 	FindFighting          = FindFightingPlayer | FindFightingMob // Currently in combat (aggro)
 	FindIdle              = FindCharmed | FindNeutral            // Not aggro or hostile
@@ -296,9 +298,9 @@ func (r *Room) AddTemporaryExit(exitName string, t TemporaryRoomExit) bool {
 	return true
 }
 
-// applies buffs to any players/mobs in the room that don't
+// applies buffs to any players in the room that don't
 // already have it
-func (r *Room) ApplyBuffId(buffId ...int) {
+func (r *Room) ApplyBuffIdToPlayers(buffId ...int) {
 
 	if len(buffId) == 0 {
 		return
@@ -318,7 +320,41 @@ func (r *Room) ApplyBuffId(buffId ...int) {
 
 	}
 
+}
+
+// applies buffs to any mobs in the room that don't
+// already have it
+func (r *Room) ApplyBuffIdToMobs(buffId ...int) {
+
+	if len(buffId) == 0 {
+		return
+	}
+
 	for _, miid := range r.GetMobs() {
+
+		if m := mobs.GetInstance(miid); m != nil {
+
+			for _, bId := range buffId {
+				if m.Character.HasBuff(bId) {
+					continue
+				}
+				m.AddBuff(bId)
+			}
+		}
+
+	}
+
+}
+
+// applies buffs to any mobs in the room that don't
+// already have it
+func (r *Room) ApplyBuffIdToNativeMobs(buffId ...int) {
+
+	if len(buffId) == 0 {
+		return
+	}
+
+	for _, miid := range r.GetMobs(FindNative) {
 
 		if m := mobs.GetInstance(miid); m != nil {
 
@@ -805,6 +841,17 @@ func (r *Room) GetMobs(findTypes ...FindFlag) []int {
 			}
 			if typeFlag&FindFightingMob == FindFightingMob && mob.Character.Aggro.MobInstanceId != 0 {
 				mobMatches = append(mobMatches, mobId)
+				continue
+			}
+		}
+
+		if typeFlag&FindNative == FindNative {
+			if mob.HomeRoomId == r.RoomId {
+				mobMatches = append(mobMatches, mobId)
+				continue
+			}
+			// If not native, and that was all we were looking for, abort further tests
+			if typeFlag == FindNative {
 				continue
 			}
 		}
@@ -1654,7 +1701,9 @@ func (r *Room) RoundTick() {
 	}
 	for _, mut := range activeMutators {
 		spec := mut.GetSpec()
-		r.ApplyBuffId(spec.BuffIds...)
+		r.ApplyBuffIdToPlayers(spec.PlayerBuffIds...)
+		r.ApplyBuffIdToMobs(spec.MobBuffIds...)
+		r.ApplyBuffIdToNativeMobs(spec.NativeBuffIds...)
 	}
 	//
 	// Done adding mutator buffs
