@@ -361,17 +361,6 @@ func LoadUser(username string, skipValidation ...bool) (*UserRecord, error) {
 		}
 	}
 
-	rebuiltMemory := []int{}
-	memoryString := string(util.Decompress(util.Decode(loadedUser.RoomMemoryBlob)))
-	for _, rId := range strings.Split(memoryString, ",") {
-		if rIdInt, err := strconv.Atoi(rId); err == nil {
-			rebuiltMemory = append(rebuiltMemory, rIdInt)
-		}
-	}
-
-	loadedUser.Character.SetRoomMemory(rebuiltMemory)
-	loadedUser.RoomMemoryBlob = ``
-
 	if loadedUser.Joined.IsZero() {
 		loadedUser.Joined = time.Now()
 	}
@@ -481,14 +470,6 @@ func SaveUser(u UserRecord) error {
 	if u.Character.RoomId >= 900 && u.Character.RoomId <= 999 {
 		u.Character.RoomId = -1
 	}
-
-	memoryString := ``
-	for _, rId := range u.Character.GetRoomMemory() {
-		memoryString += strconv.Itoa(rId) + ","
-	}
-	memoryString = strings.TrimSuffix(memoryString, ",")
-
-	u.RoomMemoryBlob = util.Encode(util.Compress([]byte(memoryString)))
 
 	data, err := yaml.Marshal(&u)
 	if err != nil {

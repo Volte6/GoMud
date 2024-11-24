@@ -1,0 +1,18 @@
+mutatorid: freezing-cold
+namemodifier:
+  behavior: append
+  text: (freezing)
+  colorpattern: cyan
+descriptionmodifier: 
+  behavior: append
+  text: The icy cold here is brutal and lethal.
+  colorpattern: cyan
+#alertmodifier: 
+#  # behavior: append # behavior is always "append" to list of alerts. No replace or prepend supported.
+#  text: The floors are very dusty!d
+#decayintoid: another-alert-id
+#respawnrate: midnight
+#decayrate: sunrise
+playerbuffids: [31] # Freezing
+#mobbuffids: []
+#nativebuffids: []

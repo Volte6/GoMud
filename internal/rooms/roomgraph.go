@@ -149,7 +149,6 @@ const (
 	MapModeAll           MapMode = 0
 	MapModeAllButSecrets MapMode = 1
 	MapModeTracking      MapMode = 2
-	MapModeMemory        MapMode = 3
 	MapModeRadius        MapMode = 4
 )
 
@@ -164,15 +163,6 @@ func NewRoomGraph(maxWidth int, maxHeight int, uidPov int, mode MapMode) *RoomGr
 		mode:            mode,
 		roomLimits:      make(map[int]struct{}),
 		forceRoomSymbol: make(map[int]symbolOverride),
-	}
-
-	if mode == MapModeMemory {
-		if user := users.GetByUserId(uidPov); user != nil {
-			memoryRoomsIds := user.Character.GetRoomMemory()
-			for _, roomId := range memoryRoomsIds {
-				rGraph.roomLimits[roomId] = struct{}{}
-			}
-		}
 	}
 
 	if mode == MapModeRadius {
@@ -426,12 +416,6 @@ func (r *RoomGraph) addNode(sourceRoomNode *roomNode, direction string, roomId i
 				return nil
 			}
 		} else {
-
-			if r.mode == MapModeMemory {
-				if _, ok := r.roomLimits[roomId]; !ok {
-					return nil
-				}
-			}
 
 			if r.mode == MapModeTracking {
 				// If the player isn't around or they haven't visited the room, recently

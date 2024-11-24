@@ -303,6 +303,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	// This will only add mutators that the player
 	// doesn't already have.
 	//
+
 	var activeMutators mutators.MutatorList
 	if zoneConfig := GetZoneConfig(newRoom.Zone); zoneConfig != nil {
 		activeMutators = append(newRoom.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
@@ -376,12 +377,6 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 				user.SetTempData(`lastGuideRound`, roundNow)
 
 			}
-		}
-	}
-
-	for _, buffId := range newRoom.GetBiome().BuffIds() {
-		if !user.Character.HasBuff(buffId) {
-			user.AddBuff(buffId)
 		}
 	}
 

@@ -98,7 +98,6 @@ func (ml *MutatorList) Add(mutName string) bool {
 }
 
 func (ml *MutatorList) Remove(mutName string) bool {
-
 	for i, mut := range *ml {
 		if mut.MutatorId == mutName {
 			if mut.Live() {
@@ -106,7 +105,6 @@ func (ml *MutatorList) Remove(mutName string) bool {
 				mut.DespawnedRound = rNow
 				mut.SpawnedRound = 0
 				(*ml)[i] = mut
-				slog.Info("FOUNDMUT", "mut.DespawnedRound", mut.DespawnedRound, "mut.SpawnedRound", mut.SpawnedRound)
 				(*ml).Update(rNow)
 				return true
 			}
@@ -178,7 +176,17 @@ func (m *Mutator) Update(currentRound uint64) {
 	// If it hasn't been initialized yet
 	//
 	if m.SpawnedRound == 0 && m.DespawnedRound == 0 {
-		m.SpawnedRound = currentRound
+
+		// If it's a special period, don't allow it to auto-initialize.
+		// Treat it as expired and now waiting for the initialization
+		if strings.HasSuffix(spec.RespawnRate, `noon`) || strings.HasSuffix(spec.RespawnRate, `noons`) ||
+			strings.HasSuffix(spec.RespawnRate, `midnight`) || strings.HasSuffix(spec.RespawnRate, `midnights`) ||
+			strings.HasSuffix(spec.RespawnRate, `sunrise`) || strings.HasSuffix(spec.RespawnRate, `sunrises`) ||
+			strings.HasSuffix(spec.RespawnRate, `sunset`) || strings.HasSuffix(spec.RespawnRate, `sunsets`) {
+			m.DespawnedRound = currentRound
+		} else {
+			m.SpawnedRound = currentRound
+		}
 	}
 
 	//
@@ -186,6 +194,7 @@ func (m *Mutator) Update(currentRound uint64) {
 	//
 	if spec.RespawnRate != `` {
 		if m.DespawnedRound != 0 {
+
 			gd := gametime.GetDate(m.DespawnedRound)
 			respawnRound := gd.AddPeriod(spec.RespawnRate)
 
