@@ -126,6 +126,8 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 		user.SendText(fmt.Sprintf(`You will be known as <ansi fg="yellow-bold">%s</ansi>!%s`, user.Character.Name, term.CRLFStr))
 	}
 
+	user.EventLog.Add(`character`, fmt.Sprintf(`You created a new character (<ansi fg="username">%s</ansi>)`, user.Character.Name))
+
 	user.SendText(fmt.Sprintf(`<ansi fg="magenta">Suddenly, a vortex appears before you, drawing you in before you have any chance to react!</ansi>%s`, term.CRLFStr))
 
 	for _, ridStr := range configs.GetConfig().TutorialStartRooms {

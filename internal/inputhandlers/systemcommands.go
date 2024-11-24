@@ -110,6 +110,7 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 	//fmt.Printf("cmd:[%s] arg:[%s]\n", cmd, arg)
 
 	if cmd == "quit" {
+
 		// Not building complex output, so just preparse the ansi in the template and cache that
 		tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
 

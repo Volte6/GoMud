@@ -48,6 +48,7 @@ type UserRecord struct {
 	Inbox          Inbox                 `yaml:"inbox,omitempty"`
 	Muted          bool                  `yaml:"muted,omitempty"`    // Cannot SEND custom communications to anyone but admin/mods
 	Deafened       bool                  `yaml:"deafened,omitempty"` // Cannot HEAR custom communications from anyone but admin/mods
+	EventLog       UserLog               `yaml:"-"`                  // Do not retain in user file (for now)
 	connectionId   uint64
 	unsentText     string
 	suggestText    string
@@ -74,6 +75,7 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 		Joined:         time.Now(),
 		connectionTime: time.Now(),
 		tempDataStore:  make(map[string]any),
+		EventLog:       UserLog{},
 	}
 
 	if c.PermaDeath {
@@ -129,9 +131,16 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 	grantXP, xpScale := u.Character.GrantXP(amt)
 
 	if xpScale != 100 {
-		u.SendText(fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi> <ansi fg="yellow">(%d%% scale)</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, xpScale, source))
+		msg := fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi> <ansi fg="yellow">(%d%% scale)</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, xpScale, source)
+		u.SendText(msg)
+
+		u.EventLog.Add(`experience`, msg)
+
 	} else {
-		u.SendText(fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source))
+		msg := fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source)
+		u.SendText(msg)
+
+		u.EventLog.Add(`experience`, msg)
 	}
 
 }

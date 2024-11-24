@@ -111,6 +111,8 @@ func (w *World) enterWorld(userId int, roomId int) {
 		return
 	}
 
+	user.EventLog.Add(`connection`, `Entered world`)
+
 	users.RemoveZombieUser(userId)
 
 	room := rooms.LoadRoom(user.Character.RoomId)
@@ -1751,5 +1753,8 @@ func (w *World) Kick(userId int) {
 		return
 	}
 	users.SetZombieUser(userId)
+
+	user.EventLog.Add(`connection`, `Kicked`)
+
 	connections.Kick(user.ConnectionId())
 }

@@ -350,6 +350,8 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 			// If failed to read from the connection, switch to zombie state
 			if userObject != nil {
 
+				userObject.EventLog.Add(`connection`, `Disconnected`)
+
 				if c.ZombieSeconds > 0 {
 
 					connDetails.SetState(connections.Zombie)
