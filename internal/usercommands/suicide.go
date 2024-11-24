@@ -50,7 +50,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 		} else {
 
-			user.EventLog.Add(`death`, fmt.Sprintf(`You (<ansi fg="username">%s</ansi>) have <ansi fg="red-bold">PERMA-DIED</ansi>`, user.Character.Name))
+			user.EventLog.Add(`death`, fmt.Sprintf(`You (<ansi fg="username">%s</ansi>) has <ansi fg="red-bold">PERMA-DIED</ansi>`, user.Character.Name))
 
 			// Perma-died!!!
 			textOut, _ := templates.Process("character/permadeath", nil)
@@ -72,7 +72,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 	}
 
-	user.EventLog.Add(`death`, fmt.Sprintf(`You (<ansi fg="username">%s</ansi>) have <ansi fg="red-bold">DIED</ansi>`, user.Character.Name))
+	user.EventLog.Add(`death`, fmt.Sprintf(`You (<ansi fg="username">%s</ansi>) has <ansi fg="red-bold">DIED</ansi>`, user.Character.Name))
 
 	if config.OnDeathEquipmentDropChance >= 0 {
 		chanceInt := int(config.OnDeathEquipmentDropChance * 100)
