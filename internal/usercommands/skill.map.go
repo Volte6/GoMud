@@ -30,10 +30,6 @@ func Map(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, errors.New(`you don't know how to map`)
 	}
 
-	if rest == "memory" {
-		user.SendText(fmt.Sprintf("You currently remember %d of %d possible rooms.", len(user.Character.GetRoomMemory()), user.Character.GetMemoryCapacity()))
-		return true, nil
-	}
 	if rest == "sprawl" {
 		user.SendText(fmt.Sprintf("The reach of your maps is %d rooms.", user.Character.GetMapSprawlCapacity()))
 		return true, nil

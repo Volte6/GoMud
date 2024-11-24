@@ -6,12 +6,11 @@ type BiomeInfo struct {
 	name           string
 	symbol         rune
 	description    string
-	darkArea       bool  // Whether is always dark
-	litArea        bool  // Whether is always lit
-	requiredItemId int   // item id required to move into any room with this biome
-	usesItem       bool  // Whether it "uses" the item (i.e. consumes it or decreases its uses left) when moving into a room with this biome
-	burns          bool  // Does this area catch fire? (brush etc.)
-	buffIds        []int // What buff id's get applied every time you enter this biome
+	darkArea       bool // Whether is always dark
+	litArea        bool // Whether is always lit
+	requiredItemId int  // item id required to move into any room with this biome
+	usesItem       bool // Whether it "uses" the item (i.e. consumes it or decreases its uses left) when moving into a room with this biome
+	burns          bool // Does this area catch fire? (brush etc.)
 }
 
 func (bi BiomeInfo) Name() string {
@@ -48,10 +47,6 @@ func (bi BiomeInfo) IsDark() bool {
 
 func (bi BiomeInfo) Burns() bool {
 	return bi.burns
-}
-
-func (bi BiomeInfo) BuffIds() []int {
-	return bi.buffIds
 }
 
 var (
@@ -117,7 +112,6 @@ var (
 			name:        `Snow`,
 			symbol:      '❄',
 			description: `Snow is cold and wet. It can be difficult to traverse, but is usually safe.`,
-			buffIds:     []int{31}, // Freezing
 		},
 		`spiderweb`: {
 			name:        `Spiderweb`,
@@ -135,13 +129,11 @@ var (
 			name:        `Desert`,
 			symbol:      '*',
 			description: `The harsh desert is unforgiving and dry.`,
-			buffIds:     []int{33}, // Thirsty
 		},
 		`farmland`: {
 			name:        `Farmland`,
 			symbol:      ',',
 			description: `Wheat or other food is grown here.`,
-			buffIds:     []int{},
 			burns:       true,
 		},
 	}

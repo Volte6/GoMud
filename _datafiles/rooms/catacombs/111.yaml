@@ -23,5 +23,5 @@ exits:
     secret: true
 spawninfo:
 - mobid: 15
-  respawnrate: '10 real minutes'
   message: The bones in the room stir, and a skeleton rises from the dirt.
+  respawnrate: 10 real minutes

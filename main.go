@@ -140,10 +140,14 @@ func main() {
 	gametime.SetToDay(-3)
 
 	for _, name := range colorpatterns.GetColorPatternNames() {
-		slog.Info("Color Test (Patterns)", "name", name, "(default)", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name)))
-		slog.Info("Color Test (Patterns)", "name", name, "  Stretch", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Stretch)))
-		slog.Info("Color Test (Patterns)", "name", name, "    Words", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Words)))
-		slog.Info("Color Test (Patterns)", "name", name, "     Once", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Once)))
+		slog.Info("Color Test (Patterns)", "name", name,
+			"(default)", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern`, name)),
+			"Stretch", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern`, name, colorpatterns.Stretch)),
+			"Words", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Words)),
+		)
+		//slog.Info("Color Test (Patterns)", "name", name, "  Stretch", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Stretch)))
+		//slog.Info("Color Test (Patterns)", "name", name, "    Words", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Words)))
+		//slog.Info("Color Test (Patterns)", "name", name, "     Once", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Once)))
 	}
 
 	for _, name := range characters.GetFormattedAdjectives(true) {

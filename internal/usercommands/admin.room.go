@@ -128,7 +128,12 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			return false, fmt.Errorf("room %d not found", roomId)
 		}
 
-		infoOutput, _ := templates.Process("admincommands/ingame/roominfo", targetRoom)
+		roomInfo := map[string]any{
+			`room`: targetRoom,
+			`zone`: rooms.GetZoneConfig(targetRoom.Zone),
+		}
+
+		infoOutput, _ := templates.Process("admincommands/ingame/roominfo", roomInfo)
 		user.SendText(infoOutput)
 
 	} else if len(args) >= 2 && roomCmd == "exit" {

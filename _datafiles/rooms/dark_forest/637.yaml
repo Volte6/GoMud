@@ -12,18 +12,18 @@ exits:
     roomid: 633
 spawninfo:
 - mobid: 35
-  respawnrate: '2 real minutes'
   message: A small spider hatches from a nearby egg.
   maxwander: 1
+  respawnrate: 2 real minutes
 - mobid: 35
-  respawnrate: '2 real minutes'
   message: A small spider hatches from a nearby egg.
   maxwander: 1
+  respawnrate: 2 real minutes
 - mobid: 35
-  respawnrate: '2 real minutes'
   message: A small spider hatches from a nearby egg.
   maxwander: 1
+  respawnrate: 2 real minutes
 - mobid: 35
-  respawnrate: '2 real minutes'
   message: A small spider hatches from a nearby egg.
   maxwander: 1
+  respawnrate: 2 real minutes

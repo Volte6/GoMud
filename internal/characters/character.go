@@ -947,28 +947,19 @@ func (c *Character) GetMaxCharmedCreatures() int {
 }
 
 func (c *Character) GetMemoryCapacity() int {
-	return c.GetSkillLevel(skills.Map)*c.Stats.Smarts.ValueAdj + 5
+	memCap := c.GetSkillLevel(skills.Map) * c.Stats.Smarts.ValueAdj
+	if memCap < 0 {
+		memCap = 0
+	}
+	return memCap + 5
 }
 
 func (c *Character) GetMapSprawlCapacity() int {
-	return c.GetSkillLevel(skills.Map) + (c.Stats.Smarts.ValueAdj >> 2)
-}
-
-// Return all rooms the player can remember visiting
-func (c *Character) GetRoomMemory() []int {
-	mapHistory := c.GetMemoryCapacity()
-	// return the last {mapHistory} items
-	if len(c.roomHistory) > mapHistory {
-		// return a copy of the last {mapHistory} items
-		return append([]int{}, c.roomHistory[len(c.roomHistory)-mapHistory:]...)
+	sprawlCap := c.GetSkillLevel(skills.Map) + (c.Stats.Smarts.ValueAdj >> 2)
+	if sprawlCap < 0 {
+		sprawlCap = 0
 	}
-	// return a full copy
-	return append([]int{}, c.roomHistory...)
-}
-
-// Return all rooms the player can remember visiting
-func (c *Character) SetRoomMemory(newMem []int) {
-	c.roomHistory = newMem
+	return sprawlCap
 }
 
 // Remember visiting a room. This may cause to forget an older room if the memory is full.

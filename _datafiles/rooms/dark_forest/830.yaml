@@ -16,8 +16,8 @@ exits:
     roomid: 558
 spawninfo:
 - mobid: 43
-  respawnrate: '1 real minutes'
   message: A small faerie enters the grove.
+  respawnrate: 1 real minutes
 skilltraining:
   tame:
     min: 1

@@ -20,5 +20,5 @@ exits:
     roomid: 164
 spawninfo:
 - mobid: 19
-  respawnrate: '5 real minutes'
   message: The webs hum as a spider descends into the room.
+  respawnrate: 5 real minutes

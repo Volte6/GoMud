@@ -16,11 +16,11 @@ exits:
     roomid: 632
 spawninfo:
 - mobid: 36
-  respawnrate: '10 real minutes'
   message: A giant spider descends from a web.
+  respawnrate: 10 real minutes
 - mobid: 35
-  respawnrate: '7 real minutes'
   message: A small spider hatches from a nearby egg.
+  respawnrate: 7 real minutes
 - mobid: 35
-  respawnrate: '7 real minutes'
   message: A small spider hatches from a nearby egg.
+  respawnrate: 7 real minutes

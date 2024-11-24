@@ -44,7 +44,6 @@ type UserRecord struct {
 	Character      *characters.Character `yaml:"character,omitempty"`
 	ItemStorage    Storage               `yaml:"itemstorage,omitempty"`
 	AdminCommands  []string              `yaml:"admincommands,omitempty"`
-	RoomMemoryBlob string                `yaml:"roommemoryblob,omitempty"`
 	ConfigOptions  map[string]any        `yaml:"configoptions,omitempty"`
 	Inbox          Inbox                 `yaml:"inbox,omitempty"`
 	Muted          bool                  `yaml:"muted,omitempty"`    // Cannot SEND custom communications to anyone but admin/mods

@@ -12,5 +12,5 @@ exits:
     roomid: 852
 spawninfo:
 - mobid: 47
-  respawnrate: '2 real minutes'
   message: The brewer enters the shop.
+  respawnrate: 2 real minutes
