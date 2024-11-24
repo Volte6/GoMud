@@ -211,6 +211,8 @@ func LoginUser(u *UserRecord, connectionId connections.ConnectionId) (*UserRecor
 				// Set their input round to current to track idle time fresh
 				u.SetLastInputRound(util.GetRoundCount())
 
+				u.EventLog.Add(`connection`, `Reconnected`)
+
 				return u, "Reconnecting...", nil
 			}
 
@@ -236,6 +238,9 @@ func LoginUser(u *UserRecord, connectionId connections.ConnectionId) (*UserRecor
 	userManager.UserConnections[u.UserId] = u.connectionId
 
 	slog.Info("LOGIN", "userId", u.UserId)
+
+	u.EventLog.Add(`connection`, `Connected`)
+
 	for _, mobInstId := range u.Character.GetCharmIds() {
 		if !mobs.MobInstanceExists(mobInstId) {
 			u.Character.TrackCharmed(mobInstId, false)

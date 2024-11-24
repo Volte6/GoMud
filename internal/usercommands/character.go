@@ -187,6 +187,8 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 			}
 			characters.SaveAlts(user.Username, newAlts)
 
+			user.EventLog.Add(`character`, `You deleted your alt character, <ansi fg="username">`+match+`</ansi>`)
+
 			user.SendText(`<ansi fg="username">` + match + `</ansi> <ansi fg="red">is deleted.</ansi>`)
 			user.ClearPrompt()
 			return true, nil
@@ -260,6 +262,8 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 			user.Character.RoomId = room.RoomId
 
 			users.SaveUser(*user)
+
+			user.EventLog.Add(`character`, `You dematerialize as <ansi fg="username">`+oldName+`</ansi>. and rematerialize as <ansi fg="username">`+char.Name+`</ansi>`)
 
 			user.SendText(term.CRLFStr + `You dematerialize as <ansi fg="username">` + oldName + `</ansi>. and rematerialize as <ansi fg="username">` + char.Name + `</ansi>!` + term.CRLFStr)
 			room.SendText(`<ansi fg="username">`+oldName+`</ansi> vanishes, and <ansi fg="username">`+char.Name+`</ansi> appears in a shower of sparks!`, user.UserId)
@@ -417,6 +421,8 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 
 			m.Character.Charm(user.UserId, -1, `suicide vanish`)
 			user.Character.TrackCharmed(m.InstanceId, true)
+
+			user.EventLog.Add(`character`, `You hired your alt character <ansi fg="username">`+m.Character.Name+`</ansi> to help you out`)
 
 			user.SendText(`<ansi fg="username">` + m.Character.Name + `</ansi> appears to help you out!`)
 			room.SendText(`<ansi fg="username">`+m.Character.Name+`</ansi> appears to help <ansi fg="username">`+user.Character.Name+`</ansi>!`, user.UserId)

@@ -68,6 +68,7 @@ help:
       - who
       - time
       - leaderboard
+      - history
     items:
       - drop
       - drink
@@ -123,13 +124,14 @@ help:
   admin:
     all:
       - badcommands
-      - build
       - buff
+      - build
       - command
       - deafen
+      - grant
       - locate
-      - mudmail
       - modify
+      - mudmail
       - mute
       - prepare
       - questtoken
@@ -137,7 +139,6 @@ help:
       - reload
       - rename
       - room
-      - questtoken
       - server
       - skillset
       - spawn
@@ -175,6 +176,8 @@ help-aliases:
   pets:             [pet]
   macros:           [macro]
   leaderboard:      [leaderboards, highscore, topscore]
+  history:          ['log']
+  time:             ['date']
 # Default aliases for commands
 # For example: inv -> inventory
 # They can be command + argument aliases
@@ -211,6 +214,8 @@ command-aliases:
   buy:              ['hire']
   trash:            ['junk']
   put:              ['place']
+  leaderboard:      ['leaderboards', 'highscore', 'topscore']
+  history:          ['log']
   'party chat':     ['pchat', 'psay']
   'bank deposit':   ['deposit']
   'bank withdraw':  ['withdraw']
@@ -219,7 +224,6 @@ command-aliases:
   'rank back':      ['backrank']
   'rank front':     ['frontrank']
   'auction bid':    ['bid']
-  'leaderboard':    ['leaderboards', 'highscore', 'topscore']
   
   # Direction aliases
 direction-aliases:

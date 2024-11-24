@@ -332,23 +332,27 @@ func (w *World) handleMobRoundTicks() {
 }
 func (w *World) logOff(userId int) {
 
-	user := users.GetByUserId(userId)
+	if user := users.GetByUserId(userId); user != nil {
 
-	users.SaveUser(*user)
+		user.EventLog.Add(`connection`, `Logged off`)
 
-	worldManager.leaveWorld(userId)
+		users.SaveUser(*user)
 
-	connId := user.ConnectionId()
+		worldManager.leaveWorld(userId)
 
-	tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
+		connId := user.ConnectionId()
 
-	connections.SendTo([]byte(tplTxt), connId)
+		tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
 
-	if err := users.LogOutUserByConnectionId(connId); err != nil {
-		slog.Error("Log Out Error", "connectionId", connId, "error", err)
+		connections.SendTo([]byte(tplTxt), connId)
+
+		if err := users.LogOutUserByConnectionId(connId); err != nil {
+			slog.Error("Log Out Error", "connectionId", connId, "error", err)
+		}
+
+		connections.Remove(connId)
+
 	}
-
-	connections.Remove(connId)
 
 }
 
@@ -1660,6 +1664,8 @@ func (w *World) CheckForLevelUps() {
 						user.Character.ExtraLives = int(c.LivesMax)
 					}
 				}
+
+				user.EventLog.Add(`experience`, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now <ansi fg="magenta-bold">level %d</ansi>!`, user.Character.Name, user.Character.Level))
 
 				levelUpData := map[string]interface{}{
 					"level":          user.Character.Level,
