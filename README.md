@@ -22,8 +22,6 @@ See some feature screnshots [here](feature-screenshots/README.md).
 
 Colorization is handled through extensive use of my [github.com/Volte6/ansitags](https://github.com/Volte6/ansitags) library.
 
-Can be run locally as a standard go program or via docker container. The default port is `33333`, but can be run on multiple ports.
-
 ## Scripting
 
 Information on scripting in GoMud can be found in the [scripting README](scripting/README.md).
@@ -104,11 +102,11 @@ Why not?
 
 Go provides a lot of terrific benefits such as:
 
-* Compatible - High degree of compatibility across platform or CPU Architectures. Go code quite painlessly compiles for Windows, Linux, ARM, etc. with minimal to no changes to the code.
+* Compatible - High degree of compatibility across platforms or CPU Architectures. Go code quite painlessly compiles for Windows, Linux, ARM, etc. with minimal to no changes to the code.
 * Fast - Go is fast. From execution to builds. The current GoMud project builds on a Macbook in less than a couple of seconds.
-* Opinionated - Go style and patterns are well established and provide a reliable way to dive into a project and immediately feel familiar witht he style.
+* Opinionated - Go style and patterns are well established and provide a reliable way to dive into a project and immediately feel familiar with the style.
 * Modern - Go is a relatively new/modern language without the burden of "every feature people thought would be useful in the last 30 or 40 years" added to it. 
-* Upgradable -  Go's promise of maintaining backwards compatibility means upgrading versions over time remains a simple and painless process (If not downright invisible).
+* Upgradable -  Go's promise of maintaining backward compatibility means upgrading versions over time remains a simple and painless process (If not downright invisible).
 * Statically Linked - If you have the binary, you have the working program. Externally linked dependencies (and whether you have them) are not an issue.
 * No Central Registries - Go is built to naturally incorporate library includes straight from their repos (such as git). This is neato.
 * Concurrent - Go has concurrency built in as a feature of the language, not a library you include.
