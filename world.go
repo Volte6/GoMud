@@ -1589,12 +1589,18 @@ func (w *World) TurnTick() {
 		_, stepName := quests.TokenToParts(quest.QuestToken)
 		if stepName == `start` {
 			if !questInfo.Secret {
+
+				questUser.EventLog.Add(`quest`, fmt.Sprintf(`You were given a new quest: <ansi fg="questname">%s</ansi>`, questInfo.Name))
+
 				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have been given a new quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
 				questUser.SendText(questUpTxt)
 			}
 		} else if stepName == `end` {
 
 			if !questInfo.Secret {
+
+				questUser.EventLog.Add(`quest`, fmt.Sprintf(`You completed the quest: <ansi fg="questname">%s</ansi>`, questInfo.Name))
+
 				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have completed the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
 				questUser.SendText(questUpTxt)
 			}
@@ -1689,6 +1695,9 @@ func (w *World) TurnTick() {
 			}
 		} else {
 			if !questInfo.Secret {
+
+				questUser.EventLog.Add(`quest`, fmt.Sprintf(`You made progress on the quest: <ansi fg="questname">%s</ansi>`, questInfo.Name))
+
 				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You've made progress on the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
 				questUser.SendText(questUpTxt)
 			}
