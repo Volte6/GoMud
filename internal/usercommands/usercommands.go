@@ -69,6 +69,7 @@ var (
 		`get`:         {Get, false, false},
 		`give`:        {Give, false, false},
 		`go`:          {Go, false, false},
+		`grant`:       {Grant, true, true}, // Admin only
 		`help`:        {Help, true, false},
 		`keyring`:     {KeyRing, true, false},
 		`killstats`:   {Killstats, true, false},

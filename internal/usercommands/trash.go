@@ -33,15 +33,11 @@ func Trash(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 		iSpec := matchItem.GetSpec()
 
-		grantXP, xpScale := user.Character.GrantXP(int(float64(iSpec.Value) / 10))
-
-		xpMsgExtra := ``
-		if xpScale != 100 {
-			xpMsgExtra = fmt.Sprintf(` <ansi fg="yellow">(%d%% scale)</ansi>`, xpScale)
+		xpGrant := int(float64(iSpec.Value) / 10)
+		if xpGrant < 1 {
+			xpGrant = 1
 		}
-
-		user.SendText(
-			fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi>%s!`, grantXP, xpMsgExtra))
+		user.GrantXP(xpGrant, `trash cleanup`)
 
 		// Trigger lost event
 		scripting.TryItemScriptEvent(`onLost`, matchItem, user.UserId)

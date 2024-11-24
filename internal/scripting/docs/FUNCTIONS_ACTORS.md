@@ -74,6 +74,9 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.ShorthandId() string](#actorobjectshorthandid-string)
   - [ActorObject.WebClientModalOpen(name string, value string)](#actorobjectwebclientmodalopenname-string-value-string)
   - [ActorObject.WebClientModalClose(name string)](#actorobjectwebclientmodalclosename-string)
+  - [ActorObject.Uncurse()](#actorobjectuncurse)
+  - [ActorObject.GetPet()](#actorobjectgetpet)
+  - [ActorObject.GrantXP(xpAmt int, reason string)](#actorobjectgrantxpxpamt-int-reason-string)
   - [ActorObject.GetLastInputRound() int](#actorobjectgetlastinputround-int)
   - [ActorObject.GetTameMastery() Object](#actorobjectgettamemastery-object)
   - [ActorObject.SetTameMastery(mobId int, newSkillLevel int)](#actorobjectsettamemasterymobid-int-newskilllevel-int)
@@ -511,6 +514,22 @@ Closes a modal if one by the name exists, IF the user is on a webclient
 |  Argument | Explanation |
 | --- | --- |
 | name | title of the modal to close |
+
+
+
+## [ActorObject.Uncurse()](/internal/scripting/actor_func.go)
+Uncurses any objects the target has equipped
+
+## [ActorObject.GetPet()](/internal/scripting/actor_func.go)
+Returns the pet object for the actor, or null
+
+## [ActorObject.GrantXP(xpAmt int, reason string)](/internal/scripting/actor_func.go)
+Gives experience points to the actor
+
+|  Argument | Explanation |
+| --- | --- |
+| xpAmt | How much experience to grant |
+| reason | Short reasons such as "combat", "trash cleanup" |
 
 ## [ActorObject.GetLastInputRound() int](/internal/scripting/actor_func.go)
 Returns the last round number the user input anything at all
