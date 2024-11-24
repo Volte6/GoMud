@@ -334,7 +334,7 @@ func (w *World) logOff(userId int) {
 
 	if user := users.GetByUserId(userId); user != nil {
 
-		user.EventLog.Add(`connection`, `Logged off`)
+		user.EventLog.Add(`conn`, `Logged off`)
 
 		users.SaveUser(*user)
 
@@ -1665,7 +1665,7 @@ func (w *World) CheckForLevelUps() {
 					}
 				}
 
-				user.EventLog.Add(`experience`, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now <ansi fg="magenta-bold">level %d</ansi>!`, user.Character.Name, user.Character.Level))
+				user.EventLog.Add(`xp`, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now <ansi fg="magenta-bold">level %d</ansi>!`, user.Character.Name, user.Character.Level))
 
 				levelUpData := map[string]interface{}{
 					"level":          user.Character.Level,

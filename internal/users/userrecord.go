@@ -134,13 +134,13 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 		msg := fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi> <ansi fg="yellow">(%d%% scale)</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, xpScale, source)
 		u.SendText(msg)
 
-		u.EventLog.Add(`experience`, msg)
+		u.EventLog.Add(`xp`, msg)
 
 	} else {
 		msg := fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source)
 		u.SendText(msg)
 
-		u.EventLog.Add(`experience`, msg)
+		u.EventLog.Add(`xp`, msg)
 	}
 
 }

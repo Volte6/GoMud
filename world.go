@@ -111,7 +111,7 @@ func (w *World) enterWorld(userId int, roomId int) {
 		return
 	}
 
-	user.EventLog.Add(`connection`, fmt.Sprintf(`<ansi fg="username">%s</ansi> entered the world`, user.Character.Name))
+	user.EventLog.Add(`conn`, fmt.Sprintf(`<ansi fg="username">%s</ansi> entered the world`, user.Character.Name))
 
 	users.RemoveZombieUser(userId)
 
@@ -1763,7 +1763,7 @@ func (w *World) Kick(userId int) {
 	}
 	users.SetZombieUser(userId)
 
-	user.EventLog.Add(`connection`, `Kicked`)
+	user.EventLog.Add(`conn`, `Kicked`)
 
 	connections.Kick(user.ConnectionId())
 }
