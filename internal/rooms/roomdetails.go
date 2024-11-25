@@ -320,9 +320,6 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 
 	for mut := range r.ActiveMutators {
 		spec := mut.GetSpec()
-		if len(spec.Exits) == 0 {
-			continue
-		}
 		for exitName, exitInfo := range spec.Exits {
 			details.VisibleExits[exitName] = exitInfo
 		}

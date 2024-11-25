@@ -60,7 +60,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		originRoomId := user.Character.RoomId
 
-		exitInfo := room.Exits[exitName]
+		exitInfo, _ := room.GetExitInfo(exitName)
 		if exitInfo.Lock.IsLocked() {
 
 			lockId := fmt.Sprintf(`%d-%s`, room.RoomId, exitName)
@@ -86,7 +86,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					user.UserId)
 
 				exitInfo.Lock.SetUnlocked()
-				room.Exits[exitName] = exitInfo
+				room.SetExitLock(exitName, false)
 
 			} else if hasKey {
 				user.SendText(fmt.Sprintf(`You use the key on your key ring to unlock the <ansi fg="exit">%s</ansi> exit.`, exitName))
@@ -95,7 +95,8 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					user.UserId)
 
 				exitInfo.Lock.SetUnlocked()
-				room.Exits[exitName] = exitInfo
+				room.SetExitLock(exitName, false)
+
 			} else {
 
 				// check for a key item on their person
@@ -114,8 +115,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					user.Character.RemoveItem(backpackKeyItm)
 
 					exitInfo.Lock.SetUnlocked()
-					room.Exits[exitName] = exitInfo
-
+					room.SetExitLock(exitName, false)
 				}
 
 				if exitInfo.Lock.IsLocked() {
@@ -143,7 +143,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			exitInfo := destRoom.Exits[enterFromExit]
 			if exitInfo.Lock.IsLocked() {
 				exitInfo.Lock.SetUnlocked()
-				destRoom.Exits[enterFromExit] = exitInfo
+				destRoom.SetExitLock(enterFromExit, false)
 			}
 
 			enterFromExit = fmt.Sprintf(`the <ansi fg="exit">%s</ansi>`, enterFromExit)

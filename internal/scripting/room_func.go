@@ -125,17 +125,10 @@ func (r ScriptRoom) GetExits() []map[string]any {
 
 func (r ScriptRoom) SetLocked(exitName string, lockIt bool) {
 
-	if exitInfo, ok := r.roomRecord.Exits[exitName]; ok {
+	if exitInfo, ok := r.roomRecord.GetExitInfo(exitName); ok {
 
 		if exitInfo.HasLock() {
-
-			if lockIt {
-				exitInfo.Lock.SetLocked()
-			} else {
-				exitInfo.Lock.SetUnlocked()
-			}
-
-			r.roomRecord.Exits[exitName] = exitInfo
+			r.roomRecord.SetExitLock(exitName, lockIt)
 		}
 
 	}

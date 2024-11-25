@@ -229,7 +229,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		}
 
-		exitInfo := room.Exits[exitName]
+		exitInfo, _ := room.GetExitInfo(exitName)
 		if exitInfo.Lock.IsLocked() {
 			user.SendText(fmt.Sprintf("The %s exit is locked.", exitName))
 			return true, nil

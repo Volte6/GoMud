@@ -157,7 +157,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 		if exitName != `` {
 
-			exitInfo := room.Exits[exitName]
+			exitInfo, _ := room.GetExitInfo(exitName)
 			if exitInfo.Lock.IsLocked() {
 				user.SendText(fmt.Sprintf(`The %s exit is locked.`, exitName))
 				return true, nil

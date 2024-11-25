@@ -165,8 +165,8 @@ func (m *Mutator) Removable() bool {
 	return true
 }
 
-func (m *Mutator) GetSpec() MutatorSpec {
-	return *allMutators[m.MutatorId]
+func (m *Mutator) GetSpec() *MutatorSpec {
+	return allMutators[m.MutatorId]
 }
 
 // Checks whether it decays or respawns

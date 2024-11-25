@@ -676,6 +676,53 @@ func (r *Room) AddItem(item items.Item, stash bool) {
 
 }
 
+func (r *Room) SetExitLock(exitName string, locked bool) {
+
+	if exitInfo, ok := r.Exits[exitName]; ok {
+		if !exitInfo.HasLock() {
+			return
+		}
+		if locked {
+			exitInfo.Lock.SetLocked()
+		} else {
+			exitInfo.Lock.SetUnlocked()
+		}
+		r.Exits[exitName] = exitInfo
+
+	} else {
+		for mut := range r.ActiveMutators {
+			spec := mut.GetSpec()
+			if exitInfo, ok = spec.Exits[exitName]; ok {
+				if !exitInfo.HasLock() {
+					continue
+				}
+				if locked {
+					exitInfo.Lock.SetLocked()
+				} else {
+					exitInfo.Lock.SetUnlocked()
+				}
+				spec.Exits[exitName] = exitInfo
+			}
+		}
+	}
+
+}
+
+func (r *Room) GetExitInfo(exitName string) (exit.RoomExit, bool) {
+	exitInfo, ok := r.Exits[exitName]
+
+	if !ok {
+		for mut := range r.ActiveMutators {
+			spec := mut.GetSpec()
+			if exitInfo, ok = spec.Exits[exitName]; ok {
+				break
+			}
+		}
+	}
+
+	return exitInfo, ok
+}
+
 func (r *Room) GetRandomExit() (exitName string, roomId int) {
 
 	nonSecretExitCt := 0
@@ -1334,9 +1381,6 @@ func (r *Room) FindExitTo(roomId int) string {
 
 	for mut := range r.ActiveMutators {
 		spec := mut.GetSpec()
-		if len(spec.Exits) == 0 {
-			continue
-		}
 		for exitName, exit := range spec.Exits {
 			if exit.RoomId == roomId {
 				return exitName
@@ -1469,9 +1513,6 @@ func (r *Room) FindExitByName(exitNameSearch string) (exitName string, exitRoomI
 	mutatorExits := map[string]exit.RoomExit{}
 	for mut := range r.ActiveMutators {
 		spec := mut.GetSpec()
-		if len(spec.Exits) == 0 {
-			continue
-		}
 		for exitName, exitInfo := range spec.Exits {
 			mutatorExits[exitName] = exitInfo
 			exitNames = append(exitNames, exitName)

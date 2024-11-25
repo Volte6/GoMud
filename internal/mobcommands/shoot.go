@@ -38,7 +38,7 @@ func Shoot(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	exitName, attackRoomId := room.FindExitByName(direction)
 	if exitName != `` {
 
-		exitInfo := room.Exits[exitName]
+		exitInfo, _ := room.GetExitInfo(exitName)
 		if exitInfo.Lock.IsLocked() {
 			return true, nil
 		}

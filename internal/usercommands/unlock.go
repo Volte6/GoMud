@@ -70,7 +70,7 @@ func Unlock(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 	} else if exitName != `` {
 
-		exitInfo := room.Exits[exitName]
+		exitInfo, _ := room.GetExitInfo(exitName)
 
 		if !exitInfo.Lock.IsLocked() {
 			user.SendText("That's not locked.")
@@ -88,7 +88,7 @@ func Unlock(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 		if hasKey {
 			exitInfo.Lock.SetUnlocked()
-			room.Exits[exitName] = exitInfo
+			room.SetExitLock(exitName, false)
 
 			user.SendText(fmt.Sprintf(`You use a key to unlock the <ansi fg="exit">%s</ansi> lock.`, exitName))
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to unlock the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), user.UserId)
@@ -97,7 +97,7 @@ func Unlock(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 			itmSpec := backpackKeyItm.GetSpec()
 
 			exitInfo.Lock.SetUnlocked()
-			room.Exits[exitName] = exitInfo
+			room.SetExitLock(exitName, false)
 
 			// Key entries look like:
 			// "key-<roomid>-<exitname>": "<itemid>"
