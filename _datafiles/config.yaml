@@ -197,7 +197,10 @@ MaxAltCharacters: 3
 #   When real world time is shown, what format should be used?
 #   This uses a Go time format string, which is kinda weird.
 #   See: https://go.dev/src/time/format.go
-TimeFormat: 'Monday, 02-Jan-2006 03:04:05PM'
+TimeFormat: 'Monday, 02-Jan-2006 3:04:05PM'
+# - TimeFormatShort - 
+#   Same as TimeFormat, but shorter form
+TimeFormatShort: 'Jan 2 ''06 3:04PM'
 # - RoundsPerDay -
 #   How many rounds are in a day? This is used to calculate the time of day.
 #   The lower this number, the faster the day/night cycle will be.

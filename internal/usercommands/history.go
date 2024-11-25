@@ -20,7 +20,7 @@ func History(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 		`<ansi fg="white-bold">%s</ansi>`,
 	}
 
-	tFormat := string(configs.GetConfig().TimeFormat)
+	tFormat := string(configs.GetConfig().TimeFormatShort)
 
 	for _, itm := range user.EventLog {
 

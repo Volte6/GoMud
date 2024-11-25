@@ -59,7 +59,8 @@ type Config struct {
 	Motd                         ConfigString      `yaml:"Motd"`                         // Message of the day to display when a user logs in
 	BannedNames                  ConfigSliceString `yaml:"BannedNames"`                  // List of names that are not allowed to be used
 
-	TimeFormat ConfigString `yaml:"TimeFormat"` // How to format time when displaying real time
+	TimeFormat      ConfigString `yaml:"TimeFormat"`      // How to format time when displaying real time
+	TimeFormatShort ConfigString `yaml:"TimeFormatShort"` // How to format time when displaying real time (shortform)
 
 	OnDeathEquipmentDropChance ConfigFloat  `yaml:"OnDeathEquipmentDropChance"` // Chance a player will drop a given piece of equipment on death
 	OnDeathAlwaysDropBackpack  ConfigBool   `yaml:"OnDeathAlwaysDropBackpack"`  // If true, players will always drop their backpack items on death
