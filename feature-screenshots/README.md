@@ -26,6 +26,8 @@ _A private log of events to look back on._
 
 _Configurable day/night cycles. A config settings define day/night length and how long a 24 hour cycle takes (in rounds)._
 
+_In-game dates and zodiac._
+
 <a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/daynight.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/daynight.png" width="600" alt="accessibility text"></a>
 
 
