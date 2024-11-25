@@ -8,6 +8,7 @@ import (
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mutators"
@@ -20,8 +21,8 @@ import (
 type RoomTemplateDetails struct {
 	VisiblePlayers []string
 	VisibleMobs    []string
-	VisibleExits   map[string]RoomExit
-	TemporaryExits map[string]TemporaryRoomExit
+	VisibleExits   map[string]exit.RoomExit
+	TemporaryExits map[string]exit.TemporaryRoomExit
 	UserId         int
 	Character      *characters.Character
 	Permission     string
@@ -55,8 +56,8 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 	details := RoomTemplateDetails{
 		VisiblePlayers: []string{},
 		VisibleMobs:    []string{},
-		VisibleExits:   make(map[string]RoomExit),
-		TemporaryExits: make(map[string]TemporaryRoomExit),
+		VisibleExits:   make(map[string]exit.RoomExit),
+		TemporaryExits: make(map[string]exit.TemporaryRoomExit),
 		Zone:           r.Zone,
 		Title:          r.Title,
 		Description:    r.GetDescription(),
@@ -158,13 +159,7 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 		details.Description = colorpatterns.ApplyColorPattern(details.Description, `flame`, colorpatterns.Words)
 	}
 
-	var activeMutators mutators.MutatorList
-
-	if zoneConfig := GetZoneConfig(r.Zone); zoneConfig != nil {
-		activeMutators = append(r.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
-	}
-
-	for _, mut := range activeMutators {
+	for mut := range r.ActiveMutators {
 		mutSpec := mut.GetSpec()
 
 		if mutSpec.NameModifier != nil {
@@ -320,6 +315,13 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 			}
 		} else {
 			details.VisibleExits[exitStr] = exitInfo
+		}
+	}
+
+	for mut := range r.ActiveMutators {
+		spec := mut.GetSpec()
+		for exitName, exitInfo := range spec.Exits {
+			details.VisibleExits[exitName] = exitInfo
 		}
 	}
 

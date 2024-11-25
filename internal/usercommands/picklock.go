@@ -66,7 +66,7 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 		// get the first entry int he slice and shorten the slice
 		args = args[1:]
 
-		exitInfo := room.Exits[exitName]
+		exitInfo, _ := room.GetExitInfo(exitName)
 
 		if !exitInfo.HasLock() {
 			user.SendText("There is no lock there.")
@@ -134,9 +134,8 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), user.UserId)
 
-			exitInfo := room.Exits[exitName]
-			exitInfo.Lock.SetUnlocked()
-			room.Exits[exitName] = exitInfo
+			room.SetExitLock(exitName, false)
+
 		}
 		return true, nil
 	}
@@ -237,12 +236,8 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 			container.Lock.SetUnlocked()
 			room.Containers[containerName] = container
 		} else {
-
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), user.UserId)
-
-			exitInfo := room.Exits[exitName]
-			exitInfo.Lock.SetUnlocked()
-			room.Exits[exitName] = exitInfo
+			room.SetExitLock(exitName, false)
 		}
 
 		user.ClearPrompt()

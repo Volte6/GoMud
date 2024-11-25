@@ -65,7 +65,7 @@ func Go(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	} else {
 		exitName, goRoomId = room.FindExitByName(rest)
 
-		exitInfo := room.Exits[exitName]
+		exitInfo, _ := room.GetExitInfo(exitName)
 		if exitInfo.Lock.IsLocked() {
 
 			mob.Command(fmt.Sprintf(`emote tries to go the <ansi fg="exit">%s</ansi> exit, but it's locked.`, exitName))
@@ -91,7 +91,7 @@ func Go(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		} else {
 
 			// Entering through the other side unlocks this side
-			exitInfo := destRoom.Exits[enterFromExit]
+			exitInfo, _ := destRoom.GetExitInfo(enterFromExit)
 
 			if exitInfo.Lock.IsLocked() {
 

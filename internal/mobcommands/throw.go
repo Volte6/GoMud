@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
@@ -45,7 +46,7 @@ func Throw(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	if exitName != `` {
 
-		exitInfo := room.Exits[exitName]
+		exitInfo, _ := room.GetExitInfo(exitName)
 		if exitInfo.Lock.IsLocked() {
 			return true, nil
 		}
@@ -88,7 +89,7 @@ func Throw(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 		exactMatch, closeMatch := util.FindMatchIn(throwWhere, exitNames...)
 
-		var tempExit rooms.TemporaryRoomExit
+		var tempExit exit.TemporaryRoomExit
 		var tempExitFound bool = false
 		if len(exactMatch) > 0 {
 			tempExit = room.ExitsTemp[exactMatch]

@@ -16,7 +16,9 @@ If you have comments, questions, suggestions:
 
 ## Screenshots
 
-See some feature screnshots [here](feature-screenshots/README.md).
+Click below to see in-game screenshots of just a handful of features:
+
+[![Feature Screenshots](feature-screenshots/screenshots-thumb.png 'Feature Screenshots')](feature-screenshots/README.md)
 
 ## ANSI Colors
 

@@ -3,10 +3,10 @@ package mobcommands
 import (
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
 )
@@ -72,11 +72,11 @@ func Portal(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	// Current = user.Character.RoomId
 	// At this point we have no open portals, we can create a new one.
 	newPortalExitName := `dark portal`
-	newPortal := rooms.TemporaryRoomExit{
+	newPortal := exit.TemporaryRoomExit{
 		RoomId:  portalTargetRoomId,
 		Title:   colorpatterns.ApplyColorPattern(newPortalExitName, `gray`),
 		UserId:  0,
-		Expires: time.Now().Add(time.Duration(configs.GetConfig().RoundSeconds*2) * time.Second), // lasts for 2 rounds
+		Expires: `2 rounds`,
 	}
 
 	// Spawn a portal in the room that leads to the portal location

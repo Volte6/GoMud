@@ -54,7 +54,7 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 		http.StripPrefix("/static/public/", http.FileServer(http.Dir("_datafiles/html/static/public"))),
 	))
 
-	http.Handle("GET /static/admin/", RunWithGameLocked(
+	http.Handle("GET /static/admin/", RunWithMUDLocked(
 		doBasicAuth(
 			handlerToHandlerFunc(
 				http.StripPrefix("/static/admin/", http.FileServer(http.Dir("_datafiles/html/static/admin"))),
@@ -63,31 +63,31 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 	))
 
 	// Admin tools
-	http.HandleFunc("GET /admin/", RunWithGameLocked(
+	http.HandleFunc("GET /admin/", RunWithMUDLocked(
 		doBasicAuth(adminIndex),
 	))
 
 	// Item Admin
-	http.HandleFunc("GET /admin/items/", RunWithGameLocked(
+	http.HandleFunc("GET /admin/items/", RunWithMUDLocked(
 		doBasicAuth(itemsIndex),
 	))
-	http.HandleFunc("GET /admin/items/itemdata/", RunWithGameLocked(
+	http.HandleFunc("GET /admin/items/itemdata/", RunWithMUDLocked(
 		doBasicAuth(itemData),
 	))
 
 	// Race Admin
-	http.HandleFunc("GET /admin/races/", RunWithGameLocked(
+	http.HandleFunc("GET /admin/races/", RunWithMUDLocked(
 		doBasicAuth(racesIndex)),
 	)
-	http.HandleFunc("GET /admin/races/racedata/", RunWithGameLocked(
+	http.HandleFunc("GET /admin/races/racedata/", RunWithMUDLocked(
 		doBasicAuth(raceData)),
 	)
 
 	// Mob Admin
-	http.HandleFunc("GET /admin/mobs/", RunWithGameLocked(
+	http.HandleFunc("GET /admin/mobs/", RunWithMUDLocked(
 		doBasicAuth(mobsIndex),
 	))
-	http.HandleFunc("GET /admin/mobs/mobdata/", RunWithGameLocked(
+	http.HandleFunc("GET /admin/mobs/mobdata/", RunWithMUDLocked(
 		doBasicAuth(mobData),
 	))
 
@@ -102,11 +102,11 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 
 // This wraps the handler functiojn with a game lock (mutex) to keep the mud from
 // Concurrently accessing the same memory
-func RunWithGameLocked(next http.HandlerFunc) http.HandlerFunc {
+func RunWithMUDLocked(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		util.LockGame()
-		defer util.UnlockGame()
+		util.LockMud()
+		defer util.UnlockMud()
 
 		next.ServeHTTP(w, r)
 	})

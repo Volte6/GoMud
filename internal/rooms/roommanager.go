@@ -16,6 +16,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mutators"
@@ -1097,7 +1098,7 @@ func BuildRoom(fromRoomId int, exitName string, mapDirection ...string) (room *R
 	slog.Info("Connection room", "fromRoom", fromRoom.RoomId, "newRoom", newRoom.RoomId, "exitName", exitName)
 
 	// connect the old room to the new room
-	newExit := RoomExit{RoomId: newRoom.RoomId, Secret: false}
+	newExit := exit.RoomExit{RoomId: newRoom.RoomId, Secret: false}
 	if exitMapDirection != exitName {
 		newExit.MapDirection = exitMapDirection
 	}
@@ -1138,7 +1139,7 @@ func ConnectRoom(fromRoomId int, toRoomId int, exitName string, mapDirection ...
 	}
 
 	// connect the old room to the new room
-	newExit := RoomExit{RoomId: toRoom.RoomId, Secret: false}
+	newExit := exit.RoomExit{RoomId: toRoom.RoomId, Secret: false}
 	if exitMapDirection != exitName {
 		newExit.MapDirection = exitMapDirection
 	}

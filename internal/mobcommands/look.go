@@ -56,7 +56,7 @@ func Look(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	exitName, lookRoomId := room.FindExitByName(lookAt)
 	if exitName != `` {
 
-		exitInfo := room.Exits[exitName]
+		exitInfo, _ := room.GetExitInfo(exitName)
 		if exitInfo.Lock.IsLocked() {
 			return true, nil
 		}

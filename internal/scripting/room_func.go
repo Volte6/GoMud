@@ -2,11 +2,11 @@ package scripting
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/dop251/goja"
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/parties"
@@ -125,17 +125,10 @@ func (r ScriptRoom) GetExits() []map[string]any {
 
 func (r ScriptRoom) SetLocked(exitName string, lockIt bool) {
 
-	if exitInfo, ok := r.roomRecord.Exits[exitName]; ok {
+	if exitInfo, ok := r.roomRecord.GetExitInfo(exitName); ok {
 
 		if exitInfo.HasLock() {
-
-			if lockIt {
-				exitInfo.Lock.SetLocked()
-			} else {
-				exitInfo.Lock.SetUnlocked()
-			}
-
-			r.roomRecord.Exits[exitName] = exitInfo
+			r.roomRecord.SetExitLock(exitName, lockIt)
 		}
 
 	}
@@ -252,17 +245,17 @@ func (r ScriptRoom) RepeatSpawnItem(itemId int, roundFrequency int, containerNam
 	return r.roomRecord.RepeatSpawnItem(itemId, roundFrequency, containerName...)
 }
 
-func (r ScriptRoom) AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int) bool {
+func (r ScriptRoom) AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, expiresTimeString string) bool {
 
 	if exitNameFancy[0:1] == `:` {
 		exitNameFancy = colorpatterns.ApplyColorPattern(exitNameSimple, exitNameFancy[1:])
 	}
 
-	tmpExit := rooms.TemporaryRoomExit{
+	tmpExit := exit.TemporaryRoomExit{
 		RoomId:  exitRoomId,
 		Title:   exitNameFancy,
 		UserId:  0,
-		Expires: time.Now().Add(time.Duration(configs.GetConfig().RoundsToSeconds(roundTTL)) * time.Second),
+		Expires: expiresTimeString,
 	}
 
 	// Spawn a portal in the room that leads to the portal location
@@ -270,7 +263,7 @@ func (r ScriptRoom) AddTemporaryExit(exitNameSimple string, exitNameFancy string
 }
 
 func (r ScriptRoom) RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int) bool {
-	tmpExit := rooms.TemporaryRoomExit{
+	tmpExit := exit.TemporaryRoomExit{
 		RoomId: exitRoomId,
 		Title:  exitNameFancy,
 		UserId: 0,
