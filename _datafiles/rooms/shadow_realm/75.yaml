@@ -15,3 +15,5 @@ description: You find yourself in the heart of the Shadow Realm, a place suspend
   down your spine. The Shadow Realm is a place of transition, where the boundary between
   life and the beyond blurs, and the mysteries of the afterlife begin to unravel.
 exits: {}
+mutators:
+- mutatorid: death-recovery

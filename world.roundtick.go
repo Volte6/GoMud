@@ -1514,11 +1514,8 @@ func (w *World) handleAutoHealing(roundNumber uint64) {
 		}
 
 		if user.Character.Health < 1 {
-			if user.Character.RoomId == 75 {
-				if user.Character.Health < user.Character.HealthMax.Value {
-					user.Character.Health++
-				}
-			} else {
+			if user.Character.RoomId != 75 {
+
 				if user.Character.Health <= -10 {
 
 					user.Command(`suicide`) // suicide drops all money/items and transports to land of the dead.
@@ -1530,21 +1527,15 @@ func (w *World) handleAutoHealing(roundNumber uint64) {
 						room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is <ansi fg="red">bleeding out</ansi>! Somebody needs to provide aid!`, user.Character.Name), userId)
 					}
 				}
+
 			}
 		} else {
 
-			if user.Character.Health > 0 || user.Character.RoomId == 75 {
-				healingFactor := 1
-				if user.Character.RoomId == 75 {
-					healingFactor = 5
-				}
-
+			if user.Character.Health > 0 {
 				user.Character.Heal(
-					//1*healingFactor, 1*healingFactor,
-					user.Character.HealthPerRound()*healingFactor,
-					user.Character.ManaPerRound()*healingFactor,
+					user.Character.HealthPerRound(),
+					user.Character.ManaPerRound(),
 				)
-
 			}
 		}
 
