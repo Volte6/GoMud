@@ -19,7 +19,7 @@
   - [RoomObject.HasQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjecthasquestquestid-string-partyuserid-int-int)
   - [RoomObject.MissingQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjectmissingquestquestid-string-partyuserid-int-int)
   - [RoomObject.SpawnMob(mobId int) Actor](#roomobjectspawnmobmobid-int-actor)
-  - [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](#roomobjectaddtemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int-roundttl-int)
+  - [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, expiresTimeString string](#roomobjectaddtemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int-expirestimestring-string)
   - [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](#roomobjectremovetemporaryexitexitnamesimple-string-exitnamefancy-string-exitroomid-int)
   - [RoomObject.AddMutator(mutName string](#roomobjectaddmutatormutname-string)
   - [RoomObject.RemoveMutator(mutName string](#roomobjectremovemutatormutname-string)
@@ -161,7 +161,7 @@ Creates a new instance of MobId,and returns the `Actor` of the mob.
 | --- | --- |
 | mobId | The ID if the mob type to spawn. NOT THE INSTANCE ID. |
 
-## [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, roundTTL int](/internal/scripting/room_func.go)
+## [RoomObject.AddTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int, expiresTimeString string](/internal/scripting/room_func.go)
 Adds a temporary exit to the room for the specified amount of time.
 
 |  Argument | Explanation |
@@ -169,7 +169,7 @@ Adds a temporary exit to the room for the specified amount of time.
 | exitNameSimple | The simple plain text exit name. |
 | exitNameFancy | Should be the simple name, but can have color tags. |
 | exitRoomId | The roomId the exit should lead to. |
-| roundTTL | How many rounds the exit should persist for. |
+| expiresTimeString | Time string (1 day, 1 real day, 4 hours, etc) before it vanishes. |
 
 ## [RoomObject.RemoveTemporaryExit(exitNameSimple string, exitNameFancy string, exitRoomId int](/internal/scripting/room_func.go)
 Removes a temporary exit

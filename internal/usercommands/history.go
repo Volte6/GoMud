@@ -22,7 +22,7 @@ func History(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 	tFormat := string(configs.GetConfig().TimeFormatShort)
 
-	for _, itm := range user.EventLog {
+	for itm := range user.EventLog.Items {
 
 		if rest != `` && rest != itm.Category {
 			continue

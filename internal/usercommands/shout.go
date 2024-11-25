@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/mutators"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
 )
@@ -36,6 +37,34 @@ func Shout(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 		if otherRoom := rooms.LoadRoom(roomInfo.RoomId); otherRoom != nil {
 			if sourceExit := otherRoom.FindExitTo(room.RoomId); sourceExit != `` {
 				otherRoom.SendTextCommunication(fmt.Sprintf(`Someone shouts from the <ansi fg="exit">%s</ansi> direction, "<ansi fg="yellow">%s</ansi>"`, sourceExit, rest), user.UserId)
+			}
+		}
+	}
+
+	for _, roomInfo := range room.ExitsTemp {
+		if otherRoom := rooms.LoadRoom(roomInfo.RoomId); otherRoom != nil {
+			if sourceExit := otherRoom.FindExitTo(room.RoomId); sourceExit != `` {
+				otherRoom.SendTextCommunication(fmt.Sprintf(`Someone shouts from the <ansi fg="exit">%s</ansi> direction, "<ansi fg="yellow">%s</ansi>"`, sourceExit, rest), user.UserId)
+			}
+		}
+	}
+
+	var activeMutators mutators.MutatorList
+
+	if zoneConfig := rooms.GetZoneConfig(room.Zone); zoneConfig != nil {
+		activeMutators = append(room.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
+	}
+
+	for _, mut := range activeMutators {
+		spec := mut.GetSpec()
+		if len(spec.Exits) == 0 {
+			continue
+		}
+		for _, exitInfo := range spec.Exits {
+			if otherRoom := rooms.LoadRoom(exitInfo.RoomId); otherRoom != nil {
+				if sourceExit := otherRoom.FindExitTo(room.RoomId); sourceExit != `` {
+					otherRoom.SendTextCommunication(fmt.Sprintf(`Someone shouts from the <ansi fg="exit">%s</ansi> direction, "<ansi fg="yellow">%s</ansi>"`, sourceExit, rest), user.UserId)
+				}
 			}
 		}
 	}

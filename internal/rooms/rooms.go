@@ -11,6 +11,7 @@ import (
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
@@ -75,25 +76,25 @@ type Room struct {
 	MapLegend         string               `yaml:"maplegend,omitempty"`  // The text to display in the legend for this room. Should be one word.
 	Biome             string               `yaml:"biome,omitempty"`      // The biome of the room. Used for weather generation.
 	Containers        map[string]Container `yaml:"containers,omitempty"` // If this room has a chest, what is in it?
-	Exits             map[string]RoomExit
-	ExitsTemp         map[string]TemporaryRoomExit   `yaml:"-"`               // Temporary exits that will be removed after a certain time. Don't bother saving on sever shutting down.
-	Nouns             map[string]string              `yaml:"nouns,omitempty"` // Interesting nouns to highlight in the room or reveal on succesful searches.
-	Items             []items.Item                   `yaml:"items,omitempty"`
-	Stash             []items.Item                   `yaml:"stash,omitempty"`             // list of items in the room that are not visible to players
-	Gold              int                            `yaml:"gold,omitempty"`              // How much gold is on the ground?
-	SpawnInfo         []SpawnInfo                    `yaml:"spawninfo,omitempty"`         // key is creature ID, value is spawn chance
-	SkillTraining     map[string]TrainingRange       `yaml:"skilltraining,omitempty"`     // list of skills that can be trained in this room
-	Signs             []Sign                         `yaml:"sign,omitempty"`              // list of scribbles in the room
-	IdleMessages      []string                       `yaml:"idlemessages,omitempty"`      // list of messages that can be displayed to players in the room
-	LastIdleMessage   uint8                          `yaml:"-"`                           // index of the last idle message displayed
-	LongTermDataStore map[string]any                 `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
-	Mutators          mutators.MutatorList           `yaml:"mutators,omitempty"`          // mutators this room spawns with.
-	Effects           map[EffectType]AreaEffect      `yaml:"-"`
-	players           []int                          `yaml:"-"` // list of user IDs currently in the room
-	mobs              []int                          `yaml:"-"` // list of mob instance IDs currently in the room. Does not get saved.
-	visitors          map[VisitorType]map[int]uint64 `yaml:"-"` // list of user IDs that have visited this room, and the last round they did
-	lastVisited       uint64                         `yaml:"-"` // last round a visitor was in the room
-	tempDataStore     map[string]any                 `yaml:"-"` // Temporary data store for the room
+	Exits             map[string]exit.RoomExit
+	ExitsTemp         map[string]exit.TemporaryRoomExit `yaml:"-"`               // Temporary exits that will be removed after a certain time. Don't bother saving on sever shutting down.
+	Nouns             map[string]string                 `yaml:"nouns,omitempty"` // Interesting nouns to highlight in the room or reveal on succesful searches.
+	Items             []items.Item                      `yaml:"items,omitempty"`
+	Stash             []items.Item                      `yaml:"stash,omitempty"`             // list of items in the room that are not visible to players
+	Gold              int                               `yaml:"gold,omitempty"`              // How much gold is on the ground?
+	SpawnInfo         []SpawnInfo                       `yaml:"spawninfo,omitempty"`         // key is creature ID, value is spawn chance
+	SkillTraining     map[string]TrainingRange          `yaml:"skilltraining,omitempty"`     // list of skills that can be trained in this room
+	Signs             []Sign                            `yaml:"sign,omitempty"`              // list of scribbles in the room
+	IdleMessages      []string                          `yaml:"idlemessages,omitempty"`      // list of messages that can be displayed to players in the room
+	LastIdleMessage   uint8                             `yaml:"-"`                           // index of the last idle message displayed
+	LongTermDataStore map[string]any                    `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
+	Mutators          mutators.MutatorList              `yaml:"mutators,omitempty"`          // mutators this room spawns with.
+	Effects           map[EffectType]AreaEffect         `yaml:"-"`
+	players           []int                             `yaml:"-"` // list of user IDs currently in the room
+	mobs              []int                             `yaml:"-"` // list of mob instance IDs currently in the room. Does not get saved.
+	visitors          map[VisitorType]map[int]uint64    `yaml:"-"` // list of user IDs that have visited this room, and the last round they did
+	lastVisited       uint64                            `yaml:"-"` // last round a visitor was in the room
+	tempDataStore     map[string]any                    `yaml:"-"` // Temporary data store for the room
 }
 
 type TrainingRange struct {
@@ -108,7 +109,7 @@ func NewRoom(zone string) *Room {
 		Title:         "An empty room.",
 		Description:   "This is an empty room that was never given a description.",
 		MapSymbol:     ``,
-		Exits:         make(map[string]RoomExit),
+		Exits:         make(map[string]exit.RoomExit),
 		Effects:       map[EffectType]AreaEffect{},
 		players:       []int{},
 		visitors:      make(map[VisitorType]map[int]uint64),
@@ -251,7 +252,7 @@ func (r *Room) GetScriptPath() string {
 	return strings.Replace(roomDataFilesPath+`/`+r.Filepath(), `.yaml`, `.js`, 1)
 }
 
-func (r *Room) FindTemporaryExitByUserId(userId int) (TemporaryRoomExit, bool) {
+func (r *Room) FindTemporaryExitByUserId(userId int) (exit.TemporaryRoomExit, bool) {
 
 	if r.ExitsTemp != nil {
 		for _, v := range r.ExitsTemp {
@@ -261,10 +262,10 @@ func (r *Room) FindTemporaryExitByUserId(userId int) (TemporaryRoomExit, bool) {
 		}
 	}
 
-	return TemporaryRoomExit{}, false
+	return exit.TemporaryRoomExit{}, false
 }
 
-func (r *Room) RemoveTemporaryExit(t TemporaryRoomExit) bool {
+func (r *Room) RemoveTemporaryExit(t exit.TemporaryRoomExit) bool {
 
 	if r.ExitsTemp == nil {
 		return false
@@ -282,10 +283,12 @@ func (r *Room) RemoveTemporaryExit(t TemporaryRoomExit) bool {
 
 // Can't add twoof the same exitName
 // Will return false if it already exists
-func (r *Room) AddTemporaryExit(exitName string, t TemporaryRoomExit) bool {
+func (r *Room) AddTemporaryExit(exitName string, t exit.TemporaryRoomExit) bool {
+
+	t.SpawnedRound = util.GetRoundCount()
 
 	if r.ExitsTemp == nil {
-		r.ExitsTemp = make(map[string]TemporaryRoomExit)
+		r.ExitsTemp = make(map[string]exit.TemporaryRoomExit)
 	}
 
 	if len(t.Title) == 0 {
@@ -1329,6 +1332,18 @@ func (r *Room) FindExitTo(roomId int) string {
 		}
 	}
 
+	for mut := range r.ActiveMutators {
+		spec := mut.GetSpec()
+		if len(spec.Exits) == 0 {
+			continue
+		}
+		for exitName, exit := range spec.Exits {
+			if exit.RoomId == roomId {
+				return exitName
+			}
+		}
+	}
+
 	return ""
 }
 
@@ -1451,6 +1466,18 @@ func (r *Room) FindExitByName(exitNameSearch string) (exitName string, exitRoomI
 		exitNames = append(exitNames, exitName)
 	}
 
+	mutatorExits := map[string]exit.RoomExit{}
+	for mut := range r.ActiveMutators {
+		spec := mut.GetSpec()
+		if len(spec.Exits) == 0 {
+			continue
+		}
+		for exitName, exitInfo := range spec.Exits {
+			mutatorExits[exitName] = exitInfo
+			exitNames = append(exitNames, exitName)
+		}
+	}
+
 	exactMatch, closeMatch := util.FindMatchIn(exitNameSearch, exitNames...)
 
 	if len(exactMatch) == 0 {
@@ -1494,15 +1521,22 @@ func (r *Room) FindExitByName(exitNameSearch string) (exitName string, exitRoomI
 		return exitInfo.Title, exitInfo.RoomId
 	}
 
+	if exitInfo, ok := mutatorExits[exactMatch]; ok {
+		return exactMatch, exitInfo.RoomId
+	}
+
 	return "", 0
 }
 
-func (r *Room) PruneTemporaryExits() []TemporaryRoomExit {
+func (r *Room) PruneTemporaryExits() []exit.TemporaryRoomExit {
 
-	prunedExits := []TemporaryRoomExit{}
+	rNow := util.GetRoundCount()
+
+	prunedExits := []exit.TemporaryRoomExit{}
 
 	for k, v := range r.ExitsTemp {
-		if v.Expires.Before(time.Now()) {
+		g := gametime.GetDate(v.SpawnedRound)
+		if rNow >= g.AddPeriod(v.Expires) {
 			delete(r.ExitsTemp, k)
 			prunedExits = append(prunedExits, v)
 		}
@@ -1695,11 +1729,7 @@ func (r *Room) RoundTick() {
 	//
 	r.Mutators.Update(roundNow)
 
-	var activeMutators mutators.MutatorList
-	if zoneConfig := GetZoneConfig(r.Zone); zoneConfig != nil {
-		activeMutators = append(r.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
-	}
-	for _, mut := range activeMutators {
+	for mut := range r.ActiveMutators {
 		spec := mut.GetSpec()
 		r.ApplyBuffIdToPlayers(spec.PlayerBuffIds...)
 		r.ApplyBuffIdToMobs(spec.MobBuffIds...)
@@ -1948,4 +1978,18 @@ func (r *Room) GetBiome() BiomeInfo {
 	bInfo, _ := GetBiome(r.Biome)
 
 	return bInfo
+}
+
+func (r *Room) ActiveMutators(yield func(mutators.Mutator) bool) {
+
+	var activeMutators mutators.MutatorList
+	if zoneConfig := GetZoneConfig(r.Zone); zoneConfig != nil {
+		activeMutators = append(r.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
+	}
+
+	for _, mut := range activeMutators {
+		if !yield(mut) {
+			return
+		}
+	}
 }

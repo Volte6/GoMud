@@ -15,6 +15,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
@@ -1598,11 +1599,11 @@ func (w *World) handleShadowRealm(roundNumber uint64) {
 				Expires time.Time // When will it be auto-cleaned up?
 			}
 
-			tmpExit := rooms.TemporaryRoomExit{
+			tmpExit := exit.TemporaryRoomExit{
 				RoomId:  rooms.StartRoomIdAlias,
 				Title:   colorpatterns.ApplyColorPattern(`shimmering portal`, `cyan`),
 				UserId:  0,
-				Expires: time.Now().Add(time.Second * 10),
+				Expires: `3 rounds`,
 			}
 			// Spawn a portal in the room that leads to the portal location
 			deadRoom.AddTemporaryExit("shimmering portal", tmpExit)

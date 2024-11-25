@@ -7,6 +7,7 @@ import (
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/mobs"
@@ -224,7 +225,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 				exactMatch, closeMatch := util.FindMatchIn(throwWhere, exitNames...)
 
-				var tempExit rooms.TemporaryRoomExit
+				var tempExit exit.TemporaryRoomExit
 				var tempExitFound bool = false
 				if len(exactMatch) > 0 {
 					tempExit = room.ExitsTemp[exactMatch]

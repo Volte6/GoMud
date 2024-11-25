@@ -204,7 +204,6 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	// Check room exits
 	//
 	exitName, lookRoomId := room.FindExitByName(lookAt)
-
 	// If nothing found, consider directional aliases
 	if exitName == `` {
 

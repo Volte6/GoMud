@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/util"
@@ -55,12 +56,13 @@ type MutatorSpec struct {
 	DescriptionModifier *TextModifier `yaml:"descriptionmodifier,omitempty"`
 	AlertModifier       *TextModifier `yaml:"alertmodifier,omitempty"` // These can only append.
 	// End text based changes
-	DecayIntoId   string `yaml:"decayintoid,omitempty"`   // Id of another Mutator that replaces this one when it decays. This can be a circular behavior.
-	PlayerBuffIds []int  `yaml:"playerbuffids,omitempty"` // buffId's that apply conditionally TO PLAYERS AND PLAYER FOLLOWERS
-	MobBuffIds    []int  `yaml:"mobbuffids,omitempty"`    // buffId's that apply conditionally TO MOBS
-	NativeBuffIds []int  `yaml:"nativebuffids,omitempty"` // buffId's that apply conditionally TO MOBS THAT SPAWNED IN THIS ROOM
-	DecayRate     string `yaml:"decayrate,omitempty"`     // how long until it is gone
-	RespawnRate   string `yaml:"respawnrate,omitempty"`   // daily, weekly, 1 day, 3 day, monthly, etc.
+	DecayIntoId   string                   `yaml:"decayintoid,omitempty"`   // Id of another Mutator that replaces this one when it decays. This can be a circular behavior.
+	PlayerBuffIds []int                    `yaml:"playerbuffids,omitempty"` // buffId's that apply conditionally TO PLAYERS AND PLAYER FOLLOWERS
+	MobBuffIds    []int                    `yaml:"mobbuffids,omitempty"`    // buffId's that apply conditionally TO MOBS
+	NativeBuffIds []int                    `yaml:"nativebuffids,omitempty"` // buffId's that apply conditionally TO MOBS THAT SPAWNED IN THIS ROOM
+	DecayRate     string                   `yaml:"decayrate,omitempty"`     // how long until it is gone
+	RespawnRate   string                   `yaml:"respawnrate,omitempty"`   // daily, weekly, 1 day, 3 day, monthly, etc.
+	Exits         map[string]exit.RoomExit `yaml:"exits,omitempty"`         // name/roomId pairs of exits only available while mutator is live.
 }
 
 func GetAllMutatorIds() []string {

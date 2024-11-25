@@ -3,11 +3,12 @@ package usercommands
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/volte6/gomud/internal/colorpatterns"
+	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/users"
@@ -55,7 +56,16 @@ func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 		}
 	}
 
-	portalLifeInSeconds := 30 + (user.Character.Stats.Mysticism.ValueAdj * 10) // 0 mysticism = 30 seconds, 100 mysticism = 1030 seconds
+	portalLifeInSeconds := user.Character.Stats.Mysticism.ValueAdj * 10 // 0 mysticism = 30 seconds, 100 mysticism = 1030 seconds
+	if portalLifeInSeconds < 0 {
+		portalLifeInSeconds = 0
+	}
+	portalLifeInSeconds += 60
+
+	portalLifeInMinutes := int(math.Floor(float64(portalLifeInSeconds) / 60))
+	if portalLifeInMinutes < 1 {
+		portalLifeInMinutes = 1
+	}
 
 	// If no argument supplied, is a direct teleport.
 	if rest == "" {
@@ -185,11 +195,11 @@ func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 			// At this point we have no open portals, we can create a new one.
 
 			newPortalExitName := fmt.Sprintf("glowing portal from %s", user.Character.Name)
-			newPortal := rooms.TemporaryRoomExit{
+			newPortal := exit.TemporaryRoomExit{
 				RoomId:  portalTargetRoomId,
 				Title:   fmt.Sprintf(`%s from <ansi fg="username">%s</ansi>`, glowingPortalColorized, user.Character.Name),
 				UserId:  user.UserId,
-				Expires: time.Now().Add(time.Duration(portalLifeInSeconds) * time.Second),
+				Expires: fmt.Sprintf(`%d real minutes`, portalLifeInMinutes),
 			}
 
 			// Spawn a portal in the room that leads to the portal location

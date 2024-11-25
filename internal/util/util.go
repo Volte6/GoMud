@@ -49,25 +49,25 @@ var (
 
 	colorShortTagRegex = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
 
-	gameLock = sync.RWMutex{}
+	mudLock = sync.RWMutex{}
 )
 
 // Mutex lock intended for synchronizing at a high level between
 // components that may asyncronously access game data
-func LockGame() {
-	gameLock.Lock()
+func LockMud() {
+	mudLock.Lock()
 }
 
-func UnlockGame() {
-	gameLock.Unlock()
+func UnlockMud() {
+	mudLock.Unlock()
 }
 
-func RLockGame() {
-	gameLock.RLock()
+func RLockMud() {
+	mudLock.RLock()
 }
 
-func RUnlockGame() {
-	gameLock.RUnlock()
+func RUnlockMud() {
+	mudLock.RUnlock()
 }
 
 //

@@ -652,36 +652,36 @@ loop:
 
 			slog.Error(`MainWorker`, `action`, `shutdown received`)
 
-			util.LockGame()
+			util.LockMud()
 			if err := rooms.SaveAllRooms(); err != nil {
 				slog.Error("rooms.SaveAllRooms()", "error", err.Error())
 			}
 			users.SaveAllUsers() // Save all user data too.
-			util.UnlockGame()
+			util.UnlockMud()
 
 			break loop
 		case <-statsTimer.C:
 
-			util.LockGame()
+			util.LockMud()
 			w.UpdateStats()
-			util.UnlockGame()
+			util.UnlockMud()
 
 			statsTimer.Reset(time.Duration(10) * time.Second)
 
 		case <-roomUpdateTimer.C:
 			slog.Debug(`MainWorker`, `action`, `rooms.RoomMaintenance()`)
 
-			util.LockGame()
+			util.LockMud()
 			rooms.RoomMaintenance()
-			util.UnlockGame()
+			util.UnlockMud()
 
 			roomUpdateTimer.Reset(roomMaintenancePeriod)
 
 		case <-ansiAliasTimer.C:
 
-			util.LockGame()
+			util.LockMud()
 			templates.LoadAliases()
-			util.UnlockGame()
+			util.UnlockMud()
 
 			ansiAliasTimer.Reset(ansiAliasReloadPeriod)
 
@@ -689,41 +689,41 @@ loop:
 
 			messageTimer.Reset(time.Millisecond)
 
-			util.LockGame()
+			util.LockMud()
 			w.MessageTick()
-			util.UnlockGame()
+			util.UnlockMud()
 
 		case <-turnTimer.C:
 
-			util.LockGame()
+			util.LockMud()
 			turnTimer.Reset(time.Duration(c.TurnMs) * time.Millisecond)
 			w.TurnTick()
-			util.UnlockGame()
+			util.UnlockMud()
 
 		case enterWorldUserId := <-w.enterWorldUserId: // [2]int
 
-			util.LockGame()
+			util.LockMud()
 			w.enterWorld(enterWorldUserId[0], enterWorldUserId[1])
-			util.UnlockGame()
+			util.UnlockMud()
 
 		case leaveWorldUserId := <-w.leaveWorldUserId: // int
 
-			util.LockGame()
+			util.LockMud()
 			w.leaveWorld(leaveWorldUserId)
-			util.UnlockGame()
+			util.UnlockMud()
 
 		case logoutConnectionId := <-w.logoutConnectionId: //  connections.ConnectionId
 
-			util.LockGame()
+			util.LockMud()
 			w.logOutUserByConnectionId(logoutConnectionId)
-			util.UnlockGame()
+			util.UnlockMud()
 
 		case zombieFlag := <-w.zombieFlag: //  [2]int
 			if zombieFlag[1] == 1 {
 
-				util.LockGame()
+				util.LockMud()
 				users.SetZombieUser(zombieFlag[0])
-				util.UnlockGame()
+				util.UnlockMud()
 
 			}
 		}

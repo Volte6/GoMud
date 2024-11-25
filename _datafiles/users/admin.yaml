@@ -17,8 +17,8 @@ character:
     to disrupt the balance of the world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 467
-  zone: Frostfang Slums
+  roomid: 300
+  zone: Dark Forest
   raceid: 2
   stats:
     strength:
@@ -55,25 +55,25 @@ character:
   items:
   - itemid: 10006
     uncursed: true
-  - itemid: 10012
   - itemid: 30002
     uses: 1
+  - itemid: 10012
   buffs:
     list:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 25
+      roundcounter: 21
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 18
+      roundcounter: 44
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
       permabuff: true
-      roundcounter: 7
+      roundcounter: 3
       triggersleft: 1000000000
   equipment:
     weapon:

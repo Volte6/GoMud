@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/users"
 )
 
@@ -45,7 +46,7 @@ type RoomGraph struct {
 }
 type foundRoomExits struct {
 	roomNode *roomNode
-	exits    map[string]RoomExit
+	exits    map[string]exit.RoomExit
 }
 
 type directionDelta struct {
@@ -493,7 +494,7 @@ func (r *RoomGraph) addNode(sourceRoomNode *roomNode, direction string, roomId i
 
 	// Finally, we crawl the new room's exit data
 	// If they don't sit outside the boundaries of the graph, we add them to the returned stack items
-	newRoomsToAdd := make(map[string]RoomExit)
+	newRoomsToAdd := make(map[string]exit.RoomExit)
 
 	// Track whether we have hit the limit
 	graphMaxedWidth := r.width > r.limitWidth
