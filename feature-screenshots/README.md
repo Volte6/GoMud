@@ -15,6 +15,12 @@ _See your character stats sheet._
 
 <a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/stats.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/stats.png" width="600" alt="accessibility text"></a>
 
+## Player Activity History
+
+_A private log of events to look back on._
+
+<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/player-history.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/player-history.png" width="600" alt="accessibility text"></a>
+
 
 ## Day/Night cycles
 
