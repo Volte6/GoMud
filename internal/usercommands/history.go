@@ -9,7 +9,7 @@ import (
 
 func History(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
-	headers := []string{`Category` /*`Round`,*/, `Time`, `Log`}
+	headers := []string{`Type` /*`Round`,*/, `Time`, `Log`}
 
 	rows := [][]string{}
 

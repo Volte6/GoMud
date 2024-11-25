@@ -58,7 +58,7 @@ func Pet(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		user.Character.Pet.Name = newName
 
-		user.EventLog.Add(`pet`, `You named your pet: `+user.Character.Pet.DisplayName())
+		user.EventLog.Add(`pet`, `Named your pet: `+user.Character.Pet.DisplayName())
 
 		user.SendText(fmt.Sprintf(`You name your pet: %s.`, user.Character.Pet.DisplayName()))
 		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> names their pet %s`, user.Character.Name, user.Character.Pet.DisplayName()), user.UserId)

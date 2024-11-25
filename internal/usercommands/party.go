@@ -41,6 +41,7 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 		}
 
 		if currentParty = parties.New(user.UserId); currentParty != nil {
+			user.EventLog.Add(`party`, `Started a new party`)
 			user.SendText(`You started a new party!`)
 		} else {
 			user.SendText(`Something went wrong.`)
@@ -107,7 +108,7 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 	if partyCommand == `accept` || partyCommand == `join` {
 
 		if currentParty.AcceptInvite(user.UserId) {
-
+			user.EventLog.Add(`party`, `Joined a party`)
 			user.SendText(`You joined the party!`)
 			for _, uid := range currentParty.UserIds {
 				if uid == user.UserId {
@@ -300,6 +301,7 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 		if currentParty.IsLeader(user.UserId) {
 
 			if len(currentParty.UserIds) <= 1 {
+				user.EventLog.Add(`party`, `Disbanded your party`)
 				user.SendText(`You disbanded the party.`)
 				currentParty.Disband()
 				return true, nil
@@ -329,6 +331,7 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 				for _, uid := range currentParty.UserIds {
 					if u := users.GetByUserId(uid); u != nil {
 						if currentParty.LeaderUserId == uid {
+							u.EventLog.Add(`party`, `Promoted to party leader`)
 							u.SendText(`You are now the leader of the party.`)
 						} else {
 							u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is now the leader of the party.`, newLeaderUser.Character.Name))
@@ -339,7 +342,7 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 		}
 
 		currentParty.Leave(user.UserId)
-
+		user.EventLog.Add(`party`, `Left the party`)
 		user.SendText(`You left the party.`)
 
 		for _, uid := range currentParty.UserIds {
@@ -375,7 +378,7 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 		}
 
 		currentParty.Disband()
-
+		user.EventLog.Add(`party`, `Disbanded the party`)
 		user.SendText(`You disbanded the party.`)
 
 		return true, nil
@@ -457,6 +460,7 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 		currentParty.LeaderUserId = promoteUserId
 
 		if u := users.GetByUserId(promoteUserId); u != nil {
+			u.EventLog.Add(`party`, `Promoted to party leader`)
 			u.SendText(`You have been promoted to party leader.`)
 		}
 

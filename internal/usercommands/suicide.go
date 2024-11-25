@@ -50,7 +50,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 		} else {
 
-			user.EventLog.Add(`death`, fmt.Sprintf(`You (<ansi fg="username">%s</ansi>) has <ansi fg="red-bold">PERMA-DIED</ansi>`, user.Character.Name))
+			user.EventLog.Add(`death`, fmt.Sprintf(`<ansi fg="username">%s</ansi> has <ansi fg="red-bold">PERMA-DIED</ansi>`, user.Character.Name))
 
 			// Perma-died!!!
 			textOut, _ := templates.Process("character/permadeath", nil)
@@ -72,7 +72,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 	}
 
-	user.EventLog.Add(`death`, fmt.Sprintf(`You (<ansi fg="username">%s</ansi>) has <ansi fg="red-bold">DIED</ansi>`, user.Character.Name))
+	user.EventLog.Add(`death`, fmt.Sprintf(`<ansi fg="username">%s</ansi> has <ansi fg="red-bold">DIED</ansi>`, user.Character.Name))
 
 	if config.OnDeathEquipmentDropChance >= 0 {
 		chanceInt := int(config.OnDeathEquipmentDropChance * 100)
@@ -88,21 +88,21 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 	}
 
 	if user.Character.Gold > 0 {
-		user.EventLog.Add(`death`, fmt.Sprintf(`You dropped <ansi fg="gold">%d gold</ansi> on death`, user.Character.Gold))
+		user.EventLog.Add(`death`, fmt.Sprintf(`Dropped <ansi fg="gold">%d gold</ansi> on death`, user.Character.Gold))
 		Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), user, room)
 	}
 
 	if config.OnDeathAlwaysDropBackpack {
 		Drop("all", user, room)
 
-		user.EventLog.Add(`death`, `You dropped <ansi fg="alert-3">everthing in your backpack</ansi> on death`)
+		user.EventLog.Add(`death`, `Dropped <ansi fg="alert-3">everthing in your backpack</ansi> on death`)
 
 	} else if config.OnDeathEquipmentDropChance >= 0 {
 		chanceInt := int(config.OnDeathEquipmentDropChance * 100)
 		for _, itm := range user.Character.GetAllBackpackItems() {
 			if util.Rand(100) < chanceInt {
 				Drop(itm.Name(), user, room)
-				user.EventLog.Add(`death`, fmt.Sprintf(`You dropped your <ansi fg="itemname">%s</ansi> on death`, itm.Name()))
+				user.EventLog.Add(`death`, fmt.Sprintf(`Dropped your <ansi fg="itemname">%s</ansi> on death`, itm.Name()))
 			}
 		}
 	}
@@ -120,7 +120,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 				user.SendText(fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>.`, oldExperience-user.Character.Experience))
 
-				user.EventLog.Add(`death`, fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>. on death`, oldExperience-user.Character.Experience))
+				user.EventLog.Add(`death`, fmt.Sprintf(`Lost <ansi fg="yellow">%d experience points</ansi> on death`, oldExperience-user.Character.Experience))
 
 			} else if lossPct > 0 { // Are they losing a set %?
 
@@ -129,7 +129,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 				user.SendText(fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>.`, loss))
 
-				user.EventLog.Add(`death`, fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>. on death`, loss))
+				user.EventLog.Add(`death`, fmt.Sprintf(`Lost <ansi fg="yellow">%d experience points</ansi> on death`, loss))
 			}
 		}
 

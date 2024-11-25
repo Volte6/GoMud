@@ -60,7 +60,7 @@ func Sell(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		mob.Character.Shop.StockItem(item.ItemId)
 
-		user.EventLog.Add(`shop`, fmt.Sprintf(`You sold a <ansi fg="itemname">%s</ansi> to <ansi fg="mobname">%s</ansi> for <ansi fg="gold">%d gold</ansi>`, item.DisplayName(), mob.Character.Name, sellValue))
+		user.EventLog.Add(`shop`, fmt.Sprintf(`Sold your <ansi fg="itemname">%s</ansi> to <ansi fg="mobname">%s</ansi> for <ansi fg="gold">%d gold</ansi>`, item.DisplayName(), mob.Character.Name, sellValue))
 
 		user.SendText(
 			fmt.Sprintf(`You sell a <ansi fg="itemname">%s</ansi> for <ansi fg="gold">%d gold</ansi>.`, item.DisplayName(), sellValue),

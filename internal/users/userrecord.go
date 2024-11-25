@@ -131,16 +131,15 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 	grantXP, xpScale := u.Character.GrantXP(amt)
 
 	if xpScale != 100 {
-		msg := fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi> <ansi fg="yellow">(%d%% scale)</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, xpScale, source)
-		u.SendText(msg)
+		u.SendText(fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi> <ansi fg="yellow">(%d%% scale)</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, xpScale, source))
 
-		u.EventLog.Add(`xp`, msg)
+		u.EventLog.Add(`xp`, fmt.Sprintf(`Gained <ansi fg="yellow-bold">%d experience points</ansi> <ansi fg="yellow">(%d%% scale)</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, xpScale, source))
 
 	} else {
-		msg := fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source)
-		u.SendText(msg)
 
-		u.EventLog.Add(`xp`, msg)
+		u.SendText(fmt.Sprintf(`You gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source))
+
+		u.EventLog.Add(`xp`, fmt.Sprintf(`Gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source))
 	}
 
 }
