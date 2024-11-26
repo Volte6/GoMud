@@ -1,0 +1,10 @@
+<ansi fg="black-bold">.:</ansi> <ansi fg="magenta">Additional help for </ansi><ansi fg="command">monster hunter</ansi>
+
+Monster Hunters have 2 skills assigned to it and is one of the jobs available to 
+players.  The following skills are available to Monster Hunters:
+
+-Tame
+-Track
+
+
+<ansi fg="magenta-bold">See also:</ansi> <ansi fg="command">help job</ansi>

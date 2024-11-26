@@ -27,6 +27,17 @@ help:
       - character
       - pets
       - train
+      job:
+      - treasure-hunter
+      - assassin
+      - explorer
+      - arcane-scholar
+      - warrior
+      - paladin
+      - ranger
+      - monster-hunter
+      - sorcerer
+      - merchant
     communication:
       - emote
       - say
