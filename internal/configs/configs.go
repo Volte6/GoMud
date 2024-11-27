@@ -89,6 +89,8 @@ type Config struct {
 
 	LeaderboardSize ConfigInt `yaml:"LeaderboardSize"` // Maximum size of leaderboard
 
+	SeedInt int64 `yaml:"-"`
+
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.
 	turnsPerSave    int     // calculated and cached when data is validated.
@@ -508,6 +510,11 @@ func (c *Config) Validate() {
 	c.turnsPerSecond = int(1000 / c.TurnMs)
 	c.roundsPerMinute = 60 / float64(c.RoundSeconds)
 
+	c.SeedInt = 0
+	for i, num := range util.Md5Bytes([]byte(string(c.Seed))) {
+		c.SeedInt += int64(num) << i
+	}
+
 	c.validated = true
 }
 
@@ -596,7 +603,6 @@ func overridePath() string {
 }
 
 func ReloadConfig() error {
-
 	configPath := util.FilePath(defaultConfigPath)
 
 	bytes, err := os.ReadFile(configPath)
@@ -609,7 +615,6 @@ func ReloadConfig() error {
 	if err != nil {
 		return err
 	}
-
 	overridePath := overridePath()
 
 	slog.Info("ReloadConfig()", "overridePath", overridePath)

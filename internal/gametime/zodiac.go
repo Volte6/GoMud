@@ -1,10 +1,9 @@
 package gametime
 
 import (
-	"strconv"
+	"math/rand"
 
 	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/util"
 )
 
 var (
@@ -227,41 +226,18 @@ var (
 		"Robin",
 		"Roc",
 	}
-
-	finalZodiac = []string{}
+	randomized = false
 )
 
 func GetZodiac(year int) string {
-	randomizeZodiac()
-	return finalZodiac[year%len(finalZodiac)]
+	if !randomized {
+		randomizeZodiac()
+	}
+	return zodiacAnimals[year%len(zodiacAnimals)]
 }
 
 func randomizeZodiac() {
-
-	if len(finalZodiac) > 0 {
-		return
-	}
-
-	i := 8
-	for len(zodiacAnimals) > 0 {
-
-		i++
-
-		hash := util.Md5Bytes([]byte(string(configs.GetConfig().Seed) + strconv.Itoa(i)))
-
-		hashSum := 0
-		for _, num := range hash {
-			hashSum += int(num)
-		}
-		idx := hashSum % len(zodiacAnimals)
-
-		finalZodiac = append(finalZodiac, zodiacAnimals[idx])
-
-		zodiacAnimals = append(zodiacAnimals[:idx], zodiacAnimals[idx+1:]...)
-	}
-
-}
-
-func init() {
-	randomizeZodiac()
+	r := rand.New(rand.NewSource(configs.GetConfig().SeedInt))
+	r.Shuffle(len(zodiacAnimals), func(i, j int) { zodiacAnimals[i], zodiacAnimals[j] = zodiacAnimals[j], zodiacAnimals[i] })
+	randomized = true
 }

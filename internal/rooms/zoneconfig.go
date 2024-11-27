@@ -11,8 +11,7 @@ type ZoneConfig struct {
 		Minimum int `yaml:"minimum,omitempty"` // level scaling minimum
 		Maximum int `yaml:"maximum,omitempty"` // level scaling maximum
 	} `yaml:"autoscale,omitempty"` // level scaling range if any
-	SpawnCooldown int                  `yaml:"spawncooldown,omitempty"` // default cooldown if no other specified
-	Mutators      mutators.MutatorList `yaml:"mutators,omitempty"`      // mutators defined here apply to entire zone
+	Mutators mutators.MutatorList `yaml:"mutators,omitempty"` // mutators defined here apply to entire zone
 }
 
 func (z *ZoneConfig) Validate() {
@@ -36,9 +35,6 @@ func (z *ZoneConfig) Validate() {
 		}
 	}
 
-	if z.SpawnCooldown < 0 {
-		z.SpawnCooldown = 0
-	}
 }
 
 // Generates a random number between min and max

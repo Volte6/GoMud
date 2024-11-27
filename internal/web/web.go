@@ -91,6 +91,14 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 		doBasicAuth(mobData),
 	))
 
+	// Mutator Admin
+	http.HandleFunc("GET /admin/mutators/", RunWithMUDLocked(
+		doBasicAuth(mutatorsIndex),
+	))
+	http.HandleFunc("GET /admin/mutators/mutatordata/", RunWithMUDLocked(
+		doBasicAuth(mutatorData),
+	))
+
 	go func() {
 		defer wg.Done()
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {

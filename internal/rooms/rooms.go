@@ -708,16 +708,18 @@ func (r *Room) SetExitLock(exitName string, locked bool) {
 
 }
 
-func (r *Room) GetExitInfo(exitName string) (exit.RoomExit, bool) {
-	exitInfo, ok := r.Exits[exitName]
+func (r *Room) GetExitInfo(exitName string) (exitInfo exit.RoomExit, ok bool) {
+
+	// Do mutators first to allow for ephemeral/temporary "taking over" of exits.
+	for mut := range r.ActiveMutators {
+		spec := mut.GetSpec()
+		if exitInfo, ok = spec.Exits[exitName]; ok {
+			break
+		}
+	}
 
 	if !ok {
-		for mut := range r.ActiveMutators {
-			spec := mut.GetSpec()
-			if exitInfo, ok = spec.Exits[exitName]; ok {
-				break
-			}
-		}
+		exitInfo, ok = r.Exits[exitName]
 	}
 
 	return exitInfo, ok
@@ -725,20 +727,8 @@ func (r *Room) GetExitInfo(exitName string) (exit.RoomExit, bool) {
 
 func (r *Room) GetRandomExit() (exitName string, roomId int) {
 
-	nonSecretExitCt := 0
-	for _, exit := range r.Exits {
-		if exit.Secret {
-			continue
-		}
-		if exit.Lock.IsLocked() {
-			continue
-		}
-		nonSecretExitCt++
-	}
+	allExits := map[string]int{}
 
-	roomSelection := util.Rand(nonSecretExitCt)
-
-	rNow := 0
 	for exitName, exit := range r.Exits {
 		if exit.Secret {
 			continue
@@ -746,10 +736,30 @@ func (r *Room) GetRandomExit() (exitName string, roomId int) {
 		if exit.Lock.IsLocked() {
 			continue
 		}
-		if roomSelection == rNow {
-			return exitName, exit.RoomId
+
+		allExits[exitName] = roomId
+	}
+
+	for mut := range r.ActiveMutators {
+		spec := mut.GetSpec()
+		for exitName, exit := range spec.Exits {
+			if exit.Secret {
+				continue
+			}
+			if exit.Lock.IsLocked() {
+				continue
+			}
+			allExits[exitName] = roomId
 		}
-		rNow++
+	}
+
+	roomSelection := util.Rand(len(allExits))
+
+	for exitName, roomId := range allExits {
+		if roomSelection == 0 {
+			return exitName, roomId
+		}
+		roomSelection--
 	}
 
 	return ``, 0
@@ -1771,6 +1781,7 @@ func (r *Room) RoundTick() {
 	r.Mutators.Update(roundNow)
 
 	for mut := range r.ActiveMutators {
+
 		spec := mut.GetSpec()
 		r.ApplyBuffIdToPlayers(spec.PlayerBuffIds...)
 		r.ApplyBuffIdToMobs(spec.MobBuffIds...)

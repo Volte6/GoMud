@@ -19,7 +19,6 @@ import (
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/mutators"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
@@ -304,12 +303,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	// This will only add mutators that the player
 	// doesn't already have.
 	//
-
-	var activeMutators mutators.MutatorList
-	if zoneConfig := GetZoneConfig(newRoom.Zone); zoneConfig != nil {
-		activeMutators = append(newRoom.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
-	}
-	for _, mut := range activeMutators {
+	for mut := range newRoom.ActiveMutators {
 		spec := mut.GetSpec()
 		if len(spec.PlayerBuffIds) == 0 {
 			continue

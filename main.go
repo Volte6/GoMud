@@ -27,6 +27,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/flags"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/inputhandlers"
 	"github.com/volte6/gomud/internal/items"
@@ -75,6 +76,8 @@ func main() {
 	}()
 
 	setupLogger()
+
+	flags.HandleFlags()
 
 	configs.ReloadConfig()
 	c := configs.GetConfig()
@@ -138,6 +141,7 @@ func main() {
 	keywords.LoadAliases()
 	mutators.LoadDataFiles()
 	gametime.SetToDay(-3)
+	gametime.GetZodiac(1) // The first time this is called it randomizes all zodiacs
 
 	for _, name := range colorpatterns.GetColorPatternNames() {
 		slog.Info("Color Test (Patterns)", "name", name,

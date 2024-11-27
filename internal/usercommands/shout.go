@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/mutators"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
 )
@@ -49,13 +48,7 @@ func Shout(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 		}
 	}
 
-	var activeMutators mutators.MutatorList
-
-	if zoneConfig := rooms.GetZoneConfig(room.Zone); zoneConfig != nil {
-		activeMutators = append(room.Mutators.GetActive(), zoneConfig.Mutators.GetActive()...)
-	}
-
-	for _, mut := range activeMutators {
+	for mut := range room.ActiveMutators {
 		spec := mut.GetSpec()
 		if len(spec.Exits) == 0 {
 			continue
