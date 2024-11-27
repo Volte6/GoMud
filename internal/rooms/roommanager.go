@@ -330,7 +330,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 
 	if user.Character.Level < 5 && toRoomId > -1 {
 
-		if formerRoomId < 900 || formerRoomId > 999 {
+		if formerRoomId > 0 && (formerRoomId < 900 || formerRoomId > 999) {
 
 			var lastGuideRound uint64 = 0
 			tmpLGR := user.GetTempData(`lastGuideRound`)

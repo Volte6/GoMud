@@ -813,7 +813,9 @@ func StringWildcardMatch(stringToSearch string, patternToSearch string) bool {
 		return strings.HasPrefix(stringToSearch, patternToSearch)
 	} else if endsWith && !startsWith { // if it ends with
 		return strings.HasSuffix(stringToSearch, patternToSearch)
+	} else if startsWith && endsWith {
+		return strings.Contains(stringToSearch, patternToSearch)
 	}
 
-	return strings.Contains(stringToSearch, patternToSearch)
+	return stringToSearch == patternToSearch
 }
