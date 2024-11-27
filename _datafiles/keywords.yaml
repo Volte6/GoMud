@@ -27,7 +27,7 @@ help:
       - character
       - pets
       - train
-      jobs:
+    jobs:
       - treasure-hunter
       - assassin
       - explorer
@@ -227,6 +227,7 @@ command-aliases:
   put:              ['place']
   leaderboard:      ['leaderboards', 'highscore', 'topscore']
   history:          ['log']
+  time:             ['date']
   'party chat':     ['pchat', 'psay']
   'bank deposit':   ['deposit']
   'bank withdraw':  ['withdraw']

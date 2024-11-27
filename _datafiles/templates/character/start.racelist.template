@@ -1,0 +1,5 @@
+
+{{ range $idx, $raceInfo := . }}  <ansi fg="red-bold">{{ printf "%2d." (add $idx 1) }}</ansi> <ansi fg="yellow-bold">{{ printf "%-17s" $raceInfo.Name }}</ansi> - <ansi fg="black-bold">{{ splitstring $raceInfo.Description 54 "                           " }}</ansi>
+{{ end }}
+  Want to know more details? Type <ansi fg="command">help {racename}</ansi> or <ansi fg="command">help {number}</ansi>
+ 

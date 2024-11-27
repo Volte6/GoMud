@@ -3,6 +3,7 @@ package usercommands
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
+	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
@@ -27,50 +29,87 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 	cmdPrompt, isNew := user.StartPrompt(`start`, rest)
 
 	if isNew {
+		user.SendText(``)
 		user.SendText(fmt.Sprintf(`You'll need to answer some questions.%s`, term.CRLFStr))
 	}
 
 	if user.Character.RaceId == 0 {
 
-		raceOptions := []string{}
+		raceOptions := []races.Race{}
 		for _, r := range races.GetRaces() {
 			if r.Selectable {
-				raceOptions = append(raceOptions, r.Name)
+				raceOptions = append(raceOptions, r)
 			}
 		}
-		raceOptions = append(raceOptions, `?`)
+		sort.SliceStable(raceOptions, func(i, j int) bool {
+			return raceOptions[i].Name < raceOptions[j].Name
+		})
 
-		question := cmdPrompt.Ask(`Which race will you be?`, raceOptions, `?`)
+		question := cmdPrompt.Ask(`Which race will you be?`, []string{})
 		if !question.Done {
+
+			tplTxt, _ := templates.Process("character/start.racelist", raceOptions)
+			user.SendText(tplTxt)
+
 			return true, nil
 		}
 
-		if question.Response == `?` {
+		respLower := strings.ToLower(question.Response)
+		if len(respLower) >= 5 && respLower[0:5] == `help ` {
+			helpCmd := `race`
+			helpRest := respLower[5:]
+
+			if restNum, err := strconv.Atoi(helpRest); err == nil {
+				if restNum > 0 && restNum <= len(raceOptions) {
+					helpRest = raceOptions[restNum-1].Name
+				} else {
+					helpCmd = `races`
+					helpRest = ``
+				}
+			}
 
 			question.RejectResponse()
-			return Help(`races`, user, room)
-
+			return Help(helpCmd+` `+helpRest, user, room)
 		}
 
+		raceNameSelection := question.Response
+		if restNum, err := strconv.Atoi(raceNameSelection); err == nil {
+			if restNum > 0 && restNum <= len(raceOptions) {
+				raceNameSelection = raceOptions[restNum-1].Name
+			}
+		}
+
+		matchFound := false
 		for _, r := range races.GetRaces() {
-			if strings.EqualFold(r.Name, question.Response) {
+			if strings.EqualFold(r.Name, raceNameSelection) {
 
 				if r.Selectable {
+					matchFound = true
 					user.Character.RaceId = r.Id()
 					user.Character.Alignment = r.DefaultAlignment
 					user.Character.Validate()
 
-					user.SendText(fmt.Sprintf(`<ansi fg="magenta">Your ghostly form materializes into that of a %s!</ansi>%s`, r.Name, term.CRLFStr))
+					user.SendText(``)
+					user.SendText(fmt.Sprintf(`  <ansi fg="magenta">*** Your ghostly form materializes into that of a %s ***</ansi>%s`, r.Name, term.CRLFStr))
+					break
 				}
 
 			}
 		}
 
+		if !matchFound {
+			question.RejectResponse()
+
+			tplTxt, _ := templates.Process("character/start.racelist", raceOptions)
+			user.SendText(tplTxt)
+
+			return true, nil
+		}
 	}
 
 	if strings.EqualFold(user.Character.Name, user.Username) || len(user.Character.Name) == 0 || strings.ToLower(user.Character.Name) == `nameless` {
 
-		question := cmdPrompt.Ask(`What will you be known as (name)?`, []string{})
+		question := cmdPrompt.Ask(`What will your character be known as (name)?`, []string{})
 		if !question.Done {
 			return true, nil
 		}
@@ -107,18 +146,30 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 			return true, nil
 		}
 
-		if err := user.SetCharacterName(question.Response); err != nil {
-			user.SendText(err.Error())
-			question.RejectResponse()
-			return true, nil
-		}
-
 		for _, name := range mobs.GetAllMobNames() {
 			if strings.EqualFold(name, question.Response) {
 				user.SendText("that name is in use")
 				question.RejectResponse()
 				return true, nil
 			}
+		}
+
+		usernameSelected := question.Response
+
+		question = cmdPrompt.Ask(`Choose the name <ansi fg="username">`+usernameSelected+`</ansi>?`, []string{`yes`, `no`}, `no`)
+		if !question.Done {
+			return true, nil
+		}
+
+		if question.Response == `no` {
+			user.ClearPrompt()
+			return Start(rest, user, room)
+		}
+
+		if err := user.SetCharacterName(usernameSelected); err != nil {
+			user.SendText(err.Error())
+			question.RejectResponse()
+			return true, nil
 		}
 
 		user.ClearPrompt()
