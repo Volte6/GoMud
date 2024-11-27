@@ -1,0 +1,11 @@
+<ansi fg="black-bold">.:</ansi> <ansi fg="magenta">Additional help for </ansi><ansi fg="command">arcane scholar</ansi>
+
+Arcane Scholars have 3 skills assigned to it and is one of the jobs available to 
+players.  The following skills are available to Arcane Scholars:
+
+-Enchant
+-Scribe
+-Inspect
+
+
+<ansi fg="magenta-bold">See also:</ansi> <ansi fg="command">help jobs</ansi>

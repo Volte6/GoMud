@@ -1,0 +1,11 @@
+<ansi fg="black-bold">.:</ansi> <ansi fg="magenta">Additional help for </ansi><ansi fg="command">assassin</ansi>
+
+Assassins have 3 skills assigned to it and is one of the jobs available to 
+players.  The following skills are available to Assassins:
+
+-SkullDuggery
+-Dual Wield
+-Track
+
+
+<ansi fg="magenta-bold">See also:</ansi> <ansi fg="command">help jobs</ansi>
