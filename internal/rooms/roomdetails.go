@@ -318,6 +318,7 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 		}
 	}
 
+	// assign mutator exits last so that they can overwrite normal exits
 	for mut := range r.ActiveMutators {
 		spec := mut.GetSpec()
 		for exitName, exitInfo := range spec.Exits {

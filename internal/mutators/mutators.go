@@ -65,6 +65,19 @@ type MutatorSpec struct {
 	Exits         map[string]exit.RoomExit `yaml:"exits,omitempty"`         // name/roomId pairs of exits only available while mutator is live.
 }
 
+func GetAllMutatorSpecs() []MutatorSpec {
+	mutSpec := []MutatorSpec{}
+	for _, spec := range allMutators {
+		mutSpec = append(mutSpec, *spec)
+	}
+	return mutSpec
+}
+
+func GetMutatorSpec(mutatorId string) *MutatorSpec {
+	mutSpec := allMutators[mutatorId]
+	return mutSpec
+}
+
 func GetAllMutatorIds() []string {
 	allNames := []string{}
 	for _, m := range allMutators {

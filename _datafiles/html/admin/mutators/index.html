@@ -1,0 +1,25 @@
+{{template "header" .}}
+
+                <div class="container-fluid">
+
+                    <div class="w-50 form-group mt-5">
+                        <h3>Select a Mutator <small>({{ len .Mutators }} found)</small></h3>
+
+                        <select class="form-control selectpicker" 
+                            name="mutatorid" id="mutatorid"  
+                            data-live-search="true"
+                            hx-get="/admin/mutators/mutatordata" 
+                            hx-target="#mutatordata-edit" 
+                            hx-trigger="change" >
+                            <option value="">Select an Mutator to View</option>
+                            <option value="0">Add New Mutator</option>
+                            {{range $index, $mutInfo := .Mutators}}
+                                <option value="{{ $mutInfo.MutatorId }}">{{ $mutInfo.MutatorId }}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="container-fluid" id="mutatordata-edit"></div>
+
+{{template "footer" .}}
