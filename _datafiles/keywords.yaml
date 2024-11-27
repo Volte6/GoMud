@@ -27,7 +27,7 @@ help:
       - character
       - pets
       - train
-      job:
+      jobs:
       - treasure-hunter
       - assassin
       - explorer
