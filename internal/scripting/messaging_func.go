@@ -22,6 +22,8 @@ func SendUserMessage(userId int, message string) {
 		return
 	}
 
+	message = userTextWrap.Wrap(message)
+
 	u.SendText(message)
 }
 
@@ -34,6 +36,8 @@ func SendRoomMessage(roomId int, message string, excludeIds ...int) {
 	if r == nil {
 		return
 	}
+
+	message = roomTextWrap.Wrap(message)
 
 	r.SendText(message, excludeIds...)
 }
@@ -48,11 +52,15 @@ func SendRoomExitsMessage(roomId int, message string, isQuiet bool, excludeUserI
 		return
 	}
 
+	message = roomTextWrap.Wrap(message)
+
 	r.SendTextToExits(message, isQuiet, excludeUserIds...)
 
 }
 
 func SendBroadcast(message string) {
+
+	message = roomTextWrap.Wrap(message)
 
 	events.AddToQueue(events.Broadcast{Text: message + "\n"})
 

@@ -6,9 +6,9 @@ function onStart(actor, triggersLeft) {
     quarryMobName = actor.GetMiscCharacterData("tracking-mob");
 
     if ( quarryUserName != null ) {
-        SendUserMessage(actor.UserId(), '<ansi fg="buff-text">Your senses are heightened as you focus your tracking skills on <ansi fg="username">'+quarryUserName+'</ansi>.</ansi>');
+        SendUserMessage(actor.UserId(), 'Your senses are heightened as you focus your tracking skills on <ansi fg="username">'+quarryUserName+'</ansi>.');
     } else {
-        SendUserMessage(actor.UserId(), '<ansi fg="buff-text">Your senses are heightened as you focus your tracking skills on <ansi fg="mobname">'+quarryMobName+'</ansi>.</ansi>');
+        SendUserMessage(actor.UserId(), 'Your senses are heightened as you focus your tracking skills on <ansi fg="mobname">'+quarryMobName+'</ansi>.');
     }
 
 }
@@ -20,9 +20,9 @@ function onEnd(actor, triggersLeft) {
     quarryMobName = actor.GetMiscCharacterData("tracking-mob");
 
     if ( quarryUserName != null ) {
-        SendUserMessage(actor.UserId(), '<ansi fg="buff-text">You are no longer actively tracking <ansi fg="username">'+quarryUserName+'</ansi>.</ansi>');
+        SendUserMessage(actor.UserId(), 'You are no longer actively tracking <ansi fg="username">'+quarryUserName+'</ansi>.');
     } else {
-        SendUserMessage(actor.UserId(), '<ansi fg="buff-text">You are no longer actively tracking <ansi fg="mobname">'+quarryMobName+'</ansi>.</ansi>');
+        SendUserMessage(actor.UserId(), 'You are no longer actively tracking <ansi fg="mobname">'+quarryMobName+'</ansi>.');
     }
 
     actor.SetMiscCharacterData("tracking-mob", null);
