@@ -147,6 +147,7 @@ color8:
   mail-note-read: 2
   mutator: 10
   buff: 4
+  buff-text: 14
 color256:
   table-title: 2
   userid: black
@@ -288,3 +289,4 @@ color256:
   mail-note-read: 2
   mutator: 49
   buff: 147
+  buff-text: 14

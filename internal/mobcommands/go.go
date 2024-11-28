@@ -2,7 +2,6 @@ package mobcommands
 
 import (
 	"fmt"
-	"log/slog"
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
@@ -13,7 +12,6 @@ import (
 
 func Go(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
-	slog.Error("MOB MOVING: ", "Name", mob.Character.Name, "Dire", rest)
 	// If has a buff that prevents combat, skip the player
 	if mob.Character.HasBuffFlag(buffs.NoMovement) {
 		return true, nil

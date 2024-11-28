@@ -29,6 +29,7 @@ func setUtilFunctions(vm *goja.Runtime) {
 	vm.Set(`UtilLocateUser`, UtilLocateUser)
 	vm.Set(`UtilApplyColorPattern`, UtilApplyColorPattern)
 	vm.Set(`UtilGetConfig`, UtilGetConfig)
+	vm.Set(`ColorWrap`, ColorWrap)
 }
 
 // ////////////////////////////////////////////////////////
@@ -146,4 +147,17 @@ func UtilApplyColorPattern(input string, patternName string, wordsOnly ...bool) 
 
 func UtilGetConfig() configs.Config {
 	return configs.GetConfig()
+}
+
+func ColorWrap(txt string, colorClass ...string) string {
+
+	if len(colorClass) > 0 && colorClass[0] != `` {
+		txt = `<ansi fg="` + colorClass[0] + `">` + txt + `</ansi>`
+	}
+
+	if len(colorClass) > 1 && colorClass[1] != `` {
+		txt = `<ansi bg="` + colorClass[1] + `">` + txt + `</ansi>`
+	}
+
+	return txt
 }

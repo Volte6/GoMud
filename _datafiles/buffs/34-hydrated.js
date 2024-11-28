@@ -4,7 +4,7 @@ function onStart(actor, triggersLeft) {
 
     actor.CancelBuffWithFlag("thirsty");
 
-    SendUserMessage(actor.UserId(), "Ahhhhhh, life giving water. Nectar of the gods!");
+    SendUserMessage(actor.UserId(), '<ansi fg="buff-text">Ahhhhhh, life giving water. Nectar of the gods!</ansi>');
 }
 
 // Invoked every time the buff is triggered (see roundinterval)

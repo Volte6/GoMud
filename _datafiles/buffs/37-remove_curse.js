@@ -6,9 +6,13 @@ function onEnd(actor, triggersLeft) {
     room = GetRoom(actor.GetRoomId())
 
     for( var i in items ) {
-        actor.SendText(`You feel a curse lifted from your `+items[i].Name()+`.`)
-        message = `The `+items[i].Name()+` held by `+actor.GetCharacterName(true)+` glows briefly.`;
+
+        actor.SendText(`<ansi fg="buff-text">You feel a curse lifted from your `+items[i].Name()+`.</ansi>`)
+        
+        message = `<ansi fg="buff-text">The `+items[i].Name()+` held by `+actor.GetCharacterName(true)+` glows briefly.</ansi>`;
+        
         room.SendText(message, actor.UserId())
+
     }
 
 }
