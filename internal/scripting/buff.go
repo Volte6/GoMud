@@ -8,6 +8,7 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/colorpatterns"
 )
 
 var (
@@ -37,8 +38,8 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 
 		// Set forced ansi tag wrappers
-		userTextWrap.Set(`buff-text`, ``, ``)
-		roomTextWrap.Set(`buff-text`, ``, ``)
+		userTextWrap.Set(`buff-text`, ``, `cyan`, colorpatterns.Stretch)
+		roomTextWrap.Set(`buff-text`, ``, `cyan`, colorpatterns.Stretch)
 
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)

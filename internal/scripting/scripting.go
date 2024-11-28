@@ -2,7 +2,6 @@ package scripting
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/dop251/goja"
@@ -23,7 +22,6 @@ func (t *TextWrapperStyle) Set(fg string, bg string, colorpattern string, colorS
 	t.ColorPattern = colorpattern
 	if len(colorStyle) > 0 {
 		t.colorPatternStyle = colorStyle[0]
-		fmt.Println("COLORSTYLE", t.colorPatternStyle)
 	} else {
 		t.colorPatternStyle = colorpatterns.Default
 	}

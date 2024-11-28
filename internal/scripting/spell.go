@@ -98,8 +98,8 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 
 		// Set forced ansi tag wrappers
-		userTextWrap.Set(`spell-text`, ``, `cyan`, colorpatterns.Stretch)
-		roomTextWrap.Set(`spell-text`, ``, `cyan`, colorpatterns.Stretch)
+		userTextWrap.Set(`spell-text`, ``, `pink`, colorpatterns.Stretch)
+		roomTextWrap.Set(`spell-text`, ``, `pink`, colorpatterns.Stretch)
 
 		var argValue goja.Value
 		if multiTargetArg != nil {
