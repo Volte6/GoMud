@@ -63,6 +63,9 @@ func (a ScriptActor) SendText(msg string) {
 	if a.userRecord == nil {
 		return
 	}
+
+	msg = userTextWrap.Wrap(msg)
+
 	a.userRecord.SendText(msg)
 }
 

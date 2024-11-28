@@ -234,10 +234,16 @@ func (r ScriptRoom) SpawnMob(mobId int) *ScriptActor {
 }
 
 func (r ScriptRoom) SendText(msg string, excludeIds ...int) {
+
+	msg = roomTextWrap.Wrap(msg)
+
 	r.roomRecord.SendText(msg, excludeIds...)
 }
 
 func (r ScriptRoom) SendTextToExits(msg string, isQuiet bool, excludeUserIds ...int) {
+
+	msg = roomTextWrap.Wrap(msg)
+
 	r.roomRecord.SendTextToExits(msg, isQuiet, excludeUserIds...)
 }
 

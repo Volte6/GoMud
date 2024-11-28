@@ -1,8 +1,8 @@
 
 // Invoked when the buff is first applied to the player.
 function onStart(actor, triggersLeft) {
-    SendUserMessage(actor.UserId(),     '<ansi fg="buff-text">You lay your head down and immediately doze off.</ansi>');
-    SendRoomMessage(actor.GetRoomId(),  '<ansi fg="buff-text">'+actor.GetCharacterName(true)+' is getting some rest.</ansi>', actor.UserId());
+    SendUserMessage(actor.UserId(),     'You lay your head down and immediately doze off.');
+    SendRoomMessage(actor.GetRoomId(),  actor.GetCharacterName(true)+' is getting some rest.', actor.UserId());
     actor.SetAdjective("sleeping", true);
 }
 
@@ -10,14 +10,14 @@ function onStart(actor, triggersLeft) {
 function onTrigger(actor, triggersLeft) {
     healAmt = actor.AddHealth(UtilDiceRoll(3, 8));
 
-    SendUserMessage(actor.UserId(),     '<ansi fg="buff-text">ZZzzz...</ansi>');
-    SendRoomMessage(actor.GetRoomId(),  '<ansi fg="buff-text">'+actor.GetCharacterName(true)+' snores loudly.</ansi>', actor.UserId());
+    SendUserMessage(actor.UserId(),     'ZZzzz...');
+    SendRoomMessage(actor.GetRoomId(),  actor.GetCharacterName(true)+' snores loudly.', actor.UserId());
 }
 
 // Invoked when the buff has run its course.
 function onEnd(actor, triggersLeft) {
-    SendUserMessage(actor.UserId(),     '<ansi fg="buff-text">You wake up!</ansi>');
-    SendRoomMessage(actor.GetRoomId(),  '<ansi fg="buff-text">'+actor.GetCharacterName(true)+' wakes up.</ansi>', actor.UserId());
+    SendUserMessage(actor.UserId(),     'You wake up!');
+    SendRoomMessage(actor.GetRoomId(),  actor.GetCharacterName(true)+' wakes up.', actor.UserId());
     actor.SetAdjective("sleeping", false);
     actor.GiveBuff(16) // Well Rested
 }

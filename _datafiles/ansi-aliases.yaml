@@ -12,6 +12,7 @@ color8:
   mobname-downed: red
   petname: 3
   spellname: magenta
+  spell-text: magenta
   nameprefix-pet: 92
   role: 90
   role-admin: 91
@@ -159,6 +160,7 @@ color256:
   mobname-downed: 124
   petname: 215
   spellname: magenta
+  spell-text: 183
   nameprefix-pet: 10
   role: 8
   role-admin: 9

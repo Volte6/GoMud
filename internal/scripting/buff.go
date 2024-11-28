@@ -36,6 +36,10 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 	}()
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 
+		// Set forced ansi tag wrappers
+		userTextWrap.Set(`buff-text`, ``, ``)
+		roomTextWrap.Set(`buff-text`, ``, ``)
+
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
 			vmw.VM.Interrupt(errTimeout)
 		})
@@ -46,6 +50,10 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 		)
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()
+
+		// Reset forced ansi tag wrappers
+		userTextWrap.Reset()
+		roomTextWrap.Reset()
 
 		if err != nil {
 

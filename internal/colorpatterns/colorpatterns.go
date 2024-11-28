@@ -14,9 +14,10 @@ import (
 type ColorizeStyle uint8
 
 var (
-	Words   ColorizeStyle = 0
-	Once    ColorizeStyle = 1
-	Stretch ColorizeStyle = 2
+	Default ColorizeStyle = 0
+	Words   ColorizeStyle = 1
+	Once    ColorizeStyle = 2
+	Stretch ColorizeStyle = 3
 
 	colorsCompiled bool = false
 
@@ -112,7 +113,7 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 	// End tokenization
 	//
 
-	if len(method) == 0 {
+	if len(method) == 0 || method[0] == Default {
 		// Color change on a per character basis (not spaces), reverses at the end
 		for _, runeChar := range input {
 

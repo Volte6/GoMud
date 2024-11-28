@@ -8,6 +8,7 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/volte6/gomud/internal/characters"
+	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/spells"
 )
 
@@ -96,6 +97,10 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 
+		// Set forced ansi tag wrappers
+		userTextWrap.Set(`spell-text`, ``, `cyan`, colorpatterns.Stretch)
+		roomTextWrap.Set(`spell-text`, ``, `cyan`, colorpatterns.Stretch)
+
 		var argValue goja.Value
 		if multiTargetArg != nil {
 			argValue = vmw.VM.ToValue(multiTargetArg)
@@ -114,6 +119,10 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 		)
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()
+
+		// Reset forced ansi tag wrappers
+		userTextWrap.Reset()
+		roomTextWrap.Reset()
 
 		if err != nil {
 

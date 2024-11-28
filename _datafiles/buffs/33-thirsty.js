@@ -7,7 +7,7 @@ function onStart(actor, triggersLeft) {
         return
     }
 
-    SendUserMessage(actor.UserId(), '<ansi fg="buff-text">You are feeling parched.</ansi>');
+    SendUserMessage(actor.UserId(), 'You are feeling parched.');
 }
 
 // Invoked every time the buff is triggered (see roundinterval)
@@ -18,5 +18,5 @@ function onTrigger(actor, triggersLeft) {
         return
     }
 
-    SendUserMessage(actor.UserId(), '<ansi fg="buff-text">You feel very thirsty!</ansi>')
+    SendUserMessage(actor.UserId(), 'You feel very thirsty!')
 }
