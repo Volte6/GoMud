@@ -10,3 +10,5 @@ exits:
       difficulty: 10
   west:
     roomid: 903
+mutators:
+- mutatorid: training-combat

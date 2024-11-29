@@ -3,3 +3,8 @@ name: Extra Attentive
 description: You're learning from the tutorial!
 triggerrate: 6 real minutes
 triggercount: 1
+statmods:
+  strength: 5
+  speed: 5
+  smarts: 5
+  perception: 5
