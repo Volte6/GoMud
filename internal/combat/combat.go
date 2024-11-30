@@ -202,6 +202,11 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 		attackCount = 1
 	}
 
+	// Statmods can add a damage bonus...
+	statModDBonus := sourceChar.StatMod(`damage`)
+	// Add any additional attacks
+	attackCount += sourceChar.StatMod(`attacks`)
+
 	for i := 0; i < attackCount; i++ {
 
 		slog.Info(`calculateCombat`, `Atk`, fmt.Sprintf(`%d/%d`, i+1, attackCount), `Source`, fmt.Sprintf(`%s (%s)`, sourceChar.Name, sourceType), `Target`, fmt.Sprintf(`%s (%s)`, targetChar.Name, targetType))
@@ -287,6 +292,9 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 			// Get default racial dice rolls
 			attacks, dCount, dSides, dBonus, critBuffs := sourceChar.GetDefaultDiceRoll()
+
+			// Add damage bonus due to statmods
+			dBonus += statModDBonus
 
 			if weapon.ItemId > 0 {
 

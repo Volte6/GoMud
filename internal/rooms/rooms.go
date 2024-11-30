@@ -121,6 +121,57 @@ func NewRoom(zone string) *Room {
 	return r
 }
 
+// 0 = none (darkness). 1 = can see this room. 2 = can see this room and all exits
+func (r *Room) GetVisibility() int {
+
+	visibility := 2 // default to max visibility
+	// At night visibility decreases by one
+	if gametime.IsNight() {
+		visibility -= 1
+	}
+
+	biome := r.GetBiome()
+	// First calculate natural lighting level for biome
+	if biome.IsDark() { // If a naturally dark biome (cave), minimize visibility
+		visibility -= 2
+		if visibility < 0 {
+			visibility = 0
+		}
+	} else if biome.IsLit() { // If the biome is naturally lit (streets with lanterns), increase visibility by one
+		visibility += 1
+		if visibility > 2 {
+			visibility = 2
+		}
+	}
+
+	// Apply any mutators
+	for mut := range r.ActiveMutators {
+		spec := mut.GetSpec()
+		if spec.LightMod != 0 {
+			visibility += spec.LightMod
+		}
+	}
+
+	// min/max visibility
+	if visibility < 0 {
+		visibility = 0
+	} else if visibility > 2 {
+		visibility = 2
+	}
+
+	// If someone has light, cancel the darkness
+	if visibility < 2 { // no need to increase light if it's already maxed
+		if len(r.GetMobs(FindHasLight)) > 0 || len(r.GetPlayers(FindHasLight)) > 0 {
+			visibility += 1
+			if visibility > 2 {
+				visibility = 2
+			}
+		}
+	}
+
+	return visibility
+}
+
 func (r *Room) SendTextCommunication(txt string, excludeUserIds ...int) {
 
 	events.AddToQueue(events.Message{
@@ -865,6 +916,11 @@ func (r *Room) PlayerCt() int {
 
 func (r *Room) GetMobs(findTypes ...FindFlag) []int {
 
+	mobMatches := []int{}
+	if len(r.mobs) == 0 {
+		return mobMatches
+	}
+
 	var typeFlag FindFlag = 0
 	if len(findTypes) < 1 {
 		typeFlag = FindAll
@@ -879,7 +935,6 @@ func (r *Room) GetMobs(findTypes ...FindFlag) []int {
 		return append([]int{}, r.mobs...)
 	}
 
-	mobMatches := []int{}
 	var isCharmed bool = false
 
 	for _, mobId := range r.mobs {
@@ -968,6 +1023,11 @@ func (r *Room) GetMobs(findTypes ...FindFlag) []int {
 
 func (r *Room) GetPlayers(findTypes ...FindFlag) []int {
 
+	playerMatches := []int{}
+	if len(r.players) == 0 {
+		return playerMatches
+	}
+
 	var typeFlag FindFlag = 0
 	if len(findTypes) < 1 {
 		typeFlag = FindAll
@@ -982,7 +1042,6 @@ func (r *Room) GetPlayers(findTypes ...FindFlag) []int {
 		return append([]int{}, r.players...)
 	}
 
-	playerMatches := []int{}
 	var isCharmed bool = false
 
 	for _, userId := range r.players {

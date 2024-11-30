@@ -62,6 +62,7 @@ type MutatorSpec struct {
 	NativeBuffIds []int                    `yaml:"nativebuffids,omitempty"` // buffId's that apply conditionally TO MOBS THAT SPAWNED IN THIS ROOM
 	DecayRate     string                   `yaml:"decayrate,omitempty"`     // how long until it is gone
 	RespawnRate   string                   `yaml:"respawnrate,omitempty"`   // daily, weekly, 1 day, 3 day, monthly, etc.
+	LightMod      int                      `yaml:"lightmod,omitempty"`      //  -2 to 2 (change). If result is 0 = none. 1 = can see this room. 2 = can see this room and all exits
 	Exits         map[string]exit.RoomExit `yaml:"exits,omitempty"`         // name/roomId pairs of exits only available while mutator is live.
 }
 

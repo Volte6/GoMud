@@ -18,8 +18,3 @@ exits:
     roomid: 28
   west:
     roomid: 30
-items:
-- itemid: 8
-  uses: 3
-- itemid: 30007
-  uses: 1

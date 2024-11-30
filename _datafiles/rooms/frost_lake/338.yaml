@@ -15,5 +15,12 @@ exits:
     roomid: 339
   south:
     roomid: 337
+spawninfo:
+- mobid: 60
+  message: A crocodile slithers out from the water
+  respawnrate: 5 real minutes
+- mobid: 60
+  message: A crocodile slithers out from the water
+  respawnrate: 5 real minutes
 idlemessages:
 - "304"

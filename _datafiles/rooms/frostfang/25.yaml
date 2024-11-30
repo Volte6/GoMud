@@ -20,9 +20,6 @@ exits:
     roomid: 34
   west:
     roomid: 24
-items:
-- itemid: 20011
-- itemid: 20011
 spawninfo:
 - mobid: 1
   message: A rat scurries out from a dark hole and wiggles its whiskers.

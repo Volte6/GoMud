@@ -21,34 +21,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		rest = strings.TrimSpace(strings.TrimPrefix(rest, "secretly"))
 	}
 
-	// 0 = none. 1 = can see this room. 2 = can see this room and all exits
-	visibility := 2
-	if gametime.IsNight() {
-		visibility -= 1
-	}
-
-	biome := room.GetBiome()
-	if biome.IsDark() {
-		visibility -= 2
-	}
-	if biome.IsLit() {
-		visibility += 1
-	}
-
-	if visibility < 0 {
-		visibility = 0
-	} else if visibility > 2 {
-		visibility = 2
-	}
-
-	// If someone has light, cancel the darkness
-	if visibility < 2 {
-		if mobInstanceIds := room.GetMobs(rooms.FindHasLight); len(mobInstanceIds) > 0 {
-			visibility += 1
-		} else if userIds := room.GetPlayers(rooms.FindHasLight); len(userIds) > 0 {
-			visibility += 1
-		}
-	}
+	visibility := room.GetVisibility()
 
 	if visibility < 1 {
 		if !user.Character.HasBuffFlag(buffs.NightVision) {

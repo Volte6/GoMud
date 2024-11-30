@@ -1,0 +1,8 @@
+itemid: 27
+name: crocodile leather
+description: The tough hide of a crocodile.
+type: object
+subtype: mundane
+value: 20
+statmods:
+  damage: 2 # This appears on crocodiles, give them an improved damage since they spawn wearing it and have no weapon. Normally can't be worn.

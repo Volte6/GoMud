@@ -37,6 +37,11 @@ statmods:
   manamax: 1             # Increase max mana
   healthrecovery: 1      # Increase the health you recover every "recover" event
   manarecovery: 1        # Increase the mana you recover every "recover" event
+  #
+  # Combat
+  #
+  damage: 1              # Bonus to any damage
+  attacks: 1             # Additional attacks (OP!)
 ```
 
 
