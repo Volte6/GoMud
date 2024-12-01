@@ -376,7 +376,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 			}
 		} else {
-			user.SendText(fmt.Sprintf("Invalid room comand: %s", args[0]))
+			user.SendText(fmt.Sprintf("Invalid room command: %s", args[0]))
 		}
 	}
 

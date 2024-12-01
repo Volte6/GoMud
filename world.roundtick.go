@@ -566,6 +566,23 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 
 			}
 
+			//
+			// Need to track before health to calculate if damage was done post-spell
+			//
+			mobHealthBefore := map[int]int{}
+			for _, mInstId := range user.Character.Aggro.SpellInfo.TargetMobInstanceIds {
+				if defMob := mobs.GetInstance(mInstId); defMob != nil {
+
+					// Remember who has hit him
+					if _, ok := defMob.DamageTaken[user.UserId]; !ok {
+						defMob.DamageTaken[user.UserId] = 0
+					}
+
+					mobHealthBefore[mInstId] = defMob.Character.Health
+
+				}
+			}
+
 			allowRetaliation := true
 			if handled, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo); err == nil {
 				if handled {
@@ -581,14 +598,28 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 					if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti || spellData.Type == spells.HarmArea {
 
 						for _, mobId := range user.Character.Aggro.SpellInfo.TargetMobInstanceIds {
+
+							affectedMobInstanceIds = append(affectedMobInstanceIds, mobId)
+
 							if defMob := mobs.GetInstance(mobId); defMob != nil {
+
+								// Track damage done
+								if hBefore, ok := mobHealthBefore[mobId]; ok {
+									hDelta := hBefore - defMob.Character.Health
+									if hDelta > 0 {
+										defMob.DamageTaken[user.UserId] = defMob.DamageTaken[user.UserId] + hDelta
+									}
+								}
 
 								defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
-								if defMob.Character.Aggro == nil {
+								if defMob.Character.Health <= 0 {
+									defMob.Character.EndAggro()
+								} else if defMob.Character.Aggro == nil {
 									defMob.PreventIdle = true
 									defMob.Command(fmt.Sprintf("attack @%d", user.UserId)) // @ means player
 								}
+
 							}
 						}
 
@@ -1013,14 +1044,20 @@ func (w *World) handleMobCombat() (affectedPlayerIds []int, affectedMobInstanceI
 					if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti || spellData.Type == spells.HarmArea {
 
 						for _, mobId := range mob.Character.Aggro.SpellInfo.TargetMobInstanceIds {
+
+							affectedMobInstanceIds = append(affectedMobInstanceIds, mobId)
+
 							if defMob := mobs.GetInstance(mobId); defMob != nil {
 
 								defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
-								if defMob.Character.Aggro == nil {
+								if defMob.Character.Health <= 0 {
+									defMob.Character.EndAggro()
+								} else if defMob.Character.Aggro == nil {
 									defMob.PreventIdle = true
 									defMob.Command(fmt.Sprintf("attack #%d", mob.InstanceId)) // # means mob
 								}
+
 							}
 						}
 

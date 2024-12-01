@@ -336,6 +336,8 @@ BannedNames:
 - "player*"
 - "user*"
 - "me"
+- "myself"
+- "self"
 - "us"
 - "you"
 - "them"

@@ -1,0 +1,10 @@
+roomid: 1001
+zone: Stormshards
+title: Hidden Path
+description: Just behind a boulder is this hidden path. The plants and overgrowth
+  make it hard to see, but you can make a way to continue along the path, or you can
+  return to the main raod.
+biome: mountains
+exits:
+  road:
+    roomid: 593

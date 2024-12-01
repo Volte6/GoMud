@@ -279,6 +279,10 @@ func (r ScriptRoom) RemoveTemporaryExit(exitNameSimple string, exitNameFancy str
 	return r.roomRecord.RemoveTemporaryExit(tmpExit)
 }
 
+func (r ScriptRoom) HasMutator(mutName string) bool {
+	return r.roomRecord.Mutators.Has(mutName)
+}
+
 func (r ScriptRoom) AddMutator(mutName string) {
 	r.roomRecord.Mutators.Add(mutName)
 }

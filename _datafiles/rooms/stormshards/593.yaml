@@ -1,13 +1,16 @@
 roomid: 593
 zone: Stormshards
 title: Mountain path
-description: As the path ascends, the terrain becomes more rugged; the trees thin
-  out, giving way to rocky outcrops and steep, craggy inclines. The earth underfoot
-  changes to a mix of loose shale and solid stone, and the incline sharpens, challenging
-  even the most seasoned travelers.
+description: As the path winds upward, the surroundings become more barren; dwindling
+  trees give way to craggy rocks and steep slopes. The terrain underfoot shifts to
+  loose shale mingled with solid stone, and a large boulder rests subtly beside the
+  trail, almost blending into the rugged backdrop. The sharp incline pushes even experienced
+  travelers to their limits.
 biome: mountains
 exits:
   northeast:
     roomid: 594
   south:
     roomid: 592
+nouns:
+  boulder: off the path lies a boulder.

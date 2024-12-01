@@ -3,6 +3,7 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
 
@@ -10,6 +11,8 @@ import (
 )
 
 func Zap(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+
+	boltOfLightning := colorpatterns.ApplyColorPattern(`bolt of lightning`, `glowing`)
 
 	if rest != `` {
 
@@ -23,18 +26,24 @@ func Zap(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				return true, nil
 			}
 
-			user.SendText(fmt.Sprintf(`You zap <ansi fg="mobname">%s</ansi> with a bolt of lightning!`, mob.Character.Name))
-			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps <ansi fg="mobname">%s</ansi> with a bolt of lightning!`, user.Character.Name, mob.Character.Name), user.UserId)
+			user.SendText(fmt.Sprintf(`You zap <ansi fg="mobname">%s</ansi> with a %s!`, mob.Character.Name, boltOfLightning))
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps <ansi fg="mobname">%s</ansi> with a %s!`, user.Character.Name, mob.Character.Name, boltOfLightning), user.UserId)
+
 			mob.Character.Health = 1
+			mob.Character.Mana = 1
+
 			return true, nil
 		}
 
 		if playerId > 0 {
 			if u := users.GetByUserId(playerId); u != nil {
-				user.SendText(fmt.Sprintf(`You zap <ansi fg="username">%s</ansi> with a bolt of lightning!`, u.Character.Name))
-				room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps <ansi fg="username">%s</ansi> with a bolt of lightning!`, user.Character.Name, u.Character.Name), user.UserId, u.UserId)
-				u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps you with a bolt of lightning!`, user.Character.Name))
+				user.SendText(fmt.Sprintf(`You zap <ansi fg="username">%s</ansi> with a %s!`, u.Character.Name, boltOfLightning))
+				room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps <ansi fg="username">%s</ansi> with a %s!`, user.Character.Name, u.Character.Name, boltOfLightning), user.UserId, u.UserId)
+				u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps you with a %s!`, user.Character.Name, boltOfLightning))
+
 				u.Character.Health = 1
+				u.Character.Mana = 1
+
 				return true, nil
 			}
 		}
@@ -52,9 +61,11 @@ func Zap(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, nil
 	}
 
-	user.SendText(fmt.Sprintf(`You zap <ansi fg="mobname">%s</ansi> with a bolt of lightning!`, mob.Character.Name))
-	room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps <ansi fg="mobname">%s</ansi> with a bolt of lightning!`, user.Character.Name, mob.Character.Name), user.UserId)
+	user.SendText(fmt.Sprintf(`You zap <ansi fg="mobname">%s</ansi> with a %s!`, mob.Character.Name, boltOfLightning))
+	room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps <ansi fg="mobname">%s</ansi> with a %s!`, user.Character.Name, mob.Character.Name, boltOfLightning), user.UserId)
+
 	mob.Character.Health = 1
+	mob.Character.Mana = 1
 
 	return true, nil
 }
