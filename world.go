@@ -1426,7 +1426,7 @@ func (w *World) TurnTick() {
 					continue
 				}
 
-				mob.DamageTaken[sourceUser.UserId] = 0 // Take note that the player did damage this mob.
+				mob.Character.TrackPlayerDamage(sourceUser.UserId, 0)
 
 				if sourceUser.Character.RoomId == mob.Character.RoomId {
 					// Mobs get aggro when attacked

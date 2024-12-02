@@ -36,10 +36,7 @@ func AttackPlayerVsMob(user *users.UserRecord, mob *mobs.Mob) AttackResult {
 	mob.Character.ApplyHealthChange(attackResult.DamageToTarget * -1)
 
 	// Remember who has hit him
-	if _, ok := mob.DamageTaken[user.UserId]; !ok {
-		mob.DamageTaken[user.UserId] = 0
-	}
-	mob.DamageTaken[user.UserId] += attackResult.DamageToTarget
+	mob.Character.TrackPlayerDamage(user.UserId, attackResult.DamageToTarget)
 
 	return attackResult
 }
@@ -77,10 +74,7 @@ func AttackMobVsMob(mobAtk *mobs.Mob, mobDef *mobs.Mob) AttackResult {
 	// If attacking mob was player charmed, attribute damage done to that player
 	if charmedUserId := mobAtk.Character.GetCharmedUserId(); charmedUserId > 0 {
 		// Remember who has hit him
-		if _, ok := mobDef.DamageTaken[charmedUserId]; !ok {
-			mobDef.DamageTaken[charmedUserId] = 0
-		}
-		mobDef.DamageTaken[charmedUserId] += attackResult.DamageToTarget
+		mobDef.Character.TrackPlayerDamage(charmedUserId, attackResult.DamageToTarget)
 	}
 
 	return attackResult

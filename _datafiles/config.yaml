@@ -159,9 +159,9 @@ StartRoom: 1
 TutorialStartRooms: [900, 990]
 # - PermaDeath - 
 #   If true, players lose their character if they die with zero lives left.
-PermaDeath: true
+PermaDeath: false
 # - LivesStart - 
-#   (Req: PermaDeath) Hhow many lives players start with before being reset.
+#   (Req: PermaDeath) How many lives players start with before being reset.
 LivesStart: 3
 # - LivesMax - 
 #   (Req: PermaDeath) The maximum lives a player can have.
@@ -336,6 +336,8 @@ BannedNames:
 - "player*"
 - "user*"
 - "me"
+- "myself"
+- "self"
 - "us"
 - "you"
 - "them"

@@ -45,6 +45,10 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int) (bool, error) 
 
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 
+		// Set forced ansi tag wrappers
+		userTextWrap.Set(`script-text`, ``, ``)
+		roomTextWrap.Set(`script-text`, ``, ``)
+
 		sUser := GetActor(userId, 0)
 		sRoom := GetRoom(roomId)
 
@@ -59,6 +63,9 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int) (bool, error) 
 
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()
+
+		userTextWrap.Reset()
+		roomTextWrap.Reset()
 
 		if err != nil {
 
@@ -99,6 +106,10 @@ func TryRoomIdleEvent(roomId int) (bool, error) {
 
 	if onCommandFunc, ok := vmw.GetFunction(`onIdle`); ok {
 
+		// Set forced ansi tag wrappers
+		userTextWrap.Set(`script-text`, ``, ``)
+		roomTextWrap.Set(`script-text`, ``, ``)
+
 		sRoom := GetRoom(roomId)
 
 		tmr := time.AfterFunc(scriptRoomTimeout, func() {
@@ -111,6 +122,9 @@ func TryRoomIdleEvent(roomId int) (bool, error) {
 
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()
+
+		userTextWrap.Reset()
+		roomTextWrap.Reset()
 
 		if err != nil {
 
@@ -177,6 +191,10 @@ func TryRoomCommand(cmd string, rest string, userId int) (bool, error) {
 
 	if cmdFound {
 
+		// Set forced ansi tag wrappers
+		userTextWrap.Set(`script-text`, ``, ``)
+		roomTextWrap.Set(`script-text`, ``, ``)
+
 		sUser := GetUser(userId)
 		sRoom := GetRoom(user.Character.RoomId)
 
@@ -190,6 +208,9 @@ func TryRoomCommand(cmd string, rest string, userId int) (bool, error) {
 		)
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()
+
+		userTextWrap.Reset()
+		roomTextWrap.Reset()
 
 		if err != nil {
 
@@ -214,6 +235,10 @@ func TryRoomCommand(cmd string, rest string, userId int) (bool, error) {
 
 	} else if onCommandFunc, ok := vmw.GetFunction(`onCommand`); ok {
 
+		// Set forced ansi tag wrappers
+		userTextWrap.Set(`script-text`, ``, ``)
+		roomTextWrap.Set(`script-text`, ``, ``)
+
 		sUser := GetUser(userId)
 		sRoom := GetRoom(user.Character.RoomId)
 
@@ -228,6 +253,9 @@ func TryRoomCommand(cmd string, rest string, userId int) (bool, error) {
 		)
 		vmw.VM.ClearInterrupt()
 		tmr.Stop()
+
+		userTextWrap.Reset()
+		roomTextWrap.Reset()
 
 		if err != nil {
 

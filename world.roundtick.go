@@ -543,6 +543,12 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 			continue
 		}
 
+		/**************************
+		*
+		* START HANDLING MAGIC
+		*
+		**************************/
+
 		if user.Character.Aggro != nil && user.Character.Aggro.Type == characters.SpellCast {
 
 			if user.Character.Aggro.RoundsWaiting > 0 {
@@ -566,6 +572,20 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 
 			}
 
+			//
+			// Need to track before health to calculate if damage was done post-spell
+			//
+			mobHealthBefore := map[int]int{}
+			for _, mInstId := range user.Character.Aggro.SpellInfo.TargetMobInstanceIds {
+				if defMob := mobs.GetInstance(mInstId); defMob != nil {
+
+					// Remember who has hit him
+					defMob.Character.TrackPlayerDamage(user.UserId, 0)
+					mobHealthBefore[mInstId] = defMob.Character.Health
+
+				}
+			}
+
 			allowRetaliation := true
 			if handled, err := scripting.TrySpellScriptEvent(`onMagic`, user.UserId, 0, user.Character.Aggro.SpellInfo); err == nil {
 				if handled {
@@ -581,14 +601,28 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 					if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti || spellData.Type == spells.HarmArea {
 
 						for _, mobId := range user.Character.Aggro.SpellInfo.TargetMobInstanceIds {
+
+							affectedMobInstanceIds = append(affectedMobInstanceIds, mobId)
+
 							if defMob := mobs.GetInstance(mobId); defMob != nil {
+
+								// Track damage done
+								if hBefore, ok := mobHealthBefore[mobId]; ok {
+									hDelta := hBefore - defMob.Character.Health
+									if hDelta > 0 {
+										defMob.Character.TrackPlayerDamage(user.UserId, hDelta)
+									}
+								}
 
 								defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
-								if defMob.Character.Aggro == nil {
+								if defMob.Character.Health <= 0 {
+									defMob.Character.EndAggro()
+								} else if defMob.Character.Aggro == nil {
 									defMob.PreventIdle = true
 									defMob.Command(fmt.Sprintf("attack @%d", user.UserId)) // @ means player
 								}
+
 							}
 						}
 
@@ -601,6 +635,18 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 			continue
 
 		}
+
+		/**************************
+		*
+		* END HANDLING MAGIC
+		*
+		**************************/
+
+		/**************************
+		*
+		* START HANDLING PHYSICAL COMBAT
+		*
+		**************************/
 
 		// In combat with another player
 		if user.Character.Aggro != nil && user.Character.Aggro.UserId > 0 {
@@ -747,6 +793,9 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 
 			// If the attack connected, check for damage to equipment.
 			if roundResult.Hit {
+
+				defUser.Character.TrackPlayerDamage(user.UserId, roundResult.DamageToTarget)
+
 				// For now, only focus on offhand items.
 				if defUser.Character.Equipment.Offhand.ItemId > 0 {
 
@@ -940,6 +989,12 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 
 		}
 
+		/**************************
+		*
+		* END HANDLING PHYSICAL COMBAT
+		*
+		**************************/
+
 	}
 
 	util.TrackTime(`World::handlePlayerCombat()`, time.Since(tStart).Seconds())
@@ -979,6 +1034,12 @@ func (w *World) handleMobCombat() (affectedPlayerIds []int, affectedMobInstanceI
 		// Disable any buffs that are cancelled by combat
 		mob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
+		/**************************
+		*
+		* START HANDLING MAGIC
+		*
+		**************************/
+
 		if mob.Character.Aggro != nil && mob.Character.Aggro.Type == characters.SpellCast {
 
 			if mob.Character.Aggro.RoundsWaiting > 0 {
@@ -1013,14 +1074,20 @@ func (w *World) handleMobCombat() (affectedPlayerIds []int, affectedMobInstanceI
 					if spellData.Type == spells.HarmSingle || spellData.Type == spells.HarmMulti || spellData.Type == spells.HarmArea {
 
 						for _, mobId := range mob.Character.Aggro.SpellInfo.TargetMobInstanceIds {
+
+							affectedMobInstanceIds = append(affectedMobInstanceIds, mobId)
+
 							if defMob := mobs.GetInstance(mobId); defMob != nil {
 
 								defMob.Character.CancelBuffsWithFlag(buffs.CancelIfCombat)
 
-								if defMob.Character.Aggro == nil {
+								if defMob.Character.Health <= 0 {
+									defMob.Character.EndAggro()
+								} else if defMob.Character.Aggro == nil {
 									defMob.PreventIdle = true
 									defMob.Command(fmt.Sprintf("attack #%d", mob.InstanceId)) // # means mob
 								}
+
 							}
 						}
 
@@ -1033,6 +1100,18 @@ func (w *World) handleMobCombat() (affectedPlayerIds []int, affectedMobInstanceI
 			continue
 
 		}
+
+		/**************************
+		*
+		* END HANDLING MAGIC
+		*
+		**************************/
+
+		/**************************
+		*
+		* START HANDLING PHYSICAL COMBAT
+		*
+		**************************/
 
 		// H2H is the base level combat, can do combat commands then
 		if mob.Character.Aggro.Type == characters.DefaultAttack {
@@ -1355,6 +1434,12 @@ func (w *World) handleMobCombat() (affectedPlayerIds []int, affectedMobInstanceI
 			}
 
 		}
+
+		/**************************
+		*
+		* END HANDLING PHYSICAL COMBAT
+		*
+		**************************/
 
 	}
 

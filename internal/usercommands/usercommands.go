@@ -93,6 +93,7 @@ var (
 		`online`:      {Online, true, false},
 		`party`:       {Party, true, false},
 		`password`:    {Password, true, false},
+		`paz`:         {Paz, true, true}, // Admin only
 		`peep`:        {Peep, false, false},
 		`pet`:         {Pet, false, false},
 		`picklock`:    {Picklock, false, false},
@@ -148,10 +149,16 @@ var (
 		`dual-wield`:  {DualWield, true, false},
 		`whisper`:     {Whisper, true, false},
 		`who`:         {Who, true, false},
-		`zap`:         {Zap, false, true},  // Admin only
+		`zap`:         {Zap, true, true},   // Admin only
 		`zone`:        {Zone, false, true}, // Admin only
 		// Special command only used upon creating a new account
 		`start`: {Start, false, false},
+	}
+
+	selfKeywords = []string{
+		`me`,
+		`self`,
+		`myself`,
 	}
 )
 
@@ -233,6 +240,19 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
+	// Experimental, not sure if will have unexpected consequences.
+	// Turn keywords for targetting self into actual string of self
+	for _, selfWord := range selfKeywords {
+		wordLen := len(selfWord)
+		if rest == selfWord {
+			rest = user.Character.Name
+			break
+		} else if len(rest) >= wordLen+1 && rest[len(rest)-(wordLen+1):] == ` `+selfWord {
+			rest = rest[:len(rest)-(wordLen+1)] + ` ` + user.Character.Name
+			break
+		}
+	}
+
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
 		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
@@ -302,17 +322,6 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		}
 	}
 
-	// "go" attempt
-	start := time.Now()
-	defer func() {
-		util.TrackTime(`usr-cmd[go]`, time.Since(start).Seconds())
-	}()
-
-	if handled, err := Go(cmd, user, room); handled {
-		return handled, err
-	}
-	// end "go" attempt
-
 	if _, ok := emoteAliases[cmd]; ok {
 		handled, err := Emote(cmd, user, room)
 		return handled, err
@@ -325,6 +334,17 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		}
 		return Cast(castCmd, user, room)
 	}
+
+	// "go" attempt
+	start := time.Now()
+	defer func() {
+		util.TrackTime(`usr-cmd[go]`, time.Since(start).Seconds())
+	}()
+
+	if handled, err := Go(cmd, user, room); handled {
+		return handled, err
+	}
+	// end "go" attempt
 
 	return false, nil
 }

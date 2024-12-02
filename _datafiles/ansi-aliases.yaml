@@ -149,6 +149,7 @@ color8:
   mutator: 10
   buff: 4
   buff-text: 14
+  script-text: 10
 color256:
   table-title: 2
   userid: black
@@ -292,3 +293,4 @@ color256:
   mutator: 49
   buff: 147
   buff-text: 14
+  script-text: 155

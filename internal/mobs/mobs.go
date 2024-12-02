@@ -55,20 +55,19 @@ type MobId int // Creating a custom type to help prevent confusion over MobId an
 
 type Mob struct {
 	MobId           MobId
-	Zone            string      `yaml:"zone,omitempty"`
-	ItemDropChance  int         // chance in 100
-	ActivityLevel   int         `yaml:"activitylevel,omitempty"` // 1 - 10%, 10 = 100%
-	InstanceId      int         `yaml:"-"`
-	HomeRoomId      int         `yaml:"-"`
-	Hostile         bool        // whether they attack on sight
-	LastIdleCommand uint8       `yaml:"-"` // Track what hte last used idlecommand was
-	BoredomCounter  uint8       `yaml:"-"` // how many rounds have passed since this mob has seen a player
-	Groups          []string    // What group do they identify with? Helps with teamwork
-	Hates           []string    `yaml:"hates,omitempty"`        // What NPC groups or races do they hate and probably fight if encountered?
-	IdleCommands    []string    `yaml:"idlecommands,omitempty"` // Commands they may do while idle (not in combat)
-	AngryCommands   []string    // randomly chosen to queue when they are angry/entering combat.
-	CombatCommands  []string    `yaml:"combatcommands,omitempty"` // Commands they may do while in combat
-	DamageTaken     map[int]int `yaml:"-"`                        // key = who, value = how much
+	Zone            string   `yaml:"zone,omitempty"`
+	ItemDropChance  int      // chance in 100
+	ActivityLevel   int      `yaml:"activitylevel,omitempty"` // 1 - 10%, 10 = 100%
+	InstanceId      int      `yaml:"-"`
+	HomeRoomId      int      `yaml:"-"`
+	Hostile         bool     // whether they attack on sight
+	LastIdleCommand uint8    `yaml:"-"` // Track what hte last used idlecommand was
+	BoredomCounter  uint8    `yaml:"-"` // how many rounds have passed since this mob has seen a player
+	Groups          []string // What group do they identify with? Helps with teamwork
+	Hates           []string `yaml:"hates,omitempty"`        // What NPC groups or races do they hate and probably fight if encountered?
+	IdleCommands    []string `yaml:"idlecommands,omitempty"` // Commands they may do while idle (not in combat)
+	AngryCommands   []string // randomly chosen to queue when they are angry/entering combat.
+	CombatCommands  []string `yaml:"combatcommands,omitempty"` // Commands they may do while in combat
 	Character       characters.Character
 	MaxWander       int      `yaml:"maxwander,omitempty"`       // Max rooms to wander from home
 	GoingHome       bool     `yaml:"-"`                         // WHether they are trying to get home
@@ -141,7 +140,7 @@ func NewMobById(mobId MobId, homeRoomId int, forceLevel ...int) *Mob {
 		mob.HomeRoomId = homeRoomId
 		mob.Character.RoomId = homeRoomId
 		mob.InstanceId = instanceCounter
-		mob.DamageTaken = make(map[int]int)
+		mob.Character.PlayerDamage = make(map[int]int)
 
 		// Level related stuff
 		if len(forceLevel) > 0 && forceLevel[0] > 0 {

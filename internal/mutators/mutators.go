@@ -92,6 +92,19 @@ func IsMutator(mutName string) bool {
 	return ok
 }
 
+func (ml *MutatorList) Has(mutName string) bool {
+	if _, ok := allMutators[mutName]; !ok {
+		return false
+	}
+
+	for _, mut := range *ml {
+		if mut.MutatorId == mutName {
+			return true
+		}
+	}
+	return false
+}
+
 func (ml *MutatorList) Add(mutName string) bool {
 
 	if _, ok := allMutators[mutName]; !ok {

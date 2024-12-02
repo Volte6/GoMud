@@ -4,7 +4,7 @@
 <ansi fg="room-description{{ if or .IsNight .IsDark }}-dark{{ end }}">Also here: </ansi>
     {{- range $index, $playerName := .VisiblePlayers -}}
         {{- $displayed = add $displayed 1 -}}
-        <ansi fg="username">{{ $playerName }}</ansi>{{- if ne $displayed $whoCt }}{{- if ne $displayed (sub $whoCt 1) }}, {{ else }} and {{ end }}{{ end -}}
+        {{ $playerName }}{{- if ne $displayed $whoCt }}{{- if ne $displayed (sub $whoCt 1) }}, {{ else }} and {{ end }}{{ end -}}
     {{- end }}
     {{- range $index, $mobName := .VisibleMobs -}}
         {{- $displayed = add $displayed 1 -}}
