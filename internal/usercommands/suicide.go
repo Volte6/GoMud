@@ -12,6 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
+	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 )
@@ -37,8 +38,49 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 		return true, nil
 	}
 
+	// Send a death msg to everyone in the room.
+	room.SendText(
+		fmt.Sprintf(`<ansi fg="username">%s</ansi> has died.`, user.Character.Name),
+		user.UserId,
+	)
+
+	i := 0
+	dmgCt := len(user.Character.PlayerDamage)
+
+	if dmgCt > 0 {
+		user.Character.KD.AddPvpDeath()
+	} else {
+		user.Character.KD.AddMobDeath()
+	}
+
+	killedBy := ``
+	for uid, _ := range user.Character.PlayerDamage {
+
+		if u := users.GetByUserId(uid); u != nil {
+
+			// Update PK stats
+			user.Character.KD.AddPlayerDeath(u.UserId, u.Character.Name)
+			u.Character.KD.AddPlayerKill(user.UserId, user.Character.Name)
+
+			if i > 0 {
+				if i < dmgCt-1 {
+					killedBy += ` and `
+				} else {
+					killedBy += `, `
+				}
+			}
+			killedBy += `<ansi fg="username">` + u.Character.Name + `</ansi>`
+			i++
+		}
+	}
+
+	msg := fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> has <ansi fg="red-bold">DIED!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, term.CRLFStr)
+	if killedBy != `` {
+		msg = fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> has <ansi fg="red-bold">DIED!</ansi> (killed by %s) <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, killedBy, term.CRLFStr)
+	}
+
 	events.AddToQueue(events.Broadcast{
-		Text: fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> has <ansi fg="red-bold">DIED!</ansi> <ansi fg="magenta-bold">***</ansi>`, user.Character.Name),
+		Text: msg,
 	})
 
 	// If permadeath is enabled, do some extra bookkeeping
@@ -139,7 +181,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 	user.Character.Health = -10
 
-	user.Character.KD.AddDeath()
+	clear(user.Character.PlayerDamage)
 
 	rooms.MoveToRoom(user.UserId, 75)
 

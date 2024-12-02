@@ -1,16 +1,30 @@
 package characters
 
+import "fmt"
+
 type KDStats struct {
 	TotalKills  int         `json:"totalkills"`  // Quick tally of kills
 	Kills       map[int]int `json:"kills"`       // map of MobId to count
 	TotalDeaths int         `json:"totaldeaths"` // Quick tally of deaths
+
+	TotalPvpKills  int            `json:"totalpvpkills"`  // Quick tally of pvp kills
+	PlayerKills    map[string]int `json:"playerkills"`    // map of userid:username to count
+	PlayerDeaths   map[string]int `json:"playerdeaths"`   // map of userid:username to count
+	TotalPvpDeaths int            `json:"totalpvpdeaths"` // Quick tally of pvp deaths
 }
 
-func (kd *KDStats) GetKDRatio() float64 {
+func (kd *KDStats) GetMobKDRatio() float64 {
 	if kd.TotalDeaths == 0 {
 		return float64(kd.TotalKills)
 	}
 	return float64(kd.TotalKills) / float64(kd.TotalDeaths)
+}
+
+func (kd *KDStats) GetPvpKDRatio() float64 {
+	if kd.TotalPvpDeaths == 0 {
+		return float64(kd.TotalPvpKills)
+	}
+	return float64(kd.TotalPvpKills) / float64(kd.TotalPvpDeaths)
 }
 
 func (kd *KDStats) GetMobKills(mobId ...int) int {
@@ -29,6 +43,26 @@ func (kd *KDStats) GetMobKills(mobId ...int) int {
 	return total
 }
 
+func (kd *KDStats) AddPlayerKill(killedUserId int, killedCharName string) {
+	if kd.PlayerKills == nil {
+		kd.PlayerKills = make(map[string]int)
+	}
+
+	keyName := fmt.Sprintf(`%d:%s`, killedUserId, killedCharName)
+
+	kd.TotalPvpKills++
+	kd.PlayerKills[keyName] = kd.PlayerKills[keyName] + 1
+}
+
+func (kd *KDStats) AddPlayerDeath(killedByUserId int, killedByCharName string) {
+	if kd.PlayerDeaths == nil {
+		kd.PlayerDeaths = make(map[string]int)
+	}
+
+	keyName := fmt.Sprintf(`%d:%s`, killedByUserId, killedByCharName)
+	kd.PlayerDeaths[keyName] = kd.PlayerDeaths[keyName] + 1
+}
+
 func (kd *KDStats) AddMobKill(mobId int) {
 	if kd.Kills == nil {
 		kd.Kills = make(map[int]int)
@@ -37,10 +71,18 @@ func (kd *KDStats) AddMobKill(mobId int) {
 	kd.Kills[mobId] = kd.Kills[mobId] + 1
 }
 
-func (kd *KDStats) GetDeaths() int {
+func (kd *KDStats) GetMobDeaths() int {
 	return kd.TotalDeaths
 }
 
-func (kd *KDStats) AddDeath() {
+func (kd *KDStats) GetPvpDeaths() int {
+	return kd.TotalPvpDeaths
+}
+
+func (kd *KDStats) AddMobDeath() {
 	kd.TotalDeaths++
+}
+
+func (kd *KDStats) AddPvpDeath() {
+	kd.TotalPvpDeaths++
 }

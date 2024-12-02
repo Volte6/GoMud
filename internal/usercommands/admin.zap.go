@@ -50,22 +50,36 @@ func Zap(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	}
 
-	if user.Character.Aggro == nil || user.Character.Aggro.MobInstanceId == 0 {
+	if user.Character.Aggro == nil {
 		user.SendText("You are not in combat.")
 		return true, nil
 	}
 
-	mob := mobs.GetInstance(user.Character.Aggro.MobInstanceId)
-	if mob == nil {
-		user.SendText("Zap Mob not found.")
-		return true, nil
+	if user.Character.Aggro.MobInstanceId > 0 {
+		mob := mobs.GetInstance(user.Character.Aggro.MobInstanceId)
+		if mob == nil {
+			user.SendText("Zap Mob not found.")
+			return true, nil
+		} else {
+			user.SendText(fmt.Sprintf(`You zap <ansi fg="mobname">%s</ansi> with a %s!`, mob.Character.Name, boltOfLightning))
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps <ansi fg="mobname">%s</ansi> with a %s!`, user.Character.Name, mob.Character.Name, boltOfLightning), user.UserId)
+
+			mob.Character.Health = 1
+			mob.Character.Mana = 1
+		}
+	} else if user.Character.Aggro.UserId > 0 {
+		u := users.GetByUserId(user.Character.Aggro.UserId)
+		if u == nil {
+			user.SendText("Zap User not found.")
+			return true, nil
+		} else {
+			user.SendText(fmt.Sprintf(`You zap <ansi fg="username">%s</ansi> with a %s!`, u.Character.Name, boltOfLightning))
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps <ansi fg="username">%s</ansi> with a %s!`, user.Character.Name, u.Character.Name, boltOfLightning), user.UserId)
+
+			u.Character.Health = 1
+			u.Character.Mana = 1
+		}
 	}
-
-	user.SendText(fmt.Sprintf(`You zap <ansi fg="mobname">%s</ansi> with a %s!`, mob.Character.Name, boltOfLightning))
-	room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> zaps <ansi fg="mobname">%s</ansi> with a %s!`, user.Character.Name, mob.Character.Name, boltOfLightning), user.UserId)
-
-	mob.Character.Health = 1
-	mob.Character.Mana = 1
 
 	return true, nil
 }

@@ -27,17 +27,20 @@ func Killstats(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 		`<ansi fg="230">%s</ansi>`,
 	}
 
-	totalKills := 0
+	totalMobKills := 0
+	totalPVPKills := 0
+	//totalPVPDeaths := 0
 
 	mobKills := map[string]int{}
 	raceKills := map[string]int{}
 	areaKills := map[string]int{}
+	charKills := map[string]int{}
 
 	for mid, kCt := range user.Character.KD.Kills {
 
 		if mobSpec := mobs.GetMobSpec(mobs.MobId(mid)); mobSpec != nil {
 
-			totalKills += kCt
+			totalMobKills += kCt
 
 			// Populate mob kills
 			mobKills[mobSpec.Character.Name] = mobKills[mobSpec.Character.Name] + kCt
@@ -52,16 +55,37 @@ func Killstats(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 		}
 	}
 
-	renderStats := mobKills
+	for userIdNameStr, killCount := range user.Character.KD.PlayerKills {
+		parts := strings.Split(userIdNameStr, `:`)
+		charKills[parts[1]] = killCount
+		totalPVPKills++
+	}
 
-	if rest == `race` || rest == `races` {
+	renderStats := mobKills
+	totalKills := totalMobKills
+	totalDeaths := user.Character.KD.GetMobDeaths()
+	kdRatio := user.Character.KD.GetMobKDRatio()
+
+	if rest == `pvp` {
+
+		renderStats = charKills
+		totalKills = totalPVPKills
+		kdRatio = user.Character.KD.GetPvpKDRatio()
+		totalDeaths = user.Character.KD.GetPvpDeaths()
+
+		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats area</ansi>`)
+		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats race</ansi>`)
+
+	} else if rest == `race` || rest == `races` {
 
 		renderStats = raceKills
+		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats pvp</ansi>`)
 		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats area</ansi>`)
 
 	} else if rest == `zone` || rest == `zones` || rest == `area` || rest == `areas` {
 
 		renderStats = areaKills
+		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats pvp</ansi>`)
 		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats race</ansi>`)
 
 	} else {
@@ -69,6 +93,7 @@ func Killstats(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 		rest = `mob` // default to mob
 
 		renderStats = mobKills
+		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats pvp</ansi>`)
 		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats area</ansi>`)
 		otherSuggestions = append(otherSuggestions, `<ansi fg="command">killstats race</ansi>`)
 	}
@@ -96,17 +121,17 @@ func Killstats(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 		``,
 	})
 
-	if user.Character.KD.GetDeaths() == 0 {
+	if totalDeaths == 0 {
 		rows = append(rows, []string{
 			`Total Deaths`,
-			fmt.Sprintf("%d", user.Character.KD.GetDeaths()),
+			fmt.Sprintf("%d", totalDeaths),
 			`N/A`,
 		})
 	} else {
 		rows = append(rows, []string{
 			`Total Deaths`,
-			fmt.Sprintf("%d", user.Character.KD.GetDeaths()),
-			fmt.Sprintf("%.2f:1", user.Character.KD.GetKDRatio()),
+			fmt.Sprintf("%d", totalDeaths),
+			fmt.Sprintf("%.2f:1", kdRatio),
 		})
 	}
 

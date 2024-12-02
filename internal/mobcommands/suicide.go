@@ -81,21 +81,21 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	partyTracker := map[int]int{} // key is party leader ID, value is how much will be shared.
 
-	if len(mob.DamageTaken) > 0 {
+	if len(mob.Character.PlayerDamage) > 0 {
 
-		xpVal = xpVal / len(mob.DamageTaken)        // Div by number of players that beat him up
-		xpVal += ((util.Rand(3) - 1) * xpVariation) // a little bit of variation
+		xpVal = xpVal / len(mob.Character.PlayerDamage) // Div by number of players that beat him up
+		xpVal += ((util.Rand(3) - 1) * xpVariation)     // a little bit of variation
 
 		totalPlayerLevels := 0
-		for uId, _ := range mob.DamageTaken {
+		for uId, _ := range mob.Character.PlayerDamage {
 			if user := users.GetByUserId(uId); user != nil {
 				totalPlayerLevels += user.Character.Level
 			}
 		}
 
-		attackerCt := len(mob.DamageTaken)
+		attackerCt := len(mob.Character.PlayerDamage)
 
-		for uId, _ := range mob.DamageTaken {
+		for uId, _ := range mob.Character.PlayerDamage {
 			if user := users.GetByUserId(uId); user != nil {
 
 				scripting.TryMobScriptEvent(`onDie`, mob.InstanceId, uId, `user`, map[string]any{`attackerCount`: attackerCt})
