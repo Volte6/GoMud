@@ -1,7 +1,6 @@
 package connections
 
 import (
-	"encoding/json"
 	"errors"
 	"log/slog"
 	"net"
@@ -9,10 +8,6 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/util"
-	"gopkg.in/yaml.v2"
 )
 
 const ReadBufferSize = 1024
@@ -60,25 +55,6 @@ func Add(conn net.Conn, wsConn *websocket.Conn) *ConnectionDetails {
 	)
 
 	netConnections[connDetails.ConnectionId()] = connDetails
-
-	// Temp hackish thing to send all color aliases
-	if wsConn != nil {
-
-		data := make(map[string]map[string]string, 100)
-		if yfile, err := os.ReadFile(util.FilePath(string(configs.GetConfig().FileAnsiAliases))); err == nil {
-			if err := yaml.Unmarshal(yfile, &data); err == nil {
-
-				jsonString, _ := json.Marshal(data[`color256`])
-
-				events.AddToQueue(events.WebClientCommand{
-					ConnectionId: connDetails.ConnectionId(),
-					Text:         "COLORMAP:" + string(jsonString) + "\n",
-				})
-
-			}
-		}
-
-	}
 
 	// return the unique ID to find this connection later
 	return connDetails
@@ -169,7 +145,7 @@ func Remove(id ConnectionId) (err error) {
 	return errors.New("connection not found")
 }
 
-func Broadcast(colorizedText []byte, rawText []byte) {
+func Broadcast(colorizedText []byte) {
 
 	lock.Lock()
 
@@ -184,11 +160,7 @@ func Broadcast(colorizedText []byte, rawText []byte) {
 		// Write the message to the connection
 		var err error
 
-		if cd.IsWebsocket() {
-			_, err = cd.Write(rawText)
-		} else {
-			_, err = cd.Write(colorizedText)
-		}
+		_, err = cd.Write(colorizedText)
 
 		if err != nil {
 			slog.Error("could not write to connection", "connectionId", id, "remoteAddr", cd.RemoteAddr().String(), "error", err)

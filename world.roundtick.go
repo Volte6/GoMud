@@ -1636,11 +1636,7 @@ func (w *World) handleAutoHealing(roundNumber uint64) {
 		// save the new prompt for next time we want to check
 		user.SetTempData(`cmdprompt`, newcmdprompt)
 
-		if connections.IsWebsocket(user.ConnectionId()) {
-			connections.SendTo([]byte(newcmdprompt), user.ConnectionId())
-		} else {
-			connections.SendTo([]byte(templates.AnsiParse(newcmdprompt)), user.ConnectionId())
-		}
+		connections.SendTo([]byte(templates.AnsiParse(newcmdprompt)), user.ConnectionId())
 
 		//
 		// Send GMCP status update

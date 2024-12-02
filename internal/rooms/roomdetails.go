@@ -8,7 +8,6 @@ import (
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/mobs"
@@ -117,11 +116,6 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 	//
 
 	tinymap := GetTinyMap(r.RoomId)
-
-	events.AddToQueue(events.WebClientCommand{
-		ConnectionId: user.ConnectionId(),
-		Text:         "MODALADD:tinymap=" + strings.Join(tinymap, "\n"),
-	})
 
 	renderNouns := user.Permission == users.PermissionAdmin
 	if user.Character.Pet.Exists() && user.Character.HasBuffFlag(buffs.SeeNouns) {

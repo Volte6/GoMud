@@ -22,11 +22,9 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 	passwordPrompt, _ := templates.Process("login/password.prompt", nil)
 	passwordMask, _ := templates.Process("login/password.mask", nil)
 
-	if !connections.IsWebsocket(clientInput.ConnectionId) {
-		usernamePrompt = templates.AnsiParse(usernamePrompt)
-		passwordPrompt = templates.AnsiParse(passwordPrompt)
-		passwordMask = templates.AnsiParse(passwordMask)
-	}
+	usernamePrompt = templates.AnsiParse(usernamePrompt)
+	passwordPrompt = templates.AnsiParse(passwordPrompt)
+	passwordMask = templates.AnsiParse(passwordMask)
 
 	var state *LoginState
 
@@ -45,9 +43,7 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 		state.SentWelcome = true
 		splashTxt, _ := templates.Process("login/connect-splash", nil)
 
-		if !connections.IsWebsocket(clientInput.ConnectionId) {
-			splashTxt = templates.AnsiParse(splashTxt)
-		}
+		splashTxt = templates.AnsiParse(splashTxt)
 
 		connections.SendTo([]byte(splashTxt), clientInput.ConnectionId)
 		connections.SendTo([]byte(usernamePrompt), clientInput.ConnectionId)
@@ -165,9 +161,8 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 				"default": "n",
 			})
 
-			if !connections.IsWebsocket(clientInput.ConnectionId) {
-				newUserPromptPrompt = templates.AnsiParse(newUserPromptPrompt)
-			}
+			newUserPromptPrompt = templates.AnsiParse(newUserPromptPrompt)
+
 			connections.SendTo([]byte(newUserPromptPrompt), clientInput.ConnectionId)
 		}
 

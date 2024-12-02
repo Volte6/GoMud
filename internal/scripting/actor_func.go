@@ -579,24 +579,6 @@ func (a ScriptActor) GiveExtraLife() {
 	}
 }
 
-func (a ScriptActor) WebClientModalOpen(name string, value string) {
-	if a.userRecord != nil {
-		events.AddToQueue(events.WebClientCommand{
-			ConnectionId: a.userRecord.ConnectionId(),
-			Text:         "MODALADD:" + name + "=" + value,
-		})
-	}
-}
-
-func (a ScriptActor) WebClientModalClose(name string) {
-	if a.userRecord != nil {
-		events.AddToQueue(events.WebClientCommand{
-			ConnectionId: a.userRecord.ConnectionId(),
-			Text:         "MODALREM:" + name,
-		})
-	}
-}
-
 func (a ScriptActor) Uncurse() []*ScriptItem {
 
 	retList := []*ScriptItem{}
