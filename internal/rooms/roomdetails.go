@@ -7,6 +7,7 @@ import (
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/colorpatterns"
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/gametime"
@@ -37,9 +38,12 @@ type RoomTemplateDetails struct {
 	IsBurning      bool
 	TrackingString string
 	RoomAlerts     []string // Messages to show below room description as a special alert
+	ShowPvp        bool     // Whether to display that the room is PVP
 }
 
 func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
+
+	c := configs.GetConfig()
 
 	var roomSymbol string = r.MapSymbol
 	var roomLegend string = r.MapLegend
@@ -51,6 +55,12 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 	}
 	if b.name != `` {
 		roomLegend = b.name
+	}
+
+	showPvp := false
+	// Don't need to show the PVP flag if Pvp is globally enabled or globally disabled
+	if c.PVP == `limited` {
+		showPvp = r.IsPvp()
 	}
 
 	details := RoomTemplateDetails{
@@ -70,6 +80,7 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 		IsNight:        gametime.IsNight(),
 		IsBurning:      r.IsBurning(),
 		TrackingString: ``,
+		ShowPvp:        showPvp,
 	}
 
 	//

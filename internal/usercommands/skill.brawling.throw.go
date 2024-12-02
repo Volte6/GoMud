@@ -101,12 +101,12 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 	} else if targetPlayerId > 0 {
 
-		if configs.GetConfig().PVP != `enabled` {
-			user.SendText(`PVP is currently disabled.`)
+		targetUser := users.GetByUserId(targetPlayerId)
+
+		if pvpErr := room.CanPvp(user, targetUser); pvpErr != nil {
+			user.SendText(pvpErr.Error())
 			return true, nil
 		}
-
-		targetUser := users.GetByUserId(targetPlayerId)
 
 		user.Character.RemoveItem(itemMatch)
 

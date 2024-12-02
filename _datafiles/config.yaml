@@ -87,9 +87,8 @@ AuctionUpdateSeconds: 30
 #   Possible Values:
 #     enabled   - PVP is enabled everywhere
 #     disabled  - PVP is disabled eveywhere
-#     voluntary - PVP is enabled everywhere for players that enable it
 #     limited   - PVP is enabled for all players but only in PVP enabled rooms
-PVP: enabled
+PVP: limited
 # - XPScale -
 #   Scales XP Charts for character leveling. Lower means less required, higher
 #   means more required. 1 is the default (no change).

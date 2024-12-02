@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
@@ -92,9 +91,13 @@ func Cast(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	} else if spellInfo.Type == spells.HarmSingle {
 
-		if targetPlayerId > 0 && configs.GetConfig().PVP != `enabled` {
-			user.SendText(`PVP is currently disabled.`)
-			return true, nil
+		if targetPlayerId > 0 {
+			if u := users.GetByUserId(targetPlayerId); u != nil {
+				if pvpErr := room.CanPvp(user, u); pvpErr != nil {
+					user.SendText(pvpErr.Error())
+					return true, nil
+				}
+			}
 		}
 
 		if spellArg == `` {
@@ -195,9 +198,12 @@ func Cast(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		} else if targetPlayerId > 0 {
 
-			if configs.GetConfig().PVP != `enabled` {
-				user.SendText(`PVP is currently disabled.`)
-				return true, nil
+			// make sure they can Pvp the player being targetted
+			if u := users.GetByUserId(targetPlayerId); u != nil {
+				if pvpErr := room.CanPvp(user, u); pvpErr != nil {
+					user.SendText(pvpErr.Error())
+					return true, nil
+				}
 			}
 
 			for _, uId := range room.GetPlayers() {
@@ -205,7 +211,9 @@ func Cast(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					continue
 				}
 				if u := users.GetByUserId(uId); u != nil {
-					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+					if pvpErr := room.CanPvp(user, u); pvpErr != nil {
+						spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+					}
 				}
 			}
 
@@ -236,9 +244,23 @@ func Cast(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			spellAggro.TargetMobInstanceIds = room.GetMobs(rooms.FindFightingPlayer)
 		}
 
-	} else if spellInfo.Type == spells.HelpArea || spellInfo.Type == spells.HarmArea {
+	} else if spellInfo.Type == spells.HelpArea {
 
 		spellAggro.TargetUserIds = room.GetPlayers()
+		spellAggro.TargetMobInstanceIds = room.GetMobs()
+
+	} else if spellInfo.Type == spells.HarmArea {
+
+		// make sure they can Pvp the player being hit
+		for _, uId := range room.GetPlayers() {
+			if u := users.GetByUserId(uId); u != nil {
+				if err := room.CanPvp(user, u); err == nil {
+					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+				}
+
+			}
+		}
+
 		spellAggro.TargetMobInstanceIds = room.GetMobs()
 
 	}

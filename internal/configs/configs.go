@@ -386,7 +386,7 @@ func (c *Config) Validate() {
 	}
 
 	// Validate PVP setting
-	if c.PVP != `enabled` && c.PVP != `disabled` {
+	if c.PVP != `enabled` && c.PVP != `disabled` && c.PVP != `limited` {
 		if c.PVP == `off` {
 			c.PVP = `disabled`
 		} else {
