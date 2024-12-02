@@ -103,6 +103,11 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 		targetUser := users.GetByUserId(targetPlayerId)
 
+		if pvpErr := room.CanPvp(user, targetUser); pvpErr != nil {
+			user.SendText(pvpErr.Error())
+			return true, nil
+		}
+
 		user.Character.RemoveItem(itemMatch)
 
 		// Tell the player they are throwing the item

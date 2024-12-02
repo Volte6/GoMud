@@ -33,7 +33,7 @@ type Config struct {
 	AuctionsAnonymous            ConfigBool        `yaml:"AuctionsAnonymous"`
 	AuctionSeconds               ConfigInt         `yaml:"AuctionSeconds"`
 	AuctionUpdateSeconds         ConfigInt         `yaml:"AuctionUpdateSeconds"`
-	PVPEnabled                   ConfigBool        `yaml:"PVPEnabled"`
+	PVP                          ConfigString      `yaml:"PVP"`
 	XPScale                      ConfigFloat       `yaml:"XPScale"`
 	TurnMs                       ConfigInt         `yaml:"TurnMs"`
 	RoundSeconds                 ConfigInt         `yaml:"RoundSeconds"`
@@ -385,7 +385,14 @@ func (c *Config) Validate() {
 		c.AuctionUpdateSeconds = c.AuctionSeconds >> 1 // default
 	}
 
-	// Nothing to do with PVPEnabled
+	// Validate PVP setting
+	if c.PVP != `enabled` && c.PVP != `disabled` && c.PVP != `limited` {
+		if c.PVP == `off` {
+			c.PVP = `disabled`
+		} else {
+			c.PVP = `enabled`
+		}
+	}
 
 	if c.XPScale <= 0 {
 		c.XPScale = 1.0 // default

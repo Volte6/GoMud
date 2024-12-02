@@ -88,7 +88,7 @@ func Spells(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 		if len(rows) > 0 {
 			rowFormatting = append(rowFormatting, []string{`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`})
-			rows = append(rows, []string{``, ``, ``, ``, ``, ``, ``, ``})
+			rows = append(rows, []string{`-`, ``, ``, ``, ``, ``, ``, ``})
 		}
 
 		for i := 0; i < len(harmfulRows); i++ {
@@ -101,7 +101,7 @@ func Spells(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 		if len(rows) > 0 {
 			rowFormatting = append(rowFormatting, []string{`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`})
-			rows = append(rows, []string{``, ``, ``, ``, ``, ``, ``, ``})
+			rows = append(rows, []string{`-`, ``, ``, ``, ``, ``, ``, ``})
 		}
 
 		for i := 0; i < len(neutralRows); i++ {

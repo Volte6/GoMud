@@ -101,9 +101,12 @@ func Bump(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	} else if pickPlayerId > 0 {
 
-		p := users.GetByUserId(pickPlayerId)
+		if p := users.GetByUserId(pickPlayerId); p != nil {
 
-		if p != nil {
+			if pvpErr := room.CanPvp(user, p); pvpErr != nil {
+				user.SendText(pvpErr.Error())
+				return true, nil
+			}
 
 			levelDelta := user.Character.Level - p.Character.Level
 			if levelDelta < 1 {

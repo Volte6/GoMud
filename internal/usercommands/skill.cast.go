@@ -91,6 +91,15 @@ func Cast(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	} else if spellInfo.Type == spells.HarmSingle {
 
+		if targetPlayerId > 0 {
+			if u := users.GetByUserId(targetPlayerId); u != nil {
+				if pvpErr := room.CanPvp(user, u); pvpErr != nil {
+					user.SendText(pvpErr.Error())
+					return true, nil
+				}
+			}
+		}
+
 		if spellArg == `` {
 
 			if user.Character.Aggro != nil {
@@ -178,32 +187,80 @@ func Cast(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		// If not currently aggro, only targets all mobs in the room
 
-		fightingMobs := room.GetMobs(rooms.FindFightingPlayer)
-		for _, mobInstId := range fightingMobs {
-			if m := mobs.GetInstance(mobInstId); m != nil {
-				if m.Character.IsAggro(user.UserId, 0) || m.HatesRace(user.Character.Race()) {
+		if targetMobInstanceId > 0 {
+
+			// target all mobs
+			for _, mobInstId := range room.GetMobs() {
+				if m := mobs.GetInstance(mobInstId); m != nil {
 					spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
 				}
 			}
-		}
 
-		fightingPlayers := room.GetPlayers(rooms.FindFightingPlayer)
-		for _, uId := range fightingPlayers {
-			if u := users.GetByUserId(uId); u != nil {
-				if u.Character.IsAggro(user.UserId, 0) {
-					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+		} else if targetPlayerId > 0 {
+
+			// make sure they can Pvp the player being targetted
+			if u := users.GetByUserId(targetPlayerId); u != nil {
+				if pvpErr := room.CanPvp(user, u); pvpErr != nil {
+					user.SendText(pvpErr.Error())
+					return true, nil
 				}
 			}
+
+			for _, uId := range room.GetPlayers() {
+				if uId == user.UserId {
+					continue
+				}
+				if u := users.GetByUserId(uId); u != nil {
+					if pvpErr := room.CanPvp(user, u); pvpErr != nil {
+						spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+					}
+				}
+			}
+
+		} else {
+
+			fightingMobs := room.GetMobs(rooms.FindFightingPlayer)
+			for _, mobInstId := range fightingMobs {
+				if m := mobs.GetInstance(mobInstId); m != nil {
+					if m.Character.IsAggro(user.UserId, 0) || m.HatesRace(user.Character.Race()) {
+						spellAggro.TargetMobInstanceIds = append(spellAggro.TargetMobInstanceIds, mobInstId)
+					}
+				}
+			}
+
+			fightingPlayers := room.GetPlayers(rooms.FindFightingPlayer)
+			for _, uId := range fightingPlayers {
+				if u := users.GetByUserId(uId); u != nil {
+					if u.Character.IsAggro(user.UserId, 0) {
+						spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+					}
+				}
+			}
+
 		}
 
 		if len(spellAggro.TargetUserIds) < 1 && len(spellAggro.TargetMobInstanceIds) < 1 {
 			// No targets found, default to all mobs in the room
-			spellAggro.TargetMobInstanceIds = fightingMobs
+			spellAggro.TargetMobInstanceIds = room.GetMobs(rooms.FindFightingPlayer)
 		}
 
-	} else if spellInfo.Type == spells.HelpArea || spellInfo.Type == spells.HarmArea {
+	} else if spellInfo.Type == spells.HelpArea {
 
 		spellAggro.TargetUserIds = room.GetPlayers()
+		spellAggro.TargetMobInstanceIds = room.GetMobs()
+
+	} else if spellInfo.Type == spells.HarmArea {
+
+		// make sure they can Pvp the player being hit
+		for _, uId := range room.GetPlayers() {
+			if u := users.GetByUserId(uId); u != nil {
+				if err := room.CanPvp(user, u); err == nil {
+					spellAggro.TargetUserIds = append(spellAggro.TargetUserIds, uId)
+				}
+
+			}
+		}
+
 		spellAggro.TargetMobInstanceIds = room.GetMobs()
 
 	}

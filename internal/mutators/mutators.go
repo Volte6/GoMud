@@ -49,6 +49,11 @@ type TextModifier struct {
 	ColorPattern string       `yaml:"colorpattern,omitempty"` // An optional color pattern name to apply
 }
 
+type PvpOverride struct {
+	Enabled  bool `yaml:"enabled,omitempty"`  // force enabled?
+	Disabled bool `yaml:"disabled,omitempty"` // force disabled?
+}
+
 type MutatorSpec struct {
 	MutatorId string `yaml:"mutatorid,omitempty"` // Short text that will uniquely identify this modifier ("dusty")
 	// Text based changes
@@ -64,6 +69,7 @@ type MutatorSpec struct {
 	RespawnRate   string                   `yaml:"respawnrate,omitempty"`   // daily, weekly, 1 day, 3 day, monthly, etc.
 	LightMod      int                      `yaml:"lightmod,omitempty"`      //  -2 to 2 (change). If result is 0 = none. 1 = can see this room. 2 = can see this room and all exits
 	Exits         map[string]exit.RoomExit `yaml:"exits,omitempty"`         // name/roomId pairs of exits only available while mutator is live.
+	Pvp           PvpOverride              `yaml:"pvp,omitempty"`           // optionally force room pvp attributes.
 }
 
 func GetAllMutatorSpecs() []MutatorSpec {

@@ -5,7 +5,6 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
@@ -163,14 +162,12 @@ func Attack(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 	} else if attackPlayerId > 0 {
 
-		if !configs.GetConfig().PVPEnabled {
-			user.SendText(`PVP is currently disabled.`)
-			return true, nil
-		}
+		if p := users.GetByUserId(attackPlayerId); p != nil {
 
-		p := users.GetByUserId(attackPlayerId)
-
-		if p != nil {
+			if pvpErr := room.CanPvp(user, p); pvpErr != nil {
+				user.SendText(pvpErr.Error())
+				return true, nil
+			}
 
 			if partyInfo := parties.Get(user.UserId); partyInfo != nil {
 				if partyInfo.IsMember(attackPlayerId) {

@@ -102,6 +102,7 @@ var (
 		`portal`:      {Portal, false, false},
 		`pray`:        {Pray, false, false},
 		`print`:       {Print, true, false},
+		`printline`:   {PrintLine, true, false},
 		`put`:         {Put, false, false},
 		`quests`:      {Quests, true, false},
 		`quit`:        {Quit, true, false},

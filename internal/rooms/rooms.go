@@ -90,11 +90,12 @@ type Room struct {
 	LongTermDataStore map[string]any                    `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
 	Mutators          mutators.MutatorList              `yaml:"mutators,omitempty"`          // mutators this room spawns with.
 	Effects           map[EffectType]AreaEffect         `yaml:"-"`
-	players           []int                             `yaml:"-"` // list of user IDs currently in the room
-	mobs              []int                             `yaml:"-"` // list of mob instance IDs currently in the room. Does not get saved.
-	visitors          map[VisitorType]map[int]uint64    `yaml:"-"` // list of user IDs that have visited this room, and the last round they did
-	lastVisited       uint64                            `yaml:"-"` // last round a visitor was in the room
-	tempDataStore     map[string]any                    `yaml:"-"` // Temporary data store for the room
+	Pvp               bool                              `yaml:"pvp,omitempty"` // config pvp is set to `limited`, uses this value
+	players           []int                             `yaml:"-"`             // list of user IDs currently in the room
+	mobs              []int                             `yaml:"-"`             // list of mob instance IDs currently in the room. Does not get saved.
+	visitors          map[VisitorType]map[int]uint64    `yaml:"-"`             // list of user IDs that have visited this room, and the last round they did
+	lastVisited       uint64                            `yaml:"-"`             // last round a visitor was in the room
+	tempDataStore     map[string]any                    `yaml:"-"`             // Temporary data store for the room
 }
 
 type TrainingRange struct {
@@ -2103,4 +2104,38 @@ func (r *Room) ActiveMutators(yield func(mutators.Mutator) bool) {
 			return
 		}
 	}
+}
+
+// Returns true if Pvp is allowed in this room
+func (r *Room) IsPvp() bool {
+	roomPvp := r.Pvp
+	for mut := range r.ActiveMutators {
+		spec := mut.GetSpec()
+		if spec.Pvp.Enabled {
+			roomPvp = true
+		} else if spec.Pvp.Disabled {
+			roomPvp = false
+		}
+	}
+	return roomPvp
+}
+
+// Returns an error with a reason why they cannot PVP, or nil
+func (r *Room) CanPvp(attUser *users.UserRecord, defUser *users.UserRecord) error {
+
+	// Possible settings are `enabled`, `disabled`, `limited`
+	pvpSetting := string(configs.GetConfig().PVP)
+
+	if pvpSetting == `disabled` {
+		return errors.New(`PVP is disabled.`)
+	}
+
+	if pvpSetting == `limited` {
+		if r.IsPvp() {
+			return nil
+		}
+		return errors.New(`This is not a PVP area.`)
+	}
+
+	return nil
 }
