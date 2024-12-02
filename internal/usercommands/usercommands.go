@@ -104,6 +104,7 @@ var (
 		`print`:       {Print, true, false},
 		`printline`:   {PrintLine, true, false},
 		`put`:         {Put, false, false},
+		`pvp`:         {Pvp, true, false},
 		`quests`:      {Quests, true, false},
 		`quit`:        {Quit, true, false},
 		`questtoken`:  {QuestToken, false, true}, // Admin only

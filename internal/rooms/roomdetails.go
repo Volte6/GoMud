@@ -58,7 +58,7 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 
 	showPvp := false
 	// Don't need to show the PVP flag if Pvp is globally enabled or globally disabled
-	if c.PVP == `limited` {
+	if c.PVP == configs.PVPLimited {
 		showPvp = r.IsPvp()
 	}
 

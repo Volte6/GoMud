@@ -190,6 +190,7 @@ help-aliases:
   leaderboard:      [leaderboards, highscore, topscore]
   history:          ['log']
   time:             ['date']
+  pvp:              ['pk']
 # Default aliases for commands
 # For example: inv -> inventory
 # They can be command + argument aliases

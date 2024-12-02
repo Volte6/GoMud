@@ -15,7 +15,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const defaultConfigPath = "_datafiles/config.yaml"
+const (
+	defaultConfigPath = "_datafiles/config.yaml"
+
+	PVPEnabled  = `enabled`
+	PVPDisabled = `disabled`
+	PVPOff      = `off`
+	PVPLimited  = `limited`
+)
 
 type Config struct {
 	Version                      ConfigString      `yaml:"Version"` // Cuurrent version of all datafiles
@@ -386,11 +393,11 @@ func (c *Config) Validate() {
 	}
 
 	// Validate PVP setting
-	if c.PVP != `enabled` && c.PVP != `disabled` && c.PVP != `limited` {
-		if c.PVP == `off` {
-			c.PVP = `disabled`
+	if c.PVP != PVPEnabled && c.PVP != PVPDisabled && c.PVP != PVPLimited {
+		if c.PVP == PVPOff {
+			c.PVP = PVPDisabled
 		} else {
-			c.PVP = `enabled`
+			c.PVP = PVPEnabled
 		}
 	}
 

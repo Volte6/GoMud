@@ -2126,11 +2126,11 @@ func (r *Room) CanPvp(attUser *users.UserRecord, defUser *users.UserRecord) erro
 	// Possible settings are `enabled`, `disabled`, `limited`
 	pvpSetting := string(configs.GetConfig().PVP)
 
-	if pvpSetting == `disabled` {
+	if pvpSetting == configs.PVPDisabled {
 		return errors.New(`PVP is disabled.`)
 	}
 
-	if pvpSetting == `limited` {
+	if pvpSetting == configs.PVPLimited {
 		if r.IsPvp() {
 			return nil
 		}
