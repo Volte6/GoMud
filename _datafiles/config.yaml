@@ -83,9 +83,13 @@ AuctionSeconds: 180
 # - AuctionUpdateSeconds -
 #   How may seconds (roughly) between updates on current auction.
 AuctionUpdateSeconds: 30
-# - PVPEnabled -
-#   If true, players can attack each other. If false, they cannot.
-PVPEnabled: true
+# - PVP -
+#   Possible Values:
+#     enabled   - PVP is enabled everywhere
+#     disabled  - PVP is disabled eveywhere
+#     voluntary - PVP is enabled everywhere for players that enable it
+#     limited   - PVP is enabled for all players but only in PVP enabled rooms
+PVP: enabled
 # - XPScale -
 #   Scales XP Charts for character leveling. Lower means less required, higher
 #   means more required. 1 is the default (no change).
@@ -368,7 +372,7 @@ BannedNames:
 #   update this to a large number (like 100000), so that as new rooms are 
 #   created they will be far beyond the range of any room id's expected through
 #   a code update.
-NextRoomId: 1001
+NextRoomId: 1002
 # - LogIntervalRoundCount - 
 #   How often to log the round count. Can help judge logs a little better.
 LogIntervalRoundCount: 1

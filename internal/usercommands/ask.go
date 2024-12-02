@@ -104,7 +104,7 @@ func Ask(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 			if mobCmd == `attack` {
 				if pid, _ := room.FindByName(askRest); pid > 0 {
-					if !configs.GetConfig().PVPEnabled {
+					if configs.GetConfig().PVP != `enabled` {
 
 						mob.Command(`emote shakes their head.`)
 						mob.Command(`say PVP is currently disabled.`)

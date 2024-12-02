@@ -163,7 +163,7 @@ func Attack(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 	} else if attackPlayerId > 0 {
 
-		if !configs.GetConfig().PVPEnabled {
+		if configs.GetConfig().PVP != `enabled` {
 			user.SendText(`PVP is currently disabled.`)
 			return true, nil
 		}

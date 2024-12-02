@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -100,6 +101,11 @@ func Bump(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		}
 
 	} else if pickPlayerId > 0 {
+
+		if configs.GetConfig().PVP != `enabled` {
+			user.SendText(`PVP is currently disabled.`)
+			return true, nil
+		}
 
 		p := users.GetByUserId(pickPlayerId)
 

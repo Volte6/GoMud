@@ -1387,7 +1387,14 @@ func (w *World) TurnTick() {
 			})
 
 			if hitPlayers {
+
 				for _, uid := range room.GetPlayers() {
+
+					// If not hitting self and pvp is disabled, skip
+					if action.SourceUserId > 0 && action.SourceUserId != uid && configs.GetConfig().PVP != `enabled` {
+						continue
+					}
+
 					for _, buffId := range iSpec.BuffIds {
 						events.AddToQueue(events.Buff{
 							UserId:        uid,
@@ -1396,6 +1403,7 @@ func (w *World) TurnTick() {
 						})
 					}
 				}
+
 			}
 
 			if !hitMobs {
