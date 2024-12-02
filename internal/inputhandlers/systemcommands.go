@@ -114,11 +114,7 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 		// Not building complex output, so just preparse the ansi in the template and cache that
 		tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
 
-		if connections.IsWebsocket(connectionId) {
-			connections.SendTo([]byte(tplTxt), connectionId)
-		} else {
-			connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
-		}
+		connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
 
 		connections.Kick(connectionId)
 		return true
@@ -137,11 +133,7 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 		onlineTableData := templates.GetTable("Online Users", headers, rows)
 		tplTxt, _ := templates.Process("tables/generic", onlineTableData)
 
-		if connections.IsWebsocket(connectionId) {
-			connections.SendTo([]byte(tplTxt), connectionId)
-		} else {
-			connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
-		}
+		connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
 
 		// Not building complex output, so just preparse the ansi in the template and cache that
 		//tplTxt, _ := templates.Process("systemcommands/who", onlineUsers)
@@ -153,11 +145,7 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 
 		tplTxt, _ := templates.Process("systemcommands/help", systemCommandList)
 
-		if connections.IsWebsocket(connectionId) {
-			connections.SendTo([]byte(tplTxt), connectionId)
-		} else {
-			connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
-		}
+		connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
 
 		return true
 	}

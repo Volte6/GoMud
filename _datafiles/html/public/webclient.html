@@ -19,24 +19,6 @@
             background-color: #1e1e1e;
         }
 
-        #toggle-button-column {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: #3e3e3e;
-            color: white;
-            border: none;
-            cursor: pointer;
-            padding: 5px 7px 5px 7px;
-            font-size: 15px;
-            border-radius: 3px;
-            z-index: 1; /* Ensure the toggle button is above other elements */
-        }
-
-        #toggle-button-column:hover {
-            background-color: #555;
-        }
-
         /* Ensure the main container is positioned relatively */
         #main-container {
             flex: 1;
@@ -47,68 +29,11 @@
             background-color: #000;
         }
 
-        /* Updated styles for button column */
-        #button-column {
-            width: 220px;
-            background-color: #2d2d2d;
-            display: flex;
-            flex-direction: column;
-            padding: 5px 5px 0px 10px;
-            overflow: hidden;
-            transition: width 0.3s ease;
-            margin-top:40px;
-            border-radius: 15px 0px 0px 0px;
-        }
-
-        #button-column.collapsed {
-            width: 0;
-            padding: 5px 0px 0px 0px;
-        }
-
         /* Adjust text-output to flex properly */
-        #text-output {
+        #terminal {
             flex: 1;
-            background-color: black;
-            color: #ccffcc;
-            overflow-y: auto;
-            font-size: calc(min((100vw / 80), (100vh / 24)));
-            line-height: 1;
-            letter-spacing: 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            padding: 10px;
-            /**/
-            transition: background-color 0.5s;
         }
 
-        .button-container {
-            display: flex;
-            align-items: center;
-            margin: 3px 0;
-        }
-        .command-button {
-            flex: 1;
-            padding: 10px;
-            background-color: #3e3e3e;
-            color: white;
-            border: none;
-            cursor: pointer;
-            text-align: left;
-            font-size: 16px;
-            border-radius: 10px;
-        }
-        .edit-icon {
-            width: 24px;
-            height: 24px;
-            margin-left: 5px;
-            cursor: pointer;
-            fill: white;
-            background: none;
-            border: none;
-        }
-        .edit-icon:hover {
-            fill: #00ff00;
-        }
         #input-area {
             display: flex;
             padding: 10px;
@@ -156,115 +81,52 @@
         #command-input:focus {
             outline: none;
         }
-
-
-        /****************************** 
-        * Button Modal Styles 
-        ******************************/
-        #addbtn-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none; /* Hidden by default */
-            justify-content: center;
-            align-items: center;
-        }
-        #addbtn-modal-content {
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            width: 300px;
-        }
-        #addbtn-modal-content h2 {
-            margin-top: 0;
-        }
-        #addbtn-modal-content label {
-            display: block;
-            margin: 10px 0 5px;
-        }
-        #addbtn-modal-content input {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        #addbtn-modal-buttons {
-            margin-top: 15px;
-            text-align: right;
-        }
-        #addbtn-modal-buttons button {
-            padding: 8px 12px;
-            margin-left: 10px;
-        }
-        #addbtn-delete-button {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        #addbtn-delete-button:hover {
-            background-color: #d32f2f;
-        }
-        #addbtn-add-button-container {
-            display: flex;
-            align-items: center;
-            margin: 5px 0;
-            margin-top: auto; /* Push to the bottom */
-        }
-        #addbtn-add-button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        #addbtn-add-button:hover {
-            background-color: #45a049;
-        }
-        /****************************** 
-        * END Button Modal Styles 
-        ******************************/
     </style>
-    <style id="ansiStyles"></style> <!-- Style tag to store dynamic styles -->
+    <link rel="stylesheet" href="/static/public/css/xterm.css" />
+    <script src="/static/public/js/xterm.4.19.0.js"></script>
+    <script src="/static/public/js/xterm-addon-fit.js"></script>
 </head>
 <body onLoad="init(); return false;">
     <div id="main-container">
-        <button id="toggle-button-column"  title="Hide Buttons">&#9776;</button>
-
-        <div id="text-output">Welcome to the Terminal Interface.
-Type your commands below.
-</div>
-        <div id="button-column" class="collapsed">
-            <div id="addbtn-add-button-container">
-                <button id="addbtn-add-button">+ Add</button>
-            </div>
-        </div>
+        <div id="terminal"></div>
     </div>
     <div id="input-area">
         <input type="text" id="command-input" placeholder="Enter command...">
         <button id="connect-button">Connect</button>
     </div>
 
-    <!-- Modal Dialog for Editing Button Properties -->
-    <div id="addbtn-modal">
-        <div id="addbtn-modal-content">
-            <h2 id="addbtn-modal-title">Edit Button</h2>
-            <label for="addbtn-button-text">Button Text:</label>
-            <input type="text" id="addbtn-button-text">
-            <label for="addbtn-button-command">Command:</label>
-            <input type="text" id="addbtn-button-command">
-            <div id="addbtn-modal-buttons">
-                <button id="addbtn-delete-button">Delete</button>
-                <button id="addbtn-cancel-button">Cancel</button>
-                <button id="addbtn-save-button">Save</button>
-            </div>
-        </div>
-    </div>
     <script>
+
+        /////////////////////////////////////////////
+        //
+        // Terminal emulation setup
+        //
+        /////////////////////////////////////////////
+        const term = new window.Terminal({
+            cols: 80, 
+            rows: 60,
+            cursorBlink: true,
+            fontSize: 20,
+            //fontFamily: "Courier New"
+        });
+        //term.setOption('theme', { fontFamily: 'DejaVu Sans Mono' })
+
+
+        const fitAddon = new window.FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+
+        term.open(document.getElementById('terminal'));
+
+        // Function to resize the terminal to fit its container
+        const resizeTerminal = () => {
+            fitAddon.fit();
+        };
+
+        // Fit the terminal initially and on window resize
+        resizeTerminal();
+        window.addEventListener('resize', resizeTerminal);
+        
+        
         /////////////////////////////////////////////
         //
         // Misc tracking
@@ -278,346 +140,7 @@ Type your commands below.
         let commandHistory = [];
         let historyPosition = 0;
         let commandHistoryMaxLength = 30;
-
-
-        /////////////////////////////////////////////
-        //
-        // Side bar toggle code
-        //
-        /////////////////////////////////////////////
-
-        let isButtonColumnVisible = false;
-        let currentButtonContainer = null; // The container of the button being edited
-        let isAddingNewButton = false; // Flag to check if adding a new button
-        let currentButton = null; // The button being edited
-
-        const toggleButton = document.getElementById('toggle-button-column');
-        const buttonColumn = document.getElementById('button-column');
-        const saveButton = document.getElementById('addbtn-save-button');
-        const cancelButton = document.getElementById('addbtn-cancel-button');
-        const deleteButton = document.getElementById('addbtn-delete-button');
-        const addButton = document.getElementById('addbtn-add-button');
-        const modal = document.getElementById('addbtn-modal');
-        const modalTitle = document.getElementById('addbtn-modal-title');
-        const buttonTextInput = document.getElementById('addbtn-button-text');
-        const buttonCommandInput = document.getElementById('addbtn-button-command');
-
-        toggleButton.addEventListener('click', () => {
-            if (isButtonColumnVisible) {
-                // Animate closing
-                buttonColumn.classList.add('collapsed');
-                isButtonColumnVisible = false;
-                // Change the toggle button icon to 'Show' icon
-                toggleButton.innerHTML = '&#9776;'; // Hamburger menu icon
-                toggleButton.title = 'Show Buttons';
-            } else {
-                // Animate opening
-                buttonColumn.classList.remove('collapsed');
-                isButtonColumnVisible = true;
-                // Change the toggle button icon back to 'Hide' icon
-                toggleButton.innerHTML = '&#9654;'; // Right-pointing triangle
-                toggleButton.title = 'Hide Buttons';
-            }
-        });
-
-
-        /////////////////////////////////////////////
-        //
-        // Button modifying code
-        //
-        /////////////////////////////////////////////
-
-        // Function to open the modal dialog
-        function openModal(button, isNew = false) {
-            isAddingNewButton = isNew;
-            if (isNew) {
-                modalTitle.textContent = 'Add New Button';
-                buttonTextInput.value = '';
-                buttonCommandInput.value = '';
-                deleteButton.style.display = 'none'; // Hide delete button when adding
-                currentButton = null;
-                currentButtonContainer = null;
-            } else {
-                modalTitle.textContent = 'Edit Button';
-                buttonTextInput.value = button.textContent;
-                buttonCommandInput.value = button.getAttribute('data-command');
-                deleteButton.style.display = 'inline-block'; // Show delete button
-                currentButton = button;
-                currentButtonContainer = button.parentElement;
-            }
-            modal.style.display = 'flex';
-        }
-
-        // Function to close the modal dialog
-        function closeModal() {
-            modal.style.display = 'none';
-            currentButton = null;
-            currentButtonContainer = null;
-            isAddingNewButton = false;
-        }
-
-        // Add event listeners to the edit icons
-        function addEditIconEventListeners() {
-            const editIcons = document.querySelectorAll('.edit-icon');
-            editIcons.forEach(icon => {
-                icon.removeEventListener('click', handleEditIconClick); // Remove previous listener if any
-                icon.addEventListener('click', handleEditIconClick);
-            });
-        }
-
-        function handleEditIconClick(event) {
-            const icon = event.currentTarget;
-            const button = icon.previousElementSibling;
-            openModal(button);
-        }
-
-        function addNewButton(name, command) {
-                // Create new button elements
-                const buttonContainer = document.createElement('div');
-                buttonContainer.className = 'button-container';
-
-                const newCommandButton = document.createElement('button');
-                newCommandButton.className = 'command-button';
-                newCommandButton.textContent = name;
-                newCommandButton.setAttribute('data-command', command);
-
-                const newEditIcon = document.createElement('button');
-                newEditIcon.className = 'edit-icon';
-                newEditIcon.title = 'Edit';
-                newEditIcon.innerHTML = '<svg viewBox="0 0 20 20"><path d="M14.69 3.23l2.08 2.08a1 1 0 010 1.41l-8.6 8.6-3.75.92a1 1 0 01-1.21-1.21l.92-3.75 8.6-8.6a1 1 0 011.41 0zM5.5 13.09l-.61 2.5 2.5-.61L15.06 7.3l-1.89-1.89L5.5 13.09z"/></svg>';
-                buttonContainer.appendChild(newCommandButton);
-                buttonContainer.appendChild(newEditIcon);
-
-                // Insert the new button before the "+Add" button container
-                const addButtonContainer = document.getElementById('addbtn-add-button-container');
-                buttonColumn.insertBefore(buttonContainer, addButtonContainer);
-
-                // Add event listeners to the new buttons
-                newCommandButton.addEventListener('click', handleCommandButtonClick);
-                newEditIcon.addEventListener('click', handleEditIconClick);
-        }
-
-        // Add event listeners to the command buttons
-        function addCommandButtonEventListeners() {
-            const commandButtons = document.querySelectorAll('.command-button');
-            commandButtons.forEach(button => {
-                button.removeEventListener('click', handleCommandButtonClick); // Remove previous listener if any
-                button.addEventListener('click', handleCommandButtonClick);
-            });
-        }
         
-        function handleCommandButtonClick(event) {
-            const button = event.currentTarget;
-            const command = button.getAttribute('data-command');
-            SendData(command);
-            textInput.focus();
-        }
-
-        // Save button in the modal
-        saveButton.addEventListener('click', () => {
-            if (isAddingNewButton) {
-                addNewButton(buttonTextInput.value, buttonCommandInput.value);
-            } else if (currentButton) {
-                currentButton.textContent = buttonTextInput.value;
-                currentButton.setAttribute('data-command', buttonCommandInput.value);
-            }
-
-            // store the change in local settings
-            saveSettings();
-
-            closeModal();
-        });
-
-        // Cancel button in the modal
-        cancelButton.addEventListener('click', () => {
-            closeModal();
-        });
-
-        // Delete button in the modal
-        deleteButton.addEventListener('click', () => {
-            if (currentButtonContainer) {
-                currentButtonContainer.remove();
-                closeModal();
-                // store the change in local settings
-                saveSettings();
-            }
-        });
-
-        // Close the modal when clicking outside the modal content
-        window.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                closeModal();
-            }
-        });
-
-        // "+Add" Button Click Event
-        addButton.addEventListener('click', () => {
-            openModal(null, true);
-        });
-
-
-        // Function to delete the dynamic style tag
-        function clearAnsiStyles() {
-            const styleTag = document.getElementById("ansiStyles");
-            if (styleTag) {
-                styleTag.innerHTML = ''; // Clear all styles inside the <style> tag
-            }
-        }
-
-        // Function to add a new class with specified foreground (text) and background colors
-        function addAnsiStyle(name, fgcolor, bgcolor, misc) {
-            const styleTag = document.getElementById("ansiStyles");
-
-            // Construct the CSS rule for the new class
-            const newStyle = `
-                .${name} {
-                    ` + (fgcolor ? `color: ${fgcolor};` : ``) + `
-                    ` + (bgcolor ? `background-color: ${bgcolor};` : ``) + `
-                    ` + (misc ? misc + `;` : ``) + `
-                }
-            `;
-
-            // Append the new style to the style tag
-            styleTag.innerHTML += newStyle;
-        }
-        
-        /////////////////////////////////////////////
-        //
-        // <ansi> tag conversion code
-        //
-        /////////////////////////////////////////////
-
-        // Boilerplate aliases
-        // More are loaded optionally via server-provided COLORMAP: commands
-        colorAliases = {		
-        "black":        0,
-		"red":          1,
-		"green":        2,
-		"yellow":       3,
-		"blue":         4,
-		"magenta":      5,
-		"cyan":         6,
-		"white":        7,
-		"black-bold":   8,
-		"red-bold":     9,
-		"green-bold":   10,
-		"yellow-bold":  11,
-		"blue-bold":    12,
-		"magenta-bold": 13,
-		"cyan-bold":    14,
-		"white-bold":   15,};
-
-        function ansiTagsToHtml(message) {
-
-            const fullTagRegex = /(<ansi\b[^>]*>)/i;
-            const propertyRegex = /(fg|bg|bold)="([A-Za-z0-9_-]+)"/g;
-            while( fullTagMatch = fullTagRegex.exec(message) ) {
-                
-                const fullTag = fullTagMatch[1];
-                let match;
-
-                css = [];
-                while ((match = propertyRegex.exec(fullTag)) !== null) {
-                    
-                    if ( match[1] == 'fg' || match[1] == 'bg' ) {
-                        ansiColor = colorAliases[match[2]] ? colorAliases[match[2]] : Number(match[2]);
-                        css.push(match[1] + ansiColor);
-                    } else if ( match[1] == 'bold' ) {
-                        console.log(match);
-                        if (match[2] == 0 || match[2] == 'false' ) {
-                            css.push('bold-off');
-                        } else {
-                            css.push('bold');
-                        }
-                    }
-                }
-
-                message = message.replaceAll(fullTag, '<span class="'+ css.join(' ') +'">')
-            }
-            
-            message = message.replaceAll('</ansi>', '</span>')
-
-            return message;
-        }
-
-        function ansiTagsToPlainText(message) {
-
-            const fullTagRegex = /(<ansi\b[^>]*>)/i;
-            const propertyRegex = /(fg|bg)="([A-Za-z0-9_-]+)"/g;
-            while( fullTagMatch = fullTagRegex.exec(message) ) {
-                const fullTag = fullTagMatch[1];
-                message = message.replaceAll(fullTag, '')
-            }
-            
-            message = message.replaceAll('</ansi>', '')
-
-            return message;
-        }
-
-        const ansi16Colors = {
-                '30': 'black', '31': 'red', '32': 'green', '33': 'yellow',
-                '34': 'blue', '35': 'magenta', '36': 'cyan', '37': 'white',
-                '90': 'gray', '91': 'lightcoral', '92': 'lightgreen', '93': 'lightyellow',
-                '94': 'lightblue', '95': 'lightpink', '96': 'lightcyan', '97': 'white'
-            };
-
-        function ansi256Color(inputColor) {
-
-            //ansiColor = inputColor.replace(/^\|+|\|+$/g, '');
-
-            ansiColor = inputColor
-            if ( colorAliases[inputColor] ) {
-                ansiColor = colorAliases[inputColor];
-            }
-
-            ansiColor = Number(ansiColor);
-
-            if (!Number.isInteger(ansiColor) || ansiColor < 0 || ansiColor > 255) {
-                return 'unknown-'+inputColor+'-'+colorAliases[inputColor];
-            }
-
-            let r, g, b;
-
-            if (ansiColor < 16) {
-                // Standard and high-intensity colors
-                const ansi16Colors = [
-                    [0, 0, 0],       // 0: Black
-                    [128, 0, 0],     // 1: Maroon
-                    [0, 128, 0],     // 2: Green
-                    [128, 128, 0],   // 3: Olive
-                    [0, 0, 128],     // 4: Navy
-                    [128, 0, 128],   // 5: Purple
-                    [0, 128, 128],   // 6: Teal
-                    [192, 192, 192], // 7: Silver
-                    [128, 128, 128], // 8: Grey
-                    [255, 0, 0],     // 9: Red
-                    [0, 255, 0],     // 10: Lime
-                    [255, 255, 0],   // 11: Yellow
-                    [0, 0, 255],     // 12: Blue
-                    [255, 0, 255],   // 13: Fuchsia
-                    [0, 255, 255],   // 14: Aqua
-                    [255, 255, 255]  // 15: White
-                ];
-                [r, g, b] = ansi16Colors[ansiColor];
-            } else if (ansiColor >= 16 && ansiColor <= 231) {
-                // 6x6x6 color cube
-                let colorIndex = ansiColor - 16;
-                const rIndex = Math.floor(colorIndex / 36) % 6;
-                const gIndex = Math.floor(colorIndex / 6) % 6;
-                const bIndex = colorIndex % 6;
-
-                r = rIndex === 0 ? 0 : rIndex * 51;
-                g = gIndex === 0 ? 0 : gIndex * 51;
-                b = bIndex === 0 ? 0 : bIndex * 51;
-            } else {
-                // Grayscale from 232 to 255
-                const gray = 8 + (ansiColor - 232) * 10;
-                r = g = b = gray;
-            }
-            
-            return `rgb(${r}, ${g}, ${b})`;
-        }
-
         /////////////////////////////////////////////
         //
         // Basic Websocket code
@@ -626,14 +149,12 @@ Type your commands below.
 
         // Initial state        
         let socket = null;
-        let rawOutput = false;
-        let monochromeOutput = false;
         let debugOutput = false;
         // track whether a drag has occurred
         let isDragging = false;
 
         const connectButton = document.getElementById('connect-button');
-        const textOutput = document.getElementById('text-output');
+        const textOutput = document.getElementById('terminal');
         const textInput = document.getElementById('command-input');
 
         const codeShortcuts = {
@@ -665,66 +186,10 @@ Type your commands below.
             "ArrowRight": "east",
         };
 
-        function escapeHtml(str) {
-            var map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return str.replace(/[&<>"']/g, function(m) {return map[m];});
-        }
-
-        function handleServerMessage(message) {
-            
-            payloadsReceived++;
-            totalBytesReceived += message.length;
-
-            // First do a quick check as to whether it might be a webclient command
-            if ( message.length > 9 && message.substring(8, 9) == ':' ) {
-                if ( handleWebclientCommand(message) ) {
-                    return;
-                }
-            }
-
-            if ( rawOutput ) {
-                
-                message = '<span>'+escapeHtml(message)+'</span>';
-
-            } else if ( monochromeOutput ) {
-
-                message = ansiTagsToPlainText(message);
-
-            }else {
-
-                message = ansiTagsToHtml(message);
-
-            }
-
-            message = message.replaceAll("\r", "");
-                
-            message = processAnsiCodes(message);
-
-            appendToOutput(message);
-        }
 
         function handleWebclientCommand(cmdString) {
 
             cmd = cmdString.substring(0, 9);
-
-            if ( cmd == "COLORMAP:" ) {// request to update color aliases
-
-                debugLog(cmdString);
-
-                jsonStr = cmdString.substring(9);
-                if ( jsonObj = JSON.parse(jsonStr) ) {    
-                    for (k in jsonObj) {
-                        colorAliases[k] = jsonObj[k];
-                    }
-                }
-                return true;
-            }
 
             if ( cmd == "TEXTMASK:" ) { // request to mask input echo to user
 
@@ -737,23 +202,6 @@ Type your commands below.
                 }
 
                 return true;
-            }
-
-            // generic modal. Expected format is 
-            // MODALADD:{modaltitle}={modalbody} 
-            // {modalbody} supports ansitags
-            if ( cmd == 'MODALADD:' ) { 
-                modalDetails = cmdString.substring(9);
-
-                splitPos = modalDetails.indexOf("=");
-
-                createDynamicModal(modalDetails.substring(0, splitPos), ansiTagsToHtml(modalDetails.substring(splitPos+1)));
-
-                return true
-            }
-            if ( cmd == 'MODALREM:' ) { 
-                closeDynamicModal(cmdString.substring(9));
-                return true
             }
 
             return false;
@@ -773,26 +221,38 @@ Type your commands below.
             socket = new WebSocket('ws://'+location.host +':80/ws');
             
             socket.onopen = function() {
-                appendToOutput("Connected to the server!\n");
-                clearScreen();
+                term.writeln("Connected to the server!");
+                term.clear()
                 connectButton.disabled = true;
                 textInput.focus();
             };
 
             socket.onmessage = function(event) {
-                handleServerMessage(event.data);
+
+                payloadsReceived++;
+                totalBytesReceived += event.data.length;
+
+                // First do a quick check as to whether it might be a webclient command
+                if ( event.data.length > 9 && event.data.substring(8, 9) == ':' ) {
+                    if ( handleWebclientCommand(event.data) ) {
+                        return;
+                    }
+                }
+
+                term.write(event.data);
+                
             };
 
             socket.onerror = function(error) {
-                appendToOutput("Error: " + error.message + "\n");
+                term.writeln("Error: " + error.message);
             };
 
             // Disconnected
             socket.onclose = function(event) {
                 if (event.wasClean) {
-                    appendToOutput("Connection closed cleanly, code=${event.code}, reason=${event.reason}\n");
+                    term.writeln("Connection closed cleanly, code=${event.code}, reason=${event.reason}");
                 } else {
-                    appendToOutput("Connection died\n");
+                    term.writeln("Connection died");
                 }
                 connectButton.disabled = false;
                 // Don't let it get stuck in "password" masking mode
@@ -805,12 +265,6 @@ Type your commands below.
 
         textInput.addEventListener('keydown', function(event) {
             
-            if ( textInput.value.length == 0 && codeShortcuts[event.code] ) {
-                SendData(codeShortcuts[event.code]);
-                if (event.preventDefault) event.preventDefault();
-                return false;
-            }
-
             // Macro support
             if ( event.key.substring(0, 1) == "F" && event.key.length == 2 ) {
                 macroNum = event.key.substring(1, 2)
@@ -831,6 +285,12 @@ Type your commands below.
                 event.target.value = commandHistory[ commandHistory.length - historyPosition ];
             }
 
+            if ( textInput.value.length == 0 && codeShortcuts[event.code] ) {
+                SendData(codeShortcuts[event.code]);
+                if (event.preventDefault) event.preventDefault();
+                return false;
+            }
+
             if (event.key === 'Enter') {
 
                 if ( event.target.value != '' ) {
@@ -844,27 +304,7 @@ Type your commands below.
                     }
                 }
 
-                if (event.target.value == "!raw") {
-                    rawOutput = !rawOutput;
-                    event.target.value = '';
-                    return;
-                } else if (event.target.value == "!monochrome") {
-                    monochromeOutput = !monochromeOutput;
-                    event.target.value = '';
-                    return;
-                }else if (event.target.value == "!debug") {
-                    debugOutput = !debugOutput;
-                    event.target.value = '';
-                    return;
-                } else if (event.target.value == "!colors" ) {
-                    listColorAliases();
-                    event.target.value = '';
-                    return;
-                } else if (event.target.value == "clear" ) {
-                    clearScreen();
-                    event.target.value = '';
-                    return;
-                } else if (event.target.value == "!net" ) {
+                if (event.target.value == "!net" ) {
                     printNetStats();
                     event.target.value = '';
                     return;
@@ -873,7 +313,7 @@ Type your commands below.
                 if ( SendData(event.target.value) ) {
                     event.target.value = '';
                 } else {
-                    appendToOutput("Not connected to the server. Did you click the Connect button?\n");
+                    term.writeln("Not connected to the server. Did you click the Connect button?");
                 }
             }
         });
@@ -891,118 +331,16 @@ Type your commands below.
             return true;
         }
 
-        function clearScreen() {
-            textOutput.innerHTML = '';
-        }
-
-        function eraseLastLine() {
-            lastPos = textOutput.innerHTML.lastIndexOf('\n');
-            textOutput.innerHTML = textOutput.innerHTML.substring(0, lastPos+1);
-        }
-
-        function appendToOutput(message) {
-           
-            textOutput.innerHTML += message;
-
-            // Keep scroll back from getting too long.
-            var maxElements = 750;
-            while (textOutput.children.length > maxElements) {
-                textOutput.removeChild(textOutput.firstChild);
-            }
-
-            textOutput.scrollTop = textOutput.scrollHeight;
-        }
-
-
-        function splitByAnsiCodes(input) {
-            // Regular expression to match ANSI escape codes
-            const ansiRegex = /(\x1b\[[0-9;]*[ABCDGHhJKlMmRT])/g;
-            // Split the string using the regex, and filter out empty strings
-            return input.split(ansiRegex).filter(part => part !== '');
-        }
-
-        function processAnsiCodes(outputString) {
-
-            finalOutput = [];
-            parts = splitByAnsiCodes(outputString);
-
-            // Loop through parts
-            for (let i = 0; i < parts.length; i++) {
-                // Check if the part is an ANSI code
-                if (parts[i].startsWith('\x1b[')) {
-
-                    category = categorizeAnsiCode(parts[i]);
-
-                    // Check whether last character is an 'm'
-                   if ( category == 'clearScreen' ) {
-                        // Process the ANSI code
-                        //finalOutput.push( "[CLEAR SCREEN]" );
-                        clearScreen();
-                        finalOutput = [];
-
-                    } else if ( category == 'eraseLine' ) {
-                        // Process the ANSI code
-                        //finalOutput.push( "[ERASE LINE]" );
-
-                        appendToOutput(finalOutput.join(''));
-                        eraseLastLine();
-                        finalOutput = [];
-
-                    } else if ( category == 'cursorMove' ) {
-                        // Process the ANSI code
-                        finalOutput.push( "[CURSOR MOVE]" );
-                    } else if ( category == 'other' ) {
-                        // Process the ANSI code
-                        debugLog("OTHER: " + parts[i].replace('\x1b[','ESC['));
-                    } else {
-                        // Process the ANSI code
-                        //finalOutput.push( "[NOOP: " + parts[i].replace('\x1b[','ESC[') +"]" );
-                    }
-
-                } else {
-                    // Process the text
-                    finalOutput.push( parts[i] );
-                }
-            }
-
-            return finalOutput.join('');
-        }
-
-        function categorizeAnsiCode(code) {
-            // Regex patterns for different types of ANSI escape codes
-            const regexPatterns = {
-                color: /^\x1b\[[0-9;]*m$/,       // Matches color codes
-                eraseLine: /^\x1b\[[0-9]*K$/,     // Matches erase line codes
-                cursorMove: /^\x1b\[[0-9;]*[ABCD]$/, // Matches cursor movement (up, down, forward, back)
-                clearScreen: /^\x1b\[2J$/,        // Matches clear screen code
-                other: /^\x1b\[[^m]*$/            // Matches other escape sequences
-            };
-
-            for (const [type, regex] of Object.entries(regexPatterns)) {
-                if (regex.test(code)) {
-                    return type;
-                }
-            }
-
-            return 'unknown'; // If no pattern matches
-        }
         
         function printNetStats() {
 
-            appendToOutput("\n");
-            appendToOutput(" Request Ct: " + String(payloadsSent) + "\n");
-            appendToOutput(" Bytes Sent: " + String(Math.round(totalBytesSent/1024 * 100) / 100) + "kb\n");
-            appendToOutput("Response Ct: " + String(payloadsReceived) + "\n");
-            appendToOutput(" Bytes Rcvd: " + String(Math.round(totalBytesReceived/1024 * 100) / 100) + "kb\n");
-            appendToOutput("\n");
+            term.writeln("");
+            term.writeln(" Request Ct: " + String(payloadsSent));
+            term.writeln(" Bytes Sent: " + String(Math.round(totalBytesSent/1024 * 100) / 100) + "kb");
+            term.writeln("Response Ct: " + String(payloadsReceived));
+            term.writeln(" Bytes Rcvd: " + String(Math.round(totalBytesReceived/1024 * 100) / 100) + "kb");
+            term.writeln("");
 
-        }
-
-        function listColorAliases() {
-            for( name in colorAliases ) {
-                colorStyle = ansi256Color(colorAliases[name]);
-                appendToOutput("<span style=\"font-family: monospace;background-color:#000000;color:" + colorStyle+"\">" + name.padStart(22) + " | " + String(colorAliases[name]).padStart(10) + " | " + colorStyle + "</span>\n")
-            }
         }
 
         function debugLog(message) {
@@ -1018,28 +356,8 @@ Type your commands below.
         //
         /////////////////////////////////////////////
         specialCommands = {
-            "!raw": "View server messages in raw format.",
-            "!monochrome": "View server messages in monochrome format.",
-            "!debug": "See special debug messages in the console.",
-            "!colors": "Print out all color aliases on screen.",
             "!net": "Print out network traffic stats",
-            "clear": "Clear the screen",
         }
-
-        defaultSettings = {
-            "defaultcolor": "rgb(204, 238, 255)",
-            "buttons":      [
-                                {"name":"Status",       "cmd":"status"},
-                                {"name":"Inventory",    "cmd":"inventory"},
-                                {"name":"Conditions",   "cmd":"conditions"},
-                                {"name":"Jobs",         "cmd":"jobs"},
-                                {"name":"Skills",       "cmd":"skills"},
-                                {"name":"Spells",       "cmd":"spells"},
-                                {"name":"Kill Stats",   "cmd":"killstats"},
-                                {"name":"Help",         "cmd":"help"}
-                            ]
-        };
-
 
         // Add event listener for mousedown to detect the start of a drag
         textOutput.addEventListener('mousedown', function() {
@@ -1066,16 +384,6 @@ Type your commands below.
 
         function init() {
 
-            for( i=0; i<255; i++ ) {
-                addAnsiStyle('fg'+String(i), ansi256Color(i), '');
-                addAnsiStyle('bg'+String(i), '', ansi256Color(i));
-            }
-            addAnsiStyle('bold', '', '', 'font-weight:bold');
-            addAnsiStyle('bold-off', '', '', 'font-weight:normal !important');
-
-            addEditIconEventListeners(); // Initialize event listeners for existing buttons
-            addCommandButtonEventListeners(); // Initialize event listeners for existing buttons
-
             console.log("%cterminal commands:", "font-weight:bold;");
             longest = 0;
             for ( i in specialCommands ) {
@@ -1085,208 +393,6 @@ Type your commands below.
                 console.log('  '+i.padEnd(longest)+" - " + specialCommands[i]); 
             }
             console.log("%cconsole commands:", "font-weight:bold;");
-            console.log("  setDefaultColor({colorString}) - Set the default text color.");
-            console.log("  resetSettings()                - Reset all local settings.");
-
-            loadSettings();
-        }
-
-        function setDefaultColor(strColor) {
-
-            let s = new Option().style;
-            s.color = strColor;
-            if ( s.color !== '' || !strColor ) {
-                textOutput.style.color = strColor;
-                // store the change in local settings
-                saveSettings();
-            }
-        }
-
-        function saveSettings(forceObject) {
-
-            const saveObject = { 
-                defaultcolor: textOutput.style.color, 
-                buttons: [],
-            };
-
-            const commandButtons = document.querySelectorAll('.command-button');
-            commandButtons.forEach(button => {
-                btnObj = {};
-                btnObj.name = button.textContent;
-                btnObj.cmd = button.getAttribute('data-command');
-
-                saveObject.buttons.push(btnObj);
-            });
-
-            localStorage.setItem('terminalConfig', JSON.stringify(saveObject));
-        }
-
-        function loadSettings() {
-
-            savedConfig = localStorage.getItem('terminalConfig');
-            
-            settings = savedConfig ? JSON.parse(savedConfig) : defaultSettings;
-
-            setDefaultColor(settings.defaultcolor);
-
-            // Remove any existing buttons
-            const commandButtons = document.querySelectorAll('.button-container');
-            commandButtons.forEach(button => {
-                button.remove();
-            });
-
-            for ( k in settings.buttons ) {
-                b = settings.buttons[k];
-                addNewButton(b.name, b.cmd);
-            }
-
-            saveSettings();
-        }
-
-        function resetSettings() {
-            localStorage.setItem('terminalConfig', '');
-            loadSettings();
-        }
-
-
-        var closedModals = {};// track any modals that were closed.
-
-        function closeDynamicModal(name) {
-
-            var existingModal = document.querySelector('[data-modal-name="' + name + '"]');
-            if (existingModal) {
-                document.body.removeChild(existingModal);
-                closedModals[name] = true;
-            }
-        }
-
-        function createDynamicModal(name, text) {
-
-            if ( closedModals[name] ) {
-                return;
-            }
-
-            // Check if a modal with this name already exists
-            var existingModal = document.querySelector('[data-modal-name="' + name + '"]');
-            if (existingModal) {
-                // Update the text content
-                var content = existingModal.querySelector('.modal-content');
-                if (content) {
-                    content.innerHTML = text;
-                    // Resize the modal to fit the new content
-                    existingModal.style.width = 'auto';
-                    existingModal.style.height = 'auto';
-                    // Reset font size to initial value
-                    content.style.fontSize = content.initialFontSize + 'px';
-                }
-                // Optionally bring the modal to the front
-                existingModal.style.zIndex = 1000;
-                return;
-            }
-
-            // Create the modal containerN
-            var modal = document.createElement('div');
-            modal.setAttribute('data-modal-name', name); // Set data attribute to identify
-            modal.style.position = 'absolute'; // Absolute positioning for draggable
-            modal.style.backgroundColor = '#1e1e1e';
-            modal.style.color = textOutput.style.color;
-            modal.style.boxSizing = 'border-box';
-            modal.style.border = '1px solid #ccc';
-            modal.style.borderRadius = '8px';
-            modal.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
-            modal.style.padding = '0'; // Remove padding
-            modal.style.overflow = 'hidden'; // Hide overflow
-            // Initially position the modal at the center of the viewport
-            modal.style.left = '50%';
-            modal.style.top = '50%';
-            modal.style.transform = 'translate(-50%, -50%)';
-            modal.style.zIndex = 1000; // Ensure the modal is on top
-
-            // Create the header for drag handle
-            var header = document.createElement('div');
-            header.style.cursor = 'move';
-            header.style.padding = '10px';
-            header.style.backgroundColor = '#f1f1f1';
-            header.style.color = '#1e1e1e';
-            header.style.borderBottom = '1px solid #ccc';
-            header.style.userSelect = 'none';
-            header.innerHTML = name; // Display the name in the header
-
-            // Create the close button
-            var closeButton = document.createElement('span');
-            closeButton.innerHTML = '&times;';
-            closeButton.style.position = 'absolute';
-            closeButton.style.color = '#000';
-            closeButton.style.top = '4px';
-            closeButton.style.right = '12px';
-            closeButton.style.cursor = 'pointer';
-            closeButton.style.fontSize = '24px';
-
-            // Close the modal when the close button is clicked
-            closeButton.onclick = function() {
-                document.body.removeChild(modal);
-                closedModals[name] = true;
-            };
-
-            // Create the content div with pre-wrap style
-            var content = document.createElement('div');
-            content.className = 'modal-content'; // Add a class for easy selection
-            content.style.whiteSpace = 'pre-wrap';
-            content.style.padding = '10px';
-            content.innerHTML = text;
-            // Set initial font size
-            content.style.fontSize = '30px';
-
-            // Store initial font size for scaling
-            content.initialFontSize = parseFloat(window.getComputedStyle(content).fontSize);
-
-            // Assemble the modal
-            modal.appendChild(header);
-            modal.appendChild(closeButton);
-            modal.appendChild(content);
-            document.body.appendChild(modal);
-
-            modal.style.top = '30px'
-
-            // Adjust modal size to fit content
-            modal.style.width = modal.offsetWidth+1 + 'px';
-            modal.style.height = modal.offsetHeight + 'px';
-
-            // Remove the transform after positioning to allow dragging without conflicts
-            modal.style.transform = '';
-
-            // Store initial modal dimensions for scaling
-            modal.initialWidth = modal.offsetWidth;
-            modal.initialHeight = modal.offsetHeight;
-
-            // Drag functionality
-            var isDragging = false;
-            var dragOffsetX = 0;
-            var dragOffsetY = 0;
-
-            header.addEventListener('mousedown', function(e) {
-                isDragging = true;
-                // Get the mouse cursor position at startup
-                dragOffsetX = e.clientX - modal.getBoundingClientRect().left;
-                dragOffsetY = e.clientY - modal.getBoundingClientRect().top;
-                // Bring modal to front
-                modal.style.zIndex = 1001;
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (isDragging) {
-                // Calculate the new cursor position
-                var x = e.clientX - dragOffsetX;
-                var y = e.clientY - dragOffsetY;
-                // Set the element's new position
-                modal.style.left = x + 'px';
-                modal.style.top = y + 'px';
-                } 
-            });
-
-            document.addEventListener('mouseup', function() {
-                isDragging = false;
-            });
 
         }
 

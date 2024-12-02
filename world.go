@@ -857,11 +857,7 @@ func (w *World) processInput(userId int, inputText string) {
 		}
 	}
 
-	if connections.IsWebsocket(connId) {
-		connections.SendTo([]byte(user.GetCommandPrompt(true)), connId)
-	} else {
-		connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
-	}
+	connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
 
 }
 
@@ -954,13 +950,12 @@ func (w *World) MessageTick() {
 		messageColorized := templates.AnsiParse(broadcast.Text)
 
 		if broadcast.SkipLineRefresh {
-			connections.Broadcast([]byte(messageColorized), []byte(broadcast.Text))
+			connections.Broadcast([]byte(messageColorized))
 			return
 		}
 
 		connections.Broadcast(
-			[]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized),
-			[]byte(broadcast.Text),
+			[]byte(term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + messageColorized),
 		)
 	}
 
@@ -999,8 +994,6 @@ func (w *World) MessageTick() {
 			continue
 		}
 
-		messageColorized := templates.AnsiParse(message.Text)
-
 		//slog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(messageColorized), "IsCommunication", message.IsCommunication)
 
 		if message.UserId > 0 {
@@ -1012,16 +1005,9 @@ func (w *World) MessageTick() {
 					continue
 				}
 
-				if connections.IsWebsocket(user.ConnectionId()) {
-					connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+message.Text), user.ConnectionId())
-					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-						redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
-					}
-				} else {
-					connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized), user.ConnectionId())
-					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-						redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
-					}
+				connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
+				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
+					redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
 				}
 
 			}
@@ -1069,17 +1055,9 @@ func (w *World) MessageTick() {
 						}
 					}
 
-					if connections.IsWebsocket(user.ConnectionId()) {
-						connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+message.Text), user.ConnectionId())
-						if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-							redrawPrompts[user.ConnectionId()] = user.GetCommandPrompt(true)
-						}
-					} else {
-						connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized), user.ConnectionId())
-						if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-							redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
-						}
-
+					connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
+					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
+						redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
 					}
 
 				}
@@ -1733,20 +1711,6 @@ func (w *World) TurnTick() {
 
 	if turnCt%uint64(c.TurnsPerSecond()) == 0 {
 		w.CheckForLevelUps()
-
-		// TODO: Move this elsewhere
-		// Testing concept, later will be replaced with a `mprompt` (modalprompt)
-		for _, uId := range users.GetOnlineUserIds() {
-			if user := users.GetByUserId(uId); user != nil {
-
-				//if user.GetConfigOption(`mprompt`) != nil {
-				events.AddToQueue(events.WebClientCommand{
-					ConnectionId: user.ConnectionId(),
-					Text:         "MODALADD:mprompt (testing)=" + user.GetCommandPrompt(false, `mprompt`),
-				})
-				//}
-			}
-		}
 	}
 
 	//
