@@ -49,9 +49,7 @@ func Sell(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		sellValue := mob.GetSellPrice(item)
 
 		if sellValue <= 0 {
-
 			mob.Command(`say I'm not interested in that.`)
-
 			continue
 		}
 

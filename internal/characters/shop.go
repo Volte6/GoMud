@@ -21,6 +21,7 @@ type ShopItem struct {
 	Quantity    int    `yaml:"quantity,omitempty"`    // How many currently avilable
 	QuantityMax int    `yaml:"quantitymax,omitempty"` // 0 for unlimited, or a maximum that can be stocked at one time
 	Price       int    `yaml:"price,omitempty"`       // If a price is provided, use it
+	TradeItemId int    `yaml:"tradeitemid,omitempty"` // ItemId required in trade
 	RestockRate string `yaml:"restockrate,omitempty"` // 1 day, 1 week, 1 real month, etc
 
 	lastRestockRound uint64 // When was the last time an item was restocked?
