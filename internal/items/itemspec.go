@@ -447,16 +447,19 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	var err error
-	items, err = fileloader.LoadAllFlatFiles[int, *ItemSpec](string(configs.GetConfig().FolderItemData))
+	tmpItems, err := fileloader.LoadAllFlatFiles[int, *ItemSpec](string(configs.GetConfig().FolderItemData))
 	if err != nil {
 		panic(err)
 	}
 
-	attackMessages, err = fileloader.LoadAllFlatFiles[ItemSubType, *WeaponAttackMessageGroup](string(configs.GetConfig().FolderAttackMessageData))
+	items = tmpItems
+
+	tmpAttackMessages, err := fileloader.LoadAllFlatFiles[ItemSubType, *WeaponAttackMessageGroup](string(configs.GetConfig().FolderAttackMessageData))
 	if err != nil {
 		panic(err)
 	}
+
+	attackMessages = tmpAttackMessages
 
 	slog.Info("itemspec.LoadDataFiles()", "itemLoadedCount", len(items), "attackMessageCount", len(attackMessages), "Time Taken", time.Since(start))
 

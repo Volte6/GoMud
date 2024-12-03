@@ -1369,6 +1369,11 @@ func GetRoomCount(zoneName string) int {
 
 func LoadDataFiles() {
 
+	if len(roomManager.zones) > 0 {
+		slog.Info("rooms.LoadDataFiles()", "msg", "skipping reload of room files, rooms shouldn't be hot reloaded from flatfiles.")
+		return
+	}
+
 	if err := loadAllRoomZones(); err != nil {
 		panic(err)
 	}

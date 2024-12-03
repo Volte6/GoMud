@@ -905,9 +905,39 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 func (w *World) MessageTick() {
 
 	//
+	// System commands such as /reload
+	//
+	eq := events.GetQueue(events.System{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		sys, typeOk := e.(events.System)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "System", "Actual Type", e.Type())
+			continue
+		}
+
+		if sys.Command == "reload" {
+
+			events.AddToQueue(events.Broadcast{
+				Text: `Reloading flat files...`,
+			})
+
+			loadAllDataFiles(true)
+
+			events.AddToQueue(events.Broadcast{
+				Text:            `Done.` + term.CRLFStr,
+				SkipLineRefresh: true,
+			})
+
+		}
+	}
+
+	//
 	// Dispatch GMCP events
 	//
-	eq := events.GetQueue(events.GMCPOut{})
+	eq = events.GetQueue(events.GMCPOut{})
 	for eq.Len() > 0 {
 
 		e := eq.Poll().(events.Event)

@@ -631,11 +631,14 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	var err error
-	mobs, err = fileloader.LoadAllFlatFiles[int, *Mob](mobDataFilesFolderPath)
+	tmpMobs, err := fileloader.LoadAllFlatFiles[int, *Mob](mobDataFilesFolderPath)
 	if err != nil {
 		panic(err)
 	}
+
+	mobs = tmpMobs
+
+	clear(mobNameCache)
 
 	for _, mob := range mobs {
 		mob.Character.CacheDescription()

@@ -91,7 +91,20 @@ func setAllScriptingFunctions(vm *goja.Runtime) {
 	setUtilFunctions(vm)
 }
 
-func PruneVMs() {
-	PruneRoomVMs()
-	PruneMobVMs()
+func PruneVMs(forceClear ...bool) {
+
+	if len(forceClear) > 0 && forceClear[0] {
+		ClearRoomVMs()
+		ClearMobVMs()
+		ClearBuffVMs()
+		ClearItemVMs()
+		ClearSpellVMs()
+	} else {
+		PruneRoomVMs()
+		PruneMobVMs()
+		PruneBuffVMs()
+		PruneItemVMs()
+		PruneSpellVMs()
+	}
+
 }

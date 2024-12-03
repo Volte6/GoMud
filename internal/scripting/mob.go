@@ -14,6 +14,10 @@ var (
 	scriptMobTimeout = 10 * time.Millisecond
 )
 
+func ClearMobVMs() {
+	clear(mobVMCache)
+}
+
 func PruneMobVMs(instanceIds ...int) {
 
 }

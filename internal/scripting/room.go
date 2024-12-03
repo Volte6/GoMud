@@ -17,6 +17,10 @@ var (
 	scriptRoomTimeout = 10 * time.Millisecond
 )
 
+func ClearRoomVMs() {
+	clear(roomVMCache)
+}
+
 func PruneRoomVMs(roomIds ...int) {
 	if len(roomIds) > 0 {
 		for _, roomId := range roomIds {

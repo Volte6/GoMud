@@ -180,11 +180,12 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	var err error
-	races, err = fileloader.LoadAllFlatFiles[int, *Race](raceDataFilesFolderPath)
+	tmpRaces, err := fileloader.LoadAllFlatFiles[int, *Race](raceDataFilesFolderPath)
 	if err != nil {
 		panic(err)
 	}
+
+	races = tmpRaces
 
 	slog.Info("races.LoadDataFiles()", "loadedCount", len(races), "Time Taken", time.Since(start))
 

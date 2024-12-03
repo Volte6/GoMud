@@ -71,6 +71,10 @@ var (
 			Description:  "Display the current location of all online users",
 			ExampleInput: "where",
 		},
+		"reload": AdminCommandHelp{
+			Description:  "Reload datafiles for various packages (items, mobs, buffs, etc.)",
+			ExampleInput: "reload",
+		},
 	}
 )
 
@@ -129,6 +133,12 @@ func tryAdminCommand(cmd string, connectionId connections.ConnectionId) bool {
 		tplTxt, _ := templates.Process("tables/generic", onlineTableData)
 		connections.SendTo([]byte(tplTxt), connectionId)
 		return true
+	}
+
+	if cmd == "reload" {
+		events.AddToQueue(events.System{
+			Command: "reload",
+		})
 	}
 
 	if cmd == "shutdown" {

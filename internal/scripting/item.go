@@ -16,6 +16,10 @@ var (
 	scriptItemTimeout = 10 * time.Millisecond
 )
 
+func ClearItemVMs() {
+	clear(itemVMCache)
+}
+
 func PruneItemVMs(instanceIds ...int) {
 
 }

@@ -178,11 +178,12 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	var err error
-	petTypes, err = fileloader.LoadAllFlatFiles[string, *Pet](petDataFilesFolderPath)
+	tmpPetTypes, err := fileloader.LoadAllFlatFiles[string, *Pet](petDataFilesFolderPath)
 	if err != nil {
 		panic(err)
 	}
+
+	petTypes = tmpPetTypes
 
 	slog.Info("pets.LoadDataFiles()", "loadedCount", len(petTypes), "Time Taken", time.Since(start))
 }

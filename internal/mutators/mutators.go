@@ -323,11 +323,12 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	var err error
-	allMutators, err = fileloader.LoadAllFlatFiles[string, *MutatorSpec](mutDataFilesFolderPath)
+	tmpMutators, err := fileloader.LoadAllFlatFiles[string, *MutatorSpec](mutDataFilesFolderPath)
 	if err != nil {
 		panic(err)
 	}
+
+	allMutators = tmpMutators
 
 	slog.Info("mutators.LoadDataFiles()", "loadedCount", len(allMutators), "Time Taken", time.Since(start))
 }

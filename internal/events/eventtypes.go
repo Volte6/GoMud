@@ -82,3 +82,10 @@ type GMCPOut struct {
 }
 
 func (b GMCPOut) Type() string { return `GMCP` }
+
+// Messages that are intended to reach all users on the system
+type System struct {
+	Command string
+}
+
+func (s System) Type() string { return `System` }

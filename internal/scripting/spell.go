@@ -17,6 +17,10 @@ var (
 	scriptSpellTimeout = 10 * time.Millisecond
 )
 
+func ClearSpellVMs() {
+	clear(spellVMCache)
+}
+
 func PruneSpellVMs(instanceIds ...int) {
 
 }

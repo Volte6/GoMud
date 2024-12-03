@@ -174,11 +174,12 @@ func LoadSpellFiles() {
 
 	start := time.Now()
 
-	var err error
-	allSpells, err = fileloader.LoadAllFlatFiles[string, *SpellData](string(configs.GetConfig().FolderSpellData))
+	tmpAllSpells, err := fileloader.LoadAllFlatFiles[string, *SpellData](string(configs.GetConfig().FolderSpellData))
 	if err != nil {
 		panic(err)
 	}
+
+	allSpells = tmpAllSpells
 
 	slog.Info("spells.loadAllSpells()", "loadedCount", len(allSpells), "Time Taken", time.Since(start))
 

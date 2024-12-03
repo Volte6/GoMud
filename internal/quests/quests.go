@@ -184,11 +184,12 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	var err error
-	quests, err = fileloader.LoadAllFlatFiles[int, *Quest](questDataFilesFolderPath)
+	tmpQuests, err := fileloader.LoadAllFlatFiles[int, *Quest](questDataFilesFolderPath)
 	if err != nil {
 		panic(err)
 	}
+
+	quests = tmpQuests
 
 	slog.Info("quests.LoadDataFiles()", "loadedCount", len(quests), "Time Taken", time.Since(start))
 

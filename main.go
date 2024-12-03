@@ -129,17 +129,8 @@ func main() {
 	runtime.GOMAXPROCS(int(c.MaxCPUCores))
 
 	// Load all the data files up front.
-	spells.LoadSpellFiles()
-	rooms.LoadDataFiles()
-	buffs.LoadDataFiles() // Load buffs before items for cost calculation reasons
-	items.LoadDataFiles()
-	races.LoadDataFiles()
-	mobs.LoadDataFiles()
-	pets.LoadDataFiles()
-	quests.LoadDataFiles()
-	templates.LoadAliases()
-	keywords.LoadAliases()
-	mutators.LoadDataFiles()
+	loadAllDataFiles(false)
+
 	gametime.SetToDay(-3)
 	gametime.GetZodiac(1) // The first time this is called it randomizes all zodiacs
 
@@ -761,5 +752,34 @@ func setupLogger() {
 
 		slog.SetDefault(localLogger)
 	}
+
+}
+
+func loadAllDataFiles(isReload bool) {
+
+	if isReload {
+
+		defer func() {
+			if r := recover(); r != nil {
+				slog.Error("RELOAD FAILED", "err", r)
+			}
+		}()
+
+	}
+
+	// Force clear all cached VM's
+	scripting.PruneVMs(true)
+
+	spells.LoadSpellFiles()
+	rooms.LoadDataFiles()
+	buffs.LoadDataFiles() // Load buffs before items for cost calculation reasons
+	items.LoadDataFiles()
+	races.LoadDataFiles()
+	mobs.LoadDataFiles()
+	pets.LoadDataFiles()
+	quests.LoadDataFiles()
+	templates.LoadAliases()
+	keywords.LoadAliases()
+	mutators.LoadDataFiles()
 
 }

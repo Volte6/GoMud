@@ -16,6 +16,10 @@ var (
 	scriptBuffTimeout = 10 * time.Millisecond
 )
 
+func ClearBuffVMs() {
+	clear(buffVMCache)
+}
+
 func PruneBuffVMs(instanceIds ...int) {
 	// Do not prune, they dont' get a VM per buff instance.
 }

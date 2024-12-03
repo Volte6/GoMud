@@ -222,11 +222,12 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	var err error
-	buffs, err = fileloader.LoadAllFlatFiles[int, *BuffSpec](buffDataFilesFolderPath)
+	tmpBuffs, err := fileloader.LoadAllFlatFiles[int, *BuffSpec](buffDataFilesFolderPath)
 	if err != nil {
 		panic(err)
 	}
+
+	buffs = tmpBuffs
 
 	slog.Info("buffSpec.LoadDataFiles()", "loadedCount", len(buffs), "Time Taken", time.Since(start))
 }
