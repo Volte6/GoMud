@@ -41,6 +41,7 @@ type Config struct {
 	AuctionSeconds               ConfigInt         `yaml:"AuctionSeconds"`
 	AuctionUpdateSeconds         ConfigInt         `yaml:"AuctionUpdateSeconds"`
 	PVP                          ConfigString      `yaml:"PVP"`
+	PVPMinimumLevel              ConfigInt         `yaml:"PVPMinimumLevel"`
 	XPScale                      ConfigFloat       `yaml:"XPScale"`
 	TurnMs                       ConfigInt         `yaml:"TurnMs"`
 	RoundSeconds                 ConfigInt         `yaml:"RoundSeconds"`
@@ -399,6 +400,10 @@ func (c *Config) Validate() {
 		} else {
 			c.PVP = PVPEnabled
 		}
+	}
+
+	if int(c.PVPMinimumLevel) < 0 {
+		c.PVPMinimumLevel = 0
 	}
 
 	if c.XPScale <= 0 {

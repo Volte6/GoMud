@@ -89,6 +89,9 @@ AuctionUpdateSeconds: 30
 #     disabled  - PVP is disabled eveywhere
 #     limited   - PVP is enabled for all players but only in PVP enabled rooms
 PVP: limited
+# - PVPMinimumLevel -
+#   Minimum level one must be to be targetted or to target other players in PVP
+PVPMinimumLevel: 15
 # - XPScale -
 #   Scales XP Charts for character leveling. Lower means less required, higher
 #   means more required. 1 is the default (no change).

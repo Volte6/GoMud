@@ -2123,11 +2123,18 @@ func (r *Room) IsPvp() bool {
 // Returns an error with a reason why they cannot PVP, or nil
 func (r *Room) CanPvp(attUser *users.UserRecord, defUser *users.UserRecord) error {
 
+	c := configs.GetConfig()
+
 	// Possible settings are `enabled`, `disabled`, `limited`
-	pvpSetting := string(configs.GetConfig().PVP)
+	pvpSetting := string(c.PVP)
+	minLevel := int(c.PVPMinimumLevel)
 
 	if pvpSetting == configs.PVPDisabled {
 		return errors.New(`PVP is disabled.`)
+	}
+
+	if attUser.Character.Level < minLevel || defUser.Character.Level < minLevel {
+		return fmt.Errorf(`Players must be at least level %d to PVP.`, minLevel)
 	}
 
 	if pvpSetting == configs.PVPLimited {
