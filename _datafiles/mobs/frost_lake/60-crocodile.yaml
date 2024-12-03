@@ -1,6 +1,6 @@
 mobid:  60
 zone: Frost Lake
-itemdropchance: 0
+itemdropchance: 2
 hostile: true
 maxwander: 1
 activitylevel: 1
