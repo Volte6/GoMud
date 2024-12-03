@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
@@ -69,7 +68,18 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(itemsAvailable) > 0 {
 
+			hasTradeItems := false
+			for _, stockItm := range itemsAvailable {
+				if stockItm.TradeItemId > 0 {
+					hasTradeItems = true
+				}
+			}
+
 			headers := []string{"Qty", "Name", "Type", "Price"}
+			if hasTradeItems {
+				headers = append(headers, "Trade")
+			}
+
 			rows := [][]string{}
 
 			for _, stockItm := range itemsAvailable {
@@ -83,14 +93,27 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				price := stockItm.Price
 				if price == 0 {
 					price = item.GetSpec().Value
+				} else if price < 0 {
+					price = 0
 				}
 
-				rows = append(rows, []string{
+				entryRow := []string{
 					qtyStr,
-					fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, item.DisplayName()) + strings.Repeat(" ", 30-len(item.Name())),
+					fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, item.DisplayName()),
 					string(item.GetSpec().Type),
-					strconv.Itoa(price)},
-				)
+					strconv.Itoa(price),
+				}
+
+				if hasTradeItems {
+					if stockItm.TradeItemId > 0 {
+						tradeItm := items.New(stockItm.TradeItemId)
+						entryRow = append(entryRow, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, tradeItm.DisplayName()))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				rows = append(rows, entryRow)
 			}
 
 			sort.Slice(rows, func(i, j int) bool {
@@ -107,7 +130,18 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(mercsAvailable) > 0 {
 
+			hasTradeItems := false
+			for _, stockItm := range mercsAvailable {
+				if stockItm.TradeItemId > 0 {
+					hasTradeItems = true
+				}
+			}
+
 			headers := []string{"Qty", "Name", "Level", "Race", "Price"}
+
+			if hasTradeItems {
+				headers = append(headers, "Trade")
+			}
 
 			rows := [][]string{}
 
@@ -130,15 +164,28 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				price := stockMerc.Price
 				if price == 0 {
 					price = 250 * mobInfo.Character.Level
+				} else if price < 0 {
+					price = 0
 				}
 
-				rows = append(rows, []string{
+				entryRow := []string{
 					qtyStr,
-					`<ansi fg="mobname">` + mobInfo.Character.Name + `</ansi>` + strings.Repeat(" ", 30-len(mobInfo.Character.Name)),
+					`<ansi fg="mobname">` + mobInfo.Character.Name + `</ansi>`,
 					strconv.Itoa(mobInfo.Character.Level),
 					raceInfo.Name,
 					strconv.Itoa(price),
-				})
+				}
+
+				if hasTradeItems {
+					if stockMerc.TradeItemId > 0 {
+						tradeItm := items.New(stockMerc.TradeItemId)
+						entryRow = append(entryRow, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, tradeItm.DisplayName()))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				rows = append(rows, entryRow)
 
 			}
 
@@ -156,7 +203,18 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(buffsAvailable) > 0 {
 
+			hasTradeItems := false
+			for _, stockItm := range buffsAvailable {
+				if stockItm.TradeItemId > 0 {
+					hasTradeItems = true
+				}
+			}
+
 			headers := []string{"Qty", "Name", "Price"}
+			if hasTradeItems {
+				headers = append(headers, "Trade")
+			}
+
 			rows := [][]string{}
 
 			for _, stockBuff := range buffsAvailable {
@@ -171,11 +229,23 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					qtyStr = strconv.Itoa(stockBuff.Quantity)
 				}
 
-				rows = append(rows, []string{
+				entryRow := []string{
 					qtyStr,
-					buffInfo.Name + strings.Repeat(" ", 30-len(buffInfo.Name)),
-					strconv.Itoa(stockBuff.Price)},
-				)
+					buffInfo.Name,
+					strconv.Itoa(stockBuff.Price),
+				}
+
+				if hasTradeItems {
+					if stockBuff.TradeItemId > 0 {
+						tradeItm := items.New(stockBuff.TradeItemId)
+						entryRow = append(entryRow, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, tradeItm.DisplayName()))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				rows = append(rows, entryRow)
+
 			}
 
 			sort.Slice(rows, func(i, j int) bool {
@@ -192,7 +262,18 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(petsAvailable) > 0 {
 
+			hasTradeItems := false
+			for _, stockItm := range petsAvailable {
+				if stockItm.TradeItemId > 0 {
+					hasTradeItems = true
+				}
+			}
+
 			headers := []string{"Qty", "Type", "Price"}
+			if hasTradeItems {
+				headers = append(headers, "Trade")
+			}
+
 			rows := [][]string{}
 
 			for _, stockPet := range petsAvailable {
@@ -210,13 +291,26 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				price := stockPet.Price
 				if price == 0 {
 					price = 10000
+				} else if price < 0 {
+					price = 0
 				}
 
-				rows = append(rows, []string{
+				entryRow := []string{
 					qtyStr,
-					`<ansi fg="petname">` + petInfo.Type + strings.Repeat(" ", 30-len(petInfo.Type)) + `</ansi>`,
-					strconv.Itoa(price)},
-				)
+					`<ansi fg="petname">` + petInfo.Type + `</ansi>`,
+					strconv.Itoa(price),
+				}
+
+				if hasTradeItems {
+					if stockPet.TradeItemId > 0 {
+						tradeItm := items.New(stockPet.TradeItemId)
+						entryRow = append(entryRow, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, tradeItm.DisplayName()))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				rows = append(rows, entryRow)
 			}
 
 			sort.Slice(rows, func(i, j int) bool {
@@ -291,11 +385,13 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				price := stockItm.Price
 				if price == 0 {
 					price = item.GetSpec().Value
+				} else if price < 0 {
+					price = 0
 				}
 
 				rows = append(rows, []string{
 					qtyStr,
-					fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, item.DisplayName()) + strings.Repeat(" ", 30-len(item.Name())),
+					fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, item.DisplayName()),
 					string(item.GetSpec().Type),
 					strconv.Itoa(price)},
 				)
@@ -338,11 +434,13 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				price := stockMerc.Price
 				if price == 0 {
 					price = 250 * mobInfo.Character.Level
+				} else if price < 0 {
+					price = 0
 				}
 
 				rows = append(rows, []string{
 					qtyStr,
-					`<ansi fg="mobname">` + mobInfo.Character.Name + `</ansi>` + strings.Repeat(" ", 30-len(mobInfo.Character.Name)),
+					`<ansi fg="mobname">` + mobInfo.Character.Name + `</ansi>`,
 					strconv.Itoa(mobInfo.Character.Level),
 					raceInfo.Name,
 					strconv.Itoa(price),
@@ -381,7 +479,7 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 				rows = append(rows, []string{
 					qtyStr,
-					buffInfo.Name + strings.Repeat(" ", 30-len(buffInfo.Name)),
+					buffInfo.Name,
 					strconv.Itoa(stockBuff.Price)},
 				)
 			}
@@ -418,11 +516,13 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				price := stockPet.Price
 				if price == 0 {
 					price = 10000
+				} else if price < 0 {
+					price = 0
 				}
 
 				rows = append(rows, []string{
 					qtyStr,
-					`<ansi fg="petname">` + petInfo.Type + strings.Repeat(" ", 30-len(petInfo.Type)) + `</ansi>`,
+					`<ansi fg="petname">` + petInfo.Type + `</ansi>`,
 					strconv.Itoa(price)},
 				)
 			}
