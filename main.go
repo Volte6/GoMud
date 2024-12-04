@@ -130,7 +130,13 @@ func main() {
 	// Load all the data files up front.
 	loadAllDataFiles(false)
 
-	gametime.SetToDay(-3)
+	rc := uint64(c.RoundCount)
+	if rc > 0 {
+		util.SetRoundCount(uint64(c.RoundCount))
+	} else {
+		gametime.SetToDay(-3)
+	}
+
 	gametime.GetZodiac(1) // The first time this is called it randomizes all zodiacs
 
 	scripting.Setup(int(c.ScriptLoadTimeoutMs), int(c.ScriptRoomTimeoutMs))

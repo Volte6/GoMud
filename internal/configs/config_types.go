@@ -6,6 +6,7 @@ import (
 )
 
 type ConfigInt int
+type ConfigUInt64 uint64
 type ConfigString string
 type ConfigFloat float64
 type ConfigBool bool
@@ -17,6 +18,9 @@ type ConfigValue interface {
 }
 
 // String
+func (c ConfigUInt64) String() string {
+	return strconv.FormatUint(uint64(c), 10)
+}
 
 func (c ConfigInt) String() string {
 	return strconv.Itoa(int(c))
@@ -39,6 +43,15 @@ func (c ConfigSliceString) String() string {
 }
 
 // Set
+
+func (c *ConfigUInt64) Set(value string) error {
+	v, err := strconv.ParseUint(value, 10, 64)
+	if err != nil {
+		return err
+	}
+	*c = ConfigUInt64(v)
+	return nil
+}
 
 func (c *ConfigInt) Set(value string) error {
 	v, err := strconv.Atoi(value)
