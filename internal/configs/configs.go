@@ -33,6 +33,7 @@ type Config struct {
 	FolderSpellData              ConfigString      `yaml:"FolderSpellData"`
 	FolderTemplates              ConfigString      `yaml:"FolderTemplates"`
 	FileAnsiAliases              ConfigString      `yaml:"FileAnsiAliases"`
+	FileColorPatterns            ConfigString      `yaml:"FileColorPatterns"`
 	FileKeywords                 ConfigString      `yaml:"FileKeywords"`
 	AllowItemBuffRemoval         ConfigBool        `yaml:"AllowItemBuffRemoval"`
 	CarefulSaveFiles             ConfigBool        `yaml:"CarefulSaveFiles"`
@@ -371,6 +372,10 @@ func (c *Config) Validate() {
 
 	if c.FileAnsiAliases == `` {
 		c.FileAnsiAliases = `_datafiles/ansi-aliases.yaml` // default
+	}
+
+	if c.FileColorPatterns == `` {
+		c.FileColorPatterns = `_datafiles/color-patterns.yaml` // default
 	}
 
 	if c.FileKeywords == `` {

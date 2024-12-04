@@ -72,6 +72,9 @@ color8:
   shop-qty: 97 # Bright white
   shop-name: 2
   shop-price: 93
+  shop-trade: 2
+  shop-pet-type: 3
+  shop-enchantment: 4
   uses-left: 90 # Bright black
   holy: 96 # Bright cyan
   good: 36 # cyan
@@ -221,6 +224,9 @@ color256:
   shop-qty: 15 # Bright white
   shop-name: 2
   shop-price: 220
+  shop-trade: 2
+  shop-pet-type: 215
+  shop-enchantment: 147
   uses-left: 8 # Bright black
   holy: 21
   good: 27

@@ -2,12 +2,20 @@ package colorpatterns
 
 import (
 	"fmt"
+	"log/slog"
 	"math"
+	"os"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
+
+	"github.com/Volte6/ansitags"
+	"github.com/pkg/errors"
+	"github.com/volte6/gomud/internal/configs"
+	"gopkg.in/yaml.v2"
 )
 
 // TODO: Load patterns from a config file.
@@ -21,36 +29,7 @@ var (
 
 	colorsCompiled bool = false
 
-	numericPatterns = map[string][]int{
-		`blackandwhite`: {247, 231},
-		`blue`:          {17, 18, 19, 20, 21, 27, 69, 117, 195},
-		`brown`:         {58, 94, 94, 130, 130, 130, 178, 178, 179},
-		`coupon`:        {147, 231},
-		`cyan`:          {27, 33, 39, 45, 51, 87, 123, 159, 195},
-		`flame`:         {124, 196, 202, 208, 214, 220, 226, 228, 230},
-		`glowing`:       {184, 226, 227, 228, 229, 230, 231, 230, 229, 228, 227, 226, 184, 142, 100, 58},
-		`gold`:          {172, 214, 214, 220, 220, 220, 226, 226},
-		`gray`:          {0, 234, 237, 239, 242, 245, 248, 252, 15},
-		`green`:         {22, 28, 34, 40, 46, 83, 120, 157, 194},
-		`mute-green`:    {65, 71, 77, 114, 151},
-		`mute-lblue`:    {66, 73, 80, 116, 152},
-		`mute-dblue`:    {60, 61, 62, 104, 146},
-		`mute-purple`:   {96, 133, 170, 176, 182},
-		`mute-red`:      {95, 131, 167, 174, 161},
-		`mute-yellow`:   {101, 143, 185, 186, 187},
-		`orange`:        {58, 94, 130, 166, 202, 208, 214, 216, 223},
-		`peppermint`:    {196, 231},
-		`pink`:          {225, 219, 213, 207, 201, 164, 127},
-		`purple`:        {53, 54, 55, 56, 57, 99, 105, 147, 189},
-		`rainbow`:       {196, 214, 226, 118, 51, 21, 93},
-		`red`:           {52, 88, 124, 160, 196, 197, 204, 210, 217},
-		`rust`:          {94, 130, 172, 214},
-		`swamp`:         {58, 64, 64, 70, 70, 70, 36, 36, 79},
-		`turquoise`:     {23, 29, 36, 42, 49, 86, 122, 158, 194},
-		`vommit`:        {34, 112, 202, 214, 223},
-		`zombie`:        {77, 77, 113, 72, 65, 78},
-	}
-
+	numericPatterns = map[string][]int{}
 	// Short tags
 	ShortTagPatterns = map[string][]string{}
 )
@@ -269,6 +248,35 @@ func IsValidPattern(pName string) bool {
 	return false
 }
 
-func init() {
+func LoadColorPatterns() {
+
+	start := time.Now()
+
+	path := string(configs.GetConfig().FileColorPatterns)
+
+	bytes, err := os.ReadFile(path)
+	if err != nil {
+		panic(errors.Wrap(err, `filepath: `+path))
+	}
+
+	clear(numericPatterns)
+	clear(ShortTagPatterns)
+	colorsCompiled = false
+
+	err = yaml.Unmarshal(bytes, &numericPatterns)
+	if err != nil {
+		panic(errors.Wrap(err, `filepath: `+path))
+	}
+
 	CompileColorPatterns()
+
+	slog.Info("...LoadColorPatterns()", "loadedCount", len(numericPatterns), "Time Taken", time.Since(start))
+
+	for _, name := range GetColorPatternNames() {
+		slog.Info("Color Test (Patterns)", "name", name,
+			"(default)", ansitags.Parse(ApplyColorPattern(`Color test pattern`, name)),
+			"Stretch", ansitags.Parse(ApplyColorPattern(`Color test pattern`, name, Stretch)),
+			"Words", ansitags.Parse(ApplyColorPattern(`Color test pattern color test pattern`, name, Words)),
+		)
+	}
 }
