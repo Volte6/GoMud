@@ -27,17 +27,6 @@ help:
       - character
       - pets
       - train
-    jobs:
-      - treasure-hunter
-      - assassin
-      - explorer
-      - arcane-scholar
-      - warrior
-      - paladin
-      - ranger
-      - monster-hunter
-      - sorcerer
-      - merchant
     communication:
       - emote
       - say
@@ -191,6 +180,7 @@ help-aliases:
   history:          ['log']
   time:             ['date']
   pvp:              ['pk']
+  about:            ['gomud']
 # Default aliases for commands
 # For example: inv -> inventory
 # They can be command + argument aliases
@@ -238,6 +228,7 @@ command-aliases:
   'rank back':      ['backrank']
   'rank front':     ['frontrank']
   'auction bid':    ['bid']
+  'help about':     ['about']
   
   # Direction aliases
 direction-aliases:

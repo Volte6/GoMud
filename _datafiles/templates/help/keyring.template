@@ -27,4 +27,3 @@ through an exit or open a container.
     └──────────┘──────────────────────────────┘───────┘──────────┘</ansi>
 
 <ansi fg="magenta-bold">See also:</ansi> <ansi fg="command">help picklock</ansi>
-

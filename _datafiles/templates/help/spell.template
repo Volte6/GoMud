@@ -10,4 +10,3 @@
 <ansi fg="yellow">Wait Time:   </ansi> <ansi fg="white-bold">{{ .WaitRounds }} rounds</ansi>
 
 <ansi fg="magenta-bold">See also:</ansi> <ansi fg="command">help spells</ansi>, <ansi fg="command">help cast</ansi>
-

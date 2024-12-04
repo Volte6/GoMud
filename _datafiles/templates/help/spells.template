@@ -9,4 +9,3 @@ The <ansi fg="command">spells</ansi> command lists spells you have learned, alon
   To get help on a particular spell, try: <ansi fg="command">help spell [spellId]</ansi>
 
 <ansi fg="magenta-bold">See also:</ansi> <ansi fg="command">help cast</ansi>
-

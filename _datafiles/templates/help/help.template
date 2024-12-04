@@ -30,5 +30,6 @@ Admin:
 {{- range $category, $commandList := .Admin -}}
 <ansi fg="black-bold">  {{ uc $category }}</ansi>
 {{ $counter := 0 }}    {{ range $i, $cmdInfo := $commandList }}<ansi fg="{{ $cmdInfo.Type }}">{{ if $cmdInfo.Missing }}<ansi fg="red-bold">*</ansi>{{ else }} {{ end }}{{ padRight 17 $cmdInfo.Command " " }}</ansi> {{ if eq (mod $counter 4) 3 }}{{ if ne $i (sub (len $commandList) 1) }}{{ printf "\n    " }}{{ end }}{{ end }}{{ $counter = (add $counter 1) }}{{ end }}
-{{ end }}
-{{ end }}
+{{ end }}{{ end }}
+
+<ansi fg="magenta-bold">See also:</ansi> <ansi fg="command">help gomud</ansi>

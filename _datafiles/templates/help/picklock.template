@@ -28,4 +28,3 @@ You'll need a set of <ansi fg="item">lockpicks</ansi>.
 <ansi fg="red">Note:</ansi> <ansi fg="yellow">Each <ansi fg="red-bold">?</ansi> symbol represents an UP or DOWN you must guess in the sequence.</ansi>
 
 <ansi fg="magenta-bold">See also:</ansi> <ansi fg="command">help picklock-example</ansi>, <ansi fg="command">help keyring</ansi>
-

@@ -13,5 +13,18 @@ will be designated as a Merchant.
 
   <ansi fg="command">jobs</ansi>
 
-<ansi fg="red">Note:</ansi> Jobs are nothing more than labels describe areas you've trained a lot in.
+<ansi fg="red">Note:</ansi> Jobs are labels/groupings that describe areas you've trained a lot in.
 
+To find out about some specific jobs, try the following help commands:
+  <ansi fg="command">
+  help arcane-scholar
+  help assassin
+  help explorer
+  help merchant
+  help monster-hunter
+  help paladin
+  help ranger
+  help sorcerer
+  help treasure-hunter
+  help warrior
+  </ansi>

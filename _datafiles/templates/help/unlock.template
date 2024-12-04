@@ -8,4 +8,3 @@ You'll need an appropriate <ansi fg="item">key</ansi> in your backpack or on you
   <ansi fg="command">unlock [exit name/container name]</ansi> - This unlocks it if it is locked.
 
 <ansi fg="magenta-bold">See also:</ansi> <ansi fg="command">help lock</ansi>, <ansi fg="command">help keyring</ansi>, <ansi fg="command">help picklock</ansi>
-
