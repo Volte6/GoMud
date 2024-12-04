@@ -665,7 +665,7 @@ loop:
 			util.LockMud()
 			w.UpdateStats()
 			util.UnlockMud()
-
+			configs.SetVal(`RoundCount`, strconv.FormatUint(util.GetRoundCount(), 10))
 			statsTimer.Reset(time.Duration(10) * time.Second)
 
 		case <-roomUpdateTimer.C:

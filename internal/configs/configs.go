@@ -100,6 +100,8 @@ type Config struct {
 
 	SeedInt int64 `yaml:"-"`
 
+	RoundCount ConfigUInt64 `yaml:"RoundCount,omitempty"` // Last saved round count
+
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.
 	turnsPerSave    int     // calculated and cached when data is validated.
