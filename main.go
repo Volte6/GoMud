@@ -18,7 +18,6 @@ import (
 
 	"log/slog"
 
-	"github.com/Volte6/ansitags"
 	"github.com/gorilla/websocket"
 	"github.com/natefinch/lumberjack"
 	"github.com/volte6/gomud/internal/buffs"
@@ -133,21 +132,6 @@ func main() {
 
 	gametime.SetToDay(-3)
 	gametime.GetZodiac(1) // The first time this is called it randomizes all zodiacs
-
-	for _, name := range colorpatterns.GetColorPatternNames() {
-		slog.Info("Color Test (Patterns)", "name", name,
-			"(default)", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern`, name)),
-			"Stretch", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern`, name, colorpatterns.Stretch)),
-			"Words", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Words)),
-		)
-		//slog.Info("Color Test (Patterns)", "name", name, "  Stretch", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Stretch)))
-		//slog.Info("Color Test (Patterns)", "name", name, "    Words", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Words)))
-		//slog.Info("Color Test (Patterns)", "name", name, "     Once", ansitags.Parse(colorpatterns.ApplyColorPattern(`Color test pattern color test pattern`, name, colorpatterns.Once)))
-	}
-
-	for _, name := range characters.GetFormattedAdjectives(true) {
-		slog.Info("Color Test (Adjectives)", "name", name, "short", ansitags.Parse(characters.GetFormattedAdjective(name+`-short`)), "full", ansitags.Parse(characters.GetFormattedAdjective(name)))
-	}
 
 	scripting.Setup(int(c.ScriptLoadTimeoutMs), int(c.ScriptRoomTimeoutMs))
 
@@ -781,5 +765,6 @@ func loadAllDataFiles(isReload bool) {
 	templates.LoadAliases()
 	keywords.LoadAliases()
 	mutators.LoadDataFiles()
-
+	colorpatterns.LoadColorPatterns()
+	characters.CompileAdjectiveSwaps() // This should come after loading color patterns.
 }

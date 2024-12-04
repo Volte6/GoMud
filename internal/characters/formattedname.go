@@ -2,47 +2,34 @@ package characters
 
 import (
 	"fmt"
+	"log/slog"
 	"sort"
 
+	"github.com/Volte6/ansitags"
 	"github.com/volte6/gomud/internal/colorpatterns"
 )
 
+type adjectiveStyle struct {
+	LongForm     string
+	ShortForm    string
+	ColorPattern string
+}
+
 var (
+
 	// -short suffix should also be defined in case shorthand symbols are preferred
-	adjectiveSwaps = map[string]string{
-
-		// Are they charmed/friendly?
-		`charmed`:       colorpatterns.ApplyColorPattern(`♥friend`, `pink`),
-		`charmed-short`: colorpatterns.ApplyColorPattern(`♥`, `pink`),
-
-		// Are they downed?
-		`downed`:       colorpatterns.ApplyColorPattern(`☠downed`, `red`),
-		`downed-short`: colorpatterns.ApplyColorPattern(`☠`, `red`),
-
-		// Are they hiding?
-		`hidden`:       colorpatterns.ApplyColorPattern(`hidden`, `gray`),
-		`hidden-short`: colorpatterns.ApplyColorPattern(`?`, `gray`),
-
-		// Does light come from this character?
-		`lit`:       colorpatterns.ApplyColors(`☀️Lit`, []int{187, 229, 228, 227}),
-		`lit-short`: colorpatterns.ApplyColors(`☀️`, []int{187, 229, 228, 227}),
-
-		// Are they hiding?
-		`sleeping`:       colorpatterns.ApplyColorPattern(`asleep`, `gray`),
-		`sleeping-short`: colorpatterns.ApplyColorPattern(`zZz`, `gray`),
-
-		// Have they disconnected and are zombie status?
-		`zombie`:       colorpatterns.ApplyColorPattern(`zOmBie`, `zombie`),
-		`zombie-short`: colorpatterns.ApplyColorPattern(`z`, `zombie`),
-
-		// Have they disconnected and are zombie status?
-		`poisoned`:       colorpatterns.ApplyColorPattern(`☠poisoned`, `purple`),
-		`poisoned-short`: colorpatterns.ApplyColorPattern(`☠`, `purple`),
-
-		// Do they sell stuff?
-		`shop`:       colorpatterns.ApplyColorPattern(`shop`, `gold`),
-		`shop-short`: colorpatterns.ApplyColorPattern(`$`, `gold`),
+	adjectiveStyles = map[string]adjectiveStyle{
+		`charmed`:  {`♥friend`, `♥`, `pink`},     // Are they charmed/friendly?
+		`downed`:   {`☠downed`, `☠`, `red`},      // Are they downed?
+		`hidden`:   {`hidden`, `?`, `gray`},      // Are they hiding?
+		`lit`:      {`☀️Lit`, `☀️`, `lit`},       // Does light come from this character?
+		`sleeping`: {`asleep`, `zZz`, `gray`},    // Are they hiding?
+		`zombie`:   {`zOmBie`, `z`, `zombie`},    // Have they disconnected and are zombie status?
+		`poisoned`: {`☠poisoned`, `☠`, `purple`}, // Have they disconnected and are zombie status?
+		`shop`:     {`shop`, `$`, `gold`},        // Do they sell stuff?
 	}
+
+	adjectiveSwaps = map[string]string{}
 )
 
 type FormattedName struct {
@@ -120,4 +107,16 @@ func GetFormattedAdjectives(excludeShort bool) []string {
 	sort.Slice(ret, func(i, j int) bool { return ret[i] < ret[j] })
 
 	return ret
+}
+
+func CompileAdjectiveSwaps() {
+	clear(adjectiveSwaps)
+	for adjName, styleDefinition := range adjectiveStyles {
+		adjectiveSwaps[adjName] = colorpatterns.ApplyColorPattern(styleDefinition.LongForm, styleDefinition.ColorPattern)
+		adjectiveSwaps[adjName+`-short`] = colorpatterns.ApplyColorPattern(styleDefinition.ShortForm, styleDefinition.ColorPattern)
+	}
+
+	for _, name := range GetFormattedAdjectives(true) {
+		slog.Info("Color Test (Adjectives)", "name", name, "short", ansitags.Parse(GetFormattedAdjective(name+`-short`)), "full", ansitags.Parse(GetFormattedAdjective(name)))
+	}
 }

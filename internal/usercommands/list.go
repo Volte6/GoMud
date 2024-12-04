@@ -68,14 +68,21 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(itemsAvailable) > 0 {
 
+			hasGoldItems := false
 			hasTradeItems := false
 			for _, stockItm := range itemsAvailable {
 				if stockItm.TradeItemId > 0 {
 					hasTradeItems = true
 				}
+				if stockItm.Price >= 0 {
+					hasGoldItems = true
+				}
 			}
 
-			headers := []string{"Qty", "Name", "Type", "Price"}
+			headers := []string{"Qty", "Name", "Type"}
+			if hasGoldItems {
+				headers = append(headers, "Price")
+			}
 			if hasTradeItems {
 				headers = append(headers, "Trade")
 			}
@@ -99,15 +106,22 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 				entryRow := []string{
 					qtyStr,
-					fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, item.DisplayName()),
+					item.DisplayName(),
 					string(item.GetSpec().Type),
-					strconv.Itoa(price),
+				}
+
+				if hasGoldItems {
+					if price > 0 {
+						entryRow = append(entryRow, strconv.Itoa(price))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
 				}
 
 				if hasTradeItems {
 					if stockItm.TradeItemId > 0 {
 						tradeItm := items.New(stockItm.TradeItemId)
-						entryRow = append(entryRow, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, tradeItm.DisplayName()))
+						entryRow = append(entryRow, tradeItm.DisplayName())
 					} else {
 						entryRow = append(entryRow, ``)
 					}
@@ -117,12 +131,13 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			}
 
 			sort.Slice(rows, func(i, j int) bool {
+				return rows[i][0] < rows[j][0]
 				num1, _ := strconv.Atoi(rows[i][3])
 				num2, _ := strconv.Atoi(rows[j][3])
 				return num1 < num2
 			})
 
-			onlineTableData := templates.GetTable(fmt.Sprintf(`%s by <ansi fg="mobname">%s</ansi>`, colorpatterns.ApplyColorPattern(`Items for sale`, `cyan`), mob.Character.Name), headers, rows)
+			onlineTableData := templates.GetTable(fmt.Sprintf(`%s by <ansi fg="mobname">%s</ansi>`, colorpatterns.ApplyColorPattern(`Items available`, `cyan`), mob.Character.Name), headers, rows)
 			tplTxt, _ := templates.Process("tables/shoplist", onlineTableData)
 			user.SendText(tplTxt)
 			user.SendText(fmt.Sprintf(`To buy something, type: <ansi fg="command">buy [name]</ansi>%s`, term.CRLFStr))
@@ -130,15 +145,21 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(mercsAvailable) > 0 {
 
+			hasGoldItems := false
 			hasTradeItems := false
 			for _, stockItm := range mercsAvailable {
 				if stockItm.TradeItemId > 0 {
 					hasTradeItems = true
 				}
+				if stockItm.Price >= 0 {
+					hasGoldItems = true
+				}
 			}
 
-			headers := []string{"Qty", "Name", "Level", "Race", "Price"}
-
+			headers := []string{"Qty", "Name", "Level", "Race"}
+			if hasGoldItems {
+				headers = append(headers, "Price")
+			}
 			if hasTradeItems {
 				headers = append(headers, "Trade")
 			}
@@ -173,13 +194,20 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					`<ansi fg="mobname">` + mobInfo.Character.Name + `</ansi>`,
 					strconv.Itoa(mobInfo.Character.Level),
 					raceInfo.Name,
-					strconv.Itoa(price),
+				}
+
+				if hasGoldItems {
+					if price > 0 {
+						entryRow = append(entryRow, strconv.Itoa(price))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
 				}
 
 				if hasTradeItems {
 					if stockMerc.TradeItemId > 0 {
 						tradeItm := items.New(stockMerc.TradeItemId)
-						entryRow = append(entryRow, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, tradeItm.DisplayName()))
+						entryRow = append(entryRow, tradeItm.DisplayName())
 					} else {
 						entryRow = append(entryRow, ``)
 					}
@@ -203,14 +231,21 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(buffsAvailable) > 0 {
 
+			hasGoldItems := false
 			hasTradeItems := false
 			for _, stockItm := range buffsAvailable {
 				if stockItm.TradeItemId > 0 {
 					hasTradeItems = true
 				}
+				if stockItm.Price >= 0 {
+					hasGoldItems = true
+				}
 			}
 
-			headers := []string{"Qty", "Name", "Price"}
+			headers := []string{"Qty", "Enchantment"}
+			if hasGoldItems {
+				headers = append(headers, "Price")
+			}
 			if hasTradeItems {
 				headers = append(headers, "Trade")
 			}
@@ -232,13 +267,20 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				entryRow := []string{
 					qtyStr,
 					buffInfo.Name,
-					strconv.Itoa(stockBuff.Price),
+				}
+
+				if hasGoldItems {
+					if stockBuff.Price > 0 {
+						entryRow = append(entryRow, strconv.Itoa(stockBuff.Price))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
 				}
 
 				if hasTradeItems {
 					if stockBuff.TradeItemId > 0 {
 						tradeItm := items.New(stockBuff.TradeItemId)
-						entryRow = append(entryRow, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, tradeItm.DisplayName()))
+						entryRow = append(entryRow, tradeItm.DisplayName())
 					} else {
 						entryRow = append(entryRow, ``)
 					}
@@ -262,14 +304,21 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(petsAvailable) > 0 {
 
+			hasGoldItems := false
 			hasTradeItems := false
 			for _, stockItm := range petsAvailable {
 				if stockItm.TradeItemId > 0 {
 					hasTradeItems = true
 				}
+				if stockItm.Price >= 0 {
+					hasGoldItems = true
+				}
 			}
 
-			headers := []string{"Qty", "Type", "Price"}
+			headers := []string{"Qty", "Pet-Type"}
+			if hasGoldItems {
+				headers = append(headers, "Price")
+			}
 			if hasTradeItems {
 				headers = append(headers, "Trade")
 			}
@@ -297,14 +346,21 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 				entryRow := []string{
 					qtyStr,
-					`<ansi fg="petname">` + petInfo.Type + `</ansi>`,
-					strconv.Itoa(price),
+					petInfo.Type,
+				}
+
+				if hasGoldItems {
+					if price > 0 {
+						entryRow = append(entryRow, strconv.Itoa(price))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
 				}
 
 				if hasTradeItems {
 					if stockPet.TradeItemId > 0 {
 						tradeItm := items.New(stockPet.TradeItemId)
-						entryRow = append(entryRow, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, tradeItm.DisplayName()))
+						entryRow = append(entryRow, tradeItm.DisplayName())
 					} else {
 						entryRow = append(entryRow, ``)
 					}
@@ -371,7 +427,26 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(itemsAvailable) > 0 {
 
-			headers := []string{"Qty", "Name", "Type", "Price"}
+			hasGoldItems := false
+			hasTradeItems := false
+			for _, stockItm := range itemsAvailable {
+				if stockItm.TradeItemId > 0 {
+					hasTradeItems = true
+				}
+				if stockItm.Price >= 0 { // 0 means use specified item value
+					hasGoldItems = true
+				}
+			}
+
+			headers := []string{"Qty", "Name", "Type"}
+
+			if hasGoldItems {
+				headers = append(headers, `Price`)
+			}
+			if hasTradeItems {
+				headers = append(headers, `Trade`)
+			}
+
 			rows := [][]string{}
 
 			for _, stockItm := range itemsAvailable {
@@ -389,12 +464,31 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					price = 0
 				}
 
-				rows = append(rows, []string{
+				entryRow := []string{
 					qtyStr,
-					fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, item.DisplayName()),
+					item.DisplayName(),
 					string(item.GetSpec().Type),
-					strconv.Itoa(price)},
-				)
+				}
+
+				if hasGoldItems {
+					if price > 0 {
+						entryRow = append(entryRow, strconv.Itoa(price))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				if hasTradeItems {
+					if stockItm.TradeItemId > 0 {
+						tradeItm := items.New(stockItm.TradeItemId)
+						entryRow = append(entryRow, tradeItm.DisplayName())
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				rows = append(rows, entryRow)
+
 			}
 
 			sort.Slice(rows, func(i, j int) bool {
@@ -403,7 +497,7 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				return num1 < num2
 			})
 
-			onlineTableData := templates.GetTable(fmt.Sprintf(`%s by <ansi fg="username">%s</ansi>`, colorpatterns.ApplyColorPattern(`Items for sale`, `cyan`), shopUser.Character.Name), headers, rows)
+			onlineTableData := templates.GetTable(fmt.Sprintf(`%s by <ansi fg="username">%s</ansi>`, colorpatterns.ApplyColorPattern(`Items available`, `cyan`), shopUser.Character.Name), headers, rows)
 			tplTxt, _ := templates.Process("tables/shoplist", onlineTableData)
 			user.SendText(tplTxt)
 			user.SendText(fmt.Sprintf(`To buy something, type: <ansi fg="command">buy [name]</ansi>%s`, term.CRLFStr))
@@ -411,7 +505,25 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(mercsAvailable) > 0 {
 
-			headers := []string{"Qty", "Name", "Level", "Race", "Price"}
+			hasGoldItems := false
+			hasTradeItems := false
+			for _, stockMerc := range itemsAvailable {
+				if stockMerc.TradeItemId > 0 {
+					hasTradeItems = true
+				}
+				if stockMerc.Price >= 0 { // 0 means auto-calculate a value
+					hasGoldItems = true
+				}
+			}
+
+			headers := []string{"Qty", "Name", "Level", "Race"}
+
+			if hasGoldItems {
+				headers = append(headers, `Price`)
+			}
+			if hasTradeItems {
+				headers = append(headers, `Trade`)
+			}
 
 			rows := [][]string{}
 
@@ -438,13 +550,31 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					price = 0
 				}
 
-				rows = append(rows, []string{
+				entryRow := []string{
 					qtyStr,
 					`<ansi fg="mobname">` + mobInfo.Character.Name + `</ansi>`,
 					strconv.Itoa(mobInfo.Character.Level),
 					raceInfo.Name,
-					strconv.Itoa(price),
-				})
+				}
+
+				if hasGoldItems {
+					if price > 0 {
+						entryRow = append(entryRow, strconv.Itoa(price))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				if hasTradeItems {
+					if stockMerc.TradeItemId > 0 {
+						tradeItm := items.New(stockMerc.TradeItemId)
+						entryRow = append(entryRow, tradeItm.DisplayName())
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				rows = append(rows, entryRow)
 
 			}
 
@@ -462,7 +592,26 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(buffsAvailable) > 0 {
 
-			headers := []string{"Qty", "Name", "Price"}
+			hasGoldItems := false
+			hasTradeItems := false
+			for _, stockBuff := range itemsAvailable {
+				if stockBuff.TradeItemId > 0 {
+					hasTradeItems = true
+				}
+				if stockBuff.Price > 0 {
+					hasGoldItems = true
+				}
+			}
+
+			headers := []string{"Qty", "Enchantment"}
+
+			if hasGoldItems {
+				headers = append(headers, `Price`)
+			}
+			if hasTradeItems {
+				headers = append(headers, `Trade`)
+			}
+
 			rows := [][]string{}
 
 			for _, stockBuff := range buffsAvailable {
@@ -477,11 +626,29 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					qtyStr = strconv.Itoa(stockBuff.Quantity)
 				}
 
-				rows = append(rows, []string{
+				entryRow := []string{
 					qtyStr,
 					buffInfo.Name,
-					strconv.Itoa(stockBuff.Price)},
-				)
+				}
+
+				if hasGoldItems {
+					if stockBuff.Price > 0 {
+						entryRow = append(entryRow, strconv.Itoa(stockBuff.Price))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				if hasTradeItems {
+					if stockBuff.TradeItemId > 0 {
+						tradeItm := items.New(stockBuff.TradeItemId)
+						entryRow = append(entryRow, tradeItm.DisplayName())
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				rows = append(rows, entryRow)
 			}
 
 			sort.Slice(rows, func(i, j int) bool {
@@ -498,7 +665,26 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 		if len(petsAvailable) > 0 {
 
-			headers := []string{"Qty", "Type", "Price"}
+			hasGoldItems := false
+			hasTradeItems := false
+			for _, stockPet := range itemsAvailable {
+				if stockPet.TradeItemId > 0 {
+					hasTradeItems = true
+				}
+				if stockPet.Price >= 0 { // zero means assign a flat price
+					hasGoldItems = true
+				}
+			}
+
+			headers := []string{"Qty", "Pet-Type"}
+
+			if hasGoldItems {
+				headers = append(headers, `Price`)
+			}
+			if hasTradeItems {
+				headers = append(headers, `Trade`)
+			}
+
 			rows := [][]string{}
 
 			for _, stockPet := range petsAvailable {
@@ -520,11 +706,29 @@ func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					price = 0
 				}
 
-				rows = append(rows, []string{
+				entryRow := []string{
 					qtyStr,
-					`<ansi fg="petname">` + petInfo.Type + `</ansi>`,
-					strconv.Itoa(price)},
-				)
+					petInfo.Type,
+				}
+
+				if hasGoldItems {
+					if price > 0 {
+						entryRow = append(entryRow, strconv.Itoa(price))
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				if hasTradeItems {
+					if stockPet.TradeItemId > 0 {
+						tradeItm := items.New(stockPet.TradeItemId)
+						entryRow = append(entryRow, tradeItm.DisplayName())
+					} else {
+						entryRow = append(entryRow, ``)
+					}
+				}
+
+				rows = append(rows, entryRow)
 			}
 
 			sort.Slice(rows, func(i, j int) bool {

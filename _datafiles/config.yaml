@@ -46,9 +46,12 @@ FolderSpellData: _datafiles/spells
 # - FolderAttackMessageData -
 #   Defines the various combat related text messages
 FolderAttackMessageData: _datafiles/combat-messages 
-# - FolderRoomData -
+# - FileAnsiAliases -
 #   Maps common aliases to specific ansi color codes
 FileAnsiAliases: _datafiles/ansi-aliases.yaml 
+# - FileColorPatterns -
+#   string name to color pattern sequences
+FileColorPatterns: _datafiles/color-patterns.yaml 
 # - FileKeywords -
 #   Keywords are used to match commands to actions
 #   Also used for aliases
@@ -347,7 +350,6 @@ BannedNames:
 - "us"
 - "you"
 - "them"
-- "party"
 - "everyone"
 - "someone"
 - "anyone"
@@ -368,6 +370,9 @@ BannedNames:
 - "down"
 - "chest"
 - "door"
+- "new"
+- "join"
+- "register"
 # - NextRoomID -
 # This number is auto-updated to the highest number of rooms in the game. 
 #   If creating your own rooms but don't want to risk an update conflicting, 
@@ -389,6 +394,7 @@ Locked:
 - FolderItemData
 - FolderAttackMessageData
 - FileAnsiAliases
+- FileColorPatterns
 - NextRoomId
 - Seed
 - OnLoginCommands
