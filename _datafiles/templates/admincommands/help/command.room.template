@@ -29,13 +29,16 @@ Set a property of the room. This updates basic properties of the room you are in
     Nouns:
         Room nouns are extra descriptive tags that can be "looked" at by players.
         <ansi fg="command">room nouns</ansi> - List all nouns for the room
-        <ansi fg="command">room noun [name] [description[</ansi> - Add or overwrite a noun
+        <ansi fg="command">room noun [name] [description]</ansi> - Add or overwrite a noun
 
 <ansi fg="command">room exit [exit_name] [room_id]</ansi> - e.g. <ansi fg="command">room exit west 159</ansi>
 This will create a new exit that links to a specific room_id using the exit_name provided.
 <ansi fg="red-bold">!Beware!</ansi> if the spacial relationship with compass direction rooms is done incorrectly, 
 movement could confuse players and maps may generate strangely.
 It is recommended that this only be used to link rooms with non-compass directions, such as "inside" or "cave"
+
+<ansi fg="command">room exit [exit_name] [new_exit_name]</ansi> - e.g. <ansi fg="command">room exit up climb</ansi>
+This will rename an exit name to something new. This only works if the new exit name is non-numeric.
 
 <ansi fg="command">room secretexit [exit_name]</ansi> - e.g. <ansi fg="command">room secretexit south</ansi>
 Toggles the secrecy of an exit on or off.

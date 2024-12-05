@@ -132,22 +132,29 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			`room`: targetRoom,
 			`zone`: rooms.GetZoneConfig(targetRoom.Zone),
 		}
-
+		fmt.Println(targetRoom.Exits)
 		infoOutput, _ := templates.Process("admincommands/ingame/roominfo", roomInfo)
 		user.SendText(infoOutput)
 
 	} else if len(args) >= 2 && roomCmd == "exit" {
 
+		// exit west 159 <- Create/change exit with roomId as target room
+		// exit up climb <- Rename exit
+
 		direction := strings.ToLower(args[1])
 		roomId = 0
 		var numError error = nil
+		exitRename := ``
 
 		if len(args) > 2 {
 			roomId, numError = strconv.Atoi(args[2])
+			if numError != nil {
+				exitRename = args[2]
+			}
 		}
 
 		// Will be erasing it.
-		if numError != nil || len(args) < 3 { // If a bad room number or NO room number supplied, delete
+		if len(args) < 3 { // If NO room number/name supplied, delete
 			if _, ok := room.Exits[direction]; !ok {
 				user.SendText(fmt.Sprintf("Exit %s does not exist.", direction))
 				return handled, nil
@@ -156,8 +163,16 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			return handled, nil
 		}
 
-		if _, ok := room.Exits[direction]; ok {
+		if currentExit, ok := room.Exits[direction]; ok {
 			user.SendText(fmt.Sprintf("Exit %s already exists (overwriting).", direction))
+
+			if exitRename != `` {
+				delete(room.Exits, direction)
+				room.Exits[exitRename] = currentExit
+
+				user.SendText(fmt.Sprintf("Exit %s renamed to %s.", direction, exitRename))
+				return true, nil
+			}
 		}
 
 		targetRoom := rooms.LoadRoom(roomId)
@@ -250,6 +265,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			if propertyValue == `` {
 				propertyValue = `[no description]`
 			}
+			propertyValue = strings.ReplaceAll(propertyValue, `\n`, "\n")
 			room.Description = propertyValue
 			rooms.SaveRoom(*room)
 		} else if propertyName == "idlemessages" {
