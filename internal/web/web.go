@@ -99,6 +99,14 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 		doBasicAuth(mutatorData),
 	))
 
+	// Room Admin
+	http.HandleFunc("GET /admin/rooms/", RunWithMUDLocked(
+		doBasicAuth(roomsIndex),
+	))
+	http.HandleFunc("GET /admin/rooms/roomdata/", RunWithMUDLocked(
+		doBasicAuth(roomData),
+	))
+
 	go func() {
 		defer wg.Done()
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
