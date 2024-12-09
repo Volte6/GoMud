@@ -1,0 +1,29 @@
+{{template "header" .}}
+
+                <div class="container-fluid">
+
+                    <div class="w-50 form-group mt-5">
+                        <h3>Select a Room <small>({{ len . }} found)</small></h3>
+                        <select class="form-control selectpicker" 
+                            name="roomid" id="roomid"  
+                            data-live-search="true"
+                            hx-get="/admin/rooms/roomdata" 
+                            hx-target="#roomdata-edit" 
+                            hx-trigger="change" >
+                            <option value="">Select a Room to View</option>
+                            <option value="0">Add New Room</option>
+                            {{$lastZoneName := ""}}
+                            {{range $i, $roomInfo := .}}
+                                {{ if ne $roomInfo.RoomZone $lastZoneName }}
+                                <option data-divider="true">Divider</option>
+                                {{$lastZoneName = $roomInfo.RoomZone }}
+                                {{ end }}
+                                <option data-content="<span class='badge badge-secondary'> {{ $roomInfo.RoomId }} </span> <span class='badge badge-pill badge-warning'>{{ $roomInfo.RoomZone }}</span> {{ if $roomInfo.ZoneRoot }}<span class='badge badge-pill badge-danger'>root</span> {{end}}<span class='font-weight-bold'>{{ $roomInfo.RoomTitle }}</span>" value="{{ $roomInfo.RoomId }}">{{ rpad 20 $roomInfo.RoomZone "&nbsp;&nbsp;" }} {{ rpad 7 $roomInfo.RoomId "&nbsp;&nbsp;" }} {{ $roomInfo.RoomTitle }}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="container-fluid" id="roomdata-edit"></div>
+
+{{template "footer" .}}

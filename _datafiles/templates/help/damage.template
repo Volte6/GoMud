@@ -2,8 +2,6 @@
 
 The <ansi fg="command">damage</ansi> stat of weapons (and unarmed combat) represents combat attacks.
 
-<ansi fg="yellow">Usage: </ansi>
-
 Damage is often reprsented as a dice roll. For example: <ansi fg="red">2d6+1</ansi>
 
 In the example <ansi fg="red">2d6+1</ansi>, to calculate damage, you would roll <ansi fg="red">2</ansi> dice, each having 
@@ -14,5 +12,5 @@ scales up with the first number (Number of dice), whereas the maximum damage
 scales up with the second number (Number of sides)
 
 Sometimes a weapon may automatically receive extra attacks. This is shown by 
-a <ansi fg="red">#@</ansi> prefix to the damage. For example: <ansi fg="red">5@2d6+1</ansi> would attack 5 times with <ansi fg="red">2d6+1</ansi>.
+a <ansi fg="red">#@</ansi> prefix to the damage. For example: <ansi fg="red">5@2d6+1</ansi> would attack <ansi fg="red">5 times</ansi> with <ansi fg="red">2d6+1</ansi>.
 
