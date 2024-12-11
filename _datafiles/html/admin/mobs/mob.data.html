@@ -56,7 +56,7 @@
             <select class="form-control form-control-sm" name="maxwander" id="maxwander" aria-describedby="maxwander-help"  rows="10">
                 <option value="-1" {{if eq .mobInfo.MaxWander -1}}SELECTED{{end}}>No Limit</option>
                 {{$mobMaxWander := .mobInfo.MaxWander}}
-                {{range $index, $wander := .dropChances}}
+                {{range $index, $wander := (intRange 0 20) }}
                     {{ if eq $wander 0 }}
                         <option value="{{ $wander }}" {{if eq $wander $mobMaxWander}}SELECTED{{end}}>Do NOT Wander</option>
                     {{ else }}
@@ -198,37 +198,42 @@
         <hr />
         <h3>{{$shopType}} Shop Info</h3>
 
-        <div class="row grid gap-3">
+        <div class="row">
             {{ if eq (len $shopItems) 0 }}
-                <div class="form-group col-2 border border-secondary">
-                    None
+                <div class="grid gap-3 form-group col-2">
+                    <div class="p-3 border border-primary">
+                        None
+                    </div>
                 </div>
             {{ end }}
             {{range $i, $shopItem := $shopItems}}
-                <div class="form-group col-2 border border-primary">
+                <div class="grid gap-3 form-group col-2">
+                    <div class="p-3 border border-primary">
 
-                    <input type="hidden" name="shop-item-position[]" value="{{$i}}">
-                    <input type="hidden" name="shop-item-type[{{$i}}]" value="{{$shopType}}">
+                        <input type="hidden" name="shop-item-position[]" value="{{$i}}">
+                        <input type="hidden" name="shop-item-type[{{$i}}]" value="{{$shopType}}">
 
-                    <label for="gold">Id For Sale</label>
-                    <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" 
-                        value="
-                        {{- if ne $shopItem.MobId 0 }}{{ $shopItem.MobId }}{{end -}}
-                        {{- if ne $shopItem.ItemId 0 }}{{ $shopItem.ItemId }}{{end -}}
-                        {{- if ne $shopItem.BuffId 0 }}{{ $shopItem.BuffId }}{{end -}}
-                        {{- if ne $shopItem.PetType "" }}{{ $shopItem.PetType }}{{end -}}
-                        ">
-                    
-                    <label for="gold">Max Stock (0 for unlimited)</label>
-                    <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" value="{{ $shopItem.QuantityMax }}">
-        
-                    <label for="gold">Override Price</label>
-                    <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" value="{{ if gt $shopItem.Price 0 }}{{ $shopItem.Price }}{{end}}">
-        
-                    <label for="gold">Override Restock Rate</label> <a href="#" class="badge badge-warning" data-toggle="modal" data-target=".time-strings-modal">example?</a>
-                    <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" value="{{ if ne $shopItem.RestockRate "" }}{{ $shopItem.RestockRate }}{{end}}">
+                        <label for="gold">Id For Sale</label>
+                        <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" 
+                            value="
+                            {{- if ne $shopItem.MobId 0 }}{{ $shopItem.MobId }}{{end -}}
+                            {{- if ne $shopItem.ItemId 0 }}{{ $shopItem.ItemId }}{{end -}}
+                            {{- if ne $shopItem.BuffId 0 }}{{ $shopItem.BuffId }}{{end -}}
+                            {{- if ne $shopItem.PetType "" }}{{ $shopItem.PetType }}{{end -}}
+                            ">
+                        
+                        <label for="gold">Max Stock (0 for unlimited)</label>
+                        <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" value="{{ $shopItem.QuantityMax }}">
+            
+                        <label for="gold">Override Price</label>
+                        <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" value="{{ if gt $shopItem.Price 0 }}{{ $shopItem.Price }}{{end}}">
+            
+                        <label for="gold">Override Restock Rate</label> <a href="#" class="badge badge-warning" data-toggle="modal" data-target=".time-strings-modal">example?</a>
+                        <input type="text" class="form-control form-control-sm" id="character-level" aria-describedby="character-level-help" value="{{ if ne $shopItem.RestockRate "" }}{{ $shopItem.RestockRate }}{{end}}">
+                    </div>
                 </div>
             {{end}}
+            
         </div>
     {{end}}
 

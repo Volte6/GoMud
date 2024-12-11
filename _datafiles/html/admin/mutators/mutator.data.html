@@ -173,12 +173,78 @@
         {{end}}
     </div>
 
+    <hr />
+    <h3>Miscellaneous</h3>
+
+    <div class="row">
+
+        <div class="form-group col-sm">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="true" name="Pvp.On" id="Pvp.On" {{ if $mutator.Pvp.Enabled }}CHECKED{{ end }}>
+                <label class="form-check-label" for="Pvp.On">
+                    Override/Force PVP Area ON
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group col-sm">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="true" name="Pvp.Off" id="Pvp.Off" {{ if $mutator.Pvp.Disabled }}CHECKED{{ end }}>
+                <label class="form-check-label" for="Pvp.Off">
+                    Override/Force PVP Area Off
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="lightmod">Adjust Light</label>
+            <select class="form-control form-control-sm" name="type" id="lightmod" aria-describedby="lightmod-help"  rows="10">
+                <option value="-2" {{ if eq $mutator.LightMod -2 }}SELECTED{{end}}>-2</option>
+                <option value="-1" {{ if eq $mutator.LightMod -1 }}SELECTED{{end}}>-1</option>
+                <option value="0" {{ if eq $mutator.LightMod 0 }}SELECTED{{end}}>0</option>
+                <option value="1" {{ if eq $mutator.LightMod 1 }}SELECTED{{end}}>+1</option>
+                <option value="2" {{ if eq $mutator.LightMod 2 }}SELECTED{{end}}>+2</option>
+            </select>
+            <small id="lightmod-help" class="form-text text-muted">Adjust lighting?</small>
+        </div>
+        
+    </div>
 
     <hr />
     <h3>Exits</h3>
 
-    <div class="form-group row form-check container-fluid"></div>
-        TODO...
+    <div class="row">
+        {{ if eq ( len $mutator.Exits ) 0 }}
+            <div class="grid gap-3 form-group col-2">
+                <div class="p-3 border border-primary">
+                    None
+                </div>
+            </div>
+        {{ end }}
+        {{range $exitName, $exitInfo := $mutator.Exits }}
+            <div class="grid gap-3 form-group col-2">
+                <div class="p-3 border border-primary">
+                    
+                    <label for="exits[{{ $exitName }}].exitname">Exit Name</label>
+                    <input type="text" class="form-control form-control-sm" id="exits[{{ $exitName }}].exitname" aria-describedby="exits[{{ $exitName }}].exitname" value="{{ $exitName }}">
+        
+                    <label for="exits[{{ $exitName }}].RoomId">Target RoomId</label>
+                    <input type="text" class="form-control form-control-sm" id="exits[{{ $exitName }}].RoomId" aria-describedby="exits[{{ $exitName }}].RoomId" value="{{ $exitInfo.RoomId }}">
+
+                    <label for="exits[{{ $exitName }}].LockDifficulty">Lock Difficulty (0 = Unlocked)</label>
+                    <input type="text" class="form-control form-control-sm" id="exits[{{ $exitName }}].LockDifficulty" aria-describedby="exits[{{ $exitName }}].LockDifficulty" value="{{ $exitInfo.Lock.Difficulty }}">
+
+                    <label class="form-check-label col-md-2" for="exits[{{ $exitName }}].Secret" title="Secret"><input 
+                        class="form-check-input"
+                        type="checkbox" 
+                        class="form-check-input form-control-sm"  
+                        id="exits[{{ $exitName }}].Secret" 
+                        aria-describedby="exits[{{ $exitName }}].Secret" value="true" {{ if $exitInfo.Secret }}CHECKED{{ end }}>
+                    Secret</label>
+                </div>
+            </div>
+        {{end}}
+        
     </div>
-    
+
 </form>
