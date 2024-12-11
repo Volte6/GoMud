@@ -2,6 +2,20 @@
 
                 <div class="container-fluid">
 
+                    <div class="row mt-5">
+                        <h3>Filter by Zone</h3>
+
+                        <div class="col-md-3 mr-1 mb-1">
+                            <a href="/admin/rooms/?filter-type=*" class="{{ if eq .FilterType "*" }}link-dark{{end}}">All</a>
+                        </div>
+                        {{$filterType := .FilterType}}
+                        {{range $index, $zInfo := .Zones}}
+                            <div class="col-md-3 mr-1 mb-1">
+                                <a href="/admin/rooms/?filter-type={{$zInfo.ZoneName}}" class="{{ if eq $filterType $zInfo.ZoneName }}link-dark{{end}}">{{$zInfo.ZoneName}}</a> ({{$zInfo.RoomCount}}) {{ if ne $zInfo.AutoScale "" }} <span class="text-secondary">[AutoScale: {{ $zInfo.AutoScale }}]</span>{{ end }}
+                            </div>
+                        {{end}}
+                    </div>
+
                     <div class="w-50 form-group mt-5">
                         <h3>Select a Room <small>({{ len . }} found)</small></h3>
                         <select class="form-control selectpicker" 
@@ -13,12 +27,12 @@
                             <option value="">Select a Room to View</option>
                             <option value="0">Add New Room</option>
                             {{$lastZoneName := ""}}
-                            {{range $i, $roomInfo := .}}
+                            {{range $i, $roomInfo := .Rooms }}
                                 {{ if ne $roomInfo.RoomZone $lastZoneName }}
                                 <option data-divider="true">Divider</option>
                                 {{$lastZoneName = $roomInfo.RoomZone }}
                                 {{ end }}
-                                <option data-content="<span class='badge badge-secondary'> {{ $roomInfo.RoomId }} </span> <span class='badge badge-pill badge-warning'>{{ $roomInfo.RoomZone }}</span> {{ if $roomInfo.ZoneRoot }}<span class='badge badge-pill badge-danger'>root</span> {{end}}<span class='font-weight-bold'>{{ $roomInfo.RoomTitle }}</span>" value="{{ $roomInfo.RoomId }}">{{ rpad 20 $roomInfo.RoomZone "&nbsp;&nbsp;" }} {{ rpad 7 $roomInfo.RoomId "&nbsp;&nbsp;" }} {{ $roomInfo.RoomTitle }}</option>
+                                <option data-content="<span class='badge badge-secondary'> {{ $roomInfo.RoomId }} </span> <span class='badge badge-pill badge-warning'>{{ $roomInfo.RoomZone }}</span> {{ if $roomInfo.ZoneRoot }}<span class='badge badge-pill badge-danger'>root</span> {{end}}<span class='font-weight-bold {{ if $roomInfo.IsPvp }}text-danger{{ end }}'>{{ $roomInfo.RoomTitle }}</span> {{ if $roomInfo.IsBank }}<span class='badge badge-pill badge-success'>bank</span> {{ end }}{{ if $roomInfo.IsStorage }}<span class='badge badge-pill badge-dark'>storage</span> {{ end }}{{ if $roomInfo.IsCharacterRoom }}<span class='badge badge-pill badge-danger'>alt char</span> {{ end }}{{ if $roomInfo.IsSkillTraining }}<span class='badge badge-pill badge-primary'>training</span> {{ end }}{{ if $roomInfo.HasContainer }}<span class='badge badge-pill badge-info'>container</span> {{ end }}" value="{{ $roomInfo.RoomId }}">{{ rpad 20 $roomInfo.RoomZone "&nbsp;&nbsp;" }} {{ rpad 7 $roomInfo.RoomId "&nbsp;&nbsp;" }} {{ $roomInfo.RoomTitle }}</option>
                             {{end}}
                         </select>
                     </div>

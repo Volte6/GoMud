@@ -56,7 +56,7 @@
             <select class="form-control form-control-sm" name="maxwander" id="maxwander" aria-describedby="maxwander-help"  rows="10">
                 <option value="-1" {{if eq .mobInfo.MaxWander -1}}SELECTED{{end}}>No Limit</option>
                 {{$mobMaxWander := .mobInfo.MaxWander}}
-                {{range $index, $wander := .dropChances}}
+                {{range $index, $wander := (intRange 0 20) }}
                     {{ if eq $wander 0 }}
                         <option value="{{ $wander }}" {{if eq $wander $mobMaxWander}}SELECTED{{end}}>Do NOT Wander</option>
                     {{ else }}

@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"html"
 	"strings"
 	"text/template"
 )
@@ -82,5 +83,19 @@ var (
 		"add": func(num int, amt int) int { return num + amt },
 		"sub": func(num int, amt int) int { return num - amt },
 		"mul": func(num int, amt int) int { return num * amt },
+		"intRange": func(start, end int) []int {
+			n := end - start + 1
+			result := make([]int, n)
+			for i := 0; i < n; i++ {
+				result[i] = start + i
+			}
+			return result
+		},
+		"escapehtml": func(str string) string {
+			return html.EscapeString(str)
+		},
+		"lowercase": func(str string) string {
+			return strings.ToLower(str)
+		},
 	}
 )

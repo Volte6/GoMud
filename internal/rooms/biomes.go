@@ -143,3 +143,11 @@ func GetBiome(name string) (BiomeInfo, bool) {
 	b, ok := AllBiomes[strings.ToLower(name)]
 	return b, ok
 }
+
+func GetAllBiomes() []BiomeInfo {
+	ret := []BiomeInfo{}
+	for _, b := range AllBiomes {
+		ret = append(ret, b)
+	}
+	return ret
+}
