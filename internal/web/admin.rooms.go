@@ -10,6 +10,7 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
+	"github.com/volte6/gomud/internal/mutators"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
 )
@@ -192,6 +193,12 @@ func roomData(w http.ResponseWriter, r *http.Request) {
 		return mapDirections[i] < mapDirections[j]
 	})
 	tplData[`mapDirections`] = mapDirections
+
+	mutSpecs := mutators.GetAllMutatorSpecs()
+	sort.SliceStable(mutSpecs, func(i, j int) bool {
+		return mutSpecs[i].MutatorId < mutSpecs[j].MutatorId
+	})
+	tplData[`mutSpecs`] = mutSpecs
 
 	if err := tmpl.Execute(w, tplData); err != nil {
 		slog.Error("HTML Execute", "error", err)

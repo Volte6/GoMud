@@ -1,5 +1,6 @@
 {{ $room := .roomInfo }}
 {{ $buffSpecs := .buffSpecs }}
+{{ $mutSpecs := .mutSpecs }}
 <form>
 
     <input type="hidden" name="roomid" value="{{ $room.RoomId }}">
@@ -9,519 +10,580 @@
         <hr />
         <h3>(Root) Zone Config</h3>
         
-        <div class="row m-3">
-            <h5>Mob Auto Level Scaling:</h5>
+        <div class="row">
 
-            <div class="input-group col-md-2">
-                <div class="input-group-prepend col-md-6 pr-0">
-                    <span class="input-group-text col-md">Minimum</span>
+            <div class="card col-md-3">
+                <div class="card-body">
+                    <h5 class="card-title">Mob Auto Level Scaling:</h5>
+                    <p class="card-text">
+                        <!--  Start Card Content -->
+
+                        <div class="input-group col-md">
+                            <div class="input-group-prepend col-md-6 pr-0">
+                                <span class="input-group-text col-md">Minimum</span>
+                            </div>
+                            <input type="text" class="form-control form-control-sm col-md" id="symbol" aria-describedby="symbol-help" value="{{ $room.ZoneConfig.MobAutoScale.Minimum }}">
+                        </div>
+                        
+                        <div class="input-group col-md ">
+                            <div class="input-group-prepend col-md-6 pr-0">
+                                <span class="input-group-text col-md">Maximum</span>
+                            </div>
+                            <input type="text" class="form-control form-control-sm col-md" id="symbol" aria-describedby="symbol-help" value="{{ $room.ZoneConfig.MobAutoScale.Maximum }}">
+                        </div>
+                    <!--  End Card Content -->
+                    </p>
+
+                    
+
                 </div>
-                <input type="text" class="form-control form-control-sm col-md-4" id="symbol" aria-describedby="symbol-help" value="{{ $room.ZoneConfig.MobAutoScale.Minimum }}">
             </div>
             
-            <div class="input-group col-md-2 ">
-                <div class="input-group-prepend col-md-6 pr-0">
-                    <span class="input-group-text col-md">Maximum</span>
+        
+            <div class="card col-md">
+                <div class="card-body">
+                    <h5 class="card-title">Mutators:</h5>
+                    <p class="card-text">
+                        <!--  Start Card Content -->
+                        {{ $zoneMutators := $room.ZoneConfig.Mutators }}
+                        {{range $index, $mutInfo := $mutSpecs }}
+                            <label class="form-check-label col-md-2" for="mutators[]" title="{{ $mutInfo.MutatorId }}"><input 
+                            class="form-check-input"
+                            type="checkbox" 
+                            name="mutators[]" 
+                            id="mutators[]" 
+                            value="{{ $mutInfo.MutatorId }}" 
+                            {{range $j, $mut := $zoneMutators}}{{if eq $mut.MutatorId $mutInfo.MutatorId}}CHECKED{{end}}{{end}}>
+                            {{ $mutInfo.MutatorId }}</label> 
+                        {{end}}
+                        <!--  End Card Content -->
+                    </p>
                 </div>
-                <input type="text" class="form-control form-control-sm col-md-4" id="symbol" aria-describedby="symbol-help" value="{{ $room.ZoneConfig.MobAutoScale.Maximum }}">
             </div>
-
-        </div>
-
-        <div class="row m-3">
-            <h5>Mutators:</h5>
-                {{ if eq (len $room.ZoneConfig.Mutators) 0 }}
-                <div class="grid gap-3 form-group col-2">
-                    <div class="p-3">
-                        None
-                    </div>
-                </div>
-                {{ end }}
-
-                {{range $index, $mutInfo := $room.ZoneConfig.Mutators }}
-                <div class="input-group col-md-2">
-                    <input type="text" class="form-control form-control-sm" id="symbol" aria-describedby="symbol-help" value="{{ $mutInfo.MutatorId }}">
-                </div>
-                {{end}}
+            
         </div>
 
     {{ end }}
 
     <hr />
-    <h3>Basic Info</h3>
+    <h3>Room Config</h3>
+    
 
     <div class="row">
 
-        <div class="form-group col-sm">
-            <label for="name">Title</label>
-            <input type="text" class="form-control form-control-sm" id="name" aria-describedby="name-help" value="{{ escapehtml $room.Title }}">
-            <small id="name-help" class="form-text text-muted">Shows above the description.</small>
+        <div class="card col-sm">
+            <div class="card-body">
+                <h5 class="card-title">Basics (Text)</h5>
+                <p class="card-text">
+                    <!--  Start Card Content -->
+                    <div class="form-group">
+                        <label for="name">Title</label>
+                        <input type="text" class="form-control form-control-sm" id="name" aria-describedby="name-help" value="{{ escapehtml $room.Title }}">
+                        <small id="name-help" class="form-text text-muted">Shows above the description.</small>
 
-            <label for="description">Description</label>
-            <textarea class="form-control form-control-sm" id="description" aria-describedby="description-help" rows="5">{{ escapehtml $room.GetDescription }}</textarea>
-            <small id="description-help" class="form-text text-muted">The full room description.</small>
-        </div>
-
-        <div class="form-group col-sm">
-
-            <div class="row">
-
-                <div class="form-group col-sm-4">
-
-                    <label for="type">Biome</label>
-                    <select class="form-control form-control-sm" name="biome" id="biome" aria-describedby="biome-help"  rows="10">
-                    {{range $index, $biomeInfo := .biomes}}
-                        <option value="{{ $biomeInfo.Name }}" {{if eq ( lowercase $biomeInfo.Name ) $room.Biome}}SELECTED{{end}}>{{ $biomeInfo.Name }}</option>
-                    {{end}}
-                    </select>
-                    <small id="type-help" class="form-text text-muted">The general environment</small>
-
-                    <label for="name">Map Symbol</label>
-                    <input type="text" class="form-control form-control-sm" id="symbol" aria-describedby="symbol-help" value="{{ $room.MapSymbol }}">
-                    <small id="symbol-help" class="form-text text-muted">Symbol that shows on map.</small>
-
-                    <label for="name">Map Legend</label>
-                    <input type="text" class="form-control form-control-sm" id="legend" aria-describedby="legend-help" value="{{ $room.MapLegend }}">
-                    <small id="legend-help" class="form-text text-muted">Short identifier on the map.</small>
-
-                </div>
-                <div class="form-group col-sm-6">
-
-                    <div class="form-check form-group">
-                        <label class="form-check-label col-md" for="isbank" title="Is bank"><input 
-                            class="form-check-input"
-                            type="checkbox" 
-                            name="isbank" 
-                            id="isbank" 
-                            value="true" 
-                            {{ if $room.IsBank }}CHECKED{{end}}>
-                            Is Bank Room</label> 
-                            <small id="isbank-help" class="form-text text-muted">Can gold be deposited and withdrawn here?</small>
+                        <label for="description">Description</label>
+                        <textarea class="form-control form-control-sm" id="description" aria-describedby="description-help" rows="5">{{ escapehtml $room.GetDescription }}</textarea>
+                        <small id="description-help" class="form-text text-muted">The full room description.</small>
                     </div>
-
-                    <div class="form-check form-group mt-2">
-                        <label class="form-check-label col-md" for="isstorage" title="Is storage"><input 
-                            class="form-check-input"
-                            type="checkbox" 
-                            name="isstorage" 
-                            id="isstorage" 
-                            value="true" 
-                            {{ if $room.IsStorage }}CHECKED{{end}}>
-                            Is Storage Room</label> 
-                            <small id="isstorage-help" class="form-text text-muted">Can objects be stored/recovered here?</small>
-                    </div>
-
-                    <div class="form-check form-group mt-2">
-                        <label class="form-check-label col-md" for="ischaracterroom" title="Is character room"><input 
-                            class="form-check-input"
-                            type="checkbox" 
-                            name="ischaracterroom" 
-                            id="ischaracterroom" 
-                            value="true" 
-                            {{ if $room.IsCharacterRoom }}CHECKED{{end}}>
-                            Is Alt Character Room</label> 
-                            <small id="ischaracterroom-help" class="form-text text-muted">Can alt characters be started/swapped here?</small>
-                    </div>
-
-                    <div class="form-check form-group mt-2">
-                        <label class="form-check-label col-md" for="ispvp" title="Is PVP room"><input 
-                            class="form-check-input"
-                            type="checkbox" 
-                            name="ispvp" 
-                            id="ispvp" 
-                            value="true" 
-                            {{ if $room.Pvp }}CHECKED{{end}}>
-                            Is PVP Room</label> 
-                            <small id="ispvp-help" class="form-text text-muted">Enable Pvp for this specific room?</small>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <hr />
-    <h3>Nouns</h3>
-
-    <div class="row">
-
-        {{ if eq (len $room.Nouns) 0 }}
-        <div class="grid gap-3 form-group col-2">
-            <div class="p-3">
-                None
+                    <!--  End Card Content -->
+                </p>
             </div>
         </div>
-        {{ end }}
-
-        {{range $noun, $description := $room.Nouns}}
-        <div class="row">
-            <div class="col-md-2 pr-0">
-                <input type="text" class="form-control form-control-sm" id="nouns[{{ $noun }}].name" aria-describedby="nouns[{{ $noun }}].name" value="{{ $noun }}">
-            </div>
-            <div class="col-md-10">
-                <input type="text" class="form-control form-control-sm" id="nouns[{{ $noun }}].description" aria-describedby="nouns[{{ $noun }}].description" value="{{ escapehtml $description }}">
-            </div>
-        </div>
-        {{end}}
-    </div>
-
-
-    <hr />
-    <h3>Idle Messages</h3>
-
-    <div class="row">
-
-        {{ if eq (len $room.IdleMessages) 0 }}
-        <div class="grid gap-3 form-group col-2">
-            <div class="p-3">
-                None
-            </div>
-        </div>
-        {{ end }}
-
-        {{range $index, $message := $room.IdleMessages}}
-        <div class="row">
-            <div class="col-md pr-0">
-                <input type="text" class="form-control form-control-sm" id="idlemessages[]" aria-describedby="idlemessages[]" value="{{ escapehtml $message }}">
-            </div>
-        </div>
-        {{end}}
-    </div>
-
-
-    <hr />
-    <h3>Training Available</h3>
-
-    <div class="row">
-        {{ range $i, $skillName := .allSkillNames }}
-        <div class="input-group col-md-4">
-            <div class="input-group-prepend col-md-4 pr-0">
-                <span class="input-group-text col-md">{{ $skillName }}</span>
-            </div>
-            <select class="form-control col-md-3" name="skilltraining[{{ $skillName }}].min" id="skilltraining[{{ $skillName }}].min" aria-describedby="skilltraining[{{ $skillName }}].min-help"  rows="10">
-                {{ $trainingRange := (index $room.SkillTraining $skillName) }}
-                {{range $index, $levelNum := ( intRange 0 4) }}
-                    <option value="{{ $levelNum }}" {{if eq $trainingRange.Min $levelNum}}SELECTED{{end}}>{{ $levelNum }} min</option>
-                {{end}}
-            </select>
-            <select class="form-control col-md-3" name="skilltraining[{{ $skillName }}].max" id="skilltraining[{{ $skillName }}].max" aria-describedby="skilltraining[{{ $skillName }}].max-help"  rows="10">
-                {{ $trainingRange := (index $room.SkillTraining $skillName) }}
-                {{range $index, $levelNum := ( intRange 0 4) }}
-                    <option value="{{ $levelNum }}" {{if eq $trainingRange.Max $levelNum}}SELECTED{{end}}>{{ $levelNum }} max</option>
-                {{end}}
-            </select>
-        </div>
-        {{ end }}
-    </div>
-
-    <hr />
-    <h3>Containers</h3>
-
-    <div class="row">
-
-        {{ if eq (len $room.Containers) 0 }}
-        <div class="grid gap-3 form-group col-2">
-            <div class="p-3">
-                None
-            </div>
-        </div>
-        {{ end }}
-
-        {{range $containerName, $containerInfo := $room.Containers}}
-            {{ if eq $containerInfo.DespawnRound 0 }}
-            <div class="grid gap-3 form-group col-2">
-                <div class="p-3 border border-primary">
-                    <label for="containers[{{ $containerName }}].name">Container Name</label>
-                    <input type="text" class="form-control form-control-sm" id="containers[{{ $containerName }}].name" aria-describedby="containers[{{ $containerName }}].name" value="{{ $containerName }}">
         
-                    <label for="containers[{{ $containerName }}].LockDifficulty">Lock Difficulty (0 = Unlocked)</label>
-                    <input type="text" class="form-control form-control-sm" id="containers[{{ $containerName }}].LockDifficulty" aria-describedby="containers[{{ $containerName }}].LockDifficulty" value="{{ $containerInfo.Lock.Difficulty }}">
-                </div>
-            </div>
-        {{ end }}
-    {{end}}
-    </div>
 
-    <hr />
-    <h3>Spawns</h3>
+        <div class="card col-sm">
+            <div class="card-body">
+                <h5 class="card-title">Basics (Properties)</h5>
+                <p class="card-text">
+                    <!--  Start Card Content -->
+                    <div class="form-group">
 
-    <div class="row">
-        {{ if eq (len $room.SpawnInfo) 0 }}
-        <div class="grid gap-3 form-group col-2">
-            <div class="p-3">
-                None
+                        <div class="row">
+
+                            <div class="form-group col-sm-4">
+
+                                <label for="type">Biome</label>
+                                <select class="form-control form-control-sm" name="biome" id="biome" aria-describedby="biome-help"  rows="10">
+                                {{range $index, $biomeInfo := .biomes}}
+                                    <option value="{{ $biomeInfo.Name }}" {{if eq ( lowercase $biomeInfo.Name ) $room.Biome}}SELECTED{{end}}>{{ $biomeInfo.Name }}</option>
+                                {{end}}
+                                </select>
+                                <small id="type-help" class="form-text text-muted">The general environment</small>
+
+                                <label for="name">Map Symbol</label>
+                                <input type="text" class="form-control form-control-sm" id="symbol" aria-describedby="symbol-help" value="{{ $room.MapSymbol }}">
+                                <small id="symbol-help" class="form-text text-muted">Symbol that shows on map.</small>
+
+                                <label for="name">Map Legend</label>
+                                <input type="text" class="form-control form-control-sm" id="legend" aria-describedby="legend-help" value="{{ $room.MapLegend }}">
+                                <small id="legend-help" class="form-text text-muted">Short identifier on the map.</small>
+
+                            </div>
+                            <div class="form-group col-sm-6">
+
+                                <div class="form-check form-group">
+                                    <label class="form-check-label col-md" for="isbank" title="Is bank"><input 
+                                        class="form-check-input"
+                                        type="checkbox" 
+                                        name="isbank" 
+                                        id="isbank" 
+                                        value="true" 
+                                        {{ if $room.IsBank }}CHECKED{{end}}>
+                                        Is Bank Room</label> 
+                                        <small id="isbank-help" class="form-text text-muted">Can gold be deposited and withdrawn here?</small>
+                                </div>
+
+                                <div class="form-check form-group mt-2">
+                                    <label class="form-check-label col-md" for="isstorage" title="Is storage"><input 
+                                        class="form-check-input"
+                                        type="checkbox" 
+                                        name="isstorage" 
+                                        id="isstorage" 
+                                        value="true" 
+                                        {{ if $room.IsStorage }}CHECKED{{end}}>
+                                        Is Storage Room</label> 
+                                        <small id="isstorage-help" class="form-text text-muted">Can objects be stored/recovered here?</small>
+                                </div>
+
+                                <div class="form-check form-group mt-2">
+                                    <label class="form-check-label col-md" for="ischaracterroom" title="Is character room"><input 
+                                        class="form-check-input"
+                                        type="checkbox" 
+                                        name="ischaracterroom" 
+                                        id="ischaracterroom" 
+                                        value="true" 
+                                        {{ if $room.IsCharacterRoom }}CHECKED{{end}}>
+                                        Is Alt Character Room</label> 
+                                        <small id="ischaracterroom-help" class="form-text text-muted">Can alt characters be started/swapped here?</small>
+                                </div>
+
+                                <div class="form-check form-group mt-2">
+                                    <label class="form-check-label col-md" for="ispvp" title="Is PVP room"><input 
+                                        class="form-check-input"
+                                        type="checkbox" 
+                                        name="ispvp" 
+                                        id="ispvp" 
+                                        value="true" 
+                                        {{ if $room.Pvp }}CHECKED{{end}}>
+                                        Is PVP Room</label> 
+                                        <small id="ispvp-help" class="form-text text-muted">Enable Pvp for this specific room?</small>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <!--  End Card Content -->
+                </p>
             </div>
         </div>
-        {{ end }}
 
-        {{range $index, $spawnInfo := $room.SpawnInfo }}
-        <div class="row form-group border border-primary p-3 m-2">
+    </div>
 
-            <div class="input-group col-md-2">
-                <div class="input-group-prepend col-md-5 pr-0">
-                    <span class="input-group-text col-md">MobId</span>
-                </div>
-                <input type="text" class="form-control form-control-sm col-md-7" id="spawninfo[{{$index}}].mobid" aria-describedby="spawninfo[{{$index}}].mobid-help" value="{{ $spawnInfo.MobId }}">
-            </div>
 
-            <div class="input-group col-md-2">
-                <div class="input-group-prepend col-md-5 pr-0">
-                    <span class="input-group-text col-md">Gold Amt</span>
-                </div>
-                <input type="text" class="form-control form-control-sm col-md-7" id="spawninfo[{{$index}}].gold" aria-describedby="spawninfo[{{$index}}].gold-help" value="{{ $spawnInfo.Gold }}">
-            </div>
+    <div class="row">
 
-            <div class="input-group col-md-2">
-                <div class="input-group-prepend col-md-5 pr-0">
-                    <span class="input-group-text col-md">ItemId</span>
-                </div>
-                <input type="text" class="form-control form-control-sm col-md-7" id="spawninfo[{{$index}}].itemid" aria-describedby="spawninfo[{{$index}}].itemid-help" value="{{ $spawnInfo.ItemId }}">
-            </div>
-
-            <div class="input-group col-md-2">
-                <div class="input-group-prepend col-md-5 pr-0">
-                    <span class="input-group-text col-md">Container</span>
-                </div>
-                <input type="text" class="form-control form-control-sm col-md-7" id="spawninfo[{{$index}}].container" aria-describedby="spawninfo[{{$index}}].container-help" value="{{ $spawnInfo.Container }}">
-            </div>
-
-            <div class="input-group col-md-3">
-                <div class="input-group-prepend col-md-4 pr-0">
-                    <span class="input-group-text col-md">Respawn Time</span>
-                </div>
-                <input type="text" class="form-control form-control-sm" id="spawninfo[{{$index}}].respawnrate" aria-describedby="spawninfo[{{$index}}].respawnrate" value="{{ $spawnInfo.RespawnRate }}">
-                <div class="col-md-2">
-                    <a href="#" class="badge badge-warning" data-toggle="modal" data-target=".time-strings-modal">example?</a>
-                </div>
-            </div>
-            
-            <div class="row form-group m-3">
-                <label for="name">Message on Spawn</label>
-                <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].message" aria-describedby="spawninfo[{{$index}}].message-help" value="{{ escapehtml $spawnInfo.Message }}">
-                <small id="name-help" class="form-text text-muted">Sent to the room when a mob spawns.</small>
-            </div>
-
-            <div class="row m3">
-                <h5>Mob Specific Details (optional)</h5>
-
-                <div class="col-md">
-                    <label for="name">Name</label>
-                    <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].name" aria-describedby="spawninfo[{{$index}}].name-help" value="{{ escapehtml $spawnInfo.Name }}">
-                    <small id="name-help" class="form-text text-muted">Override the mob name.</small>
-                </div>
-
-                <div class="col-md">
-                    <label for="name">Level</label>
-                    <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].level" aria-describedby="spawninfo[{{$index}}].level-help" value="{{ $spawnInfo.Level }}">
-                    <small id="name-help" class="form-text text-muted">Force mob to a specific level.</small>
-                </div>
-
-                <div class="col-md">
-                    <label for="name">Level Adjust</label>
-                    <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].levelmod" aria-describedby="spawninfo[{{$index}}].levelmod-help" value="{{ $spawnInfo.LevelMod }}">
-                    <small id="name-help" class="form-text text-muted">Modify mobs level by this amount (+/-).</small>
-                </div>
-
-                <div class="col-md">
-                    <label for="name">Wander</label>
-                    {{$mobMaxWander := $spawnInfo.MaxWander}}
-                    <select class="form-control form-control-sm" name="spawninfo[{{$index}}].maxwander" id="spawninfo[{{$index}}].maxwander" aria-describedby="spawninfo[{{$index}}].maxwander-help"  rows="10">
-                    <option value="-1" {{if eq $mobMaxWander -1}}SELECTED{{end}}>No Limit</option>
-                    {{range $index, $wander := (intRange 0 20) }}
-                        {{ if eq $wander 0 }}
-                            <option value="{{ $wander }}" {{if eq $wander $mobMaxWander}}SELECTED{{end}}>Use Mob default</option>
-                        {{ else }}
-                            <option value="{{ $wander }}" {{if eq $wander $mobMaxWander}}SELECTED{{end}}>{{ $wander }} Rooms</option>
-                        {{ end }}
-                    {{end}}
-                    </select>
-                    <small id="name-help" class="form-text text-muted">The maximum number of rooms it can wander.</small>
-                </div>
-
-                <div class="col-md">
-                    <label for="name">Script Tag</label>
-                    <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].scripttag" aria-describedby="spawninfo[{{$index}}].scripttag-help" value="{{ $spawnInfo.ScriptTag }}">
-                    <small id="name-help" class="form-text text-muted">Use a special script.</small>
-                </div>
-
-                <div class="col-md">
-                    <label for="name">Quest Flags</label>
-                    <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].questflags" aria-describedby="spawninfo[{{$index}}].questflags-help" value="{{ join $spawnInfo.QuestFlags "," }}">
-                    <small id="name-help" class="form-text text-muted">Comma separated list of quest id's that this mob might be involved in.</small>
-                </div>
-
-                <div class="form-check form-group">
-                    <label class="form-check-label col-md" for="spawninfo[{{$index}}].forcehostile" title="Is bank"><input 
-                        class="form-check-input"
-                        type="checkbox" 
-                        name="spawninfo[{{$index}}].forcehostile" 
-                        id="spawninfo[{{$index}}].forcehostile" 
-                        value="true" 
-                        {{ if $spawnInfo.ForceHostile }}CHECKED{{end}}>
-                        Force Hostile</label> 
-                        <small id="isbank-help" class="form-text text-muted">Will attack anyone that enters.</small>
-                </div>
-
-            
-                <div class="row">
-                    <label for="name">Idle Commands</label>
-                    {{ if eq (len $spawnInfo.IdleCommands) 0 }}
+        <div class="card col-md">
+            <div class="card-body">
+                <h5 class="card-title">Nouns:</h5>
+                <p class="card-text">
+                    <!--  Start Card Content -->
+                    {{ if eq (len $room.Nouns) 0 }}
                     <div class="grid gap-3 form-group col-2">
                         <div class="p-3">
                             None
                         </div>
                     </div>
                     {{ end }}
-            
-                    {{range $index, $command := $spawnInfo.IdleCommands}}
-                    <div class="row col-md">
-                        <div class="col-md pr-0">
-                            <input type="text" class="form-control form-control-sm" id="spawninfo[{{$index}}].idlemessages[]" aria-describedby="spawninfo[{{$index}}].idlemessages[]" value="{{ escapehtml $command }}">
+
+                    {{range $noun, $description := $room.Nouns}}
+                    <div class="row">
+                        <div class="col-md-2 pr-0">
+                            <input type="text" class="form-control form-control-sm" id="nouns[{{ $noun }}].name" aria-describedby="nouns[{{ $noun }}].name" value="{{ $noun }}">
+                        </div>
+                        <div class="col-md-10">
+                            <input type="text" class="form-control form-control-sm" id="nouns[{{ $noun }}].description" aria-describedby="nouns[{{ $noun }}].description" value="{{ escapehtml $description }}">
                         </div>
                     </div>
                     {{end}}
-                    <small id="isbank-help" class="form-text text-muted">Randomly executed when mob is idle.</small>
-                </div>
-
-                <div class="row">
-                    <label for="name">Mob Buffs</label>
-
-                    <div class="form-group row form-check container-fluid">
-                        {{ $buffIds := $spawnInfo.BuffIds }}
-                        {{range $i, $buffSpec := $buffSpecs}}
-                            <label class="form-check-label col-md-2" for="spawninfo[{{$index}}].buffids-{{$buffSpec.BuffId}}" title="{{ $buffSpec.Description }}"><input 
-                            class="form-check-input"
-                            type="checkbox" 
-                            name="spawninfo[{{$index}}].buffids[]" 
-                            id="spawninfo[{{$index}}].buffids-{{$buffSpec.BuffId}}" 
-                            value="{{ $buffSpec.BuffId }}" 
-                            {{range $j, $buffId := $buffIds}}{{if eq $buffId $buffSpec.BuffId}}CHECKED{{end}}{{end}}>
-                            {{ $buffSpec.BuffId }}. {{ $buffSpec.Name }}</label> 
-                        {{end}}
-                    </div>
-                </div>
+                    <!--  End Card Content -->
+                </p>
             </div>
         </div>
-        {{end}}
+        
+    </div>
+
+
+    <div class="row">
+
+        <div class="card col-sm">
+            <div class="card-body">
+                <h5 class="card-title">Idle Messages</h5>
+                <p class="card-text">
+                    <!--  Start Card Content -->
+                    {{ if eq (len $room.IdleMessages) 0 }}
+                    <div class="grid gap-3 form-group col-2">
+                        <div class="p-3">
+                            None
+                        </div>
+                    </div>
+                    {{ end }}
+
+                    {{range $index, $message := $room.IdleMessages}}
+                    <div class="row">
+                        <div class="col-md pr-0">
+                            <input type="text" class="form-control form-control-sm" id="idlemessages[]" aria-describedby="idlemessages[]" value="{{ escapehtml $message }}">
+                        </div>
+                    </div>
+                    {{end}}
+                    <!--  End Card Content -->
+                </p>
+            </div>
+        </div>
 
     </div>
 
-    <hr />
-    <h3>Exits</h3>
 
     <div class="row">
-        {{ if eq ( len $room.Exits ) 0 }}
-            <div class="grid gap-3 form-group col-2">
-                <div class="p-3">
-                    None
-                </div>
-            </div>
-        {{ end }}
-        {{ $mapDirections := .mapDirections }}
-        {{range $exitName, $exitInfo := $room.Exits }}
-            <div class="grid form-group border border-primary p-3 m-2">
 
-                    <div class="row ">
-                        <div class="input-group col-md-3">
-                            <div class="input-group-prepend col-md-7 pr-0">
-                                <span class="input-group-text col-md">Exit Name</span>
+        <div class="card col-md">
+            <div class="card-body">
+                <h5 class="card-title">Training Available:</h5>
+                <p class="card-text">
+                    <!--  Start Card Content -->
+                    <div class="row">
+                        {{ range $i, $skillName := .allSkillNames }}
+                        <div class="input-group col-md-2">
+                            <div class="input-group-prepend col-md-6 pr-0">
+                                <span class="input-group-text col-md">{{ $skillName }}</span>
                             </div>
-                            <input type="text" name="exits[{{$exitName}}].name" class="form-control" value="{{ $exitName }}">
-                        </div>
-
-                        <div class="input-group col-md-3">
-                            <div class="input-group-prepend col-md-7 pr-0">
-                                <span class="input-group-text col-md">Target RoomId</span>
-                            </div>
-                            <input type="text" name="exits[{{$exitName}}].roomid" class="form-control" value="{{ $exitInfo.RoomId }}">
-                        </div>
-                    
-                        <div class="input-group col-md-3">
-                            <div class="input-group-prepend col-md-7 pr-0">
-                                <span class="input-group-text col-md">Map Dir</span>
-                            </div>
-                            <select class="form-control" name="exits[{{$exitName}}].mapdirection" id="exits[{{$exitName}}].mapdirection" aria-describedby="exits[{{$exitName}}].mapdirection-help"  rows="10">
-                                <option value="" {{ if eq $exitInfo.MapDirection "" }}SELECTED{{end}}>default</option>
-                                {{ range $index, $mapDir := $mapDirections }}
-                                    <option value="{{ $mapDir }}" {{if eq $exitInfo.MapDirection $mapDir}}SELECTED{{end}}>{{ $mapDir }}</option>
+                            <select class="form-control col-md-3" name="skilltraining[{{ $skillName }}].min" id="skilltraining[{{ $skillName }}].min" aria-describedby="skilltraining[{{ $skillName }}].min-help"  rows="10">
+                                {{ $trainingRange := (index $room.SkillTraining $skillName) }}
+                                {{range $index, $levelNum := ( intRange 0 4) }}
+                                    <option value="{{ $levelNum }}" {{if eq $trainingRange.Min $levelNum}}SELECTED{{end}}>{{ $levelNum }} min</option>
+                                {{end}}
+                            </select>
+                            <select class="form-control col-md-3" name="skilltraining[{{ $skillName }}].max" id="skilltraining[{{ $skillName }}].max" aria-describedby="skilltraining[{{ $skillName }}].max-help"  rows="10">
+                                {{ $trainingRange := (index $room.SkillTraining $skillName) }}
+                                {{range $index, $levelNum := ( intRange 0 4) }}
+                                    <option value="{{ $levelNum }}" {{if eq $trainingRange.Max $levelNum}}SELECTED{{end}}>{{ $levelNum }} max</option>
                                 {{end}}
                             </select>
                         </div>
+                        {{ end }}
+                    </div>
+                    <!--  End Card Content -->
+                </p>
+            </div>
+        </div>
 
-                        <div class="col-md-3">
-                            <label class="ml-3 mt-2 form-check-label col-md-2" for="exits[{{ $exitName }}].Secret" title="Secret"><input 
-                                class="form-check-input"
-                                type="checkbox" 
-                                class="form-check-input form-control-sm"  
-                                id="exits[{{ $exitName }}].Secret" 
-                                aria-describedby="exits[{{ $exitName }}].Secret" value="true" {{ if $exitInfo.Secret }}CHECKED{{ end }}>
-                            Secret</label>
+    </div>
+
+        
+    <div class="row">
+        {{range $containerName, $containerInfo := $room.Containers}}
+            {{ if eq $containerInfo.DespawnRound 0 }}
+            <div class="card col-md-3">
+                <div class="card-body">
+                    <h5 class="card-title">Container:</h5>
+                    <p class="card-text">
+                        <!--  Start Card Content -->
+
+                        <label for="containers[{{ $containerName }}].name">Container Name</label>
+                        <input type="text" class="form-control form-control-sm" id="containers[{{ $containerName }}].name" aria-describedby="containers[{{ $containerName }}].name" value="{{ $containerName }}">
+            
+                        <label for="containers[{{ $containerName }}].LockDifficulty">Lock Difficulty (0 = Unlocked)</label>
+                        <input type="text" class="form-control form-control-sm" id="containers[{{ $containerName }}].LockDifficulty" aria-describedby="containers[{{ $containerName }}].LockDifficulty" value="{{ $containerInfo.Lock.Difficulty }}">
+
+                        <!--  End Card Content -->
+                    </p>
+                </div>
+            </div>
+            {{ end }}
+        {{end}}
+    </div>
+            
+
+
+    <div class="row">
+
+        {{range $index, $spawnInfo := $room.SpawnInfo }}
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Spawn:</h5>
+                <p class="card-text">
+                    <!--  Start Card Content -->
+
+
+                    <div class="row form-group">
+
+                        <div class="input-group col-md-2">
+                            <div class="input-group-prepend col-md-5 pr-0">
+                                <span class="input-group-text col-md">MobId</span>
+                            </div>
+                            <input type="text" class="form-control form-control-sm col-md-7" id="spawninfo[{{$index}}].mobid" aria-describedby="spawninfo[{{$index}}].mobid-help" value="{{ $spawnInfo.MobId }}">
                         </div>
 
-                    </div>
-
-
-
-
-                    <div class="row m-3">
-                        <h5>Lock:</h5>
-            
-                        {{ if eq $exitInfo.Lock.Difficulty 0 }}
-                            <div class="grid gap-3 form-group col-2">
-                                <div class="p-3">
-                                    None
-                                </div>
+                        <div class="input-group col-md-2">
+                            <div class="input-group-prepend col-md-5 pr-0">
+                                <span class="input-group-text col-md">Gold Amt</span>
                             </div>
-                        {{ else }}
+                            <input type="text" class="form-control form-control-sm col-md-7" id="spawninfo[{{$index}}].gold" aria-describedby="spawninfo[{{$index}}].gold-help" value="{{ $spawnInfo.Gold }}">
+                        </div>
 
-                            <div class="input-group col-md-3">
-                                <div class="input-group-prepend col-md-4 pr-0">
-                                    <span class="input-group-text col-md">Difficulty</span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="exits[{{ $exitName }}].LockDifficulty" aria-describedby="exits[{{ $exitName }}].LockDifficulty" value="{{ $exitInfo.Lock.Difficulty }}">
+                        <div class="input-group col-md-2">
+                            <div class="input-group-prepend col-md-5 pr-0">
+                                <span class="input-group-text col-md">ItemId</span>
                             </div>
+                            <input type="text" class="form-control form-control-sm col-md-7" id="spawninfo[{{$index}}].itemid" aria-describedby="spawninfo[{{$index}}].itemid-help" value="{{ $spawnInfo.ItemId }}">
+                        </div>
 
-                            
-                            <div class="input-group col-md-5">
-                                <div class="input-group-prepend col-md-4 pr-0">
-                                    <span class="input-group-text col-md">Relock Time</span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="exits[{{ $exitName }}].RelockInterval" aria-describedby="exits[{{ $exitName }}].RelockInterval" value="{{ $exitInfo.Lock.RelockInterval }}">
+                        <div class="input-group col-md-2">
+                            <div class="input-group-prepend col-md-5 pr-0">
+                                <span class="input-group-text col-md">Container</span>
                             </div>
-                            
-                            <div class="col-md-4">
+                            <input type="text" class="form-control form-control-sm col-md-7" id="spawninfo[{{$index}}].container" aria-describedby="spawninfo[{{$index}}].container-help" value="{{ $spawnInfo.Container }}">
+                        </div>
+
+                        <div class="input-group col-md-3">
+                            <div class="input-group-prepend col-md-4 pr-0">
+                                <span class="input-group-text col-md">Respawn Time</span>
+                            </div>
+                            <input type="text" class="form-control form-control-sm" id="spawninfo[{{$index}}].respawnrate" aria-describedby="spawninfo[{{$index}}].respawnrate" value="{{ $spawnInfo.RespawnRate }}">
+                            <div class="col-md-2">
                                 <a href="#" class="badge badge-warning" data-toggle="modal" data-target=".time-strings-modal">example?</a>
                             </div>
-                            
-                            <div class="row m-3">
-                                <h5>Trap Effect:</h5>
+                        </div>
+                        
+                        <div class="row form-group m-3">
+                            <label for="name">Message on Spawn</label>
+                            <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].message" aria-describedby="spawninfo[{{$index}}].message-help" value="{{ escapehtml $spawnInfo.Message }}">
+                            <small id="name-help" class="form-text text-muted">Sent to the room when a mob spawns.</small>
+                        </div>
+
+                        <div class="row m3">
+                            <h5>Mob Specific Details (optional)</h5>
+
+                            <div class="col-md">
+                                <label for="name">Name</label>
+                                <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].name" aria-describedby="spawninfo[{{$index}}].name-help" value="{{ escapehtml $spawnInfo.Name }}">
+                                <small id="name-help" class="form-text text-muted">Override the mob name.</small>
+                            </div>
+
+                            <div class="col-md">
+                                <label for="name">Level</label>
+                                <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].level" aria-describedby="spawninfo[{{$index}}].level-help" value="{{ $spawnInfo.Level }}">
+                                <small id="name-help" class="form-text text-muted">Force mob to a specific level.</small>
+                            </div>
+
+                            <div class="col-md">
+                                <label for="name">Level Adjust</label>
+                                <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].levelmod" aria-describedby="spawninfo[{{$index}}].levelmod-help" value="{{ $spawnInfo.LevelMod }}">
+                                <small id="name-help" class="form-text text-muted">Modify mobs level by this amount (+/-).</small>
+                            </div>
+
+                            <div class="col-md">
+                                <label for="name">Wander</label>
+                                {{$mobMaxWander := $spawnInfo.MaxWander}}
+                                <select class="form-control form-control-sm" name="spawninfo[{{$index}}].maxwander" id="spawninfo[{{$index}}].maxwander" aria-describedby="spawninfo[{{$index}}].maxwander-help"  rows="10">
+                                <option value="-1" {{if eq $mobMaxWander -1}}SELECTED{{end}}>No Limit</option>
+                                {{range $index, $wander := (intRange 0 20) }}
+                                    {{ if eq $wander 0 }}
+                                        <option value="{{ $wander }}" {{if eq $wander $mobMaxWander}}SELECTED{{end}}>Use Mob default</option>
+                                    {{ else }}
+                                        <option value="{{ $wander }}" {{if eq $wander $mobMaxWander}}SELECTED{{end}}>{{ $wander }} Rooms</option>
+                                    {{ end }}
+                                {{end}}
+                                </select>
+                                <small id="name-help" class="form-text text-muted">The maximum number of rooms it can wander.</small>
+                            </div>
+
+                            <div class="col-md">
+                                <label for="name">Script Tag</label>
+                                <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].scripttag" aria-describedby="spawninfo[{{$index}}].scripttag-help" value="{{ $spawnInfo.ScriptTag }}">
+                                <small id="name-help" class="form-text text-muted">Use a special script.</small>
+                            </div>
+
+                            <div class="col-md">
+                                <label for="name">Quest Flags</label>
+                                <input type="text" class="form-control form-control-sm col-md-10" id="spawninfo[{{$index}}].questflags" aria-describedby="spawninfo[{{$index}}].questflags-help" value="{{ join $spawnInfo.QuestFlags "," }}">
+                                <small id="name-help" class="form-text text-muted">Comma separated list of quest id's that this mob might be involved in.</small>
+                            </div>
+
+                            <div class="form-check form-group">
+                                <label class="form-check-label col-md" for="spawninfo[{{$index}}].forcehostile" title="Is bank"><input 
+                                    class="form-check-input"
+                                    type="checkbox" 
+                                    name="spawninfo[{{$index}}].forcehostile" 
+                                    id="spawninfo[{{$index}}].forcehostile" 
+                                    value="true" 
+                                    {{ if $spawnInfo.ForceHostile }}CHECKED{{end}}>
+                                    Force Hostile</label> 
+                                    <small id="isbank-help" class="form-text text-muted">Will attack anyone that enters.</small>
+                            </div>
+
+                        
+                            <div class="row">
+                                <label for="name">Idle Commands</label>
+                                {{ if eq (len $spawnInfo.IdleCommands) 0 }}
+                                <div class="grid gap-3 form-group col-2">
+                                    <div class="p-3">
+                                        None
+                                    </div>
+                                </div>
+                                {{ end }}
+                        
+                                {{range $index, $command := $spawnInfo.IdleCommands}}
+                                <div class="row col-md">
+                                    <div class="col-md pr-0">
+                                        <input type="text" class="form-control form-control-sm" id="spawninfo[{{$index}}].idlemessages[]" aria-describedby="spawninfo[{{$index}}].idlemessages[]" value="{{ escapehtml $command }}">
+                                    </div>
+                                </div>
+                                {{end}}
+                                <small id="isbank-help" class="form-text text-muted">Randomly executed when mob is idle.</small>
+                            </div>
+
+                            <div class="row">
+                                <label for="name">Mob Buffs</label>
 
                                 <div class="form-group row form-check container-fluid">
-                                    {{ $buffIds := $exitInfo.Lock.TrapBuffIds }}
+                                    {{ $buffIds := $spawnInfo.BuffIds }}
                                     {{range $i, $buffSpec := $buffSpecs}}
-                                        <label class="form-check-label col-md-2" for="critbuffids-{{$buffSpec.BuffId}}" title="{{ $buffSpec.Description }}"><input 
+                                        <label class="form-check-label col-md-2" for="spawninfo[{{$index}}].buffids-{{$buffSpec.BuffId}}" title="{{ $buffSpec.Description }}"><input 
                                         class="form-check-input"
                                         type="checkbox" 
-                                        name="critbuffids[]" 
-                                        id="critbuffids-{{$buffSpec.BuffId}}" 
+                                        name="spawninfo[{{$index}}].buffids[]" 
+                                        id="spawninfo[{{$index}}].buffids-{{$buffSpec.BuffId}}" 
                                         value="{{ $buffSpec.BuffId }}" 
                                         {{range $j, $buffId := $buffIds}}{{if eq $buffId $buffSpec.BuffId}}CHECKED{{end}}{{end}}>
                                         {{ $buffSpec.BuffId }}. {{ $buffSpec.Name }}</label> 
                                     {{end}}
                                 </div>
                             </div>
-                        {{ end }}
-
+                        </div>
                     </div>
 
-
-
-
-
+                    <!--  End Card Content -->
+                </p>
             </div>
+        </div>
+        {{end}}
+    </div>
+
+
+
+
+
+    <div class="row">
+        {{ $mapDirections := .mapDirections }}
+        {{range $exitName, $exitInfo := $room.Exits }}
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Exit:</h5>
+                <p class="card-text">
+                    <!--  Start Card Content -->
+                <div class="grid form-group">
+
+                        <div class="row ">
+                            <div class="input-group col-md-3">
+                                <div class="input-group-prepend col-md-7 pr-0">
+                                    <span class="input-group-text col-md">Exit Name</span>
+                                </div>
+                                <input type="text" name="exits[{{$exitName}}].name" class="form-control" value="{{ $exitName }}">
+                            </div>
+
+                            <div class="input-group col-md-3">
+                                <div class="input-group-prepend col-md-7 pr-0">
+                                    <span class="input-group-text col-md">Target RoomId</span>
+                                </div>
+                                <input type="text" name="exits[{{$exitName}}].roomid" class="form-control" value="{{ $exitInfo.RoomId }}">
+                            </div>
+                        
+                            <div class="input-group col-md-3">
+                                <div class="input-group-prepend col-md-7 pr-0">
+                                    <span class="input-group-text col-md">Map Dir</span>
+                                </div>
+                                <select class="form-control" name="exits[{{$exitName}}].mapdirection" id="exits[{{$exitName}}].mapdirection" aria-describedby="exits[{{$exitName}}].mapdirection-help"  rows="10">
+                                    <option value="" {{ if eq $exitInfo.MapDirection "" }}SELECTED{{end}}>default</option>
+                                    {{ range $index, $mapDir := $mapDirections }}
+                                        <option value="{{ $mapDir }}" {{if eq $exitInfo.MapDirection $mapDir}}SELECTED{{end}}>{{ $mapDir }}</option>
+                                    {{end}}
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="ml-3 mt-2 form-check-label" for="exits[{{ $exitName }}].Secret" title="Secret"><input 
+                                    class="form-check-input"
+                                    type="checkbox" 
+                                    class="form-check-input form-control-sm"  
+                                    id="exits[{{ $exitName }}].Secret" 
+                                    aria-describedby="exits[{{ $exitName }}].Secret" value="true" {{ if $exitInfo.Secret }}CHECKED{{ end }}>
+                                Secret</label>
+                            </div>
+
+                        </div>
+
+
+
+
+                        <div class="row m-3">
+                            <h5>Lock:</h5>
+                
+                            {{ if eq $exitInfo.Lock.Difficulty 0 }}
+                                <div class="grid gap-3 form-group col-2">
+                                    <div class="p-3">
+                                        None
+                                    </div>
+                                </div>
+                            {{ else }}
+
+                                <div class="input-group col-md-3">
+                                    <div class="input-group-prepend col-md-4 pr-0">
+                                        <span class="input-group-text col-md">Difficulty</span>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" id="exits[{{ $exitName }}].LockDifficulty" aria-describedby="exits[{{ $exitName }}].LockDifficulty" value="{{ $exitInfo.Lock.Difficulty }}">
+                                </div>
+
+                                
+                                <div class="input-group col-md-5">
+                                    <div class="input-group-prepend col-md-4 pr-0">
+                                        <span class="input-group-text col-md">Relock Time</span>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" id="exits[{{ $exitName }}].RelockInterval" aria-describedby="exits[{{ $exitName }}].RelockInterval" value="{{ $exitInfo.Lock.RelockInterval }}">
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <a href="#" class="badge badge-warning" data-toggle="modal" data-target=".time-strings-modal">example?</a>
+                                </div>
+                                
+                                <div class="row m-3">
+                                    <h5>Trap Effect:</h5>
+
+                                    <div class="form-group row form-check container-fluid">
+                                        {{ $buffIds := $exitInfo.Lock.TrapBuffIds }}
+                                        {{range $i, $buffSpec := $buffSpecs}}
+                                            <label class="form-check-label col-md-2" for="critbuffids-{{$buffSpec.BuffId}}" title="{{ $buffSpec.Description }}"><input 
+                                            class="form-check-input"
+                                            type="checkbox" 
+                                            name="critbuffids[]" 
+                                            id="critbuffids-{{$buffSpec.BuffId}}" 
+                                            value="{{ $buffSpec.BuffId }}" 
+                                            {{range $j, $buffId := $buffIds}}{{if eq $buffId $buffSpec.BuffId}}CHECKED{{end}}{{end}}>
+                                            {{ $buffSpec.BuffId }}. {{ $buffSpec.Name }}</label> 
+                                        {{end}}
+                                    </div>
+                                </div>
+                            {{ end }}
+
+                        </div>
+                </div>
+                    <!--  End Card Content -->
+                </p>
+            </div>
+        </div>
         {{end}}
         
     </div>
