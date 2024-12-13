@@ -28,5 +28,5 @@ character:
       itemid: 20003
   shop:
     - pettype: cat
-      price: 8000
+      price: 1200
       tradeitemid: 27
