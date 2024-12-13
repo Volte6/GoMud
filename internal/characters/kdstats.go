@@ -3,14 +3,14 @@ package characters
 import "fmt"
 
 type KDStats struct {
-	TotalKills  int         `json:"totalkills"`  // Quick tally of kills
-	Kills       map[int]int `json:"kills"`       // map of MobId to count
-	TotalDeaths int         `json:"totaldeaths"` // Quick tally of deaths
+	TotalKills  int         `json:"totalkills,omitempty"`  // Quick tally of kills
+	Kills       map[int]int `json:"kills,omitempty"`       // map of MobId to count
+	TotalDeaths int         `json:"totaldeaths,omitempty"` // Quick tally of deaths
 
-	TotalPvpKills  int            `json:"totalpvpkills"`  // Quick tally of pvp kills
-	PlayerKills    map[string]int `json:"playerkills"`    // map of userid:username to count
-	PlayerDeaths   map[string]int `json:"playerdeaths"`   // map of userid:username to count
-	TotalPvpDeaths int            `json:"totalpvpdeaths"` // Quick tally of pvp deaths
+	TotalPvpKills  int            `json:"totalpvpkills,omitempty"`  // Quick tally of pvp kills
+	PlayerKills    map[string]int `json:"playerkills,omitempty"`    // map of userid:username to count
+	PlayerDeaths   map[string]int `json:"playerdeaths,omitempty"`   // map of userid:username to count
+	TotalPvpDeaths int            `json:"totalpvpdeaths,omitempty"` // Quick tally of pvp deaths
 }
 
 func (kd *KDStats) GetMobKDRatio() float64 {
