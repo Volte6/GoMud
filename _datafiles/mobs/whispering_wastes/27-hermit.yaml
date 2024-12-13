@@ -18,5 +18,8 @@ character:
       itemid: 20024
     feet:
       itemid: 20003
+  shop:
+    - pettype: mule
+      price: 750
 scripttag: winterfire
 questflags: [5-return]
