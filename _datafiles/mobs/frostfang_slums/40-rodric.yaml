@@ -24,6 +24,9 @@ character:
       itemid: 20003
     legs:
       itemid: 20006
+  shop:
+    - pettype: owl
+      price: 1200
 hates:
   - rats
   - undead

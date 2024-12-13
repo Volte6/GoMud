@@ -165,7 +165,7 @@ StartRoom: 1
 # - TutorialStartRooms - 
 #   RoomIds players will be put in when starting the game/tutorial
 #   RoomIds 900-999 are reserved for Tutorial rooms.
-TutorialStartRooms: [900, 990]
+TutorialStartRooms: [900, 910, 920, 930, 940, 990]
 # - PermaDeath - 
 #   If true, players lose their character if they die with zero lives left.
 PermaDeath: false
