@@ -52,6 +52,7 @@ func Add(conn net.Conn, wsConn *websocket.Conn) *ConnectionDetails {
 		connectCounter,
 		conn,
 		wsConn,
+		nil, // use default settings for now TODO: add into overall config pattern?
 	)
 
 	netConnections[connDetails.ConnectionId()] = connDetails

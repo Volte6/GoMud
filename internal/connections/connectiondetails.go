@@ -2,6 +2,7 @@ package connections
 
 import (
 	"errors"
+	"log/slog"
 	"net"
 	"strings"
 	"sync"
@@ -121,6 +122,7 @@ type ConnectionDetails struct {
 	inputHandlers     []InputHandler
 	inputDisabled     bool
 	clientSettings    ClientSettings
+	heartbeat         *heartbeatManager
 }
 
 func (cd *ConnectionDetails) IsWebsocket() bool {
@@ -217,6 +219,10 @@ func (cd *ConnectionDetails) Read(p []byte) (n int, err error) {
 }
 
 func (cd *ConnectionDetails) Close() {
+	if cd.heartbeat != nil {
+		cd.heartbeat.stop()
+	}
+
 	if cd.wsConn != nil {
 		cd.wsConn.Close()
 		return
@@ -252,11 +258,13 @@ func (cd *ConnectionDetails) InputDisabled(setTo ...bool) bool {
 	return cd.inputDisabled
 }
 
-func NewConnectionDetails(connId ConnectionId, c net.Conn, wsC *websocket.Conn) *ConnectionDetails {
-	return &ConnectionDetails{
-		state:        Login,
-		connectionId: connId,
-
+func NewConnectionDetails(connId ConnectionId, c net.Conn, wsC *websocket.Conn, config *HeartbeatConfig) *ConnectionDetails {
+	if config == nil {
+		config = &DefaultHeartbeatConfig
+	}
+	cd := &ConnectionDetails{
+		state:         Login,
+		connectionId:  connId,
 		inputDisabled: false,
 		conn:          c,
 		wsConn:        wsC,
@@ -266,4 +274,14 @@ func NewConnectionDetails(connId ConnectionId, c net.Conn, wsC *websocket.Conn) 
 			Display: DisplaySettings{ScreenWidth: 80, ScreenHeight: 40}, // Default to 80x40
 		},
 	}
+
+	if wsC != nil {
+		if err := cd.StartHeartbeat(*config); err != nil {
+			slog.Error("failed to start heartbeat",
+				"connectionId", connId,
+				"error", err)
+		}
+	}
+
+	return cd
 }
