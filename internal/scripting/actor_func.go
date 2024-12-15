@@ -374,12 +374,26 @@ func (a ScriptActor) UpdateItem(itm ScriptItem) {
 	a.userRecord.Character.UpdateItem(itm.originalItem, *itm.itemRecord)
 }
 
-func (a ScriptActor) GiveItem(itm ScriptItem) {
-	if a.characterRecord.StoreItem(*itm.itemRecord) {
+func (a ScriptActor) GiveItem(itm any) {
+
+	var sItem ScriptItem
+
+	if itmScriptItem, ok := itm.(ScriptItem); ok {
+		sItem = itmScriptItem
+	} else if itmInt, ok := itm.(int64); ok {
+		sItem = *CreateItem(int(itmInt))
+	} else if itmInt, ok := itm.(int32); ok {
+		sItem = *CreateItem(int(itmInt))
+	} else if itmFloat, ok := itm.(float64); ok {
+		sItem = *CreateItem(int(itmFloat))
+	}
+
+	if a.characterRecord.StoreItem(*sItem.itemRecord) {
 		if a.userId > 0 {
-			TryItemScriptEvent(`onGive`, *itm.itemRecord, a.userId)
+			TryItemScriptEvent(`onGive`, *sItem.itemRecord, a.userId)
 		}
 	}
+
 }
 
 func (a ScriptActor) TakeItem(itm ScriptItem) {
