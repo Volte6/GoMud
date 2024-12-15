@@ -10,12 +10,10 @@ import (
 	"github.com/volte6/gomud/internal/auctions"
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/combat"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
@@ -130,11 +128,6 @@ func (w *World) roundTick() {
 	// Idle mobs
 	//
 	w.handleIdleMobs()
-
-	//
-	// Shadow/death realm
-	//
-	w.handleShadowRealm(roundNumber)
 
 	util.TrackTime(`World::RoundTick()`, time.Since(tStart).Seconds())
 }
@@ -1658,38 +1651,6 @@ func (w *World) handleAutoHealing(roundNumber uint64) {
 			)
 		}
 
-	}
-
-}
-
-// Special shadow realm stuff
-func (w *World) handleShadowRealm(roundNumber uint64) {
-
-	if roundNumber%uint64(configs.GetConfig().MinutesToRounds(1)) == 0 {
-
-		// room 75 is the Shadow Realm
-		deadRoom := rooms.LoadRoom(75)
-
-		players := deadRoom.GetPlayers()
-		if len(players) > 0 {
-
-			type TemporaryRoomExit struct {
-				RoomId  int       // Where does it lead to?
-				Title   string    // Does this exist have a special title?
-				UserId  int       // Who created it?
-				Expires time.Time // When will it be auto-cleaned up?
-			}
-
-			tmpExit := exit.TemporaryRoomExit{
-				RoomId:  rooms.StartRoomIdAlias,
-				Title:   colorpatterns.ApplyColorPattern(`shimmering portal`, `cyan`),
-				UserId:  0,
-				Expires: `3 rounds`,
-			}
-			// Spawn a portal in the room that leads to the portal location
-			deadRoom.AddTemporaryExit("shimmering portal", tmpExit)
-			deadRoom.SendText(`<ansi fg="magenta-bold">A shimmering portal appears in the room.</ansi>`)
-		}
 	}
 
 }

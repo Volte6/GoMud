@@ -6,4 +6,3 @@ function onEnter(user, room) {
     user.SendText('');
 
 }
-

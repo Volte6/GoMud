@@ -2,6 +2,7 @@ package usercommands
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
@@ -153,6 +154,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			user.SendText("Oops, couldn't move there!")
 		} else {
 
+			slog.Info("Calling onExit")
 			scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId)
 
 			c := configs.GetConfig()

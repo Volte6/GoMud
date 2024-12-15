@@ -180,6 +180,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 	user.Character.CancelBuffsWithFlag(buffs.All)
 
 	user.Character.Health = -10
+	user.Character.Mana = 0
 
 	clear(user.Character.PlayerDamage)
 

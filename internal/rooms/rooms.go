@@ -2123,6 +2123,10 @@ func (r *Room) IsPvp() bool {
 // Returns an error with a reason why they cannot PVP, or nil
 func (r *Room) CanPvp(attUser *users.UserRecord, defUser *users.UserRecord) error {
 
+	if attUser.Character.RoomId == -1 || attUser.Character.RoomId == 75 {
+		return errors.New(`Fighting is not allowed here.`)
+	}
+
 	c := configs.GetConfig()
 
 	// Possible settings are `enabled`, `disabled`, `limited`
