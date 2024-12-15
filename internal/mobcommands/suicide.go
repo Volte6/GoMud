@@ -98,6 +98,12 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		for uId, _ := range mob.Character.PlayerDamage {
 			if user := users.GetByUserId(uId); user != nil {
 
+				if user.Character.Aggro != nil {
+					if user.Character.Aggro.MobInstanceId == mob.InstanceId {
+						user.Character.Aggro = nil
+					}
+				}
+
 				scripting.TryMobScriptEvent(`onDie`, mob.InstanceId, uId, `user`, map[string]any{`attackerCount`: attackerCt})
 
 				p := parties.Get(user.UserId)
