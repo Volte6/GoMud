@@ -1321,7 +1321,7 @@ func (w *World) TurnTick() {
 			continue
 		}
 
-		if rooms.EffectType(action.Action) == rooms.Wildfire {
+		if rooms.EffectType(action.Action) == rooms.Wildfire && room.GetBiome().Burns() {
 
 			if room.AddEffect(rooms.Wildfire) {
 				room.SendText(colorpatterns.ApplyColorPattern(`A wildfire burns through the area!`, `flame`, colorpatterns.Stretch))
