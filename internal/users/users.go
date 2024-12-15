@@ -26,7 +26,8 @@ const minimumPasswordLength = 4
 const maximumPasswordLength = 16
 
 var (
-	userManager *ActiveUsers = newUserManager()
+	highestUserId int          = -1
+	userManager   *ActiveUsers = newUserManager()
 )
 
 type ActiveUsers struct {
@@ -515,26 +516,37 @@ func SaveUser(u UserRecord) error {
 }
 
 func GetUniqueUserId() int {
-	return UserCount() + 1
+
+	// if highestUserId is zero, loop through users and get real highest.
+	if highestUserId < 0 {
+
+		highestUserId = 0
+
+		// Check all user id's of offline users
+		SearchOfflineUsers(func(u *UserRecord) bool {
+
+			if u.UserId > highestUserId {
+				highestUserId = u.UserId
+			}
+
+			return true
+		})
+
+		// Check all user id's of online users
+		for _, u := range GetAllActiveUsers() {
+			if u.UserId > highestUserId {
+				highestUserId = u.UserId
+			}
+		}
+	}
+
+	// Increment the highestUserId before returning a new one
+	highestUserId += 1
+
+	return highestUserId
 }
 
 func Exists(name string) bool {
 	_, err := os.Stat(util.FilePath(string(configs.GetConfig().FolderUserData), `/`, strings.ToLower(name)+`.yaml`))
 	return !os.IsNotExist(err)
-}
-
-func UserCount() int {
-
-	entries, err := os.ReadDir(util.FilePath(string(configs.GetConfig().FolderUserData)))
-	if err != nil {
-		panic(err)
-	}
-
-	count := 0
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			count++
-		}
-	}
-	return count
 }
