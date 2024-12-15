@@ -140,7 +140,9 @@ function onAsk(mob, room, eventDetails) {
         return false;
     }
 
-    user = GetUser(eventDetails.sourceId);
+    if ( (user = GetUser(eventDetails.sourceId)) == null ) {
+        return false;
+    }
 
     match = UtilFindMatchIn(eventDetails.askText, homeNouns);
     if ( match.found ) {

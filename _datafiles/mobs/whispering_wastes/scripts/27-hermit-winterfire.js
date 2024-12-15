@@ -37,6 +37,10 @@ function onGive(mob, room, eventDetails) {
         return false;
     }
 
+    if ( (user = GetUser(eventDetails.sourceId)) == null ) {
+        return false;
+    }
+    
     if ( eventDetails.gold > 0 ) {
         mob.Command("say Moneys no good here, but every now and then I can pay for a little help.")
         return true;

@@ -37,6 +37,10 @@ function onAsk(mob, room, eventDetails) {
 
 function onGive(mob, room, eventDetails) {
 
+    if ( (user = GetUser(eventDetails.sourceId)) == null ) {
+        return false;
+    }    
+
     if (eventDetails.item) {
 
         if (eventDetails.item.ItemId == 20018) {
@@ -62,6 +66,10 @@ function onGive(mob, room, eventDetails) {
 
 function onShow(mob, room, eventDetails) {
 
+    if ( (user = GetUser(eventDetails.sourceId)) == null ) {
+        return false;
+    }
+    
     if (eventDetails.item.ItemId == 20018) {
         
         mob.Command("say Thank you for taking care of that problem. The kingdom is indebted to you.")

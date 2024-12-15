@@ -4,21 +4,25 @@ const thievesNouns = ["thief", "thieves", "guild", "hideout", "entrance", "dogs"
 
 function onAsk(mob, room, eventDetails) {
 
-    user = GetUser(eventDetails.sourceId);
 
-        // Waiting for a player to ask about the rats
-        if ( !user.HasQuest("7-start") ) {
-            startMatch = UtilFindMatchIn(eventDetails.askText, startNouns);
-            if ( startMatch.found ) {           
-                    mob.Command("say I'm worried about the rats in the slums. They're everywhere!");
-                    mob.Command("say I'm running out of traps and don't seem to be making a dent in the rat numbers.");
-                    mob.Command("say If you can kill 25 of them, come back and see me. I'll pay you for your trouble.");
-    
-                    user.GiveQuest("7-start");
-                    return true;
-            }
-            return false;
+    if ( (user = GetUser(eventDetails.sourceId)) == null ) {
+        return false;
+    }
+
+
+    // Waiting for a player to ask about the rats
+    if ( !user.HasQuest("7-start") ) {
+        startMatch = UtilFindMatchIn(eventDetails.askText, startNouns);
+        if ( startMatch.found ) {           
+                mob.Command("say I'm worried about the rats in the slums. They're everywhere!");
+                mob.Command("say I'm running out of traps and don't seem to be making a dent in the rat numbers.");
+                mob.Command("say If you can kill 25 of them, come back and see me. I'll pay you for your trouble.");
+
+                user.GiveQuest("7-start");
+                return true;
         }
+        return false;
+    }
 
     // Waiting for players to show him 25 rodent kills
     if ( user.HasQuest("7-start") && !user.HasQuest("7-gettrap") ) {
@@ -92,8 +96,9 @@ function onGive(mob, room, eventDetails) {
             return true;
         }
 
-
-        user = GetUser(eventDetails.sourceId);
+        if ( (user = GetUser(eventDetails.sourceId)) == null ) {
+            return false;
+        }    
 
         mob.Command("say Thank you so much! I can finally get back to catching some rats, and maybe earn a little coin.");
         mob.Command("say The thieves guild used to employ me to eliminate rats around their hideout, but for some reason they don't seem to need my help anymore, and didn't pay me for my last job I did for them.");

@@ -60,11 +60,15 @@ function onAsk(mob, room, eventDetails) {
 
 function onGive(mob, room, eventDetails) {
 
+    if ( (user = GetUser(eventDetails.sourceId)) == null ) {
+        return false;
+    }
+    
+    
     showLocketCounter = mob.GetTempData('showLocketCounter');
     if ( showLocketCounter === null ) {
         showLocketCounter = {};
     }
-
 
     if (eventDetails.item) {
 
