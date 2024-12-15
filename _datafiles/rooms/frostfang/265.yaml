@@ -15,6 +15,7 @@ spawninfo:
 - mobid: 26
   message: sophie steps out from another room.
   name: sophie
+  maxwander: 1
   scripttag: locketsadness
   questflags: [1-return]
   levelmod: 10
