@@ -138,12 +138,12 @@ func Attack(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 			user.Character.SetAggro(0, attackMobInstanceId, characters.DefaultAttack)
 
 			user.SendText(
-				fmt.Sprintf(`You prepare to enter into mortal combat with <ansi fg="mobname">%s</ansi>`, m.Character.Name),
+				fmt.Sprintf(`You prepare to enter into mortal combat with <ansi fg="mobname">%s</ansi>.`, m.Character.Name),
 			)
 
 			if !isSneaking {
 				room.SendText(
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, user.Character.Name, m.Character.Name),
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>.`, user.Character.Name, m.Character.Name),
 					user.UserId,
 				)
 			}
@@ -194,7 +194,7 @@ func Attack(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 			user.Character.SetAggro(attackPlayerId, 0, characters.DefaultAttack)
 
 			user.SendText(
-				fmt.Sprintf(`You prepare to enter into mortal combat with <ansi fg="username">%s</ansi>`, p.Character.Name),
+				fmt.Sprintf(`You prepare to enter into mortal combat with <ansi fg="username">%s</ansi>.`, p.Character.Name),
 			)
 
 			if !isSneaking {
@@ -204,7 +204,7 @@ func Attack(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 				)
 
 				room.SendText(
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>`, user.Character.Name, p.Character.Name),
+					fmt.Sprintf(`<ansi fg="username">%s</ansi> prepares to fight <ansi fg="mobname">%s</ansi>.`, user.Character.Name, p.Character.Name),
 					user.UserId, attackPlayerId)
 			}
 
