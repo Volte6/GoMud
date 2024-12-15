@@ -265,7 +265,7 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 		}
 	}
 
-	if user.Character.Pet.Exists() {
+	if user.Character.Pet.Exists() && r.RoomId == user.Character.RoomId {
 		details.VisiblePlayers = append(details.VisiblePlayers, fmt.Sprintf(`%s (your pet)`, user.Character.Pet.DisplayName()))
 	}
 
