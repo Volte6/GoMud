@@ -414,7 +414,7 @@ func (c *Config) Validate() {
 	}
 
 	if c.XPScale <= 0 {
-		c.XPScale = 1.0 // default
+		c.XPScale = 100.0 // default
 	}
 
 	if c.TurnMs < 10 {
