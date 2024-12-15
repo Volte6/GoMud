@@ -1,8 +1,0 @@
-buffid: 24
-name: empty
-description: Placeholder
-triggerrate: 1 round
-triggercount: 20
-flags:
-  - cancel-on-combat
-  - cancel-on-action

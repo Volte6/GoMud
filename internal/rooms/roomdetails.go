@@ -103,8 +103,7 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 	}
 
 	if r.RoomId == -1 {
-		details.RoomAlerts = append(details.RoomAlerts, `<ansi fg="yellow-bold">Type <ansi fg="command">help races</ansi> to see a list of available races.</ansi>`+
-			"\n"+`      <ansi fg="yellow-bold">Type <ansi fg="command">start</ansi> to begin playing.</ansi>`)
+		details.RoomAlerts = append(details.RoomAlerts, `      <ansi fg="yellow-bold">Type <ansi fg="command">start</ansi> to begin playing.</ansi>`)
 	}
 
 	if r.IsBurning() {
@@ -265,7 +264,7 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 		}
 	}
 
-	if user.Character.Pet.Exists() {
+	if user.Character.Pet.Exists() && r.RoomId == user.Character.RoomId {
 		details.VisiblePlayers = append(details.VisiblePlayers, fmt.Sprintf(`%s (your pet)`, user.Character.Pet.DisplayName()))
 	}
 

@@ -34,6 +34,10 @@ function onGive(mob, room, eventDetails) {
         return false;
     }
 
+    if ( (user = GetUser(eventDetails.sourceId)) == null ) {
+        return false;
+    }
+    
     if ( eventDetails.gold > 0 ) {
         mob.Command("say I'll use this money to buy more books!")
         return true;

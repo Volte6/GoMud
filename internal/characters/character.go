@@ -425,6 +425,9 @@ func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
 		return 0, 100
 	}
 
+	preScale := float64(configs.GetConfig().XPScale) / 100
+	xp = int(math.Round(preScale * float64(xp)))
+
 	xpScale = c.StatMod(string(statmods.XPScale)) + 100
 
 	if xpScale == 100 {
@@ -1236,7 +1239,7 @@ func (c *Character) XPTNL() int {
 // Amt TNL for a specific level
 func (c *Character) XPTL(lvl int) int {
 	fLvl := float64(lvl)
-	return int(float32(1000+(fLvl*(fLvl*.75)*1000)) * c.TNLScale * float32(configs.GetConfig().XPScale))
+	return int(float32(1000+(fLvl*(fLvl*.75)*1000)) * c.TNLScale)
 }
 
 // Returns the actual xp in regards to the current level/next level

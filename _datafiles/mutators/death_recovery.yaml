@@ -13,6 +13,6 @@ mutatorid: death-recovery
 #decayintoid: another-alert-id
 #respawnrate: noon
 #decayrate: sunset
-playerbuffids: [4] # Heal
+playerbuffids: [24] # death-recovery
 #mobbuffids: []
 #nativebuffids: []

@@ -220,6 +220,7 @@ command-aliases:
   leaderboard:      ['leaderboards', 'highscore', 'topscore']
   history:          ['log']
   time:             ['date']
+  noop:             ['wake']
   'party chat':     ['pchat', 'psay']
   'bank deposit':   ['deposit']
   'bank withdraw':  ['withdraw']

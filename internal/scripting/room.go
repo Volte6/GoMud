@@ -14,7 +14,7 @@ import (
 var (
 	roomVMCache       = make(map[int]*VMWrapper)
 	scriptLoadTimeout = 1000 * time.Millisecond
-	scriptRoomTimeout = 10 * time.Millisecond
+	scriptRoomTimeout = 50 * time.Millisecond
 )
 
 func ClearRoomVMs() {

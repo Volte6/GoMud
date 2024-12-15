@@ -12,6 +12,6 @@ function onStart(actor, triggersLeft) {
 
 // Invoked every time the buff is triggered (see roundinterval)
 function onTrigger(actor, triggersLeft) {
-    SendUserMessage(actor.UserId(),     'You continue your meditation. <ansi bg="blue"> *' + triggersLeft + ' rounds left* </ansi>.' )
+    SendUserMessage(actor.UserId(),     'You continue your meditation. <ansi bg="blue"> *' + triggersLeft + ' rounds left* </ansi>' )
     SendRoomMessage(actor.GetRoomId(),   actor.GetCharacterName(true)+' continues meditating.', actor.UserId() )
 }

@@ -303,7 +303,7 @@ func (c *Config) SetOverrides(overrides map[string]any) error {
 	structValue := reflect.ValueOf(c).Elem()
 	for name, value := range c.overrides {
 
-		slog.Info("SetOverrides()", "name", name, "value", value)
+		slog.Debug("SetOverrides()", "name", name, "value", value)
 
 		structFieldValue := structValue.FieldByName(name)
 
@@ -414,7 +414,7 @@ func (c *Config) Validate() {
 	}
 
 	if c.XPScale <= 0 {
-		c.XPScale = 1.0 // default
+		c.XPScale = 100.0 // default
 	}
 
 	if c.TurnMs < 10 {

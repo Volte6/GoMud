@@ -11,7 +11,7 @@ import (
 
 var (
 	mobVMCache       = make(map[string]*VMWrapper)
-	scriptMobTimeout = 10 * time.Millisecond
+	scriptMobTimeout = 50 * time.Millisecond
 )
 
 func ClearMobVMs() {

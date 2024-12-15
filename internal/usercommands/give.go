@@ -22,7 +22,7 @@ func Give(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
 	if len(args) < 2 {
-		user.SendText("Give what? To whom?")
+		user.SendText(`Give what? To whom? (<ansi fg="command">give {object-name} {receiver-name}</ansi>)`)
 		return true, nil
 	}
 
@@ -56,7 +56,7 @@ func Give(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		giveItem, found = user.Character.FindInBackpack(giveWhat)
 
 		if !found {
-			user.SendText(fmt.Sprintf("You don't have a %s to give.", giveWhat))
+			user.SendText(fmt.Sprintf(`You don't have a %s to give. (<ansi fg="command">give {object-name} {receiver-name}</ansi>)`, giveWhat))
 			return true, nil
 		}
 
@@ -232,7 +232,7 @@ func Give(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, nil
 	}
 
-	user.SendText("Who???")
+	user.SendText(`Who??? (<ansi fg="command">give {object-name} {receiver-name}</ansi>)`)
 
 	return true, nil
 }

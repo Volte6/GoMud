@@ -89,6 +89,7 @@ var (
 		`modify`:      {Modify, true, true}, // Admin only
 		`motd`:        {Motd, true, false},
 		`mute`:        {Mute, true, true},
+		`noop`:        {Noop, true, false},
 		`offer`:       {Offer, false, false},
 		`online`:      {Online, true, false},
 		`party`:       {Party, true, false},

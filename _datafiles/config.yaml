@@ -96,9 +96,9 @@ PVP: limited
 #   Minimum level one must be to be targetted or to target other players in PVP
 PVPMinimumLevel: 15
 # - XPScale -
-#   Scales XP Charts for character leveling. Lower means less required, higher
-#   means more required. 1 is the default (no change).
-XPScale: 1
+#   Scales how much XP is gained when characters gain XP. Number is a percentage
+#   Example: 100 = 100%
+XPScale: 100
 # - TurnMs -
 #   How many milliseconds per turn. While lower is generally better, this can
 #   greatly increase overhead on the server - a command per mob or user is

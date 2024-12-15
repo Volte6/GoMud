@@ -17,10 +17,6 @@ func Online(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 	rows := [][]string{}
 
-	rowsAdmin := [][]string{}
-	rowsMod := [][]string{}
-	rowsUser := [][]string{}
-
 	userCt := 0
 	for _, uid := range users.GetOnlineUserIds() {
 
@@ -57,20 +53,9 @@ func Online(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 			allFormatting = append(allFormatting, formatting)
 
-			if u.Permission == users.PermissionAdmin {
-				rowsAdmin = append(rowsAdmin, row)
-			} else if u.Permission == users.PermissionMod {
-				rowsMod = append(rowsMod, row)
-			} else {
-				rowsUser = append(rowsUser, row)
-			}
-
+			rows = append(rows, row)
 		}
 	}
-
-	rows = append(rows, rowsAdmin...)
-	rows = append(rows, rowsMod...)
-	rows = append(rows, rowsUser...)
 
 	tableTitle := fmt.Sprintf(`%d users online`, userCt)
 	if userCt == 1 {

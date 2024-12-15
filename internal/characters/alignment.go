@@ -19,7 +19,7 @@ const (
 	AlignmentEvil      int8 = -60
 	AlignmentUnholy    int8 = -80
 	// Threshold by which mobs will auto aggro
-	AlignmentAggroThreshold int = 50 // Possible delta is 0 - 200
+	AlignmentAggroThreshold int = 100 // Possible delta is 0 - 200
 
 )
 

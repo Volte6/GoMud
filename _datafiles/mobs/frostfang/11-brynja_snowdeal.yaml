@@ -21,12 +21,14 @@ character:
   shop:
     - itemid: 30001
       quantitymax: 3
+      restockrate: 1 hour
     - itemid: 20005
       quantitymax: 1
     - itemid: 6
       quantitymax: 3
     - itemid: 8
       quantitymax: 1
+      restockrate: 1 hour
     - itemid: 30015
       quantitymax: 2
   equipment:

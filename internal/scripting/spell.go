@@ -14,7 +14,7 @@ import (
 
 var (
 	spellVMCache       = make(map[string]*VMWrapper)
-	scriptSpellTimeout = 10 * time.Millisecond
+	scriptSpellTimeout = 50 * time.Millisecond
 )
 
 func ClearSpellVMs() {

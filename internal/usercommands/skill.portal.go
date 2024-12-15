@@ -23,6 +23,10 @@ Level 4 - Create a physical portal that you can share with players, or return th
 */
 func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
+	if user.Character.RoomId == 75 {
+		return false, errors.New(`portal command ignored in death recovery`)
+	}
+
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
 		if handled, err := Go(`portal`, user, room); handled {
