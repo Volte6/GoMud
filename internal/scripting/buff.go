@@ -13,7 +13,7 @@ import (
 
 var (
 	buffVMCache       = make(map[int]*VMWrapper)
-	scriptBuffTimeout = 10 * time.Millisecond
+	scriptBuffTimeout = 50 * time.Millisecond
 )
 
 func ClearBuffVMs() {

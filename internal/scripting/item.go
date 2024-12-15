@@ -13,7 +13,7 @@ import (
 
 var (
 	itemVMCache       = make(map[string]*VMWrapper)
-	scriptItemTimeout = 10 * time.Millisecond
+	scriptItemTimeout = 50 * time.Millisecond
 )
 
 func ClearItemVMs() {
