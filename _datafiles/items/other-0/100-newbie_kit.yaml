@@ -1,0 +1,8 @@
+itemid: 100
+name: newbie kit
+namesimple: kit
+description: A package containing helpful items to get started.
+type: object
+subtype: usable
+uses: 1
+value: 1

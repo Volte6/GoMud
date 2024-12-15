@@ -376,21 +376,26 @@ func (a ScriptActor) UpdateItem(itm ScriptItem) {
 
 func (a ScriptActor) GiveItem(itm any) {
 
-	var sItem ScriptItem
+	var sItem *ScriptItem
 
-	if itmScriptItem, ok := itm.(ScriptItem); ok {
+	if itmScriptItem, ok := itm.(*ScriptItem); ok {
 		sItem = itmScriptItem
-	} else if itmInt, ok := itm.(int64); ok {
-		sItem = *CreateItem(int(itmInt))
-	} else if itmInt, ok := itm.(int32); ok {
-		sItem = *CreateItem(int(itmInt))
-	} else if itmFloat, ok := itm.(float64); ok {
-		sItem = *CreateItem(int(itmFloat))
+	} else if itmInt, ok := itm.(int); ok {
+		sItem = CreateItem(itmInt)
+	} else if itmInt64, ok := itm.(int64); ok {
+		sItem = CreateItem(int(itmInt64))
+	} else if itmInt32, ok := itm.(int32); ok {
+		sItem = CreateItem(int(itmInt32))
+	} else if itmFloat64, ok := itm.(float64); ok {
+		sItem = CreateItem(int(itmFloat64))
 	}
 
-	if a.characterRecord.StoreItem(*sItem.itemRecord) {
-		if a.userId > 0 {
-			TryItemScriptEvent(`onGive`, *sItem.itemRecord, a.userId)
+	if sItem != nil {
+		iRecord := sItem.itemRecord
+		if a.characterRecord.StoreItem(*iRecord) {
+			if a.userId > 0 {
+				TryItemScriptEvent(`onGive`, *sItem.itemRecord, a.userId)
+			}
 		}
 	}
 

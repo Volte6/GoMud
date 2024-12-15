@@ -20,7 +20,10 @@ type ScriptItem struct {
 }
 
 func (i ScriptItem) ItemId() int {
-	return i.itemRecord.ItemId
+	if i.itemRecord != nil {
+		return i.itemRecord.ItemId
+	}
+	return 0
 }
 
 func (i ScriptItem) getScript() string {
@@ -121,7 +124,6 @@ func CreateItem(itemId int) *ScriptItem {
 	if i.ItemId == 0 {
 		return nil
 	}
-
 	sItm := newScriptItem(i)
 	return &sItm
 }
