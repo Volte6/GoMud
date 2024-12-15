@@ -17,7 +17,7 @@ func Broadcast(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 
 	sourceIsMod := user.Permission == users.PermissionAdmin || user.Permission == users.PermissionMod
 
-	msg := fmt.Sprintf(`<ansi fg="black-bold">(broadcast)</ansi> <ansi fg="username">%s</ansi>: <ansi fg="yellow">%s</ansi>`, user.Character.Name, rest)
+	msg := fmt.Sprintf(`<ansi fg="broadcast-prefix">(broadcast)</ansi> <ansi fg="username">%s</ansi>: <ansi fg="broadcast-body">%s</ansi>`, user.Character.Name, rest)
 
 	for _, u := range users.GetAllActiveUsers() {
 
