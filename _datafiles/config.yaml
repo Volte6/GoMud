@@ -46,6 +46,11 @@ FolderSpellData: _datafiles/spells
 # - FolderAttackMessageData -
 #   Defines the various combat related text messages
 FolderAttackMessageData: _datafiles/combat-messages 
+# - FolderConversations -
+#   Folder where all conversations exist.
+#   General conversations can be in the conversations folder
+#   Everything else should be a subfolder named by zone
+FolderConversations: _datafiles/conversations 
 # - FileAnsiAliases -
 #   Maps common aliases to specific ansi color codes
 FileAnsiAliases: _datafiles/ansi-aliases.yaml 
@@ -130,6 +135,9 @@ OnDeathAlwaysDropBackpack: false
 #   10% - lose 10% of XP
 #   50% - lose 50% of XP
 OnDeathXPPenalty: none
+# - OnDeathProtectionLevels -
+#   Players do not incur death penalties up to and including this level.
+OnDeathProtectionLevels: 5
 # - EnterRoomMessageWrapper -
 #   Decorate entrance text with this. Put a %s where the message should be.
 EnterRoomMessageWrapper: "   <ansi fg=\"enters-message\"> >>> </ansi>%s"

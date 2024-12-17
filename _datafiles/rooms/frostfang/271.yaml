@@ -17,8 +17,9 @@ exits:
 spawninfo:
 - mobid: 2
   message: A soldier walks into the barracks.
+  name: chubby guard
   maxwander: 2
   scripttag: hungry
-  questflags: [4-return]
+  questflags: [4-start, 4-return]
   levelmod: 55
   respawnrate: 7 real minutes

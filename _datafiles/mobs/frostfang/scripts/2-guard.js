@@ -1,6 +1,6 @@
 
 function onIdle(mob, room) {
-
+    
     var random = Math.floor(Math.random() * 8);
     switch (random) {
         case 0:
@@ -17,9 +17,4 @@ function onIdle(mob, room) {
     }
 
     return false;
-}
-
-// Called whenever a mob uses the converse command.
-function onConverse(message, mob, sourceMob, room) {
-
 }

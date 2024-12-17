@@ -34,7 +34,7 @@ function onIdle(mob, room) {
                 mob.MoveRoom( charmer.GetRoomId() );
                 room.SendText(`A large ` + UtilApplyColorPattern('swirling portal', 'pink') + ` appears, and ` + mob.GetCharacterName(true) + ` steps into it, right before it disappears.`);
                 targetRoom.SendText(`A large ` + UtilApplyColorPattern('swirling portal', 'pink') + ` appears, and ` + mob.GetCharacterName(true) + ` steps out of it, right before it disappears.`);
-                mob.Command(`say I almost lost you ` + charmer.GetCharacterName(true) + `!`);
+                mob.Command(`saytoonly @` + charmer.UserId() + ` I almost lost you ` + charmer.GetCharacterName(true) + `!`);
             }
             
             return true;
@@ -73,44 +73,44 @@ function onIdle(mob, room) {
     switch( UtilDiceRoll(1, 12) ) {
         case 1:
             if ( charmer.GetStatPoints() > 0 ) {
-                mob.Command(`sayto @` + charmer.UserId() + ` It looks like you've got some stat points to spend. Type <ansi fg="command">status train</ansi> to upgrade your stats!`);
+                mob.Command(`saytoonly @` + charmer.UserId() + ` It looks like you've got some stat points to spend. Type <ansi fg="command">status train</ansi> to upgrade your stats!`);
             }
             break;
         case 2:
             if ( !charmer.HasQuest(`4-start`) ) {
-                mob.Command(`sayto @` + charmer.UserId() + ` There's a guard in the barracks that constantly complains about being hungry. You should <ansi fg="command">ask</ansi> him about it.`);
+                mob.Command(`saytoonly @` + charmer.UserId() + ` There's a guard in the barracks that constantly complains about being hungry. You should <ansi fg="command">ask</ansi> him about it.`);
             }
             break;
         case 3:
             if ( !charmer.HasQuest(`2-start`) ) {
-                mob.Command(`sayto @` + charmer.UserId() + ` I have heard the king worries. If we can find an audience with him we can try to <ansi fg="command">ask</ansi> him about a quest. He is north of town square.`);
+                mob.Command(`saytoonly @` + charmer.UserId() + ` I have heard the king worries. If we can find an audience with him we can try to <ansi fg="command">ask</ansi> him about a quest. He is north of town square.`);
             }
             break;
         case 4:
-            mob.Command(`sayto @` + charmer.UserId() + ` You can find help on many subjects by typing <ansi fg="command">help</ansi>.`);
+            mob.Command(`saytoonly @` + charmer.UserId() + ` You can find help on many subjects by typing <ansi fg="command">help</ansi>.`);
             break;
         case 5:
-            mob.Command(`sayto @` + charmer.UserId() + ` I can create a portal to take us back to <ansi fg="room-title">Town Square</ansi> any time. Just <ansi fg="command">ask</ansi> me about it.`);
+            mob.Command(`saytoonly @` + charmer.UserId() + ` I can create a portal to take us back to <ansi fg="room-title">Town Square</ansi> any time. Just <ansi fg="command">ask</ansi> me about it.`);
             break;
         case 6:
-            mob.Command(`sayto @` + charmer.UserId() + ` If you have friends to play with, you can party up! <ansi fg="command">help party</ansi> to learn more.`);
+            mob.Command(`saytoonly @` + charmer.UserId() + ` If you have friends to play with, you can party up! <ansi fg="command">help party</ansi> to learn more.`);
             break;
         case 7:
-            mob.Command(`sayto @` + charmer.UserId() + ` You can send a message to everyone using the <ansi fg="command">broadcast</ansi> command.`);
+            mob.Command(`saytoonly @` + charmer.UserId() + ` You can send a message to everyone using the <ansi fg="command">broadcast</ansi> command.`);
             break
         case 8:
             if ( charmer.GetLevel() < 2 ) {
-                mob.Command(`sayto @` + charmer.UserId() + ` There are some <ansi fg="mobname">rats</ansi> to bash around the <ansi fg="room-title">The Sanctuary of the Benevolent Heart</ansi> south of <ansi fg="room-title">Town Square</ansi>. Just don't go TOO far south, it get dangerous!`);
+                mob.Command(`saytoonly @` + charmer.UserId() + ` There are some <ansi fg="mobname">rats</ansi> to bash around the <ansi fg="room-title">The Sanctuary of the Benevolent Heart</ansi> south of <ansi fg="room-title">Town Square</ansi>. Just don't go TOO far south, it get dangerous!`);
                 break;
             }
         case 9:
             if ( charmer.GetLevel() < 2 ) {
-                mob.Command(`sayto @` + charmer.UserId() + ` Type <ansi fg="command">status</ansi> to learn about yourself!`);
+                mob.Command(`saytoonly @` + charmer.UserId() + ` Type <ansi fg="command">status</ansi> to learn about yourself!`);
             }
             break;
         case 10:
             if ( charmer.GetLevel() < 2 ) {
-                mob.Command(`sayto @` + charmer.UserId() + ` Killing stuff is a great way to get stronger, but don't pick a fight with the locals!`);
+                mob.Command(`saytoonly @` + charmer.UserId() + ` Killing stuff is a great way to get stronger, but don't pick a fight with the locals!`);
             }
             break;
         default:
@@ -148,11 +148,11 @@ function onAsk(mob, room, eventDetails) {
     if ( match.found ) {
 
         if ( user.GetRoomId() == 1 ) {
-            mob.Command(`sayto @`+String(eventDetails.sourceId)+` we're already at <ansi fg="room-title">Town Square</ansi>. <ansi fg="command">Look</ansi> around!`);
+            mob.Command(`saytoonly @`+String(eventDetails.sourceId)+` we're already at <ansi fg="room-title">Town Square</ansi>. <ansi fg="command">Look</ansi> around!`);
             return true;
         }
 
-        mob.Command(`sayto @`+String(eventDetails.sourceId)+` back to <ansi fg="room-title">Town Square</ansi>? Sure thing, lets go!`);
+        mob.Command(`saytoonly @`+String(eventDetails.sourceId)+` back to <ansi fg="room-title">Town Square</ansi>? Sure thing, lets go!`);
         mob.Command(`emote whispers a soft incantation and summons a ` + UtilApplyColorPattern(`glowing portal`, `cyan`) + `.`);
 
         room.AddTemporaryExit(`glowing portal`, `:cyan`, 0, 3); // roomId zero is start room alias
@@ -163,7 +163,7 @@ function onAsk(mob, room, eventDetails) {
     match = UtilFindMatchIn(eventDetails.askText, silenceNouns);
     if ( match.found ) {
 
-        mob.Command(`sayto @`+String(eventDetails.sourceId)+` I'll try and be quieter.`);
+        mob.Command(`saytoonly @`+String(eventDetails.sourceId)+` I'll try and be quieter.`);
         
         mob.SetTempData(`lastTipRound`, -1);
 
@@ -174,7 +174,7 @@ function onAsk(mob, room, eventDetails) {
     match = UtilFindMatchIn(eventDetails.askText, leaveNouns);
     if ( match.found ) {
 
-        mob.Command(`sayto @`+String(eventDetails.sourceId)+` I'll be on my way then.`);
+        mob.Command(`saytoonly @`+String(eventDetails.sourceId)+` I'll be on my way then.`);
         mob.Command(`emote bows and bids you farewell, disappearing into the scenery`);
         mob.Command(`despawn charmed mob expired`)
 

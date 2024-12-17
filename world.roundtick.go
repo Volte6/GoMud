@@ -1531,26 +1531,34 @@ func (w *World) handleIdleMobs() {
 			continue
 		}
 
+		if mob.InConversation() {
+			mob.Converse()
+			continue
+		} else if mob.CanConverse() && util.Rand(50) == 0 { // 2% chance they will try to converse in a given round
+			mob.Command(`converse`)
+			continue
+		}
+
 		// If they have idle commands, maybe do one of them?
 		handled, _ := scripting.TryMobScriptEvent("onIdle", mob.InstanceId, 0, ``, nil)
 		if !handled {
+
 			if !mob.Character.IsCharmed() { // Won't do this stuff if befriended
 
 				if mob.MaxWander > -1 && len(mob.RoomStack) > mob.MaxWander {
 					mob.GoingHome = true
 				}
+
 				if mob.GoingHome {
 					mob.Command(`go home`)
 					continue
 				}
 
 			}
-		}
 
-		//
-		// Look for trouble
-		//
-		if !handled {
+			//
+			// Look for trouble
+			//
 			if mob.Character.IsCharmed() {
 				// Only some mobs can apply first aid
 				if mob.Character.KnowsFirstAid() {

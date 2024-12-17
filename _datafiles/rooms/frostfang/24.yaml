@@ -21,6 +21,6 @@ exits:
 spawninfo:
 - mobid: 40
   message: You notice a rat catcher setting up some traps.
-  questflags: [7-tradetrap]
+  questflags: [7-start, 7-tradetrap]
   level: 40
   respawnrate: 2 real minutes

@@ -187,20 +187,3 @@ function onDie(mob ActorObject, room RoomObject, eventDetails object) {
 
 ---
 
-```
-function onConverse(message string, mob ActorObject, sourceMob ActorObject, room RoomObject) {
-}
-```
-
-`onConverse()` is a special event function that is only called when mobs use the `converse` command.
-
-_Note: The intention of the converse command and onConverse is to faciliate mob-to-mob discussions._
-
-|  Argument | Explanation |
-| --- | --- |
-| message | The message that was sent via converse. |
-| mob | [ActorObject](FUNCTIONS_ACTORS.md) - The mob hearing the conversation |
-| sourceMob | [ActorObject](FUNCTIONS_ACTORS.md) - The mob issuing the converse command |
-| room | [RoomObject](FUNCTIONS_ROOMS.md) |
-
----

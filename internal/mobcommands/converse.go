@@ -1,52 +1,60 @@
 package mobcommands
 
 import (
-	"fmt"
-	"math/rand"
+	"strconv"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/conversations"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
 )
 
 func Converse(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	// Don't bother if no players are present
 	if room.PlayerCt() < 1 {
+		// return true, nil
+	}
+
+	if mob.InConversation() {
+		return true, nil
+	}
+
+	if !mob.CanConverse() {
 		return true, nil
 	}
 
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 
 	if isSneaking {
-		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="yellow">%s</ansi>"`, rest))
-	} else {
-		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest))
+		return true, nil
 	}
 
-	roomMobs := room.GetMobs(rooms.FindIdle)
+	for _, mobInstId := range room.GetMobs() {
 
-	// Randomize the mobs to determine who will potentially capture the message first
-	for i := range roomMobs {
-		j := rand.Intn(i + 1)
-		roomMobs[i], roomMobs[j] = roomMobs[j], roomMobs[i]
-	}
-
-	for _, roomMobInstId := range roomMobs {
-
-		if roomMobInstId == mob.InstanceId {
+		if mobInstId == mob.InstanceId { // no conversing with self
 			continue
 		}
 
-		targetMob := mobs.GetInstance(roomMobInstId)
-		if targetMob == nil {
-			continue
-		}
+		if m := mobs.GetInstance(mobInstId); m != nil {
 
-		if handled, err := scripting.TryMobConverse(rest, targetMob.InstanceId, mob.InstanceId); err == nil {
-			if handled {
-				return true, nil
+			// Not allowed to start another conversation until this one concludes
+			if m.InConversation() {
+				continue
+			}
+
+			conversationId := 0
+			if rest != `` {
+				forceIndex, _ := strconv.Atoi(rest)
+				conversationId = conversations.AttemptConversation(int(mob.MobId), mob.InstanceId, mob.Character.Name, m.InstanceId, m.Character.Name, m.Character.Zone, forceIndex)
+			} else {
+				conversationId = conversations.AttemptConversation(int(mob.MobId), mob.InstanceId, mob.Character.Name, m.InstanceId, m.Character.Name, m.Character.Zone)
+			}
+
+			if conversationId > 0 {
+				mob.SetConversation(conversationId)
+				m.SetConversation(conversationId)
+				break
 			}
 		}
 	}

@@ -32,6 +32,7 @@ type Config struct {
 	FolderUserData               ConfigString      `yaml:"FolderUserData"`
 	FolderSpellData              ConfigString      `yaml:"FolderSpellData"`
 	FolderTemplates              ConfigString      `yaml:"FolderTemplates"`
+	FolderConversations          ConfigString      `yaml:"FolderConversations"`
 	FileAnsiAliases              ConfigString      `yaml:"FileAnsiAliases"`
 	FileColorPatterns            ConfigString      `yaml:"FileColorPatterns"`
 	FileKeywords                 ConfigString      `yaml:"FileKeywords"`
@@ -74,6 +75,7 @@ type Config struct {
 	OnDeathEquipmentDropChance ConfigFloat  `yaml:"OnDeathEquipmentDropChance"` // Chance a player will drop a given piece of equipment on death
 	OnDeathAlwaysDropBackpack  ConfigBool   `yaml:"OnDeathAlwaysDropBackpack"`  // If true, players will always drop their backpack items on death
 	OnDeathXPPenalty           ConfigString `yaml:"OnDeathXPPenalty"`           // Possible values are: none, level, 10%, 25%, 50%, 75%, 90%, 100%
+	OnDeathProtectionLevels    ConfigInt    `yaml:"OnDeathProtectionLevels"`    // How many levels is the user protected from death penalties for?
 	EnterRoomMessageWrapper    ConfigString `yaml:"EnterRoomMessageWrapper"`
 	ExitRoomMessageWrapper     ConfigString `yaml:"ExitRoomMessageWrapper"`
 
@@ -372,6 +374,10 @@ func (c *Config) Validate() {
 		c.FolderTemplates = `_datafiles/templates` // default
 	}
 
+	if c.FolderConversations == `` {
+		c.FolderConversations = `_datafiles/conversations` // default
+	}
+
 	if c.FileAnsiAliases == `` {
 		c.FileAnsiAliases = `_datafiles/ansi-aliases.yaml` // default
 	}
@@ -444,6 +450,10 @@ func (c *Config) Validate() {
 				c.OnDeathXPPenalty = `none` // default
 			}
 		}
+	}
+
+	if c.OnDeathProtectionLevels < 0 {
+		c.OnDeathProtectionLevels = 0 // default
 	}
 
 	// Must have a message wrapper...
