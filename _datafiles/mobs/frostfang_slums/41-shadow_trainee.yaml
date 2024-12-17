@@ -6,9 +6,6 @@ maxwander: 0
 activitylevel: 1
 groups: 
   - slum-ruffians
-idlecommands:
-  - 'say You have done well to make it this far into my domain. Perhaps you should train here.'
-  - 'say That pesky rat catcher keeps trying to get more work from us. I told him we don''t need him anymore.'
 combatcommands:
   - 'sneak'
   - 'sneak;;;backstab'

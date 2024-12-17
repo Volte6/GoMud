@@ -22,69 +22,6 @@ func PruneMobVMs(instanceIds ...int) {
 
 }
 
-func TryMobConverse(rest string, mobInstanceId int, sourceMobInstanceId int) (bool, error) {
-
-	sMob := GetActor(0, mobInstanceId)
-	if sMob == nil {
-		return false, errors.New("mob not found")
-	}
-
-	vmw, err := getMobVM(sMob)
-	if err != nil {
-		return false, err
-	}
-
-	timestart := time.Now()
-	defer func() {
-		slog.Debug("TryMobConverse()", "mobInstanceId", mobInstanceId, "sourceMobInstanceId", sourceMobInstanceId, "time", time.Since(timestart))
-	}()
-	if onCommandFunc, ok := vmw.GetFunction("onConverse"); ok {
-
-		tmr := time.AfterFunc(scriptRoomTimeout, func() {
-			vmw.VM.Interrupt(errTimeout)
-		})
-
-		sourceMob := GetActor(0, sourceMobInstanceId)
-		if sourceMob == nil {
-			return false, errors.New("mob not found")
-		}
-
-		sRoom := GetRoom(sMob.GetRoomId())
-
-		res, err := onCommandFunc(goja.Undefined(),
-			vmw.VM.ToValue(rest),
-			vmw.VM.ToValue(sMob),
-			vmw.VM.ToValue(sourceMob),
-			vmw.VM.ToValue(sRoom),
-		)
-		vmw.VM.ClearInterrupt()
-		tmr.Stop()
-
-		if err != nil {
-
-			// Wrap the error
-			finalErr := fmt.Errorf("TryMobConverse(): %w", err)
-
-			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
-				return false, finalErr
-			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
-				return false, finalErr
-			}
-
-			slog.Error("JSVM", "error", finalErr)
-			return false, finalErr
-		}
-
-		if boolVal, ok := res.Export().(bool); ok {
-			return boolVal, nil
-		}
-	}
-
-	return false, nil
-}
-
 func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, sourceType string, details map[string]any) (bool, error) {
 
 	sMob := GetActor(0, mobInstanceId)

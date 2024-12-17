@@ -22,4 +22,4 @@ character:
     - pettype: mule
       price: 750
 scripttag: winterfire
-questflags: [5-return]
+questflags: [5-start, 5-return]

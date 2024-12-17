@@ -133,7 +133,8 @@ color8:
   spell-harmful: red
   questflag: 3
   highlight: 90
-  saytext: 13 # bright yellow
+  saytext: 13 # bright magenta
+  saytext-mob: 5 # dark magenta
   alert-5: 9
   alert-4: 1
   alert-3: 1
@@ -283,6 +284,7 @@ color256:
   questflag: 187
   highlight: 238
   saytext: 13
+  saytext-mob: 5 
   alert-5: 196
   alert-4: 203
   alert-3: 210

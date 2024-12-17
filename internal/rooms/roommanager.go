@@ -895,7 +895,7 @@ func SaveRoom(r Room) error {
 		return err
 	}
 
-	zone := zoneToFolder(r.Zone)
+	zone := ZoneToFolder(r.Zone)
 
 	roomFilePath := util.FilePath(roomDataFilesPath, `/`, fmt.Sprintf("%s%d.yaml", zone, r.RoomId))
 
@@ -927,7 +927,7 @@ func ZoneNameSanitize(zone string) string {
 	return strings.ToLower(zone)
 }
 
-func zoneToFolder(zone string) string {
+func ZoneToFolder(zone string) string {
 	zone = ZoneNameSanitize(zone)
 	// Lowercase it all, and add a slash at the end
 	return zone + "/"
@@ -1026,7 +1026,7 @@ func CreateZone(zoneName string) (roomId int, err error) {
 		return zoneInfo.RootRoomId, errors.New("zone already exists")
 	}
 
-	zoneFolder := util.FilePath(roomDataFilesPath, "/", zoneToFolder(zoneName))
+	zoneFolder := util.FilePath(roomDataFilesPath, "/", ZoneToFolder(zoneName))
 	if err := os.Mkdir(zoneFolder, 0755); err != nil {
 		return 0, err
 	}

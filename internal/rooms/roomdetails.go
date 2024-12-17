@@ -284,8 +284,9 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 			mobName := mob.Character.GetMobName(user.UserId, tmpNameFlags...)
 
 			for _, qFlag := range mob.QuestFlags {
-				if user.Character.HasQuest(qFlag) {
+				if user.Character.HasQuest(qFlag) || (len(qFlag) >= 5 && qFlag[len(qFlag)-5:] == `start`) {
 					mobName.QuestAlert = true
+					break
 				}
 			}
 

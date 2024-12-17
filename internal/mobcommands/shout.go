@@ -21,9 +21,9 @@ func Shout(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	rest = strings.ToUpper(rest)
 
 	if isSneaking {
-		room.SendText(fmt.Sprintf(`someone shouts, "<ansi fg="yellow">%s</ansi>"`, rest), mob.InstanceId)
+		room.SendText(fmt.Sprintf(`someone shouts, "<ansi fg="saytext-mob">%s</ansi>"`, rest), mob.InstanceId)
 	} else {
-		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shouts, "<ansi fg="yellow">%s</ansi>"`, mob.Character.Name, rest), mob.InstanceId)
+		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> shouts, "<ansi fg="saytext-mob">%s</ansi>"`, mob.Character.Name, rest), mob.InstanceId)
 	}
 
 	for _, roomInfo := range room.Exits {

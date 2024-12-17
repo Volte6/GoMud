@@ -1,0 +1,6 @@
+- 
+  Supported: # A map of lowercase names of "Initiator" (#1) to array of "Participant" (#2) names allowed to use this conversation. 
+    "frostfang citizen": ["guard", "captain of the guard", "master-at-arms"]
+  Conversation:
+    - ["#1 sayto #2 Thanks for keeping watch over the city."]
+    - ["#2 say I'm just doing my job."]

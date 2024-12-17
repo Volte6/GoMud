@@ -19,9 +19,9 @@ func Say(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	isSneaking := mob.Character.HasBuffFlag(buffs.Hidden)
 
 	if isSneaking {
-		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="saytext">%s</ansi>"`, rest))
+		room.SendText(fmt.Sprintf(`someone says, "<ansi fg="saytext-mob">%s</ansi>"`, rest))
 	} else {
-		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="saytext">%s</ansi>"`, mob.Character.Name, rest))
+		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="saytext-mob">%s</ansi>"`, mob.Character.Name, rest))
 	}
 
 	room.SendTextToExits(`You hear someone talking.`, true)

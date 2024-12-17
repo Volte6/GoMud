@@ -83,8 +83,10 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 		Text: msg,
 	})
 
+	allowPenalties := user.Character.Level > int(config.OnDeathProtectionLevels)
+
 	// If permadeath is enabled, do some extra bookkeeping
-	if config.PermaDeath {
+	if allowPenalties && bool(config.PermaDeath) {
 
 		if user.Character.ExtraLives > 0 {
 
@@ -116,63 +118,68 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 	user.EventLog.Add(`death`, fmt.Sprintf(`<ansi fg="username">%s</ansi> has <ansi fg="red-bold">DIED</ansi>`, user.Character.Name))
 
-	if config.OnDeathEquipmentDropChance >= 0 {
-		chanceInt := int(config.OnDeathEquipmentDropChance * 100)
-		for _, itm := range user.Character.GetAllWornItems() {
-			if util.Rand(100) < chanceInt {
+	// Only apply penalties if they were above the threshold
+	if allowPenalties {
 
-				Remove(itm.Name(), user, room)
+		if config.OnDeathEquipmentDropChance >= 0 {
+			chanceInt := int(config.OnDeathEquipmentDropChance * 100)
+			for _, itm := range user.Character.GetAllWornItems() {
+				if util.Rand(100) < chanceInt {
 
-				Drop(itm.Name(), user, room)
+					Remove(itm.Name(), user, room)
 
+					Drop(itm.Name(), user, room)
+
+				}
 			}
 		}
-	}
 
-	if user.Character.Gold > 0 {
-		user.EventLog.Add(`death`, fmt.Sprintf(`Dropped <ansi fg="gold">%d gold</ansi> on death`, user.Character.Gold))
-		Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), user, room)
-	}
+		if user.Character.Gold > 0 {
+			user.EventLog.Add(`death`, fmt.Sprintf(`Dropped <ansi fg="gold">%d gold</ansi> on death`, user.Character.Gold))
+			Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), user, room)
+		}
 
-	if config.OnDeathAlwaysDropBackpack {
-		Drop("all", user, room)
+		if config.OnDeathAlwaysDropBackpack {
+			Drop("all", user, room)
 
-		user.EventLog.Add(`death`, `Dropped <ansi fg="alert-3">everthing in your backpack</ansi> on death`)
+			user.EventLog.Add(`death`, `Dropped <ansi fg="alert-3">everthing in your backpack</ansi> on death`)
 
-	} else if config.OnDeathEquipmentDropChance >= 0 {
-		chanceInt := int(config.OnDeathEquipmentDropChance * 100)
-		for _, itm := range user.Character.GetAllBackpackItems() {
-			if util.Rand(100) < chanceInt {
-				Drop(itm.Name(), user, room)
-				user.EventLog.Add(`death`, fmt.Sprintf(`Dropped your <ansi fg="itemname">%s</ansi> on death`, itm.Name()))
+		} else if config.OnDeathEquipmentDropChance >= 0 {
+			chanceInt := int(config.OnDeathEquipmentDropChance * 100)
+			for _, itm := range user.Character.GetAllBackpackItems() {
+				if util.Rand(100) < chanceInt {
+					Drop(itm.Name(), user, room)
+					user.EventLog.Add(`death`, fmt.Sprintf(`Dropped your <ansi fg="itemname">%s</ansi> on death`, itm.Name()))
+				}
 			}
 		}
-	}
 
-	if user.Character.Level > 1 {
+		if user.Character.Level > 1 {
 
-		setting, lossPct := config.GetDeathXPPenalty()
-		if setting != `none` {
+			setting, lossPct := config.GetDeathXPPenalty()
+			if setting != `none` {
 
-			if setting == `level` { // are they being brought down to the base of their current level?
-				user.Character.Level--
-				oldExperience := user.Character.Experience
-				user.Character.Experience = user.Character.XPTNL()
-				user.Character.Level++
+				if setting == `level` { // are they being brought down to the base of their current level?
+					user.Character.Level--
+					oldExperience := user.Character.Experience
+					user.Character.Experience = user.Character.XPTNL()
+					user.Character.Level++
 
-				user.SendText(fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>.`, oldExperience-user.Character.Experience))
+					user.SendText(fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>.`, oldExperience-user.Character.Experience))
 
-				user.EventLog.Add(`death`, fmt.Sprintf(`Lost <ansi fg="yellow">%d experience points</ansi> on death`, oldExperience-user.Character.Experience))
+					user.EventLog.Add(`death`, fmt.Sprintf(`Lost <ansi fg="yellow">%d experience points</ansi> on death`, oldExperience-user.Character.Experience))
 
-			} else if lossPct > 0 { // Are they losing a set %?
+				} else if lossPct > 0 { // Are they losing a set %?
 
-				loss := int(math.Floor(float64(user.Character.Experience) * lossPct))
-				user.Character.Experience -= loss
+					loss := int(math.Floor(float64(user.Character.Experience) * lossPct))
+					user.Character.Experience -= loss
 
-				user.SendText(fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>.`, loss))
+					user.SendText(fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>.`, loss))
 
-				user.EventLog.Add(`death`, fmt.Sprintf(`Lost <ansi fg="yellow">%d experience points</ansi> on death`, loss))
+					user.EventLog.Add(`death`, fmt.Sprintf(`Lost <ansi fg="yellow">%d experience points</ansi> on death`, loss))
+				}
 			}
+
 		}
 
 	}
