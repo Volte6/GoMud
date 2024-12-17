@@ -45,7 +45,6 @@ type RoomManager struct {
 	zones                map[string]ZoneInfo // a map of zone name to room id
 	roomsWithUsers       map[int]int         // key is roomId to # players
 	roomsWithMobs        map[int]int         // key is roomId to # mobs
-	topRoomItems         []int               // list of the top room items
 	roomDescriptionCache map[string]string   // key is a hash, value is the description
 	roomIdToFileCache    map[int]string      // key is room id, value is the file path
 }
@@ -103,10 +102,14 @@ func RoomMaintenance() bool {
 		util.TrackTime(`RoomMaintenance()`, time.Since(start).Seconds())
 	}()
 
+	c := configs.GetConfig()
+
 	roundCount := util.GetRoundCount()
 	// Get the current round count
-	unloadRoundThreshold := roundCount - roomUnloadTimeoutRounds
+	unloadRoundThreshold := roundCount - uint64(c.RoomUnloadRounds)
 	unloadRooms := make([]*Room, 0)
+
+	allowUnloading := len(roomManager.rooms) > int(c.RoomUnloadThreshold)
 
 	roomsUpdated := false
 	for _, room := range roomManager.rooms {
@@ -219,7 +222,7 @@ func RoomMaintenance() bool {
 		}
 
 		// Consider unloading rooms from memory?
-		if roundCount%roomUnloadTimeoutRounds == 0 {
+		if allowUnloading {
 			if room.lastVisited < unloadRoundThreshold {
 				unloadRooms = append(unloadRooms, room)
 			}

@@ -51,6 +51,8 @@ type Config struct {
 	RoundsPerDay                 ConfigInt         `yaml:"RoundsPerDay"` // How many rounds are in a day
 	NightHours                   ConfigInt         `yaml:"NightHours"`   // How many hours of night
 	MaxMobBoredom                ConfigInt         `yaml:"MaxMobBoredom"`
+	RoomUnloadRounds             ConfigInt         `yaml:"RoomUnloadRounds"`
+	RoomUnloadThreshold          ConfigInt         `yaml:"RoomUnloadThreshold"`
 	ScriptLoadTimeoutMs          ConfigInt         `yaml:"ScriptLoadTimeoutMs"`          // How long to spend the first time a script is loaded into memory
 	ScriptRoomTimeoutMs          ConfigInt         `yaml:"ScriptRoomTimeoutMs"`          // How many milliseconds to allow a script to run before it is interrupted
 	MaxTelnetConnections         ConfigInt         `yaml:"MaxTelnetConnections"`         // Maximum number of telnet connections to accept
@@ -496,6 +498,14 @@ func (c *Config) Validate() {
 
 	if c.MaxMobBoredom < 1 {
 		c.MaxMobBoredom = 150 // default
+	}
+
+	if c.RoomUnloadRounds < 5 {
+		c.RoomUnloadRounds = 5
+	}
+
+	if c.RoomUnloadThreshold < 0 {
+		c.RoomUnloadThreshold = 0
 	}
 
 	if c.ScriptLoadTimeoutMs < 1 {

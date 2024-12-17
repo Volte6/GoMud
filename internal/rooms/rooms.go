@@ -21,8 +21,7 @@ import (
 )
 
 const roomDataFilesPath = "_datafiles/rooms"
-const visitorTrackingTimeout = 180  // 180 seconds (3 minutes?)
-const roomUnloadTimeoutRounds = 450 // 1800 seconds (30 minutes) / 4 seconds (1 round) = 450 rounds
+const visitorTrackingTimeout = 180 // 180 seconds (3 minutes?)
 const defaultMapSymbol = `•`
 
 var (

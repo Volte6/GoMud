@@ -57,7 +57,13 @@ func AttemptConversation(initiatorMobId int, initatorInstanceId int, initiatorNa
 	} else {
 		possibleConversations := []int{}
 		for i, content := range dataFile {
-			if supportedNameList, ok := content.Supported[initiatorName]; ok {
+
+			supportedNameList := content.Supported[initiatorName]
+			if supportedNameList2, ok2 := content.Supported[`*`]; ok2 {
+				supportedNameList = append(supportedNameList, supportedNameList2...)
+			}
+
+			if len(supportedNameList) > 0 {
 				for _, supportedName := range supportedNameList {
 					if supportedName == participantName || supportedName == `*` {
 						possibleConversations = append(possibleConversations, i)

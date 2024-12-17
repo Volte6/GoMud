@@ -25,7 +25,7 @@ These `yaml` files are defined as arrays of possible conversations, each definin
     - ["#2 sayto #1 SQUEEEEEEEK!"]
 ```
 
-**Supported** - This defines who can initate the conversation, and all mobs names that can be the participant in the conversation. It is a map of `Mob Name` to `Array of Mob Names`. In this manner, when a base MobId is used, but the mob has a different name they can be part of conversations or have their own uniquely defined conversations. 
+**Supported** - This defines who can initate the conversation, and all mobs names that can be the participant in the conversation. It is a map of `Mob Name` to `Array of Mob Names`. In this manner, when a base MobId is used, but the mob has a different name they can be part of conversations or have their own uniquely defined conversations. A stand alone name of `*` is a wildcard that means any name will match.
 
 **Conversation** - This is an `Array of String Arrays`, defining all actions performed, one round at a time. If you want multiple actions to be performed in one round, include them in the same string array. Conversation continues down the Array, one round at a time, until all items have been completed (or otherwise interrupted).
 

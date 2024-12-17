@@ -244,7 +244,14 @@ MaxCPUCores: 0
 #   How often the server will automatically save the game state. This is a
 #   backup feature in case the server crashes. The game state is also saved
 #   whenever the server is shut down.
-RoundsPerAutoSave: 900
+RoundsPerAutoSave: 450
+# - RoomUnloadRounds -
+#   How many rounds must pass without a visitor before a room is considered
+#   for unloading from memory.
+RoomUnloadRounds: 450
+# - RoomUnloadThreshold -
+#   Do not unload any rooms if the in-memory count is under this threshold.
+RoomUnloadThreshold: 200
 # - MaxMobBoredom -
 #   How many rounds a mob can go without seeing a player before a mob despawns. 
 #   This is mainly a resource management feature to keep the game from getting 
@@ -260,7 +267,7 @@ ScriptLoadTimeoutMs: 1000
 # - ScriptRoomTimeoutMs - 
 #   How long a room script can run before it is killed. This is a safety feature to
 #   prevent long running scripts from bogging down the server.
-ScriptRoomTimeoutMs: 10
+ScriptRoomTimeoutMs: 50
 ################################################################################
 #
 #   NETWORK SETTINGS

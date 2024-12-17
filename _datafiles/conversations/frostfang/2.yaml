@@ -1,4 +1,49 @@
 - 
+  Supported: # A map of lowercase names of "Participant" => "Initiator" allowed to use this conversation
+    "guard": ["*"]
+  Conversation:
+    - ["#1 emote nods"]
+    - ["#1 sayto #2 Good day."]
+    - ["#2 sayto #1 Good day to you."]
+- 
+  Supported: # A map of lowercase names of "Participant" => "Initiator" allowed to use this conversation
+    "guard": ["guard", "captain of the guard", "master-at-arms"]
+  Conversation:
+    - ["#1 say Another cold dawn, friend."]
+    - ["#2 emote adjusts cape", 
+       "#2 say Aye, though the wind is quieter than last night. Stay sharp."]
+    - ["#1 say Always."]
+- 
+  Supported: # A map of lowercase names of "Participant" => "Initiator" allowed to use this conversation
+    "guard": ["guard", "captain of the guard", "master-at-arms"]
+  Conversation:
+    - ["#1 say Did you hear something strange near the old catacombs entrance?"]
+    - ["#2 emote lowers their voice", 
+       "#2 say Keep that talk down. The King does not favor loose tongues."]
+    - ["#1 look #2"]
+    - ["#1 say Right. Just curiosity, nothing more."]
+    - ["#2 say Curiosity can be dangerous here."]
+- 
+  Supported: # A map of lowercase names of "Participant" => "Initiator" allowed to use this conversation
+    "guard": ["guard", "captain of the guard", "master-at-arms"]
+  Conversation:
+    - ["#1 say Saw a trio of adventurers heading to the Dark Forest this morning."]
+    - ["#2 emote frowns", 
+       "#2 say Brave souls. That forest hides more than crooked trees."]
+    - ["#1 say Think they'll return?"]
+    - ["#2 say Hard to say. The city sees many come and go. We stand here, watching."]
+    - ["#1 say Then we do what we must, and keep watch."]
+- 
+  Supported: # A map of lowercase names of "Participant" => "Initiator" allowed to use this conversation
+    "guard": ["guard", "captain of the guard", "master-at-arms"]
+  Conversation:
+    - ["#1 say Those old statues at the West Gate give me an uneasy feeling."]
+    - ["#2 say They say the statues bear secrets. But I have never dared to speak to them."]
+    - ["#1 say Nor I. We have our duty here, in Frostfang, not out there in the wastes."]
+    - ["#2 emote nods solemnly", 
+       "#2 say Aye, safer to stay within these walls."]
+    - ["#1 say Safer indeed."]
+- 
   Supported: # A map of lowercase names of "Initiator" (#1) to array of "Participant" (#2) names allowed to use this conversation. 
     "guard": ["guard", "captain of the guard", "master-at-arms"]
   Conversation:
@@ -86,9 +131,18 @@
     - ["#2 sayto #1 Squeak."]
 - 
   Supported: # A map of lowercase names of "Participant" => "Initiator" allowed to use this conversation
-    "guard": ["*"]
+    "guard": ["guard", "master-at-arms"]
   Conversation:
-    - ["#1 emote nods"]
-    - ["#1 sayto #2 Good day."]
-    - ["#2 sayto #1 Good day to you."]
-
+    - ["#1 say Did you see the ranger recruits training today?"]
+    - ["#2 emote shrugs their shoulders", 
+       "#2 say Caught a glimpse. They learn to map the land. Lucky them. I'd rather stay indoors, near a hearth and mulled cider."]
+- 
+  Supported: # A map of lowercase names of "Participant" => "Initiator" allowed to use this conversation
+    "guard": ["guard", "master-at-arms"]
+  Conversation:
+    - ["#1 sayto #2 There's talk of someone at the Sanctuary of the Benevolent Heart, giving quiet blessings to travelers."]
+    - ["#2 look #1"]
+    - ["#2 say Blessings, eh? Might be useful, especially for those heading south to the Slums. That place grows more dangerous each day."]
+    - ["#1 say Indeed. There's even talk of a hidden alley behind the sanctuary with a... secret of sorts."]
+    - ["#2 emote notices you",
+       "#2 sayto #1 Shhhh!"]
