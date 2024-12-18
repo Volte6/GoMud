@@ -63,6 +63,14 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		user.SendText(currentPrompt.(string))
 		user.SendText(``)
 
+		currentWimpy := user.GetConfigOption(`wimpy`)
+		if currentWimpy == nil {
+			currentWimpy = 0
+		}
+		user.SendText(`<ansi fg="yellow-bold">wimpy:</ansi> `)
+		user.SendText(fmt.Sprintf(`%d%%`, currentWimpy.(int)))
+		user.SendText(``)
+
 		user.SendText(`See: <ansi fg="command">help set</ansi>`)
 
 		return true, nil
@@ -198,33 +206,29 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	}
 
-	if setTarget == `mprompt` {
+	if setTarget == `wimpy` {
 
 		if len(args) < 1 {
-			currentPrompt := user.GetConfigOption(`mprompt`)
-			if currentPrompt == nil {
-				currentPrompt = users.PromptDefault
+			currentWimpy := user.GetConfigOption(`wimpy`)
+			if currentWimpy == nil {
+				currentWimpy = 0
 			}
-			user.SendText("Your current mprompt:\n")
-			user.SendText(currentPrompt.(string))
-			user.SendText("\n" + `Type <ansi fg="command">help set-prompt</ansi> for more info on customizing prompts.` + "\n")
+			user.SendText("Your current wimpy:\n")
+			user.SendText(fmt.Sprintf(`%d%%`, currentWimpy.(int)))
+			user.SendText("\n" + `Type <ansi fg="command">help wimpy</ansi> to learn about the wimpy setting.` + "\n")
 			return true, nil
 		}
 
-		promptStr := rest[len(setTarget)+1:]
+		wimpyStr := rest[len(setTarget)+1:]
+		wimipyInt, _ := strconv.Atoi(wimpyStr)
 
-		if promptStr == `default` {
-			user.SetConfigOption(`mprompt`, nil)
-			user.SetConfigOption(`mprompt-compiled`, nil)
-		} else if promptStr == `none` {
-			user.SetConfigOption(`mprompt`, ``)
-			user.SetConfigOption(`mprompt-compiled`, ``)
+		if wimipyInt == 0 {
+			user.SetConfigOption(`wimpy`, nil)
 		} else {
-			user.SetConfigOption(`mprompt`, promptStr)
-			user.SetConfigOption(`mprompt-compiled`, util.ConvertColorShortTags(promptStr))
+			user.SetConfigOption(`wimpy`, wimipyInt)
 		}
 
-		user.SendText("mprompt set.")
+		user.SendText("wimpy set.")
 		return true, nil
 
 	}

@@ -4,5 +4,4 @@ The <ansi fg="command">flee</ansi> command attempts to run away from combat into
 
 If successful, foes will not chase you. You must escape every foe attacking you, however.
 
-The chance of success is <ansi fg="red">fleeSpeed / (fleeSpeed+attackerSpeed) * 40</ansi>
-
+The chance of success is <ansi fg="red">30 + (fleeSpeed / (fleeSpeed+attackerSpeed) * 70)</ansi>

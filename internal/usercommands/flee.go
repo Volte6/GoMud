@@ -8,10 +8,10 @@ import (
 
 func Flee(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
-	if user.Character.Aggro == nil {
-		user.SendText(`You aren't in combat!`)
-	} else {
+	if user.Character.Aggro == nil || user.Character.Aggro.Type != characters.Flee {
 		user.SendText(`You attempt to flee...`)
+
+		user.Character.Aggro = &characters.Aggro{}
 		user.Character.Aggro.Type = characters.Flee
 	}
 

@@ -29,3 +29,5 @@ There are a handful of settings you can adjust with this command, including:
   <ansi fg="command">set tinymap</ansi>
   This toggles the automatic tinymap on or off. It shows when looking at rooms.
 
+  <ansi fg="command">set wimpy</ansi>
+  Set your wimpy percentage (See <ansi fg="command">help wimpy</ansi>)

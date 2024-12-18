@@ -625,3 +625,12 @@ func (u *UserRecord) GetOnlineInfo() OnlineInfo {
 		u.Permission,
 	}
 }
+
+func (u *UserRecord) WimpyCheck() {
+	if currentWimpy := u.GetConfigOption(`wimpy`); currentWimpy != nil {
+		healthPct := int(math.Floor(float64(u.Character.Health) / float64(u.Character.HealthMax.Value) * 100))
+		if healthPct < currentWimpy.(int) {
+			u.Command(`flee`, -1)
+		}
+	}
+}
