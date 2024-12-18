@@ -59,7 +59,7 @@ type Mob struct {
 	MobId           MobId
 	Zone            string   `yaml:"zone,omitempty"`
 	ItemDropChance  int      // chance in 100
-	ActivityLevel   int      `yaml:"activitylevel,omitempty"` // 1 - 10%, 10 = 100%
+	ActivityLevel   int      `yaml:"activitylevel,omitempty"` // 1-100%
 	InstanceId      int      `yaml:"-"`
 	HomeRoomId      int      `yaml:"-"`
 	Hostile         bool     // whether they attack on sight
@@ -564,11 +564,11 @@ func (r *Mob) Id() int {
 }
 
 func (r *Mob) Validate() error {
+
 	if r.ActivityLevel < 1 {
-		r.ActivityLevel = 1
-	}
-	if r.ActivityLevel > 10 {
 		r.ActivityLevel = 10
+	} else if r.ActivityLevel > 100 {
+		r.ActivityLevel = 100
 	}
 
 	r.hasConverseFile = conversations.HasConverseFile(int(r.MobId), r.Zone)

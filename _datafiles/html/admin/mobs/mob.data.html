@@ -22,7 +22,7 @@
             <select class="form-control form-control-sm" name="activitylevel" id="activitylevel" aria-describedby="activitylevel-help"  rows="10">
             {{$mobActivityLevel := .mobInfo.ActivityLevel}}
             {{range $index, $level := .activityLevels}}
-                <option value="{{ $level }}" {{if eq $level $mobActivityLevel}}SELECTED{{end}}>{{ mul $level 10 }}%</option>
+                <option value="{{ $level }}" {{if eq $level $mobActivityLevel}}SELECTED{{end}}>{{ mul $level }}%</option>
             {{end}}
             </select>
             <small id="activitylevel-help" class="form-text text-muted">How active this mob is.</small>

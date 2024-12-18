@@ -1,7 +1,7 @@
 mobid: 27
 zone: Whispering Wastes
 itemdropchance: 2
-activitylevel: 3
+activitylevel: 30
 maxwander: 0
 character:
   name: hermit

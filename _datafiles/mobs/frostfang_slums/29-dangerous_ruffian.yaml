@@ -5,7 +5,7 @@ hostile: true
 maxwander: 3
 idlecommands:
   - 'wander'
-activitylevel: 1
+activitylevel: 10
 groups: 
   - slum-ruffians
 character:

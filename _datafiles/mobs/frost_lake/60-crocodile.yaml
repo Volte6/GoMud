@@ -3,7 +3,7 @@ zone: Frost Lake
 itemdropchance: 2
 hostile: true
 maxwander: 1
-activitylevel: 1
+activitylevel: 10
 idlecommands:
   - 'wander'
 character:

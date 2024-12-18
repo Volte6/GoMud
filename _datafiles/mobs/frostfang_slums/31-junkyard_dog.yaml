@@ -3,7 +3,7 @@ zone: Frostfang Slums
 itemdropchance: 5
 hostile: false
 maxwander: 0
-activitylevel: 1
+activitylevel: 10
 groups: 
   - slum-ruffians
 character:

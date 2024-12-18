@@ -5,7 +5,7 @@ hostile: false
 maxwander: 20
 groups: 
   - mystarion-npc
-activitylevel: 4
+activitylevel: 40
 idlecommands:
   - say type `list` to see my wares
   - say If you're looking to sell something, I may be interested... as long as it's

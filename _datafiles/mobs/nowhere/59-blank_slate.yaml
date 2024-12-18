@@ -3,7 +3,7 @@ zone: Nowhere
 itemdropchance: 0
 hostile: false
 maxwander: 0
-activitylevel: 1
+activitylevel: 10
 character:
   name: blank slate
   description: 'A blank slate.'

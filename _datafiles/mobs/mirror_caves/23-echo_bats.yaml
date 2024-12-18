@@ -8,7 +8,7 @@ groups:
 idlecommands:
   - 'emote hangs from the ceiling.'
   - 'wander'
-activitylevel: 1
+activitylevel: 10
 character:
   name: echo bats
   description: 'Navigating through echolocation, these oversized bats swarm in the darker recesses of the caves.'

@@ -16,7 +16,7 @@ combatcommands:
   - 'sneak'
   - 'sneak;;;backstab'
   - 'sneak;;;backstab'
-activitylevel: 8
+activitylevel: 80
 character:
   name: cave stalker
   description: 'Stealthy and agile, these lizard-like predators blend seamlessly into the rocky environment.'

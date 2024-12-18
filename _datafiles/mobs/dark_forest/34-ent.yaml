@@ -9,7 +9,7 @@ idlecommands:
   - 'emote creeks and sways'
 combatcommands:
   - 'callforhelp calls upon the forest denizens for help!'
-activitylevel: 1
+activitylevel: 10
 character:
   name: ent
   description: 'Thick, mossy growths cling to its rough surface, and lush vines and ivy drape from its branches, creating an awe-inspiring spectacle. The Ent''s eyes, deep and wise, are set within the rough texture of its bark, shining with a profound intelligence that spans centuries.'
