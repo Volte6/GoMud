@@ -13,13 +13,17 @@ exits:
     roomid: 36
   south:
     roomid: 5
+gold: 124
 spawninfo:
 - mobid: 2
   message: A town guard emerges from a nearby building.
+  levelmod: 11
   respawnrate: 5 real minutes
 - mobid: 3
   message: The captain of the guard arrives.
+  levelmod: 20
   respawnrate: 5 real minutes
 - mobid: 2
   message: A guard has returned from his break.
+  levelmod: 10
   respawnrate: 5 real minutes

@@ -32,7 +32,11 @@ func AttackPlayerVsMob(user *users.UserRecord, mob *mobs.Mob) AttackResult {
 
 	attackResult := calculateCombat(*user.Character, mob.Character, User, Mob)
 
-	user.Character.ApplyHealthChange(attackResult.DamageToSource * -1)
+	if attackResult.DamageToSource != 0 {
+		user.Character.ApplyHealthChange(attackResult.DamageToSource * -1)
+		user.WimpyCheck()
+	}
+
 	mob.Character.ApplyHealthChange(attackResult.DamageToTarget * -1)
 
 	// Remember who has hit him
@@ -46,8 +50,15 @@ func AttackPlayerVsPlayer(userAtk *users.UserRecord, userDef *users.UserRecord) 
 
 	attackResult := calculateCombat(*userAtk.Character, *userDef.Character, User, User)
 
-	userAtk.Character.ApplyHealthChange(attackResult.DamageToSource * -1)
-	userDef.Character.ApplyHealthChange(attackResult.DamageToTarget * -1)
+	if attackResult.DamageToSource != 0 {
+		userAtk.Character.ApplyHealthChange(attackResult.DamageToSource * -1)
+		userAtk.WimpyCheck()
+	}
+
+	if attackResult.DamageToTarget != 0 {
+		userDef.Character.ApplyHealthChange(attackResult.DamageToTarget * -1)
+		userDef.WimpyCheck()
+	}
 
 	return attackResult
 }
@@ -58,7 +69,11 @@ func AttackMobVsPlayer(mob *mobs.Mob, user *users.UserRecord) AttackResult {
 	attackResult := calculateCombat(mob.Character, *user.Character, Mob, User)
 
 	mob.Character.ApplyHealthChange(attackResult.DamageToSource * -1)
-	user.Character.ApplyHealthChange(attackResult.DamageToTarget * -1)
+
+	if attackResult.DamageToTarget != 0 {
+		user.Character.ApplyHealthChange(attackResult.DamageToTarget * -1)
+		user.WimpyCheck()
+	}
 
 	return attackResult
 }

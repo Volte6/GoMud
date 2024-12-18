@@ -788,7 +788,7 @@ func (r *Room) GetRandomExit() (exitName string, roomId int) {
 			continue
 		}
 
-		allExits[exitName] = roomId
+		allExits[exitName] = exit.RoomId
 	}
 
 	for mut := range r.ActiveMutators {
@@ -800,7 +800,7 @@ func (r *Room) GetRandomExit() (exitName string, roomId int) {
 			if exit.Lock.IsLocked() {
 				continue
 			}
-			allExits[exitName] = roomId
+			allExits[exitName] = exit.RoomId
 		}
 	}
 

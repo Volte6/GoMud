@@ -170,6 +170,7 @@ help-aliases:
   equip:            [wear, wield, hold]
   status:           [score, info]
   set-prompt:       [prompt]
+  set-wimpy:        [wimpy]
   colors:           [color, ansi]
   auction:          [bid]
   killstats:        [kills, kd]

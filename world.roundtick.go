@@ -23,6 +23,7 @@ import (
 	"github.com/volte6/gomud/internal/spells"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
+	"github.com/volte6/gomud/internal/usercommands"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 )
@@ -465,8 +466,10 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 						continue
 					}
 
-					// if equal, 20% chance of fleeing... at best, 40% chance
-					chanceIn100 := int(float64(user.Character.Stats.Speed.ValueAdj) / (float64(user.Character.Stats.Speed.ValueAdj) + float64(mob.Character.Stats.Speed.ValueAdj)) * 40)
+					// Stat comparison accounts for up to 70% of chance to flee.
+					chanceIn100 := int(float64(user.Character.Stats.Speed.ValueAdj) / (float64(user.Character.Stats.Speed.ValueAdj) + float64(mob.Character.Stats.Speed.ValueAdj)) * 70)
+					chanceIn100 += 30
+
 					roll := util.Rand(100)
 
 					util.LogRoll(`Flee`, roll, chanceIn100)
@@ -486,13 +489,15 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 						continue
 					}
 
-					// if equal, 20% chance of fleeing... at best, 40% chance
-					chanceIn100 := int(float64(user.Character.Stats.Speed.ValueAdj) / (float64(user.Character.Stats.Speed.ValueAdj) + float64(u.Character.Stats.Speed.ValueAdj)) * 40)
+					// if equal, 25% chance of fleeing... at best, 50% chance. Then add 50% on top.
+					chanceIn100 := int(float64(user.Character.Stats.Speed.ValueAdj) / (float64(user.Character.Stats.Speed.ValueAdj) + float64(u.Character.Stats.Speed.ValueAdj)) * 70)
+					chanceIn100 += 30
+
 					roll := util.Rand(100)
 
 					util.LogRoll(`Flee`, roll, chanceIn100)
 
-					if roll >= chanceIn100 {
+					if roll < chanceIn100 {
 						blockedByPlayer = u.Character.Name
 						blockedByPlayerId = u.UserId
 						break
@@ -508,7 +513,7 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 
 			if blockedByPlayer != `` {
 				user.SendText(fmt.Sprintf(`<ansi fg="red-bold"><ansi fg="username">%s</ansi> blocks you from fleeing!</ansi>`, blockedByPlayer))
-				uRoom.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is blocked from fleeing by <ansi fg="username">%s</ansi>!`, user.Character.Name, blockedByPlayer), userId, blockedByPlayerId)
+				uRoom.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is blocked from fleeing by <ansi fg="username">%s</ansi>!`, user.Character.Name, blockedByPlayer), user.UserId, blockedByPlayerId)
 				continue
 			}
 
@@ -521,17 +526,30 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 			}
 
 			user.SendText(fmt.Sprintf(`You flee to the <ansi fg="exit">%s</ansi> exit!`, exitName))
-			uRoom.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> flees to the <ansi fg="exit">%s</ansi> exit!`, user.Character.Name, exitName), userId)
+			uRoom.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> flees to the <ansi fg="exit">%s</ansi> exit!`, user.Character.Name, exitName), user.UserId)
 
-			rooms.MoveToRoom(userId, exitRoomId)
+			user.Character.Aggro = nil
 
-			for _, instId := range uRoom.GetMobs(rooms.FindCharmed) {
-				if mob := mobs.GetInstance(instId); mob != nil {
-					// Charmed mobs assist
-					if mob.Character.IsCharmed(userId) {
-						mob.Command(exitName)
+			originRoomId := user.Character.RoomId
+			if err := rooms.MoveToRoom(user.UserId, exitRoomId); err == nil {
+
+				scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId)
+
+				for _, instId := range uRoom.GetMobs(rooms.FindCharmed) {
+					if mob := mobs.GetInstance(instId); mob != nil {
+						// Charmed mobs assist
+						if mob.Character.IsCharmed(userId) {
+							mob.Command(exitName)
+						}
 					}
 				}
+
+				newRoom := rooms.LoadRoom(exitRoomId)
+
+				usercommands.Look(`secretly`, user, newRoom)
+
+				scripting.TryRoomScriptEvent(`onEnter`, user.UserId, exitRoomId)
+
 			}
 
 			continue
@@ -728,9 +746,7 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 
 			affectedPlayerIds = append(affectedPlayerIds, user.Character.Aggro.UserId)
 
-			var roundResult combat.AttackResult
-
-			roundResult = combat.AttackPlayerVsPlayer(user, defUser)
+			roundResult := combat.AttackPlayerVsPlayer(user, defUser)
 
 			// If a mob attacks a player, check whether player has a charmed mob helping them, and if so, they will move to attack back
 			room := rooms.LoadRoom(roomId)
@@ -1630,7 +1646,7 @@ func (w *World) handleAutoHealing(roundNumber uint64) {
 					user.Character.Health--
 					user.SendText(`<ansi fg="red">you are bleeding out!</ansi>`)
 					if room := rooms.LoadRoom(user.Character.RoomId); room != nil {
-						room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is <ansi fg="red">bleeding out</ansi>! Somebody needs to provide aid!`, user.Character.Name), userId)
+						room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is <ansi fg="red">bleeding out</ansi>! Somebody needs to provide aid!`, user.Character.Name), user.UserId)
 					}
 				}
 
