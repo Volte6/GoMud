@@ -87,7 +87,8 @@ func AttemptConversation(initiatorMobId int, initatorInstanceId int, initiatorNa
 		}
 	}
 
-	conversationCounter[fmt.Sprintf(`%s:%d`, fileName, chosenIndex)] = conversationCounter[fmt.Sprintf(`%s:%d`, fileName, chosenIndex)] + 1
+	trackingTag := fmt.Sprintf(`%s:%d`, fileName, chosenIndex)
+	conversationCounter[trackingTag] = conversationCounter[trackingTag] + 1
 
 	conversationUniqueId++
 

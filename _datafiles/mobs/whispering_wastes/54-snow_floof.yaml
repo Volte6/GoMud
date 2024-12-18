@@ -1,7 +1,7 @@
 mobid: 54
 zone: Whispering Wastes
 itemdropchance: 2
-activitylevel: 8
+activitylevel: 80
 maxwander: 4
 idlecommands:
   - 'emote stares up with its large, shiny eyes.'

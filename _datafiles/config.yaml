@@ -261,6 +261,9 @@ MaxMobBoredom: 250
 # - MobUnloadThreshold -
 #   Do not unload any bots if the in-memory count is under this threshold.
 MobUnloadThreshold: 100
+# - MobConverseChance -
+#   Chance in 100 that the mob will attempt to converse when idle.
+MobConverseChance: 3
 # - ScriptLoadTimeoutMs -
 #   When a script is first loaded, compiled, and run, it is given this long to
 #   complete. If it takes longer, it is killed. This includes the onLoad() function

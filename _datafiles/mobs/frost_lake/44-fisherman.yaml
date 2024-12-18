@@ -5,7 +5,7 @@ hostile: false
 maxwander: 20
 groups: 
   - frostfang-npc
-activitylevel: 2
+activitylevel: 20
 idlecommands:
   - 'say I really just want to focus on fishing these days, but I''ll let you train here if you want.'
   - 'emote examines his tacklebox.'

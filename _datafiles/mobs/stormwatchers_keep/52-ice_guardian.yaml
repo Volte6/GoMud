@@ -1,7 +1,7 @@
 mobid: 52
 zone: Stormwatchers Keep
 itemdropchance: 4
-activitylevel: 3
+activitylevel: 30
 maxwander: 0
 character:
   name: ice guardian

@@ -4,7 +4,7 @@ itemdropchance: 2
 hostile: false
 groups: 
   - frostfang-npc
-activitylevel: 3
+activitylevel: 30
 maxwander: 5
 idlecommands:
   - 'wander'

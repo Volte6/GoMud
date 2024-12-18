@@ -25,32 +25,34 @@ const (
 )
 
 type Config struct {
-	Version                      ConfigString      `yaml:"Version"` // Cuurrent version of all datafiles
-	MaxCPUCores                  ConfigInt         `yaml:"MaxCPUCores"`
-	FolderItemData               ConfigString      `yaml:"FolderItemData"`
-	FolderAttackMessageData      ConfigString      `yaml:"FolderAttackMessageData"`
-	FolderUserData               ConfigString      `yaml:"FolderUserData"`
-	FolderSpellData              ConfigString      `yaml:"FolderSpellData"`
-	FolderTemplates              ConfigString      `yaml:"FolderTemplates"`
-	FolderConversations          ConfigString      `yaml:"FolderConversations"`
-	FileAnsiAliases              ConfigString      `yaml:"FileAnsiAliases"`
-	FileColorPatterns            ConfigString      `yaml:"FileColorPatterns"`
-	FileKeywords                 ConfigString      `yaml:"FileKeywords"`
-	AllowItemBuffRemoval         ConfigBool        `yaml:"AllowItemBuffRemoval"`
-	CarefulSaveFiles             ConfigBool        `yaml:"CarefulSaveFiles"`
-	AuctionsEnabled              ConfigBool        `yaml:"AuctionsEnabled"`
-	AuctionsAnonymous            ConfigBool        `yaml:"AuctionsAnonymous"`
-	AuctionSeconds               ConfigInt         `yaml:"AuctionSeconds"`
-	AuctionUpdateSeconds         ConfigInt         `yaml:"AuctionUpdateSeconds"`
-	PVP                          ConfigString      `yaml:"PVP"`
-	PVPMinimumLevel              ConfigInt         `yaml:"PVPMinimumLevel"`
-	XPScale                      ConfigFloat       `yaml:"XPScale"`
-	TurnMs                       ConfigInt         `yaml:"TurnMs"`
-	RoundSeconds                 ConfigInt         `yaml:"RoundSeconds"`
-	RoundsPerAutoSave            ConfigInt         `yaml:"RoundsPerAutoSave"`
-	RoundsPerDay                 ConfigInt         `yaml:"RoundsPerDay"` // How many rounds are in a day
-	NightHours                   ConfigInt         `yaml:"NightHours"`   // How many hours of night
-	MaxMobBoredom                ConfigInt         `yaml:"MaxMobBoredom"`
+	Version                 ConfigString `yaml:"Version"` // Cuurrent version of all datafiles
+	MaxCPUCores             ConfigInt    `yaml:"MaxCPUCores"`
+	FolderItemData          ConfigString `yaml:"FolderItemData"`
+	FolderAttackMessageData ConfigString `yaml:"FolderAttackMessageData"`
+	FolderUserData          ConfigString `yaml:"FolderUserData"`
+	FolderSpellData         ConfigString `yaml:"FolderSpellData"`
+	FolderTemplates         ConfigString `yaml:"FolderTemplates"`
+	FolderConversations     ConfigString `yaml:"FolderConversations"`
+	FileAnsiAliases         ConfigString `yaml:"FileAnsiAliases"`
+	FileColorPatterns       ConfigString `yaml:"FileColorPatterns"`
+	FileKeywords            ConfigString `yaml:"FileKeywords"`
+	AllowItemBuffRemoval    ConfigBool   `yaml:"AllowItemBuffRemoval"`
+	CarefulSaveFiles        ConfigBool   `yaml:"CarefulSaveFiles"`
+	AuctionsEnabled         ConfigBool   `yaml:"AuctionsEnabled"`
+	AuctionsAnonymous       ConfigBool   `yaml:"AuctionsAnonymous"`
+	AuctionSeconds          ConfigInt    `yaml:"AuctionSeconds"`
+	AuctionUpdateSeconds    ConfigInt    `yaml:"AuctionUpdateSeconds"`
+	PVP                     ConfigString `yaml:"PVP"`
+	PVPMinimumLevel         ConfigInt    `yaml:"PVPMinimumLevel"`
+	XPScale                 ConfigFloat  `yaml:"XPScale"`
+	TurnMs                  ConfigInt    `yaml:"TurnMs"`
+	RoundSeconds            ConfigInt    `yaml:"RoundSeconds"`
+	RoundsPerAutoSave       ConfigInt    `yaml:"RoundsPerAutoSave"`
+	RoundsPerDay            ConfigInt    `yaml:"RoundsPerDay"` // How many rounds are in a day
+	NightHours              ConfigInt    `yaml:"NightHours"`   // How many hours of night
+	MaxMobBoredom           ConfigInt    `yaml:"MaxMobBoredom"`
+	MobConverseChance       ConfigInt    `yaml:"MobConverseChance"` // Chance 1-100 of attempting to converse when idle
+
 	MobUnloadThreshold           ConfigInt         `yaml:"MobUnloadThreshold"`
 	RoomUnloadRounds             ConfigInt         `yaml:"RoomUnloadRounds"`
 	RoomUnloadThreshold          ConfigInt         `yaml:"RoomUnloadThreshold"`
@@ -499,6 +501,12 @@ func (c *Config) Validate() {
 
 	if c.MaxMobBoredom < 1 {
 		c.MaxMobBoredom = 150 // default
+	}
+
+	if c.MobConverseChance < 0 {
+		c.MobConverseChance = 0
+	} else if c.MobConverseChance > 100 {
+		c.MobConverseChance = 100
 	}
 
 	if c.MobUnloadThreshold < 0 {

@@ -78,7 +78,7 @@ func mobData(w http.ResponseWriter, r *http.Request) {
 	})
 
 	activityLevels := []int{}
-	for i := 0; i < 11; i++ {
+	for i := 1; i < 101; i++ {
 		activityLevels = append(activityLevels, i)
 	}
 

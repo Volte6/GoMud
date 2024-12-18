@@ -16,6 +16,7 @@ import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/items"
+	"github.com/volte6/gomud/internal/mobcommands"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
@@ -1114,7 +1115,7 @@ func (w *World) handleMobCombat() (affectedPlayerIds []int, affectedMobInstanceI
 			if cmdCt > 0 {
 
 				// Each mob has a 10% chance of doing an idle action.
-				if util.Rand(10) < mob.ActivityLevel {
+				if util.Rand(100) < mob.ActivityLevel {
 
 					combatAction := mob.CombatCommands[util.Rand(cmdCt)]
 
@@ -1493,6 +1494,7 @@ func (w *World) handleIdleMobs() {
 	c := configs.GetConfig()
 
 	maxBoredom := uint8(c.MaxMobBoredom)
+	globalConverseChance := int(c.MobConverseChance)
 
 	allMobInstances := mobs.GetAllMobInstanceIds()
 
@@ -1546,8 +1548,13 @@ func (w *World) handleIdleMobs() {
 		if mob.InConversation() {
 			mob.Converse()
 			continue
-		} else if mob.CanConverse() && util.Rand(50) == 0 { // 2% chance they will try to converse in a given round
-			mob.Command(`converse`)
+		}
+
+		if mob.CanConverse() && util.Rand(100) < globalConverseChance {
+			if mobRoom := rooms.LoadRoom(mob.Character.RoomId); mobRoom != nil {
+				mobcommands.Converse(``, mob, mobRoom) // Execute this directly so that target mob doesn't leave the room before this command executes
+				//mob.Command(`converse`)
+			}
 			continue
 		}
 
@@ -1579,7 +1586,7 @@ func (w *World) handleIdleMobs() {
 			} else {
 
 				idleCmd := `lookfortrouble`
-				if util.Rand(10) < mob.ActivityLevel {
+				if util.Rand(100) < mob.ActivityLevel {
 					idleCmd = mob.GetIdleCommand()
 					if idleCmd == `` {
 						idleCmd = `lookfortrouble`
