@@ -15,6 +15,7 @@
 - 
   Supported: # A map of lowercase names of "Initiator" (#1) to array of "Participant" (#2) names allowed to use this conversation. 
     "frostfang citizen": ["frostfang citizen"]
+  Conversation:
     - ["#1 say Frost Lake shore seems more dirty and dangerous all the time. Even the boats at the dock are broken!"]
     - ["#2 I've heard they clear the shores and sometimes... the water recedes, showing a hidden route."]
     - ["#1 say That's a tall tale. Next you'll say we can tame wild beasts with fairy magic."]

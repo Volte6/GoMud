@@ -140,10 +140,10 @@ OnDeathXPPenalty: none
 OnDeathProtectionLevels: 5
 # - EnterRoomMessageWrapper -
 #   Decorate entrance text with this. Put a %s where the message should be.
-EnterRoomMessageWrapper: "   <ansi fg=\"enters-message\"> >>> </ansi>%s"
+EnterRoomMessageWrapper: "\n   <ansi fg=\"enters-message\"> >>> </ansi>%s\n"
 # - ExitRoomMessageWrapper -
 #   Decorate exit text with this. Put a %s where the message should be.
-ExitRoomMessageWrapper: "   <ansi fg=\"leaves-message\"> >>> </ansi>%s"
+ExitRoomMessageWrapper: "\n   <ansi fg=\"leaves-message\"> >>> </ansi>%s\n"
 # - MaxIdleSeconds -
 #   How long players can go without any input, before being kicked.
 #   A value of 0 (zero) means never kick inactive players.
@@ -257,7 +257,10 @@ RoomUnloadThreshold: 200
 #   This is mainly a resource management feature to keep the game from getting 
 #   bogged down with too many mobs in memory. If you want mobs to stick around 
 #   indefinitely, set this to 0. Certain mobs may never despawn, however.
-MaxMobBoredom: 150
+MaxMobBoredom: 250
+# - MobUnloadThreshold -
+#   Do not unload any bots if the in-memory count is under this threshold.
+MobUnloadThreshold: 100
 # - ScriptLoadTimeoutMs -
 #   When a script is first loaded, compiled, and run, it is given this long to
 #   complete. If it takes longer, it is killed. This includes the onLoad() function

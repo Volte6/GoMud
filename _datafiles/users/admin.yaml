@@ -17,8 +17,8 @@ character:
     to disrupt the balance of the world, swiftly and decisively.
   adjectives:
   - zombie
-  roomid: 300
-  zone: Dark Forest
+  roomid: 1
+  zone: Frostfang
   raceid: 2
   stats:
     strength:
@@ -63,17 +63,17 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 21
+      roundcounter: 26
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 44
+      roundcounter: 34
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
       permabuff: true
-      roundcounter: 3
+      roundcounter: 8
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -93,7 +93,7 @@ character:
     dual-wield: 4
     enchant: 4
     inspect: 4
-    map: 4
+    map: 5
     peep: 4
     portal: 4
     protection: 4
@@ -114,6 +114,10 @@ character:
       18: 1
       58: 8
     totaldeaths: 1
+    totalpvpkills: 0
+    playerkills: {}
+    playerdeaths: {}
+    totalpvpdeaths: 0
   extralives: 3
   mobmastery:
     tame:

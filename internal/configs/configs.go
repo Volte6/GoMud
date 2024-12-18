@@ -51,6 +51,7 @@ type Config struct {
 	RoundsPerDay                 ConfigInt         `yaml:"RoundsPerDay"` // How many rounds are in a day
 	NightHours                   ConfigInt         `yaml:"NightHours"`   // How many hours of night
 	MaxMobBoredom                ConfigInt         `yaml:"MaxMobBoredom"`
+	MobUnloadThreshold           ConfigInt         `yaml:"MobUnloadThreshold"`
 	RoomUnloadRounds             ConfigInt         `yaml:"RoomUnloadRounds"`
 	RoomUnloadThreshold          ConfigInt         `yaml:"RoomUnloadThreshold"`
 	ScriptLoadTimeoutMs          ConfigInt         `yaml:"ScriptLoadTimeoutMs"`          // How long to spend the first time a script is loaded into memory
@@ -498,6 +499,10 @@ func (c *Config) Validate() {
 
 	if c.MaxMobBoredom < 1 {
 		c.MaxMobBoredom = 150 // default
+	}
+
+	if c.MobUnloadThreshold < 0 {
+		c.MobUnloadThreshold = 0
 	}
 
 	if c.RoomUnloadRounds < 5 {

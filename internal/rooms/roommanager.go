@@ -109,7 +109,10 @@ func RoomMaintenance() bool {
 	unloadRoundThreshold := roundCount - uint64(c.RoomUnloadRounds)
 	unloadRooms := make([]*Room, 0)
 
-	allowUnloading := len(roomManager.rooms) > int(c.RoomUnloadThreshold)
+	allowedUnloadCt := len(roomManager.rooms) - int(c.RoomUnloadThreshold)
+	if allowedUnloadCt < 0 {
+		allowedUnloadCt = 0
+	}
 
 	roomsUpdated := false
 	for _, room := range roomManager.rooms {
@@ -222,9 +225,10 @@ func RoomMaintenance() bool {
 		}
 
 		// Consider unloading rooms from memory?
-		if allowUnloading {
+		if allowedUnloadCt > 0 {
 			if room.lastVisited < unloadRoundThreshold {
 				unloadRooms = append(unloadRooms, room)
+				allowedUnloadCt--
 			}
 		}
 

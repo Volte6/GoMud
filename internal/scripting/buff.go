@@ -26,7 +26,6 @@ func PruneBuffVMs(instanceIds ...int) {
 
 func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId int) (bool, error) {
 
-	slog.Info("TryBuffScriptEvent()", "eventName", eventName, "buffId", buffId)
 	vmw, err := getBuffVM(buffId)
 	if err != nil {
 		return false, err

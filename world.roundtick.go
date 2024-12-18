@@ -1490,25 +1490,37 @@ func (w *World) handleAffected(affectedPlayerIds []int, affectedMobInstanceIds [
 // Idle Mobs
 func (w *World) handleIdleMobs() {
 
-	// c := configs.GetConfig()
+	c := configs.GetConfig()
 
-	maxBoredom := uint8(configs.GetConfig().MaxMobBoredom)
+	maxBoredom := uint8(c.MaxMobBoredom)
+
+	allMobInstances := mobs.GetAllMobInstanceIds()
+
+	allowedUnloadCt := len(allMobInstances) - int(c.MobUnloadThreshold)
+	if allowedUnloadCt < 0 {
+		allowedUnloadCt = 0
+	}
 
 	// Handle idle mob behavior
 	tStart := time.Now()
-	for _, mobId := range mobs.GetAllMobInstanceIds() {
+	for _, mobId := range allMobInstances {
 
 		mob := mobs.GetInstance(mobId)
 		if mob == nil {
+			allowedUnloadCt--
 			continue
 		}
 
-		if mob.BoredomCounter >= maxBoredom {
+		if allowedUnloadCt > 0 && mob.BoredomCounter >= maxBoredom {
+
 			if mob.Despawns() {
 				mob.Command(`despawn` + fmt.Sprintf(` depression %d/%d`, mob.BoredomCounter, maxBoredom))
+				allowedUnloadCt--
+
 			} else {
 				mob.BoredomCounter = 0
 			}
+
 			continue
 		}
 
