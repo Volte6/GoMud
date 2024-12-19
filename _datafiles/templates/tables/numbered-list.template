@@ -1,0 +1,4 @@
+
+{{ range $idx, $description := . }}  <ansi fg="red-bold">{{ printf "%2d." (add $idx 1) }}</ansi> <ansi fg="yellow-bold">{{ printf "%-17s" $description }}</ansi>
+{{ end }}
+ 

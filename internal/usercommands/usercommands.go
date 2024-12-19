@@ -84,10 +84,11 @@ var (
 		`lock`:        {Lock, false, false},
 		`look`:        {Look, true, false},
 		`map`:         {Map, false, false},
-		`mudmail`:     {Mudmail, true, true}, // Admin only
 		`macros`:      {Macros, true, false},
+		`mob`:         {Mob, true, true},    // Admin only
 		`modify`:      {Modify, true, true}, // Admin only
 		`motd`:        {Motd, true, false},
+		`mudmail`:     {Mudmail, true, true}, // Admin only
 		`mute`:        {Mute, true, true},
 		`noop`:        {Noop, true, false},
 		`offer`:       {Offer, false, false},
