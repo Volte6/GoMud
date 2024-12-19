@@ -190,16 +190,23 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 
 	user.ClearPrompt()
 
-	if _, err := mobs.CreateNewMobFile(mobCreateAnswerName, mobCreateAnswerRace, mobCreateAnswerZone, mobCreateAnswerDescription); err != nil {
+	mobId, err := mobs.CreateNewMobFile(mobCreateAnswerName, mobCreateAnswerRace, mobCreateAnswerZone, mobCreateAnswerDescription)
+
+	if err != nil {
 		user.SendText("Error: " + err.Error())
 		return true, nil
 	}
 
+	mobInst := mobs.GetMobSpec(mobId)
+
+	user.SendText(``)
 	user.SendText(`<ansi bg="red" fg="white-bold">MOB CREATED</ansi>`)
-	user.SendText(`<ansi fg="yellow-bold">Mob Name:</ansi> <ansi fg="white-bold">` + mobCreateAnswerName + `</ansi>`)
-	user.SendText(`<ansi fg="yellow-bold">Mob Race:</ansi> <ansi fg="white-bold">` + strconv.Itoa(mobCreateAnswerRace) + ` (` + raceNameSelection + `)</ansi>`)
-	user.SendText(`<ansi fg="yellow-bold">Mob Zone:</ansi> <ansi fg="white-bold">` + mobCreateAnswerZone + `</ansi>`)
-	user.SendText(`<ansi fg="yellow-bold">Mob Desc:</ansi> <ansi fg="white-bold">` + mobCreateAnswerDescription + `</ansi>`)
+	user.SendText(``)
+	user.SendText(`<ansi fg="yellow-bold">Mob Name:</ansi>  <ansi fg="white-bold">` + mobCreateAnswerName + `</ansi>`)
+	user.SendText(`<ansi fg="yellow-bold">Mob Race:</ansi>  <ansi fg="white-bold">` + strconv.Itoa(mobCreateAnswerRace) + ` (` + raceNameSelection + `)</ansi>`)
+	user.SendText(`<ansi fg="yellow-bold">Mob Zone:</ansi>  <ansi fg="white-bold">` + mobCreateAnswerZone + `</ansi>`)
+	user.SendText(`<ansi fg="yellow-bold">Mob Desc:</ansi>  <ansi fg="white-bold">` + mobCreateAnswerDescription + `</ansi>`)
+	user.SendText(`<ansi fg="yellow-bold">File Path:</ansi> <ansi fg="white-bold">` + mobInst.Filepath() + `</ansi>`)
 	user.SendText(``)
 	user.SendText(`<ansi fg="black-bold">note: Try <ansi fg="command">spawn mob ` + mobCreateAnswerName + `</ansi> to test it.`)
 
