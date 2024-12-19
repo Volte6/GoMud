@@ -1321,13 +1321,20 @@ func (w *World) TurnTick() {
 			continue
 		}
 
-		if rooms.EffectType(action.Action) == rooms.Wildfire && room.GetBiome().Burns() {
+		if action.Action == `mutator` {
 
-			if room.AddEffect(rooms.Wildfire) {
-				room.SendText(colorpatterns.ApplyColorPattern(`A wildfire burns through the area!`, `flame`, colorpatterns.Stretch))
-				room.SendTextToExits(`You notice a `+colorpatterns.ApplyColorPattern(`wildfire`, `flame`, colorpatterns.Stretch)+` start!`, false)
+			mutName := action.Details.(string)
+
+			if mutName == `wildfire` {
+				if room.GetBiome().Burns() && room.Mutators.Add(mutName) {
+					room.SendText(colorpatterns.ApplyColorPattern(`A wildfire burns through the area!`, `flame`, colorpatterns.Stretch))
+				}
+				continue
 			}
 
+			room.Mutators.Add(mutName)
+
+			continue
 		}
 
 		// Get the parts of the command
@@ -1390,8 +1397,9 @@ func (w *World) TurnTick() {
 			}
 
 			events.Requeue(events.RoomAction{
-				RoomId: room.RoomId,
-				Action: string(rooms.Wildfire),
+				RoomId:  room.RoomId,
+				Action:  `mutator`,
+				Details: `Details`,
 			})
 
 			if hitPlayers {

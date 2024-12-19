@@ -23,6 +23,7 @@ type RoomAction struct {
 	SourceUserId int
 	SourceMobId  int
 	Action       string
+	Details      any
 	WaitTurns    int
 }
 

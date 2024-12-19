@@ -34,7 +34,6 @@ type RoomTemplateDetails struct {
 	Description    string
 	IsDark         bool
 	IsNight        bool
-	IsBurning      bool
 	TrackingString string
 	RoomAlerts     []string // Messages to show below room description as a special alert
 	ShowPvp        bool     // Whether to display that the room is PVP
@@ -77,7 +76,6 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 		RoomLegend:     roomLegend,
 		IsDark:         b.IsDark(),
 		IsNight:        gametime.IsNight(),
-		IsBurning:      r.IsBurning(),
 		TrackingString: ``,
 		ShowPvp:        showPvp,
 	}
@@ -104,10 +102,6 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 
 	if r.RoomId == -1 {
 		details.RoomAlerts = append(details.RoomAlerts, `      <ansi fg="yellow-bold">Type <ansi fg="command">start</ansi> to begin playing.</ansi>`)
-	}
-
-	if r.IsBurning() {
-		details.RoomAlerts = append(details.RoomAlerts, colorpatterns.ApplyColorPattern(`!!!                A wildfire is burning here!                !!!`, `flame`))
 	}
 
 	//
@@ -156,11 +150,6 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 		}
 
 		details.Description = strings.Join(roomDesc, "\n")
-	}
-
-	// If burning, apply burning text effect?
-	if details.IsBurning {
-		details.Description = colorpatterns.ApplyColorPattern(details.Description, `flame`, colorpatterns.Words)
 	}
 
 	for mut := range r.ActiveMutators {
@@ -230,7 +219,15 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 		// No current plans to allow them to overwrite existing alerts.
 		if mutSpec.AlertModifier != nil {
 
-			details.RoomAlerts = append(details.RoomAlerts, colorpatterns.ApplyColorPattern(mutSpec.AlertModifier.Text, mutSpec.AlertModifier.ColorPattern))
+			alertText := mutSpec.AlertModifier.Text
+
+			// center the text
+			if len(mutSpec.AlertModifier.Text) < 65 {
+				padding := (65 - len(mutSpec.AlertModifier.Text)) >> 1
+				alertText = strings.Repeat(` `, padding) + alertText
+			}
+
+			details.RoomAlerts = append(details.RoomAlerts, colorpatterns.ApplyColorPattern(alertText, mutSpec.AlertModifier.ColorPattern))
 
 		}
 	}

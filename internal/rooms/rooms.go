@@ -88,13 +88,12 @@ type Room struct {
 	LastIdleMessage   uint8                             `yaml:"-"`                           // index of the last idle message displayed
 	LongTermDataStore map[string]any                    `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
 	Mutators          mutators.MutatorList              `yaml:"mutators,omitempty"`          // mutators this room spawns with.
-	Effects           map[EffectType]AreaEffect         `yaml:"-"`
-	Pvp               bool                              `yaml:"pvp,omitempty"` // config pvp is set to `limited`, uses this value
-	players           []int                             `yaml:"-"`             // list of user IDs currently in the room
-	mobs              []int                             `yaml:"-"`             // list of mob instance IDs currently in the room. Does not get saved.
-	visitors          map[VisitorType]map[int]uint64    `yaml:"-"`             // list of user IDs that have visited this room, and the last round they did
-	lastVisited       uint64                            `yaml:"-"`             // last round a visitor was in the room
-	tempDataStore     map[string]any                    `yaml:"-"`             // Temporary data store for the room
+	Pvp               bool                              `yaml:"pvp,omitempty"`               // config pvp is set to `limited`, uses this value
+	players           []int                             `yaml:"-"`                           // list of user IDs currently in the room
+	mobs              []int                             `yaml:"-"`                           // list of mob instance IDs currently in the room. Does not get saved.
+	visitors          map[VisitorType]map[int]uint64    `yaml:"-"`                           // list of user IDs that have visited this room, and the last round they did
+	lastVisited       uint64                            `yaml:"-"`                           // last round a visitor was in the room
+	tempDataStore     map[string]any                    `yaml:"-"`                           // Temporary data store for the room
 }
 
 type TrainingRange struct {
@@ -110,7 +109,6 @@ func NewRoom(zone string) *Room {
 		Description:   "This is an empty room that was never given a description.",
 		MapSymbol:     ``,
 		Exits:         make(map[string]exit.RoomExit),
-		Effects:       map[EffectType]AreaEffect{},
 		players:       []int{},
 		visitors:      make(map[VisitorType]map[int]uint64),
 		tempDataStore: make(map[string]any),
@@ -227,10 +225,6 @@ func (r *Room) SendTextToExits(txt string, isQuiet bool, excludeUserIds ...int) 
 
 	}
 
-}
-
-func (r *Room) IsBurning() bool {
-	return r.HasEffect(Wildfire)
 }
 
 func (r *Room) SetLongTermData(key string, value any) {
@@ -1320,55 +1314,6 @@ func (r *Room) findPlayerByName(searchName string, findTypes ...FindFlag) (int, 
 	}
 
 	return playerLookup[fullMatch], nil
-}
-
-func (r *Room) AddEffect(eType EffectType) bool {
-
-	if r.Effects == nil {
-		r.Effects = map[EffectType]AreaEffect{}
-	}
-
-	if _, ok := r.Effects[eType]; ok {
-		return false
-	}
-
-	r.Effects[eType] = NewEffect(eType)
-	return true
-}
-
-func (r *Room) HasEffect(eType EffectType) bool {
-
-	if r.Effects == nil {
-		return false
-	}
-
-	if effect, ok := r.Effects[eType]; ok {
-		return !effect.Expired()
-	}
-
-	return false
-}
-
-func (r *Room) GetEffects() []AreaEffect {
-
-	retFx := []AreaEffect{}
-
-	if r.Effects == nil {
-		return retFx
-	}
-
-	for _, details := range r.Effects {
-		if details.Cooling() {
-			continue
-		}
-		retFx = append(retFx, details)
-	}
-
-	return retFx
-}
-
-func (r *Room) RemoveEffect(eType EffectType) {
-	delete(r.Effects, eType)
 }
 
 func (r *Room) findMobByName(searchName string, findTypes ...FindFlag) (int, error) {

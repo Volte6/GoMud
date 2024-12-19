@@ -12,10 +12,8 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/mobs"
@@ -117,68 +115,6 @@ func RoomMaintenance() bool {
 	roomsUpdated := false
 	for _, room := range roomManager.rooms {
 
-		for _, fx := range room.GetEffects() {
-
-			if fx.Type == Wildfire {
-
-				if fx.Expired() { // Wildfire spreads on expiration
-
-					room.SendText(`The ` + colorpatterns.ApplyColorPattern(`burning`, `flame`) + ` finally subsides.`)
-
-					for _, exitInfo := range room.Exits {
-
-						if util.RollDice(1, 3) == 1 { // 33% chance of not spreading to this exit
-							continue
-						}
-
-						events.Requeue(events.RoomAction{
-							RoomId: exitInfo.RoomId,
-							Action: string(Wildfire),
-						})
-					}
-
-					for _, exitInfo := range room.ExitsTemp {
-
-						if util.RollDice(1, 3) == 1 { // 33% chance of not spreading to this exit
-							continue
-						}
-
-						events.Requeue(events.RoomAction{
-							RoomId: exitInfo.RoomId,
-							Action: string(Wildfire),
-						})
-					}
-
-				} else {
-
-					for _, uid := range room.GetPlayers() {
-						if user := users.GetByUserId(uid); user != nil {
-							if user.Character.HasBuff(22) { // burning
-								continue
-							}
-							user.AddBuff(22)
-						}
-					}
-
-					for _, miid := range room.GetMobs() {
-						if mob := mobs.GetInstance(miid); mob != nil {
-							if mob.Character.HasBuff(22) { // burning
-								continue
-							}
-							mob.AddBuff(22)
-						}
-					}
-
-					for _, itm := range room.GetAllFloorItems(false) {
-						room.SendText(`The ` + itm.DisplayName() + ` that was laying on the ground is destroyed by ` + colorpatterns.ApplyColorPattern(`flames`, `flame`) + `.`)
-						room.RemoveItem(itm, false)
-					}
-
-				}
-			}
-
-		}
-
 		if visitorCt := room.PruneVisitors(); visitorCt > 0 {
 			roomsUpdated = true
 		}
@@ -217,11 +153,6 @@ func RoomMaintenance() bool {
 					}
 				}
 			}
-		}
-
-		// If a room is burning, don't clean it up
-		if room.IsBurning() {
-			continue
 		}
 
 		// Consider unloading rooms from memory?
