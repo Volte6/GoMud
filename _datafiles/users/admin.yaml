@@ -7,16 +7,9 @@ macros:
   =1: e;e;e;e;e;e;e;e
 character:
   name: Adamantadmin
-  description: Adamantadmin possesses the ability to manipulate the very fabric of
-    the universe, bending it to his will with a mere thought. He can create and destroy,
-    alter reality, and shape the world around him as he sees fit. His knowledge of
-    the world is unparalleled, as he has access to its innermost workings and understands
-    its deepest secrets. With a wave of his hand, Adamantadmin can bestow blessings
-    upon other adventurers, granting them strength, wisdom, or fortune beyond their
-    wildest dreams. Conversely, he can also mete out justice to those who would seek
-    to disrupt the balance of the world, swiftly and decisively.
-  roomid: 467
-  zone: Frostfang Slums
+  description: '"The Caretaker"'
+  roomid: 1003
+  zone: The Overlook
   raceid: 2
   stats:
     strength:
@@ -35,14 +28,14 @@ character:
     perception:
       training: 2
   level: 5
-  experience: 17470
+  experience: 18156
   trainingpoints: 44
   statpoints: 6
-  health: 58
+  health: 60
   mana: 32
   actionpoints: 202
-  alignment: -1
-  gold: 9950
+  alignment: -2
+  gold: 9953
   bank: 0
   spellbook:
     curepoison: 1
@@ -56,22 +49,23 @@ character:
   - itemid: 10012
   - itemid: 30002
     uses: 1
+  - itemid: 20002
   buffs:
     list:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 28
+      roundcounter: 14
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 6
+      roundcounter: 7
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
       permabuff: true
-      roundcounter: 10
+      roundcounter: 11
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -105,12 +99,13 @@ character:
     784-chest: DUU
     key-110-west: "3"
   kd:
-    totalkills: 20
+    totalkills: 21
     kills:
       1: 5
       2: 6
       18: 1
       58: 8
+      666: 1
     totaldeaths: 1
   extralives: 3
   mobmastery:
@@ -139,4 +134,4 @@ character:
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/1TDwQ0AEBQE0Ybmsv5a0X9j4iDIzAs3oYYKGXUUXPNT3vtIcMZrBQAA//8oE0RgTgAAAA==
+roommemoryblob: H4sIAAAAAAAA/2zEwQmAQBQD0Ybm8GNixP4bEwUPCwvzphShAxkFnajE98J5y68lvbY0429PAAAA///sqqJWWAAAAA==

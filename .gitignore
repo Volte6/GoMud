@@ -2,3 +2,5 @@
 private-notes.txt
 _datafiles/users/*
 _datafiles/config-overrides.yaml
+_datafiles/.DS_Store
+_datafiles/mobs/.DS_Store

@@ -1,0 +1,23 @@
+mobid:  666
+zone: the_overlook
+itemdropchance: 2
+hostile: false
+maxwander: 20
+groups:
+activitylevel: 2
+character:
+  name: Barkeep
+  description: 'The Barkeep'
+  raceid: 1
+  level: 10
+  alignment: 30
+  gold: 3
+  equipment:
+    weapon:
+      itemid: 10002
+    neck:
+      itemid: 20002
+    feet:
+      itemid: 20003
+hates:
+  - rats

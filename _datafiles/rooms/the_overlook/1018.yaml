@@ -1,7 +1,7 @@
 roomid: 1018
 zone: The Overlook
-title: the elevator
-description: basemwent
+title: the basement
+description: Clutter and a boiler
 exits:
   elevator:
     roomid: 1017
