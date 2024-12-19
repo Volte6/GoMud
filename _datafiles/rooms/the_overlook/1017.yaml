@@ -1,0 +1,13 @@
+roomid: 1017
+zone: The Overlook
+title: the elevator
+description: the elevator
+exits:
+  "1":
+    roomid: 1008
+  "2":
+    roomid: 1019
+  "3":
+    roomid: 1020
+  B:
+    roomid: 1018

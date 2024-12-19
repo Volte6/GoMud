@@ -1,7 +1,8 @@
 userid: 1
 permission: admin
 username: admin
-password: password
+password: c12ea8107a1210574a31394fe05bebdb2cd1fb7f491939fd743d3f6f09aee721
+joined: 2024-12-19T02:16:36.817146-05:00
 macros:
   =1: e;e;e;e;e;e;e;e
 character:
@@ -14,8 +15,6 @@ character:
     upon other adventurers, granting them strength, wisdom, or fortune beyond their
     wildest dreams. Conversely, he can also mete out justice to those who would seek
     to disrupt the balance of the world, swiftly and decisively.
-  adjectives:
-  - zombie
   roomid: 467
   zone: Frostfang Slums
   raceid: 2
@@ -39,7 +38,7 @@ character:
   experience: 17470
   trainingpoints: 44
   statpoints: 6
-  health: 57
+  health: 58
   mana: 32
   actionpoints: 202
   alignment: -1
@@ -62,17 +61,17 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 26
+      roundcounter: 28
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 4
+      roundcounter: 6
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
       permabuff: true
-      roundcounter: 8
+      roundcounter: 10
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -136,8 +135,8 @@ character:
     items:
     - itemid: 30002
       uses: 1
+  created: 2024-12-19T02:16:36.817147-05:00
 itemstorage:
   items:
   - itemid: 20011
-roommemoryblob: H4sIAAAAAAAA/1TDwQkAIBTD0IVyqb9W3H8x8fBBSV54ExqokNFEwbU/5btbgrPaCQAA//8qwUlYTAAAAA==
-configoptions: {}
+roommemoryblob: H4sIAAAAAAAA/1TDwQ0AEBQE0Ybmsv5a0X9j4iDIzAs3oYYKGXUUXPNT3vtIcMZrBQAA//8oE0RgTgAAAA==

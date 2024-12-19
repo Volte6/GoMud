@@ -1,0 +1,15 @@
+roomid: 1011
+zone: The Overlook
+title: Room 237
+description: The air in Room 237 feels heavier, as though it holds onto secrets too
+  old to tell. The walls are covered in faded floral wallpaper, its once vibrant colors
+  now dulled with time and neglect. A single bed sits against the far wall, its brass
+  frame tarnished and its bedding neatly made, though a faint musty odor lingers.
+  A clawfoot bathtub occupies the bathroom, its porcelain exterior cracked and stained,
+  while the shower curtain hangs slightly askew. A heavy dresser with a cracked mirror
+  leans slightly against the opposite wall, its drawers closed but not flush. The
+  carpet is deep red, its fibers worn in uneven paths as if tread by countless unseen
+  visitors.
+exits:
+  north:
+    roomid: 1010

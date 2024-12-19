@@ -1,0 +1,7 @@
+roomid: 1020
+zone: The Overlook
+title: third floor
+description: third floor
+exits:
+  elevator:
+    roomid: 1017

@@ -1,0 +1,15 @@
+roomid: 1015
+zone: The Overlook
+title: Walk-in Freezer
+description: The walk-in freezer is a stark, frigid space where the air bites at exposed
+  skin. Metal shelves line the walls, stocked with an assortment of frozen meats,
+  vegetables, and other provisions, each package neatly labeled and covered in a fine
+  layer of frost. The floor is smooth concrete, its surface slick in spots from condensation.
+  A faint hum emanates from the overhead cooling unit, which pulses periodically as
+  it maintains the icy temperature. The metal door is thick and heavy, equipped with
+  a large latch and a release handle on the inside. The light above casts a cold,
+  sterile glow, reflecting off the frost-covered surfaces and creating an almost otherworldly
+  stillness.
+exits:
+  leave:
+    roomid: 1014

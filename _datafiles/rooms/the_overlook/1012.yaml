@@ -1,0 +1,20 @@
+roomid: 1012
+zone: The Overlook
+title: The bar
+description: The bar is a sleek and minimalist space that emanates quiet sophistication.
+  The long counter is topped with a smooth, reflective surface that captures the glow
+  of the backlit panels behind it. These panels, framed in thin red lines, emit a
+  warm, golden light, casting soft shadows across the room and illuminating the bar’s
+  details. Behind the counter, neatly arranged shelves hold a sparse selection of
+  bottles and a cash register, their positions symmetrical and deliberate. A series
+  of dark wooden barstools line the front, their simple, angular design complementing
+  the clean, geometric patterns of the bar’s base, which is detailed with subtle horizontal
+  grooves. The ceiling above is textured, catching the light in a way that adds depth
+  without drawing attention. To the side, heavy drapes obscure the walls, their soft
+  fabric contrasting with the rigid structure of the bar. The room is silent and still,
+  its understated design drawing focus to the interplay of light and shadow, creating
+  a space that feels both inviting and isolating, as though it exists in a moment
+  outside of time.
+exits:
+  exit:
+    roomid: 1006

@@ -1,0 +1,7 @@
+roomid: 1019
+zone: The Overlook
+title: the elevator
+description: the elevator
+exits:
+  elevator:
+    roomid: 1017

@@ -1,0 +1,18 @@
+roomid: 1014
+zone: The Overlook
+title: The Kitchen
+description: The kitchen is a sprawling, industrial space filled with rows of stainless
+  steel countertops and appliances. Large ovens and stovetops line one wall, their
+  surfaces gleaming with a mix of wear and meticulous cleaning. Overhead, steel racks
+  hold an assortment of pots, pans, and utensils, each organized by size and function.
+  In the center of the room, a massive butcher block table serves as a workstation,
+  its surface marked with countless knife scars. Refrigerators and freezers hum softly
+  along the back wall, their bulk imposing. The faint smell of aged grease and spices
+  lingers in the air, mingling with the sterile scent of cleaning solutions. Shelves
+  stocked with dry goods and ingredients line the far corner, a testament to the hotel's
+  capacity for grand feasts.
+exits:
+  curtain:
+    roomid: 1006
+  freezer:
+    roomid: 1015

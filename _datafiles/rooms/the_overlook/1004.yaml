@@ -1,0 +1,18 @@
+roomid: 1004
+zone: The Overlook
+title: The Lobby
+description: The lobby of the Overlook Hotel greets you with an expansive, open space,
+  floored with polished wood that gleams under the soft lighting. To your left, a
+  grand staircase curves upward, leading to the floors above. The reception desk stands
+  ahead, an imposing structure of dark wood, behind which hangs a large, ornate clock.
+  To the right, plush armchairs and sofas are arranged in inviting clusters, surrounding
+  a stone fireplace that dominates the far wall.
+exits:
+  east:
+    roomid: 1005
+  north:
+    roomid: 1006
+  south:
+    roomid: 1003
+  west:
+    roomid: 1008

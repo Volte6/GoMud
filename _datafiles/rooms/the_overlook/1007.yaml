@@ -1,0 +1,16 @@
+roomid: 1007
+zone: The Overlook
+title: The Red Bathroom
+description: The Red Bathroom is a striking, almost surreal space, with walls, floors,
+  and fixtures bathed in a deep, glossy red. The walls are smooth and seamless, their
+  reflective surface giving the room an otherworldly glow under the soft, white lighting.
+  The sinks are mounted in a long, angular countertop that matches the room’s bold
+  color, with chrome faucets and fittings standing out as the only contrast. Opposite
+  the sinks, a row of stalls with doors painted in the same intense red maintains
+  the room’s uniformity. The tiled floor is polished to a mirror-like sheen, amplifying
+  the vibrant tone that saturates the space. Despite its bold design, the room exudes
+  a strange and unsettling stillness, as though it holds secrets beyond its glossy
+  surfaces.
+exits:
+  west:
+    roomid: 1006

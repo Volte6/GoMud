@@ -1,0 +1,18 @@
+roomid: 1009
+zone: The Overlook
+title: Hallway
+description: The hallway stretches endlessly in both directions, its floor covered
+  in the iconic geometric carpet pattern of burnt orange and deep red interlocking
+  shapes, bordered by stark black lines. The walls are lined with pale, off-white
+  paneling, interrupted at intervals by numbered doors, each painted a uniform beige
+  and accented with brass handles. Dim, flickering wall sconces cast uneven pools
+  of light, leaving portions of the hallway in shadow. The ceiling is low, amplifying
+  a sense of confinement, while the faint hum of an unseen ventilation system fills
+  the space with a droning monotony. The carpet beneath your feet feels plush but
+  worn, as if countless footsteps have trodden the same path, their stories absorbed
+  into the fibers.
+exits:
+  downstairs:
+    roomid: 1008
+  east:
+    roomid: 1010

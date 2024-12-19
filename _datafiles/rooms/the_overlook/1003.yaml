@@ -1,0 +1,15 @@
+roomid: 1003
+zone: The Overlook
+zoneconfig:
+  roomid: 1003
+title: The Overlook Hotel Parking Area
+description: The parking lot of the Overlook Hotel stretches out before you, lined
+  with parking spaces on weathered asphalt. Cracks and patches mark the ground, telling
+  tales of harsh winters and the passage of time. The hotel's imposing structure rises
+  in the distance, its numerous windows reflecting the overcast sky. The main entrance
+  to the hotel is just ahead, its doors a gateway to the unknown.
+exits:
+  east:
+    roomid: 1016
+  north:
+    roomid: 1004

@@ -1,0 +1,7 @@
+roomid: 1018
+zone: The Overlook
+title: the elevator
+description: basemwent
+exits:
+  elevator:
+    roomid: 1017

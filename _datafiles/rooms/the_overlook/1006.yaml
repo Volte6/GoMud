@@ -1,0 +1,24 @@
+roomid: 1006
+zone: The Overlook
+title: The Gold Room
+description: The Gold Ballroom is a grand, opulent space that radiates luxury. The
+  walls are paneled with golden, mirror-like surfaces that reflect the glow of the
+  chandeliers hanging overhead. The floor is polished hardwood, its rich hues contrasting
+  with the gleaming metallic tones around the room. A long, elegant bar stretches
+  across one side, its countertop a smooth slab of black marble, edged with intricate
+  gold trim. Rows of glasses and bottles line the shelves behind the bar, perfectly
+  arranged and glinting under the soft light. On the opposite side, an expansive dance
+  floor opens up, framed by delicate golden arches and surrounded by small, circular
+  tables draped in white linens. At the far end of the room, a stage with crimson
+  curtains provides a focal point, its platform ready for performances or speeches.
+  The atmosphere is one of timeless sophistication, a space built for celebrations
+  and memories.
+exits:
+  bar:
+    roomid: 1012
+  curtains:
+    roomid: 1014
+  east:
+    roomid: 1007
+  south:
+    roomid: 1004

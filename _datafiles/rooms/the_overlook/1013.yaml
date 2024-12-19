@@ -1,0 +1,8 @@
+roomid: 1013
+zone: The Overlook
+title: 2nd Floor Hallway North
+description: more hallway, view down to Colorado room, stairs to N and elevator to
+  east
+exits:
+  south:
+    roomid: 1010

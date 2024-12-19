@@ -1,0 +1,16 @@
+roomid: 1005
+zone: The Overlook
+title: General Manager's Office
+description: The General Manager’s Office is a modestly sized room with an air of
+  quiet authority. The walls are painted a bold orange, their color striking against
+  the darker furnishings in the room. A large wooden desk occupies the center of the
+  space, its surface orderly, with a green desk lamp, a stack of papers, and a leather-bound
+  notebook neatly arranged. Behind the desk, a high-backed leather chair sits against
+  a wall lined with built-in bookshelves, their contents a mix of binders, ledgers,
+  and well-worn books. A small window to one side allows a view of the grounds, its
+  glass slightly fogged. A metal filing cabinet stands in the corner, its drawers
+  labeled in precise, handwritten script. The carpet beneath your feet is dark and
+  thick, muffling every step in this vibrant yet purposeful space.
+exits:
+  west:
+    roomid: 1004

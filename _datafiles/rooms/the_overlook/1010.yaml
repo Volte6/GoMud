@@ -1,0 +1,20 @@
+roomid: 1010
+zone: The Overlook
+title: Hallway Continued
+description: 'The hallway stretches in both directions, its floor covered in the familiar
+  geometric carpet of interlocking burnt orange and deep red patterns, bordered with
+  stark black lines. The walls are painted a muted beige, broken by evenly spaced
+  doors, each numbered with small brass plaques. At one end of the corridor, a single
+  door stands out: 237, its digits slightly tarnished and unevenly lit by the faint
+  glow of a wall sconce just above. The door is painted a dull cream color, its surface
+  marred by faint scuffs and scratches, as if touched by many hesitant hands. The
+  brass handle gleams faintly, polished smooth from use. The air in the hallway feels
+  heavier here, an almost imperceptible chill emanating from the doorway, making the
+  otherwise still corridor feel unnaturally charged.'
+exits:
+  north:
+    roomid: 1013
+  south:
+    roomid: 1011
+  west:
+    roomid: 1009

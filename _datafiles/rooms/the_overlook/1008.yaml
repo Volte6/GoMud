@@ -1,0 +1,21 @@
+roomid: 1008
+zone: The Overlook
+title: The Colorado Room
+description: 'The Colorado Room is a sprawling, high-ceilinged space dominated by
+  its rustic charm. Wooden beams stretch across the ceiling, their dark grain contrasting
+  with the pale plaster walls. A massive stone fireplace anchors the far end of the
+  room, its hearth large enough to stand in, framed by carved wooden panels that depict
+  mountain scenes. The center of the room is occupied by a grand table of polished
+  oak, surrounded by heavy chairs with intricate carvings on their backs and legs.
+  Rows of tall windows line one wall, their glass panes offering a view of the surrounding
+  landscape. Most of the walls are adorned with black-and-white photographs in simple
+  wooden frames, each capturing moments from decades past: gatherings, celebrations,
+  and solemn portraits of former visitors and staff. The polished wooden floor reflects
+  the light, adding a warm glow to the expansive space.'
+exits:
+  east:
+    roomid: 1004
+  elevator:
+    roomid: 1017
+  stairway:
+    roomid: 1009
