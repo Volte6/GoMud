@@ -3,6 +3,7 @@ package fileloader
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -249,6 +250,8 @@ func SaveFlatFile[T LoadableSimple](basePath string, dataUnit T, saveOptions ...
 	// Get filepath from interface
 	path := filepath.Join(basePath, dataUnit.Filepath())
 
+	os.MkdirAll(filepath.Dir(path), os.ModePerm)
+
 	var bytes []byte
 	var err error
 
@@ -385,4 +388,27 @@ func SaveAllFlatFiles[K comparable, T Loadable[K]](basePath string, data map[K]T
 	wg.Wait()
 
 	return int(saveCt), nil
+}
+
+func CopyFileContents(src, dst string) (err error) {
+	in, err := os.Open(src)
+	if err != nil {
+		return
+	}
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return
+	}
+	defer func() {
+		cerr := out.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+	if _, err = io.Copy(out, in); err != nil {
+		return
+	}
+	err = out.Sync()
+	return
 }

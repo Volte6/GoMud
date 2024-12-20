@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"math"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -640,7 +641,7 @@ func (m *Mob) GetScriptPath() string {
 		scriptFilePath,
 		1)
 
-	slog.Info("SCRIPT PATH", "path", util.FilePath(fullScriptPath))
+	//slog.Info("SCRIPT PATH", "path", util.FilePath(fullScriptPath))
 	return util.FilePath(fullScriptPath)
 }
 
@@ -696,7 +697,7 @@ func ZoneNameSanitize(zone string) string {
 	return strings.ToLower(zone)
 }
 
-func CreateNewMobFile(newMobName string, newMobRaceId int, newMobZone string, newMobDescription string) (MobId, error) {
+func CreateNewMobFile(newMobName string, newMobRaceId int, newMobZone string, newMobDescription string, includeScript bool) (MobId, error) {
 
 	newMobInfo := Mob{
 		MobId: MobId(nextMobId),
@@ -706,6 +707,10 @@ func CreateNewMobFile(newMobName string, newMobRaceId int, newMobZone string, ne
 			RaceId:      newMobRaceId,
 			Description: strings.ReplaceAll(newMobDescription, `\n`, "\n"),
 		},
+	}
+
+	if includeScript {
+		newMobInfo.QuestFlags = []string{`1000000-start`}
 	}
 
 	if err := newMobInfo.Validate(); err != nil {
@@ -726,6 +731,17 @@ func CreateNewMobFile(newMobName string, newMobRaceId int, newMobZone string, ne
 
 	if err := fileloader.SaveFlatFile[*Mob](mobDataFilesFolderPath, &newMobInfo, saveModes...); err != nil {
 		return 0, err
+	}
+
+	if includeScript {
+
+		newScriptPath := newMobInfo.GetScriptPath()
+		os.MkdirAll(filepath.Dir(newScriptPath), os.ModePerm)
+
+		fileloader.CopyFileContents(
+			util.FilePath(`_datafiles/mobs/sample-quest-mob-script.js`),
+			newMobInfo.GetScriptPath(),
+		)
 	}
 
 	return newMobInfo.MobId, nil
