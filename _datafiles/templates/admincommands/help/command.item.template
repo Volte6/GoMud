@@ -1,0 +1,10 @@
+The <ansi fg="command">item</ansi> command can be used in the following ways:
+
+<ansi fg="command">item create</ansi>
+Asks a series of questions and then creates a new item type and writes the file
+to the appropriate folder.
+
+<ansi fg="command">item spawn [ItemName/ItemId]</ansi>
+    <ansi fg="command">item spawn [ItemId]</ansi> - e.g. <ansi fg="command">item spawn 1</ansi>
+    <ansi fg="command">item spawn [ItemName]</ansi> - e.g. <ansi fg="command">item spawn dagger</ansi>
+

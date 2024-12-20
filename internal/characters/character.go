@@ -285,6 +285,8 @@ func (c *Character) GetMiscDataKeys(prefixMatch ...string) []string {
 
 func (c *Character) FindKeyInBackpack(lockId string) (items.Item, bool) {
 
+	lockId = strings.ToLower(lockId)
+
 	for _, itm := range c.GetAllBackpackItems() {
 		itmSpec := itm.GetSpec()
 		if itmSpec.Type != items.Key {

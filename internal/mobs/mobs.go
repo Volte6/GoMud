@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"math"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -30,7 +29,6 @@ var (
 	mobInstances        = map[int]*Mob{}
 	mobsHatePlayers     = map[string]map[int]int{}
 	mobNameCache        = map[MobId]string{}
-	nextMobId           = 0
 )
 
 const (
@@ -697,56 +695,6 @@ func ZoneNameSanitize(zone string) string {
 	return strings.ToLower(zone)
 }
 
-func CreateNewMobFile(newMobName string, newMobRaceId int, newMobZone string, newMobDescription string, includeScript bool) (MobId, error) {
-
-	newMobInfo := Mob{
-		MobId: MobId(nextMobId),
-		Zone:  newMobZone,
-		Character: characters.Character{
-			Name:        newMobName,
-			RaceId:      newMobRaceId,
-			Description: strings.ReplaceAll(newMobDescription, `\n`, "\n"),
-		},
-	}
-
-	if includeScript {
-		newMobInfo.QuestFlags = []string{`1000000-start`}
-	}
-
-	if err := newMobInfo.Validate(); err != nil {
-		return 0, err
-	}
-
-	nextMobId++
-
-	allMobNames = append(allMobNames, newMobInfo.Character.Name)
-	mobNameCache[newMobInfo.MobId] = newMobInfo.Character.Name
-	mobs[newMobInfo.Id()] = &newMobInfo
-
-	saveModes := []fileloader.SaveOption{}
-
-	if configs.GetConfig().CarefulSaveFiles {
-		saveModes = append(saveModes, fileloader.SaveCareful)
-	}
-
-	if err := fileloader.SaveFlatFile[*Mob](mobDataFilesFolderPath, &newMobInfo, saveModes...); err != nil {
-		return 0, err
-	}
-
-	if includeScript {
-
-		newScriptPath := newMobInfo.GetScriptPath()
-		os.MkdirAll(filepath.Dir(newScriptPath), os.ModePerm)
-
-		fileloader.CopyFileContents(
-			util.FilePath(`_datafiles/mobs/sample-quest-mob-script.js`),
-			newMobInfo.GetScriptPath(),
-		)
-	}
-
-	return newMobInfo.MobId, nil
-}
-
 // file self loads due to init()
 func LoadDataFiles() {
 
@@ -766,10 +714,6 @@ func LoadDataFiles() {
 		allMobNames = append(allMobNames, mob.Character.Name)
 		// Keep track of all original names associated with a given mobId
 		mobNameCache[mob.MobId] = mob.Character.Name
-		// Keep track of the highest mobId used.
-		if int(mob.MobId) >= nextMobId {
-			nextMobId = int(mob.MobId) + 1
-		}
 	}
 
 	slog.Info("mobs.LoadDataFiles()", "loadedCount", len(mobs), "Time Taken", time.Since(start))
