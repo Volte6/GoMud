@@ -24,44 +24,45 @@ type TokenName string
 type WeaponHands = int
 
 var (
-	items         map[int]*ItemSpec = make(map[int]*ItemSpec)
-	itemNameCache                   = map[int]string{}
+	items map[int]*ItemSpec = make(map[int]*ItemSpec)
 )
 
 type ItemTypeInfo struct {
 	Type        string
 	Description string
 	Count       int
+	MinItemId   int
+	MaxItemId   int
 }
 
 // Returns key=type and value=description
 func ItemTypes() []ItemTypeInfo {
 	return []ItemTypeInfo{
 		// Equipment
-		{string(Weapon), `This can be wielded as a weapon.`, 0},
-		{string(Offhand), `This can be worn in the offhand.`, 0},
-		{string(Head), `This can be worn in the players head equipment slot.`, 0},
-		{string(Neck), `This can be worn in the players neck equipment slot.`, 0},
-		{string(Body), `This can be worn in the players body equipment slot.`, 0},
-		{string(Belt), `This can be worn in the players belt equipment slot.`, 0},
-		{string(Gloves), `This can be worn in the players gloves equipment slot.`, 0},
-		{string(Ring), `This can be worn in the players ring equipment slot.`, 0},
-		{string(Legs), `This can be worn in the players legs equipment slot.`, 0},
-		{string(Feet), `This can be worn in the players feet equipment slot.`, 0},
+		{string(Weapon), `This can be wielded as a weapon.`, 0, 10000, 19999},
+		{string(Offhand), `This can be worn in the offhand.`, 0, 20000, 29999},
+		{string(Head), `This can be worn in the players head equipment slot.`, 0, 20000, 29999},
+		{string(Neck), `This can be worn in the players neck equipment slot.`, 0, 20000, 29999},
+		{string(Body), `This can be worn in the players body equipment slot.`, 0, 20000, 29999},
+		{string(Belt), `This can be worn in the players belt equipment slot.`, 0, 20000, 29999},
+		{string(Gloves), `This can be worn in the players gloves equipment slot.`, 0, 20000, 29999},
+		{string(Ring), `This can be worn in the players ring equipment slot.`, 0, 20000, 29999},
+		{string(Legs), `This can be worn in the players legs equipment slot.`, 0, 20000, 29999},
+		{string(Feet), `This can be worn in the players feet equipment slot.`, 0, 20000, 29999},
 		// Consumables
-		{string(Potion), `This is a magic potion.`, 0},
-		{string(Food), `This is food.`, 0},
-		{string(Drink), `This is a drink.`, 0},
-		{string(Scroll), `This is a scroll.`, 0},
-		{string(Grenade), `This is an explosive object.`, 0},
-		{string(Junk), `This is garbage.`, 0},
+		{string(Potion), `This is a magic potion.`, 0, 30000, 39999},
+		{string(Food), `This is food.`, 0, 30000, 39999},
+		{string(Drink), `This is a drink.`, 0, 30000, 39999},
+		{string(Scroll), `This is a scroll.`, 0, 0, 9999},
+		{string(Grenade), `This is an explosive object.`, 0, 0, 9999},
+		{string(Junk), `This is garbage.`, 0, 0, 9999},
 		// Other
-		{string(Readable), `This can be read.`, 0},
-		{string(Key), `This is a key that opens a locked container or door.`, 0},
-		{string(Object), `This is a catch-all generic object without pre-defined special behaviors.`, 0},
-		{string(Gemstone), `This is a gemstone.`, 0},
-		{string(Lockpicks), `This allows use of the picklock skill.`, 0},
-		{string(Botanical), `This is an herb.`, 0},
+		{string(Readable), `This can be read.`, 0, 0, 9999},
+		{string(Key), `This is a key that opens a locked container or door.`, 0, 0, 9999},
+		{string(Object), `This is a catch-all generic object without pre-defined special behaviors.`, 0, 0, 9999},
+		{string(Gemstone), `This is a gemstone.`, 0, 0, 9999},
+		{string(Lockpicks), `This allows use of the picklock skill.`, 0, 0, 9999},
+		{string(Botanical), `This is an herb.`, 0, 30000, 39999},
 	}
 }
 
@@ -69,23 +70,23 @@ func ItemTypes() []ItemTypeInfo {
 func ItemSubtypes() []ItemTypeInfo {
 	return []ItemTypeInfo{
 		// Miscellaneous
-		{string(Wearable), `Can be targetted with the equip/wear/wield command.`, 0},
-		{string(Drinkable), `Can be targetted withthe drink command.`, 0},
-		{string(Edible), `Can be targetted with the eat command.`, 0},
-		{string(Usable), `Can be targetted with the use command.`, 0},
-		{string(Throwable), `Can be targetted with the throw command.`, 0},
-		{string(Mundane), `No special behavior built in.`, 0},
+		{string(Wearable), `Can be targetted with the equip/wear/wield command.`, 0, 0, 0},
+		{string(Drinkable), `Can be targetted with the drink command.`, 0, 0, 0},
+		{string(Edible), `Can be targetted with the eat command.`, 0, 0, 0},
+		{string(Usable), `Can be targetted with the use command.`, 0, 0, 0},
+		{string(Throwable), `Can be targetted with the throw command.`, 0, 0, 0},
+		{string(Mundane), `No special behavior built in.`, 0, 0, 0},
 		// Weapons
-		{string(Generic), `Any weapon that doesn't get assigned an actual weapon subcategory.`, 0},
-		{string(Bludgeoning), `A blunt weapon.`, 0},
-		{string(Cleaving), `A hacking/chopping weapon.`, 0},
-		{string(Stabbing), `A piercing weapon.`, 0},
-		{string(Slashing), `A slicing and slashing weapon.`, 0},
-		{string(Shooting), `A ranged weapon.`, 0},
-		{string(Claws), `A slashing weapon worn on the hands.`, 0},
-		{string(Whipping), `A whipping weapon.`, 0},
+		{string(Generic), `Any weapon that doesn't get assigned an actual weapon subcategory.`, 0, 0, 0},
+		{string(Bludgeoning), `A blunt weapon.`, 0, 0, 0},
+		{string(Cleaving), `A hacking/chopping weapon.`, 0, 0, 0},
+		{string(Stabbing), `A piercing weapon.`, 0, 0, 0},
+		{string(Slashing), `A slicing and slashing weapon.`, 0, 0, 0},
+		{string(Shooting), `A ranged weapon.`, 0, 0, 0},
+		{string(Claws), `A slashing weapon worn on the hands.`, 0, 0, 0},
+		{string(Whipping), `A whipping weapon.`, 0, 0, 0},
 		// Miscellaneous data
-		{string(BlobContent), `Can store blob content in the item data.`, 0},
+		{string(BlobContent), `Can store blob content in the item data.`, 0, 0, 0},
 	}
 }
 
@@ -180,8 +181,8 @@ type Damage struct {
 	Attacks     int    `yaml:"attacks,omitempty"` // How many attacks this weapon gets (usually 1)
 	DiceRoll    string // 1d6, etc.
 	CritBuffIds []int  `yaml:"critbuffids,omitempty"` // If this damage is a crit, what buffs does it apply?
-	DiceCount   int    // how many dice to roll for this weapons damage
-	SideCount   int    // how many sides per dice roll
+	DiceCount   int    `yaml:"dicecount,omitempty"`   // how many dice to roll for this weapons damage
+	SideCount   int    `yaml:"sidecount,omitempty"`   // how many sides per dice roll
 	BonusDamage int    `yaml:"bonusdamage,omitempty"` // flat damage bonus, so for example 1d6+1
 }
 
@@ -210,7 +211,7 @@ type ItemSpec struct {
 	Type            ItemType
 	Subtype         ItemSubType
 	Damage          Damage
-	Element         Element
+	Element         Element           `yaml:"element,omitempty"`
 	StatMods        statmods.StatMods `yaml:"statmods,omitempty"`    // What stats it modifies when equipped
 	BreakChance     uint8             `yaml:"breakchance,omitempty"` // Chance in 100 that the item will break when used, or when the character is hit with it equipped, or if it is in the characters inventory during an explosion, etc.
 	Cursed          bool              `yaml:"cursed,omitempty"`      // Can't be removed once equipped
@@ -400,10 +401,6 @@ func (i *ItemSpec) Validate() error {
 }
 
 func (i *ItemSpec) Filename() string {
-
-	if name, ok := itemNameCache[i.ItemId]; ok {
-		return fmt.Sprintf("%d-%s.yaml", i.ItemId, util.ConvertForFilename(name))
-	}
 
 	filename := util.ConvertForFilename(i.Name)
 	return fmt.Sprintf("%d-%s.yaml", i.ItemId, filename)

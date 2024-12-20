@@ -77,6 +77,7 @@ var (
 		`inbox`:       {Inbox, true, false},
 		`inspect`:     {Inspect, false, false},
 		`inventory`:   {Inventory, true, false},
+		`item`:        {Item, true, true}, // Admin only
 		`jobs`:        {Jobs, true, false},
 		`leaderboard`: {Leaderboards, true, false},
 		`list`:        {List, false, false},
