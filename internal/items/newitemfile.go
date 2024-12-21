@@ -7,33 +7,7 @@ import (
 	"github.com/volte6/gomud/internal/fileloader"
 )
 
-func CreateNewItemFile(name string,
-	description string,
-	value int,
-	tp string, stp string,
-	damageRoll string,
-	uses int,
-	keyLockId string,
-	questToken string) (int, error) {
-
-	newItemInfo := ItemSpec{
-		Name:        name,
-		Description: description,
-		Value:       value,
-		Type:        ItemType(tp),
-		Subtype:     ItemSubType(stp),
-		Uses:        uses,
-		KeyLockId:   keyLockId,
-		QuestToken:  questToken,
-	}
-
-	if damageRoll != `` {
-		dmg := Damage{}
-		dmg.InitDiceRoll(damageRoll)
-		dmg.DiceRoll = dmg.FormatDiceRoll()
-		// Assign it to the item
-		newItemInfo.Damage = dmg
-	}
+func CreateNewItemFile(newItemInfo ItemSpec) (int, error) {
 
 	newItemInfo.ItemId = getNextItemId(newItemInfo.Type)
 	if newItemInfo.ItemId == 0 {

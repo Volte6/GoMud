@@ -44,12 +44,7 @@ func Item(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 func item_Spawn(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
-	itemId := items.FindItemByName(rest)
-
-	if itemId < 1 {
-		itemId, _ = strconv.Atoi(rest)
-	}
-
+	itemId := items.FindItem(rest)
 	if itemId != 0 {
 
 		itm := items.New(itemId)
@@ -78,18 +73,17 @@ func item_Spawn(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 
 func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
+	var newItemSpec = items.ItemSpec{}
+
+	args := util.SplitButRespectQuotes(rest)
+	if len(args) > 1 {
+		if itemId := items.FindItem(args[1]); itemId > 0 {
+			newItemSpec = *(items.GetItemSpec(itemId))
+		}
+	}
+
 	// Get if already exists, otherwise create new
 	cmdPrompt, isNew := user.StartPrompt(`item`, rest)
-
-	itemCreateAnswerName := ``
-	itemCreateAnswerDescription := `` // description when looking
-	itemCreateAnswerValue := 0        // value override
-	itemCreateAnswerType := ``
-	itemCreateAnswerSubType := ``
-	itemCreateAnswerDamage := ``
-	itemCreateAnswerMaxUses := 0
-	itemCreateAnswerKeyLockId := ``
-	itemCreateAnswerQuestToken := ``
 
 	if isNew {
 		user.SendText(``)
@@ -100,12 +94,14 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 	// Name Selection
 	//
 	{
-		question := cmdPrompt.Ask(`What will the item be called?`, []string{})
+
+		question := cmdPrompt.Ask(`What will the item be called?`, []string{newItemSpec.Name}, newItemSpec.Name)
 		if !question.Done {
 			return true, nil
 		}
 
-		itemCreateAnswerName = question.Response
+		newItemSpec.Name = question.Response
+
 	}
 
 	//
@@ -122,7 +118,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 			})
 		}
 
-		question := cmdPrompt.Ask(`What Type of item will it be?`, []string{})
+		question := cmdPrompt.Ask(`What Type of item will it be?`, []string{string(newItemSpec.Type)}, string(newItemSpec.Type))
 		if !question.Done {
 			tplTxt, _ := templates.Process("tables/numbered-list", typeOptions)
 			user.SendText(tplTxt)
@@ -138,11 +134,11 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 
 		for _, t := range allTypes {
 			if strings.EqualFold(t.Type, typeNameSelection) {
-				itemCreateAnswerType = t.Type
+				newItemSpec.Type = items.ItemType(t.Type)
 			}
 		}
 
-		if itemCreateAnswerType == `` {
+		if newItemSpec.Type == `` {
 			question.RejectResponse()
 
 			tplTxt, _ := templates.Process("tables/numbered-listtables/numbered-list", typeOptions)
@@ -155,31 +151,40 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 	//
 	// Damage (if weapon)
 	//
-	if itemCreateAnswerType == `weapon` {
-		question := cmdPrompt.Ask(`What damage does this weapon do (Example: 1d4)?`, []string{})
+	if newItemSpec.Type == items.Weapon {
+
+		question := cmdPrompt.Ask(`What damage does this weapon do (Example: 1d4)?`, []string{newItemSpec.Damage.DiceRoll}, newItemSpec.Damage.DiceRoll)
 		if !question.Done {
 			return true, nil
 		}
 
-		d := items.Damage{
-			DiceRoll: question.Response,
+		if question.Response != `` {
+			newItemSpec.Damage.InitDiceRoll(question.Response)
+			newItemSpec.Damage.DiceRoll = newItemSpec.Damage.FormatDiceRoll()
 		}
-		d.InitDiceRoll(d.DiceRoll)
 
-		itemCreateAnswerDamage = d.FormatDiceRoll()
 	}
 
 	//
 	// Target room/exit/container (If key)
 	//
-	if itemCreateAnswerType == `key` {
+	if newItemSpec.Type == items.Key {
 
-		question := cmdPrompt.Ask(`What Room Id will this key be used in?`, []string{}, `_`)
+		roomIdStr := ``
+		roomExitStr := ``
+
+		keyParts := strings.Split(newItemSpec.KeyLockId, `-`)
+		if len(keyParts) == 2 {
+			roomIdStr = keyParts[0]
+			roomExitStr = keyParts[1]
+		}
+
+		question := cmdPrompt.Ask(`What Room Id will this key be used in?`, []string{roomIdStr}, roomIdStr)
 		if !question.Done {
 			return true, nil
 		}
 
-		if question.Response == `_` {
+		if question.Response == `` {
 			user.SendText("Aborting...")
 			user.ClearPrompt()
 			return true, nil
@@ -191,18 +196,18 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 			return true, nil
 		}
 
-		question = cmdPrompt.Ask(`What exit name or container will this open?`, []string{}, `_`)
+		question = cmdPrompt.Ask(`What exit name or container will this open?`, []string{roomExitStr}, roomExitStr)
 		if !question.Done {
 			return true, nil
 		}
 
-		if question.Response == `_` {
+		if question.Response == `` {
 			user.SendText("Aborting...")
 			user.ClearPrompt()
 			return true, nil
 		}
 
-		itemCreateAnswerKeyLockId = fmt.Sprintf(`%d-%s`, roomId, strings.ToLower(question.Response))
+		newItemSpec.KeyLockId = fmt.Sprintf(`%d-%s`, roomId, strings.ToLower(question.Response))
 	}
 
 	//
@@ -219,7 +224,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 			})
 		}
 
-		question := cmdPrompt.Ask(`What Subtype of item will it be?`, []string{})
+		question := cmdPrompt.Ask(`What Subtype of item will it be?`, []string{string(newItemSpec.Subtype)}, string(newItemSpec.Subtype))
 		if !question.Done {
 			tplTxt, _ := templates.Process("tables/numbered-list", subTypeOptions)
 			user.SendText(tplTxt)
@@ -241,11 +246,11 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 
 		for _, t := range allSubTypes {
 			if strings.EqualFold(t.Type, typeNameSelection) {
-				itemCreateAnswerSubType = t.Type
+				newItemSpec.Subtype = items.ItemSubType(t.Type)
 			}
 		}
 
-		if itemCreateAnswerType == `` {
+		if newItemSpec.Subtype == `` {
 			question.RejectResponse()
 
 			tplTxt, _ := templates.Process("tables/numbered-listtables/numbered-list", subTypeOptions)
@@ -259,18 +264,22 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 	// Maximum Uses
 	//
 	{
-		question := cmdPrompt.Ask(`Will this item have a maximum number of uses?`, []string{`y`, `n`}, `n`)
+		defaultYN := `n`
+		if newItemSpec.Uses > 0 {
+			defaultYN = `y`
+		}
+		question := cmdPrompt.Ask(`Will this item have a maximum number of uses?`, []string{`y`, `n`}, defaultYN)
 		if !question.Done {
 			return true, nil
 		}
 
 		if question.Response == `y` {
-			question := cmdPrompt.Ask(`How many uses will this item have?`, []string{})
+			question := cmdPrompt.Ask(`How many uses will this item have?`, []string{strconv.Itoa(newItemSpec.Uses)}, strconv.Itoa(newItemSpec.Uses))
 			if !question.Done {
 				return true, nil
 			}
 
-			itemCreateAnswerMaxUses, _ = strconv.Atoi(question.Response)
+			newItemSpec.Uses, _ = strconv.Atoi(question.Response)
 		}
 
 	}
@@ -279,7 +288,13 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 	// Description
 	//
 	{
-		question := cmdPrompt.Ask(`Quest token given if acquired (if any):`, []string{}, `_`)
+		qToken := newItemSpec.QuestToken
+		qTokenDefault := qToken
+		if qToken == `` {
+			qToken = `_`
+		}
+
+		question := cmdPrompt.Ask(`Quest token given if acquired (if any):`, []string{qTokenDefault}, qToken)
 		if !question.Done {
 			return true, nil
 		}
@@ -292,7 +307,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 				return true, nil
 			}
 
-			itemCreateAnswerQuestToken = question.Response
+			newItemSpec.QuestToken = question.Response
 		}
 	}
 
@@ -300,32 +315,23 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 	// Name Selection
 	//
 	{
-		question := cmdPrompt.Ask(`Gold value override (or zero):`, []string{}, `_`)
+		question := cmdPrompt.Ask(`Gold value override:`, []string{strconv.Itoa(newItemSpec.Value)}, strconv.Itoa(newItemSpec.Value))
 		if !question.Done {
 			return true, nil
 		}
-
-		if question.Response == `_` {
-			user.SendText("Aborting...")
-			user.ClearPrompt()
-			return true, nil
-		}
-
-		itemCreateAnswerValue, _ = strconv.Atoi(question.Response)
+		newItemSpec.Value, _ = strconv.Atoi(question.Response)
 	}
 
 	//
 	// Description
 	//
 	{
-		question := cmdPrompt.Ask(`Enter a description for the item:`, []string{}, `_`)
+		question := cmdPrompt.Ask(`Enter a description for the item:`, []string{newItemSpec.Description}, newItemSpec.Description)
 		if !question.Done {
 			return true, nil
 		}
 
-		if question.Response != `_` {
-			itemCreateAnswerDescription = question.Response
-		}
+		newItemSpec.Description = question.Response
 	}
 
 	//
@@ -335,25 +341,30 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 		question := cmdPrompt.Ask(`Does this look correct?`, []string{`y`, `n`}, `n`)
 		if !question.Done {
 
-			user.SendText(`  <ansi fg="yellow-bold">Name:</ansi>        <ansi fg="white-bold">` + itemCreateAnswerName + `</ansi>`)
-			user.SendText(`  <ansi fg="yellow-bold">Desc:</ansi>        <ansi fg="white-bold">` + itemCreateAnswerDescription + `</ansi>`)
-			user.SendText(`  <ansi fg="yellow-bold">Type:</ansi>        <ansi fg="white-bold">` + itemCreateAnswerType + `</ansi>`)
-			if itemCreateAnswerType == `key` {
-				user.SendText(`  <ansi fg="yellow-bold">KeyId:</ansi>       <ansi fg="white-bold">` + itemCreateAnswerKeyLockId + `</ansi>`)
+			user.SendText(`  <ansi fg="yellow-bold">Name:</ansi>        <ansi fg="white-bold">` + newItemSpec.Name + `</ansi>`)
+			user.SendText(`  <ansi fg="yellow-bold">Desc:</ansi>        <ansi fg="white-bold">` + newItemSpec.Description + `</ansi>`)
+			user.SendText(`  <ansi fg="yellow-bold">Type:</ansi>        <ansi fg="white-bold">` + string(newItemSpec.Type) + `</ansi>`)
+
+			if newItemSpec.Type == items.Key {
+				user.SendText(`  <ansi fg="yellow-bold">KeyId:</ansi>       <ansi fg="white-bold">` + newItemSpec.KeyLockId + `</ansi>`)
 			}
-			if itemCreateAnswerType == `weapon` {
-				user.SendText(`  <ansi fg="yellow-bold">Damage:</ansi>      <ansi fg="white-bold">` + itemCreateAnswerDamage + `</ansi>`)
+			if newItemSpec.Type == items.Weapon {
+				user.SendText(`  <ansi fg="yellow-bold">Damage:</ansi>      <ansi fg="white-bold">` + newItemSpec.Damage.DiceRoll + `</ansi>`)
 			}
-			if itemCreateAnswerMaxUses > 0 {
-				user.SendText(`  <ansi fg="yellow-bold">Uses:</ansi>        <ansi fg="white-bold">` + strconv.Itoa(itemCreateAnswerMaxUses) + `</ansi>`)
+
+			if newItemSpec.Uses > 0 {
+				user.SendText(`  <ansi fg="yellow-bold">Uses:</ansi>        <ansi fg="white-bold">` + strconv.Itoa(newItemSpec.Uses) + `</ansi>`)
 			}
-			if itemCreateAnswerValue > 0 {
-				user.SendText(`  <ansi fg="yellow-bold">Value:</ansi>        <ansi fg="white-bold">` + strconv.Itoa(itemCreateAnswerValue) + `</ansi>`)
+
+			if newItemSpec.Value > 0 {
+				user.SendText(`  <ansi fg="yellow-bold">Value:</ansi>       <ansi fg="white-bold">` + strconv.Itoa(newItemSpec.Value) + `</ansi>`)
 			}
-			if itemCreateAnswerQuestToken != `` {
-				user.SendText(`  <ansi fg="yellow-bold">Quest Token:</ansi>    <ansi fg="white-bold">` + itemCreateAnswerQuestToken + `</ansi>`)
+
+			if newItemSpec.QuestToken != `` {
+				user.SendText(`  <ansi fg="yellow-bold">Quest Token:</ansi> <ansi fg="white-bold">` + newItemSpec.QuestToken + `</ansi>`)
 			}
-			user.SendText(`  <ansi fg="yellow-bold">SubType:</ansi>     <ansi fg="white-bold">` + itemCreateAnswerSubType + `</ansi>`)
+
+			user.SendText(`  <ansi fg="yellow-bold">SubType:</ansi>     <ansi fg="white-bold">` + string(newItemSpec.Subtype) + `</ansi>`)
 
 			return true, nil
 		}
@@ -366,17 +377,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 		}
 	}
 
-	newItemId, err := items.CreateNewItemFile(
-		itemCreateAnswerName,
-		itemCreateAnswerDescription,
-		itemCreateAnswerValue,
-		itemCreateAnswerType,
-		itemCreateAnswerSubType,
-		itemCreateAnswerDamage,
-		itemCreateAnswerMaxUses,
-		itemCreateAnswerKeyLockId,
-		itemCreateAnswerQuestToken,
-	)
+	newItemId, err := items.CreateNewItemFile(newItemSpec)
 
 	if err != nil {
 		user.SendText("Error: " + err.Error())
@@ -390,7 +391,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 	user.SendText(``)
 	user.SendText(`  <ansi fg="yellow-bold">File Path:</ansi>   <ansi fg="white-bold">` + itemInst.Filepath() + `</ansi>`)
 	user.SendText(``)
-	user.SendText(`  <ansi fg="black-bold">note: Try <ansi fg="command">item spawn ` + itemCreateAnswerName + `</ansi> to test it.`)
+	user.SendText(`  <ansi fg="black-bold">note: Try <ansi fg="command">item spawn ` + newItemSpec.Name + `</ansi> to test it.`)
 
 	return true, nil
 }

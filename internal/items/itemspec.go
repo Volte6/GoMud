@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"math"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -251,6 +252,16 @@ func (d *Damage) InitDiceRoll(dRoll string) {
 	}
 
 	d.Attacks, d.DiceCount, d.SideCount, d.BonusDamage, _ = util.ParseDiceRoll(dRoll)
+}
+
+func FindItem(nameOrId string) int {
+	if itemId, err := strconv.Atoi(nameOrId); err == nil {
+		if itm := New(itemId); itm.ItemId != 0 {
+			return itm.ItemId
+		}
+	}
+
+	return FindItemByName(nameOrId)
 }
 
 func FindItemByName(name string) int {

@@ -610,6 +610,17 @@ func (r *Mob) Save() error {
 	return nil
 }
 
+func (m *Mob) HasScript() bool {
+
+	scriptPath := m.GetScriptPath()
+	// Load the script into a string
+	if _, err := os.Stat(scriptPath); err == nil {
+		return true
+	}
+
+	return false
+}
+
 func (m *Mob) GetScript() string {
 
 	scriptPath := m.GetScriptPath()

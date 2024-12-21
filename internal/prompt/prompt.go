@@ -71,9 +71,16 @@ func (p *Prompt) Ask(question string, responseOptions []string, defaultOption ..
 		defOpt = defaultOption[0]
 	}
 
+	finalResponseOptions := []string{}
+	for _, opt := range responseOptions {
+		if opt != `` {
+			finalResponseOptions = append(finalResponseOptions, opt)
+		}
+	}
+
 	q := &Question{
 		Question:        question,
-		Options:         responseOptions,
+		Options:         finalResponseOptions,
 		DefaultResponse: defOpt,
 	}
 
@@ -99,6 +106,11 @@ func (q *Question) Reset() {
 	q.Done = false
 }
 
+/*
+If fewer than 2 choices provided, answer is what they enter.
+If they provide an empty string, and a default respnose is provided,
+answer is default.
+*/
 func (q *Question) Answer(answer string) {
 	// If an empty string, failover to default (if any)
 	// Otherwise, just abort and wait for a valid response
@@ -113,7 +125,7 @@ func (q *Question) Answer(answer string) {
 
 	// If options were provided, find best match if any
 	optLen := len(q.Options)
-	if optLen > 0 {
+	if optLen > 1 {
 
 		closestMatchIdx := -1
 		closestMatchLen := 0
@@ -151,7 +163,9 @@ func (q *Question) Answer(answer string) {
 		answer = q.Options[closestMatchIdx]
 	}
 
-	q.Response = answer
+	if len(answer) > 0 {
+		q.Response = answer
+	}
 	q.Done = true
 }
 

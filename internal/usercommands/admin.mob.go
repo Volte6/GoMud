@@ -88,14 +88,22 @@ func mob_Spawn(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 
 func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
+	var newMob = mobs.Mob{}
+
+	args := util.SplitButRespectQuotes(rest)
+	if len(args) > 1 {
+		if mobId, err := strconv.Atoi(args[1]); err == nil {
+			newMob = *(mobs.GetMobSpec(mobs.MobId(mobId)))
+		}
+		if newMob.MobId == 0 {
+			if mobId := mobs.MobIdByName(strings.Join(args[1:], ` `)); mobId != 0 {
+				newMob = *(mobs.GetMobSpec(mobId))
+			}
+		}
+	}
+
 	// Get if already exists, otherwise create new
 	cmdPrompt, isNew := user.StartPrompt(`mob`, rest)
-
-	mobCreateAnswerName := ``
-	mobCreateAnswerRace := 0
-	mobCreateAnswerZone := ``
-	mobCreateAnswerDescription := `Not much to look at, really.`
-	mobCreateAnswerScriptTemplate := false
 
 	if isNew {
 		user.SendText(``)
@@ -105,19 +113,18 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 	//
 	// Name Selection
 	//
-
-	question := cmdPrompt.Ask(`What will the mob be called?`, []string{}, `_`)
+	question := cmdPrompt.Ask(`What will the mob be called?`, []string{newMob.Character.Name}, newMob.Character.Name)
 	if !question.Done {
 		return true, nil
 	}
 
-	if question.Response == `_` {
+	if question.Response == `` {
 		user.SendText("Aborting...")
 		user.ClearPrompt()
 		return true, nil
 	}
 
-	mobCreateAnswerName = question.Response
+	newMob.Character.Name = question.Response
 
 	//
 	// Race Selection
@@ -136,7 +143,14 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 		return raceOptions[i].Name < raceOptions[j].Name
 	})
 
-	question = cmdPrompt.Ask(`What race will the mob be?`, []string{}, `_`)
+	raceName := ``
+	if newMob.Character.RaceId > 0 {
+		if r := races.GetRace(newMob.Character.RaceId); r != nil {
+			raceName = r.Name
+		}
+	}
+
+	question = cmdPrompt.Ask(`What race will the mob be?`, []string{raceName}, raceName)
 	if !question.Done {
 		tplTxt, _ := templates.Process("tables/numbered-list", raceOptions)
 		user.SendText(tplTxt)
@@ -145,7 +159,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 		return true, nil
 	}
 
-	if question.Response == `_` {
+	if question.Response == `` {
 		user.SendText("Aborting...")
 		user.ClearPrompt()
 		return true, nil
@@ -178,11 +192,12 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 
 	for _, r := range allRaces {
 		if strings.EqualFold(r.Name, raceNameSelection) {
-			mobCreateAnswerRace = r.RaceId
+			newMob.Character.RaceId = r.RaceId
+			break
 		}
 	}
 
-	if mobCreateAnswerRace == 0 {
+	if newMob.Character.RaceId == 0 {
 		question.RejectResponse()
 
 		tplTxt, _ := templates.Process("tables/numbered-list", raceOptions)
@@ -210,14 +225,14 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 		return zoneOptions[i].Name < zoneOptions[j].Name
 	})
 
-	question = cmdPrompt.Ask(`What zone is this mob from?`, []string{}, `_`)
+	question = cmdPrompt.Ask(`What zone is this mob from?`, []string{newMob.Zone}, newMob.Zone)
 	if !question.Done {
 		tplTxt, _ := templates.Process("tables/numbered-list", zoneOptions)
 		user.SendText(tplTxt)
 		return true, nil
 	}
 
-	if question.Response == `_` {
+	if question.Response == `` {
 		user.SendText("Aborting...")
 		user.ClearPrompt()
 		return true, nil
@@ -226,17 +241,18 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 	zoneNameSelection := question.Response
 	if restNum, err := strconv.Atoi(zoneNameSelection); err == nil {
 		if restNum > 0 && restNum <= len(zoneOptions) {
-			zoneNameSelection = allZones[restNum-1]
+			zoneNameSelection = zoneOptions[restNum-1].Name
 		}
 	}
 
 	for _, z := range allZones {
 		if strings.EqualFold(z, zoneNameSelection) {
-			mobCreateAnswerZone = z
+			newMob.Zone = z
+			break
 		}
 	}
 
-	if mobCreateAnswerZone == `` {
+	if newMob.Zone == `` {
 		question.RejectResponse()
 
 		tplTxt, _ := templates.Process("tables/numbered-list", zoneOptions)
@@ -247,14 +263,39 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 	//
 	// Description
 	//
-	question = cmdPrompt.Ask(`Enter a description for the mob:`, []string{}, `_`)
+	question = cmdPrompt.Ask(`Enter a description for the mob:`, []string{newMob.Character.GetDescription()}, newMob.Character.GetDescription())
 	if !question.Done {
 		return true, nil
 	}
 
 	if question.Response != `_` {
-		mobCreateAnswerDescription = question.Response
+		newMob.Character.Description = question.Response
 	}
+
+	//
+	// Max Wander
+	//
+	question = cmdPrompt.Ask(`How far can this mob wander (-1 = none. 0 = unlimted)?`, []string{strconv.Itoa(newMob.MaxWander)}, strconv.Itoa(newMob.MaxWander))
+	if !question.Done {
+		return true, nil
+	}
+
+	newMob.MaxWander, _ = strconv.Atoi(question.Response)
+
+	//
+	// Hostile?
+	//
+	defaultYN := `n`
+	if newMob.Hostile {
+		defaultYN = `y`
+	}
+
+	question = cmdPrompt.Ask(`Is this mob hostile?`, []string{`y`, `n`}, defaultYN)
+	if !question.Done {
+		return true, nil
+	}
+
+	newMob.Hostile = question.Response == `y`
 
 	//
 	// Quest Script?
@@ -264,7 +305,10 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 		return true, nil
 	}
 
-	mobCreateAnswerScriptTemplate = question.Response == `y`
+	scriptTemplate := ``
+	if question.Response == `y` {
+		scriptTemplate = mobs.ScriptTemplateQuest
+	}
 
 	//
 	// Confirm?
@@ -272,11 +316,13 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 	question = cmdPrompt.Ask(`Does this look correct?`, []string{`y`, `n`}, `n`)
 	if !question.Done {
 
-		user.SendText(`  <ansi fg="yellow-bold">Name:</ansi>    <ansi fg="white-bold">` + mobCreateAnswerName + `</ansi>`)
-		user.SendText(`  <ansi fg="yellow-bold">Race:</ansi>    <ansi fg="white-bold">` + strconv.Itoa(mobCreateAnswerRace) + ` (` + raceNameSelection + `)</ansi>`)
-		user.SendText(`  <ansi fg="yellow-bold">Zone:</ansi>    <ansi fg="white-bold">` + mobCreateAnswerZone + `</ansi>`)
-		user.SendText(`  <ansi fg="yellow-bold">Desc:</ansi>    <ansi fg="white-bold">` + mobCreateAnswerDescription + `</ansi>`)
-		user.SendText(`  <ansi fg="yellow-bold">Script:</ansi>  <ansi fg="white-bold">` + strconv.FormatBool(mobCreateAnswerScriptTemplate) + `</ansi>`)
+		user.SendText(`  <ansi fg="yellow-bold">Name:</ansi>    <ansi fg="white-bold">` + newMob.Character.Name + `</ansi>`)
+		user.SendText(`  <ansi fg="yellow-bold">Race:</ansi>    <ansi fg="white-bold">` + strconv.Itoa(newMob.Character.RaceId) + ` (` + raceNameSelection + `)</ansi>`)
+		user.SendText(`  <ansi fg="yellow-bold">Zone:</ansi>    <ansi fg="white-bold">` + newMob.Zone + `</ansi>`)
+		user.SendText(`  <ansi fg="yellow-bold">Desc:</ansi>    <ansi fg="white-bold">` + newMob.Character.Description + `</ansi>`)
+		user.SendText(`  <ansi fg="yellow-bold">Wander:</ansi>  <ansi fg="white-bold">` + strconv.Itoa(newMob.MaxWander) + `</ansi>`)
+		user.SendText(`  <ansi fg="yellow-bold">Hostile:</ansi> <ansi fg="white-bold">` + strconv.FormatBool(newMob.Hostile) + `</ansi>`)
+		user.SendText(`  <ansi fg="yellow-bold">Script:</ansi>  <ansi fg="white-bold">` + strconv.FormatBool(scriptTemplate != ``) + `</ansi>`)
 
 		return true, nil
 	}
@@ -288,7 +334,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 		return true, nil
 	}
 
-	mobId, err := mobs.CreateNewMobFile(mobCreateAnswerName, mobCreateAnswerRace, mobCreateAnswerZone, mobCreateAnswerDescription, mobCreateAnswerScriptTemplate)
+	mobId, err := mobs.CreateNewMobFile(newMob, scriptTemplate)
 
 	if err != nil {
 		user.SendText("Error: " + err.Error())
@@ -301,11 +347,11 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 	user.SendText(`  <ansi bg="red" fg="white-bold">MOB CREATED</ansi>`)
 	user.SendText(``)
 	user.SendText(`  <ansi fg="yellow-bold">File Path:</ansi>   <ansi fg="white-bold">` + mobInst.Filepath() + `</ansi>`)
-	if mobCreateAnswerScriptTemplate {
+	if scriptTemplate != `` {
 		user.SendText(`  <ansi fg="yellow-bold">Script Path:</ansi> <ansi fg="white-bold">` + mobInst.GetScriptPath() + `</ansi>`)
 	}
 	user.SendText(``)
-	user.SendText(`  <ansi fg="black-bold">note: Try <ansi fg="command">mob spawn ` + mobCreateAnswerName + `</ansi> to test it.`)
+	user.SendText(`  <ansi fg="black-bold">note: Try <ansi fg="command">mob spawn ` + mobInst.Character.Name + `</ansi> to test it.`)
 
 	return true, nil
 }

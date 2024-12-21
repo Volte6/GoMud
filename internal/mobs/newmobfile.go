@@ -4,27 +4,25 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/util"
 )
 
-func CreateNewMobFile(newMobName string, newMobRaceId int, newMobZone string, newMobDescription string, includeScript bool) (MobId, error) {
+const (
+	ScriptTemplateQuest = `sample-quest-mob-script.js`
+)
 
-	newMobInfo := Mob{
-		MobId: getNextMobId(),
-		Zone:  newMobZone,
-		Character: characters.Character{
-			Name:        newMobName,
-			RaceId:      newMobRaceId,
-			Description: strings.ReplaceAll(newMobDescription, `\n`, "\n"),
-		},
+func CreateNewMobFile(newMobInfo Mob, copyScript string) (MobId, error) {
+
+	newMobInfo.MobId = getNextMobId()
+
+	if newMobInfo.MobId == 0 {
+		return 0, errors.New(`Could not find a new mob id to assign.`)
 	}
 
-	if includeScript {
+	if copyScript == ScriptTemplateQuest {
 		newMobInfo.QuestFlags = []string{`1000000-start`}
 	}
 
@@ -51,13 +49,13 @@ func CreateNewMobFile(newMobName string, newMobRaceId int, newMobZone string, ne
 	mobNameCache[newMobInfo.MobId] = newMobInfo.Character.Name
 	mobs[newMobInfo.Id()] = &newMobInfo
 
-	if includeScript {
+	if copyScript != `` {
 
 		newScriptPath := newMobInfo.GetScriptPath()
 		os.MkdirAll(filepath.Dir(newScriptPath), os.ModePerm)
 
 		fileloader.CopyFileContents(
-			util.FilePath(`_datafiles/mobs/sample-quest-mob-script.js`),
+			util.FilePath(`_datafiles/mobs/`+copyScript),
 			newMobInfo.GetScriptPath(),
 		)
 	}
