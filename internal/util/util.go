@@ -804,7 +804,7 @@ func StringWildcardMatch(stringToSearch string, patternToSearch string) bool {
 		patternToSearch = patternToSearch[1:]
 	}
 
-	if patternToSearch[len(patternToSearch)-1] == '*' {
+	if len(patternToSearch) > 1 && patternToSearch[len(patternToSearch)-1] == '*' {
 		startsWith = true
 		patternToSearch = patternToSearch[0 : len(patternToSearch)-1]
 	}

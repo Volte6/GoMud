@@ -32,14 +32,51 @@ func Mob(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, nil
 	}
 
-	// mob create
+	// Create a new mob
 	if args[0] == `create` {
 		return mob_Create(rest, user, room)
 	}
 
+	// Spawn a mob instance
 	if args[0] == `spawn` {
 		return mob_Spawn(strings.TrimSpace(rest[5:]), user, room)
 	}
+
+	// List existing mobs
+	if args[0] == `list` {
+		return mob_List(strings.TrimSpace(rest[4:]), user, room)
+	}
+
+	return true, nil
+}
+
+func mob_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+
+	mobNames := []templates.NameDescription{}
+
+	for _, nm := range mobs.GetAllMobNames() {
+
+		// If searching for matches
+		if len(rest) > 0 {
+			if !strings.Contains(rest, `*`) {
+				rest += `*`
+			}
+			if !util.StringWildcardMatch(nm, rest) {
+				continue
+			}
+		}
+
+		mobNames = append(mobNames, templates.NameDescription{
+			Name: nm,
+		})
+	}
+
+	sort.SliceStable(mobNames, func(i, j int) bool {
+		return mobNames[i].Name < mobNames[j].Name
+	})
+
+	tplTxt, _ := templates.Process("tables/numbered-list-doubled", mobNames)
+	user.SendText(tplTxt)
 
 	return true, nil
 }
@@ -227,7 +264,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 
 	question = cmdPrompt.Ask(`What zone is this mob from?`, []string{newMob.Zone}, newMob.Zone)
 	if !question.Done {
-		tplTxt, _ := templates.Process("tables/numbered-list", zoneOptions)
+		tplTxt, _ := templates.Process("tables/numbered-list-doubled", zoneOptions)
 		user.SendText(tplTxt)
 		return true, nil
 	}
@@ -268,7 +305,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 		return true, nil
 	}
 
-	if question.Response != `_` {
+	if question.Response != `` {
 		newMob.Character.Description = question.Response
 	}
 

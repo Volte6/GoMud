@@ -2,6 +2,7 @@ package usercommands
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -30,14 +31,51 @@ func Item(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, nil
 	}
 
-	// mob create
+	// create a new item
 	if args[0] == `create` {
 		return item_Create(rest, user, room)
 	}
 
+	// spawn an existing item
 	if args[0] == `spawn` {
 		return item_Spawn(strings.TrimSpace(rest[5:]), user, room)
 	}
+
+	// List existing items
+	if args[0] == `list` {
+		return item_List(strings.TrimSpace(rest[4:]), user, room)
+	}
+
+	return true, nil
+}
+
+func item_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+
+	itmNames := []templates.NameDescription{}
+
+	for _, itm := range items.GetAllItemNames() {
+
+		// If searching for matches
+		if len(rest) > 0 {
+			if !strings.Contains(rest, `*`) {
+				rest += `*`
+			}
+			if !util.StringWildcardMatch(itm, rest) {
+				continue
+			}
+		}
+
+		itmNames = append(itmNames, templates.NameDescription{
+			Name: itm,
+		})
+	}
+
+	sort.SliceStable(itmNames, func(i, j int) bool {
+		return itmNames[i].Name < itmNames[j].Name
+	})
+
+	tplTxt, _ := templates.Process("tables/numbered-list-doubled", itmNames)
+	user.SendText(tplTxt)
 
 	return true, nil
 }
@@ -141,7 +179,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 		if newItemSpec.Type == `` {
 			question.RejectResponse()
 
-			tplTxt, _ := templates.Process("tables/numbered-listtables/numbered-list", typeOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", typeOptions)
 			user.SendText(tplTxt)
 
 			return true, nil
@@ -253,7 +291,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 		if newItemSpec.Subtype == `` {
 			question.RejectResponse()
 
-			tplTxt, _ := templates.Process("tables/numbered-listtables/numbered-list", subTypeOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", subTypeOptions)
 			user.SendText(tplTxt)
 
 			return true, nil
