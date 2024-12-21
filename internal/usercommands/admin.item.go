@@ -141,7 +141,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 		if newItemSpec.Type == `` {
 			question.RejectResponse()
 
-			tplTxt, _ := templates.Process("tables/numbered-listtables/numbered-list", typeOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", typeOptions)
 			user.SendText(tplTxt)
 
 			return true, nil
@@ -253,7 +253,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 		if newItemSpec.Subtype == `` {
 			question.RejectResponse()
 
-			tplTxt, _ := templates.Process("tables/numbered-listtables/numbered-list", subTypeOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", subTypeOptions)
 			user.SendText(tplTxt)
 
 			return true, nil
