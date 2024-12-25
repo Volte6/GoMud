@@ -61,6 +61,7 @@ func mob_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 			if !strings.Contains(rest, `*`) {
 				rest += `*`
 			}
+
 			if !util.StringWildcardMatch(strings.ToLower(nm), rest) {
 				continue
 			}
