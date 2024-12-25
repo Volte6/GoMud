@@ -10,8 +10,14 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
+var (
+	SampleScripts = map[string]string{
+		`item and gold`: `item-gold-quest.js`,
+	}
+)
+
 const (
-	ScriptTemplateQuest = `sample-quest-mob-script.js`
+	ScriptTemplateQuest = `item-gold-quest.js`
 )
 
 func CreateNewMobFile(newMobInfo Mob, copyScript string) (MobId, error) {
@@ -55,7 +61,7 @@ func CreateNewMobFile(newMobInfo Mob, copyScript string) (MobId, error) {
 		os.MkdirAll(filepath.Dir(newScriptPath), os.ModePerm)
 
 		fileloader.CopyFileContents(
-			util.FilePath(`_datafiles/mobs/`+copyScript),
+			util.FilePath(string(configs.GetConfig().FolderSampleScripts)+`/mobs/`+copyScript),
 			newMobInfo.GetScriptPath(),
 		)
 	}

@@ -16,14 +16,14 @@ type SpellType string
 type SpellSchool string
 
 type SpellData struct {
-	SpellId     string
-	Name        string
-	Description string
-	Type        SpellType
-	School      SpellSchool
-	Cost        int
-	WaitRounds  int
-	Difficulty  int // Augments final success chance by this %
+	SpellId     string      `yaml:"spellid,omitempty"`
+	Name        string      `yaml:"name,omitempty"`
+	Description string      `yaml:"description,omitempty"`
+	Type        SpellType   `yaml:"type,omitempty"`
+	School      SpellSchool `yaml:"school,omitempty"`
+	Cost        int         `yaml:"cost,omitempty"`
+	WaitRounds  int         `yaml:"waitrounds,omitempty"`
+	Difficulty  int         `yaml:"difficulty,omitempty"` // Augments final success chance by this %
 }
 
 const (
@@ -89,6 +89,19 @@ func (s SpellType) TargetTypeString(short ...bool) string {
 		return `Area Target`
 	}
 	return `Unknown`
+}
+
+// Finds a match for a spell by name or id
+func FindSpell(spellName string) string {
+	if sd, ok := allSpells[spellName]; ok {
+		return sd.SpellId
+	}
+	for _, spellInfo := range allSpells {
+		if strings.ToLower(spellInfo.Name) == spellName {
+			return spellInfo.SpellId
+		}
+	}
+	return ``
 }
 
 func GetSpell(spellId string) *SpellData {

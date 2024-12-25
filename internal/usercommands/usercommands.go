@@ -134,6 +134,7 @@ var (
 		`skillset`:    {Skillset, false, true}, // Admin only
 		`sneak`:       {Sneak, false, false},
 		`spawn`:       {Spawn, false, true}, // Admin only
+		`spell`:       {Spell, true, true},  // Admin only
 		`spells`:      {Spells, true, false},
 		`stash`:       {Stash, false, false},
 		`status`:      {Status, true, false},

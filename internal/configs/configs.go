@@ -33,6 +33,7 @@ type Config struct {
 	FolderSpellData         ConfigString `yaml:"FolderSpellData"`
 	FolderTemplates         ConfigString `yaml:"FolderTemplates"`
 	FolderConversations     ConfigString `yaml:"FolderConversations"`
+	FolderSampleScripts     ConfigString `yaml:"FolderSampleScripts"`
 	FileAnsiAliases         ConfigString `yaml:"FileAnsiAliases"`
 	FileColorPatterns       ConfigString `yaml:"FileColorPatterns"`
 	FileKeywords            ConfigString `yaml:"FileKeywords"`
@@ -377,6 +378,10 @@ func (c *Config) Validate() {
 
 	if c.FolderTemplates == `` {
 		c.FolderTemplates = `_datafiles/templates` // default
+	}
+
+	if c.FolderSampleScripts == `` {
+		c.FolderSampleScripts = `_datafiles/sample-scripts` // default
 	}
 
 	if c.FolderConversations == `` {

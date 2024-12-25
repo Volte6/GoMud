@@ -33,7 +33,7 @@ func Item(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// create a new item
 	if args[0] == `create` {
-		return item_Create(rest, user, room)
+		return item_Create(strings.TrimSpace(rest[6:]), user, room)
 	}
 
 	// spawn an existing item
@@ -60,7 +60,7 @@ func item_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 			if !strings.Contains(rest, `*`) {
 				rest += `*`
 			}
-			if !util.StringWildcardMatch(itm, rest) {
+			if !util.StringWildcardMatch(strings.ToLower(itm), rest) {
 				continue
 			}
 		}
@@ -113,15 +113,14 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, e
 
 	var newItemSpec = items.ItemSpec{}
 
-	args := util.SplitButRespectQuotes(rest)
-	if len(args) > 1 {
-		if itemId := items.FindItem(args[1]); itemId > 0 {
+	if len(rest) > 0 {
+		if itemId := items.FindItem(rest); itemId > 0 {
 			newItemSpec = *(items.GetItemSpec(itemId))
 		}
 	}
 
 	// Get if already exists, otherwise create new
-	cmdPrompt, isNew := user.StartPrompt(`item`, rest)
+	cmdPrompt, isNew := user.StartPrompt(`item create`, rest)
 
 	if isNew {
 		user.SendText(``)
