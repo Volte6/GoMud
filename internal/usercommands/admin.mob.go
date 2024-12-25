@@ -34,7 +34,7 @@ func Mob(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// Create a new mob
 	if args[0] == `create` {
-		return mob_Create(rest, user, room)
+		return mob_Create(strings.TrimSpace(rest[6:]), user, room)
 	}
 
 	// Spawn a mob instance
@@ -61,7 +61,8 @@ func mob_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 			if !strings.Contains(rest, `*`) {
 				rest += `*`
 			}
-			if !util.StringWildcardMatch(nm, rest) {
+
+			if !util.StringWildcardMatch(strings.ToLower(nm), rest) {
 				continue
 			}
 		}
@@ -127,20 +128,19 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 
 	var newMob = mobs.Mob{}
 
-	args := util.SplitButRespectQuotes(rest)
-	if len(args) > 1 {
-		if mobId, err := strconv.Atoi(args[1]); err == nil {
+	if len(rest) > 0 {
+		if mobId, err := strconv.Atoi(rest); err == nil {
 			newMob = *(mobs.GetMobSpec(mobs.MobId(mobId)))
 		}
 		if newMob.MobId == 0 {
-			if mobId := mobs.MobIdByName(strings.Join(args[1:], ` `)); mobId != 0 {
+			if mobId := mobs.MobIdByName(rest); mobId != 0 {
 				newMob = *(mobs.GetMobSpec(mobId))
 			}
 		}
 	}
 
 	// Get if already exists, otherwise create new
-	cmdPrompt, isNew := user.StartPrompt(`mob`, rest)
+	cmdPrompt, isNew := user.StartPrompt(`mob create`, rest)
 
 	if isNew {
 		user.SendText(``)
@@ -337,14 +337,50 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 	//
 	// Quest Script?
 	//
-	question = cmdPrompt.Ask(`Create with a default quest script?`, []string{`y`, `n`}, `n`)
+	question = cmdPrompt.Ask(`Create with a sample script?`, []string{`y`, `n`}, `n`)
 	if !question.Done {
 		return true, nil
 	}
 
+	scriptType := ``
 	scriptTemplate := ``
 	if question.Response == `y` {
-		scriptTemplate = mobs.ScriptTemplateQuest
+
+		scriptOptions := []templates.NameDescription{}
+		for about, _ := range mobs.SampleScripts {
+			scriptOptions = append(scriptOptions, templates.NameDescription{
+				Name: about,
+			})
+		}
+
+		sort.SliceStable(scriptOptions, func(i, j int) bool {
+			return scriptOptions[i].Name < scriptOptions[j].Name
+		})
+
+		question = cmdPrompt.Ask(`Which sample script?`, []string{})
+		if !question.Done {
+			tplTxt, _ := templates.Process("tables/numbered-list", scriptOptions)
+			user.SendText(tplTxt)
+			return true, nil
+		}
+
+		scriptType = question.Response
+
+		if restNum, err := strconv.Atoi(scriptType); err == nil {
+			if restNum > 0 && restNum <= len(scriptOptions) {
+				scriptType = scriptOptions[restNum-1].Name
+			}
+		}
+
+		if _, ok := mobs.SampleScripts[scriptType]; !ok {
+			question.RejectResponse()
+
+			tplTxt, _ := templates.Process("tables/numbered-list", scriptOptions)
+			user.SendText(tplTxt)
+			return true, nil
+		}
+
+		scriptTemplate = mobs.SampleScripts[scriptType]
 	}
 
 	//
@@ -359,7 +395,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 		user.SendText(`  <ansi fg="yellow-bold">Desc:</ansi>    <ansi fg="white-bold">` + newMob.Character.Description + `</ansi>`)
 		user.SendText(`  <ansi fg="yellow-bold">Wander:</ansi>  <ansi fg="white-bold">` + strconv.Itoa(newMob.MaxWander) + `</ansi>`)
 		user.SendText(`  <ansi fg="yellow-bold">Hostile:</ansi> <ansi fg="white-bold">` + strconv.FormatBool(newMob.Hostile) + `</ansi>`)
-		user.SendText(`  <ansi fg="yellow-bold">Script:</ansi>  <ansi fg="white-bold">` + strconv.FormatBool(scriptTemplate != ``) + `</ansi>`)
+		user.SendText(`  <ansi fg="yellow-bold">Script:</ansi>  <ansi fg="white-bold">` + scriptType + ` (` + scriptTemplate + `)</ansi>`)
 
 		return true, nil
 	}

@@ -51,6 +51,10 @@ FolderAttackMessageData: _datafiles/combat-messages
 #   General conversations can be in the conversations folder
 #   Everything else should be a subfolder named by zone
 FolderConversations: _datafiles/conversations 
+# - FolderSampleScripts -
+#   Contains categorized sample scripts that are copied
+#   When creating new mobs etc.
+FolderSampleScripts: _datafiles/sample-scripts 
 # - FileAnsiAliases -
 #   Maps common aliases to specific ansi color codes
 FileAnsiAliases: _datafiles/ansi-aliases.yaml 

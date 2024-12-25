@@ -94,8 +94,6 @@ function onGive(mob, room, eventDetails) {
     //
     if ( eventDetails.item.ItemId ) {
 
-        console.log("ITEMID", eventDetails.item.ItemId)
-        
         //
         // If the item they gave isn't the desired item id, give it back.
         //
