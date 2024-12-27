@@ -1,0 +1,57 @@
+services:
+  server:
+    container_name: "go-mud-server"
+    build:
+      dockerfile: ./provisioning/Dockerfile
+      args:
+        - BIN=go-mud-server
+    networks:
+      - mud_network
+    image: localhost/go-mud-server:${TAG:-latest}
+    environment:
+      SERVICE_NAME: go-mud-server
+      PORT: 33333
+    ports:
+      - 33333:33333
+      - 80:80
+    volumes:
+      - type: volume
+        source: log-volume
+        target: /app/log
+
+  busybox:
+    container_name: "server-logs"
+    image: busybox
+    command:
+      - "tail"
+      - "-F"
+      - "/app/log/logfile.log"
+    volumes:
+      - type: volume
+        source: log-volume
+        target: /app/log
+
+  terminal:
+    container_name: "mud-terminal"
+    build:
+      dockerfile: ./provisioning/terminal/Dockerfile
+      args:
+        - BIN=mud-terminal
+    stdin_open: true
+    tty: true
+    depends_on:
+      - server
+    networks:
+      - mud_network
+    environment:
+      PORT: 33333
+      SERVICE_NAME: mud-terminal
+      LINES: 50
+      COLUMNS: 120
+
+volumes:
+  log-volume:
+
+networks:
+  mud_network:
+    name: mud_network
