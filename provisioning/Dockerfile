@@ -1,30 +1,26 @@
-FROM golang:1.21.3-alpine3.18 as builder
+FROM golang:1.23.4-alpine3.21 AS builder
 
-ARG BIN=app
-ENV BIN ${BIN}
-
-RUN apk add --update make bash
-RUN mkdir -p /app
+ARG BIN=go-mud-server
+ENV BIN=${BIN}
 WORKDIR /src
 
-COPY    . ./
+RUN apk add --update make bash
 
-RUN make build_only
-RUN cp -R   provisioning/entrypoint.sh \
-            _datafiles \
-            ${BIN} \
-            /app/
+# Create logfile
+RUN mkdir -p /app/log
+RUN touch /app/log/logfile.log
 
-FROM alpine:latest
+COPY . .
+RUN go build -o ${BIN}
 
-ARG BIN=app
-ENV BIN ${BIN}
+
+FROM alpine:latest AS runner
+ARG BIN=go-mud-server
+ENV BIN=${BIN}
+WORKDIR /app
 
 EXPOSE ${PORT}
+COPY --from=builder /src/${BIN} .
+COPY --from=builder /src/_datafiles ./_datafiles
 
-WORKDIR /app
-COPY --from=builder /app .
-
-RUN chmod +x entrypoint.sh
-
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "-c", "./${BIN}"]
