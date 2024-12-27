@@ -63,7 +63,8 @@ Or you can just build the binary if you prefer:
 > `./GoMudServer`
 
 Or if you have docker installed:
-> `docker-compose -f provisioning/docker-compose.yml up --build --remove-orphans server`
+
+> `docker compose up --build`
 
 ## Connecting
 
