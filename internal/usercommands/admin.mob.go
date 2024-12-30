@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
@@ -84,9 +85,11 @@ func mob_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 
 func mob_Spawn(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
+	c := configs.GetConfig()
+
 	// special handling of loot goblin
-	if rest == `loot goblin` {
-		if gRoom := rooms.LoadRoom(rooms.GoblinRoom); gRoom != nil { // loot goblin room
+	if rest == `loot goblin` && c.LootGoblinRoom != 0 {
+		if gRoom := rooms.LoadRoom(int(c.LootGoblinRoom)); gRoom != nil { // loot goblin room
 			user.SendText(`Somewhere in the realm, a <ansi fg="mobname">loot goblin</ansi> appears!`)
 			slog.Info(`Loot Goblin Spawn`, `roundNumber`, util.GetRoundCount(), `forced`, true)
 			gRoom.Prepare(false) // Make sure the loot goblin spawns.

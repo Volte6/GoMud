@@ -34,7 +34,7 @@ Version: "1.0.0"
 #   The folder where all datafiles reside.
 #   If you are planning to create your own world, copying the current folder
 #   and its entire tree of content is a good place to start.
-FolderDataFiles: _datafiles/world/default-world
+FolderDataFiles: _datafiles/world/default
 # - FolderHtmlFiles - 
 #   The folder where all web html files reside.
 FolderHtmlFiles: _datafiles/html
@@ -145,8 +145,13 @@ LogoutRounds: 3
 # - StartRoom -
 #   This is the default starting room for the game. It only matters when there
 #   is code that explicitely tries to send the player to the "starting room"
-#   The default of 1 is Town Square in Frostfang
+#   The default of 1 is Town Square
 StartRoom: 1
+# - DeathRecoveryRoom -
+#   This is the room players are sent to when they die.
+#   This should have some way of healing them and (eventually)
+#   sending them back into the main world.
+DeathRecoveryRoom: 75
 # - TutorialStartRooms - 
 #   RoomIds players will be put in when starting the game/tutorial
 #   RoomIds 900-999 are reserved for Tutorial rooms.
@@ -280,6 +285,10 @@ WebPort: 80
 #   treasure.
 #
 ################################################################################
+# - LootGoblinRoom -
+#   The room the loot goblin spawns in (per its spawninfo). Also the room it returns
+#   to to drop off loot it finds. If zero (0), no loot goblin spawning.
+LootGoblinRoom: 139
 # - LootGoblinRoundCount -
 #   How often the Loot Goblin will spawn. It is a good idea to keep this 
 #   number low to keep the game from getting bogged down with too many items 

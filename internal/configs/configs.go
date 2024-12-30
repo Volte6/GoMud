@@ -54,6 +54,7 @@ type Config struct {
 	LocalPort                    ConfigInt         `yaml:"LocalPort"`                    // Port used for admin connections, localhost only
 	WebPort                      ConfigInt         `yaml:"WebPort"`                      // Port used for web requests
 	NextRoomId                   ConfigInt         `yaml:"NextRoomId"`                   // The next room id to use when creating a new room
+	LootGoblinRoom               ConfigInt         `yaml:"LootGoblinRoom"`               // The room the loot goblin spawns in
 	LootGoblinRoundCount         ConfigInt         `yaml:"LootGoblinRoundCount"`         // How often to spawn a loot goblin
 	LootGoblinMinimumItems       ConfigInt         `yaml:"LootGoblinMinimumItems"`       // How many items on the ground to attract the loot goblin
 	LootGoblinMinimumGold        ConfigInt         `yaml:"LootGoblinMinimumGold"`        // How much gold on the ground to attract the loot goblin
@@ -80,6 +81,7 @@ type Config struct {
 	ZombieSeconds      ConfigInt         `yaml:"ZombieSeconds"`      // How many seconds a player will be a zombie allowing them to reconnect.
 	LogoutRounds       ConfigInt         `yaml:"LogoutRounds"`       // How many rounds of uninterrupted meditation must be completed to log out.
 	StartRoom          ConfigInt         `yaml:"StartRoom"`          // Default starting room.
+	DeathRecoveryRoom  ConfigInt         `yaml:"DeathRecoveryRoom"`  // Recovery room after dying.
 	TutorialStartRooms ConfigSliceString `yaml:"TutorialStartRooms"` // List of all rooms that can be used to begin the tutorial process
 
 	// Perma-death related configs

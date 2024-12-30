@@ -48,8 +48,6 @@ type RoomManager struct {
 }
 
 const (
-	GoblinZone       = `Endless Trashheap`
-	GoblinRoom       = 139
 	StartRoomIdAlias = 0
 )
 
@@ -448,12 +446,19 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 // minimumItemCt is the minimum items in the room to care about it
 func GetRoomWithMostItems(skipRecentlyVisited bool, minimumItemCt int, minimumGoldCt int) (roomId int, itemCt int) {
 
+	goblinZone := ``
+	if goblinRoomId := int(configs.GetConfig().LootGoblinRoom); goblinRoomId != 0 {
+		if goblinRoom := LoadRoom(int(configs.GetConfig().LootGoblinRoom)); goblinRoom != nil {
+			goblinZone = goblinRoom.Zone
+		}
+	}
+
 	topItemRoomId, topItemCt := 0, 0
 	topGoldRoomId, topGoldCt := 0, 0
 
 	for cRoomId, cRoom := range roomManager.rooms {
 		// Don't include goblin trash zone items
-		if cRoom.Zone == GoblinZone {
+		if cRoom.Zone == goblinZone {
 			continue
 		}
 
@@ -578,8 +583,8 @@ func loadAllRoomZones() error {
 
 	for _, loadedRoom := range loadedRooms {
 
-		// Room 75 is the death/shadow realm and gets a pass
-		if loadedRoom.RoomId == 75 {
+		// configs.GetConfig().DeathRecoveryRoom is the death/shadow realm and gets a pass
+		if loadedRoom.RoomId == int(configs.GetConfig().DeathRecoveryRoom) {
 			continue
 		}
 
