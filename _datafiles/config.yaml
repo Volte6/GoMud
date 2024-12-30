@@ -396,12 +396,8 @@ LogIntervalRoundCount: 1
 #   It is a good idea to lock configs related to folder/file paths to prevent
 #   accidental changes that could break the game.
 Locked: 
-- FolderUserData
-- FolderTemplates
-- FolderItemData
-- FolderAttackMessageData
-- FileAnsiAliases
-- FileColorPatterns
+- FolderDataFiles
+- FolderHtmlFiles
 - NextRoomId
 - Seed
 - OnLoginCommands
