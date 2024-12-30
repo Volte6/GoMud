@@ -1,0 +1,309 @@
+# Look up the numeric codes if it's easier here: https://en.wikipedia.org/wiki/ANSI_escape_code
+# Also useful: https://www.hackitu.de/termcolor256/
+# Under 3-bit and 4-bit colors (Until 256 color support added)
+color8:
+  table-title: 2
+  userid: black
+  username: 93 # Bright yellow
+  username-aggro: red
+  username-downed: 90 # Bright black
+  mobname: 14 
+  mobname-aggro: 91 # Bright red
+  mobname-downed: red
+  petname: 3
+  spellname: magenta
+  spell-text: magenta
+  nameprefix-pet: 92
+  role: 90
+  role-admin: 91
+  role-mod: 31
+  role-user: 32
+  role-guest: 90
+  command: 6
+  command-admin: 9
+  skill: 93
+  container: 94 # Bright blue
+  exit: 92 # Bright green
+  secret-exit: 90 # Bright black
+  zone: red
+  map-shop: 2
+  map-bank: 92
+  map-you: 96
+  map-secret: 90 # Bright black
+  map-temple: 90 # Bright black BG
+  mapbg-temple: 97 # Bright black
+  map-water: 94 # Bright blue
+  map-shore: 94 # Bright blue
+  map-forest: 2
+  map-trainer: 94 # Bright blue
+  map-player: 93 # Bright yellow
+  map-friend: 93 # Bright green
+  map-mob: 91 # Bright red
+  map-npc: 36 # Bright cyan
+  map-here: 95 # Bright magenta
+  room-description: white-bold
+  room-description-dark: white
+  map-default: 90
+  map-room: 97 # Bright white
+  map-target: 91 # Bright red
+  map-city: 97 # Bright white
+  map-snow: 97 # Bright white
+  map-house: 3
+  map-mountains: 3
+  map-wall:  cyan # Bright black
+  map-legend: 90
+  trail-dead: 90
+  trail-weak: 37
+  trail-good: 32
+  trail-warm: 31
+  trail-hot: 91
+  item: 2
+  itemname: 2
+  itemdesc: 2
+  item-stashed: 8
+  questname: 6
+  xp: 93 # Bright yellow
+  experience: 93 # Bright yellow
+  gold: 93 # Bright yellow
+  stat: 35 # Magenta
+  statmod: 36 # Bright cyan
+  damage: 91 # Bright red
+  healing: 2
+  shop-qty: 97 # Bright white
+  shop-name: 2
+  shop-price: 93
+  shop-trade: 2
+  shop-pet-type: 3
+  shop-enchantment: 4
+  uses-left: 90 # Bright black
+  holy: 96 # Bright cyan
+  good: 36 # cyan
+  virtuous: 94 # bright blue
+  lawful: 37 # green
+  neutral: 90 # bright black
+  misguided: 33 # yellow
+  corrupt: 35 # magenta
+  evil: 91 # bright red
+  unholy: 31 # red
+  item-nothing: 90 # Bright black
+  item-flags:  90 # Bright black
+  item-enchanted: 6
+  item-cursed: red
+  item-bonus-damage: 6-bold
+  name-flags-wrapper: black-bold
+  name-flags: black-bold
+  room-title: magenta
+  room-zone: red
+  health-good: 92 # Bright green
+  health-ok: 32 # green
+  health-mid: 33 # yellow
+  health-bad: 31 # red
+  health-danger: 91 # bright red
+  health-100: 92
+  health-90: 92
+  health-80: 32
+  health-70: 32
+  health-60: 33
+  health-50: 33
+  health-40: 33
+  health-30: 31
+  health-20: 31
+  health-10: 91
+  health-0: 91
+  health-dead: 8
+  mana-100: 95
+  mana-90: 35
+  mana-80: 35
+  mana-70: 35
+  mana-60: 35
+  mana-50: 35
+  mana-40: 35
+  mana-30: 35
+  mana-20: 35
+  mana-10: 95
+  mana-0: 8
+  suggested-text: 90
+  night: blue
+  day: 96
+  day-dusk: 3
+  enters-message: 8
+  leaves-message: 8
+  spell-neutral: white
+  spell-helpful: 2
+  spell-harmful: red
+  questflag: 3
+  highlight: 90
+  saytext: 13 # bright magenta
+  saytext-mob: 5 # dark magenta
+  alert-5: 9
+  alert-4: 1
+  alert-3: 1
+  alert-2: 1
+  alert-1: 1
+  noun: 7
+  mail-border: 12
+  mail-title: 14
+  mail-title-read: 6
+  mail-date: 13
+  mail-date-read: 5
+  mail-message: 11
+  mail-message-read: 3
+  mail-note: 10
+  mail-note-read: 2
+  mutator: 10
+  buff: 4
+  buff-text: 14
+  script-text: 10
+  broadcast-prefix: 8
+  broadcast-body: 13
+color256:
+  table-title: 2
+  userid: black
+  username: 11 # Bright yellow
+  username-aggro: 124
+  username-downed: 8 # Bright black
+  mobname: 51
+  mobname-aggro: 9 # Bright red
+  mobname-downed: 124
+  petname: 215
+  spellname: magenta
+  spell-text: 183
+  nameprefix-pet: 10
+  role: 8
+  role-admin: 9
+  role-mod: 1
+  role-user: 2
+  role-guest: 8
+  command: 6
+  command-admin: 9
+  skill: 11
+  container: 12 # Bright blue
+  exit: 10 # Bright green
+  secret-exit: 8 # Bright black
+  zone: 124
+  map-shop: 2
+  map-bank: 10
+  map-you: 14
+  map-secret: 8 # Bright black
+  map-temple: 8 # Bright black BG
+  mapbg-temple: 15 # Bright black
+  map-water: 12 # Bright blue
+  map-shore: 12 # Bright blue
+  map-forest: 2
+  map-trainer: 12 # Bright blue
+  map-player: 11 # Bright yellow
+  map-friend: 11 # Bright green
+  map-mob: 9 # Bright red
+  map-npc: 6 # Bright cyan
+  map-here: 13 # Bright magenta
+  room-description: 15
+  room-description-dark: 8
+  map-default: 8
+  map-room: 15 # Bright white
+  map-target: 9 # Bright red
+  map-city: 15 # Bright white
+  map-snow: 15 # Bright white
+  map-house: 3
+  map-mountains: 3
+  map-wall:  cyan # Bright black
+  map-legend: 8
+  trail-dead: 8
+  trail-weak: 7
+  trail-good: 2
+  trail-warm: 1
+  trail-hot: 9
+  item: 2
+  itemname: 2
+  itemdesc: 79
+  item-stashed: 8
+  questname: 6
+  xp: 11 # Bright yellow
+  experience: 11 # Bright yellow
+  gold: 220 # light yellow
+  stat: 201 # Magenta
+  statmod: 6 # Bright cyan
+  damage: 9 # Bright red
+  healing: 157
+  shop-qty: 15 # Bright white
+  shop-name: 2
+  shop-price: 220
+  shop-trade: 2
+  shop-pet-type: 215
+  shop-enchantment: 147
+  uses-left: 8 # Bright black
+  holy: 21
+  good: 27
+  virtuous: 39
+  lawful: 51
+  neutral: 7 # bright black
+  misguided: 226
+  corrupt: 214
+  evil: 202
+  unholy: 196
+  item-nothing: 237 # darkish black
+  item-flags: 7 # light gray
+  item-enchanted: 147
+  item-cursed: 54
+  item-bonus-damage: 49
+  name-flags-wrapper: 240
+  name-flag: 246
+  room-title: 128
+  room-zone: 124
+  health-100: 46
+  health-90: 82
+  health-80: 118
+  health-70: 154
+  health-60: 190
+  health-50: 226
+  health-40: 220
+  health-30: 214
+  health-20: 208
+  health-10: 202
+  health-0: 196
+  health-dead: 8
+  mana-100: 195
+  mana-90: 159
+  mana-80: 123
+  mana-70: 87
+  mana-60: 51
+  mana-50: 44
+  mana-40: 37
+  mana-30: 30
+  mana-20: 23
+  mana-10: 245
+  mana-0: 8
+  suggested-text: 8
+  night: 19
+  day: 228
+  day-dusk: 214
+  enters-message: 8
+  leaves-message: 8
+  spell-neutral: white
+  spell-helpful: 2
+  spell-harmful: 124
+  questflag: 187
+  highlight: 238
+  saytext: 13
+  saytext-mob: 5 
+  alert-5: 196
+  alert-4: 203
+  alert-3: 210
+  alert-2: 210
+  alert-1: 217
+  noun: 115
+  mail-border: 105
+  mail-title: 51
+  mail-title-read: 37
+  mail-date: 13
+  mail-date-read: 135
+  mail-message: 229
+  mail-message-read: 188
+  mail-note: 10
+  mail-note-read: 2
+  mutator: 49
+  buff: 147
+  buff-text: 14
+  script-text: 155
+  broadcast-prefix: 135
+  broadcast-body: 164
+  

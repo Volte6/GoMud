@@ -172,7 +172,7 @@ var (
 // Only if the file has been modified since the last load
 func LoadAliases() {
 
-	tmpLoadedKeywords, err := fileloader.LoadFlatFile[*Aliases](string(configs.GetConfig().FileKeywords))
+	tmpLoadedKeywords, err := fileloader.LoadFlatFile[*Aliases](string(configs.GetConfig().FolderDataFiles) + `/keywords.yaml`)
 	if err != nil {
 		panic(err)
 	}

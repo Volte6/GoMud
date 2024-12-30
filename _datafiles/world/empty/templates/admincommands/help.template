@@ -1,0 +1,23 @@
+{{ pad 27 " Admin Commands " "_" }}
+{{- range $command, $helpDetails := . }}
+<ansi fg='red'>{{ padRight 10 $command }}</ansi><ansi fg='white'>{{ $helpDetails.Description }}</ansi>
+
+{{- if gt (len $helpDetails.Details) 0 }}
+{{ pad 10 }}<ansi fg='yellow'>{{ $helpDetails.Details }}</ansi>
+{{- end }}
+
+{{- if gt (len $helpDetails.ExampleInput) 0 }}
+{{ pad 10 }}<ansi fg='yellow'>{{ $helpDetails.ExampleInput }}</ansi>
+{{- end }}
+
+{{- end }}
+{{ pad 27 "" "_" }}
+{{/* 
+_____ System Commands _____
+help      Display this help message, or help for a specific command
+          help shutdown
+shutdown  Shutdown the server
+          An optional argument can be provided to specify the number of seconds to wait before shutting down. The default is 15 seconds.
+          shutdown [seconds]
+___________________________
+*/}}

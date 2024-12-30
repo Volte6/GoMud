@@ -31,10 +31,6 @@ var (
 	mobNameCache        = map[MobId]string{}
 )
 
-const (
-	mobDataFilesFolderPath = "_datafiles/mobs"
-)
-
 type ItemTrade struct {
 	AcceptedItemIds []int         `yaml:"accepteditemids,omitempty,flow"` // Must provide every item id in this list.
 	AcceptedGold    int           `yaml:"acceptedgold,omitempty,flow"`    // Must provide at least this much gold.
@@ -600,7 +596,7 @@ func (r *Mob) Save() error {
 		return err
 	}
 
-	saveFilePath := util.FilePath(mobDataFilesFolderPath, `/`, fmt.Sprintf("%s.yaml", fileName))
+	saveFilePath := util.FilePath(configs.GetConfig().FolderDataFiles.String(), `/`, `mobs`, `/`, fmt.Sprintf("%s.yaml", fileName))
 
 	err = os.WriteFile(saveFilePath, bytes, 0644)
 	if err != nil {
@@ -645,7 +641,7 @@ func (m *Mob) GetScriptPath() string {
 	}
 
 	scriptFilePath := `scripts/` + strings.Replace(mobFilePath, `.yaml`, newExt, 1)
-	fullScriptPath := strings.Replace(mobDataFilesFolderPath+`/`+m.Filepath(),
+	fullScriptPath := strings.Replace(configs.GetConfig().FolderDataFiles.String()+`/mobs/`+m.Filepath(),
 		mobFilePath,
 		scriptFilePath,
 		1)
@@ -711,7 +707,7 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpMobs, err := fileloader.LoadAllFlatFiles[int, *Mob](mobDataFilesFolderPath)
+	tmpMobs, err := fileloader.LoadAllFlatFiles[int, *Mob](configs.GetConfig().FolderDataFiles.String() + `/mobs`)
 	if err != nil {
 		panic(err)
 	}

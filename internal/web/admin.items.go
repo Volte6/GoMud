@@ -9,12 +9,13 @@ import (
 	"text/template"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/items"
 )
 
 func itemsIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles("_datafiles/html/admin/_header.html", "_datafiles/html/admin/items/index.html", "_datafiles/html/admin/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String()+"/admin/_header.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/items/index.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/_footer.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}
@@ -72,7 +73,7 @@ func itemsIndex(w http.ResponseWriter, r *http.Request) {
 
 func itemData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("item.data.html").Funcs(funcMap).ParseFiles("_datafiles/html/admin/items/item.data.html")
+	tmpl, err := template.New("item.data.html").Funcs(funcMap).ParseFiles(DataFiles() + "/html/admin/items/item.data.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/gametime"
@@ -15,8 +16,7 @@ import (
 )
 
 var (
-	allMutators            = map[string]*MutatorSpec{}
-	mutDataFilesFolderPath = "_datafiles/mutators"
+	allMutators = map[string]*MutatorSpec{}
 )
 
 type TextBehavior string
@@ -287,7 +287,7 @@ func (m *MutatorSpec) Save() error {
 		return err
 	}
 
-	saveFilePath := util.FilePath(mutDataFilesFolderPath, `/`, fmt.Sprintf("%s.yaml", fileName))
+	saveFilePath := util.FilePath(configs.GetConfig().FolderDataFiles.String(), `/`, `mutators`, `/`, fmt.Sprintf("%s.yaml", fileName))
 
 	err = os.WriteFile(saveFilePath, bytes, 0644)
 	if err != nil {
@@ -323,7 +323,7 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpMutators, err := fileloader.LoadAllFlatFiles[string, *MutatorSpec](mutDataFilesFolderPath)
+	tmpMutators, err := fileloader.LoadAllFlatFiles[string, *MutatorSpec](configs.GetConfig().FolderDataFiles.String() + `/mutators`)
 	if err != nil {
 		panic(err)
 	}

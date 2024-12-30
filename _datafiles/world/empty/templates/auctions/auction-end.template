@@ -1,0 +1,17 @@
+
+<ansi fg="blue-bold">*******************************************************************************</ansi>
+<ansi fg="blue-bold">* * * AUCTION END * AUCTION END * AUCTION END * AUCTION END * AUCTION END * * *</ansi>
+
+    <ansi fg="yellow">The auction has <ansi fg="white-bold">ENDED!</ansi></ansi>
+
+    Winner:      {{ if lt .HighestBid 1 }}none (It will be returned to the owner){{ else }}{{ if .Anonymous }}Anonymous{{ else }}<ansi fg="username">{{- .HighestBidderName }}</ansi>{{ end }}{{ end }}
+    Bid:         {{ if lt .HighestBid 1 }}none{{ else }}<ansi fg="gold">{{ .HighestBid }} gold</ansi>{{ end }}
+
+    Item:        <ansi fg="item">{{ .ItemData.NameComplex }}</ansi>
+    Description: <ansi fg="item">{{ splitstring .ItemData.GetSpec.Description 60 "                 " }}</ansi>
+
+    Type <ansi fg="command">help auction</ansi> to learn more about auctions.
+
+<ansi fg="blue-bold">* * * AUCTION END * AUCTION END * AUCTION END * AUCTION END * AUCTION END * * *</ansi>
+<ansi fg="blue-bold">*******************************************************************************</ansi>
+

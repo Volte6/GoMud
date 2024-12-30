@@ -18,7 +18,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 		configs.GetConfig().AllConfigData(`*port`, `seed`, `folder*`, `file*`),
 	}
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles("_datafiles/html/public/index.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(DataFiles() + "/html/public/index.html")
 	if err != nil {
 		slog.Error("HTML ERROR", "error", err)
 	}
@@ -29,5 +29,5 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 func serveClient(w http.ResponseWriter, r *http.Request) {
 	// read contents of webclient.html and print it out
-	http.ServeFile(w, r, "_datafiles/html/public/webclient.html")
+	http.ServeFile(w, r, configs.GetConfig().FolderHtmlFiles.String()+"/public/webclient.html")
 }

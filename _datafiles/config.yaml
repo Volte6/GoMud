@@ -30,41 +30,14 @@
 #   MINOR version - added functionality (backward compatible)
 #   PATCH version - bug fix (backward compatible)
 Version: "1.0.0"
-# - FolderUserData - 
-#   Relative path to where the user datafiles are stored - set to a folder
-#   outside of the repo to preserve your user data files.
-FolderUserData: _datafiles/users 
-# - FolderTemplates -
-#   Templates define all sorts of display rules
-FolderTemplates: _datafiles/templates 
-# - FolderItemData -
-#   Where the item datafiles are stored
-FolderItemData: _datafiles/items 
-# - FolderItemData -
-#   Where spell datafiles are stored
-FolderSpellData: _datafiles/spells
-# - FolderAttackMessageData -
-#   Defines the various combat related text messages
-FolderAttackMessageData: _datafiles/combat-messages 
-# - FolderConversations -
-#   Folder where all conversations exist.
-#   General conversations can be in the conversations folder
-#   Everything else should be a subfolder named by zone
-FolderConversations: _datafiles/conversations 
-# - FolderSampleScripts -
-#   Contains categorized sample scripts that are copied
-#   When creating new mobs etc.
-FolderSampleScripts: _datafiles/sample-scripts 
-# - FileAnsiAliases -
-#   Maps common aliases to specific ansi color codes
-FileAnsiAliases: _datafiles/ansi-aliases.yaml 
-# - FileColorPatterns -
-#   string name to color pattern sequences
-FileColorPatterns: _datafiles/color-patterns.yaml 
-# - FileKeywords -
-#   Keywords are used to match commands to actions
-#   Also used for aliases
-FileKeywords: _datafiles/keywords.yaml
+# - FolderDataFiles - 
+#   The folder where all datafiles reside.
+#   If you are planning to create your own world, copying the current folder
+#   and its entire tree of content is a good place to start.
+FolderDataFiles: _datafiles/world/default
+# - FolderHtmlFiles - 
+#   The folder where all web html files reside.
+FolderHtmlFiles: _datafiles/html
 # - AllowItemBuffRemoval - 
 #   Whether to allow the removal of buffs assigned by items using spells etc. 
 #   By default, once an item has buffed a player, the player cannot remove the 
@@ -172,8 +145,13 @@ LogoutRounds: 3
 # - StartRoom -
 #   This is the default starting room for the game. It only matters when there
 #   is code that explicitely tries to send the player to the "starting room"
-#   The default of 1 is Town Square in Frostfang
+#   The default of 1 is Town Square
 StartRoom: 1
+# - DeathRecoveryRoom -
+#   This is the room players are sent to when they die.
+#   This should have some way of healing them and (eventually)
+#   sending them back into the main world.
+DeathRecoveryRoom: 75
 # - TutorialStartRooms - 
 #   RoomIds players will be put in when starting the game/tutorial
 #   RoomIds 900-999 are reserved for Tutorial rooms.
@@ -307,6 +285,10 @@ WebPort: 80
 #   treasure.
 #
 ################################################################################
+# - LootGoblinRoom -
+#   The room the loot goblin spawns in (per its spawninfo). Also the room it returns
+#   to to drop off loot it finds. If zero (0), no loot goblin spawning.
+LootGoblinRoom: 139
 # - LootGoblinRoundCount -
 #   How often the Loot Goblin will spawn. It is a good idea to keep this 
 #   number low to keep the game from getting bogged down with too many items 

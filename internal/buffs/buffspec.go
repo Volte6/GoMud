@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/statmods"
@@ -21,8 +22,6 @@ Examples:
 Fast Healing - increased natural health recovery for 10 rounds
 Poison - add -10 health every round for 5 rounds
 */
-
-const buffDataFilesFolderPath = "_datafiles/buffs"
 
 type Flag string
 
@@ -209,7 +208,7 @@ func (b *BuffSpec) GetScriptPath() string {
 	buffFilePath := b.Filename()
 	scriptFilePath := strings.Replace(buffFilePath, `.yaml`, `.js`, 1)
 
-	fullScriptPath := strings.Replace(buffDataFilesFolderPath+`/`+b.Filepath(),
+	fullScriptPath := strings.Replace(string(configs.GetConfig().FolderDataFiles)+`/buffs/`+b.Filepath(),
 		buffFilePath,
 		scriptFilePath,
 		1)
@@ -222,7 +221,7 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpBuffs, err := fileloader.LoadAllFlatFiles[int, *BuffSpec](buffDataFilesFolderPath)
+	tmpBuffs, err := fileloader.LoadAllFlatFiles[int, *BuffSpec](string(configs.GetConfig().FolderDataFiles) + `/buffs`)
 	if err != nil {
 		panic(err)
 	}

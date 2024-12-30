@@ -1,0 +1,9 @@
+<ansi fg="black-bold">.:</ansi> <ansi fg="magenta">Help for </ansi><ansi fg="command">follow</ansi>
+
+The <ansi fg="command">follow</ansi> follows another player so that when they leave a room, you go with them.
+
+<ansi fg="yellow">Usage: </ansi>
+
+  <ansi fg="command">follow Jim</ansi>
+  This would follow <ansi fg="username">Jim</ansi> from now on.
+

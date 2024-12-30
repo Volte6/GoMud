@@ -1,0 +1,9 @@
+
+<ansi fg="black-bold">.:</ansi> <ansi fg="username">{{ .Character.Name }}</ansi> (<ansi fg="{{ .Character.AlignmentName }}">{{ .Character.AlignmentName }}</ansi>)
+{{- $tnl := .Character.XPTNL -}}
+{{- $pct := (pct .Character.Experience $tnl ) -}}
+{{- $exp := printf "%d/%d (%d%%)" .Character.Experience $tnl $pct }}
+ ┌─ <ansi fg="black-bold">.:</ansi><ansi fg="20">Description</ansi> ────────────────────────────────────────────────────────────┐
+   {{ splitstring .Character.GetDescription 72 "   "}}
+   {{ .Character.GetHealthAppearance }}
+ └────────────────────────────────────────────────────────────────────────────┘

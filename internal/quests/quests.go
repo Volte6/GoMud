@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/util"
 )
 
 const (
-	questDataFilesFolderPath = "_datafiles/quests"
-	QuestTokenSeparator      = `-`
+	QuestTokenSeparator = `-`
 )
 
 var (
@@ -184,7 +184,7 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpQuests, err := fileloader.LoadAllFlatFiles[int, *Quest](questDataFilesFolderPath)
+	tmpQuests, err := fileloader.LoadAllFlatFiles[int, *Quest](configs.GetConfig().FolderDataFiles.String() + `/quests`)
 	if err != nil {
 		panic(err)
 	}

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/colorpatterns"
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -23,7 +24,7 @@ Level 4 - Create a physical portal that you can share with players, or return th
 */
 func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
-	if user.Character.RoomId == 75 {
+	if user.Character.RoomId == int(configs.GetConfig().DeathRecoveryRoom) {
 		return false, errors.New(`portal command ignored in death recovery`)
 	}
 
@@ -46,8 +47,8 @@ func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 	if skillLevel >= 2 { // Defaults to root of current zone
 		portalTargetRoomId, _ = rooms.GetZoneRoot(user.Character.Zone)
-		if portalTargetRoomId == 75 {
-			portalTargetRoomId = 1 // If they are in the holding zone, send htem back to TS
+		if portalTargetRoomId == int(configs.GetConfig().DeathRecoveryRoom) {
+			portalTargetRoomId = int(configs.GetConfig().StartRoom) // If they are in the holding zone, send htem back to start
 		}
 	}
 

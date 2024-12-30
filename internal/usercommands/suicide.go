@@ -191,7 +191,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 	clear(user.Character.PlayerDamage)
 
-	rooms.MoveToRoom(user.UserId, 75)
+	rooms.MoveToRoom(user.UserId, int(config.DeathRecoveryRoom))
 
 	return true, nil
 }

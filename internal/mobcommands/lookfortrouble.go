@@ -2,6 +2,7 @@ package mobcommands
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/mobs"
@@ -40,6 +41,10 @@ func LookForTrouble(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) 
 			}
 
 			raceInfo := races.GetRace(user.Character.RaceId)
+			if raceInfo == nil {
+				slog.Error("RaceError", "Not Found", user.Character.RaceId)
+				continue
+			}
 
 			// Once a player is downed mobs stop considering them a target
 			// They don't see players that are sneaking...
