@@ -8,12 +8,13 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/colorpatterns"
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mutators"
 )
 
 func mutatorsIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(DataFiles()+"/html/admin/_header.html", DataFiles()+"/html/admin/mutators/index.html", DataFiles()+"/html/admin/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String()+"/admin/_header.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/mutators/index.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/_footer.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}

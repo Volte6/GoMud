@@ -52,13 +52,13 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 
 	// Static resources
 	http.Handle("GET /static/public/", handlerToHandlerFunc(
-		http.StripPrefix("/static/public/", http.FileServer(http.Dir(DataFiles()+"/html/static/public"))),
+		http.StripPrefix("/static/public/", http.FileServer(http.Dir(configs.GetConfig().FolderHtmlFiles.String()+"/static/public"))),
 	))
 
 	http.Handle("GET /static/admin/", RunWithMUDLocked(
 		doBasicAuth(
 			handlerToHandlerFunc(
-				http.StripPrefix("/static/admin/", http.FileServer(http.Dir(DataFiles()+"/html/static/admin"))),
+				http.StripPrefix("/static/admin/", http.FileServer(http.Dir(configs.GetConfig().FolderHtmlFiles.String()+"/static/admin"))),
 			),
 		),
 	))

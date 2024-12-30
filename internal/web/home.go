@@ -29,5 +29,5 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 func serveClient(w http.ResponseWriter, r *http.Request) {
 	// read contents of webclient.html and print it out
-	http.ServeFile(w, r, DataFiles()+"/html/public/webclient.html")
+	http.ServeFile(w, r, configs.GetConfig().FolderHtmlFiles.String()+"/public/webclient.html")
 }

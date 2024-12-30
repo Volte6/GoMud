@@ -34,7 +34,10 @@ Version: "1.0.0"
 #   The folder where all datafiles reside.
 #   If you are planning to create your own world, copying the current folder
 #   and its entire tree of content is a good place to start.
-FolderDataFiles: _datafiles/new-world
+FolderDataFiles: _datafiles/world/default-world
+# - FolderHtmlFiles - 
+#   The folder where all web html files reside.
+FolderHtmlFiles: _datafiles/html
 # - AllowItemBuffRemoval - 
 #   Whether to allow the removal of buffs assigned by items using spells etc. 
 #   By default, once an item has buffed a player, the player cannot remove the 

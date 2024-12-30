@@ -26,6 +26,7 @@ type Config struct {
 	Version              ConfigString `yaml:"Version"` // Cuurrent version of all datafiles
 	MaxCPUCores          ConfigInt    `yaml:"MaxCPUCores"`
 	FolderDataFiles      ConfigString `yaml:"FolderDataFiles"`
+	FolderHtmlFiles      ConfigString `yaml:"FolderHtmlFiles"`
 	AllowItemBuffRemoval ConfigBool   `yaml:"AllowItemBuffRemoval"`
 	CarefulSaveFiles     ConfigBool   `yaml:"CarefulSaveFiles"`
 	AuctionsEnabled      ConfigBool   `yaml:"AuctionsEnabled"`
@@ -621,7 +622,7 @@ func overridePath() string {
 
 func ReloadConfig() error {
 
-	configPath := util.FilePath(GetConfig().FolderDataFiles.String() + `/config.yaml`)
+	configPath := util.FilePath(`_datafiles/config.yaml`)
 
 	bytes, err := os.ReadFile(configPath)
 	if err != nil {
