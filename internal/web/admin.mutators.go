@@ -13,7 +13,7 @@ import (
 
 func mutatorsIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles("_datafiles/html/admin/_header.html", "_datafiles/html/admin/mutators/index.html", "_datafiles/html/admin/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(DataFiles()+"/html/admin/_header.html", DataFiles()+"/html/admin/mutators/index.html", DataFiles()+"/html/admin/_footer.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}
@@ -38,7 +38,7 @@ func mutatorsIndex(w http.ResponseWriter, r *http.Request) {
 
 func mutatorData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("mutator.data.html").Funcs(funcMap).ParseFiles("_datafiles/html/admin/mutators/mutator.data.html")
+	tmpl, err := template.New("mutator.data.html").Funcs(funcMap).ParseFiles(DataFiles() + "/html/admin/mutators/mutator.data.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}

@@ -8,7 +8,7 @@ import (
 
 func adminIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles("_datafiles/html/admin/_header.html", "_datafiles/html/admin/index.html", "_datafiles/html/admin/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(DataFiles()+"/html/admin/_header.html", DataFiles()+"/html/admin/index.html", DataFiles()+"/html/admin/_footer.html")
 	if err != nil {
 		slog.Error("HTML ERROR", "error", err)
 	}

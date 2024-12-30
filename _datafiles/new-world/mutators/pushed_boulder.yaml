@@ -1,8 +1,0 @@
-# This mutator is used when players push a boulder in room 593
-mutatorid: pushed-boulder 
-alertmodifier: 
-  text: The boulder has been pushed aside to reveal a pathway!
-decayrate: 1 hour
-exits:
-  pathway:
-    roomid: 1001

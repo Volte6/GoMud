@@ -14,7 +14,7 @@ import (
 
 func racesIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles("_datafiles/html/admin/_header.html", "_datafiles/html/admin/races/index.html", "_datafiles/html/admin/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(DataFiles()+"/html/admin/_header.html", DataFiles()+"/html/admin/races/index.html", DataFiles()+"/html/admin/_footer.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}
@@ -39,7 +39,7 @@ func racesIndex(w http.ResponseWriter, r *http.Request) {
 
 func raceData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("race.data.html").Funcs(funcMap).ParseFiles("_datafiles/html/admin/races/race.data.html")
+	tmpl, err := template.New("race.data.html").Funcs(funcMap).ParseFiles(DataFiles() + "/html/admin/races/race.data.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}

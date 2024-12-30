@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/util"
 )
 
@@ -51,13 +52,13 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 
 	// Static resources
 	http.Handle("GET /static/public/", handlerToHandlerFunc(
-		http.StripPrefix("/static/public/", http.FileServer(http.Dir("_datafiles/html/static/public"))),
+		http.StripPrefix("/static/public/", http.FileServer(http.Dir(DataFiles()+"/html/static/public"))),
 	))
 
 	http.Handle("GET /static/admin/", RunWithMUDLocked(
 		doBasicAuth(
 			handlerToHandlerFunc(
-				http.StripPrefix("/static/admin/", http.FileServer(http.Dir("_datafiles/html/static/admin"))),
+				http.StripPrefix("/static/admin/", http.FileServer(http.Dir(DataFiles()+"/html/static/admin"))),
 			),
 		),
 	))
@@ -137,4 +138,8 @@ func Shutdown() {
 		log.Printf("HTTP server shutdown failed:%+v", err)
 	}
 
+}
+
+func DataFiles() string {
+	return configs.GetConfig().FolderDataFiles.String()
 }

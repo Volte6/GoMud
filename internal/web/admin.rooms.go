@@ -23,7 +23,7 @@ type ZoneDetails struct {
 
 func roomsIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles("_datafiles/html/admin/_header.html", "_datafiles/html/admin/rooms/index.html", "_datafiles/html/admin/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(DataFiles()+"/html/admin/_header.html", DataFiles()+"/html/admin/rooms/index.html", DataFiles()+"/html/admin/_footer.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}
@@ -139,7 +139,7 @@ func roomsIndex(w http.ResponseWriter, r *http.Request) {
 
 func roomData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("room.data.html").Funcs(funcMap).ParseFiles("_datafiles/html/admin/rooms/room.data.html")
+	tmpl, err := template.New("room.data.html").Funcs(funcMap).ParseFiles(DataFiles() + "/html/admin/rooms/room.data.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}
