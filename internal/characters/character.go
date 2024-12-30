@@ -1240,6 +1240,9 @@ func (c *Character) XPTNL() int {
 
 // Amt TNL for a specific level
 func (c *Character) XPTL(lvl int) int {
+	if lvl < 1 {
+		lvl = 1
+	}
 	fLvl := float64(lvl)
 	return int(float32(1000+(fLvl*(fLvl*.75)*1000)) * c.TNLScale)
 }
@@ -1442,6 +1445,10 @@ func (c *Character) Validate(recalcPermaBuffs ...bool) error {
 
 	if len(c.Description) == 0 {
 		c.Description = "They seem thoroughly uninteresting."
+	}
+
+	if race := races.GetRace(c.RaceId); race == nil {
+		c.RaceId = 1
 	}
 
 	if c.Created.IsZero() {

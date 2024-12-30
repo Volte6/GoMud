@@ -1,0 +1,9 @@
+
+<ansi fg="blue-bold">*******************************************************************************</ansi>
+<ansi fg="blue-bold">* * * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * * *</ansi>
+
+    {{ if .Anonymous }}Someone{{ else }}<ansi fg="username">{{ .HighestBidderName }}</ansi>{{ end }} has bid <ansi fg="gold">{{ .HighestBid }} gold</ansi>
+
+<ansi fg="blue-bold">* * * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * AUCTION * * *</ansi>
+<ansi fg="blue-bold">*******************************************************************************</ansi>
+

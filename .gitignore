@@ -1,4 +1,4 @@
 .vscode
 private-notes.txt
-_datafiles/users/*
-_datafiles/config-overrides.yaml
+**/users/*
+**/config-overrides.yaml

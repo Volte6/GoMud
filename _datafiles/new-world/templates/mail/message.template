@@ -1,0 +1,14 @@
+
+{{ $readMarker := "" -}}
+{{- if .Read }}{{ $readMarker = "-read" }}{{ else }}         <ansi fg="alert-5">*NEW MESSAGE*</ansi>
+{{ end -}}
+<ansi fg="mail-title{{ $readMarker }}">Sent:</ansi>    <ansi fg="mail-date{{ $readMarker }}">{{ .DateString }}</ansi>
+<ansi fg="mail-title{{ $readMarker }}">From:</ansi>    <ansi fg="username">{{ .FromName }}</ansi>
+
+<ansi fg="mail-title{{ $readMarker }}">Message:</ansi> <ansi fg="mail-message{{ $readMarker }}">{{ splitstring .Message 71 "         " }}</ansi>
+{{ if gt .Gold 0 }}
+<ansi fg="mail-note{{ $readMarker }}"><ansi fg="alert-4">NOTE:</ansi>    This message had <ansi fg="gold">{{ .Gold }} gold</ansi> attached, which was added to your bank balance.</ansi>
+{{- end -}}
+{{- if ne .Item nil }}
+<ansi fg="mail-note{{ $readMarker }}"><ansi fg="alert-4">NOTE:</ansi>    This message came with one <ansi fg="itemname">{{ .Item.DisplayName }}</ansi> attached, which was added to your inventory.</ansi>
+{{- end -}}

@@ -1,0 +1,2 @@
+ 
+{{ range $idx, $itemInfo := . }}  <ansi fg="red-bold">{{ printf "%2d." (add $idx 1) }}</ansi> <ansi fg="yellow-bold">{{ printf "%-33s" $itemInfo.Name }}</ansi>{{ if eq (mod $idx 2) 1 }}{{ printf "\n" }}{{ end }}{{ end }}

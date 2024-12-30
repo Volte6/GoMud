@@ -1,0 +1,12 @@
+
+ <ansi fg="black-bold">.:</ansi> <ansi fg="username">{{ .Character.Name }}</ansi> the {{ profession .Character }}
+{{- $tnl := .Character.XPTNL -}}
+{{- $pct := (pct .Character.Experience $tnl ) -}}
+{{- $exp := printf "%d/%d (%d%%)" .Character.Experience $tnl $pct }}
+ ┌─ <ansi fg="black-bold">.:</ansi><ansi fg="20">Info</ansi> ──────────────────────┐ ┌─ <ansi fg="black-bold">.:</ansi><ansi fg="20">Attributes</ansi> ───────────────────────────┐
+ │ <ansi fg="yellow">Health: </ansi>{{ printf "%-10d" .Character.Health                      }} <ansi fg="yellow">Max: </ansi>{{  printf "%-6d" .Character.HealthMax.Value }}│ │ <ansi fg="yellow">Strength: </ansi>{{ printf "%-4d<ansi fg=\"statmod\">(%-3d)</ansi>" .Character.Stats.Strength.Value (.Character.StatMod "strength") }} <ansi fg="yellow">Vitality:  </ansi>{{  printf "%-4d<ansi fg=\"statmod\">(%-3d)</ansi>" .Character.Stats.Vitality.Value (.Character.StatMod "vitality")     }} │
+   <ansi fg="yellow">Mana:   </ansi>{{ printf "%-10d" .Character.Mana                        }} <ansi fg="yellow">Max: </ansi>{{  printf "%-6d" .Character.ManaMax.Value   }}    <ansi fg="yellow">Speed:    </ansi>{{ printf "%-4d<ansi fg=\"statmod\">(%-3d)</ansi>" .Character.Stats.Speed.Value (.Character.StatMod "speed")       }} <ansi fg="yellow">Mysticism: </ansi>{{   printf "%-4d<ansi fg=\"statmod\">(%-3d)</ansi>" .Character.Stats.Mysticism.Value (.Character.StatMod "mysticism")  }}
+   <ansi fg="yellow">Armor:  </ansi>{{ printf "%-22s" ( printf "%d" (.Character.GetDefense))                                                                               }}    <ansi fg="yellow">Smarts:   </ansi>{{ printf "%-4d<ansi fg=\"statmod\">(%-3d)</ansi>" .Character.Stats.Smarts.Value (.Character.StatMod "smarts")     }} <ansi fg="yellow">Percept:   </ansi>{{  printf "%-4d<ansi fg=\"statmod\">(%-3d)</ansi>" .Character.Stats.Perception.Value (.Character.StatMod "perception") }}
+   <ansi fg="yellow">Level:  </ansi>{{ printf "%-22d" .Character.Level                                                                                                     }}  
+ │ <ansi fg="yellow">Gold:   </ansi>{{ printf "%-22s" (numberFormat .Character.Gold)                                                                                       }}│ │                                          │
+ └───────────────────────────────┘ └──────────────────────────────────────────┘

@@ -1,0 +1,250 @@
+{{ $mutator := .mutatorSpec }}
+<form>
+
+    <input type="hidden" name="mutatorid" value="{{ $mutator.MutatorId }}">
+
+    <hr />
+    <h3>Name Modifier</h3>
+
+    <div class="row">
+        <div class="form-group col-sm">
+            <label for="behavior">Behavior</label>
+            <select class="form-control form-control-sm" name="type" id="behavior" aria-describedby="behavior-help"  rows="10">
+                <option value="prepend" {{ if $mutator.NameModifier }}{{ if eq $mutator.NameModifier.Behavior "prepend" }}SELECTED{{end}}{{end}}>prepend</option>
+                <option value="append" {{ if $mutator.NameModifier }}{{ if eq $mutator.NameModifier.Behavior "append" }}SELECTED{{end}}{{end}}>append</option>
+                <option value="replace" {{ if $mutator.NameModifier }}{{ if eq $mutator.NameModifier.Behavior "replace" }}SELECTED{{end}}{{end}}>replace</option>
+            </select>
+            <small id="behavior-help" class="form-text text-muted">How will the name text be modified?</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="description">Text</label>
+            <textarea class="form-control form-control-sm" id="description" aria-describedby="description-help">{{ if $mutator.NameModifier }}{{ $mutator.NameModifier.Text }}{{end}}</textarea>
+            <small id="description-help" class="form-text text-muted">Leave empty if no text changes.</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="name">ColorPattern</label>
+            <select class="form-control form-control-sm" name="type" id="behavior" aria-describedby="behavior-help"  rows="10">
+                <option value="">none</option>
+                {{range $index, $patternName := .colorPatterns}}
+                <option value="{{ $patternName }}" {{ if $mutator.NameModifier }}{{if eq $patternName $mutator.NameModifier.ColorPattern}}SELECTED{{end}}{{ end }}>{{ $patternName }}</option>
+                {{end}}
+            </select>
+            <small id="name-help" class="form-text text-muted">Optional color style</small>
+        </div>
+    </div>
+
+    <hr />
+    <h3>Description Modifier</h3>
+
+    <div class="row">
+        <div class="form-group col-sm">
+            <label for="behavior">Behavior</label>
+            <select class="form-control form-control-sm" name="type" id="behavior" aria-describedby="behavior-help"  rows="10">
+                <option value="prepend" {{ if $mutator.DescriptionModifier }}{{ if eq $mutator.DescriptionModifier.Behavior "prepend" }}SELECTED{{end}}{{end}}>prepend</option>
+                <option value="append" {{ if $mutator.DescriptionModifier }}{{ if eq $mutator.DescriptionModifier.Behavior "append" }}SELECTED{{end}}{{end}}>append</option>
+                <option value="replace" {{ if $mutator.DescriptionModifier }}{{ if eq $mutator.DescriptionModifier.Behavior "replace" }}SELECTED{{end}}{{end}}>replace</option>
+            </select>
+            <small id="behavior-help" class="form-text text-muted">How will the name text be modified?</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="description">Text</label>
+            <textarea class="form-control form-control-sm" id="description" aria-describedby="description-help">{{ if $mutator.DescriptionModifier }}{{ $mutator.DescriptionModifier.Text }}{{end}}</textarea>
+            <small id="description-help" class="form-text text-muted">Leave empty if no text changes.</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="name">ColorPattern</label>
+            <select class="form-control form-control-sm" name="type" id="behavior" aria-describedby="behavior-help"  rows="10">
+                <option value="">none</option>
+                {{range $index, $patternName := .colorPatterns}}
+                <option value="{{ $patternName }}" {{ if $mutator.DescriptionModifier }}{{if eq $patternName $mutator.DescriptionModifier.ColorPattern}}SELECTED{{end}}{{ end }}>{{ $patternName }}</option>
+                {{end}}
+            </select>
+            <small id="name-help" class="form-text text-muted">Optional color style</small>
+        </div>
+    </div>
+
+
+    <hr />
+    <h3>Alert Modifier</h3>
+
+    <div class="row">
+        <div class="form-group col-sm">
+            <label for="behavior">Behavior</label>
+            <select class="form-control form-control-sm" name="type" id="behavior" aria-describedby="behavior-help"  rows="10">
+                <option value="append" SELECTED>append</option>
+            </select>
+            <small id="behavior-help" class="form-text text-muted">How will the name text be modified?</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="description">Text</label>
+            <textarea class="form-control form-control-sm" id="description" aria-describedby="description-help">{{ if $mutator.AlertModifier }}{{ $mutator.AlertModifier.Text }}{{end}}</textarea>
+            <small id="description-help" class="form-text text-muted">Leave empty if no text changes.</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="name">ColorPattern</label>
+            <select class="form-control form-control-sm" name="type" id="behavior" aria-describedby="behavior-help"  rows="10">
+                <option value="">none</option>
+                {{range $index, $patternName := .colorPatterns}}
+                <option value="{{ $patternName }}" {{ if $mutator.AlertModifier }}{{if eq $patternName $mutator.AlertModifier.ColorPattern}}SELECTED{{end}}{{ end }}>{{ $patternName }}</option>
+                {{end}}
+            </select>
+            <small id="name-help" class="form-text text-muted">Optional color style</small>
+        </div>
+    </div>
+
+
+    <hr />
+    <h3>Lifespan</h3>
+
+    <div class="row">
+        <div class="form-group col-sm">
+            <label for="displayname">Respawn Rate</label> <a href="#" class="badge badge-warning" data-toggle="modal" data-target=".time-strings-modal">example?</a>
+            <input type="text" class="form-control form-control-sm" id="displayname" aria-describedby="displayname-help" value="{{ $mutator.RespawnRate }}">
+            <small id="displayname-help" class="form-text text-muted">How long to wait until it returns after decaying</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="displayname">Decay Rate</label> <a href="#" class="badge badge-warning" data-toggle="modal" data-target=".time-strings-modal">example?</a>
+            <input type="text" class="form-control form-control-sm" id="displayname" aria-describedby="displayname-help" value="{{ $mutator.DecayRate }}">
+            <small id="displayname-help" class="form-text text-muted">How long it lasts (or special period it lasts until)</small>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="displayname">Decay Into</label>
+            <input type="text" class="form-control form-control-sm" id="displayname" aria-describedby="displayname-help" value="{{ $mutator.DecayIntoId }}">
+            <small id="displayname-help" class="form-text text-muted">What mutator it becomes when it decays</small>
+        </div>
+    </div>
+
+    <hr />
+    <h3>Player Buffs</h3>
+
+    <div class="form-group row form-check container-fluid">
+        {{ $buffIds := .raceInfo.BuffIds }}
+        {{range $i, $buffSpec := .buffSpecs}}
+            <label class="form-check-label col-md-2" for="playerbuffids-{{$buffSpec.BuffId}}" title="{{ $buffSpec.Description }}"><input 
+            class="form-check-input"
+            type="checkbox" 
+            name="playerbuffids[]" 
+            id="playerbuffids-{{$buffSpec.BuffId}}" 
+            value="{{ $buffSpec.BuffId }}" 
+            {{range $j, $buffId := $mutator.PlayerBuffIds}}{{if eq $buffId $buffSpec.BuffId}}CHECKED{{end}}{{end}}>
+            {{ $buffSpec.BuffId }}. {{ $buffSpec.Name }}</label> 
+        {{end}}
+    </div>
+
+    <hr />
+    <h3>Mob Buffs</h3>
+
+    <div class="form-group row form-check container-fluid">
+        {{ $buffIds := .raceInfo.BuffIds }}
+        {{range $i, $buffSpec := .buffSpecs}}
+            <label class="form-check-label col-md-2" for="worn-buff-{{$buffSpec.BuffId}}" title="{{ $buffSpec.Description }}"><input 
+            class="form-check-input"
+            type="checkbox" 
+            name="mobfuffids[]" 
+            id="race-buff-{{$buffSpec.BuffId}}" 
+            value="{{ $buffSpec.BuffId }}" 
+            {{range $j, $buffId := $mutator.MobBuffIds}}{{if eq $buffId $buffSpec.BuffId}}CHECKED{{end}}{{end}}>
+            {{ $buffSpec.BuffId }}. {{ $buffSpec.Name }}</label> 
+        {{end}}
+    </div>
+
+    <hr />
+    <h3>Native Mob Buffs</h3>
+
+    <div class="form-group row form-check container-fluid">
+        {{ $buffIds := .raceInfo.BuffIds }}
+        {{range $i, $buffSpec := .buffSpecs}}
+            <label class="form-check-label col-md-2" for="worn-buff-{{$buffSpec.BuffId}}" title="{{ $buffSpec.Description }}"><input 
+            class="form-check-input"
+            type="checkbox" 
+            name="nativebuffids[]" 
+            id="race-buff-{{$buffSpec.BuffId}}" 
+            value="{{ $buffSpec.BuffId }}" 
+            {{range $j, $buffId := $mutator.NativeBuffIds}}{{if eq $buffId $buffSpec.BuffId}}CHECKED{{end}}{{end}}>
+            {{ $buffSpec.BuffId }}. {{ $buffSpec.Name }}</label> 
+        {{end}}
+    </div>
+
+    <hr />
+    <h3>Miscellaneous</h3>
+
+    <div class="row">
+
+        <div class="form-group col-sm">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="true" name="Pvp.On" id="Pvp.On" {{ if $mutator.Pvp.Enabled }}CHECKED{{ end }}>
+                <label class="form-check-label" for="Pvp.On">
+                    Override/Force PVP Area ON
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group col-sm">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="true" name="Pvp.Off" id="Pvp.Off" {{ if $mutator.Pvp.Disabled }}CHECKED{{ end }}>
+                <label class="form-check-label" for="Pvp.Off">
+                    Override/Force PVP Area Off
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group col-sm">
+            <label for="lightmod">Adjust Light</label>
+            <select class="form-control form-control-sm" name="type" id="lightmod" aria-describedby="lightmod-help"  rows="10">
+                <option value="-2" {{ if eq $mutator.LightMod -2 }}SELECTED{{end}}>-2</option>
+                <option value="-1" {{ if eq $mutator.LightMod -1 }}SELECTED{{end}}>-1</option>
+                <option value="0" {{ if eq $mutator.LightMod 0 }}SELECTED{{end}}>0</option>
+                <option value="1" {{ if eq $mutator.LightMod 1 }}SELECTED{{end}}>+1</option>
+                <option value="2" {{ if eq $mutator.LightMod 2 }}SELECTED{{end}}>+2</option>
+            </select>
+            <small id="lightmod-help" class="form-text text-muted">Adjust lighting?</small>
+        </div>
+        
+    </div>
+
+    <hr />
+    <h3>Exits</h3>
+
+    <div class="row">
+        {{ if eq ( len $mutator.Exits ) 0 }}
+            <div class="grid gap-3 form-group col-2">
+                <div class="p-3 border border-primary">
+                    None
+                </div>
+            </div>
+        {{ end }}
+        {{range $exitName, $exitInfo := $mutator.Exits }}
+            <div class="grid gap-3 form-group col-2">
+                <div class="p-3 border border-primary">
+                    
+                    <label for="exits[{{ $exitName }}].exitname">Exit Name</label>
+                    <input type="text" class="form-control form-control-sm" id="exits[{{ $exitName }}].exitname" aria-describedby="exits[{{ $exitName }}].exitname" value="{{ $exitName }}">
+        
+                    <label for="exits[{{ $exitName }}].RoomId">Target RoomId</label>
+                    <input type="text" class="form-control form-control-sm" id="exits[{{ $exitName }}].RoomId" aria-describedby="exits[{{ $exitName }}].RoomId" value="{{ $exitInfo.RoomId }}">
+
+                    <label for="exits[{{ $exitName }}].LockDifficulty">Lock Difficulty (0 = Unlocked)</label>
+                    <input type="text" class="form-control form-control-sm" id="exits[{{ $exitName }}].LockDifficulty" aria-describedby="exits[{{ $exitName }}].LockDifficulty" value="{{ $exitInfo.Lock.Difficulty }}">
+
+                    <label class="form-check-label col-md-2" for="exits[{{ $exitName }}].Secret" title="Secret"><input 
+                        class="form-check-input"
+                        type="checkbox" 
+                        class="form-check-input form-control-sm"  
+                        id="exits[{{ $exitName }}].Secret" 
+                        aria-describedby="exits[{{ $exitName }}].Secret" value="true" {{ if $exitInfo.Secret }}CHECKED{{ end }}>
+                    Secret</label>
+                </div>
+            </div>
+        {{end}}
+        
+    </div>
+
+</form>

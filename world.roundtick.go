@@ -1728,57 +1728,51 @@ func (w *World) CheckForLevelUps() {
 	for _, userId := range onlineIds {
 		user := users.GetByUserId(userId)
 
-		for {
+		if newLevel, statsDelta := user.Character.LevelUp(); newLevel {
 
-			if newLevel, statsDelta := user.Character.LevelUp(); newLevel {
+			livesBefore := user.Character.ExtraLives
 
-				livesBefore := user.Character.ExtraLives
-
-				c := configs.GetConfig()
-				if c.PermaDeath && c.LivesOnLevelUp > 0 {
-					user.Character.ExtraLives += int(c.LivesOnLevelUp)
-					if user.Character.ExtraLives > int(c.LivesMax) {
-						user.Character.ExtraLives = int(c.LivesMax)
-					}
+			c := configs.GetConfig()
+			if c.PermaDeath && c.LivesOnLevelUp > 0 {
+				user.Character.ExtraLives += int(c.LivesOnLevelUp)
+				if user.Character.ExtraLives > int(c.LivesMax) {
+					user.Character.ExtraLives = int(c.LivesMax)
 				}
+			}
 
-				user.EventLog.Add(`xp`, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now <ansi fg="magenta-bold">level %d</ansi>!`, user.Character.Name, user.Character.Level))
+			user.EventLog.Add(`xp`, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now <ansi fg="magenta-bold">level %d</ansi>!`, user.Character.Name, user.Character.Level))
 
-				levelUpData := map[string]interface{}{
-					"level":          user.Character.Level,
-					"statsDelta":     statsDelta,
-					"trainingPoints": 1,
-					"statPoints":     1,
-					"livesUp":        user.Character.ExtraLives - livesBefore,
-				}
-				levelUpStr, _ := templates.Process("character/levelup", levelUpData)
+			levelUpData := map[string]interface{}{
+				"level":          user.Character.Level,
+				"statsDelta":     statsDelta,
+				"trainingPoints": 1,
+				"statPoints":     1,
+				"livesUp":        user.Character.ExtraLives - livesBefore,
+			}
+			levelUpStr, _ := templates.Process("character/levelup", levelUpData)
 
-				user.SendText(levelUpStr)
+			user.SendText(levelUpStr)
 
-				events.AddToQueue(events.Broadcast{
-					Text: fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has leveled up to level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, user.Character.Level, term.CRLFStr),
-				})
+			events.AddToQueue(events.Broadcast{
+				Text: fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has leveled up to level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, user.Character.Level, term.CRLFStr),
+			})
 
-				if user.Character.Level >= 5 {
-					for _, mobInstanceId := range user.Character.CharmedMobs {
-						if mob := mobs.GetInstance(mobInstanceId); mob != nil {
+			if user.Character.Level >= 5 {
+				for _, mobInstanceId := range user.Character.CharmedMobs {
+					if mob := mobs.GetInstance(mobInstanceId); mob != nil {
 
-							if mob.MobId == 38 {
-								mob.Command(`say I see you have grown much stronger and more experienced. My assistance is now needed elsewhere. I wish you good luck!`)
-								mob.Command(`emote clicks their heels together and disappears in a cloud of smoke.`, 10)
-								mob.Command(`suicide vanish`, 10)
-							}
+						if mob.MobId == 38 {
+							mob.Command(`say I see you have grown much stronger and more experienced. My assistance is now needed elsewhere. I wish you good luck!`)
+							mob.Command(`emote clicks their heels together and disappears in a cloud of smoke.`, 10)
+							mob.Command(`suicide vanish`, 10)
 						}
 					}
 				}
-
-				users.SaveUser(*user)
-
-				continue
 			}
 
-			break
+			users.SaveUser(*user)
 
+			continue
 		}
 
 	}
