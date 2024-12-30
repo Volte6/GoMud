@@ -16,8 +16,6 @@ import (
 )
 
 const (
-	defaultConfigPath = "_datafiles/config.yaml"
-
 	PVPEnabled  = `enabled`
 	PVPDisabled = `disabled`
 	PVPOff      = `off`
@@ -25,34 +23,25 @@ const (
 )
 
 type Config struct {
-	Version                 ConfigString `yaml:"Version"` // Cuurrent version of all datafiles
-	MaxCPUCores             ConfigInt    `yaml:"MaxCPUCores"`
-	FolderItemData          ConfigString `yaml:"FolderItemData"`
-	FolderAttackMessageData ConfigString `yaml:"FolderAttackMessageData"`
-	FolderUserData          ConfigString `yaml:"FolderUserData"`
-	FolderSpellData         ConfigString `yaml:"FolderSpellData"`
-	FolderTemplates         ConfigString `yaml:"FolderTemplates"`
-	FolderConversations     ConfigString `yaml:"FolderConversations"`
-	FolderSampleScripts     ConfigString `yaml:"FolderSampleScripts"`
-	FileAnsiAliases         ConfigString `yaml:"FileAnsiAliases"`
-	FileColorPatterns       ConfigString `yaml:"FileColorPatterns"`
-	FileKeywords            ConfigString `yaml:"FileKeywords"`
-	AllowItemBuffRemoval    ConfigBool   `yaml:"AllowItemBuffRemoval"`
-	CarefulSaveFiles        ConfigBool   `yaml:"CarefulSaveFiles"`
-	AuctionsEnabled         ConfigBool   `yaml:"AuctionsEnabled"`
-	AuctionsAnonymous       ConfigBool   `yaml:"AuctionsAnonymous"`
-	AuctionSeconds          ConfigInt    `yaml:"AuctionSeconds"`
-	AuctionUpdateSeconds    ConfigInt    `yaml:"AuctionUpdateSeconds"`
-	PVP                     ConfigString `yaml:"PVP"`
-	PVPMinimumLevel         ConfigInt    `yaml:"PVPMinimumLevel"`
-	XPScale                 ConfigFloat  `yaml:"XPScale"`
-	TurnMs                  ConfigInt    `yaml:"TurnMs"`
-	RoundSeconds            ConfigInt    `yaml:"RoundSeconds"`
-	RoundsPerAutoSave       ConfigInt    `yaml:"RoundsPerAutoSave"`
-	RoundsPerDay            ConfigInt    `yaml:"RoundsPerDay"` // How many rounds are in a day
-	NightHours              ConfigInt    `yaml:"NightHours"`   // How many hours of night
-	MaxMobBoredom           ConfigInt    `yaml:"MaxMobBoredom"`
-	MobConverseChance       ConfigInt    `yaml:"MobConverseChance"` // Chance 1-100 of attempting to converse when idle
+	Version              ConfigString `yaml:"Version"` // Cuurrent version of all datafiles
+	MaxCPUCores          ConfigInt    `yaml:"MaxCPUCores"`
+	FolderDataFiles      ConfigString `yaml:"FolderDataFiles"`
+	AllowItemBuffRemoval ConfigBool   `yaml:"AllowItemBuffRemoval"`
+	CarefulSaveFiles     ConfigBool   `yaml:"CarefulSaveFiles"`
+	AuctionsEnabled      ConfigBool   `yaml:"AuctionsEnabled"`
+	AuctionsAnonymous    ConfigBool   `yaml:"AuctionsAnonymous"`
+	AuctionSeconds       ConfigInt    `yaml:"AuctionSeconds"`
+	AuctionUpdateSeconds ConfigInt    `yaml:"AuctionUpdateSeconds"`
+	PVP                  ConfigString `yaml:"PVP"`
+	PVPMinimumLevel      ConfigInt    `yaml:"PVPMinimumLevel"`
+	XPScale              ConfigFloat  `yaml:"XPScale"`
+	TurnMs               ConfigInt    `yaml:"TurnMs"`
+	RoundSeconds         ConfigInt    `yaml:"RoundSeconds"`
+	RoundsPerAutoSave    ConfigInt    `yaml:"RoundsPerAutoSave"`
+	RoundsPerDay         ConfigInt    `yaml:"RoundsPerDay"` // How many rounds are in a day
+	NightHours           ConfigInt    `yaml:"NightHours"`   // How many hours of night
+	MaxMobBoredom        ConfigInt    `yaml:"MaxMobBoredom"`
+	MobConverseChance    ConfigInt    `yaml:"MobConverseChance"` // Chance 1-100 of attempting to converse when idle
 
 	MobUnloadThreshold           ConfigInt         `yaml:"MobUnloadThreshold"`
 	RoomUnloadRounds             ConfigInt         `yaml:"RoomUnloadRounds"`
@@ -360,44 +349,8 @@ func (c *Config) Validate() {
 		c.MaxCPUCores = 0 // default
 	}
 
-	if c.FolderItemData == `` {
-		c.FolderItemData = `_datafiles/items` // default
-	}
-
-	if c.FolderAttackMessageData == `` {
-		c.FolderAttackMessageData = `_datafiles/combat-messages` // default
-	}
-
-	if c.FolderUserData == `` {
-		c.FolderUserData = `_datafiles/users` // default
-	}
-
-	if c.FolderSpellData == `` {
-		c.FolderSpellData = `_datafiles/spells` // default
-	}
-
-	if c.FolderTemplates == `` {
-		c.FolderTemplates = `_datafiles/templates` // default
-	}
-
-	if c.FolderSampleScripts == `` {
-		c.FolderSampleScripts = `_datafiles/sample-scripts` // default
-	}
-
-	if c.FolderConversations == `` {
-		c.FolderConversations = `_datafiles/conversations` // default
-	}
-
-	if c.FileAnsiAliases == `` {
-		c.FileAnsiAliases = `_datafiles/ansi-aliases.yaml` // default
-	}
-
-	if c.FileColorPatterns == `` {
-		c.FileColorPatterns = `_datafiles/color-patterns.yaml` // default
-	}
-
-	if c.FileKeywords == `` {
-		c.FileKeywords = `_datafiles/keywords.yaml` // default
+	if c.FolderDataFiles == `` {
+		c.FolderDataFiles = `_datafiles` // default
 	}
 
 	if c.TimeFormat == `` {
@@ -661,13 +614,14 @@ func GetConfig() Config {
 func overridePath() string {
 	overridePath := os.Getenv(`CONFIG_PATH`)
 	if overridePath == `` {
-		overridePath = `_datafiles/config-overrides.yaml`
+		overridePath = GetConfig().FolderDataFiles.String() + `/config-overrides.yaml`
 	}
 	return overridePath
 }
 
 func ReloadConfig() error {
-	configPath := util.FilePath(defaultConfigPath)
+
+	configPath := util.FilePath(GetConfig().FolderDataFiles.String() + `/config.yaml`)
 
 	bytes, err := os.ReadFile(configPath)
 	if err != nil {

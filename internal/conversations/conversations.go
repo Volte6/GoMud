@@ -24,7 +24,7 @@ func AttemptConversation(initiatorMobId int, initatorInstanceId int, initiatorNa
 	participantName = strings.ToLower(participantName)
 	zone = ZoneNameSanitize(zone)
 
-	convFolder := string(configs.GetConfig().FolderConversations)
+	convFolder := string(configs.GetConfig().FolderDataFiles) + `/conversations`
 
 	fileName := fmt.Sprintf("%s/%d.yaml", zone, initiatorMobId)
 
@@ -155,7 +155,7 @@ func HasConverseFile(mobId int, zone string) bool {
 
 	zone = ZoneNameSanitize(zone)
 
-	convFolder := string(configs.GetConfig().FolderConversations)
+	convFolder := string(configs.GetConfig().FolderDataFiles) + `/conversations`
 
 	fileName := fmt.Sprintf("%s/%d.yaml", zone, mobId)
 

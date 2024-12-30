@@ -20,7 +20,6 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-const roomDataFilesPath = "_datafiles/rooms"
 const visitorTrackingTimeout = 180 // 180 seconds (3 minutes?)
 const defaultMapSymbol = `•`
 
@@ -294,7 +293,7 @@ func (r *Room) GetScript() string {
 func (r *Room) GetScriptPath() string {
 
 	// Load any script for the room
-	return strings.Replace(roomDataFilesPath+`/`+r.Filepath(), `.yaml`, `.js`, 1)
+	return strings.Replace(configs.GetConfig().FolderDataFiles.String()+`/rooms/`+r.Filepath(), `.yaml`, `.js`, 1)
 }
 
 func (r *Room) FindTemporaryExitByUserId(userId int) (exit.TemporaryRoomExit, bool) {

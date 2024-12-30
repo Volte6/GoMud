@@ -27,7 +27,7 @@ func CreateNewSpellFile(newSpellInfo SpellData) (string, error) {
 		saveModes = append(saveModes, fileloader.SaveCareful)
 	}
 
-	if err := fileloader.SaveFlatFile[*SpellData](string(configs.GetConfig().FolderSpellData), &newSpellInfo, saveModes...); err != nil {
+	if err := fileloader.SaveFlatFile[*SpellData](string(configs.GetConfig().FolderDataFiles)+`/spells`, &newSpellInfo, saveModes...); err != nil {
 		return ``, err
 	}
 
@@ -37,7 +37,7 @@ func CreateNewSpellFile(newSpellInfo SpellData) (string, error) {
 	newScriptPath := newSpellInfo.GetScriptPath()
 	os.MkdirAll(filepath.Dir(newScriptPath), os.ModePerm)
 
-	fileloader.CopyFileContents(util.FilePath(string(configs.GetConfig().FolderSampleScripts)+`/spells/`+string(newSpellInfo.Type)+`.js`),
+	fileloader.CopyFileContents(util.FilePath(string(configs.GetConfig().FolderDataFiles)+`/sample-scripts/spells/`+string(newSpellInfo.Type)+`.js`),
 		newScriptPath)
 
 	return newSpellInfo.SpellId, nil

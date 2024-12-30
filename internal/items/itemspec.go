@@ -174,8 +174,6 @@ const (
 
 	POVUser  = 0
 	POVOther = 1
-
-	itemDataFilesFolderPath = "_datafiles/items"
 )
 
 type Damage struct {
@@ -437,7 +435,7 @@ func (i ItemSpec) GetScript() string {
 
 func (i *ItemSpec) GetScriptPath() string {
 	// Load any script for the room
-	return strings.Replace(string(configs.GetConfig().FolderItemData)+`/`+i.Filepath(), `.yaml`, `.js`, 1)
+	return strings.Replace(string(configs.GetConfig().FolderDataFiles)+`/items/`+i.Filepath(), `.yaml`, `.js`, 1)
 }
 
 func GetItemSpec(itemId int) *ItemSpec {
@@ -455,14 +453,14 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpItems, err := fileloader.LoadAllFlatFiles[int, *ItemSpec](string(configs.GetConfig().FolderItemData))
+	tmpItems, err := fileloader.LoadAllFlatFiles[int, *ItemSpec](string(configs.GetConfig().FolderDataFiles) + `/items`)
 	if err != nil {
 		panic(err)
 	}
 
 	items = tmpItems
 
-	tmpAttackMessages, err := fileloader.LoadAllFlatFiles[ItemSubType, *WeaponAttackMessageGroup](string(configs.GetConfig().FolderAttackMessageData))
+	tmpAttackMessages, err := fileloader.LoadAllFlatFiles[ItemSubType, *WeaponAttackMessageGroup](string(configs.GetConfig().FolderDataFiles) + `/combat-messages`)
 	if err != nil {
 		panic(err)
 	}

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/stats"
@@ -22,8 +23,6 @@ var (
 )
 
 const (
-	raceDataFilesFolderPath = "_datafiles/races"
-
 	Small  Size = "small"  // Something like a mouse, dog
 	Medium Size = "medium" // Something like a human
 	Large  Size = "large"  // Something like a troll, ogre, dragon, kraken, or leviathan (or bigger).
@@ -165,7 +164,7 @@ func (r *Race) Save() error {
 		return err
 	}
 
-	saveFilePath := util.FilePath(raceDataFilesFolderPath, `/`, r.Filename())
+	saveFilePath := util.FilePath(configs.GetConfig().FolderDataFiles.String(), `/`, `races`, `/`, r.Filename())
 
 	err = os.WriteFile(saveFilePath, bytes, 0644)
 	if err != nil {
@@ -180,7 +179,7 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpRaces, err := fileloader.LoadAllFlatFiles[int, *Race](raceDataFilesFolderPath)
+	tmpRaces, err := fileloader.LoadAllFlatFiles[int, *Race](configs.GetConfig().FolderDataFiles.String() + `/races`)
 	if err != nil {
 		panic(err)
 	}

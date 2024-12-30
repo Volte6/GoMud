@@ -551,7 +551,7 @@ func SaveAllRooms() error {
 		saveModes = append(saveModes, fileloader.SaveCareful)
 	}
 
-	saveCt, err := fileloader.SaveAllFlatFiles[int, *Room](roomDataFilesPath, roomManager.rooms, saveModes...)
+	saveCt, err := fileloader.SaveAllFlatFiles[int, *Room](configs.GetConfig().FolderDataFiles.String()+`/rooms`, roomManager.rooms, saveModes...)
 
 	slog.Info("SaveAllRooms()", "savedCount", saveCt, "expectedCt", len(roomManager.rooms), "Time Taken", time.Since(start))
 
@@ -569,7 +569,7 @@ func loadAllRoomZones() error {
 		}
 	}()
 
-	loadedRooms, err := fileloader.LoadAllFlatFiles[int, *Room](roomDataFilesPath)
+	loadedRooms, err := fileloader.LoadAllFlatFiles[int, *Room](configs.GetConfig().FolderDataFiles.String() + `/rooms`)
 	if err != nil {
 		return err
 	}
@@ -732,7 +732,7 @@ func findRoomFile(roomId int) string {
 	foundFilePath := ``
 	searchFileName := filepath.FromSlash(fmt.Sprintf(`/%d.yaml`, roomId))
 
-	walkPath := filepath.FromSlash(roomDataFilesPath)
+	walkPath := filepath.FromSlash(configs.GetConfig().FolderDataFiles.String() + `/rooms`)
 
 	filepath.Walk(walkPath, func(path string, info os.FileInfo, err error) error {
 
@@ -814,7 +814,7 @@ func LoadRoom(roomId int) *Room {
 	}
 
 	filename := findRoomFile(roomId)
-	retRoom, _ := loadRoomFromFile(util.FilePath(roomDataFilesPath, `/`, filename))
+	retRoom, _ := loadRoomFromFile(util.FilePath(configs.GetConfig().FolderDataFiles.String(), `/`, `rooms`, `/`, filename))
 
 	return retRoom
 }
@@ -835,7 +835,7 @@ func SaveRoom(r Room) error {
 
 	zone := ZoneToFolder(r.Zone)
 
-	roomFilePath := util.FilePath(roomDataFilesPath, `/`, fmt.Sprintf("%s%d.yaml", zone, r.RoomId))
+	roomFilePath := util.FilePath(configs.GetConfig().FolderDataFiles.String(), `/`, `rooms`, `/`, fmt.Sprintf("%s%d.yaml", zone, r.RoomId))
 
 	if err = os.WriteFile(roomFilePath, data, 0777); err != nil {
 		return err
@@ -920,7 +920,7 @@ func MoveToZone(roomId int, newZoneName string) error {
 	if !ok {
 		return errors.New("old zone doesn't exist")
 	}
-	oldFilePath := fmt.Sprintf("%s/%s", roomDataFilesPath, room.Filepath())
+	oldFilePath := fmt.Sprintf("%s/rooms/%s", configs.GetConfig().FolderDataFiles.String(), room.Filepath())
 
 	newZoneInfo, ok := roomManager.zones[newZoneName]
 	if !ok {
@@ -932,7 +932,7 @@ func MoveToZone(roomId int, newZoneName string) error {
 	}
 
 	room.Zone = newZoneName
-	newFilePath := fmt.Sprintf("%s/%s", roomDataFilesPath, room.Filepath())
+	newFilePath := fmt.Sprintf("%s/rooms/%s", configs.GetConfig().FolderDataFiles.String(), room.Filepath())
 
 	if err := os.Rename(oldFilePath, newFilePath); err != nil {
 		return err
@@ -964,7 +964,7 @@ func CreateZone(zoneName string) (roomId int, err error) {
 		return zoneInfo.RootRoomId, errors.New("zone already exists")
 	}
 
-	zoneFolder := util.FilePath(roomDataFilesPath, "/", ZoneToFolder(zoneName))
+	zoneFolder := util.FilePath(configs.GetConfig().FolderDataFiles.String(), "/", "rooms", "/", ZoneToFolder(zoneName))
 	if err := os.Mkdir(zoneFolder, 0755); err != nil {
 		return 0, err
 	}

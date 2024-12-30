@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/internal/colorpatterns"
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/statmods"
@@ -30,8 +31,6 @@ type Pet struct {
 
 var (
 	petTypes = map[string]*Pet{}
-
-	petDataFilesFolderPath = "_datafiles/pets"
 )
 
 func (p *Pet) StatMod(statName string) int {
@@ -143,7 +142,7 @@ func (p *Pet) Save() error {
 		return err
 	}
 
-	saveFilePath := util.FilePath(petDataFilesFolderPath, `/`, fmt.Sprintf("%s.yaml", fileName))
+	saveFilePath := util.FilePath(configs.GetConfig().FolderDataFiles.String(), `/`, `pets`, `/`, fmt.Sprintf("%s.yaml", fileName))
 
 	err = os.WriteFile(saveFilePath, bytes, 0644)
 	if err != nil {
@@ -178,7 +177,7 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpPetTypes, err := fileloader.LoadAllFlatFiles[string, *Pet](petDataFilesFolderPath)
+	tmpPetTypes, err := fileloader.LoadAllFlatFiles[string, *Pet](configs.GetConfig().FolderDataFiles.String() + `/pets`)
 	if err != nil {
 		panic(err)
 	}
