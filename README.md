@@ -70,7 +70,7 @@ Or if you have docker installed:
 
 *TELNET* : connect to `localhost` on port `33333` with a telnet client
 
-*WEB CLIENT*: [http://localhost/client](http://localhost/client) 
+*WEB CLIENT*: [http://localhost/webclient](http://localhost/webclient) 
 
 **Default Username:** _admin_
 
