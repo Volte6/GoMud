@@ -819,3 +819,36 @@ func StringWildcardMatch(stringToSearch string, patternToSearch string) bool {
 
 	return stringToSearch == patternToSearch
 }
+
+func ValidateWorldFiles(worldPath string) error {
+
+	exampleWorld := FilePath(`_datafiles/world/default`)
+
+	entries, err := os.ReadDir(exampleWorld)
+	if err != nil {
+		return fmt.Errorf("unable to read directory %s: %v", exampleWorld, err)
+	}
+
+	var subfolders []string
+	// Filter out only directories
+	for _, entry := range entries {
+		if entry.IsDir() {
+			subfolders = append(subfolders, entry.Name())
+		}
+	}
+
+	// Check each source subfolder in the target directory
+	for _, folder := range subfolders {
+		testPath := filepath.Join(worldPath, folder)
+
+		info, err := os.Stat(testPath)
+		if err != nil {
+			return fmt.Errorf("'%s' missing folder '%s': %v", worldPath, folder, err)
+		}
+		if !info.IsDir() {
+			return fmt.Errorf("'%s' exists but is not a directory", testPath)
+		}
+	}
+
+	return nil
+}

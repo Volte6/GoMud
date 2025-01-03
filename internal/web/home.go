@@ -18,7 +18,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 		configs.GetConfig().AllConfigData(`*port`, `seed`, `folder*`, `file*`),
 	}
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(DataFiles() + "/html/public/index.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/public/index.html")
 	if err != nil {
 		slog.Error("HTML ERROR", "error", err)
 	}

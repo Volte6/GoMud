@@ -40,7 +40,7 @@ func racesIndex(w http.ResponseWriter, r *http.Request) {
 
 func raceData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("race.data.html").Funcs(funcMap).ParseFiles(DataFiles() + "/html/admin/races/race.data.html")
+	tmpl, err := template.New("race.data.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/admin/races/race.data.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}

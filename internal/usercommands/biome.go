@@ -14,7 +14,7 @@ func Biome(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 	if !ok {
 		user.SendText(`No biome information found about this area.`)
-		return false, fmt.Errorf(`biome %d not found`, room.Biome)
+		return false, fmt.Errorf(`biome %s not found`, room.Biome)
 	}
 
 	biomeTxt, _ := templates.Process("descriptions/biome", biome)
