@@ -1,0 +1,90 @@
+# This workflow will: build gomud for multiple os/architectures
+# archive the binaries and create a new release for users to easily download
+
+name: Go
+
+on:
+  push:
+    branches: ["master", "ci-cd-releases"]
+
+env:
+  RELEASE_FILENAME: go-mud-release
+
+jobs:
+  # test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Test
+  #       run: go test -v ./...
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
+
+      - name: Create bin directory
+        run: mkdir -p bin/
+
+      - name: Copy _datafiles to bin/
+        run: cp -r _datafiles bin/
+
+      - name: Build windows amd64
+        run: env GOOS=windows GOARCH=amd64 go build -v -o bin/go-mud-windows_x64.exe .
+
+      - name: Build darwin/arm64
+        run: env GOOS=darwin GOARCH=arm64 go build -v -o bin/go-mud-darwin_arm64 .
+
+      - name: Build darwin/amd64
+        run: env GOOS=darwin GOARCH=amd64 go build -v -o bin/go-mud-darwin_x64 .
+
+      - name: Build linux/amd64
+        run: env GOOS=linux GOARCH=amd64 go build -v -o bin/go-mud-linux_x64 .
+
+      - name: Build linux/arm5
+        run: env GOOS=linux GOARCH=arm GOARM=5 go build -v -o bin/go-mud-linux_arm5 .
+
+      - name: Upload bin
+        uses: actions/upload-artifact@v4
+        with:
+          name: bin-artifact
+          path: bin/
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download builds
+        uses: actions/download-artifact@v4
+        with:
+          name: bin-artifact
+          path: bin/
+
+      - name: Set short git commit SHA
+        id: vars
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+
+      - name: Archive release
+        uses: thedoctor0/zip-release@master
+        id: zip-binaries
+        with:
+          type: zip
+          directory: bin
+          filename: ${{ env.RELEASE_FILENAME }}-${{ env.COMMIT_SHORT_SHA }}.zip
+
+      - name: Release with notes
+        uses: softprops/action-gh-release@v1
+        with:
+          files: bin/${{ env.RELEASE_FILENAME }}-${{ env.COMMIT_SHORT_SHA }}.zip
+          tag_name: release-${{ env.COMMIT_SHORT_SHA }}
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
