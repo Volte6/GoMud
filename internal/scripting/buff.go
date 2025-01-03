@@ -186,7 +186,7 @@ func getBuffVM(buffId int) (*VMWrapper, error) {
 
 	bSpec := buffs.GetBuffSpec(buffId)
 	if bSpec == nil {
-		return nil, fmt.Errorf("buff spec not found: %d", bSpec)
+		return nil, fmt.Errorf("buff spec not found: %T", bSpec)
 	}
 
 	script := bSpec.GetScript()

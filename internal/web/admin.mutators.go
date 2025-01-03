@@ -39,7 +39,7 @@ func mutatorsIndex(w http.ResponseWriter, r *http.Request) {
 
 func mutatorData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("mutator.data.html").Funcs(funcMap).ParseFiles(DataFiles() + "/html/admin/mutators/mutator.data.html")
+	tmpl, err := template.New("mutator.data.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/admin/mutators/mutator.data.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}

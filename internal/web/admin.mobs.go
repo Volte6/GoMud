@@ -41,7 +41,7 @@ func mobsIndex(w http.ResponseWriter, r *http.Request) {
 
 func mobData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("mob.data.html").Funcs(funcMap).ParseFiles(DataFiles() + "/html/admin/mobs/mob.data.html")
+	tmpl, err := template.New("mob.data.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/admin/mobs/mob.data.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}

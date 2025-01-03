@@ -1,5 +1,0 @@
-type: dog
-statmods:
-  strength: 5
-damage:
-  diceroll: 1d3

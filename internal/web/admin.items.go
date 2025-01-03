@@ -73,7 +73,7 @@ func itemsIndex(w http.ResponseWriter, r *http.Request) {
 
 func itemData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("item.data.html").Funcs(funcMap).ParseFiles(DataFiles() + "/html/admin/items/item.data.html")
+	tmpl, err := template.New("item.data.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/admin/items/item.data.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}

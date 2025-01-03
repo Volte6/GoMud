@@ -59,7 +59,7 @@ func roomsIndex(w http.ResponseWriter, r *http.Request) {
 
 				if rootRoomId, err := rooms.GetZoneRoot(room.Zone); err == nil {
 					if rootRoom := rooms.LoadRoom(rootRoomId); rootRoom != nil {
-						if rootRoom.ZoneConfig.MobAutoScale.Minimum > 0 || rootRoom.ZoneConfig.MobAutoScale.Minimum > 0 {
+						if rootRoom.ZoneConfig.MobAutoScale.Minimum > 0 || rootRoom.ZoneConfig.MobAutoScale.Maximum > 0 {
 							autoScale = fmt.Sprintf(`%d to %d`, rootRoom.ZoneConfig.MobAutoScale.Minimum, rootRoom.ZoneConfig.MobAutoScale.Maximum)
 						}
 					}
@@ -140,7 +140,7 @@ func roomsIndex(w http.ResponseWriter, r *http.Request) {
 
 func roomData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("room.data.html").Funcs(funcMap).ParseFiles(DataFiles() + "/html/admin/rooms/room.data.html")
+	tmpl, err := template.New("room.data.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/admin/rooms/room.data.html")
 	if err != nil {
 		slog.Error("HTML Template", "error", err)
 	}

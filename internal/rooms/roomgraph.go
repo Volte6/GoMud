@@ -651,7 +651,7 @@ func (r *RoomGraph) Changed() bool {
 	}
 
 	if totalRooms == len(r.trackedRoomIds) {
-		slog.Info("RoomGraph::Changed()", "Updated needed, mismatched room counts", "totalRooms", totalRooms, "trackedRoomIds", len(r.trackedRoomIds))
+		slog.Info("RoomGraph::Changed()", "error", "Updated needed, mismatched room counts", "totalRooms", totalRooms, "trackedRoomIds", len(r.trackedRoomIds))
 		//	return true
 	}
 

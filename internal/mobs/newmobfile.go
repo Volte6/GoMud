@@ -61,7 +61,7 @@ func CreateNewMobFile(newMobInfo Mob, copyScript string) (MobId, error) {
 		os.MkdirAll(filepath.Dir(newScriptPath), os.ModePerm)
 
 		fileloader.CopyFileContents(
-			util.FilePath(string(configs.GetConfig().FolderDataFiles)+`/sample-scripts/mobs/`+copyScript),
+			util.FilePath(`_datafiles/sample-scripts/mobs/`+copyScript),
 			newMobInfo.GetScriptPath(),
 		)
 	}

@@ -41,7 +41,7 @@ func Macros(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 				cmdRest = strings.Join(cmdParts[1:], ` `)
 			}
 
-			user.SendText(fmt.Sprintf(`      %s) <ansi fg="command">%s</ansi> %s`, string(97+i), cmdAlone, cmdRest))
+			user.SendText(fmt.Sprintf(`      %s) <ansi fg="command">%s</ansi> %s`, string(rune(97+i)), cmdAlone, cmdRest))
 		}
 	}
 	user.SendText(``)
