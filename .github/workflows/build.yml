@@ -7,6 +7,9 @@ on:
   push:
     branches: ["master", "ci-cd-releases"]
 
+permissions:
+  contents: write
+
 env:
   RELEASE_FILENAME: go-mud-release
 
