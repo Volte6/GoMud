@@ -19,6 +19,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"crypto/md5"
 
@@ -380,6 +381,7 @@ func Md5Bytes(input []byte) []byte {
 }
 
 func GetLockSequence(lockIdentifier string, difficulty int, seed string) string {
+
 	// A lock sequence is a sequence of UP or DOWN commands that must be entered to unlock a lock
 	// The difficulty is how many commands are in the sequence
 	// First generate a Md5Bytes() hash and then use the first N bytes to generate the sequence
@@ -387,30 +389,32 @@ func GetLockSequence(lockIdentifier string, difficulty int, seed string) string 
 	// If the number is even, the command is UP, if it's odd, the command is DOWN
 	// The sequence is then returned as a string of U's and D's
 
-	// Generate the hash
-	hash := Md5Bytes([]byte(strings.ToLower(lockIdentifier + seed)))
-
-	// Minimum difficulty of 2 (2^2 random chance)
+	// Clamp difficulty between [2..32]
 	if difficulty < 2 {
 		difficulty = 2
-	}
-	// Maxinum difficulty of 32 (2^32 random chance)
-	if difficulty > 32 {
+	} else if difficulty > 32 {
 		difficulty = 32
 	}
 
-	// Generate the sequence
-	sequence := ""
+	// Generate the hash
+	hashInput := strings.ToLower(lockIdentifier + seed)
+	hash := Md5Bytes([]byte(hashInput))
+	for len(hash) < difficulty {
+		hash = append(hash, Md5Bytes([]byte(hashInput+strconv.Itoa(len(hash))))...)
+	}
 
+	// Pre-allocate a slice of bytes
+	seq := make([]byte, difficulty)
 	for i := 0; i < difficulty; i++ {
 		if hash[i]%2 == 0 {
-			sequence += "U"
+			seq[i] = 'U'
 		} else {
-			sequence += "D"
+			seq[i] = 'D'
 		}
 	}
 
-	return sequence
+	// Convert once to string
+	return string(seq)
 }
 
 func Compress(input []byte) []byte {
@@ -621,8 +625,9 @@ func FormatDiceRoll(attacks int, dCount int, dSides int, bonus int, buffOnCrit [
 
 	// #9,11,30
 	if len(buffOnCrit) > 0 {
+		dRoll += `#`
 		for _, buffId := range buffOnCrit {
-			dRoll = fmt.Sprintf(`%s#%d,`, dRoll, buffId)
+			dRoll = fmt.Sprintf(`%s%d,`, dRoll, buffId)
 		}
 		dRoll = strings.TrimRight(dRoll, `,`)
 	}
@@ -707,6 +712,7 @@ func ManaClass(mana int, maxMana int) string {
 	return fmt.Sprintf(`mana-%d`, manaPercent)
 }
 
+// Creates a percentage and quantizes it to the nearest 10
 func QuantizeTens(value int, max int) int {
 	return int(math.Floor(float64(value)/float64(max)*10)) * 10
 }
@@ -758,7 +764,7 @@ func ValidateName(name string) error {
 		return fmt.Errorf("length must be between %d and %d characters long", 2, 16)
 	}
 
-	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(name[:1]) {
+	if !unicode.IsLetter(rune(name[0])) {
 		return errors.New(`provided name starts with a non alpha character`)
 	}
 
@@ -820,13 +826,11 @@ func StringWildcardMatch(stringToSearch string, patternToSearch string) bool {
 	return stringToSearch == patternToSearch
 }
 
-func ValidateWorldFiles(worldPath string) error {
+func ValidateWorldFiles(exampleWorldPath string, worldPath string) error {
 
-	exampleWorld := FilePath(`_datafiles/world/default`)
-
-	entries, err := os.ReadDir(exampleWorld)
+	entries, err := os.ReadDir(exampleWorldPath)
 	if err != nil {
-		return fmt.Errorf("unable to read directory %s: %v", exampleWorld, err)
+		return fmt.Errorf("unable to read directory %s: %v", exampleWorldPath, err)
 	}
 
 	var subfolders []string
