@@ -2,6 +2,7 @@
 
 If you plan to host GoMUD on a Raspberry Pi Zero 2 W, follow these steps to prepare your device:
 
+
 #### Step 1: Install Raspberry Pi OS
 
 1. Download Raspberry Pi OS Lite from the [official Raspberry Pi website](https://www.raspberrypi.com/software/).
@@ -149,15 +150,28 @@ To update your local GoMUD installation when new updates are available on the ma
 This will fetch the latest updates and rebuild the application.
 
 ---
+
 ### Other Tips
-``set description [describe yourself here]``
-
-``help portal`` 
-
-\- Regularly save your progress using the `save` command.
-
-\- Experiment with custom scripts and settings to expand your MUD's functionality.
 
 \- Join the GoMUD community forums or Discord for tips and inspiration:
 https://github.com/Volte6/GoMud/discussions
 https://discord.gg/TqeM85QFdJ
+
+### Problems?
+
+Sometimes a raspberry pi may struggle to compile the binary directly. There are configurations changes you can make resource-wise to your raspberry pi that can solve this, but it is easier/recommended in this situation that you compile the binary locally and then copy it over to the raspberry pi.
+
+There is a convenient `make` command to compile the pi chipset provided:
+
+`make build_rpi` ( this will output a binary named: `go-mud-server-rpi` )
+
+Or (window user?) just use the build comand directly:
+
+`env GOOS=linux GOARCH=arm GOARM=5 go build -o go-mud-server-rpi`
+
+Then you can copy the file over to your raspberry PI via SCP:
+
+`scp ./go-mud-server-rpi pi@raspberrypi.local:/home/pi/GoMud/go-mud-server-rpi`
+
+_Note: You may have to adjust the username/host/path information above to whatever your setup is._
+

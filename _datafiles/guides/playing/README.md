@@ -71,14 +71,8 @@ These commands will help you fully immerse yourself in the world of GoMUD.
 ---
 
 ### Other Tips
-``set description [describe yourself here]``
 
-``help portal`` 
+- `set description [describe yourself here]`
+- `help portal`
+- Regularly save your progress using the `save` command.
 
-\- Regularly save your progress using the `save` command.
-
-\- Experiment with custom scripts and settings to expand your MUD's functionality.
-
-\- Join the GoMUD community forums or Discord for tips and inspiration:
-https://github.com/Volte6/GoMud/discussions
-https://discord.gg/TqeM85QFdJ
