@@ -3,31 +3,31 @@
 All scripting is in [ECMAScript 5.1](https://en.wikipedia.org/wiki/ECMAScript) (AKA javascript).
 
 # Room Scripting
-See [Room Scripting](/internal/scripting/docs/SCRIPTING_ROOMS.md)
+See [Room Scripting](SCRIPTING_ROOMS.md)
 
 # Mob Scripting
-See [Mob Scripting](/internal/scripting/docs/SCRIPTING_MOBS.md)
+See [Mob Scripting](SCRIPTING_MOBS.md)
 
 # Item Scripting
-See [Item Scripting](/internal/scripting/docs/SCRIPTING_ITEMS.md)
+See [Item Scripting](SCRIPTING_ITEMS.md)
 
 # Buff Scripting
-See [Buff Scripting](/internal/scripting/docs/SCRIPTING_BUFFS.md)
+See [Buff Scripting](SCRIPTING_BUFFS.md)
 
 # Spell Scripting
-See [Spell Scripting](/internal/scripting/docs/SCRIPTING_SPELLS.md)
+See [Spell Scripting](SCRIPTING_SPELLS.md)
 
 # Script Functions
 
-[ActorObject Functions](/internal/scripting/docs/FUNCTIONS_ACTORS.md) - Functions that query or alter user/mob data.
+[ActorObject Functions](FUNCTIONS_ACTORS.md) - Functions that query or alter user/mob data.
 
-[RoomObject Functions](/internal/scripting/docs/FUNCTIONS_ROOMS.md) - Functions that query or alter room data.
+[RoomObject Functions](FUNCTIONS_ROOMS.md) - Functions that query or alter room data.
 
-[ItemObject Functions](/internal/scripting/docs/FUNCTIONS_ITEMS.md) - Functions that query or alter item data.
+[ItemObject Functions](FUNCTIONS_ITEMS.md) - Functions that query or alter item data.
 
-[Utility Functions](/internal/scripting/docs/FUNCTIONS_UTIL.md) - Helper and info functions.
+[Utility Functions](FUNCTIONS_UTIL.md) - Helper and info functions.
 
-[Messaging Functions](/internal/scripting/docs/FUNCTIONS_MESSAGING.md) - Helper and info functions.
+[Messaging Functions](FUNCTIONS_MESSAGING.md) - Helper and info functions.
 
 # Special symbols in user or mob commands:
 

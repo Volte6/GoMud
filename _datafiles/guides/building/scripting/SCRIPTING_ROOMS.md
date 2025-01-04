@@ -1,13 +1,13 @@
 # Room Scripting
 
 Example Script: 
-* [Room Script](../../../_datafiles/rooms/frostfang/1.js)
+[Room Script](/_datafiles/world/default/rooms/frostfang/1.js)
 
 ## Script paths
 
 All room scripts reside the same folder as the room definition file.
 
-For example, the room located at `../../../_datafiles/rooms/frostfang/1.yaml` would place its script at `../../../_datafiles/rooms/frostfang/1.js`
+For example, the room located at [/_datafiles/world/default/rooms/frostfang/1.yaml](/_datafiles/world/default/rooms/frostfang/1.yaml) would place its script at [/_datafiles/world/default/rooms/frostfang/1.js](/_datafiles/world/default/rooms/frostfang/1.js)
 
 # Script Functions and Rules
 

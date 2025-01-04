@@ -14,6 +14,8 @@ If you have comments, questions, suggestions:
 
 [Discord Server](https://discord.gg/cjukKvQWyy) - Get more interactive help in the GoMud Discord server.
 
+[Guides](_datafiles/guides/README.md) - Community created guides to help get started.
+
 ## Screenshots
 
 Click below to see in-game screenshots of just a handful of features:
