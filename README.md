@@ -14,6 +14,8 @@ If you have comments, questions, suggestions:
 
 [Discord Server](https://discord.gg/cjukKvQWyy) - Get more interactive help in the GoMud Discord server.
 
+[Guides](_datafiles/guides/README.md) - Community created guides to help get started.
+
 ## Screenshots
 
 Click below to see in-game screenshots of just a handful of features:
@@ -23,10 +25,6 @@ Click below to see in-game screenshots of just a handful of features:
 ## ANSI Colors
 
 Colorization is handled through extensive use of my [github.com/Volte6/ansitags](https://github.com/Volte6/ansitags) library.
-
-## Scripting
-
-Information on scripting in GoMud can be found in the [scripting README](scripting/README.md).
 
 ## Small Feature Demos
 
@@ -46,28 +44,6 @@ Information on scripting in GoMud can be found in the [scripting README](scripti
 - [Web Socket "Virtual Terminal"](https://www.youtube.com/watch?v=L-qtybXO4aw)
 - [Alternate Characters](https://www.youtube.com/watch?v=VERF2l70W34)
 
-# Quick Start
-
-You can download the latest release from the [releases page](https://github.com/Volte6/GoMud/releases), unzip it and run the binary to get started, or if you prefer to build it yourself, follow the instructions below.
-
-A youtube playlist to getting started has been set up here:
-
-[![Getting Started Videos](https://i.ytimg.com/vi/OOZqX01aHt8/hqdefault.jpg "Getting Started Playlist")](https://www.youtube.com/watch?v=OOZqX01aHt8&list=PL20JEmG_bxBuaOE9oFziAhAmx1pyXhQ1p)
-
-You can compile and run it locally with:
-
-> `go run .`
-
-Or you can just build the binary if you prefer:
-
-> `go build -o GoMudServer`
-
-> `./GoMudServer`
-
-Or if you have docker installed:
-
-> `docker compose up --build`
-
 ## Connecting
 
 _TELNET_ : connect to `localhost` on port `33333` with a telnet client
@@ -85,21 +61,6 @@ When running several environment variables can be set to alter behaviors of the 
 - **CONFIG_PATH**_=/path/to/alternative/config.yaml_ - This can provide a path to a copy of the config.yaml containing only values you wish to override. This way you don't have to modify the original config.yaml
 - **LOG_PATH**_=/path/to/log.txt_ - This will write all logs to a specified file. If unspecified, will write to _stderr_.
 - **LOG_LEVEL**_={LOW/MEDIUM/HIGH}_ - This sets how verbose you want the logs to be. _(Note: Log files rotate every 100MB)_
-
-## Platform specific
-
-### Raspberry pi
-
-Want to run GoMud on a raspberry pi? No problem! I do it all the time! It runs great on a [$15 Raspberry Pi Zero 2](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/). However, in my experience the raspberry pi struggles to compile the binary directly,
-so it is recommended that you compile the binary locally and then copy it over to the raspberry pi.
-
-There is a convenient `make` command to compile the pi chipset provided:
-
-`make build_rpi` ( this will output a binary named: `go-mud-server-rpi` )
-
-Or (window user?) just use the build comand directly:
-
-`env GOOS=linux GOARCH=arm GOARM=5 go build -o go-mud-server-rpi`
 
 # Why Go?
 

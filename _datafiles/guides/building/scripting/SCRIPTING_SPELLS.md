@@ -1,13 +1,13 @@
 # Spell Scripting
 
 Example Script: 
-* [Spell Script](../../../_datafiles/spells/heal.js)
+* [Spell Script](/_datafiles/world/default/spells/heal.js)
 
 ## Script paths
 
 All spell scripts reside the same folder as the spell definition file.
 
-For example, the spell located at `../../../_datafiles/spells/heal.yaml` would place its script at `../../../_datafiles/spells/heal.js`
+For example, the spell located at [/_datafiles/world/default/spells/heal.yaml](/_datafiles/world/default/spells/heal.yaml) would place its script at [/_datafiles/world/default/spells/heal.js](/_datafiles/world/default/spells/heal.js)
 
 # Script Functions and Rules
 

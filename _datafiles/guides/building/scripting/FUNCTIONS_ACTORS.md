@@ -365,7 +365,7 @@ Check whether an ActorObject has an item id in their backpack
 ## [ActorObject.GetBackpackItems() []ItemObject](/internal/scripting/actor_func.go)
 Get a list of Item objects in the ActorObjects backpack
 
-_Note: See [/scripting/docs/FUNCTIONS_ITEMS.md](/internal/scripting/docs/FUNCTIONS_ITEMS.md) for details on ItemObject objects._
+_Note: See [/scripting/docs/FUNCTIONS_ITEMS.md](FUNCTIONS_ITEMS.md) for details on ItemObject objects._
 
 ## [ActorObject.GetAlignment() int](/internal/scripting/actor_func.go)
 Get the numeric representation of a ActorObjects alignment, from -100 to 100

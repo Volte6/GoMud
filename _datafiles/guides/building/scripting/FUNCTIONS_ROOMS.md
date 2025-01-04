@@ -82,7 +82,7 @@ _Note: This is useful for long term saving/retrieving data between room scripts,
 ## [RoomObject.GetItems() []ItemObject](/internal/scripting/room_func.go)
 Returns an array of items on the floor of the room.
 
-_Note: See [/scripting/docs/FUNCTIONS_ITEMS.md](/internal/scripting/docs/FUNCTIONS_ITEMS.md) for details on ItemObject objects._
+_Note: See [/scripting/docs/FUNCTIONS_ITEMS.md](FUNCTIONS_ITEMS.md) for details on ItemObject objects._
 
 ## [RoomObject.DestroyItem(itm ScriptItem) ](/internal/scripting/room_func.go)
 Destroy an item from the ground.
