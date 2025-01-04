@@ -67,6 +67,17 @@ shell:
 .PHONY: validate
 validate: fmtcheck vet
 
+.PHONY: test
+test: 
+	@go test ./...
+
+.PHONY: coverage
+coverage: 
+	@mkdir -p bin/covdatafiles && \
+	go test ./... -coverprofile=bin/covdatafiles/cover.out && \
+	go tool cover -html=bin/covdatafiles/cover.out && \
+	rm -rf bin
+
 #
 #
 # For a complete list of GOOS/GOARCH combinations:
