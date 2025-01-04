@@ -3,14 +3,9 @@
 
 name: Build and release
 
-# on:
-#   push:
-#     branches: [master]
-#   workflow_dispatch:
-
 on:
   push:
-    branches: [pre-merge-testing]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
