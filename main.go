@@ -128,7 +128,7 @@ func main() {
 	runtime.GOMAXPROCS(int(c.MaxCPUCores))
 
 	// Validate chosen world:
-	if err := util.ValidateWorldFiles(c.FolderDataFiles.String()); err != nil {
+	if err := util.ValidateWorldFiles(`_datafiles/world/default`, c.FolderDataFiles.String()); err != nil {
 		slog.Error("World", "error", err)
 		os.Exit(1)
 	}
