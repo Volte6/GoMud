@@ -29,6 +29,7 @@ var (
 		"befriend":       {Befriend, false},
 		"break":          {Break, false},
 		"broadcast":      {Broadcast, false},
+		`bury`:           {Bury, false},
 		"cast":           {Cast, false},
 		"converse":       {Converse, false},
 		"callforhelp":    {CallForHelp, false},

@@ -87,7 +87,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					u.UserId)
 			}
 
-			descTxt, _ := templates.Process("character/description", u)
+			descTxt, _ := templates.Process("character/description", u.Character)
 			user.SendText(descTxt)
 
 			itemNames := []string{}
@@ -115,7 +115,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				)
 			}
 
-			descTxt, _ := templates.Process("character/description", m)
+			descTxt, _ := templates.Process("character/description", &m.Character)
 			user.SendText(descTxt)
 
 			itemNames := []string{}
@@ -317,6 +317,54 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		}
 	}
 
+	if len(room.Corpses) > 0 {
+
+		mobCorpseLookup := map[string]int{}
+		mobCorpses := []string{}
+
+		playerCorpseLookup := map[string]int{}
+		playerCorpses := []string{}
+		for idx, c := range room.Corpses {
+			if c.Prunable {
+				continue
+			}
+
+			if c.MobId > 0 {
+				name := c.Character.Name + ` corpse`
+				if _, ok := mobCorpseLookup[name]; !ok {
+					mobCorpseLookup[name] = idx
+					mobCorpses = append(mobCorpses, name)
+				}
+			}
+
+			if c.UserId > 0 {
+				name := c.Character.Name + ` corpse`
+				if _, ok := playerCorpseLookup[name]; !ok {
+					playerCorpseLookup[name] = idx
+					playerCorpses = append(playerCorpses, name)
+				}
+			}
+		}
+
+		if corpse, corpseFound := room.FindCorpse(rest); corpseFound {
+
+			corpseColor := `mob-corpse`
+			if corpse.UserId > 0 {
+				corpseColor = `user-corpse`
+			}
+
+			user.SendText(fmt.Sprintf(`You look at the <ansi fg="%s">%s corpse</ansi>.`, corpseColor, corpse.Character.Name))
+			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at the <ansi fg="%s">%s corpse</ansi>.`, user.Character.Name, corpseColor, corpse.Character.Name), user.UserId)
+
+			descTxt, _ := templates.Process("character/description-corpse", &corpse.Character)
+			user.SendText(descTxt)
+
+			return true, nil
+
+		}
+
+	}
+
 	// Nothing found
 	user.SendText("Look at what???")
 
@@ -427,6 +475,8 @@ func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 		name := item.DisplayName() + ` <ansi fg="item-stashed">(stashed)</ansi>`
 		groundStuff = append(groundStuff, name)
 	}
+
+	groundStuff = append(groundStuff, details.VisibleCorpses...)
 
 	groundDetails := map[string]any{
 		`GroundStuff`: groundStuff,

@@ -79,6 +79,7 @@ type Room struct {
 	Nouns             map[string]string                 `yaml:"nouns,omitempty"` // Interesting nouns to highlight in the room or reveal on succesful searches.
 	Items             []items.Item                      `yaml:"items,omitempty"`
 	Stash             []items.Item                      `yaml:"stash,omitempty"`             // list of items in the room that are not visible to players
+	Corpses           []Corpse                          `yaml:"-"`                           // Any corpses laying around from recent deaths
 	Gold              int                               `yaml:"gold,omitempty"`              // How much gold is on the ground?
 	SpawnInfo         []SpawnInfo                       `yaml:"spawninfo,omitempty"`         // key is creature ID, value is spawn chance
 	SkillTraining     map[string]TrainingRange          `yaml:"skilltraining,omitempty"`     // list of skills that can be trained in this room
@@ -167,6 +168,60 @@ func (r *Room) GetVisibility() int {
 	}
 
 	return visibility
+}
+
+func (r *Room) AddCorpse(c Corpse) {
+	r.Corpses = append(r.Corpses, c)
+}
+
+func (r *Room) RemoveCorpse(c Corpse) bool {
+	for idx, corpse := range r.Corpses {
+		if corpse.MobId != c.MobId {
+			continue
+		}
+		if corpse.UserId != c.UserId {
+			continue
+		}
+		if corpse.Character.Name != c.Character.Name {
+			continue
+		}
+		if corpse.RoundCreated != c.RoundCreated {
+			continue
+		}
+
+		r.Corpses = append(r.Corpses[:idx], r.Corpses[idx+1:]...)
+
+		return true
+	}
+	return false
+}
+
+func (r *Room) UpdateCorpses(roundNow uint64) {
+
+	c := configs.GetConfig()
+
+	if !c.CorpsesEnabled {
+		return
+	}
+
+	removeIdx := []int{}
+	for idx, corpse := range r.Corpses {
+		corpse.Update(roundNow, c.CorpseDecayTime.String())
+		if corpse.Prunable {
+			removeIdx = append(removeIdx, idx)
+			if corpse.MobId > 0 {
+				r.SendText(fmt.Sprintf(`A <ansi fg="mob-corpse">%s corpse</ansi> crumbles to dust.`, corpse.Character.Name))
+			}
+			if corpse.UserId > 0 {
+				r.SendText(fmt.Sprintf(`A <ansi fg="user-corpse">%s corpse</ansi> crumbles to dust.`, corpse.Character.Name))
+			}
+		}
+		r.Corpses[idx] = corpse
+	}
+
+	for i := len(removeIdx) - 1; i >= 0; i-- {
+		r.Corpses = append(r.Corpses[:removeIdx[i]], r.Corpses[removeIdx[i]+1:]...)
+	}
 }
 
 func (r *Room) SendTextCommunication(txt string, excludeUserIds ...int) {
@@ -840,6 +895,58 @@ func (r *Room) GetAllFloorItems(stash bool) []items.Item {
 	found = append(found, r.Items...)
 
 	return found
+}
+
+func (r *Room) FindCorpse(searchName string) (Corpse, bool) {
+
+	// First search for player corpses that match
+
+	playerCorpseLookup := map[string]int{}
+	playerCorpses := []string{}
+
+	mobCorpseLookup := map[string]int{}
+	mobCorpses := []string{}
+
+	for idx, c := range r.Corpses {
+
+		if c.Prunable {
+			continue
+		}
+
+		if c.UserId > 0 {
+			name := c.Character.Name + ` corpse`
+			if _, ok := playerCorpseLookup[name]; !ok {
+				playerCorpseLookup[name] = idx
+				playerCorpses = append(playerCorpses, name)
+			}
+		}
+
+		if c.MobId > 0 {
+			name := c.Character.Name + ` corpse`
+			if _, ok := mobCorpseLookup[name]; !ok {
+				mobCorpseLookup[name] = idx
+				mobCorpses = append(mobCorpses, name)
+			}
+		}
+	}
+
+	userMatch, closeUserMatch := util.FindMatchIn(searchName, playerCorpses...)
+	if userMatch != `` {
+		return r.Corpses[playerCorpseLookup[userMatch]], true
+	}
+
+	mobMatch, closeMobMatch := util.FindMatchIn(searchName, mobCorpses...)
+	if mobMatch != `` {
+		return r.Corpses[mobCorpseLookup[mobMatch]], true
+	}
+
+	if closeUserMatch != `` {
+		return r.Corpses[playerCorpseLookup[closeUserMatch]], true
+	} else if closeMobMatch != `` {
+		return r.Corpses[mobCorpseLookup[closeMobMatch]], true
+	}
+
+	return Corpse{}, false
 }
 
 func (r *Room) FindOnFloor(itemName string, stash bool) (items.Item, bool) {
@@ -1784,7 +1891,6 @@ func (r *Room) RoundTick() {
 	r.Mutators.Update(roundNow)
 
 	for mut := range r.ActiveMutators {
-
 		spec := mut.GetSpec()
 		r.ApplyBuffIdToPlayers(spec.PlayerBuffIds...)
 		r.ApplyBuffIdToMobs(spec.MobBuffIds...)
@@ -1816,6 +1922,11 @@ func (r *Room) RoundTick() {
 			}
 		}
 	}
+
+	//
+	// Decay any corpses
+	//
+	r.UpdateCorpses(roundNow)
 }
 
 func (r *Room) addPlayer(userId int) int {

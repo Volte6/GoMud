@@ -27,6 +27,7 @@ help:
       - character
       - pets
       - train
+      - bury
     communication:
       - emote
       - say

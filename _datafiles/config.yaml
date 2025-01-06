@@ -186,6 +186,12 @@ ShopRestockRate: 6 hours
 #   varied. 
 #   Note: see _datafiles/combat-messages/*
 ConsistentAttackMessages: true
+# - CorpsesEnabled - 
+#   If set to true, corpses are left behind by players or mobs that are killed.
+CorpsesEnabled: true
+# - CorpseDecayTime - 
+#   How long until corpses crumble to dust (Go away).
+CorpseDecayTime: 1 hour
 # - MaxAltCharacters - 
 #   How many characters beyond their original character can they create? Players
 #   can swap between characters and work on them independently if this is set

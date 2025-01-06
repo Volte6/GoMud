@@ -76,13 +76,13 @@ type Config struct {
 	EnterRoomMessageWrapper    ConfigString `yaml:"EnterRoomMessageWrapper"`
 	ExitRoomMessageWrapper     ConfigString `yaml:"ExitRoomMessageWrapper"`
 
-	MaxIdleSeconds     ConfigInt         `yaml:"MaxIdleSeconds"`     // How many seconds a player can go without a command in game before being kicked.
 	TimeoutMods        ConfigBool        `yaml:"TimeoutMods"`        // Whether to kick admin/mods when idle too long.
 	ZombieSeconds      ConfigInt         `yaml:"ZombieSeconds"`      // How many seconds a player will be a zombie allowing them to reconnect.
 	LogoutRounds       ConfigInt         `yaml:"LogoutRounds"`       // How many rounds of uninterrupted meditation must be completed to log out.
 	StartRoom          ConfigInt         `yaml:"StartRoom"`          // Default starting room.
 	DeathRecoveryRoom  ConfigInt         `yaml:"DeathRecoveryRoom"`  // Recovery room after dying.
 	TutorialStartRooms ConfigSliceString `yaml:"TutorialStartRooms"` // List of all rooms that can be used to begin the tutorial process
+	MaxIdleSeconds     ConfigInt         `yaml:"MaxIdleSeconds"`     // How many seconds a player can go without a command in game before being kicked.
 
 	// Perma-death related configs
 	PermaDeath     ConfigBool `yaml:"PermaDeath"`     // Is permadeath enabled?
@@ -92,9 +92,11 @@ type Config struct {
 	PricePerLife   ConfigInt  `yaml:"PricePerLife"`   // Price in gold to buy new lives
 
 	ShopRestockRate          ConfigString `yaml:"ShopRestockRate"`          // Default time it takes to restock 1 quantity in shops
-	ConsistentAttackMessages ConfigBool   `yaml:"ConsistentAttackMessages"` // Whether each weapon has consistent attack messages
 	MaxAltCharacters         ConfigInt    `yaml:"MaxAltCharacters"`         // How many characters beyond the default character can they create?
 	AfkSeconds               ConfigInt    `yaml:"AfkSeconds"`               // How long until a player is marked as afk?
+	ConsistentAttackMessages ConfigBool   `yaml:"ConsistentAttackMessages"` // Whether each weapon has consistent attack messages
+	CorpsesEnabled           ConfigBool   `yaml:"CorpsesEnabled"`           // Whether corpses are left behind after mob/player deaths
+	CorpseDecayTime          ConfigString `yaml:"CorpseDecayTime"`          // How long until corpses decay to dust (go away)
 
 	LeaderboardSize ConfigInt `yaml:"LeaderboardSize"` // Maximum size of leaderboard
 

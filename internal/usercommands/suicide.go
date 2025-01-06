@@ -20,6 +20,7 @@ import (
 func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	config := configs.GetConfig()
+	currentRound := util.GetRoundCount()
 
 	if user.Character.Zone == `Shadow Realm` {
 		user.SendText(`You're already dead!`)
@@ -192,6 +193,14 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 	clear(user.Character.PlayerDamage)
 
 	rooms.MoveToRoom(user.UserId, int(config.DeathRecoveryRoom))
+
+	if config.CorpsesEnabled {
+		room.AddCorpse(rooms.Corpse{
+			UserId:       user.UserId,
+			Character:    *user.Character,
+			RoundCreated: currentRound,
+		})
+	}
 
 	return true, nil
 }

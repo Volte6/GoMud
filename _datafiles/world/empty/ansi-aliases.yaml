@@ -7,7 +7,7 @@ color8:
   username: 93 # Bright yellow
   username-aggro: red
   username-downed: 90 # Bright black
-  mobname: 14 
+  mobname: 14
   mobname-aggro: 91 # Bright red
   mobname-downed: red
   petname: 3
@@ -156,6 +156,8 @@ color8:
   script-text: 10
   broadcast-prefix: 8
   broadcast-body: 13
+  mob-corpse: 8
+  user-corpse: 8
 color256:
   table-title: 2
   userid: black
@@ -306,4 +308,5 @@ color256:
   script-text: 155
   broadcast-prefix: 135
   broadcast-body: 164
-  
+  mob-corpse: 67
+  user-corpse: 143
