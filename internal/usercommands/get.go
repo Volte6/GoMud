@@ -309,6 +309,11 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	}
 
+	if _, corpseFound := room.FindCorpse(rest); corpseFound {
+		user.SendText(`You can't pick up corpses. What would people think?`)
+		return true, nil
+	}
+
 	user.SendText(fmt.Sprintf("You don't see a %s around.", rest))
 
 	return true, nil

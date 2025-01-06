@@ -21,6 +21,7 @@ import (
 type RoomTemplateDetails struct {
 	VisiblePlayers []string
 	VisibleMobs    []string
+	VisibleCorpses []string
 	VisibleExits   map[string]exit.RoomExit
 	TemporaryExits map[string]exit.TemporaryRoomExit
 	UserId         int
@@ -64,6 +65,7 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 	details := RoomTemplateDetails{
 		VisiblePlayers: []string{},
 		VisibleMobs:    []string{},
+		VisibleCorpses: []string{},
 		VisibleExits:   make(map[string]exit.RoomExit),
 		TemporaryExits: make(map[string]exit.TemporaryRoomExit),
 		Zone:           r.Zone,
@@ -317,6 +319,41 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 			}
 		} else {
 			details.VisibleExits[exitStr] = exitInfo
+		}
+	}
+
+	// add any corpses present
+	mobCorpses := map[string]int{}
+	playerCorpses := map[string]int{}
+
+	for _, c := range r.Corpses {
+		if c.Prunable {
+			continue
+		}
+
+		if c.MobId > 0 {
+			mobCorpses[c.Character.Name] = mobCorpses[c.Character.Name] + 1
+		}
+
+		if c.UserId > 0 {
+			playerCorpses[c.Character.Name] = playerCorpses[c.Character.Name] + 1
+		}
+
+	}
+
+	for name, qty := range playerCorpses {
+		if qty == 1 {
+			details.VisibleCorpses = append(details.VisibleCorpses, fmt.Sprintf(`<ansi fg="user-corpse">%s corpse</ansi>`, name))
+		} else {
+			details.VisibleCorpses = append(details.VisibleCorpses, fmt.Sprintf(`<ansi fg="user-corpse">%d %s corpses</ansi>`, qty, name))
+		}
+	}
+
+	for name, qty := range mobCorpses {
+		if qty == 1 {
+			details.VisibleCorpses = append(details.VisibleCorpses, fmt.Sprintf(`<ansi fg="mob-corpse">%s corpse</ansi>`, name))
+		} else {
+			details.VisibleCorpses = append(details.VisibleCorpses, fmt.Sprintf(`<ansi fg="mob-corpse">%d %s corpses</ansi>`, qty, name))
 		}
 	}
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/combat"
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
@@ -17,6 +18,9 @@ import (
 )
 
 func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
+
+	config := configs.GetConfig()
+	currentRound := util.GetRoundCount()
 
 	if rest != `vanish` && mob.Character.HasBuffFlag(buffs.ReviveOnDeath) {
 
@@ -65,7 +69,7 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	if mob.MobId == 38 {
 		if mob.Character.Charmed != nil {
 			if tmpU := users.GetByUserId(mob.Character.Charmed.UserId); tmpU != nil {
-				tmpU.SetTempData(`lastGuideRound`, util.GetRoundCount())
+				tmpU.SetTempData(`lastGuideRound`, currentRound)
 			}
 		}
 	}
@@ -315,6 +319,14 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 	// Remove from current room
 	room.RemoveMob(mob.InstanceId)
+
+	if config.CorpsesEnabled {
+		room.AddCorpse(rooms.Corpse{
+			MobId:        int(mob.MobId),
+			Character:    mob.Character,
+			RoundCreated: currentRound,
+		})
+	}
 
 	return true, nil
 }

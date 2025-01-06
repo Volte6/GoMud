@@ -63,7 +63,7 @@ func Peep(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			targetName := u.Character.GetPlayerName(user.UserId).String()
 
 			if skillLevel >= 2 {
-				statusTxt, _ = templates.Process("character/status-lite", u)
+				statusTxt, _ = templates.Process("character/status-lite", u.Character)
 			}
 
 			if skillLevel >= 3 {
@@ -128,7 +128,7 @@ func Peep(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			targetName := m.Character.GetMobName(user.UserId).String()
 
 			if skillLevel >= 2 {
-				statusTxt, _ = templates.Process("character/status-lite", m)
+				statusTxt, _ = templates.Process("character/status-lite", &m.Character)
 			}
 
 			if skillLevel >= 3 {
