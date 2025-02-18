@@ -12,9 +12,10 @@ or modified to build your own world using built-in tools.
 <ansi fg="187">:::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187"></ansi>
 '      `--'      `.-'      `--'      `--'      `--'      `-.'      `--'      `</ansi>
 
-<ansi fg="black-bold">.:</ansi> <ansi fg="magenta"></ansi><ansi fg="command">GoMud</ansi> History
+<ansi fg="black-bold">.:</ansi> <ansi fg="magenta"><ansi fg="command">GoMud</ansi> History</ansi>
 
-<ansi fg="command">GoMud</ansi> development began in <ansi fg="red">late 2023</ansi> with several key goals in mind:
+<ansi fg="command">GoMud</ansi> development began in <ansi fg="red">late 2023</ansi> by <ansi fg="14">Dylan Squires</ansi> (aka <ansi fg="11">Volte6</ansi>) with 
+several key goals in mind:
 
 <ansi fg="red-bold">1.</ansi> <ansi fg="11">Offer a new, free code base in a modern language.</ansi> 
    <ansi fg="command">Go</ansi> was selected as it has a fast build process and excellent OS/CPU 
@@ -40,3 +41,20 @@ or modified to build your own world using built-in tools.
 <ansi fg="6">  .--.      .-'.      .--.      .--.      .--.      .--.      .`-.      .--.
 <ansi fg="187">:::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187">::::::::.</ansi>\<ansi fg="187"></ansi>
 '      `--'      `.-'      `--'      `--'      `--'      `-.'      `--'      `</ansi>
+
+<ansi fg="black-bold">.:</ansi> <ansi fg="magenta">Special Thanks</ansi>
+
+<ansi fg="8">Those who contributed to <ansi fg="command">GoMud</ansi> via <ansi fg="15">testing</ansi>, <ansi fg="15">content</ansi>, <ansi fg="15">code</ansi>, and <ansi fg="15">discussion</ansi>
+during its first year of development. In alphabetical order:</ansi>
+
+    <ansi fg="14">Andrew Burns</ansi>    aka <ansi fg="11">mister_burns</ansi>
+    <ansi fg="14">Arin Bennett</ansi>    aka <ansi fg="11">Sloan</ansi>
+    <ansi fg="14">Colin Senner</ansi>    aka <ansi fg="11">colinsenner</ansi>
+    <ansi fg="14">Durf Durfleton</ansi>  aka <ansi fg="11">Durf</ansi>
+    <ansi fg="14">Ethan Samuels</ansi>   aka <ansi fg="11">ethaburd</ansi>
+    <ansi fg="14">Jake</ansi>            aka <ansi fg="11">Jake</ansi>
+    <ansi fg="14">Jeff</ansi>            aka <ansi fg="11">Armoredartist</ansi>
+    <ansi fg="14">Jeffrey Edwards</ansi> aka <ansi fg="11">Miphon</ansi>
+    <ansi fg="14">Michael Myers</ansi>   aka <ansi fg="11">avatus</ansi>
+    <ansi fg="14">Scott</ansi>           aka <ansi fg="11">Neopong</ansi>
+    <ansi fg="14">William L</ansi>       aka <ansi fg="11">1aw123</ansi>

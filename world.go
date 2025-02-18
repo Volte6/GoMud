@@ -964,6 +964,93 @@ func (w *World) MessageTick() {
 	}
 
 	//
+	// Dispatch MSP events
+	//
+	eq = events.GetQueue(events.MSP{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		msp, typeOk := e.(events.MSP)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "MSP", "Actual Type", e.Type())
+			continue
+		}
+
+		if msp.UserId < 1 {
+			continue
+		}
+
+		if user := users.GetByUserId(msp.UserId); user != nil {
+
+			if msp.SoundType == `MUSIC` {
+
+				if user.LastMusic != msp.SoundFile {
+
+					msg := []byte("!!MUSIC(Off)")
+					if connections.IsWebsocket(user.ConnectionId()) {
+
+						connections.SendTo(
+							msg,
+							user.ConnectionId(),
+						)
+
+					} else {
+
+						connections.SendTo(
+							term.MspCommand.BytesWithPayload(msg),
+							user.ConnectionId(),
+						)
+
+					}
+				}
+
+				user.LastMusic = msp.SoundFile
+
+				msg := []byte("!!MUSIC(" + msp.SoundFile + " V=80 L=-1 C=1)")
+
+				if connections.IsWebsocket(user.ConnectionId()) {
+
+					connections.SendTo(
+						msg,
+						user.ConnectionId(),
+					)
+
+				} else {
+
+					connections.SendTo(
+						term.MspCommand.BytesWithPayload(msg),
+						user.ConnectionId(),
+					)
+
+				}
+			} else {
+
+				msg := []byte("!!SOUND(" + msp.SoundFile + ")")
+
+				if connections.IsWebsocket(user.ConnectionId()) {
+
+					connections.SendTo(
+						msg,
+						user.ConnectionId(),
+					)
+
+				} else {
+
+					connections.SendTo(
+						term.MspCommand.BytesWithPayload(msg),
+						user.ConnectionId(),
+					)
+
+				}
+
+			}
+
+		}
+
+	}
+
+	//
 	// System-wide broadcasts
 	//
 	eq = events.GetQueue(events.Broadcast{})

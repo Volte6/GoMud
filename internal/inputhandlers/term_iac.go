@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/term"
 )
@@ -133,6 +134,36 @@ func TelnetIACHandler(clientInput *connections.ClientInput, sharedState map[stri
 
 			// Unhanlded IAC command, log it
 			slog.Info("Received", "type", "GMCP?", "size", len(iacCmd), "data", string(iacCmd))
+
+			continue
+		}
+
+		if term.IsMSPCommand(iacCmd) {
+
+			if ok, payload := term.Matches(iacCmd, term.MspAccept); ok {
+				slog.Info("Received", "type", "IAC (Client-MSP Accept)", "data", term.BytesString(payload))
+
+				cs := connections.GetClientSettings(clientInput.ConnectionId)
+				cs.MSPEnabled = true
+				connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
+
+				connections.SendTo(
+					term.MspCommand.BytesWithPayload([]byte("!!SOUND(Off U="+configs.GetConfig().MspFileUrl.String()+")")),
+					clientInput.ConnectionId,
+				)
+
+				continue
+			}
+
+			if ok, payload := term.Matches(iacCmd, term.MspRefuse); ok {
+				slog.Info("Received", "type", "IAC (Client-MSP Refuse)", "data", term.BytesString(payload))
+
+				cs := connections.GetClientSettings(clientInput.ConnectionId)
+				cs.MSPEnabled = false
+				connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
+
+				continue
+			}
 
 			continue
 		}

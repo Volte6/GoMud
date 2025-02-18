@@ -65,6 +65,7 @@ type Room struct {
 	RoomId            int        // a unique numeric index of the room. Also the filename.
 	Zone              string     // zone is a way to partition rooms into groups. Also into folders.
 	ZoneConfig        ZoneConfig `yaml:"zoneconfig,omitempty"`      // If non-null is a root room.
+	MusicFile         string     `yaml:"musicfile,omitempty"`       // background music to play when in this room
 	IsBank            bool       `yaml:"isbank,omitempty"`          // Is this a bank room? If so, players can deposit/withdraw gold here.
 	IsStorage         bool       `yaml:"isstorage,omitempty"`       // Is this a storage room? If so, players can add/remove objects here.
 	IsCharacterRoom   bool       `yaml:"ischaracterroom,omitempty"` // Is this a room where characters can create new characters to swap between them?

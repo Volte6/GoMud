@@ -6,6 +6,8 @@ type ClientSettings struct {
 	Client  ClientType
 	// Enabled GMCP Modules
 	GMCPModules map[string]int
+	// Is MSP enabled?
+	MSPEnabled bool
 }
 
 type DisplaySettings struct {
@@ -26,6 +28,10 @@ type ClientType struct {
 // Check whether the client is Mudlet
 func (c ClientSettings) IsMudlet() bool {
 	return c.Client.IsMudlet
+}
+
+func (c ClientSettings) IsMsp() bool {
+	return c.MSPEnabled
 }
 
 // Check whether a GMCP module is enabled on the client

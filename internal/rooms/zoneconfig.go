@@ -11,7 +11,8 @@ type ZoneConfig struct {
 		Minimum int `yaml:"minimum,omitempty"` // level scaling minimum
 		Maximum int `yaml:"maximum,omitempty"` // level scaling maximum
 	} `yaml:"autoscale,omitempty"` // level scaling range if any
-	Mutators mutators.MutatorList `yaml:"mutators,omitempty"` // mutators defined here apply to entire zone
+	Mutators  mutators.MutatorList `yaml:"mutators,omitempty"`  // mutators defined here apply to entire zone
+	MusicFile string               `yaml:"musicfile,omitempty"` // background music to play when in this zone
 }
 
 func (z *ZoneConfig) Validate() {

@@ -281,6 +281,9 @@ LocalPort: 9999
 # - WebPort -
 #   The port the server listens on for web requests
 WebPort: 80
+# - MspFileUrl -
+#   The base URL sound files are played from
+MspFileUrl: http://localhost/static/public/audio/
 ################################################################################
 #
 #   LOOT GOBLIN CONFIGURATIONS
