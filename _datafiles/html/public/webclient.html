@@ -8,7 +8,7 @@
             margin: 0;
             padding: 0;
         }
-        
+
         body {
             margin: 0;
             padding: 0;
@@ -17,6 +17,7 @@
             display: flex;
             flex-direction: column;
             background-color: #1e1e1e;
+            position: relative; /* So absolutely positioned children can be placed relative to <body> */
         }
 
         /* Ensure the main container is positioned relatively */
@@ -29,7 +30,6 @@
             background-color: #000;
         }
 
-        /* Adjust text-output to flex properly */
         #terminal {
             flex: 1;
         }
@@ -62,7 +62,6 @@
         #connect-button:disabled {
             color: #888;
             pointer-events: none;
-
             animation: none;
             background-color: #555;
             cursor: not-allowed;
@@ -73,7 +72,7 @@
                 color: white;
             }
             100% {
-                color:#d17a7a;
+                color: #d17a7a;
                 background-color: #9f4a4a;
             }
         }
@@ -81,13 +80,79 @@
         #command-input:focus {
             outline: none;
         }
+
+        /* Sound icon in top-right corner */
+        #menu-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 26px;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 9999;
+            /* Optional background to make it stand out: */
+            background-color: rgba(30,30,30, 0.8);
+            border-radius: 5px;
+        }
+
+        /* The floating menu container */
+        #floating-menu {
+            position: absolute;
+            top: 60px; /* Just below the icon */
+            right: 10px;
+            width: 300px;
+            padding: 10px;
+            background-color: #2e2e2e;
+            border: 1px solid #444;
+            border-radius: 5px;
+            display: none; /* hidden by default */
+            z-index: 9999;
+        }
+        #floating-menu h3 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .slider-container {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .slider-container label {
+            color: #ccc;
+            width: 70px;
+        }
+        .slider-container input[type="range"] {
+            flex: 1;
+            margin: 0 10px;
+        }
+        .slider-icon {
+            width: 32px;
+            text-align: center;
+            font-size: 20px;
+            color: #ccc;
+        }
     </style>
+
     <link rel="stylesheet" href="/static/public/css/xterm.css" />
     <script src="/static/public/js/xterm.4.19.0.js"></script>
     <script src="/static/public/js/xterm-addon-fit.js"></script>
     <script src="/static/public/js/mp3.js"></script>
 </head>
 <body onLoad="init(); return false;">
+
+    <!-- SOUND ICON (top-right). Click to toggle the volume sliders panel. -->
+    <div id="menu-icon" onclick="toggleMenu()">🔊</div>
+
+    <!-- FLOATING MENU - MULTIPLE SLIDERS -->
+    <div id="floating-menu">
+        <h3>Volume Controls</h3>
+        <div id="sliders-container">
+            <!-- Multiple sliders (Music, Sound FX, etc.) get built here -->
+        </div>
+    </div>
+
     <div id="main-container">
         <div id="terminal"></div>
     </div>
@@ -97,12 +162,15 @@
     </div>
 
     <script>
-
+        /////////////////////////////////////////////
+        //
         // Music/Sound players:
+        //
+        /////////////////////////////////////////////
         let baseMp3Url = "";
         const MusicPlayer = new MP3Player(false);
         const SoundPlayer = new MP3Player(true);
-        
+
         /////////////////////////////////////////////
         //
         // Terminal emulation setup
@@ -112,27 +180,19 @@
             cols: 80, 
             rows: 60,
             cursorBlink: true,
-            fontSize: 20,
-            //fontFamily: "Courier New"
+            fontSize: 20
         });
-        //term.setOption('theme', { fontFamily: 'DejaVu Sans Mono' })
-
-
         const fitAddon = new window.FitAddon.FitAddon();
         term.loadAddon(fitAddon);
-
         term.open(document.getElementById('terminal'));
 
-        // Function to resize the terminal to fit its container
+        // Resize the terminal to fit its container
         const resizeTerminal = () => {
             fitAddon.fit();
         };
-
-        // Fit the terminal initially and on window resize
         resizeTerminal();
         window.addEventListener('resize', resizeTerminal);
-        
-        
+
         /////////////////////////////////////////////
         //
         // Misc tracking
@@ -146,25 +206,22 @@
         let commandHistory = [];
         let historyPosition = 0;
         let commandHistoryMaxLength = 30;
-        
-        /////////////////////////////////////////////
-        //
-        // Basic Websocket code
-        //
-        /////////////////////////////////////////////
 
-        // Initial state        
+        /////////////////////////////////////////////
+        //
+        // Basic WebSocket code
+        //
+        /////////////////////////////////////////////
         let socket = null;
         let debugOutput = false;
-        // track whether a drag has occurred
         let isDragging = false;
 
         const connectButton = document.getElementById('connect-button');
         const textOutput = document.getElementById('terminal');
         const textInput = document.getElementById('command-input');
 
+        // Key shortcuts
         const codeShortcuts = {
-            // Numpad to directions
             "Numpad1": "southwest",
             "Numpad2": "south",
             "Numpad3": "southeast",
@@ -174,7 +231,6 @@
             "Numpad7": "northwest",
             "Numpad8": "north",
             "Numpad9": "northeast",
-            // Fkeys to macros
             "F1": "=1",
             "F2": "=2",
             "F3": "=3",
@@ -185,148 +241,126 @@
             "F8": "=8",
             "F9": "=9",
             "F10": "=10",
-            // Arrow keys
             "ArrowUp": "north",
             "ArrowDown": "south",
             "ArrowLeft": "west",
             "ArrowRight": "east",
         };
 
-
         function handleWebclientCommand(cmdString) {
-
-            cmd = cmdString.substring(0, 9);
-
-            if ( cmd == "TEXTMASK:" ) { // request to mask input echo to user
-
+            const cmd = cmdString.substring(0, 9);
+            if (cmd === "TEXTMASK:") {
                 debugLog(cmdString);
-
-                if ( cmdString.substring(9) == "true" ) {
-                    textInput.type = "password"; // Change back to password to hide the input
+                if (cmdString.substring(9) === "true") {
+                    textInput.type = "password";
                 } else {
-                    textInput.type = "text"; // Change back to password to hide the input
+                    textInput.type = "text";
                 }
-
                 return true;
             }
-
             return false;
         }
 
-
         connectButton.addEventListener('click', function() {
-            
-            if ( socket != null && socket.readyState === WebSocket.OPEN ) {
+            if ( socket && socket.readyState === WebSocket.OPEN ) {
                 socket.close();
                 return;
             }
 
             debugLog("Connecting to: " + 'ws://'+location.host +':80/ws');
-            
-            // Connect to the WebSocket
             socket = new WebSocket('ws://'+location.host +':80/ws');
-            
+
             socket.onopen = function() {
                 term.writeln("Connected to the server!");
-                term.clear()
+                term.clear();
                 connectButton.disabled = true;
                 textInput.focus();
             };
 
             socket.onmessage = function(event) {
-
                 payloadsReceived++;
                 totalBytesReceived += event.data.length;
 
-                // First do a quick check as to whether it might be a webclient command
-                if ( event.data.length > 9 && event.data.substring(8, 9) == ':' ) {
+                // Check if it's a webclient command
+                if ( event.data.length > 9 && event.data.substring(8, 9) === ':' ) {
                     if ( handleWebclientCommand(event.data) ) {
                         return;
                     }
                 }
 
-                // Is it an MSP command?
-                if ( event.data.length > 9 && event.data.slice(0, 2) == "!!" ) {
-
-                    if ( event.data.slice(0, 8) == "!!MUSIC(" ) {
-                    
-                        parts = event.data.slice(8, event.data.length-1).split(" ");
-                        fileName = parts[0];
-                        obj = {};
-                        for ( i=1; i<parts.length; i++) {
-                            prop = parts[i].split("=");
+                // MSP commands
+                if ( event.data.length > 9 && event.data.slice(0, 2) === "!!") {
+                    if ( event.data.slice(0, 8) === "!!MUSIC(" ) {
+                        const parts = event.data.slice(8, event.data.length-1).split(" ");
+                        let fileName = parts[0];
+                        let obj = {};
+                        for ( let i=1; i<parts.length; i++ ) {
+                            const prop = parts[i].split("=");
                             if ( prop.length == 2 ) {
                                 obj[prop[0]] = prop[1];
                             }
                         }
 
-                        if ( fileName == "Off" ) {
+                        if ( fileName === "Off" ) {
                             if ( obj.U ) {
                                 baseMp3Url = obj.U;
-                                if ( baseMp3Url[baseMp3Url.length-1] != "/" ) {
+                                if ( baseMp3Url[baseMp3Url.length-1] !== "/" ) {
                                     baseMp3Url += "/";
                                 }
                             } else {
                                 MusicPlayer.stop();
                             }
-                            
                         } else {
+                            let soundLevel = 1.0;
+                            let loopMusic = true;
 
-                            soundLevel = 1.0;
-                            loopMusic = true;
-
-                            if ( obj.L && obj.L != "-1" ) {
-                                Loop = false;
+                            if ( obj.L && obj.L !== "-1" ) {
+                                loopMusic = false;
                             }
                             if ( obj.V ) {
                                 soundLevel = Number(obj.V)/100;
                             }
 
                             if ( !MusicPlayer.isPlaying(baseMp3Url+fileName) ) {
-                                MusicPlayer.play(baseMp3Url+fileName, loopMusic, soundLevel);
+                                MusicPlayer.play(baseMp3Url+fileName, loopMusic, (sliderValues["music"]/100));
                             }
                         }
-                        
-                    } else if ( event.data.slice(0, 8) == "!!SOUND(" ) {
-                    
-                        parts = event.data.slice(8, event.data.length-1).split(" ");
-                        fileName = parts[0];
-                        obj = {};
-                        for ( i=1; i<parts.length; i++) {
-                            prop = parts[i].split("=");
+                    }
+                    else if ( event.data.slice(0, 8) === "!!SOUND(" ) {
+                        const parts = event.data.slice(8, event.data.length-1).split(" ");
+                        let fileName = parts[0];
+                        let obj = {};
+                        for ( let i=1; i<parts.length; i++ ) {
+                            const prop = parts[i].split("=");
                             if ( prop.length == 2 ) {
                                 obj[prop[0]] = prop[1];
                             }
                         }
 
-                        if ( fileName == "Off" ) {
+                        if ( fileName === "Off" ) {
                             if ( obj.U ) {
                                 baseMp3Url = obj.U;
-                                if ( baseMp3Url[baseMp3Url.length-1] != "/" ) {
+                                if ( baseMp3Url[baseMp3Url.length-1] !== "/" ) {
                                     baseMp3Url += "/";
                                 }
                             } else {
                                 SoundPlayer.stop();
                             }
-                            
                         } else {
-                            SoundPlayer.play(baseMp3Url+fileName, true, 1.0);
+                            SoundPlayer.play(baseMp3Url+fileName, true, (sliderValues["sounds"]/100));
                         }
-                    
                     }
-                    return
+                    return;
                 }
-                
 
+                // Otherwise, just write it to the terminal
                 term.write(event.data);
-                
             };
 
             socket.onerror = function(error) {
                 term.writeln("Error: " + error.message);
             };
 
-            // Disconnected
             socket.onclose = function(event) {
                 if (event.wasClean) {
                     term.writeln("Connection closed cleanly, code=${event.code}, reason=${event.reason}");
@@ -334,56 +368,54 @@
                     term.writeln("Connection died");
                 }
                 connectButton.disabled = false;
-                // Don't let it get stuck in "password" masking mode
-                if ( textInput.type == "password" ) {
-                    event.target.value = '';
+                if ( textInput.type === "password" ) {
+                    textInput.value = '';
                     textInput.type = "text";
                 }
             };
         });
 
         textInput.addEventListener('keydown', function(event) {
-            
-            // Macro support
-            if ( event.key.substring(0, 1) == "F" && event.key.length == 2 ) {
-                macroNum = event.key.substring(1, 2)
+            // Macro support: F-keys
+            if ( event.key.substring(0, 1) === "F" && event.key.length === 2 ) {
+                let macroNum = event.key.substring(1);
                 SendData("="+macroNum);
                 if (event.preventDefault) event.preventDefault();
                 return false;
             }
 
-            if (event.key == 'ArrowUp' || event.key == 'ArrowDown') {
-                if ( event.key == 'ArrowUp' ) {
+            // ArrowUp / ArrowDown for command history
+            if ( event.key === 'ArrowUp' || event.key === 'ArrowDown' ) {
+                if ( event.key === 'ArrowUp' ) {
                     historyPosition += 1;
                 } else {
                     historyPosition -= 1;
                 }
                 if ( historyPosition < 1 ) historyPosition = 1;
                 if ( historyPosition > commandHistory.length ) historyPosition = commandHistory.length;
-
                 event.target.value = commandHistory[ commandHistory.length - historyPosition ];
             }
 
-            if ( textInput.value.length == 0 && codeShortcuts[event.code] ) {
+            // If input is empty, check for numeric keypad / arrow key shortcuts
+            if ( textInput.value.length === 0 && codeShortcuts[event.code] ) {
                 SendData(codeShortcuts[event.code]);
                 if (event.preventDefault) event.preventDefault();
                 return false;
             }
 
-            if (event.key === 'Enter') {
-
-                if ( event.target.value != '' ) {
-                    if ( textInput.type != "password" ) { // ignore password entry
+            // ENTER key
+            if ( event.key === 'Enter' ) {
+                if ( event.target.value !== '' ) {
+                    if ( textInput.type !== "password" ) {
                         commandHistory.push(event.target.value);
                         historyPosition = 0;
-
                         if ( commandHistory.length > commandHistoryMaxLength ) {
-                            commandHistory = commandHistory.slice( commandHistory.length - commandHistoryMaxLength)
+                            commandHistory = commandHistory.slice(commandHistory.length - commandHistoryMaxLength);
                         }
                     }
                 }
 
-                if (event.target.value == "!net" ) {
+                if ( event.target.value === "!net" ) {
                     printNetStats();
                     event.target.value = '';
                     return;
@@ -401,82 +433,152 @@
             if (!socket || socket.readyState !== WebSocket.OPEN) {
                 return false;
             }
-
             payloadsSent++;
             totalBytesSent += dataToSend.length;
-
             socket.send(dataToSend);
-
             return true;
         }
 
-        
         function printNetStats() {
-
             term.writeln("");
             term.writeln(" Request Ct: " + String(payloadsSent));
             term.writeln(" Bytes Sent: " + String(Math.round(totalBytesSent/1024 * 100) / 100) + "kb");
             term.writeln("Response Ct: " + String(payloadsReceived));
             term.writeln(" Bytes Rcvd: " + String(Math.round(totalBytesReceived/1024 * 100) / 100) + "kb");
             term.writeln("");
-
         }
 
         function debugLog(message) {
-            if ( debugOutput ) {
+            if (debugOutput) {
                 console.log(message);
             }
         }
 
-
         /////////////////////////////////////////////
         //
-        // Initialization of all terminal interface
+        // Keep terminal focus on mouse events
         //
         /////////////////////////////////////////////
-        specialCommands = {
-            "!net": "Print out network traffic stats",
-        }
-
-        // Add event listener for mousedown to detect the start of a drag
         textOutput.addEventListener('mousedown', function() {
-            isDragging = false; // Reset the drag flag on mousedown
+            isDragging = false;
         });
-
-        // Add event listener for mousemove to detect dragging
         textOutput.addEventListener('mousemove', function() {
-            isDragging = true; // Set the drag flag if mouse moves while pressed
+            isDragging = true;
         });
-
-        // Add event listener for mouseup to detect the end of a drag and check for selection
-        textOutput.addEventListener('mouseup', function(event) {
+        textOutput.addEventListener('mouseup', function() {
             const selectedText = window.getSelection().toString();
-
-            // Check if there is no selected text and if no drag occurred
             if (!isDragging && !selectedText) {
                 textInput.focus();
             }
-
             isDragging = false;
         });
 
+        /////////////////////////////////////////////
+        //
+        // Volume sliders with dynamic speaker icons
+        //
+        /////////////////////////////////////////////
+        
+        // Our multiple volume controls:
+        let sliderValues = {
+            "music": 75,   // default 75%
+            "sounds": 75 // default 75%
+        };
+
+        // Returns an appropriate speaker icon based on value
+        function getSpeakerIcon(value) {
+            value = Number(value);
+            if (value === 0) {
+                return "🔇"; // muted
+            } else if (value < 33) {
+                return "🔈"; // low
+            } else if (value < 66) {
+                return "🔉"; // medium
+            } else {
+                return "🔊"; // high
+            }
+        }
+
+        function buildSliders() {
+            const container = document.getElementById('sliders-container');
+            container.innerHTML = ""; // Clear any old content
+
+            Object.keys(sliderValues).forEach(function(key) {
+                // Create a container for each slider row
+                const wrapper = document.createElement('div');
+                wrapper.className = "slider-container";
+
+                // Label for the name (Music, Sound FX, etc.)
+                const label = document.createElement('label');
+                label.textContent = key.toLowerCase().split(' ').map(function(word) {
+                    return word.charAt(0).toUpperCase() + word.slice(1);
+                }).join(' ');
+
+                // The slider
+                const slider = document.createElement('input');
+                slider.type = "range";
+                slider.min = 0;
+                slider.max = 100;
+                slider.value = sliderValues[key];
+
+                // The speaker icon
+                const iconSpan = document.createElement('span');
+                iconSpan.className = "slider-icon";
+                // Initial icon based on current value
+                iconSpan.textContent = getSpeakerIcon(sliderValues[key]);
+
+                // On slider change, update the map + icon
+                slider.addEventListener('input', function(e) {
+                    const val = e.target.value;
+                    sliderValues[key] = Number(val);
+                    iconSpan.textContent = getSpeakerIcon(val);
+
+                    MusicPlayer.setGlobalVolume(sliderValues["music"]/100);
+                    SoundPlayer.setGlobalVolume(sliderValues["sounds"]/100);
+                });
+
+                // Put them all together
+                wrapper.appendChild(label);
+                wrapper.appendChild(slider);
+                wrapper.appendChild(iconSpan);
+
+                container.appendChild(wrapper);
+            });
+        }
+
+        // Show/hide the floating menu
+        function toggleMenu() {
+            const menu = document.getElementById('floating-menu');
+            if (menu.style.display === "none" || menu.style.display === "") {
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        }
+
+        /////////////////////////////////////////////
+        //
+        // Initialization
+        //
+        /////////////////////////////////////////////
+        const specialCommands = {
+            "!net": "Print out network traffic stats"
+        };
 
         function init() {
-
             console.log("%cterminal commands:", "font-weight:bold;");
-            longest = 0;
-            for ( i in specialCommands ) {
-                longest = i.length > longest ? i.length : longest
+            let longest = 0;
+            for ( let i in specialCommands ) {
+                longest = i.length > longest ? i.length : longest;
             }
-            for ( i in specialCommands ) {
+            for ( let i in specialCommands ) {
                 console.log('  '+i.padEnd(longest)+" - " + specialCommands[i]); 
             }
             console.log("%cconsole commands:", "font-weight:bold;");
 
+            // Build all sliders from sliderValues
+            buildSliders();
         }
-
     </script>
-
-        
 </body>
 </html>
