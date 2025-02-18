@@ -138,6 +138,9 @@ func Go(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 		destRoom.SendTextToExits(`You hear someone moving around.`, true, room.GetPlayers(rooms.FindAll)...)
 
+		room.PlaySound(`sound/movement/room-exit.mp3`, `movement`)
+		destRoom.PlaySound(`sound/movement/room-enter.mp3`, `movement`)
+
 		return true, nil
 	}
 

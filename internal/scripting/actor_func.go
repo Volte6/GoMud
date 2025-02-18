@@ -348,6 +348,7 @@ func (a ScriptActor) MoveRoom(destRoomId int, leaveCharmedMobs ...bool) {
 		rmNow := rooms.LoadRoom(a.characterRecord.RoomId)
 
 		if rmNext := rooms.LoadRoom(destRoomId); rmNext != nil {
+
 			rooms.MoveToRoom(a.userId, destRoomId)
 
 			if len(leaveCharmedMobs) < 1 || !leaveCharmedMobs[0] {
