@@ -6,7 +6,6 @@ BIN ?= go-mud-server
 DOCKER_COMPOSE := docker-compose -f provisioning/docker-compose.yml
 
 export GOFLAGS := -mod=mod
-export GOSUMDB := off
 
 ## Build Targets
 

@@ -12,6 +12,11 @@ class MP3Player {
       this.stopAll();
     }
 
+    // Ensure volume doesn't exceed 1.0
+    if (volume > 1.0) {
+      volume = 1.0;
+    }
+
     let audio;
     if (this.audioCache.has(url)) {
       audio = this.audioCache.get(url);
@@ -25,7 +30,10 @@ class MP3Player {
     audio.loop = loop;
     audio.volume = volume;
     audio.play().catch((e) => console.error("Playback failed:", e));
+
+    // Keep track of currently playing audio
     this.activeAudios.add(audio);
+
     this.currentUrl = url;
   }
 
@@ -53,6 +61,7 @@ class MP3Player {
   }
 
   setVolume(url, level) {
+    // Set volume for a specific URL (if needed)
     if (level < 0 || level > 1) {
       console.error("Volume must be between 0 and 1");
       return;
@@ -60,6 +69,17 @@ class MP3Player {
     if (this.audioCache.has(url)) {
       this.audioCache.get(url).volume = level;
     }
+  }
+
+  setGlobalVolume(level) {
+    // Set volume for any currently playing audio
+    if (level < 0 || level > 1) {
+      console.error("Volume must be between 0 and 1");
+      return;
+    }
+    this.activeAudios.forEach(audio => {
+      audio.volume = level;
+    });
   }
 
   setLoop(url, loop) {
