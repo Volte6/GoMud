@@ -5,6 +5,7 @@ zoneconfig:
   autoscale:
     minimum: 8
     maximum: 13
+  musicfile: music/catacombs.mp3
 title: Entrance to the Catacombs
 description: Beneath the Sanctuary of the Benevolent Heart lies the labyrinthine expanse
   known as the Catacombs. A network of narrow, winding tunnels and chambers, the Catacombs

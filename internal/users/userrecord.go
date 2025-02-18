@@ -49,6 +49,7 @@ type UserRecord struct {
 	Muted          bool                  `yaml:"muted,omitempty"`    // Cannot SEND custom communications to anyone but admin/mods
 	Deafened       bool                  `yaml:"deafened,omitempty"` // Cannot HEAR custom communications from anyone but admin/mods
 	EventLog       UserLog               `yaml:"-"`                  // Do not retain in user file (for now)
+	LastMusic      string                `yaml:"-"`                  // Keeps track of the last music that was played
 	connectionId   uint64
 	unsentText     string
 	suggestText    string
@@ -141,6 +142,26 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 
 		u.EventLog.Add(`xp`, fmt.Sprintf(`Gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source))
 	}
+
+}
+
+func (u *UserRecord) PlayMusic(musicFile string) {
+
+	events.AddToQueue(events.MSP{
+		UserId:    u.UserId,
+		SoundType: `MUSIC`,
+		SoundFile: musicFile,
+	})
+
+}
+
+func (u *UserRecord) PlaySound(soundFile string) {
+
+	events.AddToQueue(events.MSP{
+		UserId:    u.UserId,
+		SoundType: `SOUND`,
+		SoundFile: soundFile,
+	})
 
 }
 

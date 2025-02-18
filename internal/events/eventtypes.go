@@ -90,3 +90,12 @@ type System struct {
 }
 
 func (s System) Type() string { return `System` }
+
+// Messages that are intended to reach all users on the system
+type MSP struct {
+	UserId    int
+	SoundType string // SOUND or MUSIC
+	SoundFile string
+}
+
+func (m MSP) Type() string { return `MSP` }

@@ -439,6 +439,19 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		)
 	}
 
+	// If this zone has music, play it.
+	// Room music takes priority.
+	if newRoom.MusicFile != `` {
+		user.PlayMusic(newRoom.MusicFile)
+	} else {
+		zoneInfo := GetZoneConfig(newRoom.Zone)
+		if zoneInfo.MusicFile != `` {
+			user.PlayMusic(zoneInfo.MusicFile)
+		} else if currentRoom.MusicFile != `` {
+			user.PlayMusic(`Off`)
+		}
+	}
+
 	return nil
 }
 

@@ -85,6 +85,7 @@
     <link rel="stylesheet" href="/static/public/css/xterm.css" />
     <script src="/static/public/js/xterm.4.19.0.js"></script>
     <script src="/static/public/js/xterm-addon-fit.js"></script>
+    <script src="/static/public/js/mp3.js"></script>
 </head>
 <body onLoad="init(); return false;">
     <div id="main-container">
@@ -97,6 +98,11 @@
 
     <script>
 
+        // Music/Sound players:
+        let baseMp3Url = "";
+        const MusicPlayer = new MP3Player(false);
+        const SoundPlayer = new MP3Player(true);
+        
         /////////////////////////////////////////////
         //
         // Terminal emulation setup
@@ -238,6 +244,79 @@
                         return;
                     }
                 }
+
+                // Is it an MSP command?
+                if ( event.data.length > 9 && event.data.slice(0, 2) == "!!" ) {
+
+                    if ( event.data.slice(0, 8) == "!!MUSIC(" ) {
+                    
+                        parts = event.data.slice(8, event.data.length-1).split(" ");
+                        fileName = parts[0];
+                        obj = {};
+                        for ( i=1; i<parts.length; i++) {
+                            prop = parts[i].split("=");
+                            if ( prop.length == 2 ) {
+                                obj[prop[0]] = prop[1];
+                            }
+                        }
+
+                        if ( fileName == "Off" ) {
+                            if ( obj.U ) {
+                                baseMp3Url = obj.U;
+                                if ( baseMp3Url[baseMp3Url.length-1] != "/" ) {
+                                    baseMp3Url += "/";
+                                }
+                            } else {
+                                MusicPlayer.stop();
+                            }
+                            
+                        } else {
+
+                            soundLevel = 1.0;
+                            loopMusic = true;
+
+                            if ( obj.L && obj.L != "-1" ) {
+                                Loop = false;
+                            }
+                            if ( obj.V ) {
+                                soundLevel = Number(obj.V)/100;
+                            }
+
+                            if ( !MusicPlayer.isPlaying(baseMp3Url+fileName) ) {
+                                MusicPlayer.play(baseMp3Url+fileName, loopMusic, soundLevel);
+                            }
+                        }
+                        
+                    } else if ( event.data.slice(0, 8) == "!!SOUND(" ) {
+                    
+                        parts = event.data.slice(8, event.data.length-1).split(" ");
+                        fileName = parts[0];
+                        obj = {};
+                        for ( i=1; i<parts.length; i++) {
+                            prop = parts[i].split("=");
+                            if ( prop.length == 2 ) {
+                                obj[prop[0]] = prop[1];
+                            }
+                        }
+
+                        if ( fileName == "Off" ) {
+                            if ( obj.U ) {
+                                baseMp3Url = obj.U;
+                                if ( baseMp3Url[baseMp3Url.length-1] != "/" ) {
+                                    baseMp3Url += "/";
+                                }
+                            } else {
+                                SoundPlayer.stop();
+                            }
+                            
+                        } else {
+                            SoundPlayer.play(baseMp3Url+fileName, true, 1.0);
+                        }
+                    
+                    }
+                    return
+                }
+                
 
                 term.write(event.data);
                 

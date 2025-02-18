@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"os/signal"
@@ -129,7 +128,7 @@ func main() {
 
 	// Validate chosen world:
 	if err := util.ValidateWorldFiles(`_datafiles/world/default`, c.FolderDataFiles.String()); err != nil {
-		slog.Error("World", "error", err)
+		slog.Error("World Validation", "error", err)
 		os.Exit(1)
 	}
 
@@ -291,6 +290,12 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		connDetails.ConnectionId(),
 	)
 
+	// Send request to enable MSP
+	connections.SendTo(
+		term.MspEnable.BytesWithPayload(nil),
+		connDetails.ConnectionId(),
+	)
+
 	clientSetupCommands := "" + //term.AnsiAltModeStart.String() + // alternative mode (No scrollback)
 		//term.AnsiCursorHide.String() + // Hide Cursor (Because we will manually echo back)
 		//term.AnsiCharSetUTF8.String() + // UTF8 mode
@@ -321,6 +326,11 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 	// Invoke the login handler for the first time
 	// The default behavior is to just send a welcome screen first
 	inputhandlers.LoginInputHandler(clientInput, sharedState)
+
+	connections.SendTo(
+		term.MspCommand.BytesWithPayload([]byte("!!MUSIC(music/intro.mp3 V=20 L=-1 C=1)")),
+		clientInput.ConnectionId,
+	)
 
 	var userObject *users.UserRecord
 	var sug suggestions.Suggestions
@@ -356,11 +366,9 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 				}
 			}
 
-			if err == io.EOF {
-				connections.Remove(connDetails.ConnectionId())
-			} else {
-				slog.Warn("Conn Read Error", "error", err)
-			}
+			slog.Warn("Conn Read Error", "error", err)
+
+			connections.Remove(connDetails.ConnectionId())
 
 			break
 		}
@@ -448,6 +456,11 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 		if lastHandler == "LoginInputHandler" {
 
+			connections.SendTo(
+				term.MspCommand.BytesWithPayload([]byte("!!MUSIC(Off)")),
+				clientInput.ConnectionId,
+			)
+
 			// Remove the login handler
 			connDetails.RemoveInputHandler("LoginInputHandler")
 			// Replace it with a regular echo handler.
@@ -473,6 +486,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 			connDetails.SetState(connections.LoggedIn)
 
 			worldManager.SendEnterWorld(userObject.UserId, userObject.Character.RoomId)
+
 		}
 
 		// If they have pressed enter (submitted their input), and nothing else has handled/aborted
@@ -558,6 +572,16 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 	// Invoke the login handler for the first time
 	// The default behavior is to just send a welcome screen first
 	inputhandlers.LoginInputHandler(clientInput, sharedState)
+
+	connections.SendTo(
+		[]byte("!!SOUND(Off U="+configs.GetConfig().MspFileUrl.String()+")"),
+		clientInput.ConnectionId,
+	)
+
+	connections.SendTo(
+		[]byte("!!MUSIC(music/intro.mp3 V=20 L=-1 C=1)"),
+		clientInput.ConnectionId,
+	)
 
 	for {
 		_, message, err := conn.ReadMessage()

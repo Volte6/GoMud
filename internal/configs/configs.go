@@ -53,6 +53,7 @@ type Config struct {
 	TelnetPort                   ConfigSliceString `yaml:"TelnetPort"`                   // One or more Ports used to accept telnet connections
 	LocalPort                    ConfigInt         `yaml:"LocalPort"`                    // Port used for admin connections, localhost only
 	WebPort                      ConfigInt         `yaml:"WebPort"`                      // Port used for web requests
+	MspFileUrl                   ConfigString      `yaml:"MspFileUrl"`                   // Where sound and music files reside for MSP protocol support
 	NextRoomId                   ConfigInt         `yaml:"NextRoomId"`                   // The next room id to use when creating a new room
 	LootGoblinRoom               ConfigInt         `yaml:"LootGoblinRoom"`               // The room the loot goblin spawns in
 	LootGoblinRoundCount         ConfigInt         `yaml:"LootGoblinRoundCount"`         // How often to spawn a loot goblin

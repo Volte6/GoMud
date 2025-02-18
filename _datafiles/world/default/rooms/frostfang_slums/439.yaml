@@ -7,6 +7,7 @@ zoneconfig:
     maximum: 10
   mutators:
   - mutatorid: pvp-enabled
+  musicfile: music/frostfang-slums.mp3
 title: Poorly Lit Street
 description: 'Tucked away in the heart of Frostfang''s sprawling slums, a dimly lit
   alleyway meanders from the bustling Beggars Lane. This concealed corner, a world

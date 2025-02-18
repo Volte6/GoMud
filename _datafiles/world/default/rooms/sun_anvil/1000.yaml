@@ -4,6 +4,7 @@ zoneconfig:
   roomid: 1000
   mutators:
   - mutatorid: desert-sun
+  musicfile: music/sun-anvil.mp3
 title: Desert's Edge
 description: You find yourself at the threshold of the Sun Anvil Desert, where the
   air itself seems to shimmer under the relentless glare of a merciless sun. The ground
