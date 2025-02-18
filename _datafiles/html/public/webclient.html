@@ -101,7 +101,7 @@
             position: absolute;
             top: 60px; /* Just below the icon */
             right: 10px;
-            width: 300px;
+            width: 450px;
             padding: 10px;
             background-color: #2e2e2e;
             border: 1px solid #444;
@@ -121,7 +121,7 @@
         }
         .slider-container label {
             color: #ccc;
-            width: 70px;
+            width: 150px;
         }
         .slider-container input[type="range"] {
             flex: 1;
@@ -347,7 +347,7 @@
                                 SoundPlayer.stop();
                             }
                         } else {
-                            SoundPlayer.play(baseMp3Url+fileName, true, (sliderValues["sounds"]/100));
+                            SoundPlayer.play(baseMp3Url+fileName, false, (sliderValues[obj.T.toLowerCase()+" sounds"]/100));
                         }
                     }
                     return;
@@ -480,9 +480,11 @@
         /////////////////////////////////////////////
         
         // Our multiple volume controls:
-        let sliderValues = {
-            "music": 75,   // default 75%
-            "sounds": 75 // default 75%
+        let sliderValues = {   // default 75%
+            "music": 75,
+            "combat sounds": 75,
+            "movement sounds": 75,
+            "other sounds": 75
         };
 
         // Returns an appropriate speaker icon based on value
@@ -534,7 +536,6 @@
                     iconSpan.textContent = getSpeakerIcon(val);
 
                     MusicPlayer.setGlobalVolume(sliderValues["music"]/100);
-                    SoundPlayer.setGlobalVolume(sliderValues["sounds"]/100);
                 });
 
                 // Put them all together

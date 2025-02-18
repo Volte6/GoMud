@@ -320,6 +320,9 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			Look(`secretly`, user, destRoom)
 
 			scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId)
+
+			room.PlaySound(`sound/movement/room-exit.mp3`, `movement`, user.UserId)
+			destRoom.PlaySound(`sound/movement/room-enter.mp3`, `movement`, user.UserId)
 		}
 
 	}

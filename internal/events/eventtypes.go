@@ -96,6 +96,7 @@ type MSP struct {
 	UserId    int
 	SoundType string // SOUND or MUSIC
 	SoundFile string
+	Category  string // special category/type for MSP string
 }
 
 func (m MSP) Type() string { return `MSP` }

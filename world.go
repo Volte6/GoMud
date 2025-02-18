@@ -1026,7 +1026,7 @@ func (w *World) MessageTick() {
 				}
 			} else {
 
-				msg := []byte("!!SOUND(" + msp.SoundFile + ")")
+				msg := []byte("!!SOUND(" + msp.SoundFile + " T=" + msp.Category + ")")
 
 				if connections.IsWebsocket(user.ConnectionId()) {
 

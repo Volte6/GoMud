@@ -248,6 +248,36 @@ func (r *Room) SendText(txt string, excludeUserIds ...int) {
 
 }
 
+func (r *Room) PlaySound(soundFile string, category string, excludeUserIds ...int) {
+
+	for _, userId := range r.players {
+
+		skip := false
+
+		exLen := len(excludeUserIds)
+		if exLen > 0 {
+			for _, excludeId := range excludeUserIds {
+				if excludeId == userId {
+					skip = true
+					break
+				}
+			}
+		}
+
+		if skip {
+			continue
+		}
+
+		events.AddToQueue(events.MSP{
+			UserId:    userId,
+			SoundType: `SOUND`,
+			SoundFile: soundFile,
+			Category:  category,
+		})
+	}
+
+}
+
 func (r *Room) SendTextToExits(txt string, isQuiet bool, excludeUserIds ...int) {
 
 	testExitIds := []int{}
