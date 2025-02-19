@@ -10,6 +10,9 @@ description: As you step into this residence, a sense of artistic flair is immed
   the owner's artistic inclinations. This home feels like a personal retreat, a place
   for creativity and relaxation amidst the harshness of Frostfang.
 biome: house
+containers:
+  tattertail loom:
+    recipes: {20045: [20001, 20001, 20001, 20001, 20001, 20001, 20001, 20001, 20001]}
 exits:
   north:
     roomid: 260

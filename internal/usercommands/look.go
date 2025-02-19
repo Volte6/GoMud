@@ -6,6 +6,7 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/gametime"
+	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
@@ -165,10 +166,43 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			chestStuff = append(chestStuff, item.DisplayName())
 		}
 
+		if len(container.Recipes) > 0 {
+
+			user.SendText(``)
+			user.SendText(fmt.Sprintf(`You can <ansi fg="command">use</ansi> the <ansi fg="container">%s</ansi> if you put the following objects inside:`, containerName))
+
+			for finalItemId, recipeList := range container.Recipes {
+
+				neededItems := map[int]int{}
+
+				for _, inputItemId := range recipeList {
+					neededItems[inputItemId] += 1
+				}
+
+				user.SendText(``)
+
+				finalItem := items.New(finalItemId)
+				user.SendText(fmt.Sprintf(`    To receive 1 <ansi fg="itemname">%s</ansi>: `, finalItem.DisplayName()))
+
+				for inputItemId, qtyNeeded := range neededItems {
+					tmpItem := items.New(inputItemId)
+					totalContained := container.Count(inputItemId)
+					colorClass := "9"
+					if totalContained == qtyNeeded {
+						colorClass = "14"
+					}
+					user.SendText(fmt.Sprintf(`        <ansi fg="%s">[%d/%d]</ansi> <ansi fg="itemname">%s</ansi>`, colorClass, totalContained, qtyNeeded, tmpItem.DisplayName()))
+				}
+
+			}
+
+		}
+
 		textOut, _ := templates.Process("descriptions/insidecontainer", chestStuff)
 
 		user.SendText(``)
 		user.SendText(textOut)
+		user.SendText(``)
 
 		return true, nil
 	}

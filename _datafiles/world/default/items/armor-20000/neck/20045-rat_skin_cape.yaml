@@ -1,0 +1,10 @@
+itemid: 20045
+value: 100
+name: rat-skin cape
+namesimple: cape
+description: A patchwork cape made up of many rat hides.
+type: neck
+subtype: wearable
+damagereduction: 5
+wornbuffids:
+  - 3 # Cold Tolerant
