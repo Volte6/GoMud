@@ -129,6 +129,7 @@ help:
       - build
       - command
       - deafen
+      - item
       - grant
       - locate
       - modify

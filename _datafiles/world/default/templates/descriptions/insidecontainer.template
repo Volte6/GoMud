@@ -1,6 +1,8 @@
 {{- $displayed := 0 -}}
 {{- $itemCt := len . -}}
-<ansi fg="white">Inside you see: </ansi>
+<ansi fg="white"> ┌─────────────────────────────────────────────────────────────────────────┐</ansi>
+
+  <ansi fg="white">Inside you see: </ansi>
 {{- if ne $itemCt 0 -}}
     {{- range $index, $itemName := . -}}
         {{- $displayed = add $displayed 1 -}}
@@ -9,3 +11,4 @@
 {{ else -}}
 Nothing
 {{ end }}
+<ansi fg="white"> └─────────────────────────────────────────────────────────────────────────┘</ansi>

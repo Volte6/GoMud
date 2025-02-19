@@ -190,6 +190,8 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 				scripting.TryItemScriptEvent(`onFound`, matchItem, user.UserId)
 
+				return true, nil
+
 			} else {
 				user.SendText(
 					fmt.Sprintf(`You can't carry the <ansi fg="itemname">%s</ansi>.`, matchItem.DisplayName()),
@@ -314,7 +316,12 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		return true, nil
 	}
 
-	user.SendText(fmt.Sprintf("You don't see a %s around.", rest))
+	containerName = room.FindContainerByName(rest)
+	if containerName != `` {
+		user.SendText(fmt.Sprintf(`You can't pick up the <ansi fg="container">%s</ansi>. Try looking at it.`, containerName))
+	} else {
+		user.SendText(fmt.Sprintf("You don't see a %s around.", rest))
+	}
 
 	return true, nil
 }
