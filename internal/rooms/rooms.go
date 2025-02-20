@@ -248,7 +248,13 @@ func (r *Room) SendText(txt string, excludeUserIds ...int) {
 
 }
 
-func (r *Room) PlaySound(soundFile string, category string, excludeUserIds ...int) {
+func (r *Room) PlaySound(soundFile string, category string, volume int, excludeUserIds ...int) {
+
+	if volume < 1 {
+		volume = 1
+	} else if volume > 100 {
+		volume = 100
+	}
 
 	for _, userId := range r.players {
 
@@ -272,6 +278,7 @@ func (r *Room) PlaySound(soundFile string, category string, excludeUserIds ...in
 			UserId:    userId,
 			SoundType: `SOUND`,
 			SoundFile: soundFile,
+			Volume:    volume,
 			Category:  category,
 		})
 	}

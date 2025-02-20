@@ -151,16 +151,28 @@ func (u *UserRecord) PlayMusic(musicFile string) {
 		UserId:    u.UserId,
 		SoundType: `MUSIC`,
 		SoundFile: musicFile,
+		Volume:    100,
 	})
 
 }
 
-func (u *UserRecord) PlaySound(soundFile string, category string) {
+func (u *UserRecord) PlaySound(soundFile string, category string, volume ...int) {
+
+	v := 100
+	if len(volume) > 0 {
+		v = volume[0]
+		if v < 1 {
+			v = 1
+		} else if v > 100 {
+			v = 100
+		}
+	}
 
 	events.AddToQueue(events.MSP{
 		UserId:    u.UserId,
 		SoundType: `SOUND`,
 		SoundFile: soundFile,
+		Volume:    v,
 		Category:  category,
 	})
 

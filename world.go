@@ -1007,7 +1007,7 @@ func (w *World) MessageTick() {
 
 				user.LastMusic = msp.SoundFile
 
-				msg := []byte("!!MUSIC(" + msp.SoundFile + " V=80 L=-1 C=1)")
+				msg := []byte("!!MUSIC(" + msp.SoundFile + " V=" + strconv.Itoa(msp.Volume) + " L=-1 C=1)")
 
 				if connections.IsWebsocket(user.ConnectionId()) {
 
@@ -1026,7 +1026,7 @@ func (w *World) MessageTick() {
 				}
 			} else {
 
-				msg := []byte("!!SOUND(" + msp.SoundFile + " T=" + msp.Category + ")")
+				msg := []byte("!!SOUND(" + msp.SoundFile + " T=" + msp.Category + " V=" + strconv.Itoa(msp.Volume) + ")")
 
 				if connections.IsWebsocket(user.ConnectionId()) {
 

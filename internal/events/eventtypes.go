@@ -96,6 +96,7 @@ type MSP struct {
 	UserId    int
 	SoundType string // SOUND or MUSIC
 	SoundFile string
+	Volume    int    // 1-100
 	Category  string // special category/type for MSP string
 }
 

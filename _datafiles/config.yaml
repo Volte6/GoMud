@@ -191,6 +191,7 @@ ConsistentAttackMessages: true
 CorpsesEnabled: true
 # - CorpseDecayTime - 
 #   How long until corpses crumble to dust (Go away).
+#   See ShopRestockRate comments for time format.
 CorpseDecayTime: 1 hour
 # - MaxAltCharacters - 
 #   How many characters beyond their original character can they create? Players
@@ -217,6 +218,9 @@ NightHours: 8
 # - LeaderboardSize -
 #   Maximum size of each leaderboard. 0 to disable.
 LeaderboardSize: 10
+# - ContainerSizeMax -
+#   Maximum number of objects a container can hold before stuff overflows
+ContainerSizeMax: 10
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS

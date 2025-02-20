@@ -99,7 +99,8 @@ type Config struct {
 	CorpsesEnabled           ConfigBool   `yaml:"CorpsesEnabled"`           // Whether corpses are left behind after mob/player deaths
 	CorpseDecayTime          ConfigString `yaml:"CorpseDecayTime"`          // How long until corpses decay to dust (go away)
 
-	LeaderboardSize ConfigInt `yaml:"LeaderboardSize"` // Maximum size of leaderboard
+	LeaderboardSize  ConfigInt `yaml:"LeaderboardSize"`  // Maximum size of leaderboard
+	ContainerSizeMax ConfigInt `yaml:"ContainerSizeMax"` // How many objects containers can hold before overflowing
 
 	SeedInt int64 `yaml:"-"`
 

@@ -1,13 +1,11 @@
 {{- $displayed := 0 -}}
-{{- $itemCt := len . -}}
+{{ $itemCt := len .ItemNames -}}
 <ansi fg="white"> ┌─────────────────────────────────────────────────────────────────────────┐</ansi>
 
-  <ansi fg="white">Inside you see: </ansi>
+  <ansi fg="white">Inside: </ansi>
 {{- if ne $itemCt 0 -}}
-    {{- range $index, $itemName := . -}}
-        {{- $displayed = add $displayed 1 -}}
-        <ansi fg="item">{{ $itemName }}</ansi>{{- if ne $displayed $itemCt }}{{- if ne $displayed (sub $itemCt 1) }}, {{ else }} and {{ end }}{{ end -}}
-    {{- end }}
+    {{ $formattedNames := .ItemNamesFormatted -}}{{- $strlen := 0 -}}{{- $lineCt := 1 -}}
+ {{ range $index, $name := .ItemNames -}}{{ $proposedLength := (add 2 (add $strlen (len $name))) }}{{- if gt $proposedLength 66 -}}{{- $strlen = 0 -}}{{- $lineCt = (add 1 $lineCt) -}}{{- printf "\n          " -}}{{- end -}}{{ index $formattedNames $index }}{{- if ne $index (sub $itemCt 1) }}, {{ $strlen = (add 2 (add $strlen (len $name))) }}{{ end }}{{ end }}
 {{ else -}}
 Nothing
 {{ end }}
