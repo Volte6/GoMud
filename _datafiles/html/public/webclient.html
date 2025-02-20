@@ -480,7 +480,7 @@
         /////////////////////////////////////////////
         
         // Our multiple volume controls:
-        let sliderValues = {   // default 75%
+        let sliderValues = {   // defaults
             "music": 75,
             "combat sounds": 75,
             "movement sounds": 75,
@@ -535,6 +535,10 @@
                     sliderValues[key] = Number(val);
                     iconSpan.textContent = getSpeakerIcon(val);
 
+                    // LOCALSTORAGE ADDED: update local storage for every slider change
+                    localStorage.setItem('sliderValues', JSON.stringify(sliderValues));
+
+                    // Example: update the global music volume
                     MusicPlayer.setGlobalVolume(sliderValues["music"]/100);
                 });
 
@@ -576,6 +580,16 @@
                 console.log('  '+i.padEnd(longest)+" - " + specialCommands[i]); 
             }
             console.log("%cconsole commands:", "font-weight:bold;");
+
+            // LOCALSTORAGE ADDED: load sliderValues from localStorage if available
+            const savedValues = localStorage.getItem('sliderValues');
+            if (savedValues) {
+                try {
+                    sliderValues = JSON.parse(savedValues);
+                } catch (e) {
+                    console.warn("Could not parse saved sliderValues, using defaults.");
+                }
+            }
 
             // Build all sliders from sliderValues
             buildSliders();

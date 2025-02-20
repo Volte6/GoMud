@@ -1264,7 +1264,7 @@ func (w *World) TurnTick() {
 			Text: `Saving users...`,
 		})
 
-		users.SaveAllUsers()
+		users.SaveAllUsers(true)
 
 		events.AddToQueue(events.Broadcast{
 			Text:            `Done.` + term.CRLFStr,
