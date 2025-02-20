@@ -133,6 +133,22 @@
             font-size: 20px;
             color: #ccc;
         }
+
+        /* ADDED (Mute Checkbox) */
+        #mute-container {
+            margin-bottom: 15px;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+        }
+        #mute-container label {
+            cursor: pointer;
+        }
+        #mute-container input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
     </style>
 
     <link rel="stylesheet" href="/static/public/css/xterm.css" />
@@ -148,6 +164,13 @@
     <!-- FLOATING MENU - MULTIPLE SLIDERS -->
     <div id="floating-menu">
         <h3>Volume Controls</h3>
+
+        <!-- ADDED (Mute Checkbox) -->
+        <div id="mute-container">
+            <input type="checkbox" id="mute-checkbox" onchange="toggleMuteAll()">
+            <label for="mute-checkbox"><span id="mute-icon">🔊</span> Mute All Sound</label>
+        </div>
+
         <div id="sliders-container">
             <!-- Multiple sliders (Music, Sound FX, etc.) get built here -->
         </div>
@@ -177,7 +200,7 @@
         //
         /////////////////////////////////////////////
         const term = new window.Terminal({
-            cols: 80, 
+            cols: 80,
             rows: 60,
             cursorBlink: true,
             fontSize: 20
@@ -347,6 +370,8 @@
                                 SoundPlayer.stop();
                             }
                         } else {
+                            // We rely on dynamic volume from sliderValues
+                            // 'obj.T' might be 'combat' or 'movement' or 'other', etc.
                             SoundPlayer.play(baseMp3Url+fileName, false, (sliderValues[obj.T.toLowerCase()+" sounds"]/100));
                         }
                     }
@@ -480,12 +505,15 @@
         /////////////////////////////////////////////
         
         // Our multiple volume controls:
-        let sliderValues = {   // defaults
+        let sliderValues = {
             "music": 75,
             "combat sounds": 75,
             "movement sounds": 75,
             "other sounds": 75
         };
+
+        // We'll also store the last known unmuted state in localStorage
+        let unmutedSliderValues = null;
 
         // Returns an appropriate speaker icon based on value
         function getSpeakerIcon(value) {
@@ -535,11 +563,21 @@
                     sliderValues[key] = Number(val);
                     iconSpan.textContent = getSpeakerIcon(val);
 
-                    // LOCALSTORAGE ADDED: update local storage for every slider change
+                    // Update localStorage with the new slider values
                     localStorage.setItem('sliderValues', JSON.stringify(sliderValues));
 
-                    // Example: update the global music volume
+                    // Update the global music volume
                     MusicPlayer.setGlobalVolume(sliderValues["music"]/100);
+
+                    // If user moves any slider, uncheck 'Mute' if it was checked
+                    // so that the user can adjust volume again
+                    const muteCheckbox = document.getElementById('mute-checkbox');
+                    if (muteCheckbox.checked && val > 0) {
+                        // Uncheck and sync everything
+                        muteCheckbox.checked = false;
+                        localStorage.setItem('muteAllSound', JSON.stringify(false));
+                        document.getElementById('mute-icon').textContent = "🔊";
+                    }
                 });
 
                 // Put them all together
@@ -549,6 +587,56 @@
 
                 container.appendChild(wrapper);
             });
+        }
+
+        // ADDED (Mute Toggle Function)
+        function toggleMuteAll() {
+            const muteCheckbox = document.getElementById('mute-checkbox');
+            const isChecked = muteCheckbox.checked;
+            const muteIcon = document.getElementById('mute-icon');
+
+            if (isChecked) {
+                // Store the unmuted values so we can restore them later
+                unmutedSliderValues = { ...sliderValues };
+                localStorage.setItem('unmutedSliderValues', JSON.stringify(unmutedSliderValues));
+
+                // Set all sliders to 0
+                Object.keys(sliderValues).forEach(key => {
+                    sliderValues[key] = 0;
+                });
+                localStorage.setItem('sliderValues', JSON.stringify(sliderValues));
+
+                buildSliders();
+
+                // Change the mute icon
+                muteIcon.textContent = "🔇";
+
+                // Also set the music player's global volume to 0
+                MusicPlayer.setGlobalVolume(0);
+
+                // Mark in localStorage that we're muted
+                localStorage.setItem('muteAllSound', JSON.stringify(true));
+
+            } else {
+                // If we had previously saved unmuted values, restore them
+                const savedUnmuted = localStorage.getItem('unmutedSliderValues');
+                if (savedUnmuted) {
+                    unmutedSliderValues = JSON.parse(savedUnmuted);
+                    sliderValues = { ...unmutedSliderValues };
+
+                    // Save them back as the "current" sliderValues
+                    localStorage.setItem('sliderValues', JSON.stringify(sliderValues));
+                }
+                buildSliders();
+
+                muteIcon.textContent = "🔊";
+
+                // Restore music volume from the slider
+                MusicPlayer.setGlobalVolume(sliderValues["music"]/100);
+
+                // Mark in localStorage that we're unmuted
+                localStorage.setItem('muteAllSound', JSON.stringify(false));
+            }
         }
 
         // Show/hide the floating menu
@@ -577,11 +665,11 @@
                 longest = i.length > longest ? i.length : longest;
             }
             for ( let i in specialCommands ) {
-                console.log('  '+i.padEnd(longest)+" - " + specialCommands[i]); 
+                console.log('  '+i.padEnd(longest)+" - " + specialCommands[i]);
             }
             console.log("%cconsole commands:", "font-weight:bold;");
 
-            // LOCALSTORAGE ADDED: load sliderValues from localStorage if available
+            // 1) Load main sliderValues from localStorage if available
             const savedValues = localStorage.getItem('sliderValues');
             if (savedValues) {
                 try {
@@ -591,8 +679,46 @@
                 }
             }
 
-            // Build all sliders from sliderValues
+            // 2) See if we have a "muteAllSound" property set
+            const savedMute = localStorage.getItem('muteAllSound');
+            if (savedMute) {
+                try {
+                    const isMuted = JSON.parse(savedMute);
+                    document.getElementById('mute-checkbox').checked = isMuted;
+                } catch (e) {
+                    console.warn("Could not parse muteAllSound, ignoring.");
+                }
+            }
+
+            // 3) Build the sliders
             buildSliders();
+
+            // 4) If currently muted, set all slider values to 0
+            const muteCheckbox = document.getElementById('mute-checkbox');
+            const muteIcon = document.getElementById('mute-icon');
+
+            if (muteCheckbox.checked) {
+                // Possibly retrieve unmuted values from storage if we have them
+                const savedUnmuted = localStorage.getItem('unmutedSliderValues');
+                if (savedUnmuted) {
+                    unmutedSliderValues = JSON.parse(savedUnmuted);
+                }
+
+                // Force all current sliders to 0
+                Object.keys(sliderValues).forEach(key => {
+                    sliderValues[key] = 0;
+                });
+                localStorage.setItem('sliderValues', JSON.stringify(sliderValues));
+                buildSliders();
+
+                // Adjust icon & volumes
+                muteIcon.textContent = "🔇";
+                MusicPlayer.setGlobalVolume(0);
+            } else {
+                // If not muted, use the slider's "music" volume
+                MusicPlayer.setGlobalVolume(sliderValues["music"]/100);
+                muteIcon.textContent = "🔊";
+            }
         }
     </script>
 </body>

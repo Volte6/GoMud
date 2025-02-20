@@ -143,6 +143,9 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	containerName := room.FindContainerByName(lookAt)
 	if containerName != `` {
 
+		itemNames := []string{}
+		itemNamesFormatted := []string{}
+
 		container := room.Containers[containerName]
 
 		if container.Lock.IsLocked() {
@@ -152,10 +155,9 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			return true, nil
 		}
 
-		chestStuff := []string{}
-
 		if container.Gold > 0 {
-			chestStuff = append(chestStuff, fmt.Sprintf(`<ansi fg="gold">%d gold</ansi>`, container.Gold))
+			itemNames = append(itemNames, fmt.Sprintf(`%d gold`, container.Gold))
+			itemNamesFormatted = append(itemNamesFormatted, fmt.Sprintf(`<ansi fg="gold">%d gold</ansi>`, container.Gold))
 		}
 
 		for _, item := range container.Items {
@@ -163,7 +165,9 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				room.RemoveItem(item, false)
 				continue
 			}
-			chestStuff = append(chestStuff, item.DisplayName())
+
+			itemNames = append(itemNames, item.Name())
+			itemNamesFormatted = append(itemNamesFormatted, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, item.DisplayName()))
 		}
 
 		if len(container.Recipes) > 0 {
@@ -182,20 +186,27 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				user.SendText(``)
 
 				finalItem := items.New(finalItemId)
-				user.SendText(fmt.Sprintf(`    To receive 1 <ansi fg="itemname">%s</ansi>: `, finalItem.DisplayName()))
+				user.SendText(fmt.Sprintf(`    <ansi fg="230">To receive 1 <ansi fg="itemname">%s</ansi>:</ansi> `, finalItem.DisplayName()))
 
 				for inputItemId, qtyNeeded := range neededItems {
 					tmpItem := items.New(inputItemId)
 					totalContained := container.Count(inputItemId)
-					colorClass := "9"
+					colorClass := "8" // None fulfilled
 					if totalContained == qtyNeeded {
-						colorClass = "14"
+						colorClass = "10"
+					} else if totalContained > 0 {
+						colorClass = "3"
 					}
 					user.SendText(fmt.Sprintf(`        <ansi fg="%s">[%d/%d]</ansi> <ansi fg="itemname">%s</ansi>`, colorClass, totalContained, qtyNeeded, tmpItem.DisplayName()))
 				}
 
 			}
 
+		}
+
+		chestStuff := map[string]any{
+			`ItemNames`:          itemNames,
+			`ItemNamesFormatted`: itemNamesFormatted,
 		}
 
 		textOut, _ := templates.Process("descriptions/insidecontainer", chestStuff)

@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
@@ -93,14 +94,15 @@ func Put(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	}
 
 	if itemFound {
+
 		container.AddItem(item)
 		user.Character.RemoveItem(item)
 
 		user.SendText(fmt.Sprintf(`You place your <ansi fg="itemname">%s</ansi> into the <ansi fg="container">%s</ansi>`, item.DisplayName(), containerName))
 		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> places their <ansi fg="itemname">%s</ansi> into the <ansi fg="container">%s</ansi>`, user.Character.Name, item.DisplayName(), containerName), user.UserId)
 
-		// current hard limit of 10 max items.
-		if len(container.Items) > 10 {
+		// Enforce container size limits
+		if len(container.Items) > int(configs.GetConfig().ContainerSizeMax) {
 
 			randItemToRemove := util.Rand(len(container.Items))
 			oopsItem := container.Items[randItemToRemove]
