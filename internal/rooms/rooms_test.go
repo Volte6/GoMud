@@ -94,3 +94,131 @@ func TestRoom_FindCorpse(t *testing.T) {
 	found, ok = r.FindCorpse("NonExistent")
 	assert.False(t, ok, "Expected not to find a missing corpse")
 }
+
+func TestFindNoun(t *testing.T) {
+	// Create a room with various noun mappings (including aliases).
+	r := &Room{
+		Nouns: map[string]string{
+			"torch":            "a fiery torch",
+			"torchAlias":       ":torch", // alias -> :torch means "torch"
+			"lamp":             "an illuminating lamp",
+			"lampAlias":        ":lamp", // alias -> :lamp means "lamp"
+			"candles":          "some wax candles",
+			"pony":             "a small horse",
+			"mystery":          "just a riddle",
+			"secret":           ":mystery",                   // chain alias -> :mystery
+			"projector screen": "a wide, matte-white screen", // multi-word matching
+		},
+	}
+
+	// Table-driven tests.
+	tests := []struct {
+		name          string
+		inputNoun     string
+		wantFoundNoun string
+		wantDesc      string
+	}{
+		{
+			name:          "Direct match (torch)",
+			inputNoun:     "torch",
+			wantFoundNoun: "torch",
+			wantDesc:      "a fiery torch",
+		},
+		{
+			name:          "Direct match (candles)",
+			inputNoun:     "candles",
+			wantFoundNoun: "candles",
+			wantDesc:      "some wax candles",
+		},
+		{
+			name:          "Direct match (pony)",
+			inputNoun:     "pony",
+			wantFoundNoun: "pony",
+			wantDesc:      "a small horse",
+		},
+		{
+			name:          "Alias match (torchAlias -> :torch)",
+			inputNoun:     "torchAlias",
+			wantFoundNoun: "torch",
+			wantDesc:      "a fiery torch",
+		},
+		{
+			name:          "Alias match (lampAlias -> :lamp)",
+			inputNoun:     "lampAlias",
+			wantFoundNoun: "lamp",
+			wantDesc:      "an illuminating lamp",
+		},
+		{
+			name:          "Chain alias (secret -> :mystery)",
+			inputNoun:     "secret",
+			wantFoundNoun: "mystery",
+			wantDesc:      "just a riddle",
+		},
+		{
+			name:          "Plural form by adding s (pony -> ponies)",
+			inputNoun:     "ponies",
+			wantFoundNoun: "pony",
+			wantDesc:      "a small horse",
+		},
+		{
+			name:          "Plural form by adding es (torches)",
+			inputNoun:     "torches",
+			wantFoundNoun: "torch",
+			wantDesc:      "a fiery torch",
+		},
+
+		{
+			name:          "Multi-word input, second word valid (red torches)",
+			inputNoun:     "red torches",
+			wantFoundNoun: "torch",
+			wantDesc:      "a fiery torch",
+		},
+		{
+			name:          "Multi-word input, multi-word match",
+			inputNoun:     "projector screen",
+			wantFoundNoun: "projector screen",
+			wantDesc:      "a wide, matte-white screen",
+		},
+		{
+			name:          "Single-word input, multi-word match 1",
+			inputNoun:     "projector",
+			wantFoundNoun: "projector screen",
+			wantDesc:      "a wide, matte-white screen",
+		},
+		{
+			name:          "Single-word input, multi-word match 2",
+			inputNoun:     "screen",
+			wantFoundNoun: "projector screen",
+			wantDesc:      "a wide, matte-white screen",
+		},
+		{
+			name:          "Multi-word input, first word valid (torch something)",
+			inputNoun:     "torch something",
+			wantFoundNoun: "torch",
+			wantDesc:      "a fiery torch",
+		},
+		{
+			name:          "No match",
+			inputNoun:     "gibberish",
+			wantFoundNoun: "",
+			wantDesc:      "",
+		},
+		{
+			name:          "Multi-word no match (foo bar)",
+			inputNoun:     "foo bar",
+			wantFoundNoun: "",
+			wantDesc:      "",
+		},
+	}
+
+	// Run each sub-test.
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotFound, gotDesc := r.FindNoun(tt.inputNoun)
+			if gotFound != tt.wantFoundNoun || gotDesc != tt.wantDesc {
+				t.Errorf("FindNoun(%q) = (%q, %q), want (%q, %q)",
+					tt.inputNoun, gotFound, gotDesc, tt.wantFoundNoun, tt.wantDesc)
+			}
+		})
+	}
+}
