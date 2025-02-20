@@ -276,10 +276,10 @@ func SetZombieUser(userId int) {
 
 }
 
-func SaveAllUsers() {
+func SaveAllUsers(isAutoSave ...bool) {
 
 	for _, u := range userManager.Users {
-		if err := SaveUser(*u); err != nil {
+		if err := SaveUser(*u, isAutoSave...); err != nil {
 			slog.Error("SaveAllUsers()", "error", err.Error())
 		}
 	}
@@ -457,7 +457,7 @@ func CharacterNameSearch(nameToFind string) (foundUserId int, foundUserName stri
 	return foundUserId, foundUserName
 }
 
-func SaveUser(u UserRecord) error {
+func SaveUser(u UserRecord, isAutoSave ...bool) error {
 
 	fileWritten := false
 	tmpSaved := false
@@ -474,7 +474,9 @@ func SaveUser(u UserRecord) error {
 	//}
 
 	if u.Character.RoomId >= 900 && u.Character.RoomId <= 999 {
-		u.Character.RoomId = -1
+		if len(isAutoSave) == 0 || !isAutoSave[0] {
+			u.Character.RoomId = -1
+		}
 	}
 
 	data, err := yaml.Marshal(&u)
