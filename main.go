@@ -19,6 +19,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/natefinch/lumberjack"
+	"github.com/volte6/gomud/internal/audio"
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/colorpatterns"
@@ -327,10 +328,16 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 	// The default behavior is to just send a welcome screen first
 	inputhandlers.LoginInputHandler(clientInput, sharedState)
 
-	connections.SendTo(
-		term.MspCommand.BytesWithPayload([]byte("!!MUSIC(music/intro.mp3 V=20 L=-1 C=1)")),
-		clientInput.ConnectionId,
-	)
+	if audioConfig := audio.GetFile(`intro`); audioConfig.FilePath != `` {
+		v := 100
+		if audioConfig.Volume > 0 && audioConfig.Volume <= 100 {
+			v = audioConfig.Volume
+		}
+		connections.SendTo(
+			term.MspCommand.BytesWithPayload([]byte("!!MUSIC("+audioConfig.FilePath+" V="+strconv.Itoa(v)+" L=-1 C=1)")),
+			clientInput.ConnectionId,
+		)
+	}
 
 	var userObject *users.UserRecord
 	var sug suggestions.Suggestions
@@ -578,10 +585,16 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		clientInput.ConnectionId,
 	)
 
-	connections.SendTo(
-		[]byte("!!MUSIC(music/intro.mp3 V=20 L=-1 C=1)"),
-		clientInput.ConnectionId,
-	)
+	if audioConfig := audio.GetFile(`intro`); audioConfig.FilePath != `` {
+		v := 100
+		if audioConfig.Volume > 0 && audioConfig.Volume <= 100 {
+			v = audioConfig.Volume
+		}
+		connections.SendTo(
+			[]byte("!!MUSIC("+audioConfig.FilePath+" V="+strconv.Itoa(v)+" L=-1 C=1)"),
+			clientInput.ConnectionId,
+		)
+	}
 
 	for {
 		_, message, err := conn.ReadMessage()
@@ -802,5 +815,6 @@ func loadAllDataFiles(isReload bool) {
 	keywords.LoadAliases()
 	mutators.LoadDataFiles()
 	colorpatterns.LoadColorPatterns()
+	audio.LoadAudioConfig()
 	characters.CompileAdjectiveSwaps() // This should come after loading color patterns.
 }

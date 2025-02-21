@@ -332,7 +332,7 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 		// Give them the item
 		newItm := items.New(matchedShopItem.ItemId)
 		user.Character.StoreItem(newItm)
-		user.PlaySound(`sound/other/buy.mp3`, `other`)
+		user.PlaySound(`purchase`, `other`)
 
 		iSpec := newItm.GetSpec()
 		if iSpec.QuestToken != `` {

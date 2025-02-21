@@ -1770,7 +1770,7 @@ func (w *World) CheckForLevelUps() {
 				}
 			}
 
-			user.PlaySound(`sound/other/levelup.mp3`, `other`)
+			user.PlaySound(`levelup`, `other`)
 
 			users.SaveUser(*user)
 

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volte6/gomud/internal/audio"
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
@@ -248,12 +249,14 @@ func (r *Room) SendText(txt string, excludeUserIds ...int) {
 
 }
 
-func (r *Room) PlaySound(soundFile string, category string, volume int, excludeUserIds ...int) {
+func (r *Room) PlaySound(soundId string, category string, excludeUserIds ...int) {
 
-	if volume < 1 {
-		volume = 1
-	} else if volume > 100 {
-		volume = 100
+	volume := 100
+	if soundConfig := audio.GetFile(soundId); soundConfig.FilePath != `` {
+		soundId = soundConfig.FilePath
+		if soundConfig.Volume > 0 && soundConfig.Volume <= 100 {
+			volume = soundConfig.Volume
+		}
 	}
 
 	for _, userId := range r.players {
@@ -277,7 +280,7 @@ func (r *Room) PlaySound(soundFile string, category string, volume int, excludeU
 		events.AddToQueue(events.MSP{
 			UserId:    userId,
 			SoundType: `SOUND`,
-			SoundFile: soundFile,
+			SoundFile: soundId,
 			Volume:    volume,
 			Category:  category,
 		})

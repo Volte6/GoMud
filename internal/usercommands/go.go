@@ -321,8 +321,8 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 			scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId)
 
-			room.PlaySound(`sound/movement/room-exit.mp3`, `movement`, user.UserId)
-			destRoom.PlaySound(`sound/movement/room-enter.mp3`, `movement`, user.UserId)
+			room.PlaySound(`room-exit`, `movement`, user.UserId)
+			destRoom.PlaySound(`room-enter`, `movement`, user.UserId)
 		}
 
 	}

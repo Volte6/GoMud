@@ -43,9 +43,9 @@ func AttackPlayerVsMob(user *users.UserRecord, mob *mobs.Mob) AttackResult {
 	mob.Character.TrackPlayerDamage(user.UserId, attackResult.DamageToTarget)
 
 	if attackResult.Hit {
-		user.PlaySound(`sound/combat/hit-other.mp3`, `combat`)
+		user.PlaySound(`hit-other`, `combat`)
 	} else {
-		user.PlaySound(`sound/combat/miss1.mp3`, `combat`)
+		user.PlaySound(`miss`, `combat`)
 	}
 
 	return attackResult
@@ -67,10 +67,10 @@ func AttackPlayerVsPlayer(userAtk *users.UserRecord, userDef *users.UserRecord) 
 	}
 
 	if attackResult.Hit {
-		userAtk.PlaySound(`sound/combat/hit-other.mp3`, `combat`)
-		userDef.PlaySound(`sound/combat/hit-self.mp3`, `combat`)
+		userAtk.PlaySound(`hit-other`, `combat`)
+		userDef.PlaySound(`hit-self`, `combat`)
 	} else {
-		userAtk.PlaySound(`sound/combat/miss1.mp3`, `combat`)
+		userAtk.PlaySound(`miss`, `combat`)
 	}
 
 	return attackResult
@@ -89,7 +89,7 @@ func AttackMobVsPlayer(mob *mobs.Mob, user *users.UserRecord) AttackResult {
 	}
 
 	if attackResult.Hit {
-		user.PlaySound(`sound/combat/hit-self.mp3`, `combat`)
+		user.PlaySound(`hit-self`, `combat`)
 	}
 
 	return attackResult
