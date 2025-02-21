@@ -87,12 +87,10 @@ XPScale: 100
 #   processed per turn. This is not the same as rounds, which is how often the
 #   mobs choose their actions, but if multiple actions are queued up, they will
 #   be processed in order once per turn. 
-#   The effect of this can be easily seen in the initial login to the game,
-#   where several commands are queued up at once and processed in order for the 
-#   player.
-#   100 is a good balance between handling input from players and not bogging
+#   50 is a good balance between handling input from players and not bogging
 #   down the server.
-TurnMs: 100
+#   Note: If your automapper/walker seems slow, this is probably the culprit.
+TurnMs: 50
 # - RoundSeconds - 
 #   How many seconds per round. Anything gated by rounds will be affected by
 #   this. This is the main setting for controlling the pace of the game.
@@ -287,7 +285,7 @@ LocalPort: 9999
 WebPort: 80
 # - MspFileUrl -
 #   The base URL sound files are played from
-MspFileUrl: /static/public/audio/
+MspFileUrl: http://localhost/static/public/audio/
 ################################################################################
 #
 #   LOOT GOBLIN CONFIGURATIONS

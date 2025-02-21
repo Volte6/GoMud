@@ -769,8 +769,6 @@ func (w *World) processInput(userId int, inputText string) {
 		return
 	}
 
-	connId := user.ConnectionId()
-
 	var activeQuestion *prompt.Question = nil
 
 	if cmdPrompt := user.GetPrompt(); cmdPrompt != nil {
@@ -857,7 +855,10 @@ func (w *World) processInput(userId int, inputText string) {
 		}
 	}
 
-	connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
+	// Removing this as possibly redundant.
+	// Leaving in case I need to remember that I did it...
+	//connId := user.ConnectionId()
+	//connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
 
 }
 
