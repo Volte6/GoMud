@@ -40,7 +40,9 @@ type ItemTypeInfo struct {
 func ItemTypes() []ItemTypeInfo {
 	return []ItemTypeInfo{
 		// Equipment
+		// Equipment - Weapons
 		{string(Weapon), `This can be wielded as a weapon.`, 0, 10000, 19999},
+		// Equipment - Armor
 		{string(Offhand), `This can be worn in the offhand.`, 0, 20000, 29999},
 		{string(Head), `This can be worn in the players head equipment slot.`, 0, 20000, 29999},
 		{string(Neck), `This can be worn in the players neck equipment slot.`, 0, 20000, 29999},

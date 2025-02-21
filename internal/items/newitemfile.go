@@ -67,7 +67,7 @@ func getNextItemId(t ItemType) int {
 	lowestFreeId := 1
 	for _, iSpec := range items {
 
-		if iSpec.Type != t {
+		if iSpec.ItemId < rangeMin || iSpec.ItemId > rangeMax {
 			continue
 		}
 
