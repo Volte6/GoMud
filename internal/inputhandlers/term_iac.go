@@ -187,6 +187,16 @@ func TelnetIACHandler(clientInput *connections.ClientInput, sharedState map[stri
 			continue
 		}
 
+		if ok, _ := term.Matches(iacCmd, term.TelnetDontSuppressGoAhead); ok {
+			slog.Info("Received", "type", "IAC (TelnetDontSuppressGoAhead)")
+
+			cs := connections.GetClientSettings(clientInput.ConnectionId)
+			cs.SendTelnetGoAhead = true
+			connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
+
+			continue
+		}
+
 		// Is it a screen size report?
 		if ok, payload := term.Matches(iacCmd, term.TelnetScreenSizeResponse); ok {
 

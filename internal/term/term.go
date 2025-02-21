@@ -48,8 +48,9 @@ var (
 	//
 	// GENERAL SETUP
 	//
-	// // Suppress Go Ahead
-	TelnetSuppressGoAhead = TerminalCommand{[]byte{TELNET_IAC, TELNET_WILL, TELNET_OPT_SUP_GO_AHD}, []byte{}}
+	// // Do/Don't Suppress Go Ahead
+	TelnetSuppressGoAhead     = TerminalCommand{[]byte{TELNET_IAC, TELNET_WILL, TELNET_OPT_SUP_GO_AHD}, []byte{}}
+	TelnetDontSuppressGoAhead = TerminalCommand{[]byte{TELNET_IAC, TELNET_DONT, TELNET_OPT_SUP_GO_AHD}, []byte{}}
 	// // Echo On
 	TelnetEchoOn = TerminalCommand{[]byte{TELNET_IAC, TELNET_WILL, TELNET_OPT_ECHO}, []byte{}}
 	// // Echo Off
@@ -76,6 +77,8 @@ var (
 	TelnetAcceptedChangeCharset = TerminalCommand{[]byte{TELNET_IAC, TELNET_SB, 2}, []byte{TELNET_IAC, TELNET_SE}}
 	// Client rejectected change
 	TelnetRejectedChangeCharset = TerminalCommand{[]byte{TELNET_IAC, TELNET_SB, 3, TELNET_IAC, TELNET_SE}, []byte{}}
+	// Go Ahead
+	TelnetGoAhead = TerminalCommand{[]byte{TELNET_IAC, TELNET_GA}, []byte{}}
 
 	///////////////////////////
 	// ANSI COMMANDS

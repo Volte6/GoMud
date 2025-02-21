@@ -58,7 +58,7 @@ type Message struct {
 
 func (m Message) Type() string { return `Message` }
 
-// Messages that are intended to reach all users on the system
+// Special commands that only the webclient is equipped to handle
 type WebClientCommand struct {
 	ConnectionId uint64
 	Text         string
@@ -66,7 +66,7 @@ type WebClientCommand struct {
 
 func (b WebClientCommand) Type() string { return `WebClientCommand` }
 
-// Messages that are intended to reach all users on the system
+// GMCP Commands from clients to server
 type GMCPIn struct {
 	ConnectionId uint64
 	Command      string
@@ -75,7 +75,7 @@ type GMCPIn struct {
 
 func (b GMCPIn) Type() string { return `GMCP` }
 
-// Messages that are intended to reach all users on the system
+// GMCP Commands from server to client
 type GMCPOut struct {
 	ConnectionId uint64
 	UserId       int
@@ -91,7 +91,7 @@ type System struct {
 
 func (s System) Type() string { return `System` }
 
-// Messages that are intended to reach all users on the system
+// Payloads describing sound/music to play
 type MSP struct {
 	UserId    int
 	SoundType string // SOUND or MUSIC

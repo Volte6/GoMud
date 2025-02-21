@@ -297,6 +297,11 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		connDetails.ConnectionId(),
 	)
 
+	connections.SendTo(
+		term.TelnetSuppressGoAhead.BytesWithPayload(nil),
+		connDetails.ConnectionId(),
+	)
+
 	clientSetupCommands := "" + //term.AnsiAltModeStart.String() + // alternative mode (No scrollback)
 		//term.AnsiCursorHide.String() + // Hide Cursor (Because we will manually echo back)
 		//term.AnsiCharSetUTF8.String() + // UTF8 mode

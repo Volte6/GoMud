@@ -290,17 +290,20 @@ func (u *UserRecord) GetConnectTime() time.Time {
 	return u.connectionTime
 }
 
-func (u *UserRecord) GetCommandPrompt(fullRedraw bool, forcePromptType ...string) string {
+func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 
 	promptOut := ``
 
-	if len(forcePromptType) == 0 || forcePromptType[0] != `mprompt` {
-		if u.activePrompt != nil {
+	if u.activePrompt != nil {
 
-			if activeQuestion := u.activePrompt.GetNextQuestion(); activeQuestion != nil {
-				promptOut = activeQuestion.String()
-			}
+		if activeQuestion := u.activePrompt.GetNextQuestion(); activeQuestion != nil {
+			promptOut = activeQuestion.String()
 		}
+	}
+
+	goAhead := ``
+	if connections.GetClientSettings(u.ConnectionId()).SendTelnetGoAhead {
+		goAhead = term.TelnetGoAhead.String()
 	}
 
 	if len(promptOut) == 0 {
@@ -308,18 +311,13 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool, forcePromptType ...string
 		var customPrompt any = nil
 		var inCombat bool = u.Character.Aggro != nil
 
-		if len(forcePromptType) > 0 {
-			customPrompt = u.GetConfigOption(forcePromptType[0] + `-compiled`)
-		} else {
+		if inCombat {
+			customPrompt = u.GetConfigOption(`fprompt-compiled`)
+		}
 
-			if inCombat {
-				customPrompt = u.GetConfigOption(`fprompt-compiled`)
-			}
-
-			// No other custom prompts? try the default setting
-			if customPrompt == nil {
-				customPrompt = u.GetConfigOption(`prompt-compiled`)
-			}
+		// No other custom prompts? try the default setting
+		if customPrompt == nil {
+			customPrompt = u.GetConfigOption(`prompt-compiled`)
 		}
 
 		var ok bool
@@ -339,10 +337,10 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool, forcePromptType ...string
 		if len(suggested) > 0 {
 			suggested = `<ansi fg="suggested-text">` + suggested + `</ansi>`
 		}
-		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + promptOut + unsent + suggested
+		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + promptOut + unsent + suggested + goAhead
 	}
 
-	return promptOut
+	return promptOut + goAhead
 }
 
 func (u *UserRecord) ProcessPromptString(promptStr string) string {
