@@ -11,6 +11,7 @@ import (
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/templates"
+	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 )
@@ -34,6 +35,11 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	var roomId int = 0
 	roomCmd := strings.ToLower(args[0])
+
+	// Interactive Editing
+	if roomCmd == `edit` {
+		return room_Edit(strings.TrimSpace(rest[4:]), user, room)
+	}
 
 	if roomCmd == `noun` || roomCmd == `nouns` {
 
@@ -397,4 +403,84 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	}
 
 	return handled, nil
+}
+
+func room_Edit_Containers(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+
+	containersNow := []string{}
+	for name, _ := range room.Containers {
+		containersNow = append(containersNow, name)
+	}
+
+	return true, nil
+}
+
+func room_Edit(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+
+	if rest == `containers` {
+		return room_Edit_Containers(``, user, room)
+	}
+
+	// Get if already exists, otherwise create new
+	if rest == `` {
+		cmdPrompt, isNew := user.StartPrompt(`room edit`, rest)
+
+		if isNew {
+			user.SendText(``)
+			user.SendText(fmt.Sprintf(`What would you like to edit?%s`, term.CRLFStr))
+		}
+
+		editOptions := []templates.NameDescription{
+			{Name: `Title`, Description: `The title of the room.`},
+			{Name: `Description`, Description: `The description of the room.`},
+			{Name: `Containers`, Description: `Add, Remove, or Edit containers in the room.`},
+		}
+
+		question := cmdPrompt.Ask(`What would you like to edit?`, []string{}, `quit`)
+		if !question.Done {
+			tplTxt, _ := templates.Process("tables/numbered-list", editOptions)
+			user.SendText(tplTxt)
+			return true, nil
+		}
+
+		optionSelected := question.Response
+
+		if optionSelected == `quit` {
+			user.SendText("Aborting...")
+			user.ClearPrompt()
+			return true, nil
+		}
+
+		menuOption := ``
+
+		if restNum, err := strconv.Atoi(optionSelected); err == nil {
+			if restNum > 0 && restNum <= len(editOptions) {
+				optionSelected = editOptions[restNum-1].Name
+			}
+		}
+
+		for _, o := range editOptions {
+			if strings.EqualFold(o.Name, optionSelected) {
+				menuOption = o.Name
+			}
+		}
+
+		if menuOption == `` {
+			question.RejectResponse()
+
+			tplTxt, _ := templates.Process("tables/numbered-list", editOptions)
+			user.SendText(tplTxt)
+
+			return true, nil
+		}
+
+		// claer the prompt - dont with this sequence of prompts.
+		user.ClearPrompt()
+
+		// Initiate a new command, seed with the specific edit we want.
+		user.Command(`room edit ` + strings.ToLower(menuOption))
+		return true, nil
+	}
+
+	return true, nil
 }
