@@ -3,11 +3,12 @@ package connections
 type ClientSettings struct {
 	Display DisplaySettings
 	Discord DiscordSettings
-	Client  ClientType
+	Client  ClientType // Client data provided by `Core.Hello` GMCP command
 	// Enabled GMCP Modules
-	GMCPModules map[string]int
+	GMCPModules map[string]int // Enabled GMCP Modules (if any)
 	// Is MSP enabled?
-	MSPEnabled bool
+	MSPEnabled        bool // Do they accept sound in their client?
+	SendTelnetGoAhead bool // Defaults false, should we send a IAC GA after prompts?
 }
 
 type DisplaySettings struct {
