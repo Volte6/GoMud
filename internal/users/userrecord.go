@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volte6/gomud/internal/audio"
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
@@ -145,33 +146,39 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 
 }
 
-func (u *UserRecord) PlayMusic(musicFile string) {
+func (u *UserRecord) PlayMusic(musicFileOrId string) {
+
+	v := 100
+	if soundConfig := audio.GetFile(musicFileOrId); soundConfig.FilePath != `` {
+		musicFileOrId = soundConfig.FilePath
+		if soundConfig.Volume > 0 && soundConfig.Volume <= 100 {
+			v = soundConfig.Volume
+		}
+	}
 
 	events.AddToQueue(events.MSP{
 		UserId:    u.UserId,
 		SoundType: `MUSIC`,
-		SoundFile: musicFile,
-		Volume:    100,
+		SoundFile: musicFileOrId,
+		Volume:    v,
 	})
 
 }
 
-func (u *UserRecord) PlaySound(soundFile string, category string, volume ...int) {
+func (u *UserRecord) PlaySound(soundId string, category string) {
 
 	v := 100
-	if len(volume) > 0 {
-		v = volume[0]
-		if v < 1 {
-			v = 1
-		} else if v > 100 {
-			v = 100
+	if soundConfig := audio.GetFile(soundId); soundConfig.FilePath != `` {
+		soundId = soundConfig.FilePath
+		if soundConfig.Volume > 0 && soundConfig.Volume <= 100 {
+			v = soundConfig.Volume
 		}
 	}
 
 	events.AddToQueue(events.MSP{
 		UserId:    u.UserId,
 		SoundType: `SOUND`,
-		SoundFile: soundFile,
+		SoundFile: soundId,
 		Volume:    v,
 		Category:  category,
 	})

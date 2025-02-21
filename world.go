@@ -981,6 +981,10 @@ func (w *World) MessageTick() {
 			continue
 		}
 
+		if msp.SoundFile == `` {
+			continue
+		}
+
 		if user := users.GetByUserId(msp.UserId); user != nil {
 
 			if msp.SoundType == `MUSIC` {
