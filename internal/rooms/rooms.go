@@ -90,7 +90,7 @@ type Room struct {
 	LastIdleMessage   uint8                             `yaml:"-"`                           // index of the last idle message displayed
 	LongTermDataStore map[string]any                    `yaml:"longtermdatastore,omitempty"` // Long term data store for the room
 	Mutators          mutators.MutatorList              `yaml:"mutators,omitempty"`          // mutators this room spawns with.
-	Pvp               bool                              `yaml:"pvp,omitempty"`               // config pvp is set to `limited`, uses this value
+	Pvp               bool                              `yaml:"pvp,omitempty"`               // if config pvp is set to `limited`, uses this value
 	players           []int                             `yaml:"-"`                           // list of user IDs currently in the room
 	mobs              []int                             `yaml:"-"`                           // list of mob instance IDs currently in the room. Does not get saved.
 	visitors          map[VisitorType]map[int]uint64    `yaml:"-"`                           // list of user IDs that have visited this room, and the last round they did

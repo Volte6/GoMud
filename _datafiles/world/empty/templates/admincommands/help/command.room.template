@@ -34,6 +34,9 @@ Set a property of the room. This updates basic properties of the room you are in
     Containers:
         You can interactively add/remove/edit containers using the command:
         <ansi fg="command">room edit containers</ansi>
+    Exits:
+        You can interactively add/remove/edit exits using the command:
+        <ansi fg="command">room edit exits</ansi>
 
 <ansi fg="command">room exit [exit_name] [room_id]</ansi> - e.g. <ansi fg="command">room exit west 159</ansi>
 This will create a new exit that links to a specific room_id using the exit_name provided.
