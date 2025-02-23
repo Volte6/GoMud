@@ -856,3 +856,10 @@ func ValidateWorldFiles(exampleWorldPath string, worldPath string) error {
 
 	return nil
 }
+
+func BoolYN(b bool) string {
+	if b {
+		return `yes`
+	}
+	return `no`
+}

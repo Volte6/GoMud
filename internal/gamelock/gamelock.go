@@ -5,6 +5,10 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
+const (
+	DefaultRelockTime = `1 hour`
+)
+
 type Lock struct {
 	Difficulty     uint8  `yaml:"difficulty,omitempty"`       // 0 - no lock. greater than zero = difficulty to unlock.
 	UnlockedRound  uint64 `yaml:"-"`                          // What round it was unlocked at, when util.GetRoundCount() > UnlockedUntil, it is relocked (set to zero).
@@ -26,7 +30,7 @@ func (l Lock) IsLocked() bool {
 	gd := gametime.GetDate(rndNow)
 
 	if l.RelockInterval == `` {
-		return rndNow >= gd.AddPeriod(`1 hour`)
+		return rndNow >= gd.AddPeriod(DefaultRelockTime)
 	}
 
 	return rndNow >= gd.AddPeriod(l.RelockInterval)
