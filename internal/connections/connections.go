@@ -146,11 +146,12 @@ func Remove(id ConnectionId) (err error) {
 	return errors.New("connection not found")
 }
 
-func Broadcast(colorizedText []byte) {
+func Broadcast(colorizedText []byte) []ConnectionId {
 
 	lock.Lock()
 
 	removeIds := []ConnectionId{}
+	sentToIds := []ConnectionId{}
 
 	for id, cd := range netConnections {
 
@@ -169,12 +170,15 @@ func Broadcast(colorizedText []byte) {
 			removeIds = append(removeIds, id)
 		}
 
+		sentToIds = append(sentToIds, id)
 	}
 	lock.Unlock()
 
 	for _, id := range removeIds {
 		Remove(id)
 	}
+
+	return sentToIds
 }
 
 func SendTo(b []byte, ids ...ConnectionId) {

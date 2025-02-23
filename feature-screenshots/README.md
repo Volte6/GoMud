@@ -65,6 +65,12 @@ _Pets are special famliars that help the player and provide special bonuses or u
 
 <a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/pets.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/pets.png" width="600" alt="accessibility text"></a>
 
+## Containers & Recipes
+
+_Containers hold stuff. Recipes turn containers into "Crafting machines"._
+
+<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/container-recipes.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/container-recipes.png" width="600" alt="accessibility text"></a>
+
 ## Custom Prompts
 
 _Players can customize their prompts, including colors._

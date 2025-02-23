@@ -39,9 +39,10 @@ type Question struct {
 }
 
 type Prompt struct {
-	Command   string      // Where does it call when complete?
-	Rest      string      // What is the 'rest' of the command
-	Questions []*Question // All questions so far
+	Command   string         // Where does it call when complete?
+	Rest      string         // What is the 'rest' of the command
+	Questions []*Question    // All questions so far
+	State     map[string]any // Optional place to store state
 }
 
 func New(command string, rest string) *Prompt {
@@ -49,6 +50,7 @@ func New(command string, rest string) *Prompt {
 		Command:   command,
 		Rest:      rest,
 		Questions: make([]*Question, 0),
+		State:     map[string]any{},
 	}
 }
 
@@ -100,6 +102,17 @@ func (p *Prompt) GetNextQuestion() *Question {
 	}
 
 	return nil
+}
+
+func (p *Prompt) Store(name string, val any) {
+	p.State[name] = val
+}
+
+func (p *Prompt) Recall(name string) (any, bool) {
+	if v, ok := p.State[name]; ok {
+		return v, true
+	}
+	return nil, false
 }
 
 func (q *Question) Reset() {

@@ -769,12 +769,10 @@ func (w *World) processInput(userId int, inputText string) {
 		return
 	}
 
-	connId := user.ConnectionId()
-
 	var activeQuestion *prompt.Question = nil
-
+	hadPrompt := false
 	if cmdPrompt := user.GetPrompt(); cmdPrompt != nil {
-
+		hadPrompt = true
 		if activeQuestion = cmdPrompt.GetNextQuestion(); activeQuestion != nil {
 
 			activeQuestion.Answer(string(inputText))
@@ -845,6 +843,9 @@ func (w *World) processInput(userId int, inputText string) {
 			}
 		}
 
+	} else {
+		connId := user.ConnectionId()
+		connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
 	}
 
 	if !handled {
@@ -857,7 +858,15 @@ func (w *World) processInput(userId int, inputText string) {
 		}
 	}
 
-	connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
+	// If they had an input prompt, but now they don't, lets make sure to resend a status prompt
+	if hadPrompt {
+		connId := user.ConnectionId()
+		connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
+	}
+	// Removing this as possibly redundant.
+	// Leaving in case I need to remember that I did it...
+	//connId := user.ConnectionId()
+	//connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
 
 }
 
@@ -1054,6 +1063,8 @@ func (w *World) MessageTick() {
 
 	}
 
+	redrawPrompts := make(map[uint64]string)
+
 	//
 	// System-wide broadcasts
 	//
@@ -1070,17 +1081,26 @@ func (w *World) MessageTick() {
 
 		messageColorized := templates.AnsiParse(broadcast.Text)
 
+		var sentToConnectionIds []connections.ConnectionId
+
 		if broadcast.SkipLineRefresh {
-			connections.Broadcast([]byte(messageColorized))
-			return
+			sentToConnectionIds = connections.Broadcast(
+				[]byte(messageColorized),
+			)
+		} else {
+
+			sentToConnectionIds = connections.Broadcast(
+				[]byte(term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + messageColorized),
+			)
 		}
 
-		connections.Broadcast(
-			[]byte(term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + messageColorized),
-		)
+		for _, connId := range sentToConnectionIds {
+			if _, ok := redrawPrompts[connId]; !ok {
+				user := users.GetByConnectionId(connId)
+				redrawPrompts[connId] = templates.AnsiParse(user.GetCommandPrompt(true))
+			}
+		}
 	}
-
-	redrawPrompts := make(map[uint64]string)
 
 	eq = events.GetQueue(events.WebClientCommand{})
 	for eq.Len() > 0 {
