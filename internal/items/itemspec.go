@@ -264,6 +264,20 @@ func FindItem(nameOrId string) int {
 	return FindItemByName(nameOrId)
 }
 
+func FindKeyByLockId(lockId string) int {
+
+	for _, item := range items {
+		if item.Type != Key {
+			continue
+		}
+		if item.KeyLockId == lockId {
+			return item.ItemId
+		}
+	}
+
+	return 0
+}
+
 func FindItemByName(name string) int {
 	name = strings.ToLower(name)
 
