@@ -128,7 +128,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommand
 
 		if exitInfo.ExitMessage != `` && !flags.Has(CmdIsRequeue) {
 			user.SendText(exitInfo.ExitMessage)
-			user.CommandFlagged(rest, uint64(flags)|uint64(CmdIsRequeue), configs.GetConfig().SecondsToTurns(1))
+			user.CommandFlagged(rest, uint64(flags|CmdIsRequeue|BlockInput), configs.GetConfig().SecondsToTurns(1))
 			return true, nil
 		}
 

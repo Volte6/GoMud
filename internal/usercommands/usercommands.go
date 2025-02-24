@@ -37,7 +37,8 @@ func (f UserCommandFlag) Has(flag UserCommandFlag) bool {
 const (
 	CmdNone      UserCommandFlag = 0
 	CmdSecretly  UserCommandFlag = 1 << iota // User beahvior should not be alerted to the room
-	CmdIsRequeue                             // This command was a requeue. The flag is intended to avoid a infinite requeue loop.
+	CmdIsRequeue                             // This command was a requeue. The flag is intended to help avoid a infinite requeue loop.
+	BlockInput                               // If queuing for multiple turns, use this to block any user input in the meantime.
 )
 
 var (
