@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Jobs(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Jobs(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	type JobDisplay struct {
 		Name       string

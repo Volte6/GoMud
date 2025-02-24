@@ -17,7 +17,7 @@ import (
 SkullDuggery Skill
 Level 4 - Pickpocket
 */
-func Pickpocket(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Pickpocket(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 

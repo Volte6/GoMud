@@ -26,6 +26,20 @@ type CommandAccess struct {
 	AdminOnly         bool
 }
 
+// Signature of user command
+type UserCommand func(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error)
+type UserCommandFlag uint64
+
+func (f UserCommandFlag) Has(flag UserCommandFlag) bool {
+	return f&flag == flag
+}
+
+const (
+	CmdNone      UserCommandFlag = 0
+	CmdSecretly  UserCommandFlag = 1 << iota // User beahvior should not be alerted to the room
+	CmdIsRequeue                             // This command was a requeue. The flag is intended to avoid a infinite requeue loop.
+)
+
 var (
 	userCommands map[string]CommandAccess = map[string]CommandAccess{
 		`aid`:         {Aid, false, false},
@@ -217,10 +231,7 @@ func GetHelpSuggestions(text string, includeAdmin bool) []string {
 	return results
 }
 
-// Signature of user command
-type UserCommand func(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
-
-func TryCommand(cmd string, rest string, userId int) (bool, error) {
+func TryCommand(cmd string, rest string, userId int, flags UserCommandFlag) (bool, error) {
 
 	// Do not allow scripts to intercept server commands
 	if cmd != `server` {
@@ -323,14 +334,14 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 			}()
 
 			// Run the command here
-			handled, err := cmdInfo.Func(rest, user, room)
+			handled, err := cmdInfo.Func(rest, user, room, flags)
 			return handled, err
 
 		}
 	}
 
 	if _, ok := emoteAliases[cmd]; ok {
-		handled, err := Emote(cmd, user, room)
+		handled, err := Emote(cmd, user, room, flags)
 		return handled, err
 	}
 
@@ -339,7 +350,7 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		if len(rest) > 0 {
 			castCmd += ` ` + rest
 		}
-		return Cast(castCmd, user, room)
+		return Cast(castCmd, user, room, flags)
 	}
 
 	// "go" attempt
@@ -348,7 +359,7 @@ func TryCommand(cmd string, rest string, userId int) (bool, error) {
 		util.TrackTime(`usr-cmd[go]`, time.Since(start).Seconds())
 	}()
 
-	if handled, err := Go(cmd, user, room); handled {
+	if handled, err := Go(cmd, user, room, flags); handled {
 		return handled, err
 	}
 	// end "go" attempt

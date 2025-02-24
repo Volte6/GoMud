@@ -15,7 +15,7 @@ import (
 Brawling Skill
 Level 4 - Attempt to disarm an opponent.
 */
-func Disarm(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Disarm(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 

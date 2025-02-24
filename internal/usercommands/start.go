@@ -19,7 +19,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Start(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if user.Character.RoomId != -1 {
 		return false, errors.New(`only allowed in the void`)
@@ -70,7 +70,7 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 			}
 
 			question.RejectResponse()
-			return Help(helpCmd+` `+helpRest, user, room)
+			return Help(helpCmd+` `+helpRest, user, room, flags)
 		}
 
 		raceNameSelection := question.Response
@@ -166,7 +166,7 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 		if question.Response == `no` {
 			user.ClearPrompt()
-			return Start(rest, user, room)
+			return Start(rest, user, room, flags)
 		}
 
 		if err := user.SetCharacterName(usernameSelected); err != nil {

@@ -16,7 +16,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Item(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Item(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if user.Permission != users.PermissionAdmin {
 		user.SendText(`<ansi fg="alert-4">Only admins can use this command</ansi>`)
@@ -33,23 +33,23 @@ func Item(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// create a new item
 	if args[0] == `create` {
-		return item_Create(strings.TrimSpace(rest[6:]), user, room)
+		return item_Create(strings.TrimSpace(rest[6:]), user, room, flags)
 	}
 
 	// spawn an existing item
 	if args[0] == `spawn` {
-		return item_Spawn(strings.TrimSpace(rest[5:]), user, room)
+		return item_Spawn(strings.TrimSpace(rest[5:]), user, room, flags)
 	}
 
 	// List existing items
 	if args[0] == `list` {
-		return item_List(strings.TrimSpace(rest[4:]), user, room)
+		return item_List(strings.TrimSpace(rest[4:]), user, room, flags)
 	}
 
 	return true, nil
 }
 
-func item_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func item_List(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	itmNames := []templates.NameDescription{}
 
@@ -80,7 +80,7 @@ func item_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 	return true, nil
 }
 
-func item_Spawn(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func item_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	itemId := items.FindItem(rest)
 	if itemId != 0 {
@@ -109,7 +109,7 @@ func item_Spawn(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 	return true, nil
 }
 
-func item_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func item_Create(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	var newItemSpec = items.ItemSpec{}
 

@@ -14,7 +14,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Ask(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Ask(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	// Core "useful" commands
 	usefulCommands := []string{

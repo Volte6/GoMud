@@ -8,7 +8,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Gearup(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Gearup(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	wornItems := map[items.ItemType]items.Item{}
 	wearNewItems := map[items.ItemType]items.Item{}

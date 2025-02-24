@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Mudmail(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Mudmail(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	/*
 		args := util.SplitButRespectQuotes(rest)

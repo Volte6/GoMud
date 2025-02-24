@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Share(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Share(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	party := parties.Get(user.UserId)
 	if party == nil {

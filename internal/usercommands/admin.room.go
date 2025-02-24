@@ -21,7 +21,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Room(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	handled := true
 
@@ -45,15 +45,15 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	if roomCmd == `edit` {
 
 		if rest == `edit container` || rest == `edit containers` {
-			return room_Edit_Containers(``, user, room)
+			return room_Edit_Containers(``, user, room, flags)
 		}
 
 		if rest == `edit exit` || rest == `edit exits` {
-			return room_Edit_Exits(``, user, room)
+			return room_Edit_Exits(``, user, room, flags)
 		}
 
 		if rest == `edit mutator` || rest == `edit mutators` {
-			return room_Edit_Mutators(``, user, room)
+			return room_Edit_Mutators(``, user, room, flags)
 		}
 
 		user.SendText(`<ansi fg="red">edit WHAT?</ansi> Try:`)
@@ -415,7 +415,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 					}
 				}
 
-				Look(`secretly`, user, gotoRoom)
+				Look(`secretly`, user, gotoRoom, flags)
 
 				scripting.TryRoomScriptEvent(`onEnter`, user.UserId, gotoRoomId)
 
@@ -428,7 +428,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	return handled, nil
 }
 
-func room_Edit_Containers(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func room_Edit_Containers(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	// This basic struct will be used to keep track of what we're editing
 	type ContainerEdit struct {
@@ -1025,7 +1025,7 @@ func room_Edit_Containers_SendRecipes(user *users.UserRecord, recipeResultItemId
 	user.SendText(``)
 }
 
-func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	// This basic struct will be used to keep track of what we're editing
 	type ExitEdit struct {
@@ -1182,6 +1182,24 @@ func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room) (boo
 	}
 
 	//
+	// Exit message?
+	//
+	{
+		secretExitDefault := `no`
+		if currentlyEditing.Exit.Secret {
+			secretExitDefault = `yes`
+		}
+
+		// allow them to name/rename the exit.
+		question := cmdPrompt.Ask(`Is this a hidden exit?`, []string{`yes`, `no`}, secretExitDefault)
+		if !question.Done {
+			return true, nil
+		}
+
+		currentlyEditing.Exit.Secret = question.Response == `yes`
+	}
+
+	//
 	// Secret exit?
 	//
 	{
@@ -1197,6 +1215,26 @@ func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room) (boo
 		}
 
 		currentlyEditing.Exit.Secret = question.Response == `yes`
+	}
+
+	//
+	// Special message when using the exit?
+	//
+	{
+		defaultMessage := currentlyEditing.Exit.ExitMessage
+		if defaultMessage == `` {
+			defaultMessage = `none`
+		}
+		// allow them to name/rename the exit.
+		question := cmdPrompt.Ask(`Special message when using the exit?`, []string{defaultMessage}, defaultMessage)
+		if !question.Done {
+			return true, nil
+		}
+
+		if question.Response != `none` {
+			currentlyEditing.Exit.ExitMessage = question.Response
+		}
+
 	}
 
 	//
@@ -1413,7 +1451,7 @@ func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room) (boo
 	return true, nil
 }
 
-func room_Edit_Mutators(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func room_Edit_Mutators(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	allRoomMutators := []string{}
 	for _, roomMut := range room.Mutators {

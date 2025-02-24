@@ -7,7 +7,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Follow(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Follow(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if rest == "" {
 		user.SendText("Follow whom?")

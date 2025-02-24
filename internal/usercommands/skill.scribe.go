@@ -18,7 +18,7 @@ Level 2 - Scribe to a sign
 Level 3 - Scribe a hidden rune
 Level 4 - TODO
 */
-func Scribe(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Scribe(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Scribe)
 

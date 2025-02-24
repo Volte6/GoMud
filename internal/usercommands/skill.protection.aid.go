@@ -17,7 +17,7 @@ Protection Skill
 Level 1 - Aid (revive) a player
 Level 3 - Aid (revive) a player, even during combat
 */
-func Aid(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Aid(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Protection)
 

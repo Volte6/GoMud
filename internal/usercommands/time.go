@@ -8,7 +8,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Time(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Time(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	gd := gametime.GetDate()
 

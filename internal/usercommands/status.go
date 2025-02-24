@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Status(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Status(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	//possibleStatuses := []string{`strength`, `speed`, `smarts`, `vitality`, `mysticism`, `perception`}
 
@@ -108,7 +108,7 @@ func Status(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 	tplTxt, _ := templates.Process("character/status", user)
 	user.SendText(tplTxt)
 
-	Inventory(``, user, room)
+	Inventory(``, user, room, flags)
 
 	return true, nil
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Read(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Read(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	// Check whether the user has an item in their inventory that matches
 

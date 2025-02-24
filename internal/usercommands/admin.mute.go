@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Mute(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Mute(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.mute", nil)
@@ -36,7 +36,7 @@ func Mute(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	return true, nil
 }
 
-func UnMute(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func UnMute(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.mute", nil)

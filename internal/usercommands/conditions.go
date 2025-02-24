@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Conditions(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Conditions(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	type buffInfo struct {
 		Name        string

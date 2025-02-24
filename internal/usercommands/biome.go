@@ -8,7 +8,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Biome(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Biome(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	biome, ok := rooms.GetBiome(room.Biome)
 

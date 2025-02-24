@@ -18,7 +18,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Mob(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Mob(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if user.Permission != users.PermissionAdmin {
 		user.SendText(`<ansi fg="alert-4">Only admins can use this command</ansi>`)
@@ -35,23 +35,23 @@ func Mob(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// Create a new mob
 	if args[0] == `create` {
-		return mob_Create(strings.TrimSpace(rest[6:]), user, room)
+		return mob_Create(strings.TrimSpace(rest[6:]), user, room, flags)
 	}
 
 	// Spawn a mob instance
 	if args[0] == `spawn` {
-		return mob_Spawn(strings.TrimSpace(rest[5:]), user, room)
+		return mob_Spawn(strings.TrimSpace(rest[5:]), user, room, flags)
 	}
 
 	// List existing mobs
 	if args[0] == `list` {
-		return mob_List(strings.TrimSpace(rest[4:]), user, room)
+		return mob_List(strings.TrimSpace(rest[4:]), user, room, flags)
 	}
 
 	return true, nil
 }
 
-func mob_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func mob_List(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	mobNames := []templates.NameDescription{}
 
@@ -83,7 +83,7 @@ func mob_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, erro
 	return true, nil
 }
 
-func mob_Spawn(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func mob_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	c := configs.GetConfig()
 
@@ -127,7 +127,7 @@ func mob_Spawn(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 	return true, nil
 }
 
-func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func mob_Create(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	var newMob = mobs.Mob{}
 
@@ -220,7 +220,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 		}
 
 		question.RejectResponse()
-		return Help(helpCmd+` `+helpRest, user, room)
+		return Help(helpCmd+` `+helpRest, user, room, flags)
 	}
 
 	raceNameSelection := question.Response

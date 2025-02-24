@@ -23,7 +23,7 @@ type TrainingOptions struct {
 	Options        []TrainingOption
 }
 
-func Train(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Train(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if len(room.SkillTraining) == 0 {
 		user.SendText(`You must find a trainer to perform training.`)

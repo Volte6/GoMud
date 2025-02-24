@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Modify(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Modify(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if user.Permission != users.PermissionAdmin {
 		user.SendText(`<ansi fg="alert-4">Only admins can use this command</ansi>`)

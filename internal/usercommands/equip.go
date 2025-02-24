@@ -10,10 +10,10 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Equip(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Equip(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if rest == "all" {
-		return Gearup(``, user, room)
+		return Gearup(``, user, room, flags)
 	}
 
 	// Check whether the user has an item in their inventory that matches

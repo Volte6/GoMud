@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Skillset(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Skillset(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	// args should look like one of the following:
 	// target buffId - put buff on target if in the room

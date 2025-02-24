@@ -14,7 +14,7 @@ type SkillsOptions struct {
 	SkillCooldowns map[string]int
 }
 
-func Skills(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Skills(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	allSkills := user.Character.GetSkills()
 	allCooldowns := map[string]int{}

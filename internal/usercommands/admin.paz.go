@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Paz(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Paz(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	beamOfLight := colorpatterns.ApplyColorPattern(`beam of light`, `rainbow`)
 

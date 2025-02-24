@@ -23,7 +23,7 @@ Level 2 - Tame up to 3 creatures
 Level 3 - Tame up to 4 creatures
 Level 4 - Tame up to 5 creatures
 */
-func Tame(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Tame(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Tame)
 	if skillLevel == 0 {

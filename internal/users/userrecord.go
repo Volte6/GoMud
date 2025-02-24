@@ -200,6 +200,22 @@ func (u *UserRecord) Command(inputTxt string, waitTurns ...int) {
 
 }
 
+func (u *UserRecord) CommandFlagged(inputTxt string, flagData uint64, waitTurns ...int) {
+
+	wt := 0
+	if len(waitTurns) > 0 {
+		wt = waitTurns[0]
+	}
+
+	events.AddToQueue(events.Input{
+		UserId:    u.UserId,
+		InputText: inputTxt,
+		WaitTurns: wt,
+		Flags:     flagData,
+	})
+
+}
+
 func (u *UserRecord) AddBuff(buffId int) {
 
 	events.AddToQueue(events.Buff{
@@ -620,7 +636,6 @@ func (u *UserRecord) GetPrompt() *prompt.Prompt {
 }
 
 func (u *UserRecord) ClearPrompt() {
-
 	u.activePrompt = nil
 }
 

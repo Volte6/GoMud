@@ -5,7 +5,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Save(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Save(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	user.SendText("Saving...")
 	users.SaveUser(*user)

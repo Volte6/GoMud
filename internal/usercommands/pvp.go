@@ -6,7 +6,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Pvp(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Pvp(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	setting := configs.GetConfig().PVP
 

@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Macros(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Macros(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if len(user.Macros) == 0 {
 		user.SendText("You have no macros set.")

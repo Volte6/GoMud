@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Get(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
@@ -24,14 +24,14 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	if args[0] == "all" {
 		if room.Gold > 0 {
-			Get(`gold`, user, room)
+			Get(`gold`, user, room, flags)
 		}
 
 		if len(room.Items) > 0 {
 			iCopies := append([]items.Item{}, room.Items...)
 
 			for _, item := range iCopies {
-				Get(item.Name(), user, room)
+				Get(item.Name(), user, room, flags)
 			}
 		}
 

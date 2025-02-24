@@ -11,7 +11,7 @@ import (
 )
 
 // Prints message to screen
-func Print(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Print(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	events.AddToQueue(events.Message{
 		UserId: user.UserId,
@@ -22,7 +22,7 @@ func Print(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 }
 
 // PrintLine (command `printline`) is just a simple measuring tool/ruler for layout purposes
-func PrintLine(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func PrintLine(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	sectionSize := 20
 

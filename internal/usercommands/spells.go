@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Spells(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Spells(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `MPs`, `Wait`, `Casts`, `% Chance`}
 

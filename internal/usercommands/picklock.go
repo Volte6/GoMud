@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Picklock(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Picklock(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	lockpickItm := items.Item{}
 	for _, itm := range user.Character.GetAllBackpackItems() {

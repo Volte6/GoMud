@@ -6,6 +6,6 @@ import (
 )
 
 // This is a no-op, does nothing
-func Noop(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Noop(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 	return true, nil
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Quests(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Quests(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	type QuestRecord struct {
 		Id          int

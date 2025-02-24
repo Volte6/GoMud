@@ -15,7 +15,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Give(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Give(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	rest = util.StripPrepositions(rest)
 

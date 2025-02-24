@@ -18,7 +18,7 @@ Level 2 - Reveals weapon damage or uses an item has left.
 Level 3 - Reveals any stat modifiers an item has.
 Level 4 - Reveals special magical properties like elemental effects.
 */
-func Inspect(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Inspect(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if user.Character.GetSkillLevel(skills.Inspect) == 0 {
 		user.SendText("You don't know how to inspect.")

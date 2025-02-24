@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Offer(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Offer(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	item, found := user.Character.FindInBackpack(rest)
 	if !found {

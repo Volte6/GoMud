@@ -30,7 +30,7 @@ Level 2 - Display all players and mobs to recently walk through here
 Level 3 - Shows exit information for all tracked players or mobs
 Level 4 - Specify a mob or username and every room you enter will tell you what exit they took.
 */
-func Track(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Track(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Track)
 

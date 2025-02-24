@@ -14,13 +14,9 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Look(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Look(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
-	secretLook := false
-	if strings.HasPrefix(rest, "secretly") {
-		secretLook = true
-		rest = strings.TrimSpace(strings.TrimPrefix(rest, "secretly"))
-	}
+	secretLook := flags.Has(CmdSecretly)
 
 	visibility := room.GetVisibility()
 

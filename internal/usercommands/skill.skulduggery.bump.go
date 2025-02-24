@@ -16,7 +16,7 @@ import (
 SkullDuggery Skill
 Level 3 - Backstab
 */
-func Bump(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Bump(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Skulduggery)
 

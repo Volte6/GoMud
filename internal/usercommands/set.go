@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Set(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Set(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 

@@ -18,7 +18,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func List(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	listedSomething := false
 

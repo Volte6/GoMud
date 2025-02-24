@@ -6,7 +6,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Flee(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Flee(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if user.Character.Aggro == nil || user.Character.Aggro.Type != characters.Flee {
 		user.SendText(`You attempt to flee...`)

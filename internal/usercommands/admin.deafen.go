@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Deafen(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Deafen(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.deafen", nil)
@@ -36,7 +36,7 @@ func Deafen(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 	return true, nil
 }
 
-func UnDeafen(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func UnDeafen(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.deafen", nil)

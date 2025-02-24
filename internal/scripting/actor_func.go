@@ -309,6 +309,17 @@ func (a ScriptActor) Command(cmd string, waitTurns ...int) {
 	}
 }
 
+func (a ScriptActor) CommandFlagged(cmd string, flags int, waitTurns ...int) {
+	if len(waitTurns) < 1 {
+		waitTurns = append(waitTurns, 0)
+	}
+	if a.userId > 0 {
+		a.userRecord.CommandFlagged(cmd, uint64(flags), waitTurns[0])
+	} else {
+		a.mobRecord.Command(cmd, waitTurns[0])
+	}
+}
+
 func (a ScriptActor) TrainSkill(skillName string, skillLevel int) bool {
 
 	if a.userRecord == nil {

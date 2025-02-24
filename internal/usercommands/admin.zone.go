@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Zone(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Zone(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	handled := true
 
@@ -35,7 +35,7 @@ func Zone(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 
 	// Interactive Editing
 	if zoneCmd == `edit` {
-		return zone_Edit(``, user, room)
+		return zone_Edit(``, user, room, flags)
 	}
 
 	zoneConfig := rooms.GetZoneConfig(room.Zone)
@@ -100,7 +100,7 @@ func Zone(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 	return true, nil
 }
 
-func zone_Edit(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func zone_Edit(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	originalZoneConfig := rooms.GetZoneConfig(room.Zone)
 	if originalZoneConfig == nil {
@@ -243,11 +243,22 @@ func zone_Edit(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 	//
 	{
 
-		question := cmdPrompt.Ask(`Zone music file?`, []string{editZoneConfig.MusicFile}, editZoneConfig.MusicFile)
+		question := cmdPrompt.Ask(`Should the zone have music?`, []string{`yes`, `no`}, util.BoolYN(editZoneConfig.MusicFile != ``))
 		if !question.Done {
 			return true, nil
 		}
-		editZoneConfig.MusicFile = question.Response
+
+		if question.Response == `yes` {
+
+			question := cmdPrompt.Ask(`Zone music file?`, []string{editZoneConfig.MusicFile}, editZoneConfig.MusicFile)
+			if !question.Done {
+				return true, nil
+			}
+			editZoneConfig.MusicFile = question.Response
+
+		} else {
+			editZoneConfig.MusicFile = ``
+		}
 
 	}
 

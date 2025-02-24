@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Leaderboards(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Leaderboards(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if configs.GetConfig().LeaderboardSize == 0 {
 		user.SendText(`Leaderboards are disabled.`)
