@@ -49,6 +49,7 @@ func (wi WorldInput) Id() int {
 
 type World struct {
 	worldInput         chan WorldInput
+	ignoreInput        map[int]struct{}
 	enterWorldUserId   chan [2]int
 	leaveWorldUserId   chan int
 	logoutConnectionId chan connections.ConnectionId
@@ -59,6 +60,7 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 
 	w := &World{
 		worldInput:         make(chan WorldInput),
+		ignoreInput:        make(map[int]struct{}),
 		enterWorldUserId:   make(chan [2]int),
 		leaveWorldUserId:   make(chan int),
 		logoutConnectionId: make(chan connections.ConnectionId),
@@ -73,6 +75,9 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 // Send input to the world.
 // Just sends via a channel. Will block until read.
 func (w *World) SendInput(i WorldInput) {
+	if _, ok := w.ignoreInput[i.FromId]; ok {
+		return // discard
+	}
 	w.worldInput <- i
 }
 
@@ -1356,7 +1361,14 @@ func (w *World) TurnTick() {
 		}
 
 		if input.WaitTurns < 0 { // -1 and below, process immediately and don't count towards limit
+
 			w.processInput(input.UserId, input.InputText, usercommands.UserCommandFlag(input.Flags))
+
+			// If this command was potentially blocking input, unblock it now.
+			if input.Flags&uint64(usercommands.BlockInput) == uint64(usercommands.BlockInput) {
+				delete(w.ignoreInput, input.UserId)
+			}
+
 			continue
 		}
 
@@ -1366,9 +1378,22 @@ func (w *World) TurnTick() {
 		}
 
 		if input.WaitTurns == 0 { // 0 means process immediately but wait another turn before processing another from this user
+
 			w.processInput(input.UserId, input.InputText, usercommands.UserCommandFlag(input.Flags))
+
+			// If this command was potentially blocking input, unblock it now.
+			if input.Flags&uint64(usercommands.BlockInput) == uint64(usercommands.BlockInput) {
+				delete(w.ignoreInput, input.UserId)
+			}
+
 			alreadyProcessed[input.UserId] = struct{}{}
 		} else {
+
+			// If this is a multi-turn wait, block further input if flagged to do so
+			if input.Flags&uint64(usercommands.BlockInput) == uint64(usercommands.BlockInput) {
+				w.ignoreInput[input.UserId] = struct{}{}
+			}
+
 			input.WaitTurns--
 			events.Requeue(input)
 		}
