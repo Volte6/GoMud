@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mutators"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
@@ -250,7 +251,12 @@ func zone_Edit(rest string, user *users.UserRecord, room *rooms.Room, flags User
 
 		if question.Response == `yes` {
 
-			question := cmdPrompt.Ask(`Zone music file?`, []string{editZoneConfig.MusicFile}, editZoneConfig.MusicFile)
+			relativeString := configs.GetConfig().MspFileUrl.String()
+			if len(relativeString) > 0 {
+				user.SendText(`   <ansi fg="red">Note:</ansi> Music file path must be relative to: <ansi fg="red">` + relativeString + `</ansi>`)
+			}
+
+			question := cmdPrompt.Ask(`Zone music file path?`, []string{editZoneConfig.MusicFile}, editZoneConfig.MusicFile)
 			if !question.Done {
 				return true, nil
 			}
