@@ -145,3 +145,11 @@ func TryCommand(cmd string, rest string, mobId int) (bool, error) {
 
 	return false, nil
 }
+
+// Register mob commands from outside of the package
+func RegisterCommand(command string, handlerFunc MobCommand, isBlockable bool) {
+	mobCommands[command] = CommandAccess{
+		handlerFunc,
+		isBlockable,
+	}
+}

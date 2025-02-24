@@ -200,6 +200,7 @@ func GetCmdSuggestions(text string, includeAdmin bool) []string {
 
 	return results
 }
+
 func GetHelpSuggestions(text string, includeAdmin bool) []string {
 
 	results := []string{}
@@ -364,4 +365,13 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 	// end "go" attempt
 
 	return false, nil
+}
+
+// Register mob commands from outside of the package
+func RegisterCommand(command string, handlerFunc UserCommand, isBlockable bool, isAdminOnly bool) {
+	userCommands[command] = CommandAccess{
+		handlerFunc,
+		isBlockable,
+		isAdminOnly,
+	}
 }
