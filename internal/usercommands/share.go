@@ -6,13 +6,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Share(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Share(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	party := parties.Get(user.UserId)
 	if party == nil {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
@@ -11,7 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Status(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Status(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	//possibleStatuses := []string{`strength`, `speed`, `smarts`, `vitality`, `mysticism`, `perception`}
 

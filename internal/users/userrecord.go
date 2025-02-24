@@ -59,6 +59,7 @@ type UserRecord struct {
 	tempDataStore  map[string]any
 	activePrompt   *prompt.Prompt
 	isZombie       bool // are they a zombie currently?
+	inputBlocked   bool // Whether input is currently intentionally turned off (for a certain category of commands)
 }
 
 func NewUserRecord(userId int, connectionId uint64) *UserRecord {
@@ -200,11 +201,27 @@ func (u *UserRecord) Command(inputTxt string, waitTurns ...int) {
 
 }
 
-func (u *UserRecord) CommandFlagged(inputTxt string, flagData uint64, waitTurns ...int) {
+func (u *UserRecord) BlockInput() {
+	u.inputBlocked = true
+}
+
+func (u *UserRecord) UnblockInput() {
+	u.inputBlocked = false
+}
+
+func (u *UserRecord) InputBlocked() bool {
+	return u.inputBlocked
+}
+
+func (u *UserRecord) CommandFlagged(inputTxt string, flagData events.EventFlag, waitTurns ...int) {
 
 	wt := 0
 	if len(waitTurns) > 0 {
 		wt = waitTurns[0]
+	}
+
+	if flagData&events.CmdBlockInput == events.CmdBlockInput {
+		u.BlockInput()
 	}
 
 	events.AddToQueue(events.Input{

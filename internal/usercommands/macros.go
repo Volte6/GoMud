@@ -5,11 +5,12 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Macros(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Macros(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if len(user.Macros) == 0 {
 		user.SendText("You have no macros set.")

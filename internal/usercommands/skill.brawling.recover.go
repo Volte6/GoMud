@@ -13,7 +13,7 @@ import (
 Brawling Skill
 Level 1 - Enter a state of rest where health is recovered more quickly
 */
-func Recover(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Recover(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 

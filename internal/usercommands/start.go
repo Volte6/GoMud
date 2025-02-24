@@ -9,6 +9,7 @@ import (
 
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
@@ -19,7 +20,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Start(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if user.Character.RoomId != -1 {
 		return false, errors.New(`only allowed in the void`)
@@ -206,7 +207,6 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 		}
 
 		if _, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, int(rid)); err == nil {
-
 			rooms.MoveToRoom(user.UserId, int(rid))
 			return true, nil
 		}

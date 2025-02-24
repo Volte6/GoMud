@@ -22,7 +22,7 @@ import (
 Brawling Skill
 Level 2 - You can throw objects at NPCs or other rooms.
 */
-func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 	handled := false

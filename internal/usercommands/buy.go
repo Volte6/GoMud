@@ -17,7 +17,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Buy(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Buy(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
 		return List(rest, user, room, flags)

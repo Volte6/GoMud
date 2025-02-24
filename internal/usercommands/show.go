@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
@@ -13,7 +14,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Show(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Show(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	rest = util.StripPrepositions(rest)
 

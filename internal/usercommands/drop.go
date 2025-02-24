@@ -15,7 +15,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Drop(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Drop(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
@@ -112,6 +112,7 @@ func Drop(rest string, user *users.UserRecord, room *rooms.Room, flags UserComma
 
 		// Trigger onLost event
 		scripting.TryItemScriptEvent(`onLost`, matchItem, user.UserId)
+
 	}
 
 	return true, nil

@@ -3,13 +3,14 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Deafen(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Deafen(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.deafen", nil)
@@ -36,7 +37,7 @@ func Deafen(rest string, user *users.UserRecord, room *rooms.Room, flags UserCom
 	return true, nil
 }
 
-func UnDeafen(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func UnDeafen(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.deafen", nil)

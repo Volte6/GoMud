@@ -8,6 +8,7 @@ import (
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/colorpatterns"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/pets"
@@ -18,7 +19,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func List(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func List(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	listedSomething := false
 

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
@@ -19,7 +20,7 @@ var (
 	memoryReportCache = map[string]util.MemoryResult{}
 )
 
-func Server(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Server(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
 		infoOutput, _ := templates.Process("admincommands/help/command.server", nil)

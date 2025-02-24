@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Stash(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Stash(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// Check whether the user has an item in their inventory that matches
 	matchItem, found := user.Character.FindInBackpack(rest)

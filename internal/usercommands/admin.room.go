@@ -8,6 +8,7 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/gamelock"
 	"github.com/volte6/gomud/internal/items"
@@ -21,7 +22,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Room(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	handled := true
 
@@ -415,7 +416,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags UserComma
 					}
 				}
 
-				Look(`secretly`, user, gotoRoom, flags)
+				Look(``, user, gotoRoom, flags)
 
 				scripting.TryRoomScriptEvent(`onEnter`, user.UserId, gotoRoomId)
 
@@ -428,7 +429,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags UserComma
 	return handled, nil
 }
 
-func room_Edit_Containers(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func room_Edit_Containers(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// This basic struct will be used to keep track of what we're editing
 	type ContainerEdit struct {
@@ -1025,7 +1026,7 @@ func room_Edit_Containers_SendRecipes(user *users.UserRecord, recipeResultItemId
 	user.SendText(``)
 }
 
-func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// This basic struct will be used to keep track of what we're editing
 	type ExitEdit struct {
@@ -1451,7 +1452,7 @@ func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room, flag
 	return true, nil
 }
 
-func room_Edit_Mutators(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func room_Edit_Mutators(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	allRoomMutators := []string{}
 	for _, roomMut := range room.Mutators {

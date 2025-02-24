@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/spells"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Spells(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Spells(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	headers := []string{`SpellId`, `Name`, `Description`, `Target`, `MPs`, `Wait`, `Casts`, `% Chance`}
 

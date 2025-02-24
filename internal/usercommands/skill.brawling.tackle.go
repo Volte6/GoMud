@@ -15,7 +15,7 @@ import (
 Brawling Skill
 Level 3 - Attempt to tackle an opponent, making them miss a round.
 */
-func Tackle(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Tackle(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 

@@ -5,13 +5,14 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Mudmail(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Mudmail(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	/*
 		args := util.SplitButRespectQuotes(rest)

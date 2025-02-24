@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/volte6/gomud/internal/colorpatterns"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
 
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Paz(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Paz(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	beamOfLight := colorpatterns.ApplyColorPattern(`beam of light`, `rainbow`)
 

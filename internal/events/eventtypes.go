@@ -35,7 +35,7 @@ type Input struct {
 	MobInstanceId int
 	InputText     string
 	WaitTurns     int
-	Flags         uint64
+	Flags         EventFlag
 }
 
 func (i Input) Type() string { return `Input` }

@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func IBuild(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func IBuild(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// args should look like one of the following:
 	// info <optional room id>
@@ -115,7 +115,7 @@ func IBuild(rest string, user *users.UserRecord, room *rooms.Room, flags UserCom
 	return true, nil
 }
 
-func Build(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Build(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// args should look like one of the following:
 	// info <optional room id>

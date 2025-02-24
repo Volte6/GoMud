@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
@@ -12,7 +13,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Inventory(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Inventory(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	itemNames := []string{}
 	itemNamesFormatted := []string{}

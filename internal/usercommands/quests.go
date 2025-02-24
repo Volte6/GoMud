@@ -5,6 +5,7 @@ import (
 	"math"
 	"sort"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/quests"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
@@ -12,7 +13,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Quests(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Quests(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	type QuestRecord struct {
 		Id          int

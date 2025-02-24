@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Command(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Command(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// args should look like one of the following:
 	// target buffId - put buff on target if in the room

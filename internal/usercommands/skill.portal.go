@@ -9,6 +9,7 @@ import (
 
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -22,7 +23,7 @@ Level 2 - Teleport back to the root of the area you are in
 Level 3 - Set a new destination for your portal teleportation
 Level 4 - Create a physical portal that you can share with players, or return through.
 */
-func Portal(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Portal(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if user.Character.RoomId == int(configs.GetConfig().DeathRecoveryRoom) {
 		return false, errors.New(`portal command ignored in death recovery`)

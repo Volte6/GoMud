@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/util"
@@ -13,7 +14,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Skillset(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Skillset(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// args should look like one of the following:
 	// target buffId - put buff on target if in the room

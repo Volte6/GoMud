@@ -6,9 +6,22 @@ import (
 	"github.com/dop251/goja"
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
+)
+
+var (
+	EventFlags = map[string]events.EventFlag{
+		`CmdNone`:                    events.CmdNone,
+		`CmdSkipScripts`:             events.CmdSkipScripts,
+		`CmdSecretly`:                events.CmdSecretly,
+		`CmdIsRequeue`:               events.CmdIsRequeue,
+		`CmdBlockInput`:              events.CmdBlockInput,
+		`CmdUnBlockInput`:            events.CmdUnBlockInput,
+		`CmdBlockInputUntilComplete`: events.CmdBlockInputUntilComplete, // Combines both of the above two
+	}
 )
 
 func setUtilFunctions(vm *goja.Runtime) {
@@ -30,6 +43,7 @@ func setUtilFunctions(vm *goja.Runtime) {
 	vm.Set(`UtilApplyColorPattern`, UtilApplyColorPattern)
 	vm.Set(`UtilGetConfig`, UtilGetConfig)
 	vm.Set(`ColorWrap`, ColorWrap)
+	vm.Set(`EventFlags`, EventFlags)
 }
 
 // ////////////////////////////////////////////////////////

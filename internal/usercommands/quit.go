@@ -6,7 +6,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Quit(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Quit(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if user.Character.Aggro != nil {
 		user.SendText("You're too busy to quit right now!")

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/races"
@@ -21,7 +22,7 @@ Level 2 - Reveals detailed stats of a player or mob.
 Level 3 - Reveals detailed stats of the player or mob, plus equipment and items
 Level 4 - eveals detailed stats of the player or mob, plus equipment and items, and tells you the % chance of dropping items.
 */
-func Peep(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Peep(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Peep)
 

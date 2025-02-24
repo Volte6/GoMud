@@ -6,6 +6,7 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -26,7 +27,7 @@ Level 4 - You are always aware of hidden players/mobs in the area
 (Lvl 3) <ansi fg="skill">search</ansi> Finds special/unknown "things of interest" in the area.
 (Lvl 4) <ansi fg="skill">search</ansi> Doubles your chance of success when searching.
 */
-func Search(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Search(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Search)
 

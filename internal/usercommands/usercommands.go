@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
@@ -27,19 +28,7 @@ type CommandAccess struct {
 }
 
 // Signature of user command
-type UserCommand func(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error)
-type UserCommandFlag uint64
-
-func (f UserCommandFlag) Has(flag UserCommandFlag) bool {
-	return f&flag == flag
-}
-
-const (
-	CmdNone      UserCommandFlag = 0
-	CmdSecretly  UserCommandFlag = 1 << iota // User beahvior should not be alerted to the room
-	CmdIsRequeue                             // This command was a requeue. The flag is intended to help avoid a infinite requeue loop.
-	BlockInput                               // If queuing for multiple turns, use this to block any user input in the meantime.
-)
+type UserCommand func(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error)
 
 var (
 	userCommands map[string]CommandAccess = map[string]CommandAccess{
@@ -232,13 +221,13 @@ func GetHelpSuggestions(text string, includeAdmin bool) []string {
 	return results
 }
 
-func TryCommand(cmd string, rest string, userId int, flags UserCommandFlag) (bool, error) {
+func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bool, error) {
 
 	// Do not allow scripts to intercept server commands
 	if cmd != `server` {
 
 		alias := keywords.TryCommandAlias(cmd)
-		skipScript := false
+		skipScript := flags.Has(events.CmdSkipScripts)
 		if info, ok := userCommands[alias]; ok && info.AdminOnly {
 			skipScript = true
 		}
@@ -322,9 +311,18 @@ func TryCommand(cmd string, rest string, userId int, flags UserCommandFlag) (boo
 
 	if cmdInfo, ok := userCommands[cmd]; ok {
 
-		if userDisabled && !cmdInfo.AllowedWhenDowned && !cmdInfo.AdminOnly {
-			user.SendText("You are unable to do that while downed.")
-			return true, nil
+		if !cmdInfo.AllowedWhenDowned {
+
+			// If actually downed, prevent it (unless admin)
+			if userDisabled && !cmdInfo.AdminOnly {
+				user.SendText("You are unable to do that while downed.")
+				return true, nil
+			}
+
+			// Disabled input affects commands which can't be performed when downed.
+			if user.InputBlocked() {
+				return true, nil
+			}
 		}
 
 		if isAdmin || !cmdInfo.AdminOnly {

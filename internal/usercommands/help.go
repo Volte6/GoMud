@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
@@ -15,7 +16,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Help(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Help(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	var helpTxt string
 	var err error = nil

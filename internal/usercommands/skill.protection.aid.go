@@ -5,6 +5,7 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/skills"
@@ -17,7 +18,7 @@ Protection Skill
 Level 1 - Aid (revive) a player
 Level 3 - Aid (revive) a player, even during combat
 */
-func Aid(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Aid(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Protection)
 

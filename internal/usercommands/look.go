@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
@@ -14,9 +15,9 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Look(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Look(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
-	secretLook := flags.Has(CmdSecretly)
+	secretLook := flags.Has(events.CmdSecretly)
 
 	visibility := room.GetVisibility()
 

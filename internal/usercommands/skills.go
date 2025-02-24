@@ -3,6 +3,7 @@ package usercommands
 import (
 	"fmt"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
@@ -14,7 +15,7 @@ type SkillsOptions struct {
 	SkillCooldowns map[string]int
 }
 
-func Skills(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Skills(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	allSkills := user.Character.GetSkills()
 	allCooldowns := map[string]int{}

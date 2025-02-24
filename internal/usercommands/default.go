@@ -1,13 +1,14 @@
 package usercommands
 
 import (
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
 )
 
 // Default is a special command that tries to contextually pick a default action for a room.
 // The failover is to "look"
-func Default(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Default(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// If there is a shop, "list"
 	if len(room.GetMobs(rooms.FindMerchant)) > 0 || len(room.GetPlayers(rooms.FindMerchant)) > 0 {

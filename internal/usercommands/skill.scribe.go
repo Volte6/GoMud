@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -18,7 +19,7 @@ Level 2 - Scribe to a sign
 Level 3 - Scribe a hidden rune
 Level 4 - TODO
 */
-func Scribe(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Scribe(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Scribe)
 

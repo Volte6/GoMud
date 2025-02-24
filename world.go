@@ -49,7 +49,7 @@ func (wi WorldInput) Id() int {
 
 type World struct {
 	worldInput         chan WorldInput
-	ignoreInput        map[int]struct{}
+	ignoreInput        map[int]uint64 // userid->turn set to ignore
 	enterWorldUserId   chan [2]int
 	leaveWorldUserId   chan int
 	logoutConnectionId chan connections.ConnectionId
@@ -60,7 +60,7 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 
 	w := &World{
 		worldInput:         make(chan WorldInput),
-		ignoreInput:        make(map[int]struct{}),
+		ignoreInput:        make(map[int]uint64),
 		enterWorldUserId:   make(chan [2]int),
 		leaveWorldUserId:   make(chan int),
 		logoutConnectionId: make(chan connections.ConnectionId),
@@ -75,9 +75,11 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 // Send input to the world.
 // Just sends via a channel. Will block until read.
 func (w *World) SendInput(i WorldInput) {
-	if _, ok := w.ignoreInput[i.FromId]; ok {
-		return // discard
-	}
+	/*
+		if _, ok := w.ignoreInput[i.FromId]; ok {
+			return // discard
+		}
+	*/
 	w.worldInput <- i
 }
 
@@ -766,7 +768,7 @@ loop:
 	}
 }
 
-func (w *World) processInput(userId int, inputText string, flags usercommands.UserCommandFlag) {
+func (w *World) processInput(userId int, inputText string, flags events.EventFlag) {
 
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
@@ -1336,7 +1338,7 @@ func (w *World) TurnTick() {
 	//
 	// Handle Input Queue
 	//
-	alreadyProcessed := make(map[int]struct{}) // Keep track of players who already had a command this turn
+	alreadyProcessed := make(map[int]struct{}) // Keep track of players who already had a command this turn, and what turn it was
 	eq = events.GetQueue(events.Input{})
 	for eq.Len() > 0 {
 
@@ -1350,6 +1352,7 @@ func (w *World) TurnTick() {
 
 		//slog.Debug(`Event`, `type`, input.Type(), `UserId`, input.UserId, `MobInstanceId`, input.MobInstanceId, `WaitTurns`, input.WaitTurns, `InputText`, input.InputText)
 
+		// If it's a mob
 		if input.MobInstanceId > 0 {
 			if input.WaitTurns < 1 {
 				w.processMobInput(input.MobInstanceId, input.InputText)
@@ -1360,44 +1363,71 @@ func (w *World) TurnTick() {
 			continue
 		}
 
-		if input.WaitTurns < 0 { // -1 and below, process immediately and don't count towards limit
-
-			w.processInput(input.UserId, input.InputText, usercommands.UserCommandFlag(input.Flags))
+		// -1 and below, process immediately and don't count towards limit
+		if input.WaitTurns <= -1 {
 
 			// If this command was potentially blocking input, unblock it now.
-			if input.Flags&uint64(usercommands.BlockInput) == uint64(usercommands.BlockInput) {
-				delete(w.ignoreInput, input.UserId)
+			if input.Flags.Has(events.CmdUnBlockInput) {
+
+				if _, ok := w.ignoreInput[input.UserId]; ok {
+					delete(w.ignoreInput, input.UserId)
+					if user := users.GetByUserId(input.UserId); user != nil {
+						user.UnblockInput()
+					}
+				}
+
 			}
+
+			w.processInput(input.UserId, input.InputText, input.Flags)
 
 			continue
 		}
 
+		// If an event was already processed for this user this turn, skip
 		if _, ok := alreadyProcessed[input.UserId]; ok {
 			events.Requeue(input)
 			continue
 		}
 
-		if input.WaitTurns == 0 { // 0 means process immediately but wait another turn before processing another from this user
-
-			w.processInput(input.UserId, input.InputText, usercommands.UserCommandFlag(input.Flags))
-
-			// If this command was potentially blocking input, unblock it now.
-			if input.Flags&uint64(usercommands.BlockInput) == uint64(usercommands.BlockInput) {
-				delete(w.ignoreInput, input.UserId)
-			}
-
-			alreadyProcessed[input.UserId] = struct{}{}
-		} else {
+		// 0 means process immediately
+		// however, process no further events from this user until next turn
+		if input.WaitTurns > 0 {
 
 			// If this is a multi-turn wait, block further input if flagged to do so
-			if input.Flags&uint64(usercommands.BlockInput) == uint64(usercommands.BlockInput) {
-				w.ignoreInput[input.UserId] = struct{}{}
+			if input.Flags.Has(events.CmdBlockInput) {
+
+				if _, ok := w.ignoreInput[input.UserId]; !ok {
+					w.ignoreInput[input.UserId] = turnCt
+				}
+
+				input.Flags.Remove(events.CmdBlockInput)
 			}
 
 			input.WaitTurns--
 			events.Requeue(input)
+
+			continue
 		}
 
+		//
+		// Event ready to be processed
+		//
+
+		// If this command was potentially blocking input, unblock it now.
+		if input.Flags.Has(events.CmdUnBlockInput) {
+
+			if _, ok := w.ignoreInput[input.UserId]; ok {
+				delete(w.ignoreInput, input.UserId)
+				if user := users.GetByUserId(input.UserId); user != nil {
+					user.UnblockInput()
+				}
+			}
+
+		}
+
+		w.processInput(input.UserId, input.InputText, events.EventFlag(input.Flags))
+
+		alreadyProcessed[input.UserId] = struct{}{}
 	}
 
 	//

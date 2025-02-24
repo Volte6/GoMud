@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -18,7 +19,7 @@ Level 2 - Reveals weapon damage or uses an item has left.
 Level 3 - Reveals any stat modifiers an item has.
 Level 4 - Reveals special magical properties like elemental effects.
 */
-func Inspect(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Inspect(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if user.Character.GetSkillLevel(skills.Inspect) == 0 {
 		user.SendText("You don't know how to inspect.")

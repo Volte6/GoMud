@@ -3,7 +3,7 @@
 The `usercommands` package defines a function type and contains all of the commands a user can enter.
 
 ```
-type UserCommand func(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error)
+type UserCommand func(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error)
 ```
 
 All commands follow that definition, where
@@ -13,7 +13,7 @@ All commands follow that definition, where
 
 ```
 
-func Glarble(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Glarble(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
     
     room.SendText(`This glarble text goes out to all players in room`)
 

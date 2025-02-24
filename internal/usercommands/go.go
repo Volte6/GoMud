@@ -5,6 +5,7 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/parties"
@@ -14,7 +15,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Go(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if user.Character.Aggro != nil {
 		user.SendText("You can't do that! You are in combat!")
@@ -126,9 +127,9 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommand
 
 		}
 
-		if exitInfo.ExitMessage != `` && !flags.Has(CmdIsRequeue) {
+		if exitInfo.ExitMessage != `` && !flags.Has(events.CmdIsRequeue) {
 			user.SendText(exitInfo.ExitMessage)
-			user.CommandFlagged(rest, uint64(flags|CmdIsRequeue|BlockInput), configs.GetConfig().SecondsToTurns(1))
+			user.CommandFlagged(rest, flags|events.CmdIsRequeue|events.CmdBlockInputUntilComplete, configs.GetConfig().SecondsToTurns(1))
 			return true, nil
 		}
 
@@ -323,7 +324,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommand
 			}
 
 			handled = true
-			Look(``, user, destRoom, CmdSecretly) // Do a secret look.
+			Look(``, user, destRoom, events.CmdSecretly) // Do a secret look.
 
 			scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId)
 

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mutators"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
@@ -14,7 +15,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Zone(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Zone(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	handled := true
 
@@ -101,7 +102,7 @@ func Zone(rest string, user *users.UserRecord, room *rooms.Room, flags UserComma
 	return true, nil
 }
 
-func zone_Edit(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func zone_Edit(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	originalZoneConfig := rooms.GetZoneConfig(room.Zone)
 	if originalZoneConfig == nil {

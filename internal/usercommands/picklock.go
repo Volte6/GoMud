@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/statmods"
@@ -13,7 +14,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Picklock(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Picklock(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	lockpickItm := items.Item{}
 	for _, itm := range user.Character.GetAllBackpackItems() {

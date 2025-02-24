@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/templates"
@@ -23,7 +24,7 @@ type TrainingOptions struct {
 	Options        []TrainingOption
 }
 
-func Train(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Train(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if len(room.SkillTraining) == 0 {
 		user.SendText(`You must find a trainer to perform training.`)

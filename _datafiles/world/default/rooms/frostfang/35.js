@@ -8,15 +8,26 @@ function onCommand_west(rest, user, room) {
         SendUserMessage(user.UserId(), '<ansi fg="51">The icy wind howls through the gate, and you feel a chill run down your spine.</ansi>');
         SendUserMessage(user.UserId(), '<ansi fg="51">You sense that you are not yet ready to face the dangers that lie beyond.</ansi>');
         SendUserMessage(user.UserId(), ' ');
-    } else {
+        
+        // Queue it with an input blocking flag and ignore further scripts flag
+        user.CommandFlagged('west', EventFlags.CmdSkipScripts|EventFlags.CmdBlockInputUntilComplete, UtilGetSecondsToTurns(1))
+        // return true (handled) to prevent further execution
+        return true
 
-        SendUserMessage(user.UserId(), '');
-        SendUserMessage(user.UserId(), 'The eyes of the stone statues <ansi fg="51">glow</ansi> as you say the words, "<ansi fg="51">'+magic_phrase+'</ansi>"');
-        SendUserMessage(user.UserId(), 'You feel a sense of warmth wash over you, and the biting cold air no longer bothers you.');
-        SendUserMessage(user.UserId(), '');
+    } 
 
-        user.GiveBuff(3);
-    }
+    SendUserMessage(user.UserId(), '');
+    SendUserMessage(user.UserId(), 'The eyes of the stone statues <ansi fg="51">glow</ansi> as you say the words, "<ansi fg="51">'+magic_phrase+'</ansi>"');
+    SendUserMessage(user.UserId(), 'You feel a sense of warmth wash over you, and the biting cold air no longer bothers you.');
+    SendUserMessage(user.UserId(), '');
+
+    user.GiveBuff(3);
+
+    // Queue it with an input blocking flag and ignore further scripts flag
+    user.CommandFlagged('west', EventFlags.CmdSkipScripts|EventFlags.CmdBlockInputUntilComplete, UtilGetSecondsToTurns(1))
+    // return true (handled) to prevent further execution
+
+    return true
 }
 
 
