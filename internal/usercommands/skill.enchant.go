@@ -13,12 +13,12 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Uncurse(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
-	return Enchant("uncurse "+rest, user, room)
+func Uncurse(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+	return Enchant("uncurse "+rest, user, room, flags)
 }
 
-func Unenchant(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
-	return Enchant("remove "+rest, user, room)
+func Unenchant(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+	return Enchant("remove "+rest, user, room, flags)
 }
 
 /*
@@ -28,7 +28,7 @@ Level 2 - Enchant equipment with a defensive bonus.
 Level 3 - Add a stat bonus to a weapon or equipment in addition to the above.
 Level 4 - Remove the enchantment or curse from any object.
 */
-func Enchant(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Enchant(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Enchant)
 

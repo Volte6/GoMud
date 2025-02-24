@@ -5,7 +5,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Password(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Password(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	// Get if already exists, otherwise create new
 	cmdPrompt, _ := user.StartPrompt(`password`, rest)

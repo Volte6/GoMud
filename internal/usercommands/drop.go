@@ -15,7 +15,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Drop(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Drop(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
@@ -30,13 +30,13 @@ func Drop(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 		iCopies := []items.Item{}
 
 		if user.Character.Gold > 0 {
-			Drop(fmt.Sprintf("%d gold", user.Character.Gold), user, room)
+			Drop(fmt.Sprintf("%d gold", user.Character.Gold), user, room, flags)
 		}
 
 		iCopies = append(iCopies, user.Character.Items...)
 
 		for _, item := range iCopies {
-			Drop(item.Name(), user, room)
+			Drop(item.Name(), user, room, flags)
 		}
 
 		return true, nil

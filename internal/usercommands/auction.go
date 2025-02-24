@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Auction(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Auction(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if on := user.GetConfigOption(`auction`); on != nil && !on.(bool) {
 

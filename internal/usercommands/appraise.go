@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Appraise(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Appraise(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	for _, mobId := range room.GetMobs(rooms.FindMerchant) {
 

@@ -22,7 +22,7 @@ Level 2 - Teleport back to the root of the area you are in
 Level 3 - Set a new destination for your portal teleportation
 Level 4 - Create a physical portal that you can share with players, or return through.
 */
-func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Portal(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if user.Character.RoomId == int(configs.GetConfig().DeathRecoveryRoom) {
 		return false, errors.New(`portal command ignored in death recovery`)
@@ -30,7 +30,7 @@ func Portal(rest string, user *users.UserRecord, room *rooms.Room) (bool, error)
 
 	// This is a hack because using "portal" to enter an existing portal is very common
 	if rest == `` {
-		if handled, err := Go(`portal`, user, room); handled {
+		if handled, err := Go(`portal`, user, room, flags); handled {
 			return handled, err
 		}
 	}

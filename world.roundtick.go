@@ -546,7 +546,7 @@ func (w *World) handlePlayerCombat() (affectedPlayerIds []int, affectedMobInstan
 
 				newRoom := rooms.LoadRoom(exitRoomId)
 
-				usercommands.Look(`secretly`, user, newRoom)
+				usercommands.Look(``, user, newRoom, usercommands.CmdSecretly)
 
 				scripting.TryRoomScriptEvent(`onEnter`, user.UserId, exitRoomId)
 

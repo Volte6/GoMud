@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Alias(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Alias(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	// biuld array and look up table for sorting purposes
 	allOutCmds := []string{}

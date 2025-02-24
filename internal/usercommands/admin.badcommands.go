@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func BadCommands(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func BadCommands(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if rest == "clear" {
 		badinputtracker.Clear()

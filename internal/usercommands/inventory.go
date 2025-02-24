@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Inventory(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Inventory(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	itemNames := []string{}
 	itemNamesFormatted := []string{}

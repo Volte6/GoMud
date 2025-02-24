@@ -13,7 +13,7 @@ import (
 Protection Skill
 Level 2 - Front/Backrank
 */
-func Rank(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Rank(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Protection)
 

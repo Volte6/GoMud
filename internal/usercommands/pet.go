@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Pet(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Pet(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(rest)
 

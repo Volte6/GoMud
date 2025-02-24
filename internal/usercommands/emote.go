@@ -92,7 +92,7 @@ var (
 	}
 )
 
-func Emote(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Emote(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if len(rest) == 0 {
 		user.SendText("You emote.")

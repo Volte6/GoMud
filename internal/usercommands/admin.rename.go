@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Rename(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Rename(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(rest)
 

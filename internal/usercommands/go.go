@@ -14,7 +14,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Go(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if user.Character.Aggro != nil {
 		user.SendText("You can't do that! You are in combat!")
@@ -124,6 +124,12 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 				}
 			}
 
+		}
+
+		if exitInfo.ExitMessage != `` && !flags.Has(CmdIsRequeue) {
+			user.SendText(exitInfo.ExitMessage)
+			user.CommandFlagged(rest, uint64(flags)|uint64(CmdIsRequeue), configs.GetConfig().SecondsToTurns(1))
+			return true, nil
 		}
 
 		// Load current room details
@@ -317,7 +323,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
 			}
 
 			handled = true
-			Look(`secretly`, user, destRoom)
+			Look(``, user, destRoom, CmdSecretly) // Do a secret look.
 
 			scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId)
 

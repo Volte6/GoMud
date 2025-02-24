@@ -6,7 +6,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Motd(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Motd(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	user.SendText(string(configs.GetConfig().Motd))
 

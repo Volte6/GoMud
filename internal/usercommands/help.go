@@ -15,7 +15,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Help(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Help(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	var helpTxt string
 	var err error = nil

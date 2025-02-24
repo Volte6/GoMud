@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Say(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Say(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if user.Muted {
 		user.SendText(`You are <ansi fg="alert-5">MUTED</ansi>. You can only send <ansi fg="command">whisper</ansi>'s to Admins and Moderators.`)

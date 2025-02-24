@@ -6,7 +6,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Who(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Who(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	details := rooms.GetDetails(room, user)
 

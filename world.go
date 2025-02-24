@@ -761,7 +761,7 @@ loop:
 	}
 }
 
-func (w *World) processInput(userId int, inputText string) {
+func (w *World) processInput(userId int, inputText string, flags usercommands.UserCommandFlag) {
 
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
@@ -837,7 +837,7 @@ func (w *World) processInput(userId int, inputText string) {
 				command = inputText
 			}
 
-			handled, err = usercommands.TryCommand(command, remains, userId)
+			handled, err = usercommands.TryCommand(command, remains, userId, flags)
 			if err != nil {
 				slog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
 			}
@@ -1356,7 +1356,7 @@ func (w *World) TurnTick() {
 		}
 
 		if input.WaitTurns < 0 { // -1 and below, process immediately and don't count towards limit
-			w.processInput(input.UserId, input.InputText)
+			w.processInput(input.UserId, input.InputText, usercommands.UserCommandFlag(input.Flags))
 			continue
 		}
 
@@ -1366,7 +1366,7 @@ func (w *World) TurnTick() {
 		}
 
 		if input.WaitTurns == 0 { // 0 means process immediately but wait another turn before processing another from this user
-			w.processInput(input.UserId, input.InputText)
+			w.processInput(input.UserId, input.InputText, usercommands.UserCommandFlag(input.Flags))
 			alreadyProcessed[input.UserId] = struct{}{}
 		} else {
 			input.WaitTurns--

@@ -17,7 +17,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	config := configs.GetConfig()
 	currentRound := util.GetRoundCount()
@@ -103,10 +103,10 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 			// Unequip everything
 			for _, itm := range user.Character.GetAllWornItems() {
-				Remove(itm.Name(), user, room)
+				Remove(itm.Name(), user, room, flags)
 			}
 			// drop all items / gold
-			Drop("all", user, room)
+			Drop("all", user, room, flags)
 
 			rooms.MoveToRoom(user.UserId, -1)
 
@@ -127,9 +127,9 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 			for _, itm := range user.Character.GetAllWornItems() {
 				if util.Rand(100) < chanceInt {
 
-					Remove(itm.Name(), user, room)
+					Remove(itm.Name(), user, room, flags)
 
-					Drop(itm.Name(), user, room)
+					Drop(itm.Name(), user, room, flags)
 
 				}
 			}
@@ -137,11 +137,11 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 
 		if user.Character.Gold > 0 {
 			user.EventLog.Add(`death`, fmt.Sprintf(`Dropped <ansi fg="gold">%d gold</ansi> on death`, user.Character.Gold))
-			Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), user, room)
+			Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), user, room, flags)
 		}
 
 		if config.OnDeathAlwaysDropBackpack {
-			Drop("all", user, room)
+			Drop("all", user, room, flags)
 
 			user.EventLog.Add(`death`, `Dropped <ansi fg="alert-3">everthing in your backpack</ansi> on death`)
 
@@ -149,7 +149,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 			chanceInt := int(config.OnDeathEquipmentDropChance * 100)
 			for _, itm := range user.Character.GetAllBackpackItems() {
 				if util.Rand(100) < chanceInt {
-					Drop(itm.Name(), user, room)
+					Drop(itm.Name(), user, room, flags)
 					user.EventLog.Add(`death`, fmt.Sprintf(`Dropped your <ansi fg="itemname">%s</ansi> on death`, itm.Name()))
 				}
 			}

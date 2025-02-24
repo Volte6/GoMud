@@ -29,7 +29,8 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.AddGold(amt int \[, bankAmt int\])](#actorobjectaddgoldamt-int--bankamt-int)
   - [ActorObject.AddHealth(amt int) int](#actorobjectaddhealthamt-int-int)
   - [ActorObject.Sleep(seconds int)](#actorobjectsleepseconds-int)
-  - [ActorObject.Command(cmd string, waitTurns ...int)](#actorobjectcommandcmd-string-waitturns-int)
+  - [ActorObject.Command(cmd string \[, waitTurns int\])](#actorobjectcommandcmd-string--waitturns-int)
+  - [ActorObject.CommandFlagged(cmd string, flag int \[, waitTurns int\])](#actorobjectcommandflaggedcmd-string-flag-int--waitturns-int)
   - [ActorObject.IsTameable() bool](#actorobjectistameable-bool)
   - [ActorObject.TrainSkill(skillName string, skillLevel int)](#actorobjecttrainskillskillname-string-skilllevel-int)
   - [ActorObject.GetSkillLevel(skillName string)](#actorobjectgetskilllevelskillname-string)
@@ -259,7 +260,7 @@ _Note: Only works on mobs._
 | --- | --- |
 | seconds | How many seconds to wait. |
 
-## [ActorObject.Command(cmd string, waitTurns ...int)](/internal/scripting/actor_func.go)
+## [ActorObject.Command(cmd string [, waitTurns int])](/internal/scripting/actor_func.go)
 Forces an ActorObject to execute a command as if they entered it
 
 _Note: Don't underestimate the power of this function! Complex and interesting behaviors or interactions can emerge from using it._
@@ -267,6 +268,18 @@ _Note: Don't underestimate the power of this function! Complex and interesting b
 |  Argument | Explanation |
 | --- | --- |
 | cmd | The command to execute such as `look west` or `say goodbye`. |
+| waitTurns (optional) | The number of turns (NOT rounds) to wait before executing the command. |
+
+## [ActorObject.CommandFlagged(cmd string, flag int [, waitTurns int])](/internal/scripting/actor_func.go)
+Forces an ActorObject to execute a command as if they entered it.
+WARNING: Advanced Usage. Required a flag integer.
+
+_Note: Don't underestimate the power of this function! Complex and interesting behaviors or interactions can emerge from using it._
+
+|  Argument | Explanation |
+| --- | --- |
+| cmd | The command to execute such as `look west` or `say goodbye`. |
+| flag | The special control flag to pass to the command. |
 | waitTurns (optional) | The number of turns (NOT rounds) to wait before executing the command. |
 
 ## [ActorObject.IsTameable() bool](/internal/scripting/actor_func.go)

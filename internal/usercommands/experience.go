@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Experience(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Experience(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 

@@ -15,7 +15,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Spell(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Spell(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if user.Permission != users.PermissionAdmin {
 		user.SendText(`<ansi fg="alert-4">Only admins can use this command</ansi>`)
@@ -32,18 +32,18 @@ func Spell(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) 
 
 	// Create a new spell
 	if args[0] == `create` {
-		return spell_Create(strings.TrimSpace(rest[6:]), user, room)
+		return spell_Create(strings.TrimSpace(rest[6:]), user, room, flags)
 	}
 
 	// List existing spells
 	if args[0] == `list` {
-		return spell_List(strings.TrimSpace(rest[4:]), user, room)
+		return spell_List(strings.TrimSpace(rest[4:]), user, room, flags)
 	}
 
 	return true, nil
 }
 
-func spell_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func spell_List(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	spellNames := []templates.NameDescription{}
 
@@ -75,7 +75,7 @@ func spell_List(rest string, user *users.UserRecord, room *rooms.Room) (bool, er
 	return true, nil
 }
 
-func spell_Create(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func spell_Create(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	var newSpell = spells.SpellData{}
 

@@ -9,11 +9,11 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Remove(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Remove(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if rest == "all" {
 		for _, item := range user.Character.Equipment.GetAllItems() {
-			Remove(item.Name(), user, room)
+			Remove(item.Name(), user, room, flags)
 		}
 		return true, nil
 	}

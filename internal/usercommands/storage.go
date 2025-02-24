@@ -14,7 +14,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Storage(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Storage(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if !room.IsStorage {
 
@@ -73,7 +73,7 @@ func Storage(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 		if itemName == `all` {
 
 			for _, itm := range user.Character.GetAllBackpackItems() {
-				Storage(fmt.Sprintf(`add !%d`, itm.ItemId), user, room)
+				Storage(fmt.Sprintf(`add !%d`, itm.ItemId), user, room, flags)
 
 				spaceLeft--
 				if spaceLeft < 0 {
@@ -104,7 +104,7 @@ func Storage(rest string, user *users.UserRecord, room *rooms.Room) (bool, error
 		if itemName == `all` {
 
 			for _, itm := range user.ItemStorage.GetItems() {
-				Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), user, room)
+				Storage(fmt.Sprintf(`remove !%d`, itm.ItemId), user, room, flags)
 			}
 
 			return true, nil

@@ -11,7 +11,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Attack(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Attack(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	attackPlayerId := 0
 	attackMobInstanceId := 0

@@ -7,7 +7,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func History(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func History(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	headers := []string{`Type` /*`Round`,*/, `Time`, `Log`}
 

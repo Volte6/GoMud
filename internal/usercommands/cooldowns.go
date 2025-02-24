@@ -6,7 +6,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Cooldowns(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Cooldowns(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	cdTxt, _ := templates.Process("character/cooldowns", user.Character.GetAllCooldowns())
 	user.SendText(cdTxt)

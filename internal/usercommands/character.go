@@ -20,7 +20,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, error) {
+func Character(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
 
 	if !room.IsCharacterRoom {
 		return false, fmt.Errorf(`not in a IsCharacterRoom`)
@@ -317,7 +317,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room) (bool, err
 			tmpChar := user.Character
 			user.Character = &char
 
-			Status(``, user, room)
+			Status(``, user, room, flags)
 
 			user.Character = tmpChar
 

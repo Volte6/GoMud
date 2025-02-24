@@ -63,17 +63,17 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 28
+      roundcounter: 23
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 36
+      roundcounter: 16
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
       permabuff: true
-      roundcounter: 10
+      roundcounter: 5
       triggersleft: 1000000000
   equipment:
     weapon:
