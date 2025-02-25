@@ -49,6 +49,13 @@ func AuctionUpdate_Listener(e events.Event) bool {
 
 			if user := users.GetByUserId(a.HighestBidUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
+
+					events.AddToQueue(events.ItemOwnership{
+						UserId: user.UserId,
+						Item:   a.ItemData,
+						Gained: true,
+					})
+
 					msg := fmt.Sprintf(`<ansi fg="yellow">You have won the auction for the <ansi fg="item">%s</ansi>! It has been added to your backpack.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr)
 					user.SendText(msg)
 				}
@@ -112,6 +119,13 @@ func AuctionUpdate_Listener(e events.Event) bool {
 		} else if a.SellerUserId > 0 {
 			if user := users.GetByUserId(a.SellerUserId); user != nil {
 				if user.Character.StoreItem(a.ItemData) {
+
+					events.AddToQueue(events.ItemOwnership{
+						UserId: user.UserId,
+						Item:   a.ItemData,
+						Gained: true,
+					})
+
 					msg := fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr)
 					user.SendText(msg)
 				}

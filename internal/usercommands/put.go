@@ -99,6 +99,12 @@ func Put(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		container.AddItem(item)
 		user.Character.RemoveItem(item)
 
+		events.AddToQueue(events.ItemOwnership{
+			UserId: user.UserId,
+			Item:   item,
+			Gained: false,
+		})
+
 		user.SendText(fmt.Sprintf(`You place your <ansi fg="itemname">%s</ansi> into the <ansi fg="container">%s</ansi>`, item.DisplayName(), containerName))
 		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> places their <ansi fg="itemname">%s</ansi> into the <ansi fg="container">%s</ansi>`, user.Character.Name, item.DisplayName(), containerName), user.UserId)
 

@@ -75,16 +75,6 @@ func Give(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			targetUser.Character.StoreItem(giveItem)
 			user.Character.RemoveItem(giveItem)
 
-			iSpec := giveItem.GetSpec()
-			if iSpec.QuestToken != `` {
-
-				events.AddToQueue(events.Quest{
-					UserId:     targetUser.UserId,
-					QuestToken: iSpec.QuestToken,
-				})
-
-			}
-
 			user.SendText(
 				fmt.Sprintf(`You give the <ansi fg="item">%s</ansi> to <ansi fg="username">%s</ansi>.`, giveItem.DisplayName(), targetUser.Character.Name),
 			)
@@ -96,10 +86,17 @@ func Give(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				user.UserId,
 				targetUser.UserId)
 
-			// Trigger onLost event
-			scripting.TryItemScriptEvent(`onLost`, giveItem, user.UserId)
+			events.AddToQueue(events.ItemOwnership{
+				UserId: user.UserId,
+				Item:   giveItem,
+				Gained: false,
+			})
 
-			scripting.TryItemScriptEvent(`onFound`, giveItem, targetUser.UserId)
+			events.AddToQueue(events.ItemOwnership{
+				UserId: targetUser.UserId,
+				Item:   giveItem,
+				Gained: true,
+			})
 
 		} else if giveGoldAmount > 0 {
 
@@ -173,8 +170,17 @@ func Give(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 						user.UserId,
 					)
 
-					// Trigger onLost event
-					scripting.TryItemScriptEvent(`onLost`, giveItem, user.UserId)
+					events.AddToQueue(events.ItemOwnership{
+						UserId: user.UserId,
+						Item:   giveItem,
+						Gained: false,
+					})
+
+					events.AddToQueue(events.ItemOwnership{
+						MobInstanceId: m.InstanceId,
+						Item:          giveItem,
+						Gained:        true,
+					})
 
 				}
 
@@ -223,6 +229,12 @@ func Give(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> gives their <ansi fg="itemname">%s</ansi> to %s...`, user.Character.Name, giveItem.DisplayName(), petUser.Character.Pet.DisplayName()), user.UserId)
 
 		user.Character.RemoveItem(giveItem)
+
+		events.AddToQueue(events.ItemOwnership{
+			UserId: user.UserId,
+			Item:   giveItem,
+			Gained: false,
+		})
 
 		if len(petUser.Character.Pet.Items) >= petUser.Character.Pet.Capacity || !petUser.Character.Pet.StoreItem(giveItem) {
 			room.SendText(fmt.Sprintf(`%s throws the <ansi fg="itemname">%s</ansi> onto the ground.`, petUser.Character.Pet.DisplayName(), giveItem.DisplayName()))

@@ -35,4 +35,7 @@ func RegisterListeners() {
 	events.RegisterListener(events.NewTurn{}, ActionPoints_Listener)
 	events.RegisterListener(events.NewTurn{}, LevelUp_Listener)
 
+	// ItemOwnership
+	events.RegisterListener(events.ItemOwnership{}, CheckItemQuests_Listener)
+
 }

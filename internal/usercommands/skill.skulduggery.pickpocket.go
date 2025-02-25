@@ -96,6 +96,18 @@ func Pickpocket(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 					m.Character.RemoveItem(itemStolen)
 					user.Character.StoreItem(itemStolen)
 
+					events.AddToQueue(events.ItemOwnership{
+						MobInstanceId: m.InstanceId,
+						Item:          itemStolen,
+						Gained:        false,
+					})
+
+					events.AddToQueue(events.ItemOwnership{
+						UserId: user.UserId,
+						Item:   itemStolen,
+						Gained: true,
+					})
+
 					stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, itemStolen.DisplayName()))
 				}
 
@@ -176,15 +188,17 @@ func Pickpocket(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 					p.Character.RemoveItem(itemStolen)
 					user.Character.StoreItem(itemStolen)
 
-					iSpec := itemStolen.GetSpec()
-					if iSpec.QuestToken != `` {
+					events.AddToQueue(events.ItemOwnership{
+						UserId: user.UserId,
+						Item:   itemStolen,
+						Gained: true,
+					})
 
-						events.AddToQueue(events.Quest{
-							UserId:     user.UserId,
-							QuestToken: iSpec.QuestToken,
-						})
-
-					}
+					events.AddToQueue(events.ItemOwnership{
+						UserId: p.UserId,
+						Item:   itemStolen,
+						Gained: false,
+					})
 
 					stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="itemname">%s</ansi>`, itemStolen.DisplayName()))
 				}

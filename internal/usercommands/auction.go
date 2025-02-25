@@ -183,6 +183,13 @@ func Auction(rest string, user *users.UserRecord, room *rooms.Room, flags events
 
 	if auctions.StartAuction(matchItem, user.UserId, amt) {
 		user.Character.RemoveItem(matchItem)
+
+		events.AddToQueue(events.ItemOwnership{
+			UserId: user.UserId,
+			Item:   matchItem,
+			Gained: false,
+		})
+
 	}
 
 	return true, nil

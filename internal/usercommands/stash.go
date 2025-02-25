@@ -6,7 +6,6 @@ import (
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/users"
 )
 
@@ -25,6 +24,12 @@ func Stash(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		room.AddItem(matchItem, true)
 		user.Character.RemoveItem(matchItem)
 
+		events.AddToQueue(events.ItemOwnership{
+			UserId: user.UserId,
+			Item:   matchItem,
+			Gained: false,
+		})
+
 		isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 
 		user.SendText(
@@ -36,8 +41,6 @@ func Stash(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 				user.UserId)
 		}
 
-		// Trigger lost event
-		scripting.TryItemScriptEvent(`onLost`, matchItem, user.UserId)
 	}
 
 	return true, nil

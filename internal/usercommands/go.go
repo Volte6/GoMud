@@ -117,6 +117,12 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 					user.Character.SetKey(`key-`+lockId, fmt.Sprintf(`%d`, backpackKeyItm.ItemId))
 					user.Character.RemoveItem(backpackKeyItm)
 
+					events.AddToQueue(events.ItemOwnership{
+						UserId: user.UserId,
+						Item:   backpackKeyItm,
+						Gained: false,
+					})
+
 					exitInfo.Lock.SetUnlocked()
 					room.SetExitLock(exitName, false)
 				}

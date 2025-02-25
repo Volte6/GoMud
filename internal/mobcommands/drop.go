@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
@@ -67,6 +68,12 @@ func Drop(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		// Swap the item location
 		room.AddItem(matchItem, false)
 		mob.Character.RemoveItem(matchItem)
+
+		events.AddToQueue(events.ItemOwnership{
+			MobInstanceId: mob.InstanceId,
+			Item:          matchItem,
+			Gained:        false,
+		})
 
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> drops their <ansi fg="item">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))

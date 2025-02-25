@@ -203,6 +203,13 @@ func Enchant(rest string, user *users.UserRecord, room *rooms.Room, flags events
 		util.LogRoll(`Enchant->Destroy`, roll, chanceToDestroy)
 
 		if roll < chanceToDestroy {
+
+			events.AddToQueue(events.ItemOwnership{
+				UserId: user.UserId,
+				Item:   matchItem,
+				Gained: false,
+			})
+
 			user.SendText(fmt.Sprintf(`The <ansi fg="itemname">%s</ansi> explodes in a shower of sparks!`, matchItem.DisplayName()))
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> holds out their <ansi fg="itemname">%s</ansi> and slowly waves their hand over it. The <ansi fg="itemname">%s</ansi> explodes in a shower of sparks!`, user.Character.Name, matchItem.DisplayName(), matchItem.DisplayName()), user.UserId)
 			return true, nil

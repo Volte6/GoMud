@@ -1060,6 +1060,69 @@ func (w *World) EventLoop() {
 	turnNow := util.GetTurnCount()
 
 	//
+	// ItemOwnership
+	//
+	eq = events.GetQueue(events.ItemOwnership{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		_, typeOk := e.(events.ItemOwnership)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "ItemOwnership", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+	}
+
+	//
+	// System commands such as /reload
+	//
+	eq = events.GetQueue(events.System{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		sys, typeOk := e.(events.System)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "System", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		if sys.Command == `reload` {
+
+			events.AddToQueue(events.Broadcast{
+				Text: `Reloading flat files...`,
+			})
+
+			loadAllDataFiles(true)
+
+			events.AddToQueue(events.Broadcast{
+				Text:            `Done.` + term.CRLFStr,
+				SkipLineRefresh: true,
+			})
+
+		} else if sys.Command == `kick` {
+			w.Kick(sys.Data.(int))
+		} else if sys.Command == `leaveworld` {
+			w.leaveWorld(sys.Data.(int))
+			users.RemoveZombieUser(sys.Data.(int))
+		} else if sys.Command == `logoff` {
+			w.logOff(sys.Data.(int))
+		}
+
+	}
+
+	//
 	// Handle Turn Queue
 	//
 	eq = events.GetQueue(events.NewTurn{})
@@ -1568,49 +1631,6 @@ func (w *World) EventLoop() {
 		// Allow any handlers to handle the event
 		if !events.DoListeners(e) {
 			continue
-		}
-
-	}
-
-	//
-	// System commands such as /reload
-	//
-	eq = events.GetQueue(events.System{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		sys, typeOk := e.(events.System)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "System", "Actual Type", e.Type())
-			continue
-		}
-
-		// Allow any handlers to handle the event
-		if !events.DoListeners(e) {
-			continue
-		}
-
-		if sys.Command == `reload` {
-
-			events.AddToQueue(events.Broadcast{
-				Text: `Reloading flat files...`,
-			})
-
-			loadAllDataFiles(true)
-
-			events.AddToQueue(events.Broadcast{
-				Text:            `Done.` + term.CRLFStr,
-				SkipLineRefresh: true,
-			})
-
-		} else if sys.Command == `kick` {
-			w.Kick(sys.Data.(int))
-		} else if sys.Command == `leaveworld` {
-			w.leaveWorld(sys.Data.(int))
-			users.RemoveZombieUser(sys.Data.(int))
-		} else if sys.Command == `logoff` {
-			w.logOff(sys.Data.(int))
 		}
 
 	}

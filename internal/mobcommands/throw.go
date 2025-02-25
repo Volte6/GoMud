@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/mobs"
@@ -65,6 +66,12 @@ func Throw(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		mob.Character.RemoveItem(itemMatch)
 		throwToRoom.AddItem(itemMatch, false)
 
+		events.AddToQueue(events.ItemOwnership{
+			MobInstanceId: mob.InstanceId,
+			Item:          itemMatch,
+			Gained:        false,
+		})
+
 		// Tell the old room they are leaving
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, mob.Character.Name, itemMatch.DisplayName(), exitName),
@@ -115,6 +122,12 @@ func Throw(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 			mob.Character.RemoveItem(itemMatch)
 			throwToRoom.AddItem(itemMatch, false)
+
+			events.AddToQueue(events.ItemOwnership{
+				MobInstanceId: mob.InstanceId,
+				Item:          itemMatch,
+				Gained:        false,
+			})
 
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> throws their <ansi fg="item">%s</ansi> through the %s exit.`, mob.Character.Name, itemMatch.DisplayName(), tempExit.Title),

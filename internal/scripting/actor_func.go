@@ -406,7 +406,13 @@ func (a ScriptActor) GiveItem(itm any) {
 		iRecord := sItem.itemRecord
 		if a.characterRecord.StoreItem(*iRecord) {
 			if a.userId > 0 {
-				TryItemScriptEvent(`onGive`, *sItem.itemRecord, a.userId)
+
+				events.AddToQueue(events.ItemOwnership{
+					UserId: a.userId,
+					Item:   *iRecord,
+					Gained: true,
+				})
+
 			}
 		}
 	}
@@ -416,7 +422,13 @@ func (a ScriptActor) GiveItem(itm any) {
 func (a ScriptActor) TakeItem(itm ScriptItem) {
 	if a.characterRecord.RemoveItem(*itm.itemRecord) {
 		if a.userId > 0 {
-			TryItemScriptEvent(`onLost`, *itm.itemRecord, a.userId)
+
+			events.AddToQueue(events.ItemOwnership{
+				UserId: a.userId,
+				Item:   *itm.itemRecord,
+				Gained: false,
+			})
+
 		}
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
@@ -88,6 +89,12 @@ func Get(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		// Swap the item location
 		room.RemoveItem(matchItem, getFromStash)
 		mob.Character.StoreItem(matchItem)
+
+		events.AddToQueue(events.ItemOwnership{
+			MobInstanceId: mob.InstanceId,
+			Item:          matchItem,
+			Gained:        true,
+		})
 
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> picks up the <ansi fg="itemname">%s</ansi>...`, mob.Character.Name, matchItem.DisplayName()))

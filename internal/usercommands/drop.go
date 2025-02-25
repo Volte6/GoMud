@@ -10,7 +10,6 @@ import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 )
@@ -85,6 +84,12 @@ func Drop(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		// Swap the item location
 		user.Character.RemoveItem(matchItem)
 
+		events.AddToQueue(events.ItemOwnership{
+			UserId: user.UserId,
+			Item:   matchItem,
+			Gained: false,
+		})
+
 		user.SendText(
 			fmt.Sprintf(`You drop the <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),
 		)
@@ -110,8 +115,11 @@ func Drop(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 		room.AddItem(matchItem, false)
 
-		// Trigger onLost event
-		scripting.TryItemScriptEvent(`onLost`, matchItem, user.UserId)
+		events.AddToQueue(events.ItemOwnership{
+			UserId: user.UserId,
+			Item:   matchItem,
+			Gained: false,
+		})
 
 	}
 

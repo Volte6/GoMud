@@ -59,6 +59,12 @@ func Unlock(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 			user.Character.SetKey(`key-`+lockId, fmt.Sprintf(`%d`, backpackKeyItm.ItemId))
 			user.Character.RemoveItem(backpackKeyItm)
 
+			events.AddToQueue(events.ItemOwnership{
+				UserId: user.UserId,
+				Item:   backpackKeyItm,
+				Gained: false,
+			})
+
 			user.SendText(fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to lock the <ansi fg="container">%s</ansi>, and add it to your key ring for the future.`, itmSpec.Name, containerName))
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to lock the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName),
@@ -104,6 +110,12 @@ func Unlock(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 			// "key-<roomid>-<exitname>": "<itemid>"
 			user.Character.SetKey(`key-`+lockId, fmt.Sprintf(`%d`, backpackKeyItm.ItemId))
 			user.Character.RemoveItem(backpackKeyItm)
+
+			events.AddToQueue(events.ItemOwnership{
+				UserId: user.UserId,
+				Item:   backpackKeyItm,
+				Gained: false,
+			})
 
 			user.SendText(fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to unlock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName))
 			room.SendText(

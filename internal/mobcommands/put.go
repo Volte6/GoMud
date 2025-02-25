@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
@@ -77,6 +78,12 @@ func Put(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	if itemFound {
 		container.AddItem(item)
 		mob.Character.RemoveItem(item)
+
+		events.AddToQueue(events.ItemOwnership{
+			MobInstanceId: mob.InstanceId,
+			Item:          item,
+			Gained:        false,
+		})
 
 		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> places their <ansi fg="itemname">%s</ansi> into the <ansi fg="container">%s</ansi>`, mob.Character.Name, item.DisplayName(), containerName))
 

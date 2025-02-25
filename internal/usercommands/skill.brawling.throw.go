@@ -12,7 +12,6 @@ import (
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
@@ -62,8 +61,11 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 
 		if user.Character.RemoveItem(itemMatch) {
 
-			// Trigger onLost event
-			scripting.TryItemScriptEvent(`onLost`, itemMatch, user.UserId)
+			events.AddToQueue(events.ItemOwnership{
+				UserId: user.UserId,
+				Item:   itemMatch,
+				Gained: false,
+			})
 
 			// Tell the player they are throwing the item
 			user.SendText(
@@ -109,6 +111,12 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		}
 
 		user.Character.RemoveItem(itemMatch)
+
+		events.AddToQueue(events.ItemOwnership{
+			UserId: user.UserId,
+			Item:   itemMatch,
+			Gained: false,
+		})
 
 		// Tell the player they are throwing the item
 		user.SendText(
@@ -180,6 +188,12 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			}
 
 			user.Character.RemoveItem(itemMatch)
+
+			events.AddToQueue(events.ItemOwnership{
+				UserId: user.UserId,
+				Item:   itemMatch,
+				Gained: false,
+			})
 
 			// Tell the player they are throwing the item
 			user.SendText(
@@ -255,6 +269,12 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 					}
 
 					user.Character.RemoveItem(itemMatch)
+
+					events.AddToQueue(events.ItemOwnership{
+						UserId: user.UserId,
+						Item:   itemMatch,
+						Gained: false,
+					})
 
 					// Tell the player they are throwing the item
 					user.SendText(

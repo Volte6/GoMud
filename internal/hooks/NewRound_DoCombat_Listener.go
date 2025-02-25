@@ -438,10 +438,23 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 
 						defRoom.SendText(fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="username">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple(), defUser.Character.Name), defUser.UserId)
 
+						events.AddToQueue(events.ItemOwnership{
+							UserId: defUser.UserId,
+							Item:   defUser.Character.Equipment.Offhand,
+							Gained: false,
+						})
+
 						defUser.Character.RemoveFromBody(defUser.Character.Equipment.Offhand)
+
 						itm := items.New(20) // Broken item
 						if !defUser.Character.StoreItem(itm) {
 							room.AddItem(itm, false)
+
+							events.AddToQueue(events.ItemOwnership{
+								UserId: defUser.UserId,
+								Item:   itm,
+								Gained: true,
+							})
 						}
 					}
 				}
@@ -917,10 +930,24 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 
 						defRoom.SendText(fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="username">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defUser.Character.Equipment.Offhand.NameSimple(), defUser.Character.Name), defUser.UserId)
 
+						events.AddToQueue(events.ItemOwnership{
+							UserId: defUser.UserId,
+							Item:   defUser.Character.Equipment.Offhand,
+							Gained: false,
+						})
+
 						defUser.Character.RemoveFromBody(defUser.Character.Equipment.Offhand)
+
 						itm := items.New(20) // Broken item
 						if !defUser.Character.StoreItem(itm) {
 							room.AddItem(itm, false)
+
+							events.AddToQueue(events.ItemOwnership{
+								UserId: defUser.UserId,
+								Item:   itm,
+								Gained: true,
+							})
+
 						}
 					}
 				}
@@ -1040,10 +1067,22 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 
 							defRoom.SendText(fmt.Sprintf(`<ansi fg="214"><ansi fg="202">***</ansi> The <ansi fg="item">%s</ansi> <ansi fg="mobname">%s</ansi> was carrying breaks! <ansi fg="202">***</ansi></ansi>`, defMob.Character.Equipment.Offhand.NameSimple(), defMob.Character.Name))
 
+							events.AddToQueue(events.ItemOwnership{
+								MobInstanceId: defMob.InstanceId,
+								Item:          defMob.Character.Equipment.Offhand,
+								Gained:        false,
+							})
+
 							defMob.Character.RemoveFromBody(defMob.Character.Equipment.Offhand)
 							itm := items.New(20) // Broken item
 							if !defMob.Character.StoreItem(itm) {
 								defRoom.AddItem(itm, false)
+
+								events.AddToQueue(events.ItemOwnership{
+									MobInstanceId: defMob.InstanceId,
+									Item:          itm,
+									Gained:        true,
+								})
 							}
 						}
 					}

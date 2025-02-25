@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/items"
 )
 
 // Used to apply or remove buffs
@@ -137,3 +138,12 @@ type NewTurn struct {
 }
 
 func (r NewTurn) Type() string { return `NewTurn` }
+
+type ItemOwnership struct {
+	UserId        int
+	MobInstanceId int
+	Item          items.Item
+	Gained        bool
+}
+
+func (r ItemOwnership) Type() string { return `LostItem` }
