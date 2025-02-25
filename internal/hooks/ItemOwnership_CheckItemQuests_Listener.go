@@ -1,6 +1,8 @@
 package hooks
 
 import (
+	"log/slog"
+
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/scripting"
 )
@@ -11,7 +13,11 @@ import (
 
 func CheckItemQuests_Listener(e events.Event) bool {
 
-	evt := e.(events.ItemOwnership)
+	evt, typeOk := e.(events.ItemOwnership)
+	if !typeOk {
+		slog.Error("Event", "Expected Type", "ItemOwnership", "Actual Type", e.Type())
+		return false
+	}
 
 	// Only care about users for this stuff
 	if evt.UserId == 0 {

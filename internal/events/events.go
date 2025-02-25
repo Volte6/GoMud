@@ -1,6 +1,8 @@
 package events
 
-import "sync"
+import (
+	"sync"
+)
 
 type EventType string
 

@@ -2,6 +2,7 @@
 package hooks
 
 import (
+	"log/slog"
 	"time"
 
 	"github.com/volte6/gomud/internal/events"
@@ -18,7 +19,11 @@ import (
 
 func AutoSave_Listener(e events.Event) bool {
 
-	evt := e.(events.NewTurn)
+	evt, typeOk := e.(events.NewTurn)
+	if !typeOk {
+		slog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
+		return false
+	}
 
 	if evt.TurnNumber%uint64(evt.Config.TurnsPerAutoSave()) == 0 {
 		tStart := time.Now()

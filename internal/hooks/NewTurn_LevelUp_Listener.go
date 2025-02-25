@@ -18,6 +18,7 @@ func LevelUp_Listener(e events.Event) bool {
 
 	evt := e.(events.NewTurn)
 
+	// Only checks every 1 second or so
 	if evt.TurnNumber%uint64(evt.Config.TurnsPerSecond()) != 0 {
 		return true
 	}

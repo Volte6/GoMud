@@ -16,7 +16,13 @@ import (
 
 func PruneBuffs_Listener(e events.Event) bool {
 
-	//evt := e.(events.NewTurn)
+	/*
+		evt, typeOk := e.(events.NewTurn)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
+			return false
+		}
+	*/
 
 	roomsWithPlayers := rooms.GetRoomsWithPlayers()
 	for _, roomId := range roomsWithPlayers {

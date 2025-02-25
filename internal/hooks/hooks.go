@@ -39,4 +39,9 @@ func RegisterListeners() {
 	// ItemOwnership
 	events.RegisterListener(events.ItemOwnership{}, CheckItemQuests_Listener)
 
+	// MSP Sound
+	events.RegisterListener(events.MSP{}, PlaySound_Listener)
+	// Quest Events
+	events.RegisterListener(events.Quest{}, HandleQuestUpdate_Listener)
+
 }

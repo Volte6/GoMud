@@ -11,7 +11,14 @@ import (
 //
 
 func ActionPoints_Listener(e events.Event) bool {
-	//evt := e.(events.NewTurn)
+
+	/*
+		evt, typeOk := e.(events.NewTurn)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
+			return false
+		}
+	*/
 
 	for _, user := range users.GetAllActiveUsers() {
 		user.Character.ActionPoints += 1

@@ -2,6 +2,7 @@ package hooks
 
 import (
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -18,7 +19,12 @@ import (
 //
 
 func LocationGMCPUpdates_Listener(e events.Event) bool {
-	evt := e.(events.RoomChange)
+
+	evt, typeOk := e.(events.RoomChange)
+	if !typeOk {
+		slog.Error("Event", "Expected Type", "RoomChange", "Actual Type", e.Type())
+		return false
+	}
 
 	// If this isn't a user changing rooms, just pass it along.
 	if evt.UserId == 0 {

@@ -17,7 +17,7 @@ var (
 )
 
 // Returns an ID for the listener which can be used to unregister later.
-func RegisterListener(emptyEvent Event, cbFunc Listener) ListenerId {
+func RegisterListener(emptyEvent Event, cbFunc Listener, addToFront ...bool) ListenerId {
 	listenerLock.Lock()
 	defer listenerLock.Unlock()
 
@@ -32,7 +32,11 @@ func RegisterListener(emptyEvent Event, cbFunc Listener) ListenerId {
 		eventListeners[eType] = []ListenerWrapper{}
 	}
 
-	eventListeners[eType] = append(eventListeners[eType], ListenerWrapper{listenerCt, cbFunc})
+	if len(addToFront) > 0 && addToFront[0] {
+		eventListeners[eType] = append([]ListenerWrapper{{listenerCt, cbFunc}}, eventListeners[eType]...)
+	} else {
+		eventListeners[eType] = append(eventListeners[eType], ListenerWrapper{listenerCt, cbFunc})
+	}
 
 	// Write it to debug out
 	slog.Debug("Listener Registered", "Event", emptyEvent.Type(), "Function", runtime.FuncForPC(reflect.ValueOf(cbFunc).Pointer()).Name())

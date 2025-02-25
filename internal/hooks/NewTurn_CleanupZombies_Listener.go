@@ -14,7 +14,11 @@ import (
 
 func CleanupZombies_Listener(e events.Event) bool {
 
-	evt := e.(events.NewTurn)
+	evt, typeOk := e.(events.NewTurn)
+	if !typeOk {
+		slog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
+		return false
+	}
 
 	expTurns := uint64(evt.Config.SecondsToTurns(int(evt.Config.ZombieSeconds)))
 

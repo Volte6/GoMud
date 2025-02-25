@@ -1,6 +1,8 @@
 package hooks
 
 import (
+	"log/slog"
+
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
@@ -13,7 +15,12 @@ import (
 //
 
 func LocationMusicChange_Listener(e events.Event) bool {
-	evt := e.(events.RoomChange)
+
+	evt, typeOk := e.(events.RoomChange)
+	if !typeOk {
+		slog.Error("Event", "Expected Type", "RoomChange", "Actual Type", e.Type())
+		return false
+	}
 
 	// If this isn't a user changing rooms, just pass it along.
 	if evt.UserId == 0 {
