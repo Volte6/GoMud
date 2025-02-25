@@ -7,6 +7,7 @@ func RegisterListeners() {
 
 	// RoomChange Listeners
 	events.RegisterListener(events.RoomChange{}, LocationGMCPUpdates_Listener)
+	events.RegisterListener(events.RoomChange{}, LocationMusicChange_Listener)
 
 	// NewRound Listeners
 	events.RegisterListener(events.NewRound{}, PruneVMs_Listener)

@@ -169,18 +169,5 @@ func LocationGMCPUpdates_Listener(e events.Event) bool {
 		})
 	}
 
-	// If this zone has music, play it.
-	// Room music takes priority.
-	if newRoom.MusicFile != `` {
-		user.PlayMusic(newRoom.MusicFile)
-	} else {
-		zoneInfo := rooms.GetZoneConfig(newRoom.Zone)
-		if zoneInfo.MusicFile != `` {
-			user.PlayMusic(zoneInfo.MusicFile)
-		} else if oldRoom.MusicFile != `` {
-			user.PlayMusic(`Off`)
-		}
-	}
-
 	return true
 }
