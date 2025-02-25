@@ -302,23 +302,23 @@ func (m *Mob) Converse() {
 
 // Cause the mob to basically wait and do nothing for x seconds
 func (m *Mob) Sleep(seconds int) {
-	turnCount := seconds * configs.GetConfig().TurnsPerSecond()
-	m.Command(`noop`, turnCount)
+	m.Command(`noop`, float64(seconds))
 }
 
-func (m *Mob) Command(inputTxt string, waitTurns ...int) {
+func (m *Mob) Command(inputTxt string, waitSeconds ...float64) {
 
-	wt := 0
-	if len(waitTurns) > 0 {
-		wt = waitTurns[0]
+	readyTurn := util.GetTurnCount()
+	if len(waitSeconds) > 0 {
+		readyTurn += uint64(float64(configs.GetConfig().SecondsToTurns(1)) * waitSeconds[0])
 	}
 
 	for _, cmd := range strings.Split(inputTxt, `;`) {
 		events.AddToQueue(events.Input{
 			MobInstanceId: m.InstanceId,
 			InputText:     cmd,
-			WaitTurns:     wt,
+			ReadyTurn:     readyTurn,
 		})
+		readyTurn++
 	}
 
 }

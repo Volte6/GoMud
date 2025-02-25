@@ -63,8 +63,9 @@ func RemoveZombieUser(userId int) {
 	if u := userManager.Users[userId]; u != nil {
 		u.Character.SetAdjective(`zombie`, false)
 	}
-	connId := userManager.UserConnections[userId]
-	delete(userManager.ZombieConnections, connId)
+	if connId, ok := userManager.UserConnections[userId]; ok {
+		delete(userManager.ZombieConnections, connId)
+	}
 }
 
 func RemoveZombieConnection(connectionId connections.ConnectionId) {

@@ -30,7 +30,7 @@ type RoomAction struct {
 	SourceMobId  int
 	Action       string
 	Details      any
-	WaitTurns    int
+	ReadyTurn    uint64
 }
 
 func (r RoomAction) Type() string { return `RoomAction` }
@@ -40,7 +40,7 @@ type Input struct {
 	UserId        int
 	MobInstanceId int
 	InputText     string
-	WaitTurns     int
+	ReadyTurn     uint64
 	Flags         EventFlag
 }
 

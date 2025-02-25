@@ -87,7 +87,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 					SourceUserId: user.UserId,
 					SourceMobId:  0,
 					Action:       fmt.Sprintf("detonate #%d %s", targetMob.InstanceId, itemMatch.ShorthandId()),
-					WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+					ReadyTurn:    util.GetTurnCount() + uint64(configs.GetConfig().TurnsPerRound()*3),
 				})
 
 			}
@@ -136,7 +136,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 				SourceUserId: user.UserId,
 				SourceMobId:  0,
 				Action:       fmt.Sprintf("detonate @%d %s", targetUser.UserId, itemMatch.ShorthandId()),
-				WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+				ReadyTurn:    util.GetTurnCount() + uint64(configs.GetConfig().TurnsPerRound()*3),
 			})
 
 		}
@@ -209,7 +209,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 					SourceUserId: user.UserId,
 					SourceMobId:  0,
 					Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
-					WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+					ReadyTurn:    util.GetTurnCount() + uint64(configs.GetConfig().TurnsPerRound()*3),
 				})
 
 			}
@@ -284,7 +284,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 							SourceUserId: user.UserId,
 							SourceMobId:  0,
 							Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
-							WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+							ReadyTurn:    util.GetTurnCount() + uint64(configs.GetConfig().TurnsPerRound()*3),
 						})
 
 					}

@@ -20,7 +20,6 @@ import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
-	"github.com/volte6/gomud/internal/leaderboard"
 	"github.com/volte6/gomud/internal/mobcommands"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/parties"
@@ -40,7 +39,7 @@ import (
 type WorldInput struct {
 	FromId    int
 	InputText string
-	WaitTurns int
+	ReadyTurn uint64
 }
 
 func (wi WorldInput) Id() int {
@@ -144,7 +143,7 @@ func (w *World) enterWorld(userId int, roomId int) {
 			events.AddToQueue(events.Input{
 				UserId:    userId,
 				InputText: cmd,
-				WaitTurns: -1, // No delay between execution of commands
+				ReadyTurn: 0, // No delay between execution of commands
 			})
 
 		}
@@ -207,11 +206,11 @@ func (w *World) leaveWorld(userId int) {
 		if u := users.GetByUserId(uid); u != nil {
 			if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
 
-				bytesOut := []byte(fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name))
-				connections.SendTo(
-					term.GmcpPayload.BytesWithPayload(bytesOut),
-					user.ConnectionId(),
-				)
+				events.AddToQueue(events.GMCPOut{
+					UserId:  uid,
+					Payload: fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name),
+				})
+
 			}
 		}
 	}
@@ -697,14 +696,32 @@ loop:
 			messageTimer.Reset(time.Millisecond)
 
 			util.LockMud()
-			w.MessageTick()
+			w.EventLoop()
 			util.UnlockMud()
 
 		case <-turnTimer.C:
 
 			util.LockMud()
 			turnTimer.Reset(time.Duration(c.TurnMs) * time.Millisecond)
-			w.TurnTick()
+
+			turnCt := util.IncrementTurnCount()
+			c := configs.GetConfig()
+
+			events.AddToQueue(events.NewTurn{TurnNumber: turnCt, TimeNow: time.Now(), Config: c})
+
+			// After a full round of turns, we can do a round tick.
+			if turnCt%uint64(c.TurnsPerRound()) == 0 {
+
+				roundNumber := util.IncrementRoundCount()
+
+				if c.LogIntervalRoundCount > 0 && roundNumber%uint64(c.LogIntervalRoundCount) == 0 {
+					slog.Info("World::RoundTick()", "roundNumber", roundNumber)
+				}
+				events.AddToQueue(events.NewRound{RoundNumber: roundNumber, TimeNow: time.Now(), Config: c})
+			}
+
+			w.EventLoopTurns()
+
 			util.UnlockMud()
 
 		case enterWorldUserId := <-w.enterWorldUserId: // [2]int
@@ -761,7 +778,7 @@ loop:
 			events.AddToQueue(events.Input{
 				UserId:    wi.FromId,
 				InputText: wi.InputText,
-				WaitTurns: wi.WaitTurns,
+				ReadyTurn: util.GetTurnCount(),
 			})
 
 		}
@@ -814,7 +831,8 @@ func (w *World) processInput(userId int, inputText string, flags events.EventFla
 		if user.Macros != nil && len(inputText) == 2 {
 			if macro, ok := user.Macros[inputText]; ok {
 				handled = true
-				for waitTime, newCmd := range strings.Split(macro, `;`) {
+				readyTurn := util.GetTurnCount()
+				for _, newCmd := range strings.Split(macro, `;`) {
 					if newCmd == `` {
 						continue
 					}
@@ -822,9 +840,10 @@ func (w *World) processInput(userId int, inputText string, flags events.EventFla
 					events.AddToQueue(events.Input{
 						UserId:    userId,
 						InputText: newCmd,
-						WaitTurns: waitTime,
+						ReadyTurn: readyTurn,
 					})
 
+					readyTurn++
 				}
 			}
 		}
@@ -917,502 +936,16 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 }
 
-// Handles sending out queued up messaged to users
-func (w *World) MessageTick() {
+// Events that are throttled by TurnMs in config.yaml
+func (w *World) EventLoopTurns() {
 
-	//
-	// System commands such as /reload
-	//
-	eq := events.GetQueue(events.System{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		sys, typeOk := e.(events.System)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "System", "Actual Type", e.Type())
-			continue
-		}
-
-		// Allow any handlers to handle the event
-		if !events.DoListeners(e) {
-			continue
-		}
-
-		if sys.Command == `reload` {
-
-			events.AddToQueue(events.Broadcast{
-				Text: `Reloading flat files...`,
-			})
-
-			loadAllDataFiles(true)
-
-			events.AddToQueue(events.Broadcast{
-				Text:            `Done.` + term.CRLFStr,
-				SkipLineRefresh: true,
-			})
-
-		} else if sys.Command == `kick` {
-			w.Kick(sys.Data.(int))
-		}
-
-	}
-
-	//
-	// Dispatch GMCP events
-	//
-	eq = events.GetQueue(events.GMCPOut{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		gmcp, typeOk := e.(events.GMCPOut)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "GMCPOut", "Actual Type", e.Type())
-			continue
-		}
-
-		// Allow any handlers to handle the event
-		if !events.DoListeners(e) {
-			continue
-		}
-
-		if gmcp.UserId < 1 {
-			continue
-		}
-
-		connId := users.GetConnectionId(gmcp.UserId)
-		if connId == 0 {
-			continue
-		}
-
-		switch v := gmcp.Payload.(type) {
-		case []byte:
-			connections.SendTo(term.GmcpPayload.BytesWithPayload(v), connId)
-		case string:
-			connections.SendTo(term.GmcpPayload.BytesWithPayload([]byte(v)), connId)
-		default:
-			payload, err := json.Marshal(gmcp.Payload)
-			if err != nil {
-				slog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
-				continue
-			}
-			connections.SendTo(term.GmcpPayload.BytesWithPayload(payload), connId)
-		}
-
-	}
-
-	//
-	// Handle RoomChange events
-	//
-	eq = events.GetQueue(events.RoomChange{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		// Allow any handlers to handle the event
-		if !events.DoListeners(e) {
-			continue
-		}
-
-	}
-
-	//
-	// Handle NewRound events
-	//
-	eq = events.GetQueue(events.NewRound{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		// Allow any handlers to handle the event
-		if !events.DoListeners(e) {
-			continue
-		}
-
-	}
-
-	//
-	// Dispatch MSP events
-	//
-	eq = events.GetQueue(events.MSP{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		msp, typeOk := e.(events.MSP)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "MSP", "Actual Type", e.Type())
-			continue
-		}
-
-		// Allow any handlers to handle the event
-		if !events.DoListeners(e) {
-			continue
-		}
-
-		if msp.UserId < 1 {
-			continue
-		}
-
-		if msp.SoundFile == `` {
-			continue
-		}
-
-		if user := users.GetByUserId(msp.UserId); user != nil {
-
-			if msp.SoundType == `MUSIC` {
-
-				if user.LastMusic != msp.SoundFile {
-
-					msg := []byte("!!MUSIC(Off)")
-					if connections.IsWebsocket(user.ConnectionId()) {
-
-						connections.SendTo(
-							msg,
-							user.ConnectionId(),
-						)
-
-					} else {
-
-						connections.SendTo(
-							term.MspCommand.BytesWithPayload(msg),
-							user.ConnectionId(),
-						)
-
-					}
-				}
-
-				user.LastMusic = msp.SoundFile
-
-				msg := []byte("!!MUSIC(" + msp.SoundFile + " V=" + strconv.Itoa(msp.Volume) + " L=-1 C=1)")
-
-				if connections.IsWebsocket(user.ConnectionId()) {
-
-					connections.SendTo(
-						msg,
-						user.ConnectionId(),
-					)
-
-				} else {
-
-					connections.SendTo(
-						term.MspCommand.BytesWithPayload(msg),
-						user.ConnectionId(),
-					)
-
-				}
-			} else {
-
-				msg := []byte("!!SOUND(" + msp.SoundFile + " T=" + msp.Category + " V=" + strconv.Itoa(msp.Volume) + ")")
-
-				if connections.IsWebsocket(user.ConnectionId()) {
-
-					connections.SendTo(
-						msg,
-						user.ConnectionId(),
-					)
-
-				} else {
-
-					connections.SendTo(
-						term.MspCommand.BytesWithPayload(msg),
-						user.ConnectionId(),
-					)
-
-				}
-
-			}
-
-		}
-
-	}
-
-	redrawPrompts := make(map[uint64]string)
-
-	//
-	// System-wide broadcasts
-	//
-	eq = events.GetQueue(events.Broadcast{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		broadcast, typeOk := e.(events.Broadcast)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "Broadcast", "Actual Type", e.Type())
-			continue
-		}
-
-		// Allow any handlers to handle the event
-		if !events.DoListeners(e) {
-			continue
-		}
-
-		messageColorized := templates.AnsiParse(broadcast.Text)
-
-		var sentToConnectionIds []connections.ConnectionId
-
-		if broadcast.SkipLineRefresh {
-			sentToConnectionIds = connections.Broadcast(
-				[]byte(messageColorized),
-			)
-		} else {
-
-			sentToConnectionIds = connections.Broadcast(
-				[]byte(term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + messageColorized),
-			)
-		}
-
-		for _, connId := range sentToConnectionIds {
-			if _, ok := redrawPrompts[connId]; !ok {
-				user := users.GetByConnectionId(connId)
-				redrawPrompts[connId] = templates.AnsiParse(user.GetCommandPrompt(true))
-			}
-		}
-	}
-
-	eq = events.GetQueue(events.WebClientCommand{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		cmd, typeOk := e.(events.WebClientCommand)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
-			continue
-		}
-
-		// Allow any handlers to handle the event
-		if !events.DoListeners(e) {
-			continue
-		}
-
-		if !connections.IsWebsocket(cmd.ConnectionId) {
-			continue
-		}
-
-		connections.SendTo([]byte(cmd.Text), cmd.ConnectionId)
-
-	}
-
-	//
-	// Outbound text strings
-	//
-	eq = events.GetQueue(events.Message{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		message, typeOk := e.(events.Message)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
-			continue
-		}
-
-		// Allow any handlers to handle the event
-		if !events.DoListeners(e) {
-			continue
-		}
-
-		//slog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(messageColorized), "IsCommunication", message.IsCommunication)
-
-		if message.UserId > 0 {
-
-			if user := users.GetByUserId(message.UserId); user != nil {
-
-				// If they are deafened, they cannot hear user communications
-				if message.IsCommunication && user.Deafened {
-					continue
-				}
-
-				connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
-				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-					redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
-				}
-
-			}
-		}
-
-		if message.RoomId > 0 {
-
-			room := rooms.LoadRoom(message.RoomId)
-			if room == nil {
-				continue
-			}
-
-			for _, userId := range room.GetPlayers() {
-				skip := false
-
-				if message.UserId == userId {
-					continue
-				}
-
-				exLen := len(message.ExcludeUserIds)
-				if exLen > 0 {
-					for _, excludeId := range message.ExcludeUserIds {
-						if excludeId == userId {
-							skip = true
-							break
-						}
-					}
-				}
-
-				if skip {
-					continue
-				}
-
-				if user := users.GetByUserId(userId); user != nil {
-
-					// If they are deafened, they cannot hear user communications
-					if message.IsCommunication && user.Deafened {
-						continue
-					}
-
-					// If this is a quiet message, make sure the player can hear it
-					if message.IsQuiet {
-						if !user.Character.HasBuffFlag(buffs.SuperHearing) {
-							continue
-						}
-					}
-
-					connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
-					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-						redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
-					}
-
-				}
-			}
-
-		}
-
-	}
-
-	for connectionId, prompt := range redrawPrompts {
-		connections.SendTo([]byte(prompt), connectionId)
-	}
-}
-
-func (w *World) UpdateStats() {
-	s := web.GetStats()
-	s.Reset()
-
-	c := configs.GetConfig()
-
-	for _, u := range users.GetAllActiveUsers() {
-		s.OnlineUsers = append(s.OnlineUsers, u.GetOnlineInfo())
-	}
-
-	sort.Slice(s.OnlineUsers, func(i, j int) bool {
-		if s.OnlineUsers[i].Permission == users.PermissionAdmin {
-			return true
-		}
-		if s.OnlineUsers[j].Permission == users.PermissionAdmin {
-			return false
-		}
-		return s.OnlineUsers[i].OnlineTime > s.OnlineUsers[j].OnlineTime
-	})
-
-	for _, t := range c.TelnetPort {
-		p, _ := strconv.Atoi(t)
-		if p > 0 {
-			s.TelnetPorts = append(s.TelnetPorts, p)
-		}
-	}
-
-	s.WebSocketPort = int(c.WebPort)
-
-	web.UpdateStats(s)
-}
-
-// Turns are much finer resolution than rounds...
-// Many turns occur int he time a round does.
-// Discrete actions are processed on the turn level
-func (w *World) TurnTick() {
-
-	// Grab the current config
-	c := configs.GetConfig()
-
-	turnCt := util.IncrementTurnCount()
-
-	//
-	// Cleanup any zombies
-	//
-
-	expTurns := uint64(c.SecondsToTurns(int(c.ZombieSeconds)))
-
-	if expTurns < turnCt {
-
-		expZombies := users.GetExpiredZombies(turnCt - expTurns)
-		if len(expZombies) > 0 {
-			slog.Info("Expired Zombies", "count", len(expZombies))
-			connIds := users.GetConnectionIds(expZombies)
-
-			for _, userId := range expZombies {
-				worldManager.leaveWorld(userId)
-				users.RemoveZombieUser(userId)
-			}
-			for _, connId := range connIds {
-				if err := users.LogOutUserByConnectionId(connId); err != nil {
-					slog.Error("Log Out Error", "connectionId", connId, "error", err)
-				}
-			}
-
-		}
-	}
-
-	if turnCt%uint64(c.TurnsPerAutoSave()) == 0 {
-		tStart := time.Now()
-
-		events.AddToQueue(events.Broadcast{
-			Text: `Saving users...`,
-		})
-
-		users.SaveAllUsers(true)
-
-		events.AddToQueue(events.Broadcast{
-			Text:            `Done.` + term.CRLFStr,
-			SkipLineRefresh: true,
-		})
-
-		events.AddToQueue(events.Broadcast{
-			Text: `Saving rooms...`,
-		})
-
-		rooms.SaveAllRooms()
-
-		events.AddToQueue(events.Broadcast{
-			Text:            `Done.` + term.CRLFStr,
-			SkipLineRefresh: true,
-		})
-
-		util.TrackTime(`Save Game State`, time.Since(tStart).Seconds())
-
-		// Do leaderboard updates here too
-		events.AddToQueue(events.Broadcast{
-			Text: `Updating leaderboards...`,
-		})
-
-		tStart = time.Now()
-
-		leaderboard.Update()
-
-		util.TrackTime(`Leaderboards`, time.Since(tStart).Seconds())
-
-		events.AddToQueue(events.Broadcast{
-			Text:            `Done.` + term.CRLFStr,
-			SkipLineRefresh: true,
-		})
-	}
-
-	tStart := time.Now()
-	var eq *events.Queue
+	var turnCt uint64 = util.GetTurnCount()
 
 	//
 	// Handle Input Queue
 	//
 	alreadyProcessed := make(map[int]struct{}) // Keep track of players who already had a command this turn, and what turn it was
-	eq = events.GetQueue(events.Input{})
+	eq := events.GetQueue(events.Input{})
 	for eq.Len() > 0 {
 
 		e := eq.Poll().(events.Event)
@@ -1427,7 +960,7 @@ func (w *World) TurnTick() {
 
 		// If it's a mob
 		if input.MobInstanceId > 0 {
-			if input.WaitTurns < 1 {
+			if input.ReadyTurn <= turnCt {
 
 				// Allow any handlers to handle the event
 				if !events.DoListeners(e) {
@@ -1436,14 +969,13 @@ func (w *World) TurnTick() {
 
 				w.processMobInput(input.MobInstanceId, input.InputText)
 			} else {
-				input.WaitTurns--
 				events.Requeue(input)
 			}
 			continue
 		}
 
 		// -1 and below, process immediately and don't count towards limit
-		if input.WaitTurns <= -1 {
+		if input.ReadyTurn == 0 {
 
 			// If this command was potentially blocking input, unblock it now.
 			if input.Flags.Has(events.CmdUnBlockInput) {
@@ -1475,7 +1007,7 @@ func (w *World) TurnTick() {
 
 		// 0 means process immediately
 		// however, process no further events from this user until next turn
-		if input.WaitTurns > 0 {
+		if input.ReadyTurn > turnCt {
 
 			// If this is a multi-turn wait, block further input if flagged to do so
 			if input.Flags.Has(events.CmdBlockInput) {
@@ -1487,7 +1019,6 @@ func (w *World) TurnTick() {
 				input.Flags.Remove(events.CmdBlockInput)
 			}
 
-			input.WaitTurns--
 			events.Requeue(input)
 
 			continue
@@ -1519,6 +1050,35 @@ func (w *World) TurnTick() {
 		alreadyProcessed[input.UserId] = struct{}{}
 	}
 
+}
+
+// Should only handle sending messages out to users
+func (w *World) EventLoop() {
+
+	var c configs.Config = configs.GetConfig()
+	var eq *events.Queue
+	turnNow := util.GetTurnCount()
+
+	//
+	// Handle Turn Queue
+	//
+	eq = events.GetQueue(events.NewTurn{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		_, typeOk := e.(events.NewTurn)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+	}
+
 	//
 	// Handle RoomAction Queue
 	//
@@ -1535,9 +1095,9 @@ func (w *World) TurnTick() {
 
 		//slog.Debug(`Event`, `type`, action.Type(), `RoomId`, action.RoomId, `SourceUserId`, action.SourceUserId, `SourceMobId`, action.SourceMobId, `WaitTurns`, action.WaitTurns, `Action`, action.Action)
 
-		if action.WaitTurns > 0 {
+		if action.ReadyTurn > turnNow {
 
-			if action.WaitTurns%c.TurnsPerRound() == 0 {
+			if int(action.ReadyTurn-turnNow)%c.TurnsPerRound() == 0 {
 				// Get the parts of the command
 				parts := strings.SplitN(action.Action, ` `, 3)
 				if parts[0] == `detonate` {
@@ -1565,7 +1125,6 @@ func (w *World) TurnTick() {
 
 			}
 
-			action.WaitTurns--
 			events.Requeue(action)
 			continue
 		}
@@ -2000,38 +1559,412 @@ func (w *World) TurnTick() {
 	}
 
 	//
-	// Prune all buffs that have expired.
+	// Handle NewRound events
 	//
-	w.PruneBuffs()
+	eq = events.GetQueue(events.NewRound{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+	}
 
 	//
-	// Update movement points for each player
-	// TODO: Optimize this to avoid re-loops through users
+	// System commands such as /reload
 	//
-	for _, uId := range users.GetOnlineUserIds() {
-		if user := users.GetByUserId(uId); user != nil {
-			user.Character.ActionPoints += 1
-			if user.Character.ActionPoints > user.Character.ActionPointsMax.Value {
-				user.Character.ActionPoints = user.Character.ActionPointsMax.Value
+	eq = events.GetQueue(events.System{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		sys, typeOk := e.(events.System)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "System", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		if sys.Command == `reload` {
+
+			events.AddToQueue(events.Broadcast{
+				Text: `Reloading flat files...`,
+			})
+
+			loadAllDataFiles(true)
+
+			events.AddToQueue(events.Broadcast{
+				Text:            `Done.` + term.CRLFStr,
+				SkipLineRefresh: true,
+			})
+
+		} else if sys.Command == `kick` {
+			w.Kick(sys.Data.(int))
+		} else if sys.Command == `leaveworld` {
+			w.leaveWorld(sys.Data.(int))
+			users.RemoveZombieUser(sys.Data.(int))
+		} else if sys.Command == `logoff` {
+			w.logOff(sys.Data.(int))
+		}
+
+	}
+
+	//
+	// Dispatch GMCP events
+	//
+	eq = events.GetQueue(events.GMCPOut{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		gmcp, typeOk := e.(events.GMCPOut)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "GMCPOut", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		if gmcp.UserId < 1 {
+			continue
+		}
+
+		connId := users.GetConnectionId(gmcp.UserId)
+		if connId == 0 {
+			continue
+		}
+
+		switch v := gmcp.Payload.(type) {
+		case []byte:
+			connections.SendTo(term.GmcpPayload.BytesWithPayload(v), connId)
+		case string:
+			connections.SendTo(term.GmcpPayload.BytesWithPayload([]byte(v)), connId)
+		default:
+			payload, err := json.Marshal(gmcp.Payload)
+			if err != nil {
+				slog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
+				continue
+			}
+			connections.SendTo(term.GmcpPayload.BytesWithPayload(payload), connId)
+		}
+
+	}
+
+	//
+	// Handle RoomChange events
+	//
+	eq = events.GetQueue(events.RoomChange{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+	}
+
+	//
+	// Dispatch MSP events
+	//
+	eq = events.GetQueue(events.MSP{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		msp, typeOk := e.(events.MSP)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "MSP", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		if msp.UserId < 1 {
+			continue
+		}
+
+		if msp.SoundFile == `` {
+			continue
+		}
+
+		if user := users.GetByUserId(msp.UserId); user != nil {
+
+			if msp.SoundType == `MUSIC` {
+
+				if user.LastMusic != msp.SoundFile {
+
+					msg := []byte("!!MUSIC(Off)")
+					if connections.IsWebsocket(user.ConnectionId()) {
+
+						connections.SendTo(
+							msg,
+							user.ConnectionId(),
+						)
+
+					} else {
+
+						connections.SendTo(
+							term.MspCommand.BytesWithPayload(msg),
+							user.ConnectionId(),
+						)
+
+					}
+				}
+
+				user.LastMusic = msp.SoundFile
+
+				msg := []byte("!!MUSIC(" + msp.SoundFile + " V=" + strconv.Itoa(msp.Volume) + " L=-1 C=1)")
+
+				if connections.IsWebsocket(user.ConnectionId()) {
+
+					connections.SendTo(
+						msg,
+						user.ConnectionId(),
+					)
+
+				} else {
+
+					connections.SendTo(
+						term.MspCommand.BytesWithPayload(msg),
+						user.ConnectionId(),
+					)
+
+				}
+			} else {
+
+				msg := []byte("!!SOUND(" + msp.SoundFile + " T=" + msp.Category + " V=" + strconv.Itoa(msp.Volume) + ")")
+
+				if connections.IsWebsocket(user.ConnectionId()) {
+
+					connections.SendTo(
+						msg,
+						user.ConnectionId(),
+					)
+
+				} else {
+
+					connections.SendTo(
+						term.MspCommand.BytesWithPayload(msg),
+						user.ConnectionId(),
+					)
+
+				}
+
+			}
+
+		}
+
+	}
+
+	redrawPrompts := make(map[uint64]string)
+
+	//
+	// System-wide broadcasts
+	//
+	eq = events.GetQueue(events.Broadcast{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		broadcast, typeOk := e.(events.Broadcast)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "Broadcast", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		messageColorized := templates.AnsiParse(broadcast.Text)
+
+		var sentToConnectionIds []connections.ConnectionId
+
+		if broadcast.SkipLineRefresh {
+			sentToConnectionIds = connections.Broadcast(
+				[]byte(messageColorized),
+			)
+		} else {
+
+			sentToConnectionIds = connections.Broadcast(
+				[]byte(term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + messageColorized),
+			)
+		}
+
+		for _, connId := range sentToConnectionIds {
+			if _, ok := redrawPrompts[connId]; !ok {
+				user := users.GetByConnectionId(connId)
+				redrawPrompts[connId] = templates.AnsiParse(user.GetCommandPrompt(true))
 			}
 		}
 	}
 
-	if turnCt%uint64(c.TurnsPerSecond()) == 0 {
-		w.CheckForLevelUps()
+	eq = events.GetQueue(events.WebClientCommand{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		cmd, typeOk := e.(events.WebClientCommand)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		if !connections.IsWebsocket(cmd.ConnectionId) {
+			continue
+		}
+
+		connections.SendTo([]byte(cmd.Text), cmd.ConnectionId)
+
 	}
 
 	//
-	// End processing of buffs
+	// Outbound text strings
 	//
+	eq = events.GetQueue(events.Message{})
+	for eq.Len() > 0 {
 
-	util.TrackTime(`World::TurnTick()`, time.Since(tStart).Seconds())
+		e := eq.Poll().(events.Event)
 
-	// After a full round of turns, we can do a round tick.
-	if turnCt%uint64(c.TurnsPerRound()) == 0 {
-		w.roundTick()
+		message, typeOk := e.(events.Message)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		//slog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(messageColorized), "IsCommunication", message.IsCommunication)
+
+		if message.UserId > 0 {
+
+			if user := users.GetByUserId(message.UserId); user != nil {
+
+				// If they are deafened, they cannot hear user communications
+				if message.IsCommunication && user.Deafened {
+					continue
+				}
+
+				connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
+				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
+					redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
+				}
+
+			}
+		}
+
+		if message.RoomId > 0 {
+
+			room := rooms.LoadRoom(message.RoomId)
+			if room == nil {
+				continue
+			}
+
+			for _, userId := range room.GetPlayers() {
+				skip := false
+
+				if message.UserId == userId {
+					continue
+				}
+
+				exLen := len(message.ExcludeUserIds)
+				if exLen > 0 {
+					for _, excludeId := range message.ExcludeUserIds {
+						if excludeId == userId {
+							skip = true
+							break
+						}
+					}
+				}
+
+				if skip {
+					continue
+				}
+
+				if user := users.GetByUserId(userId); user != nil {
+
+					// If they are deafened, they cannot hear user communications
+					if message.IsCommunication && user.Deafened {
+						continue
+					}
+
+					// If this is a quiet message, make sure the player can hear it
+					if message.IsQuiet {
+						if !user.Character.HasBuffFlag(buffs.SuperHearing) {
+							continue
+						}
+					}
+
+					connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
+					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
+						redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
+					}
+
+				}
+			}
+
+		}
+
 	}
 
+	for connectionId, prompt := range redrawPrompts {
+		connections.SendTo([]byte(prompt), connectionId)
+	}
+}
+
+func (w *World) UpdateStats() {
+	s := web.GetStats()
+	s.Reset()
+
+	c := configs.GetConfig()
+
+	for _, u := range users.GetAllActiveUsers() {
+		s.OnlineUsers = append(s.OnlineUsers, u.GetOnlineInfo())
+	}
+
+	sort.Slice(s.OnlineUsers, func(i, j int) bool {
+		if s.OnlineUsers[i].Permission == users.PermissionAdmin {
+			return true
+		}
+		if s.OnlineUsers[j].Permission == users.PermissionAdmin {
+			return false
+		}
+		return s.OnlineUsers[i].OnlineTime > s.OnlineUsers[j].OnlineTime
+	})
+
+	for _, t := range c.TelnetPort {
+		p, _ := strconv.Atoi(t)
+		if p > 0 {
+			s.TelnetPorts = append(s.TelnetPorts, p)
+		}
+	}
+
+	s.WebSocketPort = int(c.WebPort)
+
+	web.UpdateStats(s)
 }
 
 // Force disconnect a user (Makes them a zombie)

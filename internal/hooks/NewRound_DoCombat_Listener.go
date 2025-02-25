@@ -751,12 +751,14 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 						continue
 					}
 
+					var waitTime float64 = 0.0
 					allCmds := strings.Split(combatAction, `;`)
 					if len(allCmds) >= evt.Config.TurnsPerRound() {
 						mob.Command(`say I have a CombatAction that is too long. Please notify an admin.`)
 					} else {
-						for turnDelay, action := range strings.Split(combatAction, `;`) {
-							mob.Command(action, turnDelay)
+						for _, action := range strings.Split(combatAction, `;`) {
+							mob.Command(action, waitTime)
+							waitTime += 0.1
 						}
 					}
 					continue

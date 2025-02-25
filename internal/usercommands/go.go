@@ -2,6 +2,7 @@ package usercommands
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
@@ -47,13 +48,14 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 			actionCost = 50
 			encumbered = true
 		}
-
+		fmt.Println("TEST")
 		if !user.Character.DeductActionPoints(actionCost) {
 
 			if encumbered {
 				user.SendText("You're too encumbered to move (<ansi fg=\"command\">help encumbrance</ansi>)!")
 			} else {
 				user.SendText("You're too tired to move (slow down)!")
+				slog.Debug("No ActionPoints", "AP", user.Character.ActionPoints, "Needed", actionCost)
 			}
 
 			return true, nil
@@ -129,7 +131,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 
 		if exitInfo.ExitMessage != `` && !flags.Has(events.CmdIsRequeue) {
 			user.SendText(exitInfo.ExitMessage)
-			user.CommandFlagged(rest, flags|events.CmdIsRequeue|events.CmdBlockInputUntilComplete, configs.GetConfig().SecondsToTurns(1))
+			user.CommandFlagged(rest, flags|events.CmdIsRequeue|events.CmdBlockInputUntilComplete, 1)
 			return true, nil
 		}
 

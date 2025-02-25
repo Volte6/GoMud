@@ -298,25 +298,25 @@ func (a ScriptActor) Sleep(seconds int) {
 	}
 }
 
-func (a ScriptActor) Command(cmd string, waitTurns ...int) {
-	if len(waitTurns) < 1 {
-		waitTurns = append(waitTurns, 0)
+func (a ScriptActor) Command(cmd string, waitSeconds ...float64) {
+	if len(waitSeconds) < 1 {
+		waitSeconds = append(waitSeconds, 0)
 	}
 	if a.userId > 0 {
-		a.userRecord.Command(cmd, waitTurns[0])
+		a.userRecord.Command(cmd, waitSeconds[0])
 	} else {
-		a.mobRecord.Command(cmd, waitTurns[0])
+		a.mobRecord.Command(cmd, waitSeconds[0])
 	}
 }
 
-func (a ScriptActor) CommandFlagged(cmd string, flags events.EventFlag, waitTurns ...int) {
-	if len(waitTurns) < 1 {
-		waitTurns = append(waitTurns, 0)
+func (a ScriptActor) CommandFlagged(cmd string, flags events.EventFlag, waitSeconds ...float64) {
+	if len(waitSeconds) < 1 {
+		waitSeconds = append(waitSeconds, 0)
 	}
 	if a.userId > 0 {
-		a.userRecord.CommandFlagged(cmd, flags, waitTurns[0])
+		a.userRecord.CommandFlagged(cmd, flags, waitSeconds[0])
 	} else {
-		a.mobRecord.Command(cmd, waitTurns[0])
+		a.mobRecord.Command(cmd, waitSeconds[0])
 	}
 }
 

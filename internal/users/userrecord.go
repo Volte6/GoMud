@@ -186,17 +186,17 @@ func (u *UserRecord) PlaySound(soundId string, category string) {
 
 }
 
-func (u *UserRecord) Command(inputTxt string, waitTurns ...int) {
+func (u *UserRecord) Command(inputTxt string, waitSeconds ...float64) {
 
-	wt := 0
-	if len(waitTurns) > 0 {
-		wt = waitTurns[0]
+	readyTurn := util.GetTurnCount()
+	if len(waitSeconds) > 0 {
+		readyTurn += uint64(float64(configs.GetConfig().SecondsToTurns(1)) * waitSeconds[0])
 	}
 
 	events.AddToQueue(events.Input{
 		UserId:    u.UserId,
 		InputText: inputTxt,
-		WaitTurns: wt,
+		ReadyTurn: readyTurn,
 	})
 
 }
@@ -213,11 +213,11 @@ func (u *UserRecord) InputBlocked() bool {
 	return u.inputBlocked
 }
 
-func (u *UserRecord) CommandFlagged(inputTxt string, flagData events.EventFlag, waitTurns ...int) {
+func (u *UserRecord) CommandFlagged(inputTxt string, flagData events.EventFlag, waitSeconds ...float64) {
 
-	wt := 0
-	if len(waitTurns) > 0 {
-		wt = waitTurns[0]
+	readyTurn := util.GetTurnCount()
+	if len(waitSeconds) > 0 {
+		readyTurn += uint64(float64(configs.GetConfig().SecondsToTurns(1)) * waitSeconds[0])
 	}
 
 	if flagData&events.CmdBlockInput == events.CmdBlockInput {
@@ -227,7 +227,7 @@ func (u *UserRecord) CommandFlagged(inputTxt string, flagData events.EventFlag, 
 	events.AddToQueue(events.Input{
 		UserId:    u.UserId,
 		InputText: inputTxt,
-		WaitTurns: wt,
+		ReadyTurn: readyTurn,
 		Flags:     flagData,
 	})
 
