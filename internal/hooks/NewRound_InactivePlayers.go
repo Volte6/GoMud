@@ -15,7 +15,9 @@ func InactivePlayers(e events.Event) bool {
 
 	evt := e.(events.NewRound)
 
-	maxIdleRounds := evt.Config.SecondsToRounds(int(evt.Config.MaxIdleSeconds))
+	c := evt.Config.(configs.Config)
+
+	maxIdleRounds := c.SecondsToRounds(int(c.MaxIdleSeconds))
 	if maxIdleRounds == 0 {
 		return true
 	}

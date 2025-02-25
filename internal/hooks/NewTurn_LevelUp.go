@@ -3,6 +3,7 @@ package hooks
 import (
 	"fmt"
 
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/templates"
@@ -18,8 +19,10 @@ func LevelUp(e events.Event) bool {
 
 	evt := e.(events.NewTurn)
 
+	c := evt.Config.(configs.Config)
+
 	// Only checks every 1 second or so
-	if evt.TurnNumber%uint64(evt.Config.TurnsPerSecond()) != 0 {
+	if evt.TurnNumber%uint64(c.TurnsPerSecond()) != 0 {
 		return true
 	}
 
@@ -31,10 +34,10 @@ func LevelUp(e events.Event) bool {
 
 			livesBefore := user.Character.ExtraLives
 
-			if evt.Config.PermaDeath && evt.Config.LivesOnLevelUp > 0 {
-				user.Character.ExtraLives += int(evt.Config.LivesOnLevelUp)
-				if user.Character.ExtraLives > int(evt.Config.LivesMax) {
-					user.Character.ExtraLives = int(evt.Config.LivesMax)
+			if c.PermaDeath && c.LivesOnLevelUp > 0 {
+				user.Character.ExtraLives += int(c.LivesOnLevelUp)
+				if user.Character.ExtraLives > int(c.LivesMax) {
+					user.Character.ExtraLives = int(c.LivesMax)
 				}
 			}
 

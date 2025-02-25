@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/scripting"
 )
 
@@ -24,9 +25,11 @@ func CheckItemQuests(e events.Event) bool {
 		return true
 	}
 
+	itm := evt.Item.(items.Item)
+
 	if evt.Gained {
 
-		iSpec := evt.Item.GetSpec()
+		iSpec := itm.GetSpec()
 		if iSpec.QuestToken != `` {
 			events.AddToQueue(events.Quest{
 				UserId:     evt.UserId,
@@ -34,11 +37,11 @@ func CheckItemQuests(e events.Event) bool {
 			})
 		}
 
-		scripting.TryItemScriptEvent(`onFound`, evt.Item, evt.UserId)
+		scripting.TryItemScriptEvent(`onFound`, itm, evt.UserId)
 
 	} else {
 
-		scripting.TryItemScriptEvent(`onLost`, evt.Item, evt.UserId)
+		scripting.TryItemScriptEvent(`onLost`, itm, evt.UserId)
 
 	}
 

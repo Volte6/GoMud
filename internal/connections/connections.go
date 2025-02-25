@@ -136,8 +136,6 @@ func Remove(id ConnectionId) (err error) {
 		disconnectCounter++
 		// Remove the entry
 		delete(netConnections, id)
-		// remove the connection from the map
-		slog.Info("connection removed", "connectionId", id, "remoteAddr", cd.RemoteAddr().String())
 
 		return nil
 

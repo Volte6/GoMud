@@ -28,6 +28,7 @@ func (h *ColorHandler) Handle(ctx context.Context, r slog.Record) error {
 		return nil
 	}
 
+	logToAdmin := false
 	switch r.Level {
 	case slog.LevelDebug:
 		level = fmt.Sprintf("\033[95m%s:\033[0m", r.Level.String()) // magenta
@@ -35,8 +36,10 @@ func (h *ColorHandler) Handle(ctx context.Context, r slog.Record) error {
 		level = fmt.Sprintf("\033[32m%s: \033[0m", r.Level.String()) // green
 	case slog.LevelWarn:
 		level = fmt.Sprintf("\033[33m%s: \033[0m", r.Level.String()) // yellow
+		logToAdmin = true
 	case slog.LevelError:
 		level = fmt.Sprintf("\033[31m%s:\033[0m", r.Level.String()) // red
+		logToAdmin = true
 	}
 
 	finalOut := strings.Builder{}
@@ -108,6 +111,23 @@ func (h *ColorHandler) Handle(ctx context.Context, r slog.Record) error {
 	msg := fmt.Sprintf("\033[36m%s\033[39;49m", r.Message) // cyan
 
 	h.l.Println(timeStr, level, msg, finalOut.String())
+
+	if logToAdmin {
+
+		// TODO: Experimental
+		// TODO: Direct this to admins actively listening to logs
+		/*
+			events.AddToQueue(events.Broadcast{
+				Text: fmt.Sprintln(timeStr, level, msg, finalOut.String()),
+			})
+		*/
+		/*
+			connections.Broadcast(
+				[]byte(fmt.Sprint(timeStr, level, msg, finalOut.String()) + "\r\n"),
+			)
+		*/
+
+	}
 
 	return nil
 }
