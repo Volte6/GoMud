@@ -1,5 +1,11 @@
 package events
 
+import (
+	"time"
+
+	"github.com/volte6/gomud/internal/configs"
+)
+
 // Used to apply or remove buffs
 type Buff struct {
 	UserId        int
@@ -78,9 +84,8 @@ func (b GMCPIn) Type() string { return `GMCP` }
 
 // GMCP Commands from server to client
 type GMCPOut struct {
-	ConnectionId uint64
-	UserId       int
-	Payload      any
+	UserId  int
+	Payload any
 }
 
 func (b GMCPOut) Type() string { return `GMCP` }
@@ -88,6 +93,7 @@ func (b GMCPOut) Type() string { return `GMCP` }
 // Messages that are intended to reach all users on the system
 type System struct {
 	Command string
+	Data    any
 }
 
 func (s System) Type() string { return `System` }
@@ -102,3 +108,32 @@ type MSP struct {
 }
 
 func (m MSP) Type() string { return `MSP` }
+
+// Fired whenever a mob or player changes rooms
+type RoomChange struct {
+	UserId        int
+	MobInstanceId int
+	FromRoomId    int
+	ToRoomId      int
+}
+
+func (r RoomChange) Type() string { return `RoomChange` }
+
+// Fired every new round
+type NewRound struct {
+	RoundNumber uint64
+	TimeNow     time.Time
+	Config      configs.Config
+}
+
+func (r NewRound) Type() string { return `NewRound` }
+
+// Fired every new turn (much faster! see TurnMs in config)
+// TODO: Need to move world methods to these events...
+type NewTurn struct {
+	TurnNumber uint64
+	TimeNow    time.Time
+	Config     configs.Config
+}
+
+func (r NewTurn) Type() string { return `NewTurn` }

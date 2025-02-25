@@ -28,6 +28,7 @@ import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/flags"
 	"github.com/volte6/gomud/internal/gametime"
+	"github.com/volte6/gomud/internal/hooks"
 	"github.com/volte6/gomud/internal/inputhandlers"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
@@ -132,6 +133,8 @@ func main() {
 		slog.Error("World Validation", "error", err)
 		os.Exit(1)
 	}
+
+	hooks.RegisterListeners()
 
 	// Load all the data files up front.
 	loadAllDataFiles(false)

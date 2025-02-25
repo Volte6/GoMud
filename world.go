@@ -156,11 +156,11 @@ func (w *World) enterWorld(userId int, roomId int) {
 	//
 	if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
 
-		bytesOut := []byte(fmt.Sprintf(`Char.Name {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
-		connections.SendTo(
-			term.GmcpPayload.BytesWithPayload(bytesOut),
-			user.ConnectionId(),
-		)
+		events.AddToQueue(events.GMCPOut{
+			UserId:  user.UserId,
+			Payload: fmt.Sprintf(`Char.Name {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name),
+		})
+
 	}
 
 	w.UpdateStats()
@@ -934,7 +934,12 @@ func (w *World) MessageTick() {
 			continue
 		}
 
-		if sys.Command == "reload" {
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		if sys.Command == `reload` {
 
 			events.AddToQueue(events.Broadcast{
 				Text: `Reloading flat files...`,
@@ -947,7 +952,10 @@ func (w *World) MessageTick() {
 				SkipLineRefresh: true,
 			})
 
+		} else if sys.Command == `kick` {
+			w.Kick(sys.Data.(int))
 		}
+
 	}
 
 	//
@@ -964,17 +972,62 @@ func (w *World) MessageTick() {
 			continue
 		}
 
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
 		if gmcp.UserId < 1 {
 			continue
 		}
 
-		if user := users.GetByUserId(gmcp.UserId); user != nil {
+		connId := users.GetConnectionId(gmcp.UserId)
+		if connId == 0 {
+			continue
+		}
+
+		switch v := gmcp.Payload.(type) {
+		case []byte:
+			connections.SendTo(term.GmcpPayload.BytesWithPayload(v), connId)
+		case string:
+			connections.SendTo(term.GmcpPayload.BytesWithPayload([]byte(v)), connId)
+		default:
 			payload, err := json.Marshal(gmcp.Payload)
 			if err != nil {
 				slog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
 				continue
 			}
-			connections.SendTo([]byte(payload), user.ConnectionId())
+			connections.SendTo(term.GmcpPayload.BytesWithPayload(payload), connId)
+		}
+
+	}
+
+	//
+	// Handle RoomChange events
+	//
+	eq = events.GetQueue(events.RoomChange{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+	}
+
+	//
+	// Handle NewRound events
+	//
+	eq = events.GetQueue(events.NewRound{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
 		}
 
 	}
@@ -990,6 +1043,11 @@ func (w *World) MessageTick() {
 		msp, typeOk := e.(events.MSP)
 		if !typeOk {
 			slog.Error("Event", "Expected Type", "MSP", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
 			continue
 		}
 
@@ -1086,6 +1144,11 @@ func (w *World) MessageTick() {
 			continue
 		}
 
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
 		messageColorized := templates.AnsiParse(broadcast.Text)
 
 		var sentToConnectionIds []connections.ConnectionId
@@ -1120,6 +1183,11 @@ func (w *World) MessageTick() {
 			continue
 		}
 
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
 		if !connections.IsWebsocket(cmd.ConnectionId) {
 			continue
 		}
@@ -1139,6 +1207,11 @@ func (w *World) MessageTick() {
 		message, typeOk := e.(events.Message)
 		if !typeOk {
 			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
 			continue
 		}
 
@@ -1355,6 +1428,12 @@ func (w *World) TurnTick() {
 		// If it's a mob
 		if input.MobInstanceId > 0 {
 			if input.WaitTurns < 1 {
+
+				// Allow any handlers to handle the event
+				if !events.DoListeners(e) {
+					continue
+				}
+
 				w.processMobInput(input.MobInstanceId, input.InputText)
 			} else {
 				input.WaitTurns--
@@ -1376,6 +1455,11 @@ func (w *World) TurnTick() {
 					}
 				}
 
+			}
+
+			// Allow any handlers to handle the event
+			if !events.DoListeners(e) {
+				continue
 			}
 
 			w.processInput(input.UserId, input.InputText, input.Flags)
@@ -1423,6 +1507,11 @@ func (w *World) TurnTick() {
 				}
 			}
 
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
 		}
 
 		w.processInput(input.UserId, input.InputText, events.EventFlag(input.Flags))
@@ -1478,6 +1567,11 @@ func (w *World) TurnTick() {
 
 			action.WaitTurns--
 			events.Requeue(action)
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
 			continue
 		}
 
@@ -1679,7 +1773,12 @@ func (w *World) TurnTick() {
 			continue
 		}
 
-		slog.Debug(`Event`, `type`, buff.Type(), `UserId`, buff.UserId, `MobInstanceId`, buff.MobInstanceId, `BuffId`, buff.BuffId)
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		//slog.Debug(`Event`, `type`, buff.Type(), `UserId`, buff.UserId, `MobInstanceId`, buff.MobInstanceId, `BuffId`, buff.BuffId)
 
 		buffInfo := buffs.GetBuffSpec(buff.BuffId)
 		if buffInfo == nil {
@@ -1748,7 +1847,12 @@ func (w *World) TurnTick() {
 			continue
 		}
 
-		slog.Debug(`Event`, `type`, quest.Type(), `UserId`, quest.UserId, `QuestToken`, quest.QuestToken)
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		//slog.Debug(`Event`, `type`, quest.Type(), `UserId`, quest.UserId, `QuestToken`, quest.QuestToken)
 
 		// Give them a token
 		remove := false
@@ -1932,6 +2036,8 @@ func (w *World) TurnTick() {
 
 // Force disconnect a user (Makes them a zombie)
 func (w *World) Kick(userId int) {
+
+	slog.Info(`Kick`, `userId`, userId)
 
 	user := users.GetByUserId(userId)
 	if user == nil {

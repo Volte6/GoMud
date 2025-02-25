@@ -13,12 +13,11 @@ import (
 
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/connections"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 
@@ -311,146 +310,11 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		}
 	}
 
-	//
-	// Send GMCP Updates
-	//
-	if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-
-		newRoomPlayers := strings.Builder{}
-
-		// Send to everyone in the new room that a player arrived
-		for _, uid := range newRoom.GetPlayers() {
-
-			if uid == user.UserId {
-				continue
-			}
-
-			if u := users.GetByUserId(uid); u != nil {
-
-				if newRoomPlayers.Len() > 0 {
-					newRoomPlayers.WriteString(`, `)
-				}
-
-				newRoomPlayers.WriteString(`"` + u.Character.Name + `": ` + `"` + u.Character.Name + `"`)
-
-				if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
-
-					bytesOut := []byte(fmt.Sprintf(`Room.AddPlayer {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
-					connections.SendTo(
-						term.GmcpPayload.BytesWithPayload(bytesOut),
-						user.ConnectionId(),
-					)
-				}
-			}
-		}
-
-		// Send to everyone in the old room that a player left
-		for _, uid := range currentRoom.GetPlayers() {
-
-			if uid == user.UserId {
-				continue
-			}
-
-			if u := users.GetByUserId(uid); u != nil {
-				if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
-
-					bytesOut := []byte(fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name))
-					connections.SendTo(
-						term.GmcpPayload.BytesWithPayload(bytesOut),
-						user.ConnectionId(),
-					)
-				}
-			}
-		}
-
-		roomInfoStr := strings.Builder{}
-		roomInfoStr.WriteString(`{ `)
-		roomInfoStr.WriteString(`"num": ` + strconv.Itoa(newRoom.RoomId) + `, `)
-		roomInfoStr.WriteString(`"name": "` + newRoom.Title + `", `)
-		roomInfoStr.WriteString(`"area": "` + newRoom.Zone + `", `)
-		roomInfoStr.WriteString(`"environment": "` + newRoom.GetBiome().Name() + `", `)
-
-		// build exits
-		roomInfoStr.WriteString(`"exits": {`)
-		exitCt := 0
-		for name, exitInfo := range newRoom.Exits {
-			if exitInfo.Secret {
-				continue
-			}
-			if exitCt > 0 {
-				roomInfoStr.WriteString(`, `)
-			}
-
-			roomInfoStr.WriteString(`"` + name + `": ` + strconv.Itoa(exitInfo.RoomId))
-
-			exitCt++
-		}
-		roomInfoStr.WriteString(`}, `)
-		// End exits
-
-		// build details
-		roomInfoStr.WriteString(`"details": [`)
-
-		detailCt := 0
-		if len(newRoom.GetMobs(FindMerchant)) > 0 || len(newRoom.GetPlayers(FindMerchant)) > 0 {
-			if detailCt > 0 {
-				roomInfoStr.WriteString(`, `)
-			}
-			detailCt++
-			roomInfoStr.WriteString(`"shop"`)
-		}
-		if len(newRoom.SkillTraining) > 0 {
-			if detailCt > 0 {
-				roomInfoStr.WriteString(`, `)
-			}
-			detailCt++
-			roomInfoStr.WriteString(`"trainer"`)
-		}
-		if newRoom.IsBank {
-			if detailCt > 0 {
-				roomInfoStr.WriteString(`, `)
-			}
-			detailCt++
-			roomInfoStr.WriteString(`"bank"`)
-		}
-		if newRoom.IsStorage {
-			if detailCt > 0 {
-				roomInfoStr.WriteString(`, `)
-			}
-			detailCt++
-			roomInfoStr.WriteString(`"storage"`)
-		}
-		roomInfoStr.WriteString(`]`)
-		// end details
-
-		roomInfoStr.WriteString(` }`)
-		// End room info
-
-		// send big 'ol room info object
-		connections.SendTo(
-			term.GmcpPayload.BytesWithPayload([]byte("Room.Info "+roomInfoStr.String())),
-			user.ConnectionId(),
-		)
-
-		// send player list for room
-		connections.SendTo(
-			term.GmcpPayload.BytesWithPayload([]byte("Room.Players {"+newRoomPlayers.String()+`}`)),
-			user.ConnectionId(),
-		)
-	}
-
-	// If this zone has music, play it.
-	// Room music takes priority.
-	if newRoom.MusicFile != `` {
-		user.PlayMusic(newRoom.MusicFile)
-	} else {
-		zoneInfo := GetZoneConfig(newRoom.Zone)
-		if zoneInfo.MusicFile != `` {
-			user.PlayMusic(zoneInfo.MusicFile)
-		} else if currentRoom.MusicFile != `` {
-			user.PlayMusic(`Off`)
-		}
-	}
+	events.AddToQueue(events.RoomChange{
+		UserId:     userId,
+		FromRoomId: currentRoom.RoomId,
+		ToRoomId:   newRoom.RoomId,
+	})
 
 	return nil
 }

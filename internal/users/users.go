@@ -87,6 +87,13 @@ func GetExpiredZombies(expirationTurn uint64) []int {
 	return expiredUsers
 }
 
+func GetConnectionId(userId int) connections.ConnectionId {
+	if user, ok := userManager.Users[userId]; ok {
+		return user.connectionId
+	}
+	return 0
+}
+
 func GetConnectionIds(userIds []int) []connections.ConnectionId {
 
 	connectionIds := make([]connections.ConnectionId, 0, len(userIds))
