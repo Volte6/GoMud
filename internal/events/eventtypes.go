@@ -72,7 +72,7 @@ type WebClientCommand struct {
 	Text         string
 }
 
-func (b WebClientCommand) Type() string { return `WebClientCommand` }
+func (w WebClientCommand) Type() string { return `WebClientCommand` }
 
 // GMCP Commands from clients to server
 type GMCPIn struct {
@@ -81,7 +81,7 @@ type GMCPIn struct {
 	Json         []byte
 }
 
-func (b GMCPIn) Type() string { return `GMCPIn` }
+func (g GMCPIn) Type() string { return `GMCPIn` }
 
 // GMCP Commands from server to client
 type GMCPOut struct {
@@ -89,7 +89,7 @@ type GMCPOut struct {
 	Payload any
 }
 
-func (b GMCPOut) Type() string { return `GMCPOut` }
+func (g GMCPOut) Type() string { return `GMCPOut` }
 
 // Messages that are intended to reach all users on the system
 type System struct {
@@ -127,7 +127,7 @@ type NewRound struct {
 	Config      configs.Config
 }
 
-func (r NewRound) Type() string { return `NewRound` }
+func (n NewRound) Type() string { return `NewRound` }
 
 type NewTurn struct {
 	TurnNumber uint64
@@ -135,7 +135,7 @@ type NewTurn struct {
 	Config     configs.Config
 }
 
-func (r NewTurn) Type() string { return `NewTurn` }
+func (n NewTurn) Type() string { return `NewTurn` }
 
 type ItemOwnership struct {
 	UserId        int
@@ -144,11 +144,11 @@ type ItemOwnership struct {
 	Gained        bool
 }
 
-func (r ItemOwnership) Type() string { return `ItemOwnership` }
+func (i ItemOwnership) Type() string { return `ItemOwnership` }
 
 type ScriptedEvent struct {
 	Name string
 	Data map[string]any
 }
 
-func (r ScriptedEvent) Type() string { return `ScriptedEvent` }
+func (s ScriptedEvent) Type() string { return `ScriptedEvent` }

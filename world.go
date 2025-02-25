@@ -636,7 +636,7 @@ func (w *World) MainWorker(shutdown chan bool, wg *sync.WaitGroup) {
 
 	roomUpdateTimer := time.NewTimer(roomMaintenancePeriod)
 	ansiAliasTimer := time.NewTimer(ansiAliasReloadPeriod)
-	messageTimer := time.NewTimer(time.Millisecond)
+	eventLoopTimer := time.NewTimer(time.Millisecond)
 	turnTimer := time.NewTimer(time.Duration(c.TurnMs) * time.Millisecond)
 	statsTimer := time.NewTimer(time.Duration(10) * time.Second)
 
@@ -664,6 +664,7 @@ loop:
 			break loop
 		case <-statsTimer.C:
 
+			// TODO: Move this to events
 			util.LockMud()
 			w.UpdateStats()
 			util.UnlockMud()
@@ -673,6 +674,7 @@ loop:
 		case <-roomUpdateTimer.C:
 			slog.Debug(`MainWorker`, `action`, `rooms.RoomMaintenance()`)
 
+			// TODO: Move this to events
 			util.LockMud()
 			rooms.RoomMaintenance()
 			util.UnlockMud()
@@ -681,15 +683,16 @@ loop:
 
 		case <-ansiAliasTimer.C:
 
+			// TODO: Move this to events
 			util.LockMud()
 			templates.LoadAliases()
 			util.UnlockMud()
 
 			ansiAliasTimer.Reset(ansiAliasReloadPeriod)
 
-		case <-messageTimer.C:
+		case <-eventLoopTimer.C:
 
-			messageTimer.Reset(time.Millisecond)
+			eventLoopTimer.Reset(time.Millisecond)
 
 			util.LockMud()
 			w.EventLoop()
