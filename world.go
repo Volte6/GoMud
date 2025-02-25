@@ -974,7 +974,7 @@ func (w *World) EventLoopTurns() {
 			continue
 		}
 
-		// -1 and below, process immediately and don't count towards limit
+		// 0 and below, process immediately and don't count towards limit
 		if input.ReadyTurn == 0 {
 
 			// If this command was potentially blocking input, unblock it now.

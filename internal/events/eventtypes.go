@@ -81,7 +81,7 @@ type GMCPIn struct {
 	Json         []byte
 }
 
-func (b GMCPIn) Type() string { return `GMCP` }
+func (b GMCPIn) Type() string { return `GMCPIn` }
 
 // GMCP Commands from server to client
 type GMCPOut struct {
@@ -89,7 +89,7 @@ type GMCPOut struct {
 	Payload any
 }
 
-func (b GMCPOut) Type() string { return `GMCP` }
+func (b GMCPOut) Type() string { return `GMCPOut` }
 
 // Messages that are intended to reach all users on the system
 type System struct {
@@ -129,8 +129,6 @@ type NewRound struct {
 
 func (r NewRound) Type() string { return `NewRound` }
 
-// Fired every new turn (much faster! see TurnMs in config)
-// TODO: Need to move world methods to these events...
 type NewTurn struct {
 	TurnNumber uint64
 	TimeNow    time.Time
@@ -146,4 +144,4 @@ type ItemOwnership struct {
 	Gained        bool
 }
 
-func (r ItemOwnership) Type() string { return `LostItem` }
+func (r ItemOwnership) Type() string { return `ItemOwnership` }
