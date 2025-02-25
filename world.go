@@ -1060,6 +1060,27 @@ func (w *World) EventLoop() {
 	turnNow := util.GetTurnCount()
 
 	//
+	// ScriptedEvents
+	//
+	eq = events.GetQueue(events.ScriptedEvent{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll().(events.Event)
+
+		_, typeOk := e.(events.ScriptedEvent)
+		if !typeOk {
+			slog.Error("Event", "Expected Type", "ScriptedEvent", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+	}
+
+	//
 	// ItemOwnership
 	//
 	eq = events.GetQueue(events.ItemOwnership{})

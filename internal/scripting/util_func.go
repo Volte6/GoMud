@@ -44,6 +44,8 @@ func setUtilFunctions(vm *goja.Runtime) {
 	vm.Set(`UtilGetConfig`, UtilGetConfig)
 	vm.Set(`ColorWrap`, ColorWrap)
 	vm.Set(`EventFlags`, EventFlags)
+	vm.Set(`RaiseEvent`, RaiseEvent)
+
 }
 
 // ////////////////////////////////////////////////////////
@@ -174,4 +176,8 @@ func ColorWrap(txt string, colorClass ...string) string {
 	}
 
 	return txt
+}
+
+func RaiseEvent(name string, data map[string]any) {
+	events.AddToQueue(events.ScriptedEvent{Name: name, Data: data})
 }

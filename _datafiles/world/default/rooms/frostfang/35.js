@@ -3,6 +3,7 @@
 const magic_phrase = "zyphrial lumara vorthos";
 
 function onCommand_west(rest, user, room) {
+
     if ( !user.HasQuest("3-end") ) {
         SendUserMessage(user.UserId(), ' ');
         SendUserMessage(user.UserId(), '<ansi fg="51">The icy wind howls through the gate, and you feel a chill run down your spine.</ansi>');

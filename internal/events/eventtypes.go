@@ -145,3 +145,10 @@ type ItemOwnership struct {
 }
 
 func (r ItemOwnership) Type() string { return `ItemOwnership` }
+
+type ScriptedEvent struct {
+	Name string
+	Data map[string]any
+}
+
+func (r ScriptedEvent) Type() string { return `ScriptedEvent` }

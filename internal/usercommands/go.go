@@ -48,7 +48,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 			actionCost = 50
 			encumbered = true
 		}
-		fmt.Println("TEST")
+
 		if !user.Character.DeductActionPoints(actionCost) {
 
 			if encumbered {
