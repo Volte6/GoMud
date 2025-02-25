@@ -10,9 +10,10 @@ import (
 
 //
 // Cleans up zombie users
+// Zombie users are users who have disconnected but their user/character is still in game.
 //
 
-func CleanupZombies_Listener(e events.Event) bool {
+func CleanupZombies(e events.Event) bool {
 
 	evt, typeOk := e.(events.NewTurn)
 	if !typeOk {

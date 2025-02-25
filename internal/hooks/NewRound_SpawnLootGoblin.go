@@ -12,7 +12,7 @@ import (
 // Applies autohealing where appropriate
 //
 
-func SpawnLootGoblin_Listener(e events.Event) bool {
+func SpawnLootGoblin(e events.Event) bool {
 
 	evt := e.(events.NewRound)
 

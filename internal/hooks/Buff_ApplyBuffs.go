@@ -15,7 +15,7 @@ import (
 // Checks for quests on the item
 //
 
-func ApplyBuffs_Listener(e events.Event) bool {
+func ApplyBuffs(e events.Event) bool {
 
 	evt, typeOk := e.(events.Buff)
 	if !typeOk {

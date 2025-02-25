@@ -129,6 +129,7 @@ type NewRound struct {
 
 func (n NewRound) Type() string { return `NewRound` }
 
+// Each new turn (TurnMs in config.yaml)
 type NewTurn struct {
 	TurnNumber uint64
 	TimeNow    time.Time
@@ -137,6 +138,7 @@ type NewTurn struct {
 
 func (n NewTurn) Type() string { return `NewTurn` }
 
+// Gained or lost an item
 type ItemOwnership struct {
 	UserId        int
 	MobInstanceId int
@@ -146,9 +148,24 @@ type ItemOwnership struct {
 
 func (i ItemOwnership) Type() string { return `ItemOwnership` }
 
+// Triggered by a script
 type ScriptedEvent struct {
 	Name string
 	Data map[string]any
 }
 
 func (s ScriptedEvent) Type() string { return `ScriptedEvent` }
+
+// Entered the world
+type PlayerSpawn struct {
+	UserId int
+}
+
+func (s PlayerSpawn) Type() string { return `PlayerSpawn` }
+
+// Left the world
+type PlayerDespawn struct {
+	UserId int
+}
+
+func (s PlayerDespawn) Type() string { return `PlayerDespawn` }

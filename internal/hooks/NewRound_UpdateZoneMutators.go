@@ -9,7 +9,7 @@ import (
 // Check all zones and update their mutators.
 //
 
-func UpdateZoneMutators_Listener(e events.Event) bool {
+func UpdateZoneMutators(e events.Event) bool {
 	evt := e.(events.NewRound)
 
 	// Update all zone based mutators once a round

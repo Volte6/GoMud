@@ -14,7 +14,7 @@ import (
 // Check all users for a level up
 //
 
-func LevelUp_Listener(e events.Event) bool {
+func LevelUp(e events.Event) bool {
 
 	evt := e.(events.NewTurn)
 

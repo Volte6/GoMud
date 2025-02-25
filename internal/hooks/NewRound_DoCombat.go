@@ -25,7 +25,7 @@ import (
 // Applies autohealing where appropriate
 //
 
-func DoCombat_Listener(e events.Event) bool {
+func DoCombat(e events.Event) bool {
 
 	evt := e.(events.NewRound)
 
@@ -635,7 +635,7 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 
 	}
 
-	util.TrackTime(`DoCombat_Listener::handlePlayerCombat()`, time.Since(tStart).Seconds())
+	util.TrackTime(`DoCombat::handlePlayerCombat()`, time.Since(tStart).Seconds())
 
 	return affectedPlayerIds, affectedMobInstanceIds
 }

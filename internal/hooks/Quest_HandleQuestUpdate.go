@@ -19,7 +19,7 @@ import (
 // Handles quest progress
 //
 
-func HandleQuestUpdate_Listener(e events.Event) bool {
+func HandleQuestUpdate(e events.Event) bool {
 
 	evt, typeOk := e.(events.Quest)
 	if !typeOk {

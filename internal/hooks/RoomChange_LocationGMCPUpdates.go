@@ -18,7 +18,7 @@ import (
 // Also sends music changes out
 //
 
-func LocationGMCPUpdates_Listener(e events.Event) bool {
+func LocationGMCPUpdates(e events.Event) bool {
 
 	evt, typeOk := e.(events.RoomChange)
 	if !typeOk {

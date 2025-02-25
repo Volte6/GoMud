@@ -14,7 +14,7 @@ import (
 // Applies autohealing where appropriate
 //
 
-func MobRoundTick_Listener(e events.Event) bool {
+func MobRoundTick(e events.Event) bool {
 
 	//
 	// Reduce existing hostility (if any)

@@ -17,7 +17,7 @@ import (
 // Autosaves users/rooms every so often
 //
 
-func AutoSave_Listener(e events.Event) bool {
+func AutoSave(e events.Event) bool {
 
 	evt, typeOk := e.(events.NewTurn)
 	if !typeOk {

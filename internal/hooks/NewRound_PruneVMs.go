@@ -9,7 +9,7 @@ import (
 // Prunes VM's every now and then to free up memory
 //
 
-func PruneVMs_Listener(e events.Event) bool {
+func PruneVMs(e events.Event) bool {
 
 	if e.(events.NewRound).RoundNumber%100 == 0 {
 		scripting.PruneVMs()

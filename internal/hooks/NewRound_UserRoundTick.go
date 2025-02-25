@@ -15,7 +15,7 @@ import (
 // Player Round Tick
 //
 
-func UserRoundTick_Listener(e events.Event) bool {
+func UserRoundTick(e events.Event) bool {
 
 	roomsWithPlayers := rooms.GetRoomsWithPlayers()
 	for _, roomId := range roomsWithPlayers {

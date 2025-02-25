@@ -15,7 +15,7 @@ import (
 // Applies autohealing where appropriate
 //
 
-func AutoHeal_Listener(e events.Event) bool {
+func AutoHeal(e events.Event) bool {
 
 	evt := e.(events.NewRound)
 

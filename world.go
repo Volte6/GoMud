@@ -21,7 +21,6 @@ import (
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/mobcommands"
 	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/prompt"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
@@ -107,56 +106,7 @@ func (w *World) logOutUserByConnectionId(connectionId connections.ConnectionId) 
 
 func (w *World) enterWorld(userId int, roomId int) {
 
-	user := users.GetByUserId(userId)
-	if user == nil {
-		slog.Error("EnterWorld", "error", fmt.Sprintf(`user %d not found`, user.Character.RoomId))
-		return
-	}
-
-	user.EventLog.Add(`conn`, fmt.Sprintf(`<ansi fg="username">%s</ansi> entered the world`, user.Character.Name))
-
-	users.RemoveZombieUser(userId)
-
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-
-		slog.Error("EnterWorld", "error", fmt.Sprintf(`room %d not found`, user.Character.RoomId))
-
-		user.Character.RoomId = 1
-		user.Character.Zone = "Frostfang"
-		room = rooms.LoadRoom(user.Character.RoomId)
-		if room == nil {
-			slog.Error("EnterWorld", "error", fmt.Sprintf(`room %d not found`, user.Character.RoomId))
-		}
-	}
-
-	// TODO HERE
-	loginCmds := configs.GetConfig().OnLoginCommands
-	if len(loginCmds) > 0 {
-
-		for _, cmd := range loginCmds {
-
-			events.AddToQueue(events.Input{
-				UserId:    userId,
-				InputText: cmd,
-				ReadyTurn: 0, // No delay between execution of commands
-			})
-
-		}
-
-	}
-
-	//
-	// Send GMCP for their char name
-	//
-	if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
-
-		events.AddToQueue(events.GMCPOut{
-			UserId:  user.UserId,
-			Payload: fmt.Sprintf(`Char.Name {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name),
-		})
-
-	}
+	events.AddToQueue(events.PlayerSpawn{UserId: userId})
 
 	w.UpdateStats()
 
@@ -166,50 +116,8 @@ func (w *World) enterWorld(userId int, roomId int) {
 
 func (w *World) leaveWorld(userId int) {
 
-	user := users.GetByUserId(userId)
-	if user == nil {
-		return
-	}
+	events.AddToQueue(events.PlayerDespawn{UserId: userId})
 
-	room := rooms.LoadRoom(user.Character.RoomId)
-
-	if currentParty := parties.Get(userId); currentParty != nil {
-		currentParty.Leave(userId)
-	}
-
-	for _, mobInstId := range room.GetMobs(rooms.FindCharmed) {
-		if mob := mobs.GetInstance(mobInstId); mob != nil {
-			if mob.Character.IsCharmed(userId) {
-				mob.Character.Charmed.Expire()
-			}
-		}
-	}
-
-	if _, ok := room.RemovePlayer(userId); ok {
-		tplTxt, _ := templates.Process("player-despawn", user.Character.Name)
-		room.SendText(tplTxt)
-	}
-
-	//
-	// Send GMCP Updates for players leaving
-	//
-	for _, uid := range room.GetPlayers() {
-
-		if uid == user.UserId {
-			continue
-		}
-
-		if u := users.GetByUserId(uid); u != nil {
-			if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
-
-				events.AddToQueue(events.GMCPOut{
-					UserId:  uid,
-					Payload: fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name),
-				})
-
-			}
-		}
-	}
 }
 
 func (w *World) GetAutoComplete(userId int, inputText string) []string {
@@ -1059,6 +967,22 @@ func (w *World) EventLoop() {
 	turnNow := util.GetTurnCount()
 
 	//
+	// Player joined the world
+	//
+	eq = events.GetQueue(events.PlayerSpawn{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll().(events.Event))
+	}
+
+	//
+	// Player left the world
+	//
+	eq = events.GetQueue(events.PlayerDespawn{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll().(events.Event))
+	}
+
+	//
 	// ScriptedEvents
 	//
 	eq = events.GetQueue(events.ScriptedEvent{})
@@ -1109,8 +1033,11 @@ func (w *World) EventLoop() {
 		} else if sys.Command == `kick` {
 			w.Kick(sys.Data.(int))
 		} else if sys.Command == `leaveworld` {
-			w.leaveWorld(sys.Data.(int))
+
+			w.leaveWorld(sys.Data.(int)) // Fire off the leaveworld event
+
 			users.RemoveZombieUser(sys.Data.(int))
+
 		} else if sys.Command == `logoff` {
 			w.logOff(sys.Data.(int))
 		}

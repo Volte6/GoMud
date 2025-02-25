@@ -14,7 +14,7 @@ import (
 // Prune all buffs that have expired.
 //
 
-func PruneBuffs_Listener(e events.Event) bool {
+func PruneBuffs(e events.Event) bool {
 
 	/*
 		evt, typeOk := e.(events.NewTurn)

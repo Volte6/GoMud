@@ -10,7 +10,7 @@ import (
 // TODO: Optimize this to avoid re-loops through users
 //
 
-func ActionPoints_Listener(e events.Event) bool {
+func ActionPoints(e events.Event) bool {
 
 	/*
 		evt, typeOk := e.(events.NewTurn)

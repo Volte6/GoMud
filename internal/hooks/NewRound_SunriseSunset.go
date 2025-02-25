@@ -11,7 +11,7 @@ import (
 // Performs auction status updates
 //
 
-func SunriseSunset_Listener(e events.Event) bool {
+func SunriseSunset(e events.Event) bool {
 
 	evt := e.(events.NewRound)
 

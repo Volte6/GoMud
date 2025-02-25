@@ -14,7 +14,7 @@ import (
 // Checks for quests on the item
 //
 
-func PlaySound_Listener(e events.Event) bool {
+func PlaySound(e events.Event) bool {
 
 	evt, typeOk := e.(events.MSP)
 	if !typeOk {
