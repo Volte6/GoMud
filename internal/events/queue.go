@@ -77,13 +77,14 @@ func (q *Queue[T]) Poll() T {
 // i.e. the oldest value in the queue.
 // Note: this function does NOT mutate the queue.
 // go-routine safe.
-func (q *Queue[T]) Peek() interface{} {
+func (q *Queue[T]) Peek() T {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
 	n := q.head
 	if n == nil {
-		return nil
+		var nilVal T
+		return nilVal
 	}
 
 	return n.data
