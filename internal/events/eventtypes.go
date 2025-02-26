@@ -2,6 +2,9 @@ package events
 
 import (
 	"time"
+
+	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/items"
 )
 
 // Used to apply or remove buffs
@@ -121,7 +124,7 @@ func (r RoomChange) Type() string { return `RoomChange` }
 type NewRound struct {
 	RoundNumber uint64
 	TimeNow     time.Time
-	Config      any
+	Config      configs.Config
 }
 
 func (n NewRound) Type() string { return `NewRound` }
@@ -130,7 +133,7 @@ func (n NewRound) Type() string { return `NewRound` }
 type NewTurn struct {
 	TurnNumber uint64
 	TimeNow    time.Time
-	Config     any
+	Config     configs.Config
 }
 
 func (n NewTurn) Type() string { return `NewTurn` }
@@ -139,7 +142,7 @@ func (n NewTurn) Type() string { return `NewTurn` }
 type ItemOwnership struct {
 	UserId        int
 	MobInstanceId int
-	Item          any
+	Item          items.Item
 	Gained        bool
 }
 

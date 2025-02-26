@@ -9,7 +9,6 @@ import (
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/combat"
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
@@ -44,8 +43,6 @@ func DoCombat(e events.Event) bool {
 }
 
 func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobInstanceIds []int) {
-
-	c := evt.Config.(configs.Config)
 
 	tStart := time.Now()
 
@@ -596,7 +593,7 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 			//
 			// Hostility default to 5 minutes
 			for _, groupName := range defMob.Groups {
-				mobs.MakeHostile(groupName, user.UserId, c.MinutesToRounds(2)-user.Character.Stats.Perception.ValueAdj)
+				mobs.MakeHostile(groupName, user.UserId, evt.Config.MinutesToRounds(2)-user.Character.Stats.Perception.ValueAdj)
 			}
 
 			// Mobs get aggro when attacked
@@ -644,8 +641,6 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 }
 
 func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobInstanceIds []int) {
-
-	c := evt.Config.(configs.Config)
 
 	tStart := time.Now()
 
@@ -771,7 +766,7 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 
 					var waitTime float64 = 0.0
 					allCmds := strings.Split(combatAction, `;`)
-					if len(allCmds) >= c.TurnsPerRound() {
+					if len(allCmds) >= evt.Config.TurnsPerRound() {
 						mob.Command(`say I have a CombatAction that is too long. Please notify an admin.`)
 					} else {
 						for _, action := range strings.Split(combatAction, `;`) {

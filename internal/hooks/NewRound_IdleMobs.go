@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobcommands"
 	"github.com/volte6/gomud/internal/mobs"
@@ -23,14 +22,12 @@ func IdleMobs(e events.Event) bool {
 
 	evt := e.(events.NewRound)
 
-	c := evt.Config.(configs.Config)
-
-	maxBoredom := uint8(c.MaxMobBoredom)
-	globalConverseChance := int(c.MobConverseChance)
+	maxBoredom := uint8(evt.Config.MaxMobBoredom)
+	globalConverseChance := int(evt.Config.MobConverseChance)
 
 	allMobInstances := mobs.GetAllMobInstanceIds()
 
-	allowedUnloadCt := len(allMobInstances) - int(c.MobUnloadThreshold)
+	allowedUnloadCt := len(allMobInstances) - int(evt.Config.MobUnloadThreshold)
 	if allowedUnloadCt < 0 {
 		allowedUnloadCt = 0
 	}

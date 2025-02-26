@@ -2,7 +2,6 @@
 package hooks
 
 import (
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/users"
 )
@@ -15,9 +14,7 @@ func InactivePlayers(e events.Event) bool {
 
 	evt := e.(events.NewRound)
 
-	c := evt.Config.(configs.Config)
-
-	maxIdleRounds := c.SecondsToRounds(int(c.MaxIdleSeconds))
+	maxIdleRounds := evt.Config.SecondsToRounds(int(evt.Config.MaxIdleSeconds))
 	if maxIdleRounds == 0 {
 		return true
 	}
@@ -26,7 +23,7 @@ func InactivePlayers(e events.Event) bool {
 		return true
 	}
 
-	kickMods := bool(configs.GetConfig().TimeoutMods)
+	kickMods := bool(evt.Config.TimeoutMods)
 
 	cutoffRound := evt.RoundNumber - uint64(maxIdleRounds)
 

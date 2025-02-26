@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/leaderboard"
 	"github.com/volte6/gomud/internal/rooms"
@@ -26,9 +25,7 @@ func AutoSave(e events.Event) bool {
 		return false
 	}
 
-	c := evt.Config.(configs.Config)
-
-	if evt.TurnNumber%uint64(c.TurnsPerAutoSave()) == 0 {
+	if evt.TurnNumber%uint64(evt.Config.TurnsPerAutoSave()) == 0 {
 		tStart := time.Now()
 
 		events.AddToQueue(events.Broadcast{
