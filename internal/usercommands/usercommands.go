@@ -88,7 +88,6 @@ var (
 		`list`:        {List, false, false},
 		`locate`:      {Locate, true, true}, // Admin only
 		`lock`:        {Lock, false, false},
-		`logwatch`:    {LogWatch, true, true}, // Admin only
 		`look`:        {Look, true, false},
 		`map`:         {Map, false, false},
 		`macros`:      {Macros, true, false},
@@ -146,6 +145,7 @@ var (
 		`status`:      {Status, true, false},
 		`storage`:     {Storage, false, false},
 		`suicide`:     {Suicide, true, false},
+		`syslogs`:     {SysLogs, true, true}, // Admin only
 		`tame`:        {Tame, false, false},
 		`time`:        {Time, true, false},
 		`throw`:       {Throw, false, false},

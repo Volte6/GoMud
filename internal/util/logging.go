@@ -19,7 +19,7 @@ type ColorHandler struct {
 }
 
 type TeeLogger interface {
-	Println(v ...any)
+	Println(level string, v ...any)
 }
 
 func (h *ColorHandler) Handle(ctx context.Context, r slog.Record) error {
@@ -115,7 +115,7 @@ func (h *ColorHandler) Handle(ctx context.Context, r slog.Record) error {
 	h.l.Println(timeStr, level, msg, finalOut.String())
 
 	if h.lTee != nil {
-		h.lTee.Println(timeStr, level, msg, finalOut.String())
+		h.lTee.Println(r.Level.String(), timeStr, level, msg, finalOut.String())
 	}
 
 	return nil

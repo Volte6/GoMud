@@ -623,9 +623,9 @@ loop:
 
 				roundNumber := util.IncrementRoundCount()
 
-				if c.LogIntervalRoundCount > 0 && roundNumber%uint64(c.LogIntervalRoundCount) == 0 {
-					slog.Info("World::RoundTick()", "roundNumber", roundNumber)
-				}
+				//if c.LogIntervalRoundCount > 0 && roundNumber%uint64(c.LogIntervalRoundCount) == 0 {
+				//slog.Info("World::RoundTick()", "roundNumber", roundNumber)
+				//}
 				events.AddToQueue(events.NewRound{RoundNumber: roundNumber, TimeNow: time.Now(), Config: c})
 			}
 

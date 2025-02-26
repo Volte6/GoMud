@@ -696,6 +696,10 @@ func LoadRoom(roomId int) *Room {
 	}
 
 	filename := findRoomFile(roomId)
+	if len(filename) == 0 {
+		return nil
+	}
+
 	retRoom, _ := loadRoomFromFile(util.FilePath(configs.GetConfig().FolderDataFiles.String(), `/`, `rooms`, `/`, filename))
 
 	return retRoom

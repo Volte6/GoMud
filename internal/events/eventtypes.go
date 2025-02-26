@@ -174,6 +174,7 @@ func (p PlayerDespawn) Type() string { return `PlayerDespawn` }
 type Log struct {
 	FollowAdd    connections.ConnectionId
 	FollowRemove connections.ConnectionId
+	Level        string
 	Data         []any
 }
 

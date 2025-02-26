@@ -1,5 +1,0 @@
-The <ansi fg="command">logwatch</ansi> command can be used to watch the server logs live.
-
-<ansi fg="command">logwatch on</ansi>  - Begin following the logs
-<ansi fg="command">logwatch off</ansi> - Stop following the logs
-
