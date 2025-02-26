@@ -14,6 +14,12 @@ var (
 	hasWildcardListener bool = false
 )
 
+func ClearListeners() {
+	listenerLock.Lock()
+	defer listenerLock.Unlock()
+	eventListeners = map[string][]ListenerWrapper{}
+}
+
 // Returns an ID for the listener which can be used to unregister later.
 func RegisterListener(emptyEvent Event, cbFunc Listener, addToFront ...bool) ListenerId {
 	listenerLock.Lock()

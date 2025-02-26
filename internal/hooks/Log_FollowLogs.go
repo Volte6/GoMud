@@ -36,6 +36,7 @@ func FollowLogs(e events.Event) bool {
 			for idx, connId := range logFollowConnectionIds {
 				if connId == evt.FollowRemove {
 					logFollowConnectionIds = append(logFollowConnectionIds[:idx], logFollowConnectionIds[idx+1:]...)
+					break
 				}
 			}
 		}
@@ -49,6 +50,7 @@ func FollowLogs(e events.Event) bool {
 				}
 			}
 		}
+
 	} else {
 		connections.SendTo([]byte(fmt.Sprintln(evt.Data...)), logFollowConnectionIds...)
 	}
