@@ -7,6 +7,9 @@ import (
 // Register hooks here...
 func RegisterListeners() {
 
+	// Buffs
+	events.RegisterListener(events.Buff{}, ApplyBuffs)
+
 	// RoomChange Listeners
 	events.RegisterListener(events.RoomChange{}, LocationGMCPUpdates)
 	events.RegisterListener(events.RoomChange{}, LocationMusicChange)

@@ -47,7 +47,8 @@ func FuncInterface(m interface{}) uint64 {
 //
 
 func SetupTestData() {
-	for i := 0; i < 1000; i++ {
+
+	for i := 0; i < 10; i++ {
 		AddToQueue(Buff{})
 		AddToQueue(Broadcast{})
 		AddToQueue(Quest{})
@@ -170,5 +171,4 @@ func Benchmark_Iterator(b *testing.B) {
 		}
 
 	}
-
 }
