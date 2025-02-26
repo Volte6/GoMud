@@ -49,7 +49,7 @@ func RegisterListeners() {
 	events.RegisterListener(events.PlayerSpawn{}, HandleJoin)
 	events.RegisterListener(events.PlayerDespawn{}, HandleLeave)
 
-	// Listener for debugging some stuff
+	// Listener for debugging some stuff (catches all events)
 	/*
 		events.RegisterListener(nil, func(e events.Event) bool {
 			t := e.Type()
@@ -60,4 +60,6 @@ func RegisterListeners() {
 		})
 	*/
 
+	// Log tee to users
+	events.RegisterListener(events.Log{}, FollowLogs)
 }

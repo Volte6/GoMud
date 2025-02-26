@@ -132,6 +132,7 @@ help:
       - item
       - grant
       - locate
+      - logwatch
       - modify
       - mudmail
       - mute

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/items"
 )
 
@@ -169,3 +170,11 @@ type PlayerDespawn struct {
 }
 
 func (p PlayerDespawn) Type() string { return `PlayerDespawn` }
+
+type Log struct {
+	FollowAdd    connections.ConnectionId
+	FollowRemove connections.ConnectionId
+	Data         []any
+}
+
+func (l Log) Type() string { return `Log` }

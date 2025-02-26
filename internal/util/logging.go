@@ -15,6 +15,11 @@ type ColorHandler struct {
 	slog.Handler
 	l                    *log.Logger
 	minimumMessageLength int
+	lTee                 TeeLogger
+}
+
+type TeeLogger interface {
+	Println(v ...any)
 }
 
 func (h *ColorHandler) Handle(ctx context.Context, r slog.Record) error {
@@ -28,7 +33,6 @@ func (h *ColorHandler) Handle(ctx context.Context, r slog.Record) error {
 		return nil
 	}
 
-	logToAdmin := false
 	switch r.Level {
 	case slog.LevelDebug:
 		level = fmt.Sprintf("\033[95m%s:\033[0m", r.Level.String()) // magenta
@@ -36,10 +40,8 @@ func (h *ColorHandler) Handle(ctx context.Context, r slog.Record) error {
 		level = fmt.Sprintf("\033[32m%s: \033[0m", r.Level.String()) // green
 	case slog.LevelWarn:
 		level = fmt.Sprintf("\033[33m%s: \033[0m", r.Level.String()) // yellow
-		logToAdmin = true
 	case slog.LevelError:
 		level = fmt.Sprintf("\033[31m%s:\033[0m", r.Level.String()) // red
-		logToAdmin = true
 	}
 
 	finalOut := strings.Builder{}
@@ -112,27 +114,14 @@ func (h *ColorHandler) Handle(ctx context.Context, r slog.Record) error {
 
 	h.l.Println(timeStr, level, msg, finalOut.String())
 
-	if logToAdmin {
-
-		// TODO: Experimental
-		// TODO: Direct this to admins actively listening to logs
-		/*
-			events.AddToQueue(events.Broadcast{
-				Text: fmt.Sprintln(timeStr, level, msg, finalOut.String()),
-			})
-		*/
-		/*
-			connections.Broadcast(
-				[]byte(fmt.Sprint(timeStr, level, msg, finalOut.String()) + "\r\n"),
-			)
-		*/
-
+	if h.lTee != nil {
+		h.lTee.Println(timeStr, level, msg, finalOut.String())
 	}
 
 	return nil
 }
 
-func GetColorLogHandler(out io.Writer, logLvl slog.Level) *ColorHandler {
+func GetColorLogHandler(out io.Writer, logLvl slog.Level, teeOut TeeLogger) *ColorHandler {
 
 	opt := &slog.HandlerOptions{
 
@@ -159,6 +148,7 @@ func GetColorLogHandler(out io.Writer, logLvl slog.Level) *ColorHandler {
 	h := &ColorHandler{
 		Handler: slog.NewTextHandler(out, opt),
 		l:       log.New(out, "", 0),
+		lTee:    teeOut,
 	}
 
 	return h

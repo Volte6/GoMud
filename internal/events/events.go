@@ -70,3 +70,19 @@ func GetQueue(e Event) *Queue[Event] {
 
 	return allQueues[eventType]
 }
+
+// Iterator
+/*
+	for q := range events.Queues {
+		events.DoListeners(q.Poll())
+	}
+*/
+func Queues(yield func(value *Queue[Event]) bool) {
+	qLock.Lock()
+	defer qLock.Unlock()
+	for _, eQueue := range allQueues {
+		if !yield(eQueue) {
+			return
+		}
+	}
+}

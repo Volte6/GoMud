@@ -75,7 +75,7 @@ func main() {
 		}
 	}()
 
-	setupLogger()
+	setupLogger(events.GetLogger())
 
 	flags.HandleFlags()
 
@@ -735,7 +735,7 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 	return server
 }
 
-func setupLogger() {
+func setupLogger(eventLogger events.EventLogger) {
 
 	logLevel := strings.ToUpper(strings.TrimSpace(os.Getenv(`LOG_LEVEL`)))
 	if logLevel == `` {
@@ -786,7 +786,7 @@ func setupLogger() {
 		defer file.Close()
 
 		fileLogger := slog.New(
-			util.GetColorLogHandler(lj, slogLevel),
+			util.GetColorLogHandler(lj, slogLevel, eventLogger),
 		)
 
 		// Setup the default logger
@@ -795,7 +795,7 @@ func setupLogger() {
 	} else {
 
 		localLogger := slog.New(
-			util.GetColorLogHandler(os.Stderr, slogLevel),
+			util.GetColorLogHandler(os.Stderr, slogLevel, eventLogger),
 		)
 
 		slog.SetDefault(localLogger)

@@ -88,6 +88,7 @@ var (
 		`list`:        {List, false, false},
 		`locate`:      {Locate, true, true}, // Admin only
 		`lock`:        {Lock, false, false},
+		`logwatch`:    {LogWatch, true, true}, // Admin only
 		`look`:        {Look, true, false},
 		`map`:         {Map, false, false},
 		`macros`:      {Macros, true, false},

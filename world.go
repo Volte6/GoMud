@@ -968,10 +968,17 @@ func (w *World) EventLoop() {
 
 	turnNow := util.GetTurnCount()
 
+	// Player joined the world
+	//
+	eq := events.GetQueue(events.Log{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
 	//
 	// Player joined the world
 	//
-	eq := events.GetQueue(events.PlayerSpawn{})
+	eq = events.GetQueue(events.PlayerSpawn{})
 	for eq.Len() > 0 {
 		events.DoListeners(eq.Poll())
 	}
