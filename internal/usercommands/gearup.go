@@ -21,21 +21,45 @@ func Gearup(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 	}
 
 	allBackpackItems := user.Character.GetAllBackpackItems()
+	wearableCount := 0
 
 	for _, itm := range allBackpackItems {
 		itmSpec := itm.GetSpec()
 
-		// Is there already a new item ready for that slot? Compare to that.
-		if plannedItem, ok := wearNewItems[itmSpec.Type]; ok {
-			if itmSpec.Value > plannedItem.GetSpec().Value {
-				wearNewItems[itmSpec.Type] = itm
-			}
+		if itmSpec.Type != items.Weapon && itmSpec.Subtype != items.Wearable {
 			continue
 		}
 
-		// If we get here, there hasn't been anything to replace the current gear yet.
-		if wornItem, ok := wornItems[itmSpec.Type]; ok {
-			if itmSpec.Value > wornItem.GetSpec().Value {
+		if itmSpec.Type == items.Weapon {
+			// If it requires 2 hands, make sure it won't remove an offhand item!
+			if user.Character.HandsRequired(itm) == 2 {
+				if _, ok := wornItems[items.Offhand]; ok {
+					continue
+				}
+			}
+		}
+
+		if itmSpec.Type == items.Offhand {
+			// If it's offhand, make sure it won't remove an equipped two handed weapon
+			if currentWeapon, ok := wornItems[items.Weapon]; ok {
+				if user.Character.HandsRequired(currentWeapon) == 2 {
+					continue
+
+				}
+			}
+		}
+
+		// Keep track of how many wearble items they hold
+		wearableCount++
+
+		// Skip items if something is already in that slot.
+		if _, ok := wornItems[itmSpec.Type]; ok {
+			continue
+		}
+
+		// If we've chosen something to wear in that slot already, consider this as a better option.
+		if plannedItem, ok := wearNewItems[itmSpec.Type]; ok {
+			if itmSpec.Value > plannedItem.GetSpec().Value {
 				wearNewItems[itmSpec.Type] = itm
 			}
 			continue
@@ -46,7 +70,11 @@ func Gearup(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 	}
 
 	if len(wearNewItems) == 0 {
-		user.SendText("You have nothing to wear")
+		if wearableCount == 0 {
+			user.SendText("You have nothing to wear.")
+		} else {
+			user.SendText("You're already wearing everything you can!")
+		}
 		return true, nil
 	}
 

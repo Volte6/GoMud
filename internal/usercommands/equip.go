@@ -17,6 +17,11 @@ func Equip(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		return Gearup(``, user, room, flags)
 	}
 
+	if rest == "" {
+		user.SendText(`Wear WHAT?`)
+		return true, nil
+	}
+
 	// Check whether the user has an item in their inventory that matches
 	matchItem, found := user.Character.FindInBackpack(rest)
 
