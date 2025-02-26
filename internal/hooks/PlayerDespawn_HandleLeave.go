@@ -30,6 +30,13 @@ func HandleLeave(e events.Event) bool {
 		return false
 	}
 
+	connId := user.ConnectionId()
+
+	// Remove any zombie tracking for the user since they've been despawned from the world.
+	if users.IsZombieConnection(connId) {
+		users.RemoveZombieUser(evt.UserId)
+	}
+
 	room := rooms.LoadRoom(user.Character.RoomId)
 
 	if currentParty := parties.Get(evt.UserId); currentParty != nil {
@@ -68,6 +75,10 @@ func HandleLeave(e events.Event) bool {
 
 			}
 		}
+	}
+
+	if err := users.LogOutUserByConnectionId(connId); err != nil {
+		slog.Error("Log Out Error", "connectionId", connId, "error", err)
 	}
 
 	return true

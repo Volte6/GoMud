@@ -350,9 +350,9 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 	var userObject *users.UserRecord
 	var sug suggestions.Suggestions
 	lastInput := time.Now()
-	for {
+	c := configs.GetConfig()
 
-		c := configs.GetConfig()
+	for {
 
 		clientInput.EnterPressed = false // Default state is always false
 		clientInput.TabPressed = false   // Default state is always false
@@ -360,8 +360,6 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 		n, err := connDetails.Read(inputBuffer)
 		if err != nil {
-
-			slog.Error("TELNET", "ReadERR", err)
 
 			// If failed to read from the connection, switch to zombie state
 			if userObject != nil {
@@ -379,9 +377,10 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 					worldManager.SendLogoutConnectionId(connDetails.ConnectionId())
 
 				}
+
 			}
 
-			slog.Warn("Conn Read Error", "error", err)
+			slog.Warn("Telnet", "error", err)
 
 			connections.Remove(connDetails.ConnectionId())
 
@@ -507,6 +506,10 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		// If they have pressed enter (submitted their input), and nothing else has handled/aborted
 		if clientInput.EnterPressed {
 
+			// Update config after enter presses
+			// No need to update it every loop
+			c = configs.GetConfig()
+
 			if time.Since(lastInput) < time.Duration(c.TurnMs)*time.Millisecond {
 				/*
 					connections.SendTo(
@@ -604,12 +607,14 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		)
 	}
 
+	c := configs.GetConfig()
+
 	for {
 		_, message, err := conn.ReadMessage()
 
-		c := configs.GetConfig()
-
 		if err != nil {
+
+			userObject.EventLog.Add(`conn`, `Disconnected`)
 
 			// If failed to read from the connection, switch to zombie state
 			if userObject != nil {
@@ -625,6 +630,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 					worldManager.SendLogoutConnectionId(connDetails.ConnectionId())
 
 				}
+
 			}
 
 			slog.Error("WS Read", "error", err)
@@ -679,6 +685,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		// Buffer should be processed as an in-game command
 		worldManager.SendInput(wi)
 
+		c = configs.GetConfig()
 	}
 }
 

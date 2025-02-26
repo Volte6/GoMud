@@ -110,15 +110,17 @@ func (w *World) enterWorld(userId int, roomId int) {
 
 	w.UpdateStats()
 
-	// Pu thtme in the room
+	// Put htme in the room
 	rooms.MoveToRoom(userId, roomId, true)
 }
 
-func (w *World) leaveWorld(userId int) {
-
-	events.AddToQueue(events.PlayerDespawn{UserId: userId})
-
-}
+/*
+users can be:
+Disconnected	+ OutWorld (no presence)	No record in connections.netConnections or users.ZombieConnections	| user object in room
+Connected		+ OutWorld (logging in) 	Has record in connections.netConnections 							| user object in room
+Connected		+ InWorld  (non-zombie) 	No record in users.ZombieConnections								| no zombie flag		| user object in room
+Disconnected	+ InWorld  (zombie)			Has record in users.ZombieConnections 								| has zombie flag		| user object in room
+*/
 
 func (w *World) GetAutoComplete(userId int, inputText string) []string {
 
@@ -640,7 +642,7 @@ loop:
 		case leaveWorldUserId := <-w.leaveWorldUserId: // int
 
 			util.LockMud()
-			w.leaveWorld(leaveWorldUserId)
+			events.AddToQueue(events.PlayerDespawn{UserId: leaveWorldUserId})
 			util.UnlockMud()
 
 		case logoutConnectionId := <-w.logoutConnectionId: //  connections.ConnectionId
@@ -1034,9 +1036,7 @@ func (w *World) EventLoop() {
 			w.Kick(sys.Data.(int))
 		} else if sys.Command == `leaveworld` {
 
-			w.leaveWorld(sys.Data.(int)) // Fire off the leaveworld event
-
-			users.RemoveZombieUser(sys.Data.(int))
+			events.AddToQueue(events.PlayerDespawn{UserId: sys.Data.(int)})
 
 		} else if sys.Command == `logoff` {
 			w.logOff(sys.Data.(int))

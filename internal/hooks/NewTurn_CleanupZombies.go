@@ -26,17 +26,13 @@ func CleanupZombies(e events.Event) bool {
 	if expTurns < evt.TurnNumber {
 
 		expZombies := users.GetExpiredZombies(evt.TurnNumber - expTurns)
+
 		if len(expZombies) > 0 {
+
 			slog.Info("Expired Zombies", "count", len(expZombies))
-			connIds := users.GetConnectionIds(expZombies)
 
 			for _, userId := range expZombies {
 				events.AddToQueue(events.System{Command: `leaveworld`, Data: userId})
-			}
-			for _, connId := range connIds {
-				if err := users.LogOutUserByConnectionId(connId); err != nil {
-					slog.Error("Log Out Error", "connectionId", connId, "error", err)
-				}
 			}
 
 		}

@@ -161,11 +161,11 @@ type PlayerSpawn struct {
 	UserId int
 }
 
-func (s PlayerSpawn) Type() string { return `PlayerSpawn` }
+func (p PlayerSpawn) Type() string { return `PlayerSpawn` }
 
 // Left the world
 type PlayerDespawn struct {
 	UserId int
 }
 
-func (s PlayerDespawn) Type() string { return `PlayerDespawn` }
+func (p PlayerDespawn) Type() string { return `PlayerDespawn` }
