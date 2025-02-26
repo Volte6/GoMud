@@ -2,29 +2,29 @@ package events
 
 import "sync"
 
-type queuenode struct {
-	data interface{}
-	next *queuenode
+type queuenode[T any] struct {
+	data T
+	next *queuenode[T]
 }
 
 // A go-routine safe FIFO (first in first out) data stucture.
-type Queue struct {
-	head  *queuenode
-	tail  *queuenode
+type Queue[T any] struct {
+	head  *queuenode[T]
+	tail  *queuenode[T]
 	count int
 	lock  *sync.Mutex
 }
 
 // Creates a new pointer to a new queue.
-func NewQueue() *Queue {
-	q := &Queue{}
+func NewQueue[T any]() *Queue[T] {
+	q := &Queue[T]{}
 	q.lock = &sync.Mutex{}
 	return q
 }
 
 // Returns the number of elements in the queue (i.e. size/length)
 // go-routine safe.
-func (q *Queue) Len() int {
+func (q *Queue[T]) Len() int {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	return q.count
@@ -33,11 +33,11 @@ func (q *Queue) Len() int {
 // Pushes/inserts a value at the end/tail of the queue.
 // Note: this function does mutate the queue.
 // go-routine safe.
-func (q *Queue) Push(item interface{}) {
+func (q *Queue[T]) Push(item T) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
-	n := &queuenode{data: item}
+	n := &queuenode[T]{data: item}
 
 	if q.tail == nil {
 		q.tail = n
@@ -53,12 +53,13 @@ func (q *Queue) Push(item interface{}) {
 // i.e. the oldest value in the queue.
 // Note: this function does mutate the queue.
 // go-routine safe.
-func (q *Queue) Poll() interface{} {
+func (q *Queue[T]) Poll() T {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
 	if q.head == nil {
-		return nil
+		var nilVal T
+		return nilVal
 	}
 
 	n := q.head
@@ -76,7 +77,7 @@ func (q *Queue) Poll() interface{} {
 // i.e. the oldest value in the queue.
 // Note: this function does NOT mutate the queue.
 // go-routine safe.
-func (q *Queue) Peek() interface{} {
+func (q *Queue[T]) Peek() interface{} {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
@@ -91,11 +92,11 @@ func (q *Queue) Peek() interface{} {
 // Shifts/inserts a value at the front/head of the queue.
 // Note: this function does mutate the queue.
 // go-routine safe.
-func (q *Queue) Shift(item interface{}) {
+func (q *Queue[T]) Shift(item T) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
-	n := &queuenode{data: item}
+	n := &queuenode[T]{data: item}
 
 	if q.head == nil {
 		// If the queue is empty, both head and tail should point to the new node

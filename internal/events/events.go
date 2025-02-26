@@ -8,7 +8,7 @@ type EventType string
 
 var (
 	qLock     = sync.RWMutex{}
-	allQueues = map[string]*Queue{}
+	allQueues = map[string]*Queue[Event]{}
 	requeues  = map[string][]Event{}
 )
 
@@ -39,7 +39,7 @@ func AddToQueue(e Event, shiftToFront ...bool) {
 	q, ok := allQueues[eventType]
 
 	if !ok {
-		q = NewQueue()
+		q = NewQueue[Event]()
 		allQueues[eventType] = q
 	}
 
@@ -50,7 +50,7 @@ func AddToQueue(e Event, shiftToFront ...bool) {
 	}
 }
 
-func GetQueue(e Event) *Queue {
+func GetQueue(e Event) *Queue[Event] {
 
 	qLock.Lock()
 	defer qLock.Unlock()
@@ -58,7 +58,7 @@ func GetQueue(e Event) *Queue {
 	eventType := e.Type()
 
 	if _, ok := allQueues[eventType]; !ok {
-		allQueues[eventType] = NewQueue()
+		allQueues[eventType] = NewQueue[Event]()
 		requeues[eventType] = []Event{}
 	}
 

@@ -857,7 +857,7 @@ func (w *World) EventLoopTurns() {
 	eq := events.GetQueue(events.Input{})
 	for eq.Len() > 0 {
 
-		e := eq.Poll().(events.Event)
+		e := eq.Poll()
 
 		input, typeOk := e.(events.Input)
 		if !typeOk {
@@ -965,15 +965,15 @@ func (w *World) EventLoopTurns() {
 func (w *World) EventLoop() {
 
 	var c configs.Config = configs.GetConfig()
-	var eq *events.Queue
+
 	turnNow := util.GetTurnCount()
 
 	//
 	// Player joined the world
 	//
-	eq = events.GetQueue(events.PlayerSpawn{})
+	eq := events.GetQueue(events.PlayerSpawn{})
 	for eq.Len() > 0 {
-		events.DoListeners(eq.Poll().(events.Event))
+		events.DoListeners(eq.Poll())
 	}
 
 	//
@@ -981,7 +981,7 @@ func (w *World) EventLoop() {
 	//
 	eq = events.GetQueue(events.PlayerDespawn{})
 	for eq.Len() > 0 {
-		events.DoListeners(eq.Poll().(events.Event))
+		events.DoListeners(eq.Poll())
 	}
 
 	//
@@ -989,7 +989,7 @@ func (w *World) EventLoop() {
 	//
 	eq = events.GetQueue(events.ScriptedEvent{})
 	for eq.Len() > 0 {
-		events.DoListeners(eq.Poll().(events.Event))
+		events.DoListeners(eq.Poll())
 	}
 
 	//
@@ -997,7 +997,7 @@ func (w *World) EventLoop() {
 	//
 	eq = events.GetQueue(events.ItemOwnership{})
 	for eq.Len() > 0 {
-		events.DoListeners(eq.Poll().(events.Event))
+		events.DoListeners(eq.Poll())
 	}
 
 	//
@@ -1006,7 +1006,7 @@ func (w *World) EventLoop() {
 	eq = events.GetQueue(events.System{})
 	for eq.Len() > 0 {
 
-		e := eq.Poll().(events.Event)
+		e := eq.Poll()
 
 		sys, typeOk := e.(events.System)
 		if !typeOk {
@@ -1049,7 +1049,7 @@ func (w *World) EventLoop() {
 	//
 	eq = events.GetQueue(events.NewTurn{})
 	for eq.Len() > 0 {
-		events.DoListeners(eq.Poll().(events.Event))
+		events.DoListeners(eq.Poll())
 	}
 
 	//
@@ -1059,7 +1059,7 @@ func (w *World) EventLoop() {
 	eq = events.GetQueue(events.RoomAction{})
 	for eq.Len() > 0 {
 
-		e := eq.Poll().(events.Event)
+		e := eq.Poll()
 
 		action, typeOk := e.(events.RoomAction)
 		if !typeOk {
@@ -1297,7 +1297,7 @@ func (w *World) EventLoop() {
 	//
 	eq = events.GetQueue(events.Buff{})
 	for eq.Len() > 0 {
-		events.DoListeners(eq.Poll().(events.Event))
+		events.DoListeners(eq.Poll())
 	}
 
 	//
@@ -1305,7 +1305,7 @@ func (w *World) EventLoop() {
 	//
 	eq = events.GetQueue(events.Quest{})
 	for eq.Len() > 0 {
-		events.DoListeners(eq.Poll().(events.Event))
+		events.DoListeners(eq.Poll())
 	}
 
 	//
@@ -1313,7 +1313,7 @@ func (w *World) EventLoop() {
 	//
 	eq = events.GetQueue(events.NewRound{})
 	for eq.Len() > 0 {
-		events.DoListeners(eq.Poll().(events.Event))
+		events.DoListeners(eq.Poll())
 	}
 
 	//
@@ -1322,7 +1322,7 @@ func (w *World) EventLoop() {
 	eq = events.GetQueue(events.GMCPOut{})
 	for eq.Len() > 0 {
 
-		e := eq.Poll().(events.Event)
+		e := eq.Poll()
 
 		gmcp, typeOk := e.(events.GMCPOut)
 		if !typeOk {
@@ -1365,7 +1365,7 @@ func (w *World) EventLoop() {
 	//
 	eq = events.GetQueue(events.RoomChange{})
 	for eq.Len() > 0 {
-		events.DoListeners(eq.Poll().(events.Event))
+		events.DoListeners(eq.Poll())
 	}
 
 	//
@@ -1373,7 +1373,7 @@ func (w *World) EventLoop() {
 	//
 	eq = events.GetQueue(events.MSP{})
 	for eq.Len() > 0 {
-		events.DoListeners(eq.Poll().(events.Event))
+		events.DoListeners(eq.Poll())
 	}
 
 	//
@@ -1390,7 +1390,7 @@ func (w *World) EventLoop() {
 	eq = events.GetQueue(events.Broadcast{})
 	for eq.Len() > 0 {
 
-		e := eq.Poll().(events.Event)
+		e := eq.Poll()
 
 		broadcast, typeOk := e.(events.Broadcast)
 		if !typeOk {
@@ -1429,7 +1429,7 @@ func (w *World) EventLoop() {
 	eq = events.GetQueue(events.WebClientCommand{})
 	for eq.Len() > 0 {
 
-		e := eq.Poll().(events.Event)
+		e := eq.Poll()
 
 		cmd, typeOk := e.(events.WebClientCommand)
 		if !typeOk {
@@ -1456,7 +1456,7 @@ func (w *World) EventLoop() {
 	eq = events.GetQueue(events.Message{})
 	for eq.Len() > 0 {
 
-		e := eq.Poll().(events.Event)
+		e := eq.Poll()
 
 		message, typeOk := e.(events.Message)
 		if !typeOk {
