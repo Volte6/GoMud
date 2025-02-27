@@ -400,7 +400,7 @@ BannedNames:
 NextRoomId: 1002
 # - LogIntervalRoundCount - 
 #   How often to log the round count. Can help judge logs a little better.
-LogIntervalRoundCount: 1
+LogIntervalRoundCount: 15
 # - Locked -
 #   All config names defined here are immutable to the `server set` admin 
 #   command. They can only be changed by editing the config file directly.

@@ -139,10 +139,8 @@ func main() {
 	// Load all the data files up front.
 	loadAllDataFiles(false)
 
-	rc := uint64(c.RoundCount)
-	if rc > 0 {
-		util.SetRoundCount(uint64(c.RoundCount))
-	} else {
+	// Load the round count from the file
+	if util.LoadRoundCount(c.FolderDataFiles.String()+`/`+util.RoundCountFilename) == util.RoundCountMinimum {
 		gametime.SetToDay(-3)
 	}
 
@@ -202,6 +200,8 @@ func main() {
 	})
 
 	serverAlive.Store(false) // immediately stop processing incoming connections
+
+	util.SaveRoundCount(c.FolderDataFiles.String() + `/` + util.RoundCountFilename)
 
 	// some last minute stats reporting
 	totalConnections, totalDisconnections := connections.Stats()

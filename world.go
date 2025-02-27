@@ -576,9 +576,13 @@ loop:
 
 			// TODO: Move this to events
 			util.LockMud()
+
 			w.UpdateStats()
+			// save the round counter.
+			util.SaveRoundCount(c.FolderDataFiles.String() + `/` + util.RoundCountFilename)
+
 			util.UnlockMud()
-			configs.SetVal(`RoundCount`, strconv.FormatUint(util.GetRoundCount(), 10))
+
 			statsTimer.Reset(time.Duration(10) * time.Second)
 
 		case <-roomUpdateTimer.C:
@@ -623,9 +627,10 @@ loop:
 
 				roundNumber := util.IncrementRoundCount()
 
-				//if c.LogIntervalRoundCount > 0 && roundNumber%uint64(c.LogIntervalRoundCount) == 0 {
-				//slog.Info("World::RoundTick()", "roundNumber", roundNumber)
-				//}
+				if c.LogIntervalRoundCount > 0 && roundNumber%uint64(c.LogIntervalRoundCount) == 0 {
+					slog.Info("World::RoundTick()", "roundNumber", roundNumber)
+				}
+
 				events.AddToQueue(events.NewRound{RoundNumber: roundNumber, TimeNow: time.Now(), Config: c})
 			}
 
