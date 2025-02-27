@@ -2,6 +2,7 @@ package usercommands
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -334,6 +335,10 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 			defer func() {
 				util.TrackTime(`usr-cmd[`+cmd+`]`, time.Since(start).Seconds())
 			}()
+
+			if isAdmin {
+				slog.Info("Admin Command", "cmd", cmd, "rest", rest, "userId", user.UserId)
+			}
 
 			// Run the command here
 			handled, err := cmdInfo.Func(rest, user, room, flags)

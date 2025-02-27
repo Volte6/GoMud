@@ -235,7 +235,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 	for i := 0; i < attackCount; i++ {
 
-		slog.Info(`calculateCombat`, `Atk`, fmt.Sprintf(`%d/%d`, i+1, attackCount), `Source`, fmt.Sprintf(`%s (%s)`, sourceChar.Name, sourceType), `Target`, fmt.Sprintf(`%s (%s)`, targetChar.Name, targetType))
+		slog.Debug(`calculateCombat`, `Atk`, fmt.Sprintf(`%d/%d`, i+1, attackCount), `Source`, fmt.Sprintf(`%s (%s)`, sourceChar.Name, sourceType), `Target`, fmt.Sprintf(`%s (%s)`, targetChar.Name, targetType))
 
 		attackWeapons := []items.Item{}
 
@@ -341,7 +341,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 				msgSeed = weapon.ItemId
 			}
 
-			slog.Info("DiceRolls", "attacks", attacks, "dCount", dCount, "dSides", dSides, "dBonus", dBonus, "critBuffs", critBuffs)
+			slog.Debug("DiceRolls", "attacks", attacks, "dCount", dCount, "dSides", dSides, "dBonus", dBonus, "critBuffs", critBuffs)
 
 			// Individual weapons may get multiple attacks
 			for j := 0; j < attacks; j++ {

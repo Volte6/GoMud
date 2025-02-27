@@ -168,7 +168,7 @@ func Rand(maxInt int) int {
 
 func LogRoll(name string, rollResult int, targetNumber int) {
 	success := rollResult < targetNumber
-	slog.Info(`Rand Result`, `Name`, name, `Result`, fmt.Sprintf(`%d < %d`, rollResult, targetNumber), `Success`, success)
+	slog.Debug(`Rand Result`, `Name`, name, `Result`, fmt.Sprintf(`%d < %d`, rollResult, targetNumber), `Success`, success)
 }
 
 func SplitString(input string, lineWidth int) []string {

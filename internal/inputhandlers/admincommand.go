@@ -116,7 +116,7 @@ func tryAdminCommand(cmd string, connectionId connections.ConnectionId) bool {
 		return false
 	}
 
-	slog.Info("admin command", "cmd", cmd, "arg", arg)
+	slog.Info("Admin Command", "cmd", cmd, "arg", arg)
 	//fmt.Printf("cmd:[%s] arg:[%s]\n", cmd, arg)
 
 	if cmd == "where" {
@@ -131,7 +131,7 @@ func tryAdminCommand(cmd string, connectionId connections.ConnectionId) bool {
 
 		onlineTableData := templates.GetTable("Online Users", headers, rows)
 		tplTxt, _ := templates.Process("tables/generic", onlineTableData)
-		connections.SendTo([]byte(tplTxt), connectionId)
+		connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
 		return true
 	}
 
@@ -187,7 +187,7 @@ func tryAdminCommand(cmd string, connectionId connections.ConnectionId) bool {
 	if cmd == "adminhelp" {
 
 		tplTxt, _ := templates.Process("admincommands/help", adminCommandList)
-		connections.SendTo([]byte(tplTxt), connectionId)
+		connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
 		return true
 	}
 

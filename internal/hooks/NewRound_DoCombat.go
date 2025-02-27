@@ -324,7 +324,7 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 			}
 
 			if user.Character.Aggro.RoundsWaiting > 0 {
-				slog.Info(`RoundsWaiting`, `User`, user.Character.Name, `Rounds`, user.Character.Aggro.RoundsWaiting)
+				slog.Debug(`RoundsWaiting`, `User`, user.Character.Name, `Rounds`, user.Character.Aggro.RoundsWaiting)
 
 				user.Character.Aggro.RoundsWaiting--
 
@@ -518,7 +518,7 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 			}
 
 			if user.Character.Aggro.RoundsWaiting > 0 {
-				slog.Info(`RoundsWaiting`, `User`, user.Character.Name, `Rounds`, user.Character.Aggro.RoundsWaiting)
+				slog.Debug(`RoundsWaiting`, `User`, user.Character.Name, `Rounds`, user.Character.Aggro.RoundsWaiting)
 
 				user.Character.Aggro.RoundsWaiting--
 
@@ -837,7 +837,7 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 			}
 
 			if mob.Character.Aggro.RoundsWaiting > 0 {
-				slog.Info(`RoundsWaiting`, `User`, mob.Character.Name, `Rounds`, mob.Character.Aggro.RoundsWaiting)
+				slog.Debug(`RoundsWaiting`, `User`, mob.Character.Name, `Rounds`, mob.Character.Aggro.RoundsWaiting)
 
 				mob.Character.Aggro.RoundsWaiting--
 
@@ -983,7 +983,7 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 			}
 
 			if mob.Character.Aggro.RoundsWaiting > 0 {
-				slog.Info(`RoundsWaiting`, `User`, mob.Character.Name, `Rounds`, mob.Character.Aggro.RoundsWaiting)
+				slog.Debug(`RoundsWaiting`, `User`, mob.Character.Name, `Rounds`, mob.Character.Aggro.RoundsWaiting)
 
 				mob.Character.Aggro.RoundsWaiting--
 

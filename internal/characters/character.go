@@ -446,7 +446,7 @@ func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
 
 	c.Experience += actualXP
 
-	slog.Info(`GrantXP()`, `username`, c.Name, `xp`, xp, `xpscale`, xpScale, `actualXP`, actualXP)
+	slog.Debug(`GrantXP()`, `username`, c.Name, `xp`, xp, `xpscale`, xpScale, `actualXP`, actualXP)
 
 	return actualXP, xpScale
 }

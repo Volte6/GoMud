@@ -106,7 +106,7 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 		return false
 	}
 
-	slog.Info("system command", "cmd", cmd, "arg", arg)
+	slog.Info("System Command", "cmd", cmd, "arg", arg)
 	//fmt.Printf("cmd:[%s] arg:[%s]\n", cmd, arg)
 
 	if cmd == "quit" {
