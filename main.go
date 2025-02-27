@@ -488,10 +488,8 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 			}
 
 			if userObject.Permission == users.PermissionAdmin {
-				connDetails.AddInputHandler("AdminCommandInputHandler", inputhandlers.AdminCommandInputHandler)
+				connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
 			}
-
-			connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
 
 			// Add a signal handler (shortcut ctrl combos) after the AnsiHandler
 			// This captures signals and replaces user input so should happen after AnsiHandler to ensure it happens before other processes.
@@ -661,10 +659,8 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 			}
 
 			if userObject.Permission == users.PermissionAdmin {
-				connDetails.AddInputHandler("AdminCommandInputHandler", inputhandlers.AdminCommandInputHandler)
+				connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
 			}
-
-			connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
 
 			// Add a signal handler (shortcut ctrl combos) after the AnsiHandler
 			// This captures signals and replaces user input so should happen after AnsiHandler to ensure it happens before other processes.

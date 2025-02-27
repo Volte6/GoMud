@@ -2,13 +2,16 @@ package inputhandlers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+	"syscall"
+	"time"
 
 	"log/slog"
 
 	"github.com/volte6/gomud/internal/connections"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/users"
 )
 
 func SystemCommandInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
@@ -57,13 +60,13 @@ var (
 			Description:  "Disconnect self from the server",
 			ExampleInput: "quit",
 		},
-		"who": SystemCommandHelp{
-			Description:  "List all connected users",
-			ExampleInput: "who",
+		"reload": SystemCommandHelp{
+			Description:  "Reload datafiles for various packages (items, mobs, buffs, etc.)",
+			ExampleInput: "reload",
 		},
-		"help": SystemCommandHelp{
-			Description:  "Display this help message, or help for a specific command",
-			ExampleInput: "help shutdown",
+		"shutdown": SystemCommandHelp{
+			Description:  "Shutdown the server",
+			ExampleInput: "shutdown [15/seconds]",
 		},
 	}
 )
@@ -120,33 +123,52 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 		return true
 	}
 
-	if cmd == "who" {
-		onlineUsers := users.GetOnlineList()
-
-		headers := []string{"UserId", "Username", "Character", "Level", "Role"}
-
-		rows := [][]string{}
-		for _, user := range onlineUsers {
-			rows = append(rows, []string{user.UserId, user.Username, user.CharacterName, fmt.Sprintf(`%d`, user.CharacterLevel), user.Permission})
-		}
-
-		onlineTableData := templates.GetTable("Online Users", headers, rows)
-		tplTxt, _ := templates.Process("tables/generic", onlineTableData)
-
-		connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
-
-		// Not building complex output, so just preparse the ansi in the template and cache that
-		//tplTxt, _ := templates.Process("systemcommands/who", onlineUsers)
-		//connections.SendTo([]byte(tplTxt), connectionId)
-		return true
+	if cmd == "reload" {
+		events.AddToQueue(events.System{
+			Command: "reload",
+		})
 	}
 
-	if cmd == "help" {
+	if cmd == "shutdown" {
+		var timeToShutdown uint64 = 15
 
-		tplTxt, _ := templates.Process("systemcommands/help", systemCommandList)
+		if len(arg) > 0 {
+			timeToShutdown, _ = strconv.ParseUint(arg, 10, 64)
+		}
 
-		connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
+		go func() {
 
+			// Not building complex output, so just preparse the ansi in the template and cache that
+			tplTxt, _ := templates.Process("admincommands/shutdown-countdown", nil, templates.AnsiTagsPreParse)
+
+			for i := timeToShutdown; i > 0; i-- {
+
+				writeOut := false
+				if i == timeToShutdown {
+					writeOut = true
+				} else if i > 60 {
+					if i%30 == 0 {
+						writeOut = true
+					}
+				} else if i > 15 {
+					if i%15 == 0 {
+						writeOut = true
+					}
+				} else if i%5 == 0 {
+					writeOut = true
+				}
+
+				if writeOut {
+
+					events.AddToQueue(events.Broadcast{Text: fmt.Sprintf(tplTxt, i)})
+
+				}
+
+				time.Sleep(time.Second)
+			}
+			connections.SignalShutdown(syscall.SIGTERM)
+
+		}()
 		return true
 	}
 
