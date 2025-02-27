@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"log/slog"
-
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
@@ -296,7 +294,7 @@ func SaveAllUsers(isAutoSave ...bool) {
 
 	for _, u := range userManager.Users {
 		if err := SaveUser(*u, isAutoSave...); err != nil {
-			slog.Error("SaveAllUsers()", "error", err.Error())
+			mudlog.Error("SaveAllUsers()", "error", err.Error())
 		}
 	}
 
@@ -374,7 +372,7 @@ func LoadUser(username string, skipValidation ...bool) (*UserRecord, error) {
 
 	loadedUser := &UserRecord{}
 	if err := yaml.Unmarshal([]byte(userFileTxt), loadedUser); err != nil {
-		slog.Error("LoadUser", "error", err.Error())
+		mudlog.Error("LoadUser", "error", err.Error())
 	}
 
 	if len(skipValidation) == 0 || !skipValidation[0] {
