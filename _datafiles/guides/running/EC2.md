@@ -4,6 +4,9 @@ If you plan to host GoMUD on a remote server using AWS, EC2 is a solid option. H
 
 Note: Configuration of the separate datafiles repository is optional, but be aware that different GoMud configuration options might be necessary
 
+Before embarking on this journey, please familiarize yourself with the [general running guide](https://github.com/Volte6/GoMud/blob/master/_datafiles/guides/running/README.md).
+
+
 #### Step 1: Create EC2 Instance
 
 Set up an ec2 instance on your AWS account. Here are some suggested options:
