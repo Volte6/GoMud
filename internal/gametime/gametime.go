@@ -2,12 +2,12 @@ package gametime
 
 import (
 	"fmt"
-	"log/slog"
 	"math"
 	"strconv"
 	"strings"
 
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
 )
 
@@ -383,7 +383,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 		} else if strShort == `noo` { // if timeStr == `noon` || timeStr == `noons` {
 
 			if realTime {
-				slog.Error("AddPeriod", "error", "real time not supported for noon yet: "+timeStr)
+				mudlog.Error("AddPeriod", "error", "real time not supported for noon yet: "+timeStr)
 			}
 
 			g = getDate(GetLastPeriod(`noon`, g.RoundNumber))
@@ -395,7 +395,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 		} else if strShort == `mid` { // if timeStr == `midnight` || timeStr == `midnights` {
 
 			if realTime {
-				slog.Error("AddPeriod", "error", "real time not supported for midnight yet: "+timeStr)
+				mudlog.Error("AddPeriod", "error", "real time not supported for midnight yet: "+timeStr)
 			}
 
 			g = getDate(GetLastPeriod(`day`, g.RoundNumber))
@@ -407,7 +407,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 		} else if timeStr == `sunrise` || timeStr == `sunrises` {
 
 			if realTime {
-				slog.Error("AddPeriod", "error", "real time not supported for sunrise yet: "+timeStr)
+				mudlog.Error("AddPeriod", "error", "real time not supported for sunrise yet: "+timeStr)
 			}
 
 			g = getDate(GetLastPeriod(`sunrise`, g.RoundNumber))
@@ -419,7 +419,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 		} else if timeStr == `sunset` || timeStr == `sunsets` {
 
 			if realTime {
-				slog.Error("AddPeriod", "error", "real time not supported for sunset yet: "+timeStr)
+				mudlog.Error("AddPeriod", "error", "real time not supported for sunset yet: "+timeStr)
 			}
 
 			g = getDate(GetLastPeriod(`sunset`, g.RoundNumber))

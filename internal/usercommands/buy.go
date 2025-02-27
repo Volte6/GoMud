@@ -2,7 +2,6 @@ package usercommands
 
 import (
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
@@ -10,6 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/pets"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -51,7 +51,7 @@ func Buy(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 	success := false
 	defer func() {
-		slog.Debug("PURCHASE", "rest", rest, "itemname", itemname, "targetUserId", targetUserId, "targetMobInstanceId", targetMobInstanceId, "success", success)
+		mudlog.Debug("PURCHASE", "rest", rest, "itemname", itemname, "targetUserId", targetUserId, "targetMobInstanceId", targetMobInstanceId, "success", success)
 	}()
 
 	merchantPlayers := room.GetPlayers(rooms.FindMerchant)

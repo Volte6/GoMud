@@ -2,7 +2,6 @@ package colorpatterns
 
 import (
 	"fmt"
-	"log/slog"
 	"math"
 	"os"
 	"regexp"
@@ -15,6 +14,7 @@ import (
 	"github.com/Volte6/ansitags"
 	"github.com/pkg/errors"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"gopkg.in/yaml.v2"
 )
 
@@ -270,10 +270,10 @@ func LoadColorPatterns() {
 
 	CompileColorPatterns()
 
-	slog.Info("...LoadColorPatterns()", "loadedCount", len(numericPatterns), "Time Taken", time.Since(start))
+	mudlog.Info("...LoadColorPatterns()", "loadedCount", len(numericPatterns), "Time Taken", time.Since(start))
 
 	for _, name := range GetColorPatternNames() {
-		slog.Info("Color Test (Patterns)", "name", name,
+		mudlog.Info("Color Test (Patterns)", "name", name,
 			"(default)", ansitags.Parse(ApplyColorPattern(`Color test pattern`, name)),
 			"Stretch", ansitags.Parse(ApplyColorPattern(`Color test pattern`, name, Stretch)),
 			"Words", ansitags.Parse(ApplyColorPattern(`Color test pattern color test pattern`, name, Words)),

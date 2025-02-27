@@ -2,9 +2,8 @@
 package hooks
 
 import (
-	"log/slog"
-
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/users"
 )
 
@@ -17,7 +16,7 @@ func CleanupZombies(e events.Event) bool {
 
 	evt, typeOk := e.(events.NewTurn)
 	if !typeOk {
-		slog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
 		return false
 	}
 
@@ -29,7 +28,7 @@ func CleanupZombies(e events.Event) bool {
 
 		if len(expZombies) > 0 {
 
-			slog.Info("Expired Zombies", "count", len(expZombies))
+			mudlog.Info("Expired Zombies", "count", len(expZombies))
 
 			for _, userId := range expZombies {
 				events.AddToQueue(events.System{Command: `leaveworld`, Data: userId})

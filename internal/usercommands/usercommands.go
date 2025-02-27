@@ -2,13 +2,13 @@ package usercommands
 
 import (
 	"fmt"
-	"log/slog"
 	"strings"
 	"time"
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/keywords"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/users"
@@ -337,7 +337,7 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 			}()
 
 			if isAdmin {
-				slog.Info("Admin Command", "cmd", cmd, "rest", rest, "userId", user.UserId)
+				mudlog.Info("Admin Command", "cmd", cmd, "rest", rest, "userId", user.UserId)
 			}
 
 			// Run the command here

@@ -47,7 +47,7 @@ func RegisterListener(emptyEvent Event, cbFunc Listener, addToFront ...bool) Lis
 	}
 
 	// Write it to debug out
-	//slog.Debug("Listener Registered", "Event", eType, "Function", runtime.FuncForPC(reflect.ValueOf(cbFunc).Pointer()).Name())
+	//mudlog.Debug("Listener Registered", "Event", eType, "Function", runtime.FuncForPC(reflect.ValueOf(cbFunc).Pointer()).Name())
 
 	if eType == `*` {
 		hasWildcardListener = true

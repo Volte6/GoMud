@@ -14,6 +14,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
 
 	//
@@ -189,7 +190,7 @@ func GetByConnectionId(connectionId connections.ConnectionId) *UserRecord {
 // First time creating a user.
 func LoginUser(user *UserRecord, connectionId connections.ConnectionId) (*UserRecord, string, error) {
 
-	slog.Info("LoginUser()", "username", user.Username, "connectionId", connectionId)
+	mudlog.Info("LoginUser()", "username", user.Username, "connectionId", connectionId)
 
 	user.Character.SetAdjective(`zombie`, false)
 
@@ -202,7 +203,7 @@ func LoginUser(user *UserRecord, connectionId connections.ConnectionId) (*UserRe
 			// Is it a zombie connection? If so, lets make this new connection the owner
 			if IsZombieConnection(otherConnId) {
 
-				slog.Info("LoginUser()", "Zombie", true)
+				mudlog.Info("LoginUser()", "Zombie", true)
 
 				if zombieUser, ok := userManager.Users[user.UserId]; ok {
 					user = zombieUser
@@ -241,7 +242,7 @@ func LoginUser(user *UserRecord, connectionId connections.ConnectionId) (*UserRe
 		user.Permission = PermissionMod
 	}
 
-	slog.Info("LoginUser()", "Zombie", false)
+	mudlog.Info("LoginUser()", "Zombie", false)
 
 	// Set their input round to current to track idle time fresh
 	user.SetLastInputRound(util.GetRoundCount())
@@ -253,7 +254,7 @@ func LoginUser(user *UserRecord, connectionId connections.ConnectionId) (*UserRe
 	userManager.Connections[user.connectionId] = user.UserId
 	userManager.UserConnections[user.UserId] = user.connectionId
 
-	slog.Info("LOGIN", "userId", user.UserId)
+	mudlog.Info("LOGIN", "userId", user.UserId)
 
 	user.EventLog.Add(`conn`, `Connected`)
 
@@ -480,7 +481,7 @@ func SaveUser(u UserRecord, isAutoSave ...bool) error {
 	completed := false
 
 	defer func() {
-		slog.Info("SaveUser()", "username", u.Username, "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
+		mudlog.Info("SaveUser()", "username", u.Username, "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
 	}()
 
 	// Don't save if they haven't entered the real game world yet.

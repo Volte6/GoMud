@@ -2,7 +2,6 @@ package usercommands
 
 import (
 	"fmt"
-	"log/slog"
 	"sort"
 	"strconv"
 	"strings"
@@ -10,6 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
@@ -92,7 +92,7 @@ func mob_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags even
 	if rest == `loot goblin` && c.LootGoblinRoom != 0 {
 		if gRoom := rooms.LoadRoom(int(c.LootGoblinRoom)); gRoom != nil { // loot goblin room
 			user.SendText(`Somewhere in the realm, a <ansi fg="mobname">loot goblin</ansi> appears!`)
-			slog.Info(`Loot Goblin Spawn`, `roundNumber`, util.GetRoundCount(), `forced`, true)
+			mudlog.Info(`Loot Goblin Spawn`, `roundNumber`, util.GetRoundCount(), `forced`, true)
 			gRoom.Prepare(false) // Make sure the loot goblin spawns.
 		}
 		return true, nil

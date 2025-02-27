@@ -2,11 +2,11 @@
 package hooks
 
 import (
-	"log/slog"
 	"time"
 
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/leaderboard"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
@@ -21,7 +21,7 @@ func AutoSave(e events.Event) bool {
 
 	evt, typeOk := e.(events.NewTurn)
 	if !typeOk {
-		slog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
 		return false
 	}
 

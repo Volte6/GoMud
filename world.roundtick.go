@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log/slog"
 
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
@@ -28,7 +28,7 @@ func (w *World) logOff(userId int) {
 		connections.SendTo([]byte(tplTxt), connId)
 
 		if err := users.LogOutUserByConnectionId(connId); err != nil {
-			slog.Error("Log Out Error", "connectionId", connId, "error", err)
+			mudlog.Error("Log Out Error", "connectionId", connId, "error", err)
 		}
 
 		connections.Remove(connId)

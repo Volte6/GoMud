@@ -3,7 +3,6 @@ package races
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 	"strings"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/items"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/stats"
 	"github.com/volte6/gomud/internal/util"
 	"gopkg.in/yaml.v2"
@@ -186,6 +186,6 @@ func LoadDataFiles() {
 
 	races = tmpRaces
 
-	slog.Info("races.LoadDataFiles()", "loadedCount", len(races), "Time Taken", time.Since(start))
+	mudlog.Info("races.LoadDataFiles()", "loadedCount", len(races), "Time Taken", time.Since(start))
 
 }

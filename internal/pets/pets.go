@@ -2,7 +2,6 @@ package pets
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 	"strings"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/items"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/statmods"
 	"github.com/volte6/gomud/internal/util"
 	"gopkg.in/yaml.v2"
@@ -184,5 +184,5 @@ func LoadDataFiles() {
 
 	petTypes = tmpPetTypes
 
-	slog.Info("pets.LoadDataFiles()", "loadedCount", len(petTypes), "Time Taken", time.Since(start))
+	mudlog.Info("pets.LoadDataFiles()", "loadedCount", len(petTypes), "Time Taken", time.Since(start))
 }

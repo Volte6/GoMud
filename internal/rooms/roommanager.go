@@ -17,11 +17,10 @@ import (
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
-
-	"log/slog"
 
 	"gopkg.in/yaml.v2"
 )
@@ -435,7 +434,7 @@ func SaveAllRooms() error {
 
 	saveCt, err := fileloader.SaveAllFlatFiles[int, *Room](configs.GetConfig().FolderDataFiles.String()+`/rooms`, roomManager.rooms, saveModes...)
 
-	slog.Info("SaveAllRooms()", "savedCount", saveCt, "expectedCt", len(roomManager.rooms), "Time Taken", time.Since(start))
+	mudlog.Info("SaveAllRooms()", "savedCount", saveCt, "expectedCt", len(roomManager.rooms), "Time Taken", time.Since(start))
 
 	return err
 }
@@ -483,7 +482,7 @@ func loadAllRoomZones() error {
 			continue
 		}
 
-		slog.Warn("No Entrance", "roomId", roomId, "filePath", filePath)
+		mudlog.Warn("No Entrance", "roomId", roomId, "filePath", filePath)
 	}
 
 	for _, loadedRoom := range loadedRooms {
@@ -520,7 +519,7 @@ func loadAllRoomZones() error {
 		roomManager.zones[loadedRoom.Zone] = zoneInfo
 	}
 
-	slog.Info("rooms.loadAllRoomZones()", "loadedCount", len(loadedRooms), "Time Taken", time.Since(start))
+	mudlog.Info("rooms.loadAllRoomZones()", "loadedCount", len(loadedRooms), "Time Taken", time.Since(start))
 
 	return nil
 }
@@ -561,7 +560,7 @@ func removeRoomFromMemory(r *Room) {
 
 	afterCt := len(roomManager.rooms)
 
-	slog.Info("Removing from memory", "RoomId", r.RoomId, "Title", r.Title, "beforeCt", beforeCt, "afterCt", afterCt)
+	mudlog.Info("Removing from memory", "RoomId", r.RoomId, "Title", r.Title, "beforeCt", beforeCt, "afterCt", afterCt)
 }
 
 // Loads a room from disk and stores in memory
@@ -639,7 +638,7 @@ func loadRoomFromFile(roomFilePath string) (*Room, error) {
 
 	roomPtr, err := fileloader.LoadFlatFile[*Room](roomFilePath)
 	if err != nil {
-		slog.Error("loadRoomFromFile()", "error", err.Error())
+		mudlog.Error("loadRoomFromFile()", "error", err.Error())
 		return roomPtr, err
 	}
 
@@ -727,7 +726,7 @@ func SaveRoom(r Room) error {
 		return err
 	}
 
-	slog.Info("Saved room", "room", r.RoomId)
+	mudlog.Info("Saved room", "room", r.RoomId)
 
 	return nil
 }
@@ -913,7 +912,7 @@ func BuildRoom(fromRoomId int, exitName string, mapDirection ...string) (room *R
 		//newRoom.IdleMessages = fromRoom.IdleMessages
 	}
 
-	slog.Info("Connection room", "fromRoom", fromRoom.RoomId, "newRoom", newRoom.RoomId, "exitName", exitName)
+	mudlog.Info("Connection room", "fromRoom", fromRoom.RoomId, "newRoom", newRoom.RoomId, "exitName", exitName)
 
 	// connect the old room to the new room
 	newExit := exit.RoomExit{RoomId: newRoom.RoomId, Secret: false}
@@ -1171,7 +1170,7 @@ func GetSpecificMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, 
 		}
 
 		if err != nil {
-			slog.Error("Map Prop", "error", err.Error())
+			mudlog.Error("Map Prop", "error", err.Error())
 			return ``
 		}
 
@@ -1194,7 +1193,7 @@ func GetRoomCount(zoneName string) int {
 func LoadDataFiles() {
 
 	if len(roomManager.zones) > 0 {
-		slog.Info("rooms.LoadDataFiles()", "msg", "skipping reload of room files, rooms shouldn't be hot reloaded from flatfiles.")
+		mudlog.Info("rooms.LoadDataFiles()", "msg", "skipping reload of room files, rooms shouldn't be hot reloaded from flatfiles.")
 		return
 	}
 

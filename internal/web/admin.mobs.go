@@ -1,7 +1,6 @@
 package web
 
 import (
-	"log/slog"
 	"net/http"
 	"sort"
 	"strconv"
@@ -11,6 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
 )
@@ -19,7 +19,7 @@ func mobsIndex(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String()+"/admin/_header.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/mobs/index.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/_footer.html")
 	if err != nil {
-		slog.Error("HTML Template", "error", err)
+		mudlog.Error("HTML Template", "error", err)
 	}
 
 	allMobs := mobs.GetAllMobInfo()
@@ -34,7 +34,7 @@ func mobsIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := tmpl.Execute(w, mobIndexData); err != nil {
-		slog.Error("HTML Execute", "error", err)
+		mudlog.Error("HTML Execute", "error", err)
 	}
 
 }
@@ -43,7 +43,7 @@ func mobData(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.New("mob.data.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/admin/mobs/mob.data.html")
 	if err != nil {
-		slog.Error("HTML Template", "error", err)
+		mudlog.Error("HTML Template", "error", err)
 	}
 
 	urlVals := r.URL.Query()
@@ -145,7 +145,7 @@ func mobData(w http.ResponseWriter, r *http.Request) {
 	tplData[`buffSpecs`] = buffSpecs
 
 	if err := tmpl.Execute(w, tplData); err != nil {
-		slog.Error("HTML Execute", "error", err)
+		mudlog.Error("HTML Execute", "error", err)
 	}
 
 }

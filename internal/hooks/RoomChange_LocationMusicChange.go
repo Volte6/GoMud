@@ -1,9 +1,8 @@
 package hooks
 
 import (
-	"log/slog"
-
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
 )
@@ -18,7 +17,7 @@ func LocationMusicChange(e events.Event) bool {
 
 	evt, typeOk := e.(events.RoomChange)
 	if !typeOk {
-		slog.Error("Event", "Expected Type", "RoomChange", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "RoomChange", "Actual Type", e.Type())
 		return false
 	}
 

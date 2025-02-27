@@ -2,13 +2,13 @@ package usercommands
 
 import (
 	"fmt"
-	"log/slog"
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
@@ -55,7 +55,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 				user.SendText("You're too encumbered to move (<ansi fg=\"command\">help encumbrance</ansi>)!")
 			} else {
 				user.SendText("You're too tired to move (slow down)!")
-				slog.Debug("No ActionPoints", "AP", user.Character.ActionPoints, "Needed", actionCost)
+				mudlog.Debug("No ActionPoints", "AP", user.Character.ActionPoints, "Needed", actionCost)
 			}
 
 			return true, nil

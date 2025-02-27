@@ -57,7 +57,7 @@ func RegisterListeners() {
 		events.RegisterListener(nil, func(e events.Event) bool {
 			t := e.Type()
 			if t != `NewTurn` && t != `Message` && t != `NewRound` && t != `Broadcast` {
-				slog.Info("Event", "e.Type", e.Type(), "e", e)
+				mudlog.Info("Event", "e.Type", e.Type(), "e", e)
 			}
 			return true
 		})

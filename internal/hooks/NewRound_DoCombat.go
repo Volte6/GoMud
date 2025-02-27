@@ -2,7 +2,6 @@ package hooks
 
 import (
 	"fmt"
-	"log/slog"
 	"strings"
 	"time"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/spells"
@@ -324,7 +324,7 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 			}
 
 			if user.Character.Aggro.RoundsWaiting > 0 {
-				slog.Debug(`RoundsWaiting`, `User`, user.Character.Name, `Rounds`, user.Character.Aggro.RoundsWaiting)
+				mudlog.Debug(`RoundsWaiting`, `User`, user.Character.Name, `Rounds`, user.Character.Aggro.RoundsWaiting)
 
 				user.Character.Aggro.RoundsWaiting--
 
@@ -518,7 +518,7 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 			}
 
 			if user.Character.Aggro.RoundsWaiting > 0 {
-				slog.Debug(`RoundsWaiting`, `User`, user.Character.Name, `Rounds`, user.Character.Aggro.RoundsWaiting)
+				mudlog.Debug(`RoundsWaiting`, `User`, user.Character.Name, `Rounds`, user.Character.Aggro.RoundsWaiting)
 
 				user.Character.Aggro.RoundsWaiting--
 
@@ -837,7 +837,7 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 			}
 
 			if mob.Character.Aggro.RoundsWaiting > 0 {
-				slog.Debug(`RoundsWaiting`, `User`, mob.Character.Name, `Rounds`, mob.Character.Aggro.RoundsWaiting)
+				mudlog.Debug(`RoundsWaiting`, `User`, mob.Character.Name, `Rounds`, mob.Character.Aggro.RoundsWaiting)
 
 				mob.Character.Aggro.RoundsWaiting--
 
@@ -983,7 +983,7 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 			}
 
 			if mob.Character.Aggro.RoundsWaiting > 0 {
-				slog.Debug(`RoundsWaiting`, `User`, mob.Character.Name, `Rounds`, mob.Character.Aggro.RoundsWaiting)
+				mudlog.Debug(`RoundsWaiting`, `User`, mob.Character.Name, `Rounds`, mob.Character.Aggro.RoundsWaiting)
 
 				mob.Character.Aggro.RoundsWaiting--
 

@@ -2,10 +2,10 @@ package hooks
 
 import (
 	"fmt"
-	"log/slog"
 
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mudlog"
 )
 
 // Tee's log output to admins following
@@ -28,7 +28,7 @@ func FollowLogs(e events.Event) bool {
 
 	evt, typeOk := e.(events.Log)
 	if !typeOk {
-		slog.Error("Event", "Expected Type", "Log", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "Log", "Actual Type", e.Type())
 		return false
 	}
 

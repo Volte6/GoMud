@@ -7,10 +7,9 @@ import (
 	"syscall"
 	"time"
 
-	"log/slog"
-
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/templates"
 )
 
@@ -26,7 +25,7 @@ func SystemCommandInputHandler(clientInput *connections.ClientInput, sharedState
 	// grab whatever was typed in so far and trim out leading/trailing whitespace and null byte
 	message := strings.TrimSpace(string(clientInput.Buffer))
 
-	//slog.Info("SystemCommandInputHandler Received", "type", "TXT", "size", len(clientInput.Buffer), "data", string(clientInput.Buffer), "message", message)
+	//mudlog.Info("SystemCommandInputHandler Received", "type", "TXT", "size", len(clientInput.Buffer), "data", string(clientInput.Buffer), "message", message)
 
 	// If all they ever sent was white space, we won't have anything to work with. We can just ignore the input...
 	// ALternatively, they may have only hit ENTER, and we may do something with that...
@@ -109,7 +108,7 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 		return false
 	}
 
-	slog.Info("System Command", "cmd", cmd, "arg", arg)
+	mudlog.Info("System Command", "cmd", cmd, "arg", arg)
 	//fmt.Printf("cmd:[%s] arg:[%s]\n", cmd, arg)
 
 	if cmd == "quit" {
@@ -172,7 +171,7 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 		return true
 	}
 
-	slog.Error("valid command unhandled", "cmd", cmd, "arg", arg)
+	mudlog.Error("valid command unhandled", "cmd", cmd, "arg", arg)
 
 	return true
 }

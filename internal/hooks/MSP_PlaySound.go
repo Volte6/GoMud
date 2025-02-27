@@ -1,11 +1,11 @@
 package hooks
 
 import (
-	"log/slog"
 	"strconv"
 
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 )
@@ -18,7 +18,7 @@ func PlaySound(e events.Event) bool {
 
 	evt, typeOk := e.(events.MSP)
 	if !typeOk {
-		slog.Error("Event", "Expected Type", "MSP", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "MSP", "Actual Type", e.Type())
 		return false
 	}
 

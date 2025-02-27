@@ -1,12 +1,12 @@
 package audio
 
 import (
-	"log/slog"
 	"os"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"gopkg.in/yaml.v2"
 )
 
@@ -44,5 +44,5 @@ func LoadAudioConfig() {
 		panic(errors.Wrap(err, `filepath: `+path))
 	}
 
-	slog.Info("...LoadAudioConfig()", "loadedCount", len(audioLookup), "Time Taken", time.Since(start))
+	mudlog.Info("...LoadAudioConfig()", "loadedCount", len(audioLookup), "Time Taken", time.Since(start))
 }

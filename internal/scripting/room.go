@@ -3,10 +3,10 @@ package scripting
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/dop251/goja"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
 )
@@ -44,7 +44,7 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int) (bool, error) 
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TryRoomScriptEvent()", "eventName", eventName, "roomId", roomId, "time", time.Since(timestart))
+		mudlog.Debug("TryRoomScriptEvent()", "eventName", eventName, "roomId", roomId, "time", time.Since(timestart))
 	}()
 
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
@@ -77,14 +77,14 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int) (bool, error) 
 			finalErr := fmt.Errorf("%s(): %w", eventName, err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -105,7 +105,7 @@ func TryRoomIdleEvent(roomId int) (bool, error) {
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TryRoomIdleEvent()", "roomId", roomId, "time", time.Since(timestart))
+		mudlog.Debug("TryRoomIdleEvent()", "roomId", roomId, "time", time.Since(timestart))
 	}()
 
 	if onCommandFunc, ok := vmw.GetFunction(`onIdle`); ok {
@@ -136,14 +136,14 @@ func TryRoomIdleEvent(roomId int) (bool, error) {
 			finalErr := fmt.Errorf("TryRoomIdleEvent(): %w", err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -185,7 +185,7 @@ func TryRoomCommand(cmd string, rest string, userId int) (bool, error) {
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TryRoomCommand()", "cmd", cmd, "roomId", user.Character.RoomId, "time", time.Since(timestart))
+		mudlog.Debug("TryRoomCommand()", "cmd", cmd, "roomId", user.Character.RoomId, "time", time.Since(timestart))
 	}()
 
 	onCommandFunc, cmdFound := vmw.GetFunction(`onCommand_` + cmd)
@@ -222,14 +222,14 @@ func TryRoomCommand(cmd string, rest string, userId int) (bool, error) {
 			finalErr := fmt.Errorf("onCommand_%s(): %w", cmd, err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -267,14 +267,14 @@ func TryRoomCommand(cmd string, rest string, userId int) (bool, error) {
 			finalErr := fmt.Errorf("onCommand(): %w", err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -327,14 +327,14 @@ func getRoomVM(roomId int) (*VMWrapper, error) {
 		finalErr := fmt.Errorf("RunProgram: %w", err)
 
 		if _, ok := finalErr.(*goja.Exception); ok {
-			slog.Error("JSVM", "exception", finalErr)
+			mudlog.Error("JSVM", "exception", finalErr)
 			return nil, finalErr
 		} else if errors.Is(finalErr, errTimeout) {
-			slog.Error("JSVM", "interrupted", finalErr)
+			mudlog.Error("JSVM", "interrupted", finalErr)
 			return nil, finalErr
 		}
 
-		slog.Error("JSVM", "error", finalErr)
+		mudlog.Error("JSVM", "error", finalErr)
 		return nil, finalErr
 	}
 	vm.ClearInterrupt()
@@ -355,14 +355,14 @@ func getRoomVM(roomId int) (*VMWrapper, error) {
 			finalErr := fmt.Errorf("onLoad: %w", err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return nil, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return nil, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return nil, finalErr
 		}
 	}

@@ -3,11 +3,11 @@ package usercommands
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"math"
 
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -194,7 +194,7 @@ func Map(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 	mapTxt, err := templates.Process("maps/map", mapData)
 	if err != nil {
-		slog.Error("Map", "error", err.Error())
+		mudlog.Error("Map", "error", err.Error())
 		user.SendText(`No map found (or an error occured)"`)
 		return true, err
 	}

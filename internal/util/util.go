@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"math"
 	"math/rand"
 	"net/http"
@@ -23,6 +22,7 @@ import (
 
 	"crypto/md5"
 
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/term"
 )
 
@@ -168,7 +168,7 @@ func Rand(maxInt int) int {
 
 func LogRoll(name string, rollResult int, targetNumber int) {
 	success := rollResult < targetNumber
-	slog.Debug(`Rand Result`, `Name`, name, `Result`, fmt.Sprintf(`%d < %d`, rollResult, targetNumber), `Success`, success)
+	mudlog.Debug(`Rand Result`, `Name`, name, `Result`, fmt.Sprintf(`%d < %d`, rollResult, targetNumber), `Success`, success)
 }
 
 func SplitString(input string, lineWidth int) []string {
@@ -876,7 +876,7 @@ func SaveRoundCount(fpath string) {
 	err := os.WriteFile(fpath, []byte(strconv.FormatUint(roundCount, 10)), 0644)
 	if err != nil {
 
-		slog.Error("SaveRoundCount()", "error", err)
+		mudlog.Error("SaveRoundCount()", "error", err)
 	}
 
 }
@@ -887,14 +887,14 @@ func LoadRoundCount(fpath string) uint64 {
 	if err != nil {
 		roundCount = RoundCountMinimum
 		roundCount = RoundCountMinimum
-		slog.Warn("LoadRoundCount()", "error", err, "message", "Trying to create...")
+		mudlog.Warn("LoadRoundCount()", "error", err, "message", "Trying to create...")
 		SaveRoundCount(fpath)
 	}
 
 	roundCountUint64, err := strconv.ParseUint(string(roundCountData), 10, 64)
 	if err != nil {
 
-		slog.Warn("LoadRoundCount()", "error", err, "file-contents", string(roundCountData))
+		mudlog.Warn("LoadRoundCount()", "error", err, "file-contents", string(roundCountData))
 
 	} else {
 		roundCount = roundCountUint64

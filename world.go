@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"os"
 	"sort"
 	"strconv"
@@ -21,6 +20,7 @@ import (
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/mobcommands"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/prompt"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
@@ -100,7 +100,7 @@ func (w *World) SendSetZombie(userId int, on bool) {
 func (w *World) logOutUserByConnectionId(connectionId connections.ConnectionId) {
 
 	if err := users.LogOutUserByConnectionId(connectionId); err != nil {
-		slog.Error("Log Out Error", "connectionId", connectionId, "error", err)
+		mudlog.Error("Log Out Error", "connectionId", connectionId, "error", err)
 	}
 }
 
@@ -536,9 +536,9 @@ func (w *World) MainWorker(shutdown chan bool, wg *sync.WaitGroup) {
 
 	wg.Add(1)
 
-	slog.Info("MainWorker", "state", "Started")
+	mudlog.Info("MainWorker", "state", "Started")
 	defer func() {
-		slog.Error("MainWorker", "state", "Stopped")
+		mudlog.Error("MainWorker", "state", "Stopped")
 		wg.Done()
 	}()
 
@@ -562,11 +562,11 @@ loop:
 		select {
 		case <-shutdown:
 
-			slog.Error(`MainWorker`, `action`, `shutdown received`)
+			mudlog.Error(`MainWorker`, `action`, `shutdown received`)
 
 			util.LockMud()
 			if err := rooms.SaveAllRooms(); err != nil {
-				slog.Error("rooms.SaveAllRooms()", "error", err.Error())
+				mudlog.Error("rooms.SaveAllRooms()", "error", err.Error())
 			}
 			users.SaveAllUsers() // Save all user data too.
 			util.UnlockMud()
@@ -586,7 +586,7 @@ loop:
 			statsTimer.Reset(time.Duration(10) * time.Second)
 
 		case <-roomUpdateTimer.C:
-			slog.Debug(`MainWorker`, `action`, `rooms.RoomMaintenance()`)
+			mudlog.Debug(`MainWorker`, `action`, `rooms.RoomMaintenance()`)
 
 			// TODO: Move this to events
 			util.LockMud()
@@ -628,7 +628,7 @@ loop:
 				roundNumber := util.IncrementRoundCount()
 
 				if c.LogIntervalRoundCount > 0 && roundNumber%uint64(c.LogIntervalRoundCount) == 0 {
-					slog.Info("World::RoundTick()", "roundNumber", roundNumber)
+					mudlog.Info("World::RoundTick()", "roundNumber", roundNumber)
 				}
 
 				events.AddToQueue(events.NewRound{RoundNumber: roundNumber, TimeNow: time.Now(), Config: c})
@@ -675,9 +675,9 @@ loop:
 func (w *World) InputWorker(shutdown chan bool, wg *sync.WaitGroup) {
 	wg.Add(1)
 
-	slog.Info("InputWorker", "state", "Started")
+	mudlog.Info("InputWorker", "state", "Started")
 	defer func() {
-		slog.Error("InputWorker", "state", "Stopped")
+		mudlog.Error("InputWorker", "state", "Stopped")
 		wg.Done()
 	}()
 
@@ -685,7 +685,7 @@ loop:
 	for {
 		select {
 		case <-shutdown:
-			slog.Error(`InputWorker`, `action`, `shutdown received`)
+			mudlog.Error(`InputWorker`, `action`, `shutdown received`)
 			break loop
 		case wi := <-w.worldInput:
 
@@ -703,7 +703,7 @@ func (w *World) processInput(userId int, inputText string, flags events.EventFla
 
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		slog.Error("User not found", "userId", userId)
+		mudlog.Error("User not found", "userId", userId)
 		return
 	}
 
@@ -779,7 +779,7 @@ func (w *World) processInput(userId int, inputText string, flags events.EventFla
 
 			handled, err = usercommands.TryCommand(command, remains, userId, flags)
 			if err != nil {
-				slog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
+				mudlog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
 			}
 		}
 
@@ -815,7 +815,7 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 	mob := mobs.GetInstance(mobInstanceId)
 	if mob == nil { // Something went wrong. User not found.
-		slog.Error("Mob not found", "mobId", mobInstanceId, "where", "processMobInput()")
+		mudlog.Error("Mob not found", "mobId", mobInstanceId, "where", "processMobInput()")
 		return
 	}
 
@@ -833,11 +833,11 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 			command = inputText
 		}
 
-		//slog.Info("World received mob input", "InputText", (inputText))
+		//mudlog.Info("World received mob input", "InputText", (inputText))
 
 		handled, err = mobcommands.TryCommand(command, remains, mobInstanceId)
 		if err != nil {
-			slog.Error("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
+			mudlog.Error("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
 		}
 
 	}
@@ -866,11 +866,11 @@ func (w *World) EventLoopTurns() {
 
 		input, typeOk := e.(events.Input)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "Input", "Actual Type", e.Type())
+			mudlog.Error("Event", "Expected Type", "Input", "Actual Type", e.Type())
 			continue
 		}
 
-		//slog.Debug(`Event`, `type`, input.Type(), `UserId`, input.UserId, `MobInstanceId`, input.MobInstanceId, `WaitTurns`, input.WaitTurns, `InputText`, input.InputText)
+		//mudlog.Debug(`Event`, `type`, input.Type(), `UserId`, input.UserId, `MobInstanceId`, input.MobInstanceId, `WaitTurns`, input.WaitTurns, `InputText`, input.InputText)
 
 		// If it's a mob
 		if input.MobInstanceId > 0 {
@@ -1022,7 +1022,7 @@ func (w *World) EventLoop() {
 
 		sys, typeOk := e.(events.System)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "System", "Actual Type", e.Type())
+			mudlog.Error("Event", "Expected Type", "System", "Actual Type", e.Type())
 			continue
 		}
 
@@ -1075,11 +1075,11 @@ func (w *World) EventLoop() {
 
 		action, typeOk := e.(events.RoomAction)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "RoomAction", "Actual Type", e.Type())
+			mudlog.Error("Event", "Expected Type", "RoomAction", "Actual Type", e.Type())
 			continue
 		}
 
-		//slog.Debug(`Event`, `type`, action.Type(), `RoomId`, action.RoomId, `SourceUserId`, action.SourceUserId, `SourceMobId`, action.SourceMobId, `WaitTurns`, action.WaitTurns, `Action`, action.Action)
+		//mudlog.Debug(`Event`, `type`, action.Type(), `RoomId`, action.RoomId, `SourceUserId`, action.SourceUserId, `SourceMobId`, action.SourceMobId, `WaitTurns`, action.WaitTurns, `Action`, action.Action)
 
 		if action.ReadyTurn > turnNow {
 
@@ -1338,7 +1338,7 @@ func (w *World) EventLoop() {
 
 		gmcp, typeOk := e.(events.GMCPOut)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "GMCPOut", "Actual Type", e.Type())
+			mudlog.Error("Event", "Expected Type", "GMCPOut", "Actual Type", e.Type())
 			continue
 		}
 
@@ -1364,7 +1364,7 @@ func (w *World) EventLoop() {
 		default:
 			payload, err := json.Marshal(gmcp.Payload)
 			if err != nil {
-				slog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
+				mudlog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
 				continue
 			}
 			connections.SendTo(term.GmcpPayload.BytesWithPayload(payload), connId)
@@ -1406,7 +1406,7 @@ func (w *World) EventLoop() {
 
 		broadcast, typeOk := e.(events.Broadcast)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "Broadcast", "Actual Type", e.Type())
+			mudlog.Error("Event", "Expected Type", "Broadcast", "Actual Type", e.Type())
 			continue
 		}
 
@@ -1445,7 +1445,7 @@ func (w *World) EventLoop() {
 
 		cmd, typeOk := e.(events.WebClientCommand)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
+			mudlog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
 			continue
 		}
 
@@ -1472,7 +1472,7 @@ func (w *World) EventLoop() {
 
 		message, typeOk := e.(events.Message)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
+			mudlog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
 			continue
 		}
 
@@ -1481,7 +1481,7 @@ func (w *World) EventLoop() {
 			continue
 		}
 
-		//slog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(messageColorized), "IsCommunication", message.IsCommunication)
+		//mudlog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(messageColorized), "IsCommunication", message.IsCommunication)
 
 		if message.UserId > 0 {
 
@@ -1594,7 +1594,7 @@ func (w *World) UpdateStats() {
 // Force disconnect a user (Makes them a zombie)
 func (w *World) Kick(userId int) {
 
-	slog.Info(`Kick`, `userId`, userId)
+	mudlog.Info(`Kick`, `userId`, userId)
 
 	user := users.GetByUserId(userId)
 	if user == nil {

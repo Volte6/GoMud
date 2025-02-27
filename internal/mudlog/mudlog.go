@@ -9,14 +9,13 @@ import (
 	"strings"
 
 	"github.com/natefinch/lumberjack"
-	"github.com/volte6/gomud/internal/events"
 )
 
 var (
 	slogInstance *slog.Logger
 )
 
-func SetupLogger(inGameLogger events.EventLogger, logLevel string, logPath string, colorLogs bool) {
+func SetupLogger(inGameLogger TeeLogger, logLevel string, logPath string, colorLogs bool) {
 
 	SetLogLevel(strings.ToUpper(logLevel))
 

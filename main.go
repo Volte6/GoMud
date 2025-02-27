@@ -13,8 +13,6 @@ import (
 	"syscall"
 	"time"
 
-	"log/slog"
-
 	"github.com/gorilla/websocket"
 	"github.com/volte6/gomud/internal/audio"
 	"github.com/volte6/gomud/internal/buffs"
@@ -69,7 +67,7 @@ func main() {
 
 	defer func() {
 		if r := recover(); r != nil {
-			slog.Error("PANIC", "error", r)
+			mudlog.Error("PANIC", "error", r)
 		}
 	}()
 
@@ -107,26 +105,26 @@ func main() {
 	slices.Sort(cfgKeys)
 
 	for _, k := range cfgKeys {
-		slog.Info("Config", k, cfgData[k])
+		mudlog.Info("Config", k, cfgData[k])
 	}
 	//
-	slog.Info(`========================`)
+	mudlog.Info(`========================`)
 
 	// Do version related checks
-	slog.Info(`Version: ` + Version)
+	mudlog.Info(`Version: ` + Version)
 	if err := version.VersionCheck(Version); err != nil {
 
 		if err == version.ErrIncompatibleVersion {
-			slog.Error("Incompatible version.", "details", "Backup all datafiles and run with -u or --upgrade flag to attempt an automatic upgrade.")
+			mudlog.Error("Incompatible version.", "details", "Backup all datafiles and run with -u or --upgrade flag to attempt an automatic upgrade.")
 			return
 		}
 
 		if err == version.ErrUpgradePossible {
-			slog.Warn("Version mismatch.", "details", "Your config files could use some updating. Backup all datafiles and run with -u or --upgrade flag to attempt an automatic upgrade.")
+			mudlog.Warn("Version mismatch.", "details", "Your config files could use some updating. Backup all datafiles and run with -u or --upgrade flag to attempt an automatic upgrade.")
 		}
 
 	}
-	slog.Info(`========================`)
+	mudlog.Info(`========================`)
 
 	//
 	// System Configurations
@@ -134,7 +132,7 @@ func main() {
 
 	// Validate chosen world:
 	if err := util.ValidateWorldFiles(`_datafiles/world/default`, c.FolderDataFiles.String()); err != nil {
-		slog.Error("World Validation", "error", err)
+		mudlog.Error("World Validation", "error", err)
 		os.Exit(1)
 	}
 
@@ -153,7 +151,7 @@ func main() {
 	scripting.Setup(int(c.ScriptLoadTimeoutMs), int(c.ScriptRoomTimeoutMs))
 
 	//
-	slog.Info(`========================`)
+	mudlog.Info(`========================`)
 
 	//
 	// Generate initial leaderboard cache
@@ -196,7 +194,7 @@ func main() {
 
 	tplTxt, err := templates.Process("goodbye", nil)
 	if err != nil {
-		slog.Error("Template Error", "error", err)
+		mudlog.Error("Template Error", "error", err)
 	}
 
 	events.AddToQueue(events.Broadcast{
@@ -209,7 +207,7 @@ func main() {
 
 	// some last minute stats reporting
 	totalConnections, totalDisconnections := connections.Stats()
-	slog.Error(
+	mudlog.Error(
 		"shutting down server",
 		"LifetimeConnections", totalConnections,
 		"LifetimeDisconnects", totalDisconnections,
@@ -228,7 +226,7 @@ func main() {
 	// Just an ephemeral goroutine that spins its wheels until the program shuts down")
 	go func() {
 		for {
-			slog.Error("Waiting on workers")
+			mudlog.Error("Waiting on workers")
 			// sleep for 3 seconds
 			time.Sleep(time.Duration(3) * time.Second)
 		}
@@ -250,7 +248,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		wg.Done()
 	}()
 
-	slog.Info("New Connection", "connectionID", connDetails.ConnectionId(), "remoteAddr", connDetails.RemoteAddr().String())
+	mudlog.Info("New Connection", "connectionID", connDetails.ConnectionId(), "remoteAddr", connDetails.RemoteAddr().String())
 
 	// Add starting handlers
 
@@ -384,7 +382,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 			}
 
-			slog.Warn("Telnet", "error", err)
+			mudlog.Warn("Telnet", "error", err)
 
 			connections.Remove(connDetails.ConnectionId())
 
@@ -402,7 +400,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 		// Was there an error? If so, we should probably just stop processing input
 		if err != nil {
-			slog.Warn("InputHandler", "error", err)
+			mudlog.Warn("InputHandler", "error", err)
 			continue
 		}
 
@@ -635,7 +633,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 			}
 
-			slog.Error("WS Read", "error", err)
+			mudlog.Error("WS Read", "error", err)
 			break
 		}
 
@@ -693,7 +691,7 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 
 	server, err := net.Listen("tcp", fmt.Sprintf("%s:%d", hostname, portNum))
 	if err != nil {
-		slog.Error("Error creating server", "error", err)
+		mudlog.Error("Error creating server", "error", err)
 		return nil
 	}
 
@@ -705,12 +703,12 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 			conn, err := server.Accept()
 
 			if !serverAlive.Load() {
-				slog.Error("Connections disabled.")
+				mudlog.Error("Connections disabled.")
 				return
 			}
 
 			if err != nil {
-				slog.Error("Connection error", "error", err)
+				mudlog.Error("Connection error", "error", err)
 				continue
 			}
 
@@ -741,7 +739,7 @@ func loadAllDataFiles(isReload bool) {
 
 		defer func() {
 			if r := recover(); r != nil {
-				slog.Error("RELOAD FAILED", "err", r)
+				mudlog.Error("RELOAD FAILED", "err", r)
 			}
 		}()
 

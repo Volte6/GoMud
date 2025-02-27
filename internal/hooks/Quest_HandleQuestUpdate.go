@@ -2,12 +2,12 @@ package hooks
 
 import (
 	"fmt"
-	"log/slog"
 	"strconv"
 	"strings"
 
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/quests"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -23,11 +23,11 @@ func HandleQuestUpdate(e events.Event) bool {
 
 	evt, typeOk := e.(events.Quest)
 	if !typeOk {
-		slog.Error("Event", "Expected Type", "Quest", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "Quest", "Actual Type", e.Type())
 		return false
 	}
 
-	//slog.Debug(`Event`, `type`, evt.Type(), `UserId`, evt.UserId, `QuestToken`, evt.QuestToken)
+	//mudlog.Debug(`Event`, `type`, evt.Type(), `UserId`, evt.UserId, `QuestToken`, evt.QuestToken)
 
 	// Give them a token
 	remove := false

@@ -3,12 +3,12 @@ package scripting
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/dop251/goja"
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/colorpatterns"
+	"github.com/volte6/gomud/internal/mudlog"
 )
 
 var (
@@ -36,7 +36,7 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TryBuffScriptEvent()", "eventName", eventName, "buffId", buffId, "time", time.Since(timestart))
+		mudlog.Debug("TryBuffScriptEvent()", "eventName", eventName, "buffId", buffId, "time", time.Since(timestart))
 	}()
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 
@@ -65,14 +65,14 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 			finalErr := fmt.Errorf("%s(): %w", eventName, err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -96,7 +96,7 @@ func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buff
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TryBuffCommand()", "cmd", cmd, "buffId", buffId, "time", time.Since(timestart))
+		mudlog.Debug("TryBuffCommand()", "cmd", cmd, "buffId", buffId, "time", time.Since(timestart))
 	}()
 
 	if onCommandFunc, ok := vmw.GetFunction(`onCommand_` + cmd); ok {
@@ -118,14 +118,14 @@ func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buff
 			finalErr := fmt.Errorf("onCommand_%s(): %w", cmd, err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -156,14 +156,14 @@ func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buff
 			finalErr := fmt.Errorf("onCommand(): %w", err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -216,14 +216,14 @@ func getBuffVM(buffId int) (*VMWrapper, error) {
 		finalErr := fmt.Errorf("RunProgram: %w", err)
 
 		if _, ok := finalErr.(*goja.Exception); ok {
-			slog.Error("JSVM", "exception", finalErr)
+			mudlog.Error("JSVM", "exception", finalErr)
 			return nil, finalErr
 		} else if errors.Is(finalErr, errTimeout) {
-			slog.Error("JSVM", "interrupted", finalErr)
+			mudlog.Error("JSVM", "interrupted", finalErr)
 			return nil, finalErr
 		}
 
-		slog.Error("JSVM", "error", finalErr)
+		mudlog.Error("JSVM", "error", finalErr)
 		return nil, finalErr
 	}
 	vm.ClearInterrupt()

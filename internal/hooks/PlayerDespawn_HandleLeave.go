@@ -2,11 +2,11 @@ package hooks
 
 import (
 	"fmt"
-	"log/slog"
 
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
@@ -21,7 +21,7 @@ func HandleLeave(e events.Event) bool {
 
 	evt, typeOk := e.(events.PlayerDespawn)
 	if !typeOk {
-		slog.Error("Event", "Expected Type", "DeSpawned", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "DeSpawned", "Actual Type", e.Type())
 		return false
 	}
 
@@ -78,7 +78,7 @@ func HandleLeave(e events.Event) bool {
 	}
 
 	if err := users.LogOutUserByConnectionId(connId); err != nil {
-		slog.Error("Log Out Error", "connectionId", connId, "error", err)
+		mudlog.Error("Log Out Error", "connectionId", connId, "error", err)
 	}
 
 	return true

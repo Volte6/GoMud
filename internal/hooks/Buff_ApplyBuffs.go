@@ -1,12 +1,11 @@
 package hooks
 
 import (
-	"log/slog"
-
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/users"
 )
@@ -19,11 +18,11 @@ func ApplyBuffs(e events.Event) bool {
 
 	evt, typeOk := e.(events.Buff)
 	if !typeOk {
-		slog.Error("Event", "Expected Type", "Buff", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "Buff", "Actual Type", e.Type())
 		return false
 	}
 
-	//slog.Debug(`Event`, `type`, evt.Type(), `UserId`, evt.UserId, `MobInstanceId`, evt.MobInstanceId, `BuffId`, evt.BuffId)
+	//mudlog.Debug(`Event`, `type`, evt.Type(), `UserId`, evt.UserId, `MobInstanceId`, evt.MobInstanceId, `BuffId`, evt.BuffId)
 
 	buffInfo := buffs.GetBuffSpec(evt.BuffId)
 	if buffInfo == nil {

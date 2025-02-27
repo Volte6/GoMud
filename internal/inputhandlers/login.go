@@ -1,10 +1,9 @@
 package inputhandlers
 
 import (
-	"log/slog"
-
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
@@ -183,7 +182,7 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 	}
 
 	if err := users.CreateUser(state.UserObject); err != nil {
-		slog.Error("Could not create user", "error", err.Error())
+		mudlog.Error("Could not create user", "error", err.Error())
 
 		connections.SendTo([]byte("Could not create user: "+err.Error()+"\n"), clientInput.ConnectionId)
 

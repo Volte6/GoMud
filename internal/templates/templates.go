@@ -10,11 +10,10 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"log/slog"
-
 	"github.com/Volte6/ansitags"
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
 )
 
@@ -90,7 +89,7 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 
 	fInfo, err := os.Stat(fullPath)
 	if err != nil {
-		//slog.Error("could not stat template file", "error", err)
+		//mudlog.Error("could not stat template file", "error", err)
 		return "[TEMPLATE READ ERROR]", err
 	}
 
@@ -106,7 +105,7 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 		// Get the file contents
 		fileContents, err := os.ReadFile(fullPath)
 		if err != nil {
-			slog.Error("could not read template file", "error", err)
+			mudlog.Error("could not read template file", "error", err)
 			return "[TEMPLATE READ ERROR]", err
 		}
 
@@ -129,7 +128,7 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 	var buf bytes.Buffer
 	err = cache.tpl.Execute(&buf, data)
 	if err != nil {
-		slog.Error("could not parse template file", "error", err)
+		mudlog.Error("could not parse template file", "error", err)
 		return "[TEMPLATE ERROR]", err
 	}
 
@@ -283,8 +282,8 @@ func LoadAliases() {
 
 	ansiAliasFileModTime = fInfo.ModTime()
 	if err = ansitags.LoadAliases(util.FilePath(string(configs.GetConfig().FolderDataFiles) + `/ansi-aliases.yaml`)); err != nil {
-		slog.Info("ansitags.LoadAliases()", "changed", true, "Time Taken", time.Since(start), "error", err.Error())
+		mudlog.Info("ansitags.LoadAliases()", "changed", true, "Time Taken", time.Since(start), "error", err.Error())
 	}
 
-	slog.Info("ansitags.LoadAliases()", "changed", true, "Time Taken", time.Since(start))
+	mudlog.Info("ansitags.LoadAliases()", "changed", true, "Time Taken", time.Since(start))
 }

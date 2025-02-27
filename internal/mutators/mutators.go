@@ -2,7 +2,6 @@ package mutators
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 	"strings"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/gametime"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
 	"gopkg.in/yaml.v2"
 )
@@ -330,5 +330,5 @@ func LoadDataFiles() {
 
 	allMutators = tmpMutators
 
-	slog.Info("mutators.LoadDataFiles()", "loadedCount", len(allMutators), "Time Taken", time.Since(start))
+	mudlog.Info("mutators.LoadDataFiles()", "loadedCount", len(allMutators), "Time Taken", time.Since(start))
 }

@@ -1,9 +1,8 @@
 package hooks
 
 import (
-	"log/slog"
-
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/scripting"
 )
 
@@ -15,7 +14,7 @@ func CheckItemQuests(e events.Event) bool {
 
 	evt, typeOk := e.(events.ItemOwnership)
 	if !typeOk {
-		slog.Error("Event", "Expected Type", "ItemOwnership", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "ItemOwnership", "Actual Type", e.Type())
 		return false
 	}
 

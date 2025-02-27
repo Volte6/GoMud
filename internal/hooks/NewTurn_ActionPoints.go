@@ -15,7 +15,7 @@ func ActionPoints(e events.Event) bool {
 	/*
 		evt, typeOk := e.(events.NewTurn)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
+			mudlog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
 			return false
 		}
 	*/

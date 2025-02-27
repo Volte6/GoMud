@@ -2,13 +2,13 @@ package spells
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
 )
 
@@ -194,6 +194,6 @@ func LoadSpellFiles() {
 
 	allSpells = tmpAllSpells
 
-	slog.Info("spells.loadAllSpells()", "loadedCount", len(allSpells), "Time Taken", time.Since(start))
+	mudlog.Info("spells.loadAllSpells()", "loadedCount", len(allSpells), "Time Taken", time.Since(start))
 
 }

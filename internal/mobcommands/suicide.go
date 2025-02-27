@@ -2,13 +2,13 @@ package mobcommands
 
 import (
 	"fmt"
-	"log/slog"
 	"math"
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/combat"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
@@ -33,7 +33,7 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		return true, nil
 	}
 
-	slog.Debug(`Mob Death`, `name`, mob.Character.Name, `rest`, rest)
+	mudlog.Debug(`Mob Death`, `name`, mob.Character.Name, `rest`, rest)
 
 	// Make sure to clean up any charm stuff if it's being removed
 	if charmedUserId := mob.Character.RemoveCharm(); charmedUserId > 0 {
@@ -135,7 +135,7 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 					finalXPVal := int(math.Ceil(float64(xpVal) * xpScaler))
 
-					slog.Debug("XP Calculation", "MobLevel", mob.Character.Level, "XPBase", mobXP, "xpVal", xpVal, "xpVariation", xpVariation, "xpScaler", xpScaler, "finalXPVal", finalXPVal)
+					mudlog.Debug("XP Calculation", "MobLevel", mob.Character.Level, "XPBase", mobXP, "xpVal", xpVal, "xpVariation", xpVariation, "xpScaler", xpScaler, "finalXPVal", finalXPVal)
 
 					user.GrantXP(finalXPVal, `combat`)
 
@@ -145,7 +145,7 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 					user.Character.UpdateAlignment(alignmentAdj)
 					alignmentAfter := user.Character.AlignmentName()
 
-					slog.Debug("Alignment", "user Alignment", user.Character.Alignment, "mob Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
+					mudlog.Debug("Alignment", "user Alignment", user.Character.Alignment, "mob Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
 
 					if alignmentBefore != alignmentAfter {
 						alignmentBefore = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentBefore, alignmentBefore)
@@ -168,7 +168,7 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 						targetNumber = 1
 					}
 
-					slog.Debug("Tame Chance", "levelDelta", levelDelta, "skillsDelta", skillsDelta, "targetNumber", targetNumber)
+					mudlog.Debug("Tame Chance", "levelDelta", levelDelta, "skillsDelta", skillsDelta, "targetNumber", targetNumber)
 
 					if util.Rand(1000) < targetNumber {
 						if mob.IsTameable() && user.Character.GetSkillLevel(skills.Tame) > 0 {
@@ -207,7 +207,7 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 				allMembers := p.GetMembers()
 				xpSplit := xp / len(allMembers)
 
-				slog.Info(`Party XP`, `totalXP`, xp, `splitXP`, xpSplit, `memberCt`, len(allMembers))
+				mudlog.Info(`Party XP`, `totalXP`, xp, `splitXP`, xpSplit, `memberCt`, len(allMembers))
 
 				for _, memberId := range allMembers {
 
@@ -225,7 +225,7 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 						user.Character.UpdateAlignment(alignmentAdj)
 						alignmentAfter := user.Character.AlignmentName()
 
-						slog.Debug("Alignment", "user Alignment", user.Character.Alignment, "mob Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
+						mudlog.Debug("Alignment", "user Alignment", user.Character.Alignment, "mob Alignment", mob.Character.Alignment, `alignmentAdj`, alignmentAdj, `alignmentBefore`, alignmentBefore, `alignmentAfter`, alignmentAfter)
 
 						if alignmentBefore != alignmentAfter {
 							alignmentBefore = fmt.Sprintf(`<ansi fg="%s">%s</ansi>`, alignmentBefore, alignmentBefore)
@@ -248,7 +248,7 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 							targetNumber = 1
 						}
 
-						slog.Debug("Tame Chance", "levelDelta", levelDelta, "skillsDelta", skillsDelta, "targetNumber", targetNumber)
+						mudlog.Debug("Tame Chance", "levelDelta", levelDelta, "skillsDelta", skillsDelta, "targetNumber", targetNumber)
 
 						if util.Rand(1000) < targetNumber {
 							if mob.IsTameable() && user.Character.GetSkillLevel(skills.Tame) > 0 {
