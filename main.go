@@ -42,7 +42,6 @@ import (
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
-	"github.com/volte6/gomud/internal/version"
 	"github.com/volte6/gomud/internal/web"
 )
 
@@ -108,22 +107,6 @@ func main() {
 		mudlog.Info("Config", k, cfgData[k])
 	}
 	//
-	mudlog.Info(`========================`)
-
-	// Do version related checks
-	mudlog.Info(`Version: ` + Version)
-	if err := version.VersionCheck(Version); err != nil {
-
-		if err == version.ErrIncompatibleVersion {
-			mudlog.Error("Incompatible version.", "details", "Backup all datafiles and run with -u or --upgrade flag to attempt an automatic upgrade.")
-			return
-		}
-
-		if err == version.ErrUpgradePossible {
-			mudlog.Warn("Version mismatch.", "details", "Your config files could use some updating. Backup all datafiles and run with -u or --upgrade flag to attempt an automatic upgrade.")
-		}
-
-	}
 	mudlog.Info(`========================`)
 
 	//
