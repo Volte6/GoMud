@@ -14,7 +14,7 @@ type LogHandler struct {
 	slog.Handler
 	l                    *log.Logger
 	minimumMessageLength int
-	lTee                 TeeLogger
+	lTee                 teeLogger
 	noColorHandler       *slog.TextHandler
 }
 
@@ -121,7 +121,7 @@ func (h *LogHandler) Handle(ctx context.Context, r slog.Record) error {
 	return nil
 }
 
-func getLogHandler(out io.Writer, teeOut TeeLogger, colorLogs bool) *LogHandler {
+func getLogHandler(out io.Writer, teeOut teeLogger, colorLogs bool) *LogHandler {
 
 	opt := &slog.HandlerOptions{
 

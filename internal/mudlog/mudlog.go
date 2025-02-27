@@ -13,9 +13,30 @@ import (
 
 var (
 	slogInstance *slog.Logger
+	logLevel     = new(slog.LevelVar) // goroutine safe way to change log levels
 )
 
-func SetupLogger(inGameLogger TeeLogger, logLevel string, logPath string, colorLogs bool) {
+type teeLogger interface {
+	Println(level string, v ...any)
+}
+
+func SetLogLevel(lvl string) {
+
+	if len(lvl) > 0 {
+		if lvl[0:1] == `M` {
+			logLevel.Set(slog.LevelInfo)
+			return
+		} else if lvl[0:1] == `L` {
+			logLevel.Set(slog.LevelWarn)
+			return
+		}
+	}
+
+	logLevel.Set(slog.LevelDebug)
+
+}
+
+func SetupLogger(inGameLogger teeLogger, logLevel string, logPath string, colorLogs bool) {
 
 	SetLogLevel(strings.ToUpper(logLevel))
 
@@ -28,7 +49,6 @@ func SetupLogger(inGameLogger TeeLogger, logLevel string, logPath string, colorL
 	}
 
 	// Setup file logging
-
 	fileInfo, err := os.Stat(logPath)
 	if err == nil {
 		if fileInfo.IsDir() {
