@@ -35,6 +35,8 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 	// Routing
 	// Basic homepage
 	http.HandleFunc("/", serveHome)
+	// config view page
+	http.HandleFunc("/viewconfig", viewConfig)
 	// websocket client
 	http.HandleFunc("/webclient", serveClient)
 	// websocket upgrade

@@ -115,10 +115,10 @@ OnDeathXPPenalty: none
 OnDeathProtectionLevels: 5
 # - EnterRoomMessageWrapper -
 #   Decorate entrance text with this. Put a %s where the message should be.
-EnterRoomMessageWrapper: "\n   <ansi fg=\"enters-message\"> >>> </ansi>%s\n"
+EnterRoomMessageWrapper: "   <ansi fg=\"enters-message\"> >>> </ansi>%s\n"
 # - ExitRoomMessageWrapper -
 #   Decorate exit text with this. Put a %s where the message should be.
-ExitRoomMessageWrapper: "\n   <ansi fg=\"leaves-message\"> >>> </ansi>%s\n"
+ExitRoomMessageWrapper: "   <ansi fg=\"leaves-message\"> >>> </ansi>%s\n"
 # - MaxIdleSeconds -
 #   How long players can go without any input, before being kicked.
 #   A value of 0 (zero) means never kick inactive players.
