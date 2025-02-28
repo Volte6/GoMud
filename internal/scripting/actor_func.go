@@ -298,25 +298,25 @@ func (a ScriptActor) Sleep(seconds int) {
 	}
 }
 
-func (a ScriptActor) Command(cmd string, waitTurns ...int) {
-	if len(waitTurns) < 1 {
-		waitTurns = append(waitTurns, 0)
+func (a ScriptActor) Command(cmd string, waitSeconds ...float64) {
+	if len(waitSeconds) < 1 {
+		waitSeconds = append(waitSeconds, 0)
 	}
 	if a.userId > 0 {
-		a.userRecord.Command(cmd, waitTurns[0])
+		a.userRecord.Command(cmd, waitSeconds[0])
 	} else {
-		a.mobRecord.Command(cmd, waitTurns[0])
+		a.mobRecord.Command(cmd, waitSeconds[0])
 	}
 }
 
-func (a ScriptActor) CommandFlagged(cmd string, flags int, waitTurns ...int) {
-	if len(waitTurns) < 1 {
-		waitTurns = append(waitTurns, 0)
+func (a ScriptActor) CommandFlagged(cmd string, flags events.EventFlag, waitSeconds ...float64) {
+	if len(waitSeconds) < 1 {
+		waitSeconds = append(waitSeconds, 0)
 	}
 	if a.userId > 0 {
-		a.userRecord.CommandFlagged(cmd, uint64(flags), waitTurns[0])
+		a.userRecord.CommandFlagged(cmd, flags, waitSeconds[0])
 	} else {
-		a.mobRecord.Command(cmd, waitTurns[0])
+		a.mobRecord.Command(cmd, waitSeconds[0])
 	}
 }
 
@@ -406,7 +406,13 @@ func (a ScriptActor) GiveItem(itm any) {
 		iRecord := sItem.itemRecord
 		if a.characterRecord.StoreItem(*iRecord) {
 			if a.userId > 0 {
-				TryItemScriptEvent(`onGive`, *sItem.itemRecord, a.userId)
+
+				events.AddToQueue(events.ItemOwnership{
+					UserId: a.userId,
+					Item:   *iRecord,
+					Gained: true,
+				})
+
 			}
 		}
 	}
@@ -416,7 +422,13 @@ func (a ScriptActor) GiveItem(itm any) {
 func (a ScriptActor) TakeItem(itm ScriptItem) {
 	if a.characterRecord.RemoveItem(*itm.itemRecord) {
 		if a.userId > 0 {
-			TryItemScriptEvent(`onLost`, *itm.itemRecord, a.userId)
+
+			events.AddToQueue(events.ItemOwnership{
+				UserId: a.userId,
+				Item:   *itm.itemRecord,
+				Gained: false,
+			})
+
 		}
 	}
 }

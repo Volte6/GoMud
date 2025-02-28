@@ -1,9 +1,8 @@
 package inputhandlers
 
 import (
-	"log/slog"
-
 	"github.com/volte6/gomud/internal/connections"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/term"
 )
 
@@ -36,9 +35,9 @@ func AnsiHandler(clientInput *connections.ClientInput, sharedState map[string]an
 
 			w, h, err := term.AnsiParseScreenSizePayload(payload)
 			if err != nil {
-				slog.Info("Received", "type", "ANSI (Screensize)", "data", term.BytesString(payload), "error", err)
+				mudlog.Debug("Received", "type", "ANSI (Screensize)", "data", term.BytesString(payload), "error", err)
 			} else {
-				slog.Info("Received", "type", "ANSI (Screensize)", "width", w, "height", h)
+				mudlog.Debug("Received", "type", "ANSI (Screensize)", "width", w, "height", h)
 
 				if err != nil {
 
@@ -63,9 +62,9 @@ func AnsiHandler(clientInput *connections.ClientInput, sharedState map[string]an
 
 			x, y, err := term.AnsiParseMouseClickPayload(payload)
 			if err != nil {
-				slog.Info("Received", "type", "ANSI (MouseClick)", "data", term.BytesString(payload), "error", err)
+				mudlog.Debug("Received", "type", "ANSI (MouseClick)", "data", term.BytesString(payload), "error", err)
 			} else {
-				slog.Info("Received", "type", "ANSI (MouseClick)", "x", x, "y", y)
+				mudlog.Debug("Received", "type", "ANSI (MouseClick)", "x", x, "y", y)
 			}
 
 			continue
@@ -75,9 +74,9 @@ func AnsiHandler(clientInput *connections.ClientInput, sharedState map[string]an
 
 			x, y, err := term.AnsiParseMouseWheelScroll(payload)
 			if err != nil {
-				slog.Info("Received", "type", "ANSI (MouseWheelUp)", "data", term.BytesString(payload), "error", err)
+				mudlog.Debug("Received", "type", "ANSI (MouseWheelUp)", "data", term.BytesString(payload), "error", err)
 			} else {
-				slog.Info("Received", "type", "ANSI (MouseWheelUp)", "x", x, "y", y)
+				mudlog.Debug("Received", "type", "ANSI (MouseWheelUp)", "x", x, "y", y)
 			}
 
 			continue
@@ -86,15 +85,15 @@ func AnsiHandler(clientInput *connections.ClientInput, sharedState map[string]an
 		if ok, payload := term.Matches(ansiCmds, term.AnsiMouseWheelDown); ok {
 			x, y, err := term.AnsiParseMouseWheelScroll(payload)
 			if err != nil {
-				slog.Info("Received", "type", "ANSI (MouseWheelDown)", "data", term.BytesString(payload), "error", err)
+				mudlog.Debug("Received", "type", "ANSI (MouseWheelDown)", "data", term.BytesString(payload), "error", err)
 			} else {
-				slog.Info("Received", "type", "ANSI (MouseWheelDown)", "x", x, "y", y)
+				mudlog.Debug("Received", "type", "ANSI (MouseWheelDown)", "x", x, "y", y)
 			}
 			continue
 		}
 
 		if ok, _ := term.Matches(ansiCmds, term.AnsiMoveCursorUp); ok {
-			slog.Info("Received", "type", "ANSI (MoveCursorUp)", "currentInput", string(clientInput.Buffer), "LastSubmitted", string(clientInput.LastSubmitted))
+			mudlog.Debug("Received", "type", "ANSI (MoveCursorUp)", "currentInput", string(clientInput.Buffer), "LastSubmitted", string(clientInput.LastSubmitted))
 
 			// For each character in the buffer, backspace it out
 			// Then add whatever was last submitted
@@ -107,7 +106,7 @@ func AnsiHandler(clientInput *connections.ClientInput, sharedState map[string]an
 				spaceSequence = append(spaceSequence, term.ASCII_SPACE)
 			}
 
-			slog.Info("Received", "type", "ANSI (MoveCursorUp)", "bsSequence", len(bsSequence), "spaceSequence", len(spaceSequence))
+			mudlog.Debug("Received", "type", "ANSI (MoveCursorUp)", "bsSequence", len(bsSequence), "spaceSequence", len(spaceSequence))
 
 			connections.SendTo(bsSequence, clientInput.ConnectionId)
 			connections.SendTo(spaceSequence, clientInput.ConnectionId)
@@ -128,7 +127,7 @@ func AnsiHandler(clientInput *connections.ClientInput, sharedState map[string]an
 		}
 
 		if ok, _ := term.Matches(ansiCmds, term.AnsiMoveCursorDown); ok {
-			slog.Info("Received", "type", "ANSI (MoveCursorDown)", "currentInput", string(clientInput.Buffer), "LastSubmitted", string(clientInput.LastSubmitted))
+			mudlog.Debug("Received", "type", "ANSI (MoveCursorDown)", "currentInput", string(clientInput.Buffer), "LastSubmitted", string(clientInput.LastSubmitted))
 
 			// For each character in the buffer, backspace it out
 			// Then add whatever was last submitted
@@ -141,7 +140,7 @@ func AnsiHandler(clientInput *connections.ClientInput, sharedState map[string]an
 				spaceSequence = append(spaceSequence, term.ASCII_SPACE)
 			}
 
-			slog.Info("Received", "type", "ANSI (MoveCursorUp)", "bsSequence", len(bsSequence), "spaceSequence", len(spaceSequence))
+			mudlog.Debug("Received", "type", "ANSI (MoveCursorUp)", "bsSequence", len(bsSequence), "spaceSequence", len(spaceSequence))
 
 			connections.SendTo(bsSequence, clientInput.ConnectionId)
 			connections.SendTo(spaceSequence, clientInput.ConnectionId)
@@ -175,7 +174,7 @@ func AnsiHandler(clientInput *connections.ClientInput, sharedState map[string]an
 		}
 
 		// Unhanlded ANSI command, log it
-		slog.Info("Received", "type", "ANSI", "size", len(ansiCmds), "data", term.AnsiCommandToString(ansiCmds))
+		mudlog.Debug("Received", "type", "ANSI", "size", len(ansiCmds), "data", term.AnsiCommandToString(ansiCmds))
 	}
 
 	return nextHandler

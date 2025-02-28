@@ -2,11 +2,12 @@ package usercommands
 
 import (
 	"github.com/volte6/gomud/internal/characters"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Flee(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Flee(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if user.Character.Aggro == nil || user.Character.Aggro.Type != characters.Flee {
 		user.SendText(`You attempt to flee...`)

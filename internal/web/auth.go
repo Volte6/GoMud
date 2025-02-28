@@ -1,10 +1,10 @@
 package web
 
 import (
-	"log/slog"
 	"net/http"
 	"time"
 
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/users"
 )
 
@@ -48,7 +48,7 @@ func doBasicAuth(next http.HandlerFunc) http.HandlerFunc {
 
 					if uRecord.Permission == users.PermissionAdmin || uRecord.Permission == users.PermissionMod {
 
-						slog.Warn("ADMIN LOGIN", "username", username, "success", true)
+						mudlog.Warn("ADMIN LOGIN", "username", username, "success", true)
 
 						// Cache auth for 30 minutes to avoid re-auth every load
 						authCache[authHeader] = time.Now().Add(time.Minute * 30)
@@ -58,13 +58,13 @@ func doBasicAuth(next http.HandlerFunc) http.HandlerFunc {
 
 					} else {
 
-						slog.Error("ADMIN LOGIN", "username", username, "success", false, "error", `Permissions=`+uRecord.Permission)
+						mudlog.Error("ADMIN LOGIN", "username", username, "success", false, "error", `Permissions=`+uRecord.Permission)
 
 					}
 				}
 
 			} else {
-				slog.Error("ADMIN LOGIN", "username", username, "success", false, "error", err)
+				mudlog.Error("ADMIN LOGIN", "username", username, "success", false, "error", err)
 			}
 		}
 

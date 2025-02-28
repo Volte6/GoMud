@@ -3,13 +3,14 @@ package usercommands
 import (
 	"sort"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Alias(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Alias(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// biuld array and look up table for sorting purposes
 	allOutCmds := []string{}

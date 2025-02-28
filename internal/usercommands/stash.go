@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Stash(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Stash(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// Check whether the user has an item in their inventory that matches
 	matchItem, found := user.Character.FindInBackpack(rest)
@@ -24,6 +24,12 @@ func Stash(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 		room.AddItem(matchItem, true)
 		user.Character.RemoveItem(matchItem)
 
+		events.AddToQueue(events.ItemOwnership{
+			UserId: user.UserId,
+			Item:   matchItem,
+			Gained: false,
+		})
+
 		isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 
 		user.SendText(
@@ -35,8 +41,6 @@ func Stash(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 				user.UserId)
 		}
 
-		// Trigger lost event
-		scripting.TryItemScriptEvent(`onLost`, matchItem, user.UserId)
 	}
 
 	return true, nil

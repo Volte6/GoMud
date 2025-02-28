@@ -4,14 +4,20 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Online(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Online(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	headers := []string{`Name`, `Level`, `Alignment`, `Profession`, `Online`, `Role`}
+
+	if user.Permission != users.PermissionUser {
+		headers = append([]string{`UserId`}, headers...)
+		headers = append(headers, []string{`Zone`, `RoomId`}...)
+	}
 
 	allFormatting := [][]string{}
 
@@ -49,6 +55,14 @@ func Online(rest string, user *users.UserRecord, room *rooms.Room, flags UserCom
 				`<ansi fg="white-bold">%s</ansi>`,
 				`<ansi fg="magenta">%s</ansi>`,
 				`<ansi fg="role-` + u.Permission + `-bold">%s</ansi>`,
+			}
+
+			if user.Permission != users.PermissionUser {
+				row = append([]string{strconv.Itoa(u.UserId)}, row...)
+				row = append(row, []string{u.Character.Zone, strconv.Itoa(u.Character.RoomId)}...)
+
+				formatting = append([]string{`<ansi fg="userid">%s</ansi>`}, formatting...)
+				formatting = append(formatting, []string{`<ansi fg="zone">%s</ansi>`, `<ansi fg="1">%s</ansi>`}...)
 			}
 
 			allFormatting = append(allFormatting, formatting)

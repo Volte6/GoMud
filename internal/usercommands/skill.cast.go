@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/characters"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
@@ -23,7 +24,7 @@ Level 2 - Become proficient in a spell at 125% rate
 Level 3 - Become proficient in a spell at 175% rate
 Level 4 - Become proficient in a spell at 250% rate
 */
-func Cast(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Cast(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Cast)
 

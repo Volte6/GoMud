@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
@@ -11,7 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Killstats(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Killstats(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	otherSuggestions := []string{}
 

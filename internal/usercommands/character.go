@@ -3,14 +3,15 @@ package usercommands
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"sort"
 	"strconv"
 
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -20,7 +21,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Character(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Character(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if !room.IsCharacterRoom {
 		return false, fmt.Errorf(`not in a IsCharacterRoom`)
@@ -378,7 +379,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags User
 
 			charValue := gearValue + (250 * char.Level)
 
-			slog.Debug(`Hire Alt`, `UserId`, user.UserId, `alt-name`, char.Name, `gear-value`, gearValue, `level`, char.Level, `total`, charValue)
+			mudlog.Debug(`Hire Alt`, `UserId`, user.UserId, `alt-name`, char.Name, `gear-value`, gearValue, `level`, char.Level, `total`, charValue)
 
 			question := cmdPrompt.Ask(fmt.Sprintf(`<ansi fg="51">The price to hire <ansi fg="username">%s</ansi> is <ansi fg="gold">%d gold</ansi>. Are you sure?</ansi>`, char.Name, charValue), []string{`yes`, `no`}, `no`)
 			if !question.Done {

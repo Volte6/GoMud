@@ -2,13 +2,14 @@ package usercommands
 
 import (
 	"fmt"
-	"log/slog"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
@@ -18,7 +19,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Mob(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Mob(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if user.Permission != users.PermissionAdmin {
 		user.SendText(`<ansi fg="alert-4">Only admins can use this command</ansi>`)
@@ -51,7 +52,7 @@ func Mob(rest string, user *users.UserRecord, room *rooms.Room, flags UserComman
 	return true, nil
 }
 
-func mob_List(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func mob_List(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	mobNames := []templates.NameDescription{}
 
@@ -83,7 +84,7 @@ func mob_List(rest string, user *users.UserRecord, room *rooms.Room, flags UserC
 	return true, nil
 }
 
-func mob_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func mob_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	c := configs.GetConfig()
 
@@ -91,7 +92,7 @@ func mob_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags User
 	if rest == `loot goblin` && c.LootGoblinRoom != 0 {
 		if gRoom := rooms.LoadRoom(int(c.LootGoblinRoom)); gRoom != nil { // loot goblin room
 			user.SendText(`Somewhere in the realm, a <ansi fg="mobname">loot goblin</ansi> appears!`)
-			slog.Info(`Loot Goblin Spawn`, `roundNumber`, util.GetRoundCount(), `forced`, true)
+			mudlog.Info(`Loot Goblin Spawn`, `roundNumber`, util.GetRoundCount(), `forced`, true)
 			gRoom.Prepare(false) // Make sure the loot goblin spawns.
 		}
 		return true, nil
@@ -127,7 +128,7 @@ func mob_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags User
 	return true, nil
 }
 
-func mob_Create(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func mob_Create(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	var newMob = mobs.Mob{}
 

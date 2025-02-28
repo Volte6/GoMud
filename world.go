@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"os"
 	"sort"
 	"strconv"
@@ -13,22 +12,17 @@ import (
 
 	"github.com/volte6/gomud/internal/badinputtracker"
 	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
-	"github.com/volte6/gomud/internal/leaderboard"
 	"github.com/volte6/gomud/internal/mobcommands"
 	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/parties"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/prompt"
-	"github.com/volte6/gomud/internal/quests"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
-	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/usercommands"
@@ -40,7 +34,7 @@ import (
 type WorldInput struct {
 	FromId    int
 	InputText string
-	WaitTurns int
+	ReadyTurn uint64
 }
 
 func (wi WorldInput) Id() int {
@@ -49,7 +43,7 @@ func (wi WorldInput) Id() int {
 
 type World struct {
 	worldInput         chan WorldInput
-	ignoreInput        map[int]struct{}
+	ignoreInput        map[int]uint64 // userid->turn set to ignore
 	enterWorldUserId   chan [2]int
 	leaveWorldUserId   chan int
 	logoutConnectionId chan connections.ConnectionId
@@ -60,7 +54,7 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 
 	w := &World{
 		worldInput:         make(chan WorldInput),
-		ignoreInput:        make(map[int]struct{}),
+		ignoreInput:        make(map[int]uint64),
 		enterWorldUserId:   make(chan [2]int),
 		leaveWorldUserId:   make(chan int),
 		logoutConnectionId: make(chan connections.ConnectionId),
@@ -75,9 +69,11 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 // Send input to the world.
 // Just sends via a channel. Will block until read.
 func (w *World) SendInput(i WorldInput) {
-	if _, ok := w.ignoreInput[i.FromId]; ok {
-		return // discard
-	}
+	/*
+		if _, ok := w.ignoreInput[i.FromId]; ok {
+			return // discard
+		}
+	*/
 	w.worldInput <- i
 }
 
@@ -104,116 +100,27 @@ func (w *World) SendSetZombie(userId int, on bool) {
 func (w *World) logOutUserByConnectionId(connectionId connections.ConnectionId) {
 
 	if err := users.LogOutUserByConnectionId(connectionId); err != nil {
-		slog.Error("Log Out Error", "connectionId", connectionId, "error", err)
+		mudlog.Error("Log Out Error", "connectionId", connectionId, "error", err)
 	}
 }
 
 func (w *World) enterWorld(userId int, roomId int) {
 
-	user := users.GetByUserId(userId)
-	if user == nil {
-		slog.Error("EnterWorld", "error", fmt.Sprintf(`user %d not found`, user.Character.RoomId))
-		return
-	}
-
-	user.EventLog.Add(`conn`, fmt.Sprintf(`<ansi fg="username">%s</ansi> entered the world`, user.Character.Name))
-
-	users.RemoveZombieUser(userId)
-
-	room := rooms.LoadRoom(user.Character.RoomId)
-	if room == nil {
-
-		slog.Error("EnterWorld", "error", fmt.Sprintf(`room %d not found`, user.Character.RoomId))
-
-		user.Character.RoomId = 1
-		user.Character.Zone = "Frostfang"
-		room = rooms.LoadRoom(user.Character.RoomId)
-		if room == nil {
-			slog.Error("EnterWorld", "error", fmt.Sprintf(`room %d not found`, user.Character.RoomId))
-		}
-	}
-
-	// TODO HERE
-	loginCmds := configs.GetConfig().OnLoginCommands
-	if len(loginCmds) > 0 {
-
-		for _, cmd := range loginCmds {
-
-			events.AddToQueue(events.Input{
-				UserId:    userId,
-				InputText: cmd,
-				WaitTurns: -1, // No delay between execution of commands
-			})
-
-		}
-
-	}
-
-	//
-	// Send GMCP for their char name
-	//
-	if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
-
-		bytesOut := []byte(fmt.Sprintf(`Char.Name {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
-		connections.SendTo(
-			term.GmcpPayload.BytesWithPayload(bytesOut),
-			user.ConnectionId(),
-		)
-	}
+	events.AddToQueue(events.PlayerSpawn{UserId: userId})
 
 	w.UpdateStats()
 
-	// Pu thtme in the room
+	// Put htme in the room
 	rooms.MoveToRoom(userId, roomId, true)
 }
 
-func (w *World) leaveWorld(userId int) {
-
-	user := users.GetByUserId(userId)
-	if user == nil {
-		return
-	}
-
-	room := rooms.LoadRoom(user.Character.RoomId)
-
-	if currentParty := parties.Get(userId); currentParty != nil {
-		currentParty.Leave(userId)
-	}
-
-	for _, mobInstId := range room.GetMobs(rooms.FindCharmed) {
-		if mob := mobs.GetInstance(mobInstId); mob != nil {
-			if mob.Character.IsCharmed(userId) {
-				mob.Character.Charmed.Expire()
-			}
-		}
-	}
-
-	if _, ok := room.RemovePlayer(userId); ok {
-		tplTxt, _ := templates.Process("player-despawn", user.Character.Name)
-		room.SendText(tplTxt)
-	}
-
-	//
-	// Send GMCP Updates for players leaving
-	//
-	for _, uid := range room.GetPlayers() {
-
-		if uid == user.UserId {
-			continue
-		}
-
-		if u := users.GetByUserId(uid); u != nil {
-			if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
-
-				bytesOut := []byte(fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name))
-				connections.SendTo(
-					term.GmcpPayload.BytesWithPayload(bytesOut),
-					user.ConnectionId(),
-				)
-			}
-		}
-	}
-}
+/*
+users can be:
+Disconnected	+ OutWorld (no presence)	No record in connections.netConnections or users.ZombieConnections	| user object in room
+Connected		+ OutWorld (logging in) 	Has record in connections.netConnections 							| user object in room
+Connected		+ InWorld  (non-zombie) 	No record in users.ZombieConnections								| no zombie flag		| user object in room
+Disconnected	+ InWorld  (zombie)			Has record in users.ZombieConnections 								| has zombie flag		| user object in room
+*/
 
 func (w *World) GetAutoComplete(userId int, inputText string) []string {
 
@@ -629,9 +536,9 @@ func (w *World) MainWorker(shutdown chan bool, wg *sync.WaitGroup) {
 
 	wg.Add(1)
 
-	slog.Info("MainWorker", "state", "Started")
+	mudlog.Info("MainWorker", "state", "Started")
 	defer func() {
-		slog.Error("MainWorker", "state", "Stopped")
+		mudlog.Error("MainWorker", "state", "Stopped")
 		wg.Done()
 	}()
 
@@ -639,7 +546,7 @@ func (w *World) MainWorker(shutdown chan bool, wg *sync.WaitGroup) {
 
 	roomUpdateTimer := time.NewTimer(roomMaintenancePeriod)
 	ansiAliasTimer := time.NewTimer(ansiAliasReloadPeriod)
-	messageTimer := time.NewTimer(time.Millisecond)
+	eventLoopTimer := time.NewTimer(time.Millisecond)
 	turnTimer := time.NewTimer(time.Duration(c.TurnMs) * time.Millisecond)
 	statsTimer := time.NewTimer(time.Duration(10) * time.Second)
 
@@ -655,11 +562,11 @@ loop:
 		select {
 		case <-shutdown:
 
-			slog.Error(`MainWorker`, `action`, `shutdown received`)
+			mudlog.Error(`MainWorker`, `action`, `shutdown received`)
 
 			util.LockMud()
 			if err := rooms.SaveAllRooms(); err != nil {
-				slog.Error("rooms.SaveAllRooms()", "error", err.Error())
+				mudlog.Error("rooms.SaveAllRooms()", "error", err.Error())
 			}
 			users.SaveAllUsers() // Save all user data too.
 			util.UnlockMud()
@@ -667,15 +574,21 @@ loop:
 			break loop
 		case <-statsTimer.C:
 
+			// TODO: Move this to events
 			util.LockMud()
+
 			w.UpdateStats()
+			// save the round counter.
+			util.SaveRoundCount(c.FolderDataFiles.String() + `/` + util.RoundCountFilename)
+
 			util.UnlockMud()
-			configs.SetVal(`RoundCount`, strconv.FormatUint(util.GetRoundCount(), 10))
+
 			statsTimer.Reset(time.Duration(10) * time.Second)
 
 		case <-roomUpdateTimer.C:
-			slog.Debug(`MainWorker`, `action`, `rooms.RoomMaintenance()`)
+			mudlog.Debug(`MainWorker`, `action`, `rooms.RoomMaintenance()`)
 
+			// TODO: Move this to events
 			util.LockMud()
 			rooms.RoomMaintenance()
 			util.UnlockMud()
@@ -684,25 +597,45 @@ loop:
 
 		case <-ansiAliasTimer.C:
 
+			// TODO: Move this to events
 			util.LockMud()
 			templates.LoadAliases()
 			util.UnlockMud()
 
 			ansiAliasTimer.Reset(ansiAliasReloadPeriod)
 
-		case <-messageTimer.C:
+		case <-eventLoopTimer.C:
 
-			messageTimer.Reset(time.Millisecond)
+			eventLoopTimer.Reset(time.Millisecond)
 
 			util.LockMud()
-			w.MessageTick()
+			w.EventLoop()
 			util.UnlockMud()
 
 		case <-turnTimer.C:
 
 			util.LockMud()
 			turnTimer.Reset(time.Duration(c.TurnMs) * time.Millisecond)
-			w.TurnTick()
+
+			turnCt := util.IncrementTurnCount()
+			c := configs.GetConfig()
+
+			events.AddToQueue(events.NewTurn{TurnNumber: turnCt, TimeNow: time.Now(), Config: c})
+
+			// After a full round of turns, we can do a round tick.
+			if turnCt%uint64(c.TurnsPerRound()) == 0 {
+
+				roundNumber := util.IncrementRoundCount()
+
+				if c.LogIntervalRoundCount > 0 && roundNumber%uint64(c.LogIntervalRoundCount) == 0 {
+					mudlog.Info("World::RoundTick()", "roundNumber", roundNumber)
+				}
+
+				events.AddToQueue(events.NewRound{RoundNumber: roundNumber, TimeNow: time.Now(), Config: c})
+			}
+
+			w.EventLoopTurns()
+
 			util.UnlockMud()
 
 		case enterWorldUserId := <-w.enterWorldUserId: // [2]int
@@ -714,7 +647,7 @@ loop:
 		case leaveWorldUserId := <-w.leaveWorldUserId: // int
 
 			util.LockMud()
-			w.leaveWorld(leaveWorldUserId)
+			events.AddToQueue(events.PlayerDespawn{UserId: leaveWorldUserId})
 			util.UnlockMud()
 
 		case logoutConnectionId := <-w.logoutConnectionId: //  connections.ConnectionId
@@ -742,9 +675,9 @@ loop:
 func (w *World) InputWorker(shutdown chan bool, wg *sync.WaitGroup) {
 	wg.Add(1)
 
-	slog.Info("InputWorker", "state", "Started")
+	mudlog.Info("InputWorker", "state", "Started")
 	defer func() {
-		slog.Error("InputWorker", "state", "Stopped")
+		mudlog.Error("InputWorker", "state", "Stopped")
 		wg.Done()
 	}()
 
@@ -752,25 +685,25 @@ loop:
 	for {
 		select {
 		case <-shutdown:
-			slog.Error(`InputWorker`, `action`, `shutdown received`)
+			mudlog.Error(`InputWorker`, `action`, `shutdown received`)
 			break loop
 		case wi := <-w.worldInput:
 
 			events.AddToQueue(events.Input{
 				UserId:    wi.FromId,
 				InputText: wi.InputText,
-				WaitTurns: wi.WaitTurns,
+				ReadyTurn: util.GetTurnCount(),
 			})
 
 		}
 	}
 }
 
-func (w *World) processInput(userId int, inputText string, flags usercommands.UserCommandFlag) {
+func (w *World) processInput(userId int, inputText string, flags events.EventFlag) {
 
 	user := users.GetByUserId(userId)
 	if user == nil { // Something went wrong. User not found.
-		slog.Error("User not found", "userId", userId)
+		mudlog.Error("User not found", "userId", userId)
 		return
 	}
 
@@ -812,7 +745,8 @@ func (w *World) processInput(userId int, inputText string, flags usercommands.Us
 		if user.Macros != nil && len(inputText) == 2 {
 			if macro, ok := user.Macros[inputText]; ok {
 				handled = true
-				for waitTime, newCmd := range strings.Split(macro, `;`) {
+				readyTurn := util.GetTurnCount()
+				for _, newCmd := range strings.Split(macro, `;`) {
 					if newCmd == `` {
 						continue
 					}
@@ -820,9 +754,10 @@ func (w *World) processInput(userId int, inputText string, flags usercommands.Us
 					events.AddToQueue(events.Input{
 						UserId:    userId,
 						InputText: newCmd,
-						WaitTurns: waitTime,
+						ReadyTurn: readyTurn,
 					})
 
+					readyTurn++
 				}
 			}
 		}
@@ -844,7 +779,7 @@ func (w *World) processInput(userId int, inputText string, flags usercommands.Us
 
 			handled, err = usercommands.TryCommand(command, remains, userId, flags)
 			if err != nil {
-				slog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
+				mudlog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
 			}
 		}
 
@@ -880,7 +815,7 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 	mob := mobs.GetInstance(mobInstanceId)
 	if mob == nil { // Something went wrong. User not found.
-		slog.Error("Mob not found", "mobId", mobInstanceId, "where", "processMobInput()")
+		mudlog.Error("Mob not found", "mobId", mobInstanceId, "where", "processMobInput()")
 		return
 	}
 
@@ -898,11 +833,11 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 			command = inputText
 		}
 
-		//slog.Info("World received mob input", "InputText", (inputText))
+		//mudlog.Info("World received mob input", "InputText", (inputText))
 
 		handled, err = mobcommands.TryCommand(command, remains, mobInstanceId)
 		if err != nil {
-			slog.Error("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
+			mudlog.Error("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
 		}
 
 	}
@@ -915,24 +850,188 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 }
 
-// Handles sending out queued up messaged to users
-func (w *World) MessageTick() {
+// Events that are throttled by TurnMs in config.yaml
+func (w *World) EventLoopTurns() {
+
+	var turnCt uint64 = util.GetTurnCount()
+
+	//
+	// Handle Input Queue
+	//
+	alreadyProcessed := make(map[int]struct{}) // Keep track of players who already had a command this turn, and what turn it was
+	eq := events.GetQueue(events.Input{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll()
+
+		input, typeOk := e.(events.Input)
+		if !typeOk {
+			mudlog.Error("Event", "Expected Type", "Input", "Actual Type", e.Type())
+			continue
+		}
+
+		//mudlog.Debug(`Event`, `type`, input.Type(), `UserId`, input.UserId, `MobInstanceId`, input.MobInstanceId, `WaitTurns`, input.WaitTurns, `InputText`, input.InputText)
+
+		// If it's a mob
+		if input.MobInstanceId > 0 {
+			if input.ReadyTurn <= turnCt {
+
+				// Allow any handlers to handle the event
+				if !events.DoListeners(e) {
+					continue
+				}
+
+				w.processMobInput(input.MobInstanceId, input.InputText)
+			} else {
+				events.Requeue(input)
+			}
+			continue
+		}
+
+		// 0 and below, process immediately and don't count towards limit
+		if input.ReadyTurn == 0 {
+
+			// If this command was potentially blocking input, unblock it now.
+			if input.Flags.Has(events.CmdUnBlockInput) {
+
+				if _, ok := w.ignoreInput[input.UserId]; ok {
+					delete(w.ignoreInput, input.UserId)
+					if user := users.GetByUserId(input.UserId); user != nil {
+						user.UnblockInput()
+					}
+				}
+
+			}
+
+			// Allow any handlers to handle the event
+			if !events.DoListeners(e) {
+				continue
+			}
+
+			w.processInput(input.UserId, input.InputText, input.Flags)
+
+			continue
+		}
+
+		// If an event was already processed for this user this turn, skip
+		if _, ok := alreadyProcessed[input.UserId]; ok {
+			events.Requeue(input)
+			continue
+		}
+
+		// 0 means process immediately
+		// however, process no further events from this user until next turn
+		if input.ReadyTurn > turnCt {
+
+			// If this is a multi-turn wait, block further input if flagged to do so
+			if input.Flags.Has(events.CmdBlockInput) {
+
+				if _, ok := w.ignoreInput[input.UserId]; !ok {
+					w.ignoreInput[input.UserId] = turnCt
+				}
+
+				input.Flags.Remove(events.CmdBlockInput)
+			}
+
+			events.Requeue(input)
+
+			continue
+		}
+
+		//
+		// Event ready to be processed
+		//
+
+		// If this command was potentially blocking input, unblock it now.
+		if input.Flags.Has(events.CmdUnBlockInput) {
+
+			if _, ok := w.ignoreInput[input.UserId]; ok {
+				delete(w.ignoreInput, input.UserId)
+				if user := users.GetByUserId(input.UserId); user != nil {
+					user.UnblockInput()
+				}
+			}
+
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		w.processInput(input.UserId, input.InputText, events.EventFlag(input.Flags))
+
+		alreadyProcessed[input.UserId] = struct{}{}
+	}
+
+}
+
+// Should only handle sending messages out to users
+func (w *World) EventLoop() {
+
+	var c configs.Config = configs.GetConfig()
+
+	turnNow := util.GetTurnCount()
+
+	// Player joined the world
+	//
+	eq := events.GetQueue(events.Log{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
+	// Player joined the world
+	//
+	eq = events.GetQueue(events.PlayerSpawn{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
+	// Player left the world
+	//
+	eq = events.GetQueue(events.PlayerDespawn{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
+	// ScriptedEvents
+	//
+	eq = events.GetQueue(events.ScriptedEvent{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
+	// ItemOwnership
+	//
+	eq = events.GetQueue(events.ItemOwnership{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
 
 	//
 	// System commands such as /reload
 	//
-	eq := events.GetQueue(events.System{})
+	eq = events.GetQueue(events.System{})
 	for eq.Len() > 0 {
 
-		e := eq.Poll().(events.Event)
+		e := eq.Poll()
 
 		sys, typeOk := e.(events.System)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "System", "Actual Type", e.Type())
+			mudlog.Error("Event", "Expected Type", "System", "Actual Type", e.Type())
 			continue
 		}
 
-		if sys.Command == "reload" {
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		if sys.Command == `reload` {
 
 			events.AddToQueue(events.Broadcast{
 				Text: `Reloading flat files...`,
@@ -945,480 +1044,46 @@ func (w *World) MessageTick() {
 				SkipLineRefresh: true,
 			})
 
+		} else if sys.Command == `kick` {
+			w.Kick(sys.Data.(int))
+		} else if sys.Command == `leaveworld` {
+
+			events.AddToQueue(events.PlayerDespawn{UserId: sys.Data.(int)})
+
+		} else if sys.Command == `logoff` {
+			w.logOff(sys.Data.(int))
 		}
+
 	}
 
 	//
-	// Dispatch GMCP events
+	// Handle Turn Queue
 	//
-	eq = events.GetQueue(events.GMCPOut{})
+	eq = events.GetQueue(events.NewTurn{})
 	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		gmcp, typeOk := e.(events.GMCPOut)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "GMCPOut", "Actual Type", e.Type())
-			continue
-		}
-
-		if gmcp.UserId < 1 {
-			continue
-		}
-
-		if user := users.GetByUserId(gmcp.UserId); user != nil {
-			payload, err := json.Marshal(gmcp.Payload)
-			if err != nil {
-				slog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
-				continue
-			}
-			connections.SendTo([]byte(payload), user.ConnectionId())
-		}
-
-	}
-
-	//
-	// Dispatch MSP events
-	//
-	eq = events.GetQueue(events.MSP{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		msp, typeOk := e.(events.MSP)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "MSP", "Actual Type", e.Type())
-			continue
-		}
-
-		if msp.UserId < 1 {
-			continue
-		}
-
-		if msp.SoundFile == `` {
-			continue
-		}
-
-		if user := users.GetByUserId(msp.UserId); user != nil {
-
-			if msp.SoundType == `MUSIC` {
-
-				if user.LastMusic != msp.SoundFile {
-
-					msg := []byte("!!MUSIC(Off)")
-					if connections.IsWebsocket(user.ConnectionId()) {
-
-						connections.SendTo(
-							msg,
-							user.ConnectionId(),
-						)
-
-					} else {
-
-						connections.SendTo(
-							term.MspCommand.BytesWithPayload(msg),
-							user.ConnectionId(),
-						)
-
-					}
-				}
-
-				user.LastMusic = msp.SoundFile
-
-				msg := []byte("!!MUSIC(" + msp.SoundFile + " V=" + strconv.Itoa(msp.Volume) + " L=-1 C=1)")
-
-				if connections.IsWebsocket(user.ConnectionId()) {
-
-					connections.SendTo(
-						msg,
-						user.ConnectionId(),
-					)
-
-				} else {
-
-					connections.SendTo(
-						term.MspCommand.BytesWithPayload(msg),
-						user.ConnectionId(),
-					)
-
-				}
-			} else {
-
-				msg := []byte("!!SOUND(" + msp.SoundFile + " T=" + msp.Category + " V=" + strconv.Itoa(msp.Volume) + ")")
-
-				if connections.IsWebsocket(user.ConnectionId()) {
-
-					connections.SendTo(
-						msg,
-						user.ConnectionId(),
-					)
-
-				} else {
-
-					connections.SendTo(
-						term.MspCommand.BytesWithPayload(msg),
-						user.ConnectionId(),
-					)
-
-				}
-
-			}
-
-		}
-
-	}
-
-	redrawPrompts := make(map[uint64]string)
-
-	//
-	// System-wide broadcasts
-	//
-	eq = events.GetQueue(events.Broadcast{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		broadcast, typeOk := e.(events.Broadcast)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "Broadcast", "Actual Type", e.Type())
-			continue
-		}
-
-		messageColorized := templates.AnsiParse(broadcast.Text)
-
-		var sentToConnectionIds []connections.ConnectionId
-
-		if broadcast.SkipLineRefresh {
-			sentToConnectionIds = connections.Broadcast(
-				[]byte(messageColorized),
-			)
-		} else {
-
-			sentToConnectionIds = connections.Broadcast(
-				[]byte(term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + messageColorized),
-			)
-		}
-
-		for _, connId := range sentToConnectionIds {
-			if _, ok := redrawPrompts[connId]; !ok {
-				user := users.GetByConnectionId(connId)
-				redrawPrompts[connId] = templates.AnsiParse(user.GetCommandPrompt(true))
-			}
-		}
-	}
-
-	eq = events.GetQueue(events.WebClientCommand{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		cmd, typeOk := e.(events.WebClientCommand)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
-			continue
-		}
-
-		if !connections.IsWebsocket(cmd.ConnectionId) {
-			continue
-		}
-
-		connections.SendTo([]byte(cmd.Text), cmd.ConnectionId)
-
-	}
-
-	//
-	// Outbound text strings
-	//
-	eq = events.GetQueue(events.Message{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		message, typeOk := e.(events.Message)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
-			continue
-		}
-
-		//slog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(messageColorized), "IsCommunication", message.IsCommunication)
-
-		if message.UserId > 0 {
-
-			if user := users.GetByUserId(message.UserId); user != nil {
-
-				// If they are deafened, they cannot hear user communications
-				if message.IsCommunication && user.Deafened {
-					continue
-				}
-
-				connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
-				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-					redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
-				}
-
-			}
-		}
-
-		if message.RoomId > 0 {
-
-			room := rooms.LoadRoom(message.RoomId)
-			if room == nil {
-				continue
-			}
-
-			for _, userId := range room.GetPlayers() {
-				skip := false
-
-				if message.UserId == userId {
-					continue
-				}
-
-				exLen := len(message.ExcludeUserIds)
-				if exLen > 0 {
-					for _, excludeId := range message.ExcludeUserIds {
-						if excludeId == userId {
-							skip = true
-							break
-						}
-					}
-				}
-
-				if skip {
-					continue
-				}
-
-				if user := users.GetByUserId(userId); user != nil {
-
-					// If they are deafened, they cannot hear user communications
-					if message.IsCommunication && user.Deafened {
-						continue
-					}
-
-					// If this is a quiet message, make sure the player can hear it
-					if message.IsQuiet {
-						if !user.Character.HasBuffFlag(buffs.SuperHearing) {
-							continue
-						}
-					}
-
-					connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
-					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
-						redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
-					}
-
-				}
-			}
-
-		}
-
-	}
-
-	for connectionId, prompt := range redrawPrompts {
-		connections.SendTo([]byte(prompt), connectionId)
-	}
-}
-
-func (w *World) UpdateStats() {
-	s := web.GetStats()
-	s.Reset()
-
-	c := configs.GetConfig()
-
-	for _, u := range users.GetAllActiveUsers() {
-		s.OnlineUsers = append(s.OnlineUsers, u.GetOnlineInfo())
-	}
-
-	sort.Slice(s.OnlineUsers, func(i, j int) bool {
-		if s.OnlineUsers[i].Permission == users.PermissionAdmin {
-			return true
-		}
-		if s.OnlineUsers[j].Permission == users.PermissionAdmin {
-			return false
-		}
-		return s.OnlineUsers[i].OnlineTime > s.OnlineUsers[j].OnlineTime
-	})
-
-	for _, t := range c.TelnetPort {
-		p, _ := strconv.Atoi(t)
-		if p > 0 {
-			s.TelnetPorts = append(s.TelnetPorts, p)
-		}
-	}
-
-	s.WebSocketPort = int(c.WebPort)
-
-	web.UpdateStats(s)
-}
-
-// Turns are much finer resolution than rounds...
-// Many turns occur int he time a round does.
-// Discrete actions are processed on the turn level
-func (w *World) TurnTick() {
-
-	// Grab the current config
-	c := configs.GetConfig()
-
-	turnCt := util.IncrementTurnCount()
-
-	//
-	// Cleanup any zombies
-	//
-
-	expTurns := uint64(c.SecondsToTurns(int(c.ZombieSeconds)))
-
-	if expTurns < turnCt {
-
-		expZombies := users.GetExpiredZombies(turnCt - expTurns)
-		if len(expZombies) > 0 {
-			slog.Info("Expired Zombies", "count", len(expZombies))
-			connIds := users.GetConnectionIds(expZombies)
-
-			for _, userId := range expZombies {
-				worldManager.leaveWorld(userId)
-				users.RemoveZombieUser(userId)
-			}
-			for _, connId := range connIds {
-				if err := users.LogOutUserByConnectionId(connId); err != nil {
-					slog.Error("Log Out Error", "connectionId", connId, "error", err)
-				}
-			}
-
-		}
-	}
-
-	if turnCt%uint64(c.TurnsPerAutoSave()) == 0 {
-		tStart := time.Now()
-
-		events.AddToQueue(events.Broadcast{
-			Text: `Saving users...`,
-		})
-
-		users.SaveAllUsers(true)
-
-		events.AddToQueue(events.Broadcast{
-			Text:            `Done.` + term.CRLFStr,
-			SkipLineRefresh: true,
-		})
-
-		events.AddToQueue(events.Broadcast{
-			Text: `Saving rooms...`,
-		})
-
-		rooms.SaveAllRooms()
-
-		events.AddToQueue(events.Broadcast{
-			Text:            `Done.` + term.CRLFStr,
-			SkipLineRefresh: true,
-		})
-
-		util.TrackTime(`Save Game State`, time.Since(tStart).Seconds())
-
-		// Do leaderboard updates here too
-		events.AddToQueue(events.Broadcast{
-			Text: `Updating leaderboards...`,
-		})
-
-		tStart = time.Now()
-
-		leaderboard.Update()
-
-		util.TrackTime(`Leaderboards`, time.Since(tStart).Seconds())
-
-		events.AddToQueue(events.Broadcast{
-			Text:            `Done.` + term.CRLFStr,
-			SkipLineRefresh: true,
-		})
-	}
-
-	tStart := time.Now()
-	var eq *events.Queue
-
-	//
-	// Handle Input Queue
-	//
-	alreadyProcessed := make(map[int]struct{}) // Keep track of players who already had a command this turn
-	eq = events.GetQueue(events.Input{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		input, typeOk := e.(events.Input)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "Input", "Actual Type", e.Type())
-			continue
-		}
-
-		//slog.Debug(`Event`, `type`, input.Type(), `UserId`, input.UserId, `MobInstanceId`, input.MobInstanceId, `WaitTurns`, input.WaitTurns, `InputText`, input.InputText)
-
-		if input.MobInstanceId > 0 {
-			if input.WaitTurns < 1 {
-				w.processMobInput(input.MobInstanceId, input.InputText)
-			} else {
-				input.WaitTurns--
-				events.Requeue(input)
-			}
-			continue
-		}
-
-		if input.WaitTurns < 0 { // -1 and below, process immediately and don't count towards limit
-
-			w.processInput(input.UserId, input.InputText, usercommands.UserCommandFlag(input.Flags))
-
-			// If this command was potentially blocking input, unblock it now.
-			if input.Flags&uint64(usercommands.BlockInput) == uint64(usercommands.BlockInput) {
-				delete(w.ignoreInput, input.UserId)
-			}
-
-			continue
-		}
-
-		if _, ok := alreadyProcessed[input.UserId]; ok {
-			events.Requeue(input)
-			continue
-		}
-
-		if input.WaitTurns == 0 { // 0 means process immediately but wait another turn before processing another from this user
-
-			w.processInput(input.UserId, input.InputText, usercommands.UserCommandFlag(input.Flags))
-
-			// If this command was potentially blocking input, unblock it now.
-			if input.Flags&uint64(usercommands.BlockInput) == uint64(usercommands.BlockInput) {
-				delete(w.ignoreInput, input.UserId)
-			}
-
-			alreadyProcessed[input.UserId] = struct{}{}
-		} else {
-
-			// If this is a multi-turn wait, block further input if flagged to do so
-			if input.Flags&uint64(usercommands.BlockInput) == uint64(usercommands.BlockInput) {
-				w.ignoreInput[input.UserId] = struct{}{}
-			}
-
-			input.WaitTurns--
-			events.Requeue(input)
-		}
-
+		events.DoListeners(eq.Poll())
 	}
 
 	//
 	// Handle RoomAction Queue
+	// Needs a major overhaul/change to how it works.
 	//
 	eq = events.GetQueue(events.RoomAction{})
 	for eq.Len() > 0 {
 
-		e := eq.Poll().(events.Event)
+		e := eq.Poll()
 
 		action, typeOk := e.(events.RoomAction)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "RoomAction", "Actual Type", e.Type())
+			mudlog.Error("Event", "Expected Type", "RoomAction", "Actual Type", e.Type())
 			continue
 		}
 
-		//slog.Debug(`Event`, `type`, action.Type(), `RoomId`, action.RoomId, `SourceUserId`, action.SourceUserId, `SourceMobId`, action.SourceMobId, `WaitTurns`, action.WaitTurns, `Action`, action.Action)
+		//mudlog.Debug(`Event`, `type`, action.Type(), `RoomId`, action.RoomId, `SourceUserId`, action.SourceUserId, `SourceMobId`, action.SourceMobId, `WaitTurns`, action.WaitTurns, `Action`, action.Action)
 
-		if action.WaitTurns > 0 {
+		if action.ReadyTurn > turnNow {
 
-			if action.WaitTurns%c.TurnsPerRound() == 0 {
+			if int(action.ReadyTurn-turnNow)%c.TurnsPerRound() == 0 {
 				// Get the parts of the command
 				parts := strings.SplitN(action.Action, ` `, 3)
 				if parts[0] == `detonate` {
@@ -1446,8 +1111,12 @@ func (w *World) TurnTick() {
 
 			}
 
-			action.WaitTurns--
 			events.Requeue(action)
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
 			continue
 		}
 
@@ -1640,68 +1309,7 @@ func (w *World) TurnTick() {
 	//
 	eq = events.GetQueue(events.Buff{})
 	for eq.Len() > 0 {
-
-		e := eq.Poll().(events.Event)
-
-		buff, typeOk := e.(events.Buff)
-		if !typeOk {
-			slog.Error("Event", "Expected Type", "Buff", "Actual Type", e.Type())
-			continue
-		}
-
-		slog.Debug(`Event`, `type`, buff.Type(), `UserId`, buff.UserId, `MobInstanceId`, buff.MobInstanceId, `BuffId`, buff.BuffId)
-
-		buffInfo := buffs.GetBuffSpec(buff.BuffId)
-		if buffInfo == nil {
-			continue
-		}
-
-		var targetChar *characters.Character
-
-		if buff.MobInstanceId > 0 {
-			buffMob := mobs.GetInstance(buff.MobInstanceId)
-			if buffMob == nil {
-				continue
-			}
-			targetChar = &buffMob.Character
-		} else {
-			buffUser := users.GetByUserId(buff.UserId)
-			if buffUser == nil {
-				continue
-			}
-			targetChar = buffUser.Character
-		}
-
-		if buff.BuffId < 0 {
-			targetChar.RemoveBuff(buffInfo.BuffId * -1)
-			continue
-		}
-
-		// Apply the buff
-		targetChar.AddBuff(buff.BuffId, false)
-
-		//
-		// Fire onStart for buff script
-		//
-		if _, err := scripting.TryBuffScriptEvent(`onStart`, buff.UserId, buff.MobInstanceId, buff.BuffId); err == nil {
-			targetChar.TrackBuffStarted(buff.BuffId)
-		}
-
-		//
-		// If the buff calls for an immediate triggering
-		//
-		if buffInfo.TriggerNow {
-			scripting.TryBuffScriptEvent(`onTrigger`, buff.UserId, buff.MobInstanceId, buff.BuffId)
-
-			if buff.MobInstanceId > 0 && targetChar.Health <= 0 {
-				// Mob died
-				events.AddToQueue(events.Input{
-					MobInstanceId: buff.MobInstanceId,
-					InputText:     `suicide`,
-				})
-			}
-		}
-
+		events.DoListeners(eq.Poll())
 	}
 
 	//
@@ -1709,199 +1317,284 @@ func (w *World) TurnTick() {
 	//
 	eq = events.GetQueue(events.Quest{})
 	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
 
-		e := eq.Poll().(events.Event)
+	//
+	// Handle NewRound events
+	//
+	eq = events.GetQueue(events.NewRound{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
 
-		quest, typeOk := e.(events.Quest)
+	//
+	// Dispatch GMCP events
+	//
+	eq = events.GetQueue(events.GMCPOut{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll()
+
+		gmcp, typeOk := e.(events.GMCPOut)
 		if !typeOk {
-			slog.Error("Event", "Expected Type", "Quest", "Actual Type", e.Type())
+			mudlog.Error("Event", "Expected Type", "GMCPOut", "Actual Type", e.Type())
 			continue
 		}
 
-		slog.Debug(`Event`, `type`, quest.Type(), `UserId`, quest.UserId, `QuestToken`, quest.QuestToken)
-
-		// Give them a token
-		remove := false
-		if quest.QuestToken[0:1] == `-` {
-			remove = true
-			quest.QuestToken = quest.QuestToken[1:]
-		}
-
-		questInfo := quests.GetQuest(quest.QuestToken)
-		if questInfo == nil {
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
 			continue
 		}
 
-		questUser := users.GetByUserId(quest.UserId)
-		if questUser == nil {
+		if gmcp.UserId < 1 {
 			continue
 		}
 
-		if remove {
-			questUser.Character.ClearQuestToken(quest.QuestToken)
-			continue
-		}
-		// This only succees if the user doesn't have the quest yet or the quest is a later step of one they've started
-		if !questUser.Character.GiveQuestToken(quest.QuestToken) {
+		connId := users.GetConnectionId(gmcp.UserId)
+		if connId == 0 {
 			continue
 		}
 
-		_, stepName := quests.TokenToParts(quest.QuestToken)
-		if stepName == `start` {
-			if !questInfo.Secret {
-
-				questUser.EventLog.Add(`quest`, fmt.Sprintf(`Given a new quest: <ansi fg="questname">%s</ansi>`, questInfo.Name))
-
-				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have been given a new quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-				questUser.SendText(questUpTxt)
+		switch v := gmcp.Payload.(type) {
+		case []byte:
+			connections.SendTo(term.GmcpPayload.BytesWithPayload(v), connId)
+		case string:
+			connections.SendTo(term.GmcpPayload.BytesWithPayload([]byte(v)), connId)
+		default:
+			payload, err := json.Marshal(gmcp.Payload)
+			if err != nil {
+				mudlog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
+				continue
 			}
-		} else if stepName == `end` {
+			connections.SendTo(term.GmcpPayload.BytesWithPayload(payload), connId)
+		}
 
-			if !questInfo.Secret {
+	}
 
-				questUser.EventLog.Add(`quest`, fmt.Sprintf(`Completed a quest: <ansi fg="questname">%s</ansi>`, questInfo.Name))
+	//
+	// Handle RoomChange events
+	//
+	eq = events.GetQueue(events.RoomChange{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
 
-				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You have completed the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-				questUser.SendText(questUpTxt)
+	//
+	// Dispatch MSP events
+	//
+	eq = events.GetQueue(events.MSP{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
+	//
+	// What follows are communication based events
+	// (Events expected to send output to users)
+	//
+	//
+	redrawPrompts := make(map[uint64]string)
+
+	//
+	// System-wide broadcasts
+	//
+	eq = events.GetQueue(events.Broadcast{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll()
+
+		broadcast, typeOk := e.(events.Broadcast)
+		if !typeOk {
+			mudlog.Error("Event", "Expected Type", "Broadcast", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		messageColorized := templates.AnsiParse(broadcast.Text)
+
+		var sentToConnectionIds []connections.ConnectionId
+
+		if broadcast.SkipLineRefresh {
+			sentToConnectionIds = connections.Broadcast(
+				[]byte(messageColorized),
+			)
+		} else {
+
+			sentToConnectionIds = connections.Broadcast(
+				[]byte(term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + messageColorized),
+			)
+		}
+
+		for _, connId := range sentToConnectionIds {
+			if _, ok := redrawPrompts[connId]; !ok {
+				user := users.GetByConnectionId(connId)
+				redrawPrompts[connId] = templates.AnsiParse(user.GetCommandPrompt(true))
 			}
+		}
+	}
 
-			// Message to player?
-			if len(questInfo.Rewards.PlayerMessage) > 0 {
-				questUser.SendText(questInfo.Rewards.PlayerMessage)
-			}
-			// Message to room?
-			if len(questInfo.Rewards.RoomMessage) > 0 {
-				if room := rooms.LoadRoom(questUser.Character.RoomId); room != nil {
-					room.SendText(questInfo.Rewards.RoomMessage, questUser.UserId)
+	eq = events.GetQueue(events.WebClientCommand{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll()
+
+		cmd, typeOk := e.(events.WebClientCommand)
+		if !typeOk {
+			mudlog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		if !connections.IsWebsocket(cmd.ConnectionId) {
+			continue
+		}
+
+		connections.SendTo([]byte(cmd.Text), cmd.ConnectionId)
+
+	}
+
+	//
+	// Outbound text strings
+	//
+	eq = events.GetQueue(events.Message{})
+	for eq.Len() > 0 {
+
+		e := eq.Poll()
+
+		message, typeOk := e.(events.Message)
+		if !typeOk {
+			mudlog.Error("Event", "Expected Type", "Message", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		//mudlog.Debug("Message{}", "userId", message.UserId, "roomId", message.RoomId, "length", len(messageColorized), "IsCommunication", message.IsCommunication)
+
+		if message.UserId > 0 {
+
+			if user := users.GetByUserId(message.UserId); user != nil {
+
+				// If they are deafened, they cannot hear user communications
+				if message.IsCommunication && user.Deafened {
+					continue
 				}
-			}
-			// New quest to start?
-			if len(questInfo.Rewards.QuestId) > 0 {
 
-				events.AddToQueue(events.Quest{
-					UserId:     questUser.UserId,
-					QuestToken: questInfo.Rewards.QuestId,
-				})
-
-			}
-			// Gold reward?
-			if questInfo.Rewards.Gold > 0 {
-				questUser.SendText(fmt.Sprintf(`You receive <ansi fg="gold">%d gold</ansi>!`, questInfo.Rewards.Gold))
-				questUser.Character.Gold += questInfo.Rewards.Gold
-			}
-			// Item reward?
-			if questInfo.Rewards.ItemId > 0 {
-				newItm := items.New(questInfo.Rewards.ItemId)
-				questUser.SendText(fmt.Sprintf(`You receive <ansi fg="itemname">%s</ansi>!`, newItm.NameSimple()))
-				questUser.Character.StoreItem(newItm)
-
-				iSpec := newItm.GetSpec()
-				if iSpec.QuestToken != `` {
-
-					events.AddToQueue(events.Quest{
-						UserId:     questUser.UserId,
-						QuestToken: iSpec.QuestToken,
-					})
-
+				connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
+				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
+					redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
 				}
-			}
-			// Buff reward?
-			if questInfo.Rewards.BuffId > 0 {
-
-				events.AddToQueue(events.Buff{
-					UserId:        questUser.UserId,
-					MobInstanceId: 0,
-					BuffId:        questInfo.Rewards.BuffId,
-				})
 
 			}
-			// Experience reward?
-			if questInfo.Rewards.Experience > 0 {
-				questUser.GrantXP(questInfo.Rewards.Experience, `quest progress`)
+		}
+
+		if message.RoomId > 0 {
+
+			room := rooms.LoadRoom(message.RoomId)
+			if room == nil {
+				continue
 			}
-			// Skill reward?
-			if questInfo.Rewards.SkillInfo != `` {
-				details := strings.Split(questInfo.Rewards.SkillInfo, `:`)
-				if len(details) > 1 {
-					skillName := strings.ToLower(details[0])
-					skillLevel, _ := strconv.Atoi(details[1])
-					currentLevel := questUser.Character.GetSkillLevel(skills.SkillTag(skillName))
 
-					if currentLevel < skillLevel {
-						newLevel := questUser.Character.TrainSkill(skillName, skillLevel)
+			for _, userId := range room.GetPlayers() {
+				skip := false
 
-						skillData := struct {
-							SkillName  string
-							SkillLevel int
-						}{
-							SkillName:  skillName,
-							SkillLevel: newLevel,
+				if message.UserId == userId {
+					continue
+				}
+
+				exLen := len(message.ExcludeUserIds)
+				if exLen > 0 {
+					for _, excludeId := range message.ExcludeUserIds {
+						if excludeId == userId {
+							skip = true
+							break
 						}
-						skillUpTxt, _ := templates.Process("character/skillup", skillData)
-						questUser.SendText(skillUpTxt)
+					}
+				}
+
+				if skip {
+					continue
+				}
+
+				if user := users.GetByUserId(userId); user != nil {
+
+					// If they are deafened, they cannot hear user communications
+					if message.IsCommunication && user.Deafened {
+						continue
+					}
+
+					// If this is a quiet message, make sure the player can hear it
+					if message.IsQuiet {
+						if !user.Character.HasBuffFlag(buffs.SuperHearing) {
+							continue
+						}
+					}
+
+					connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
+					if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
+						redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
 					}
 
 				}
 			}
-			// Move them to another room/area?
-			if questInfo.Rewards.RoomId > 0 {
-				questUser.SendText(`You are suddenly moved to a new place!`)
 
-				if room := rooms.LoadRoom(questUser.Character.RoomId); room != nil {
-					room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is suddenly moved to a new place!`, questUser.Character.Name), questUser.UserId)
-				}
-
-				rooms.MoveToRoom(questUser.UserId, questInfo.Rewards.RoomId)
-			}
-		} else {
-			if !questInfo.Secret {
-
-				questUser.EventLog.Add(`quest`, fmt.Sprintf(`Made progress on a quest: <ansi fg="questname">%s</ansi>`, questInfo.Name))
-
-				questUpTxt, _ := templates.Process("character/questup", fmt.Sprintf(`You've made progress on the quest: <ansi fg="questname">%s</ansi>!`, questInfo.Name))
-				questUser.SendText(questUpTxt)
-			}
 		}
 
 	}
 
-	//
-	// Prune all buffs that have expired.
-	//
-	w.PruneBuffs()
+	for connectionId, prompt := range redrawPrompts {
+		connections.SendTo([]byte(prompt), connectionId)
+	}
+}
 
-	//
-	// Update movement points for each player
-	// TODO: Optimize this to avoid re-loops through users
-	//
-	for _, uId := range users.GetOnlineUserIds() {
-		if user := users.GetByUserId(uId); user != nil {
-			user.Character.ActionPoints += 1
-			if user.Character.ActionPoints > user.Character.ActionPointsMax.Value {
-				user.Character.ActionPoints = user.Character.ActionPointsMax.Value
-			}
+func (w *World) UpdateStats() {
+	s := web.GetStats()
+	s.Reset()
+
+	c := configs.GetConfig()
+
+	for _, u := range users.GetAllActiveUsers() {
+		s.OnlineUsers = append(s.OnlineUsers, u.GetOnlineInfo())
+	}
+
+	sort.Slice(s.OnlineUsers, func(i, j int) bool {
+		if s.OnlineUsers[i].Permission == users.PermissionAdmin {
+			return true
+		}
+		if s.OnlineUsers[j].Permission == users.PermissionAdmin {
+			return false
+		}
+		return s.OnlineUsers[i].OnlineTime > s.OnlineUsers[j].OnlineTime
+	})
+
+	for _, t := range c.TelnetPort {
+		p, _ := strconv.Atoi(t)
+		if p > 0 {
+			s.TelnetPorts = append(s.TelnetPorts, p)
 		}
 	}
 
-	if turnCt%uint64(c.TurnsPerSecond()) == 0 {
-		w.CheckForLevelUps()
-	}
+	s.WebSocketPort = int(c.WebPort)
 
-	//
-	// End processing of buffs
-	//
-
-	util.TrackTime(`World::TurnTick()`, time.Since(tStart).Seconds())
-
-	// After a full round of turns, we can do a round tick.
-	if turnCt%uint64(c.TurnsPerRound()) == 0 {
-		w.roundTick()
-	}
-
+	web.UpdateStats(s)
 }
 
 // Force disconnect a user (Makes them a zombie)
 func (w *World) Kick(userId int) {
+
+	mudlog.Info(`Kick`, `userId`, userId)
 
 	user := users.GetByUserId(userId)
 	if user == nil {

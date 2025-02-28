@@ -2,7 +2,6 @@ package items
 
 import (
 	"fmt"
-	"log/slog"
 	"math"
 	"os"
 	"strconv"
@@ -12,6 +11,7 @@ import (
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/statmods"
 	"github.com/volte6/gomud/internal/util"
 )
@@ -483,6 +483,6 @@ func LoadDataFiles() {
 
 	attackMessages = tmpAttackMessages
 
-	slog.Info("itemspec.LoadDataFiles()", "itemLoadedCount", len(items), "attackMessageCount", len(attackMessages), "Time Taken", time.Since(start))
+	mudlog.Info("itemspec.LoadDataFiles()", "itemLoadedCount", len(items), "attackMessageCount", len(attackMessages), "Time Taken", time.Since(start))
 
 }

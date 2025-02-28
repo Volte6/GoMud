@@ -3,11 +3,12 @@ package flags
 import (
 	"flag"
 	"fmt"
-	"log/slog"
 	"net"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/volte6/gomud/internal/mudlog"
 )
 
 func HandleFlags() {
@@ -27,7 +28,7 @@ func doPortSearch(portRangeStr string) {
 	portRange := strings.Split(portRangeStr, `-`)
 
 	if len(portRange) < 2 {
-		slog.Error("-port-search", "error", "Invalid port range specified")
+		mudlog.Error("-port-search", "error", "Invalid port range specified")
 		return
 	}
 
@@ -35,17 +36,17 @@ func doPortSearch(portRangeStr string) {
 	portRangeEnd, _ := strconv.Atoi(portRange[1])
 
 	if portRangeStart == 0 || portRangeEnd == 0 || portRangeStart >= portRangeEnd {
-		slog.Error("-port-search", "error", "Invalid port range specified")
+		mudlog.Error("-port-search", "error", "Invalid port range specified")
 		return
 	}
 
-	slog.Info("-port-search", "message", fmt.Sprintf("Searching for first 10 available ports between %d and %d", portRangeStart, portRangeEnd))
+	mudlog.Info("-port-search", "message", fmt.Sprintf("Searching for first 10 available ports between %d and %d", portRangeStart, portRangeEnd))
 
 	foundPorts := 0
 	for i := portRangeStart; i < portRangeEnd; i++ {
 
 		if !isPortInUse(i) {
-			slog.Info("-port-search", "message", "Found port", "port", i)
+			mudlog.Info("-port-search", "message", "Found port", "port", i)
 			foundPorts++
 		}
 		if foundPorts >= 10 {
@@ -53,7 +54,7 @@ func doPortSearch(portRangeStr string) {
 		}
 	}
 
-	slog.Info("-port-search", "message", fmt.Sprintf("Found %d available ports", foundPorts))
+	mudlog.Info("-port-search", "message", fmt.Sprintf("Found %d available ports", foundPorts))
 
 }
 

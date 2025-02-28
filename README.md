@@ -61,6 +61,7 @@ When running several environment variables can be set to alter behaviors of the 
 - **CONFIG_PATH**_=/path/to/alternative/config.yaml_ - This can provide a path to a copy of the config.yaml containing only values you wish to override. This way you don't have to modify the original config.yaml
 - **LOG_PATH**_=/path/to/log.txt_ - This will write all logs to a specified file. If unspecified, will write to _stderr_.
 - **LOG_LEVEL**_={LOW/MEDIUM/HIGH}_ - This sets how verbose you want the logs to be. _(Note: Log files rotate every 100MB)_
+- **LOG_NOCOLOR**_=1_ - If set, logs will be written without colorization.
 
 # Why Go?
 

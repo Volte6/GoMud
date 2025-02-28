@@ -2,11 +2,11 @@ package characters
 
 import (
 	"fmt"
-	"log/slog"
 	"sort"
 
 	"github.com/Volte6/ansitags"
 	"github.com/volte6/gomud/internal/colorpatterns"
+	"github.com/volte6/gomud/internal/mudlog"
 )
 
 type adjectiveStyle struct {
@@ -117,6 +117,6 @@ func CompileAdjectiveSwaps() {
 	}
 
 	for _, name := range GetFormattedAdjectives(true) {
-		slog.Info("Color Test (Adjectives)", "name", name, "short", ansitags.Parse(GetFormattedAdjective(name+`-short`)), "full", ansitags.Parse(GetFormattedAdjective(name)))
+		mudlog.Info("Color Test (Adjectives)", "name", name, "short", ansitags.Parse(GetFormattedAdjective(name+`-short`)), "full", ansitags.Parse(GetFormattedAdjective(name)))
 	}
 }

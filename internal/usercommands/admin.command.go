@@ -12,7 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Command(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Command(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// args should look like one of the following:
 	// target buffId - put buff on target if in the room
@@ -37,13 +37,14 @@ func Command(rest string, user *users.UserRecord, room *rooms.Room, flags UserCo
 	playerId, mobId := room.FindByName(searchName)
 
 	// Use the index for how many turns to defer the extra commands
-	for waitTurns, oneCmd := range strings.Split(cmd, `;`) {
+	readyTurn := util.GetTurnCount()
+	for _, oneCmd := range strings.Split(cmd, `;`) {
 		if mobId > 0 {
 
 			events.AddToQueue(events.Input{
 				MobInstanceId: mobId,
 				InputText:     oneCmd,
-				WaitTurns:     waitTurns,
+				ReadyTurn:     readyTurn,
 			})
 
 		} else if playerId > 0 {
@@ -51,10 +52,11 @@ func Command(rest string, user *users.UserRecord, room *rooms.Room, flags UserCo
 			events.AddToQueue(events.Input{
 				UserId:    playerId,
 				InputText: oneCmd,
-				WaitTurns: waitTurns,
+				ReadyTurn: readyTurn,
 			})
 
 		}
+		readyTurn++
 	}
 
 	return true, nil

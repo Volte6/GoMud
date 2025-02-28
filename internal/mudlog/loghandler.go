@@ -1,4 +1,4 @@
-package util
+package mudlog
 
 import (
 	"context"
@@ -6,18 +6,19 @@ import (
 	"io"
 	"log"
 	"log/slog"
-	"os"
 	"strings"
 	"time"
 )
 
-type ColorHandler struct {
+type LogHandler struct {
 	slog.Handler
 	l                    *log.Logger
 	minimumMessageLength int
+	lTee                 teeLogger
+	noColorHandler       *slog.TextHandler
 }
 
-func (h *ColorHandler) Handle(ctx context.Context, r slog.Record) error {
+func (h *LogHandler) Handle(ctx context.Context, r slog.Record) error {
 
 	var level string
 
@@ -107,16 +108,24 @@ func (h *ColorHandler) Handle(ctx context.Context, r slog.Record) error {
 
 	msg := fmt.Sprintf("\033[36m%s\033[39;49m", r.Message) // cyan
 
-	h.l.Println(timeStr, level, msg, finalOut.String())
+	if h.noColorHandler == nil {
+		h.l.Println(timeStr, level, msg, finalOut.String())
+	} else {
+		h.noColorHandler.Handle(ctx, r)
+	}
+
+	if h.lTee != nil {
+		h.lTee.Println(r.Level.String(), timeStr, level, msg, finalOut.String())
+	}
 
 	return nil
 }
 
-func GetColorLogHandler(out io.Writer, logLvl slog.Level) *ColorHandler {
+func getLogHandler(out io.Writer, teeOut teeLogger, colorLogs bool) *LogHandler {
 
 	opt := &slog.HandlerOptions{
 
-		Level: logLvl,
+		Level: logLevel,
 		//AddSource: true,
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.TimeKey {
@@ -136,36 +145,41 @@ func GetColorLogHandler(out io.Writer, logLvl slog.Level) *ColorHandler {
 		},
 	}
 
-	h := &ColorHandler{
-		Handler: slog.NewTextHandler(out, opt),
-		l:       log.New(out, "", 0),
+	var ncLogger *slog.TextHandler
+
+	if !colorLogs {
+		ncLogger = slog.NewTextHandler(
+			out,
+			&slog.HandlerOptions{
+
+				Level: logLevel,
+				//AddSource: true,
+				ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+					if a.Key == slog.TimeKey {
+						return slog.String("time", time.Now().Format("15:04:05"))
+					}
+
+					if a.Key == slog.MessageKey {
+						if strings.HasPrefix(a.Value.String(), "INFO ") {
+							return slog.String("msg", a.Value.String()[5:])
+						}
+					}
+
+					if a.Key == slog.LevelKey {
+						return slog.Attr{}
+					}
+					return a
+				},
+			})
+
+	}
+
+	h := &LogHandler{
+		Handler:        slog.NewTextHandler(out, opt),
+		l:              log.New(out, "", 0),
+		lTee:           teeOut,
+		noColorHandler: ncLogger,
 	}
 
 	return h
-}
-
-func GetLogHandler(output *os.File, logLvl slog.Level) slog.Handler {
-	return slog.NewTextHandler(
-		output,
-		&slog.HandlerOptions{
-
-			Level: logLvl,
-			//AddSource: true,
-			ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
-				if a.Key == slog.TimeKey {
-					return slog.String("time", time.Now().Format("15:04:05"))
-				}
-
-				if a.Key == slog.MessageKey {
-					if strings.HasPrefix(a.Value.String(), "INFO ") {
-						return slog.String("msg", a.Value.String()[5:])
-					}
-				}
-
-				if a.Key == slog.LevelKey {
-					return slog.Attr{}
-				}
-				return a
-			},
-		})
 }

@@ -1,12 +1,14 @@
 package events
 
-import "sync"
+import (
+	"sync"
+)
 
 type EventType string
 
 var (
 	qLock     = sync.RWMutex{}
-	allQueues = map[string]*Queue{}
+	allQueues = map[string]*Queue[Event]{}
 	requeues  = map[string][]Event{}
 )
 
@@ -37,7 +39,7 @@ func AddToQueue(e Event, shiftToFront ...bool) {
 	q, ok := allQueues[eventType]
 
 	if !ok {
-		q = NewQueue()
+		q = NewQueue[Event]()
 		allQueues[eventType] = q
 	}
 
@@ -48,7 +50,7 @@ func AddToQueue(e Event, shiftToFront ...bool) {
 	}
 }
 
-func GetQueue(e Event) *Queue {
+func GetQueue(e Event) *Queue[Event] {
 
 	qLock.Lock()
 	defer qLock.Unlock()
@@ -56,7 +58,7 @@ func GetQueue(e Event) *Queue {
 	eventType := e.Type()
 
 	if _, ok := allQueues[eventType]; !ok {
-		allQueues[eventType] = NewQueue()
+		allQueues[eventType] = NewQueue[Event]()
 		requeues[eventType] = []Event{}
 	}
 
@@ -67,4 +69,20 @@ func GetQueue(e Event) *Queue {
 	requeues[eventType] = requeues[eventType][:0]
 
 	return allQueues[eventType]
+}
+
+// Iterator
+/*
+	for q := range events.Queues {
+		events.DoListeners(q.Poll())
+	}
+*/
+func Queues(yield func(value *Queue[Event]) bool) {
+	qLock.Lock()
+	defer qLock.Unlock()
+	for _, eQueue := range allQueues {
+		if !yield(eQueue) {
+			return
+		}
+	}
 }

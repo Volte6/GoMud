@@ -2,7 +2,6 @@ package connections
 
 import (
 	"errors"
-	"log/slog"
 	"net"
 	"strings"
 	"sync"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/volte6/gomud/internal/mudlog"
 )
 
 type ConnectState uint32
@@ -277,7 +277,7 @@ func NewConnectionDetails(connId ConnectionId, c net.Conn, wsC *websocket.Conn, 
 
 	if wsC != nil {
 		if err := cd.StartHeartbeat(*config); err != nil {
-			slog.Error("failed to start heartbeat",
+			mudlog.Error("failed to start heartbeat",
 				"connectionId", connId,
 				"error", err)
 		}

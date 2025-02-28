@@ -3,12 +3,12 @@ package scripting
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/dop251/goja"
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/colorpatterns"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/spells"
 )
 
@@ -34,12 +34,12 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TrySpellScriptEvent()", "eventName", eventName, "spellId", spellAggro.SpellId, "spellRest", spellAggro.SpellRest, "TargetUsers", spellAggro.TargetUserIds, "TargetMobs", spellAggro.TargetMobInstanceIds, "time", time.Since(timestart))
+		mudlog.Debug("TrySpellScriptEvent()", "eventName", eventName, "spellId", spellAggro.SpellId, "spellRest", spellAggro.SpellRest, "TargetUsers", spellAggro.TargetUserIds, "TargetMobs", spellAggro.TargetMobInstanceIds, "time", time.Since(timestart))
 	}()
 
 	vmw, err := getSpellVM(spellAggro.SpellId)
 	if err != nil {
-		slog.Debug("TrySpellScriptEvent()", "error", err)
+		mudlog.Debug("TrySpellScriptEvent()", "error", err)
 		return false, err
 	}
 
@@ -134,14 +134,14 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 			finalErr := fmt.Errorf("%s(): %w", eventName, err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -196,14 +196,14 @@ func getSpellVM(scriptId string) (*VMWrapper, error) {
 		finalErr := fmt.Errorf("RunProgram: %w", err)
 
 		if _, ok := finalErr.(*goja.Exception); ok {
-			slog.Error("JSVM", "exception", finalErr)
+			mudlog.Error("JSVM", "exception", finalErr)
 			return nil, finalErr
 		} else if errors.Is(finalErr, errTimeout) {
-			slog.Error("JSVM", "interrupted", finalErr)
+			mudlog.Error("JSVM", "interrupted", finalErr)
 			return nil, finalErr
 		}
 
-		slog.Error("JSVM", "error", finalErr)
+		mudlog.Error("JSVM", "error", finalErr)
 		return nil, finalErr
 	}
 	vm.ClearInterrupt()

@@ -12,7 +12,6 @@ import (
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
@@ -22,7 +21,7 @@ import (
 Brawling Skill
 Level 2 - You can throw objects at NPCs or other rooms.
 */
-func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Brawling)
 	handled := false
@@ -62,8 +61,11 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 
 		if user.Character.RemoveItem(itemMatch) {
 
-			// Trigger onLost event
-			scripting.TryItemScriptEvent(`onLost`, itemMatch, user.UserId)
+			events.AddToQueue(events.ItemOwnership{
+				UserId: user.UserId,
+				Item:   itemMatch,
+				Gained: false,
+			})
 
 			// Tell the player they are throwing the item
 			user.SendText(
@@ -87,7 +89,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 					SourceUserId: user.UserId,
 					SourceMobId:  0,
 					Action:       fmt.Sprintf("detonate #%d %s", targetMob.InstanceId, itemMatch.ShorthandId()),
-					WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+					ReadyTurn:    util.GetTurnCount() + uint64(configs.GetConfig().TurnsPerRound()*3),
 				})
 
 			}
@@ -109,6 +111,12 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 		}
 
 		user.Character.RemoveItem(itemMatch)
+
+		events.AddToQueue(events.ItemOwnership{
+			UserId: user.UserId,
+			Item:   itemMatch,
+			Gained: false,
+		})
 
 		// Tell the player they are throwing the item
 		user.SendText(
@@ -136,7 +144,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 				SourceUserId: user.UserId,
 				SourceMobId:  0,
 				Action:       fmt.Sprintf("detonate @%d %s", targetUser.UserId, itemMatch.ShorthandId()),
-				WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+				ReadyTurn:    util.GetTurnCount() + uint64(configs.GetConfig().TurnsPerRound()*3),
 			})
 
 		}
@@ -181,6 +189,12 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 
 			user.Character.RemoveItem(itemMatch)
 
+			events.AddToQueue(events.ItemOwnership{
+				UserId: user.UserId,
+				Item:   itemMatch,
+				Gained: false,
+			})
+
 			// Tell the player they are throwing the item
 			user.SendText(
 				fmt.Sprintf(`You hurl the <ansi fg="item">%s</ansi> towards the %s exit.`, itemMatch.DisplayName(), exitName),
@@ -209,7 +223,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 					SourceUserId: user.UserId,
 					SourceMobId:  0,
 					Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
-					WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+					ReadyTurn:    util.GetTurnCount() + uint64(configs.GetConfig().TurnsPerRound()*3),
 				})
 
 			}
@@ -256,6 +270,12 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 
 					user.Character.RemoveItem(itemMatch)
 
+					events.AddToQueue(events.ItemOwnership{
+						UserId: user.UserId,
+						Item:   itemMatch,
+						Gained: false,
+					})
+
 					// Tell the player they are throwing the item
 					user.SendText(
 						fmt.Sprintf(`You hurl the <ansi fg="item">%s</ansi> towards the %s exit.`, itemMatch.DisplayName(), tempExit.Title),
@@ -284,7 +304,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 							SourceUserId: user.UserId,
 							SourceMobId:  0,
 							Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
-							WaitTurns:    configs.GetConfig().TurnsPerRound() * 3,
+							ReadyTurn:    util.GetTurnCount() + uint64(configs.GetConfig().TurnsPerRound()*3),
 						})
 
 					}

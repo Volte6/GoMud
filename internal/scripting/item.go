@@ -3,12 +3,12 @@ package scripting
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"strconv"
 	"time"
 
 	"github.com/dop251/goja"
 	"github.com/volte6/gomud/internal/items"
+	"github.com/volte6/gomud/internal/mudlog"
 )
 
 var (
@@ -30,7 +30,7 @@ func TryItemScriptEvent(eventName string, item items.Item, userId int) (bool, er
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TryItemScriptEvent()", "eventName", eventName, "item", item, "time", time.Since(timestart))
+		mudlog.Debug("TryItemScriptEvent()", "eventName", eventName, "item", item, "time", time.Since(timestart))
 	}()
 
 	vmw, err := getItemVM(sItem)
@@ -60,14 +60,14 @@ func TryItemScriptEvent(eventName string, item items.Item, userId int) (bool, er
 			finalErr := fmt.Errorf("%s(): %w", eventName, err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -91,7 +91,7 @@ func TryItemCommand(cmd string, item items.Item, userId int) (bool, error) {
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TryItemCommand()", "cmd", cmd, "itemId", item.ItemId, "userId", userId, "time", time.Since(timestart))
+		mudlog.Debug("TryItemCommand()", "cmd", cmd, "itemId", item.ItemId, "userId", userId, "time", time.Since(timestart))
 	}()
 
 	vmw, err := getItemVM(sItem)
@@ -121,14 +121,14 @@ func TryItemCommand(cmd string, item items.Item, userId int) (bool, error) {
 			finalErr := fmt.Errorf("onCommand_%s(): %w", cmd, err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -162,14 +162,14 @@ func TryItemCommand(cmd string, item items.Item, userId int) (bool, error) {
 			finalErr := fmt.Errorf("onCommand(): %w", err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -223,14 +223,14 @@ func getItemVM(sItem *ScriptItem) (*VMWrapper, error) {
 		finalErr := fmt.Errorf("RunProgram: %w", err)
 
 		if _, ok := finalErr.(*goja.Exception); ok {
-			slog.Error("JSVM", "exception", finalErr)
+			mudlog.Error("JSVM", "exception", finalErr)
 			return nil, finalErr
 		} else if errors.Is(finalErr, errTimeout) {
-			slog.Error("JSVM", "interrupted", finalErr)
+			mudlog.Error("JSVM", "interrupted", finalErr)
 			return nil, finalErr
 		}
 
-		slog.Error("JSVM", "error", finalErr)
+		mudlog.Error("JSVM", "error", finalErr)
 		return nil, finalErr
 	}
 	vm.ClearInterrupt()

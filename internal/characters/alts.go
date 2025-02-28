@@ -1,11 +1,11 @@
 package characters
 
 import (
-	"log/slog"
 	"os"
 	"strings"
 
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
 	"gopkg.in/yaml.v2"
 )
@@ -26,14 +26,14 @@ func LoadAlts(username string) []Character {
 
 	altsFileBytes, err := os.ReadFile(altsFilePath)
 	if err != nil {
-		slog.Error("LoadAlts", "error", err.Error())
+		mudlog.Error("LoadAlts", "error", err.Error())
 		return nil
 	}
 
 	altsRecords := []Character{}
 
 	if err := yaml.Unmarshal(altsFileBytes, &altsRecords); err != nil {
-		slog.Error("LoadAlts", "error", err.Error())
+		mudlog.Error("LoadAlts", "error", err.Error())
 	}
 
 	return altsRecords
@@ -48,12 +48,12 @@ func SaveAlts(username string, alts []Character) bool {
 	completed := false
 
 	defer func() {
-		slog.Info("SaveAlts()", "username", username, "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
+		mudlog.Info("SaveAlts()", "username", username, "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
 	}()
 
 	data, err := yaml.Marshal(&alts)
 	if err != nil {
-		slog.Error("SaveAlts", "error", err.Error())
+		mudlog.Error("SaveAlts", "error", err.Error())
 		return false
 	}
 
@@ -68,7 +68,7 @@ func SaveAlts(username string, alts []Character) bool {
 
 	err = os.WriteFile(saveFilePath, data, 0777)
 	if err != nil {
-		slog.Error("SaveAlts", "error", err.Error())
+		mudlog.Error("SaveAlts", "error", err.Error())
 		return false
 	}
 	fileWritten = true
@@ -81,7 +81,7 @@ func SaveAlts(username string, alts []Character) bool {
 		// Once the file is written, rename it to remove the .new suffix and overwrite the old file
 		//
 		if err := os.Rename(saveFilePath, path); err != nil {
-			slog.Error("SaveAlts", "error", err.Error())
+			mudlog.Error("SaveAlts", "error", err.Error())
 			return false
 		}
 		tmpCopied = true

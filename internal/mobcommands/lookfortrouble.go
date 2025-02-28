@@ -2,10 +2,10 @@ package mobcommands
 
 import (
 	"fmt"
-	"log/slog"
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
@@ -27,7 +27,7 @@ func LookForTrouble(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) 
 	nonDownedUserTargets := []int{}
 	possibleMobTargets := []int{}
 
-	//slog.Info("lookgfortrouble", "mobname", fmt.Sprintf(`%s#%d`, mob.Character.Name, mob.InstanceId))
+	//mudlog.Info("lookgfortrouble", "mobname", fmt.Sprintf(`%s#%d`, mob.Character.Name, mob.InstanceId))
 
 	if !isCharmed {
 
@@ -42,7 +42,7 @@ func LookForTrouble(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) 
 
 			raceInfo := races.GetRace(user.Character.RaceId)
 			if raceInfo == nil {
-				slog.Error("RaceError", "Not Found", user.Character.RaceId)
+				mudlog.Error("RaceError", "Not Found", user.Character.RaceId)
 				continue
 			}
 

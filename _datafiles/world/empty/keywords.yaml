@@ -145,6 +145,7 @@ help:
       - server
       - skillset
       - spawn
+      - syslogs
       - zap
       - zone
 # Aliases for keywords when typing: help <keyword>
@@ -224,6 +225,7 @@ command-aliases:
   history:          ['log']
   time:             ['date']
   noop:             ['wake']
+  syslogs:          ['syslog']
   'party chat':     ['pchat', 'psay']
   'bank deposit':   ['deposit']
   'bank withdraw':  ['withdraw']

@@ -2,7 +2,6 @@ package combat
 
 import (
 	"fmt"
-	"log/slog"
 	"math"
 	"strconv"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -235,7 +235,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 	for i := 0; i < attackCount; i++ {
 
-		slog.Info(`calculateCombat`, `Atk`, fmt.Sprintf(`%d/%d`, i+1, attackCount), `Source`, fmt.Sprintf(`%s (%s)`, sourceChar.Name, sourceType), `Target`, fmt.Sprintf(`%s (%s)`, targetChar.Name, targetType))
+		mudlog.Debug(`calculateCombat`, `Atk`, fmt.Sprintf(`%d/%d`, i+1, attackCount), `Source`, fmt.Sprintf(`%s (%s)`, sourceChar.Name, sourceType), `Target`, fmt.Sprintf(`%s (%s)`, targetChar.Name, targetType))
 
 		attackWeapons := []items.Item{}
 
@@ -341,7 +341,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 				msgSeed = weapon.ItemId
 			}
 
-			slog.Info("DiceRolls", "attacks", attacks, "dCount", dCount, "dSides", dSides, "dBonus", dBonus, "critBuffs", critBuffs)
+			mudlog.Debug("DiceRolls", "attacks", attacks, "dCount", dCount, "dSides", dSides, "dBonus", dBonus, "critBuffs", critBuffs)
 
 			// Individual weapons may get multiple attacks
 			for j := 0; j < attacks; j++ {
@@ -408,7 +408,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 					toAttackerRoomMsg = msgs.Separate.ToAttackerRoom.Get(msgSeed)
 					toDefenderRoomMsg = msgs.Separate.ToDefenderRoom.Get(msgSeed)
 
-					slog.Error("toDefenderRoomMsg", "msg", toDefenderRoomMsg)
+					mudlog.Error("toDefenderRoomMsg", "msg", toDefenderRoomMsg)
 					// Find the exit that leads to the target from the source (if any)
 					if atkRoom := rooms.LoadRoom(sourceChar.RoomId); atkRoom != nil {
 						for exitName, exit := range atkRoom.Exits {

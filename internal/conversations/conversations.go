@@ -2,11 +2,11 @@ package conversations
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 	"strings"
 
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
 	"gopkg.in/yaml.v2"
 )
@@ -37,7 +37,7 @@ func AttemptConversation(initiatorMobId int, initatorInstanceId int, initiatorNa
 
 	bytes, err := os.ReadFile(filePath)
 	if err != nil {
-		slog.Error("AttemptConversation()", "error", "Problem reading conversation datafile "+filePath+": "+err.Error())
+		mudlog.Error("AttemptConversation()", "error", "Problem reading conversation datafile "+filePath+": "+err.Error())
 		return 0
 	}
 
@@ -45,7 +45,7 @@ func AttemptConversation(initiatorMobId int, initatorInstanceId int, initiatorNa
 
 	err = yaml.Unmarshal(bytes, &dataFile)
 	if err != nil {
-		slog.Error("AttemptConversation()", "error", "Problem unmarshalling conversation datafile "+filePath+": "+err.Error())
+		mudlog.Error("AttemptConversation()", "error", "Problem unmarshalling conversation datafile "+filePath+": "+err.Error())
 		return 0
 	}
 

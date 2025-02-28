@@ -16,7 +16,7 @@ import (
 Protection Skill
 Level 4 - Pray to gods for a blessing
 */
-func Pray(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Pray(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Protection)
 

@@ -1,5 +1,13 @@
 package events
 
+import (
+	"time"
+
+	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/connections"
+	"github.com/volte6/gomud/internal/items"
+)
+
 // Used to apply or remove buffs
 type Buff struct {
 	UserId        int
@@ -24,7 +32,7 @@ type RoomAction struct {
 	SourceMobId  int
 	Action       string
 	Details      any
-	WaitTurns    int
+	ReadyTurn    uint64
 }
 
 func (r RoomAction) Type() string { return `RoomAction` }
@@ -34,8 +42,8 @@ type Input struct {
 	UserId        int
 	MobInstanceId int
 	InputText     string
-	WaitTurns     int
-	Flags         uint64
+	ReadyTurn     uint64
+	Flags         EventFlag
 }
 
 func (i Input) Type() string { return `Input` }
@@ -65,7 +73,7 @@ type WebClientCommand struct {
 	Text         string
 }
 
-func (b WebClientCommand) Type() string { return `WebClientCommand` }
+func (w WebClientCommand) Type() string { return `WebClientCommand` }
 
 // GMCP Commands from clients to server
 type GMCPIn struct {
@@ -74,20 +82,20 @@ type GMCPIn struct {
 	Json         []byte
 }
 
-func (b GMCPIn) Type() string { return `GMCP` }
+func (g GMCPIn) Type() string { return `GMCPIn` }
 
 // GMCP Commands from server to client
 type GMCPOut struct {
-	ConnectionId uint64
-	UserId       int
-	Payload      any
+	UserId  int
+	Payload any
 }
 
-func (b GMCPOut) Type() string { return `GMCP` }
+func (g GMCPOut) Type() string { return `GMCPOut` }
 
 // Messages that are intended to reach all users on the system
 type System struct {
 	Command string
+	Data    any
 }
 
 func (s System) Type() string { return `System` }
@@ -102,3 +110,72 @@ type MSP struct {
 }
 
 func (m MSP) Type() string { return `MSP` }
+
+// Fired whenever a mob or player changes rooms
+type RoomChange struct {
+	UserId        int
+	MobInstanceId int
+	FromRoomId    int
+	ToRoomId      int
+}
+
+func (r RoomChange) Type() string { return `RoomChange` }
+
+// Fired every new round
+type NewRound struct {
+	RoundNumber uint64
+	TimeNow     time.Time
+	Config      configs.Config
+}
+
+func (n NewRound) Type() string { return `NewRound` }
+
+// Each new turn (TurnMs in config.yaml)
+type NewTurn struct {
+	TurnNumber uint64
+	TimeNow    time.Time
+	Config     configs.Config
+}
+
+func (n NewTurn) Type() string { return `NewTurn` }
+
+// Gained or lost an item
+type ItemOwnership struct {
+	UserId        int
+	MobInstanceId int
+	Item          items.Item
+	Gained        bool
+}
+
+func (i ItemOwnership) Type() string { return `ItemOwnership` }
+
+// Triggered by a script
+type ScriptedEvent struct {
+	Name string
+	Data map[string]any
+}
+
+func (s ScriptedEvent) Type() string { return `ScriptedEvent` }
+
+// Entered the world
+type PlayerSpawn struct {
+	UserId int
+}
+
+func (p PlayerSpawn) Type() string { return `PlayerSpawn` }
+
+// Left the world
+type PlayerDespawn struct {
+	UserId int
+}
+
+func (p PlayerDespawn) Type() string { return `PlayerDespawn` }
+
+type Log struct {
+	FollowAdd    connections.ConnectionId
+	FollowRemove connections.ConnectionId
+	Level        string
+	Data         []any
+}
+
+func (l Log) Type() string { return `Log` }

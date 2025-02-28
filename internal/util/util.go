@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"math"
 	"math/rand"
 	"net/http"
@@ -23,12 +22,13 @@ import (
 
 	"crypto/md5"
 
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/term"
 )
 
 var (
 	turnCount    uint64 = 0
-	roundCount   uint64 = 1314000 // start at 1314000 (approx. 4 years in the future) to avoid complexities of delta comparisons and to allow for date adjustments
+	roundCount   uint64 = RoundCountMinimum
 	timeTrackers        = map[string]*Accumulator{}
 	serverAddr   string = `Unknown`
 
@@ -51,6 +51,13 @@ var (
 	colorShortTagRegex = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
 
 	mudLock = sync.RWMutex{}
+)
+
+const (
+	// start at 1314000 (approx. 4 years in the future) to avoid complexities of
+	// delta comparisons and to allow for date adjustments.
+	RoundCountMinimum  = 1314000
+	RoundCountFilename = `.roundcount`
 )
 
 // Mutex lock intended for synchronizing at a high level between
@@ -161,7 +168,7 @@ func Rand(maxInt int) int {
 
 func LogRoll(name string, rollResult int, targetNumber int) {
 	success := rollResult < targetNumber
-	slog.Info(`Rand Result`, `Name`, name, `Result`, fmt.Sprintf(`%d < %d`, rollResult, targetNumber), `Success`, success)
+	mudlog.Debug(`Rand Result`, `Name`, name, `Result`, fmt.Sprintf(`%d < %d`, rollResult, targetNumber), `Success`, success)
 }
 
 func SplitString(input string, lineWidth int) []string {
@@ -862,4 +869,40 @@ func BoolYN(b bool) string {
 		return `yes`
 	}
 	return `no`
+}
+
+func SaveRoundCount(fpath string) {
+
+	err := os.WriteFile(fpath, []byte(strconv.FormatUint(roundCount, 10)), 0644)
+	if err != nil {
+
+		mudlog.Error("SaveRoundCount()", "error", err)
+	}
+
+}
+
+func LoadRoundCount(fpath string) uint64 {
+
+	roundCountData, err := os.ReadFile(fpath)
+	if err != nil {
+		roundCount = RoundCountMinimum
+		roundCount = RoundCountMinimum
+		mudlog.Warn("LoadRoundCount()", "error", err, "message", "Trying to create...")
+		SaveRoundCount(fpath)
+	}
+
+	roundCountUint64, err := strconv.ParseUint(string(roundCountData), 10, 64)
+	if err != nil {
+
+		mudlog.Warn("LoadRoundCount()", "error", err, "file-contents", string(roundCountData))
+
+	} else {
+		roundCount = roundCountUint64
+	}
+
+	if roundCount < RoundCountMinimum {
+		roundCount = RoundCountMinimum
+	}
+
+	return roundCount
 }

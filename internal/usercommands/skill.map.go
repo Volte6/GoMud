@@ -3,10 +3,11 @@ package usercommands
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"math"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
@@ -21,7 +22,7 @@ Level 2 - Map a 9x7 area
 Level 3 - Map a 13x9 area
 Level 4 - Map a 17x9 area, and enables the "wide" version.
 */
-func Map(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Map(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	skillLevel := user.Character.GetSkillLevel(skills.Map)
 
@@ -193,7 +194,7 @@ func Map(rest string, user *users.UserRecord, room *rooms.Room, flags UserComman
 
 	mapTxt, err := templates.Process("maps/map", mapData)
 	if err != nil {
-		slog.Error("Map", "error", err.Error())
+		mudlog.Error("Map", "error", err.Error())
 		user.SendText(`No map found (or an error occured)"`)
 		return true, err
 	}

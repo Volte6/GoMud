@@ -2,7 +2,6 @@ package mobs
 
 import (
 	"fmt"
-	"log/slog"
 	"math"
 	"os"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/conversations"
+	"github.com/volte6/gomud/internal/mudlog"
 
 	"github.com/volte6/gomud/internal/events"
 
@@ -302,23 +302,23 @@ func (m *Mob) Converse() {
 
 // Cause the mob to basically wait and do nothing for x seconds
 func (m *Mob) Sleep(seconds int) {
-	turnCount := seconds * configs.GetConfig().TurnsPerSecond()
-	m.Command(`noop`, turnCount)
+	m.Command(`noop`, float64(seconds))
 }
 
-func (m *Mob) Command(inputTxt string, waitTurns ...int) {
+func (m *Mob) Command(inputTxt string, waitSeconds ...float64) {
 
-	wt := 0
-	if len(waitTurns) > 0 {
-		wt = waitTurns[0]
+	readyTurn := util.GetTurnCount()
+	if len(waitSeconds) > 0 {
+		readyTurn += uint64(float64(configs.GetConfig().SecondsToTurns(1)) * waitSeconds[0])
 	}
 
 	for _, cmd := range strings.Split(inputTxt, `;`) {
 		events.AddToQueue(events.Input{
 			MobInstanceId: m.InstanceId,
 			InputText:     cmd,
-			WaitTurns:     wt,
+			ReadyTurn:     readyTurn,
 		})
+		readyTurn++
 	}
 
 }
@@ -646,7 +646,7 @@ func (m *Mob) GetScriptPath() string {
 		scriptFilePath,
 		1)
 
-	//slog.Info("SCRIPT PATH", "path", util.FilePath(fullScriptPath))
+	//mudlog.Info("SCRIPT PATH", "path", util.FilePath(fullScriptPath))
 	return util.FilePath(fullScriptPath)
 }
 
@@ -723,6 +723,6 @@ func LoadDataFiles() {
 		mobNameCache[mob.MobId] = mob.Character.Name
 	}
 
-	slog.Info("mobs.LoadDataFiles()", "loadedCount", len(mobs), "Time Taken", time.Since(start))
+	mudlog.Info("mobs.LoadDataFiles()", "loadedCount", len(mobs), "Time Taken", time.Since(start))
 
 }

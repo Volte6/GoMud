@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/templates"
@@ -13,7 +14,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Jobs(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Jobs(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	type JobDisplay struct {
 		Name       string

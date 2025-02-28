@@ -8,12 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"log/slog"
-
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
 
 	//
@@ -63,12 +62,17 @@ func RemoveZombieUser(userId int) {
 	if u := userManager.Users[userId]; u != nil {
 		u.Character.SetAdjective(`zombie`, false)
 	}
-	connId := userManager.UserConnections[userId]
-	delete(userManager.ZombieConnections, connId)
+	if connId, ok := userManager.UserConnections[userId]; ok {
+		delete(userManager.ZombieConnections, connId)
+	}
+}
+
+func IsZombieConnection(connectionId connections.ConnectionId) bool {
+	_, ok := userManager.ZombieConnections[connectionId]
+	return ok
 }
 
 func RemoveZombieConnection(connectionId connections.ConnectionId) {
-
 	delete(userManager.ZombieConnections, connectionId)
 }
 
@@ -85,6 +89,13 @@ func GetExpiredZombies(expirationTurn uint64) []int {
 	}
 
 	return expiredUsers
+}
+
+func GetConnectionId(userId int) connections.ConnectionId {
+	if user, ok := userManager.Users[userId]; ok {
+		return user.connectionId
+	}
+	return 0
 }
 
 func GetConnectionIds(userIds []int) []connections.ConnectionId {
@@ -175,80 +186,83 @@ func GetByConnectionId(connectionId connections.ConnectionId) *UserRecord {
 }
 
 // First time creating a user.
-func LoginUser(u *UserRecord, connectionId connections.ConnectionId) (*UserRecord, string, error) {
+func LoginUser(user *UserRecord, connectionId connections.ConnectionId) (*UserRecord, string, error) {
 
-	slog.Info("LoginUser()", "username", u.Username, "connectionId", connectionId)
+	mudlog.Info("LoginUser()", "username", user.Username, "connectionId", connectionId)
 
-	u.Character.SetAdjective(`zombie`, false)
+	user.Character.SetAdjective(`zombie`, false)
 
-	if userId, ok := userManager.Usernames[u.Username]; ok {
+	// If they're already logged in
+	if userId, ok := userManager.Usernames[user.Username]; ok {
 
+		// Do they have a connection tracked?
 		if otherConnId, ok := userManager.UserConnections[userId]; ok {
 
-			if _, ok := userManager.ZombieConnections[otherConnId]; ok {
+			// Is it a zombie connection? If so, lets make this new connection the owner
+			if IsZombieConnection(otherConnId) {
 
-				slog.Info("LoginUser()", "Zombie", true)
+				mudlog.Info("LoginUser()", "Zombie", true)
 
-				if zombieUser, ok := userManager.Users[u.UserId]; ok {
-					u = zombieUser
+				if zombieUser, ok := userManager.Users[user.UserId]; ok {
+					user = zombieUser
 				}
 
-				// The user is a zombie.
-				delete(userManager.ZombieConnections, otherConnId)
+				RemoveZombieConnection(otherConnId)
 
-				u.connectionId = connectionId
+				user.connectionId = connectionId
 
-				userManager.Users[u.UserId] = u
-				userManager.Usernames[u.Username] = u.UserId
-				userManager.Connections[u.connectionId] = u.UserId
-				userManager.UserConnections[u.UserId] = u.connectionId
+				userManager.Users[user.UserId] = user
+				userManager.Usernames[user.Username] = user.UserId
+				userManager.Connections[user.connectionId] = user.UserId
+				userManager.UserConnections[user.UserId] = user.connectionId
 
-				for _, mobInstId := range u.Character.GetCharmIds() {
+				for _, mobInstId := range user.Character.GetCharmIds() {
 					if !mobs.MobInstanceExists(mobInstId) {
-						u.Character.TrackCharmed(mobInstId, false)
+						user.Character.TrackCharmed(mobInstId, false)
 					}
 				}
 
 				// Set their input round to current to track idle time fresh
-				u.SetLastInputRound(util.GetRoundCount())
+				user.SetLastInputRound(util.GetRoundCount())
 
-				u.EventLog.Add(`conn`, `Reconnected`)
+				user.EventLog.Add(`conn`, `Reconnected`)
 
-				return u, "Reconnecting...", nil
+				return user, "Reconnecting...", nil
 			}
 
 		}
 
+		// Otherwise, someone else is logged in, can't double-login!
 		return nil, "That user is already logged in.", errors.New("user is already logged in")
 	}
 
-	if len(u.AdminCommands) > 0 {
-		u.Permission = PermissionMod
+	if len(user.AdminCommands) > 0 {
+		user.Permission = PermissionMod
 	}
 
-	slog.Info("LoginUser()", "Zombie", false)
+	mudlog.Info("LoginUser()", "Zombie", false)
 
 	// Set their input round to current to track idle time fresh
-	u.SetLastInputRound(util.GetRoundCount())
+	user.SetLastInputRound(util.GetRoundCount())
 
-	u.connectionId = connectionId
+	user.connectionId = connectionId
 
-	userManager.Users[u.UserId] = u
-	userManager.Usernames[u.Username] = u.UserId
-	userManager.Connections[u.connectionId] = u.UserId
-	userManager.UserConnections[u.UserId] = u.connectionId
+	userManager.Users[user.UserId] = user
+	userManager.Usernames[user.Username] = user.UserId
+	userManager.Connections[user.connectionId] = user.UserId
+	userManager.UserConnections[user.UserId] = user.connectionId
 
-	slog.Info("LOGIN", "userId", u.UserId)
+	mudlog.Info("LOGIN", "userId", user.UserId)
 
-	u.EventLog.Add(`conn`, `Connected`)
+	user.EventLog.Add(`conn`, `Connected`)
 
-	for _, mobInstId := range u.Character.GetCharmIds() {
+	for _, mobInstId := range user.Character.GetCharmIds() {
 		if !mobs.MobInstanceExists(mobInstId) {
-			u.Character.TrackCharmed(mobInstId, false)
+			user.Character.TrackCharmed(mobInstId, false)
 		}
 	}
 
-	return u, "", nil
+	return user, "", nil
 }
 
 func SetZombieUser(userId int) {
@@ -280,7 +294,7 @@ func SaveAllUsers(isAutoSave ...bool) {
 
 	for _, u := range userManager.Users {
 		if err := SaveUser(*u, isAutoSave...); err != nil {
-			slog.Error("SaveAllUsers()", "error", err.Error())
+			mudlog.Error("SaveAllUsers()", "error", err.Error())
 		}
 	}
 
@@ -358,7 +372,7 @@ func LoadUser(username string, skipValidation ...bool) (*UserRecord, error) {
 
 	loadedUser := &UserRecord{}
 	if err := yaml.Unmarshal([]byte(userFileTxt), loadedUser); err != nil {
-		slog.Error("LoadUser", "error", err.Error())
+		mudlog.Error("LoadUser", "error", err.Error())
 	}
 
 	if len(skipValidation) == 0 || !skipValidation[0] {
@@ -465,7 +479,7 @@ func SaveUser(u UserRecord, isAutoSave ...bool) error {
 	completed := false
 
 	defer func() {
-		slog.Info("SaveUser()", "username", u.Username, "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
+		mudlog.Info("SaveUser()", "username", u.Username, "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
 	}()
 
 	// Don't save if they haven't entered the real game world yet.

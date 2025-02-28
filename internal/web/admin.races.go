@@ -1,7 +1,6 @@
 package web
 
 import (
-	"log/slog"
 	"net/http"
 	"sort"
 	"strconv"
@@ -10,6 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/races"
 )
 
@@ -17,7 +17,7 @@ func racesIndex(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String()+"/admin/_header.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/races/index.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/_footer.html")
 	if err != nil {
-		slog.Error("HTML Template", "error", err)
+		mudlog.Error("HTML Template", "error", err)
 	}
 
 	allRaces := races.GetRaces()
@@ -33,7 +33,7 @@ func racesIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := tmpl.Execute(w, raceIndexData); err != nil {
-		slog.Error("HTML Execute", "error", err)
+		mudlog.Error("HTML Execute", "error", err)
 	}
 
 }
@@ -42,7 +42,7 @@ func raceData(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.New("race.data.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/admin/races/race.data.html")
 	if err != nil {
-		slog.Error("HTML Template", "error", err)
+		mudlog.Error("HTML Template", "error", err)
 	}
 
 	urlVals := r.URL.Query()
@@ -74,7 +74,7 @@ func raceData(w http.ResponseWriter, r *http.Request) {
 	tplData[`allSlotTypes`] = characters.GetAllSlotTypes()
 
 	if err := tmpl.Execute(w, tplData); err != nil {
-		slog.Error("HTML Execute", "error", err)
+		mudlog.Error("HTML Execute", "error", err)
 	}
 
 }

@@ -3,7 +3,6 @@ package configs
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"math"
 	"os"
 	"reflect"
@@ -11,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
 	"gopkg.in/yaml.v2"
 )
@@ -104,8 +104,6 @@ type Config struct {
 
 	SeedInt int64 `yaml:"-"`
 
-	RoundCount ConfigUInt64 `yaml:"RoundCount,omitempty"` // Last saved round count
-
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.
 	turnsPerSave    int     // calculated and cached when data is validated.
@@ -192,7 +190,7 @@ func SetVal(propName string, propVal string, force ...bool) error {
 	reflect.ValueOf(overrides).SetMapIndex(reflect.ValueOf(propName), fieldVal)
 
 	if err := configData.SetOverrides(overrides); err != nil {
-		slog.Error("SetVal()", "error", err)
+		mudlog.Error("SetVal()", "error", err)
 	}
 
 	configData.Validate()
@@ -307,7 +305,7 @@ func (c *Config) SetOverrides(overrides map[string]any) error {
 	structValue := reflect.ValueOf(c).Elem()
 	for name, value := range c.overrides {
 
-		slog.Debug("SetOverrides()", "name", name, "value", value)
+		mudlog.Debug("SetOverrides()", "name", name, "value", value)
 
 		structFieldValue := structValue.FieldByName(name)
 
@@ -642,12 +640,12 @@ func ReloadConfig() error {
 	}
 	overridePath := overridePath()
 
-	slog.Info("ReloadConfig()", "overridePath", overridePath)
+	mudlog.Info("ReloadConfig()", "overridePath", overridePath)
 
 	if _, err := os.Stat(util.FilePath(overridePath)); err == nil {
 		if overridePath != `` {
 
-			slog.Info("ReloadConfig()", "Loading overrides", true)
+			mudlog.Info("ReloadConfig()", "Loading overrides", true)
 
 			overrideBytes, err := os.ReadFile(util.FilePath(overridePath))
 			if err != nil {
@@ -661,11 +659,11 @@ func ReloadConfig() error {
 			}
 
 			if err := tmpConfigData.SetOverrides(overrides); err != nil {
-				slog.Error("ReloadConfig()", "error", err)
+				mudlog.Error("ReloadConfig()", "error", err)
 			}
 		}
 	} else {
-		slog.Info("ReloadConfig()", "Loading overrides", false)
+		mudlog.Info("ReloadConfig()", "Loading overrides", false)
 		tmpConfigData.SetOverrides(map[string]any{})
 	}
 

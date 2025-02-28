@@ -16,3 +16,5 @@ biome: city
 exits:
   leave:
     roomid: 61
+    exitmessage: You gather your belongings and head back towards the main room of
+      the Inn.

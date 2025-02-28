@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
 )
 
@@ -26,7 +26,7 @@ var (
 
 func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
 
-	slog.Info("Starting web server", "webport", webPort)
+	mudlog.Info("Starting web server", "webport", webPort)
 
 	wg.Add(1)
 
@@ -35,6 +35,8 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 	// Routing
 	// Basic homepage
 	http.HandleFunc("/", serveHome)
+	// config view page
+	http.HandleFunc("/viewconfig", viewConfig)
 	// websocket client
 	http.HandleFunc("/webclient", serveClient)
 	// websocket upgrade
@@ -111,7 +113,7 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 	go func() {
 		defer wg.Done()
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			slog.Error("Error starting web server", "error", err)
+			mudlog.Error("Error starting web server", "error", err)
 		}
 	}()
 

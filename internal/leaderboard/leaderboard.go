@@ -1,13 +1,13 @@
 package leaderboard
 
 import (
-	"log/slog"
 	"math"
 	"sync"
 	"time"
 
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/users"
 )
@@ -70,7 +70,7 @@ func Update() map[string]Leaderboard {
 		lbCopy[name] = append(Leaderboard{}, lbEntries...)
 	}
 
-	slog.Info("leaderboard.Update()", "user-processed", userCount, "characters-processed", characterCount, "Time Taken", time.Since(start))
+	mudlog.Info("leaderboard.Update()", "user-processed", userCount, "characters-processed", characterCount, "Time Taken", time.Since(start))
 
 	return lbCopy
 }

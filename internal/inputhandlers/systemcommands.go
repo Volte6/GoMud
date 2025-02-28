@@ -2,13 +2,15 @@ package inputhandlers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
-
-	"log/slog"
+	"syscall"
+	"time"
 
 	"github.com/volte6/gomud/internal/connections"
+	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/users"
 )
 
 func SystemCommandInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
@@ -23,7 +25,7 @@ func SystemCommandInputHandler(clientInput *connections.ClientInput, sharedState
 	// grab whatever was typed in so far and trim out leading/trailing whitespace and null byte
 	message := strings.TrimSpace(string(clientInput.Buffer))
 
-	//slog.Info("SystemCommandInputHandler Received", "type", "TXT", "size", len(clientInput.Buffer), "data", string(clientInput.Buffer), "message", message)
+	//mudlog.Info("SystemCommandInputHandler Received", "type", "TXT", "size", len(clientInput.Buffer), "data", string(clientInput.Buffer), "message", message)
 
 	// If all they ever sent was white space, we won't have anything to work with. We can just ignore the input...
 	// ALternatively, they may have only hit ENTER, and we may do something with that...
@@ -57,13 +59,13 @@ var (
 			Description:  "Disconnect self from the server",
 			ExampleInput: "quit",
 		},
-		"who": SystemCommandHelp{
-			Description:  "List all connected users",
-			ExampleInput: "who",
+		"reload": SystemCommandHelp{
+			Description:  "Reload datafiles for various packages (items, mobs, buffs, etc.)",
+			ExampleInput: "reload",
 		},
-		"help": SystemCommandHelp{
-			Description:  "Display this help message, or help for a specific command",
-			ExampleInput: "help shutdown",
+		"shutdown": SystemCommandHelp{
+			Description:  "Shutdown the server",
+			ExampleInput: "shutdown [15/seconds]",
 		},
 	}
 )
@@ -106,7 +108,7 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 		return false
 	}
 
-	slog.Info("system command", "cmd", cmd, "arg", arg)
+	mudlog.Info("System Command", "cmd", cmd, "arg", arg)
 	//fmt.Printf("cmd:[%s] arg:[%s]\n", cmd, arg)
 
 	if cmd == "quit" {
@@ -120,37 +122,56 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 		return true
 	}
 
-	if cmd == "who" {
-		onlineUsers := users.GetOnlineList()
+	if cmd == "reload" {
+		events.AddToQueue(events.System{
+			Command: "reload",
+		})
+	}
 
-		headers := []string{"UserId", "Username", "Character", "Level", "Role"}
+	if cmd == "shutdown" {
+		var timeToShutdown uint64 = 15
 
-		rows := [][]string{}
-		for _, user := range onlineUsers {
-			rows = append(rows, []string{user.UserId, user.Username, user.CharacterName, fmt.Sprintf(`%d`, user.CharacterLevel), user.Permission})
+		if len(arg) > 0 {
+			timeToShutdown, _ = strconv.ParseUint(arg, 10, 64)
 		}
 
-		onlineTableData := templates.GetTable("Online Users", headers, rows)
-		tplTxt, _ := templates.Process("tables/generic", onlineTableData)
+		go func() {
 
-		connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
+			// Not building complex output, so just preparse the ansi in the template and cache that
+			tplTxt, _ := templates.Process("admincommands/shutdown-countdown", nil, templates.AnsiTagsPreParse)
 
-		// Not building complex output, so just preparse the ansi in the template and cache that
-		//tplTxt, _ := templates.Process("systemcommands/who", onlineUsers)
-		//connections.SendTo([]byte(tplTxt), connectionId)
+			for i := timeToShutdown; i > 0; i-- {
+
+				writeOut := false
+				if i == timeToShutdown {
+					writeOut = true
+				} else if i > 60 {
+					if i%30 == 0 {
+						writeOut = true
+					}
+				} else if i > 15 {
+					if i%15 == 0 {
+						writeOut = true
+					}
+				} else if i%5 == 0 {
+					writeOut = true
+				}
+
+				if writeOut {
+
+					events.AddToQueue(events.Broadcast{Text: fmt.Sprintf(tplTxt, i)})
+
+				}
+
+				time.Sleep(time.Second)
+			}
+			connections.SignalShutdown(syscall.SIGTERM)
+
+		}()
 		return true
 	}
 
-	if cmd == "help" {
-
-		tplTxt, _ := templates.Process("systemcommands/help", systemCommandList)
-
-		connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
-
-		return true
-	}
-
-	slog.Error("valid command unhandled", "cmd", cmd, "arg", arg)
+	mudlog.Error("valid command unhandled", "cmd", cmd, "arg", arg)
 
 	return true
 }

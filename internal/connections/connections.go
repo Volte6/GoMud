@@ -2,12 +2,12 @@ package connections
 
 import (
 	"errors"
-	"log/slog"
 	"net"
 	"os"
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/volte6/gomud/internal/mudlog"
 )
 
 const ReadBufferSize = 1024
@@ -113,7 +113,7 @@ func Kick(id ConnectionId) (err error) {
 		// keep track of the number of disconnects
 		disconnectCounter++
 		// remove the connection from the map
-		slog.Info("connection kicked", "connectionId", id, "remoteAddr", cd.RemoteAddr().String())
+		mudlog.Info("connection kicked", "connectionId", id, "remoteAddr", cd.RemoteAddr().String())
 
 		return nil
 
@@ -136,8 +136,6 @@ func Remove(id ConnectionId) (err error) {
 		disconnectCounter++
 		// Remove the entry
 		delete(netConnections, id)
-		// remove the connection from the map
-		slog.Info("connection removed", "connectionId", id, "remoteAddr", cd.RemoteAddr().String())
 
 		return nil
 
@@ -165,7 +163,7 @@ func Broadcast(colorizedText []byte) []ConnectionId {
 		_, err = cd.Write(colorizedText)
 
 		if err != nil {
-			slog.Error("could not write to connection", "connectionId", id, "remoteAddr", cd.RemoteAddr().String(), "error", err)
+			mudlog.Error("could not write to connection", "connectionId", id, "remoteAddr", cd.RemoteAddr().String(), "error", err)
 			// Remove from the connections
 			removeIds = append(removeIds, id)
 		}
@@ -194,7 +192,7 @@ func SendTo(b []byte, ids ...ConnectionId) {
 		if cd, ok := netConnections[id]; ok {
 
 			if _, err := cd.Write(b); err != nil {
-				slog.Error("could not write to connection", "connectionId", id, "remoteAddr", cd.RemoteAddr().String(), "error", err)
+				mudlog.Error("could not write to connection", "connectionId", id, "remoteAddr", cd.RemoteAddr().String(), "error", err)
 				// Remove from the connections
 				removeIds = append(removeIds, id)
 				continue
@@ -206,7 +204,7 @@ func SendTo(b []byte, ids ...ConnectionId) {
 	}
 
 	if sentCt < 1 {
-		//slog.Info("message sent to nobody", "message", strings.Replace(string(b), "\033", "ESC", -1))
+		//mudlog.Info("message sent to nobody", "message", strings.Replace(string(b), "\033", "ESC", -1))
 	}
 
 	lock.Unlock()

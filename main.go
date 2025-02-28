@@ -5,20 +5,15 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"runtime"
 	"slices"
 	"strconv"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
 	"time"
 
-	"log/slog"
-
 	"github.com/gorilla/websocket"
-	"github.com/natefinch/lumberjack"
 	"github.com/volte6/gomud/internal/audio"
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
@@ -28,11 +23,13 @@ import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/flags"
 	"github.com/volte6/gomud/internal/gametime"
+	"github.com/volte6/gomud/internal/hooks"
 	"github.com/volte6/gomud/internal/inputhandlers"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/leaderboard"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/mutators"
 	"github.com/volte6/gomud/internal/pets"
 	"github.com/volte6/gomud/internal/quests"
@@ -45,7 +42,6 @@ import (
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
-	"github.com/volte6/gomud/internal/version"
 	"github.com/volte6/gomud/internal/web"
 )
 
@@ -70,27 +66,33 @@ func main() {
 
 	defer func() {
 		if r := recover(); r != nil {
-			slog.Error("PANIC", "error", r)
+			mudlog.Error("PANIC", "error", r)
 		}
 	}()
 
-	setupLogger()
+	// Setup logging
+	mudlog.SetupLogger(
+		events.GetLogger(),
+		os.Getenv(`LOG_LEVEL`),
+		os.Getenv(`LOG_PATH`),
+		os.Getenv(`LOG_NOCOLOR`) == ``,
+	)
 
 	flags.HandleFlags()
 
 	configs.ReloadConfig()
 	c := configs.GetConfig()
 
-	slog.Info(`========================`)
+	mudlog.Info(`========================`)
 	//
-	slog.Info(`  ___  ____   _______   `)
-	slog.Info(`  |  \/  | | | |  _  \  `)
-	slog.Info(`  | .  . | | | | | | |  `)
-	slog.Info(`  | |\/| | | | | | | |  `)
-	slog.Info(`  | |  | | |_| | |/ /   `)
-	slog.Info(`  \_|  |_/\___/|___/    `)
+	mudlog.Info(`  ___  ____   _______   `)
+	mudlog.Info(`  |  \/  | | | |  _  \  `)
+	mudlog.Info(`  | .  . | | | | | | |  `)
+	mudlog.Info(`  | |\/| | | | | | | |  `)
+	mudlog.Info(`  | |  | | |_| | |/ /   `)
+	mudlog.Info(`  \_|  |_/\___/|___/    `)
 	//
-	slog.Info(`========================`)
+	mudlog.Info(`========================`)
 	//
 	cfgData := c.AllConfigData()
 	cfgKeys := make([]string, 0, len(cfgData))
@@ -102,26 +104,10 @@ func main() {
 	slices.Sort(cfgKeys)
 
 	for _, k := range cfgKeys {
-		slog.Info("Config", k, cfgData[k])
+		mudlog.Info("Config", k, cfgData[k])
 	}
 	//
-	slog.Info(`========================`)
-
-	// Do version related checks
-	slog.Info(`Version: ` + Version)
-	if err := version.VersionCheck(Version); err != nil {
-
-		if err == version.ErrIncompatibleVersion {
-			slog.Error("Incompatible version.", "details", "Backup all datafiles and run with -u or --upgrade flag to attempt an automatic upgrade.")
-			return
-		}
-
-		if err == version.ErrUpgradePossible {
-			slog.Warn("Version mismatch.", "details", "Your config files could use some updating. Backup all datafiles and run with -u or --upgrade flag to attempt an automatic upgrade.")
-		}
-
-	}
-	slog.Info(`========================`)
+	mudlog.Info(`========================`)
 
 	//
 	// System Configurations
@@ -129,17 +115,17 @@ func main() {
 
 	// Validate chosen world:
 	if err := util.ValidateWorldFiles(`_datafiles/world/default`, c.FolderDataFiles.String()); err != nil {
-		slog.Error("World Validation", "error", err)
+		mudlog.Error("World Validation", "error", err)
 		os.Exit(1)
 	}
+
+	hooks.RegisterListeners()
 
 	// Load all the data files up front.
 	loadAllDataFiles(false)
 
-	rc := uint64(c.RoundCount)
-	if rc > 0 {
-		util.SetRoundCount(uint64(c.RoundCount))
-	} else {
+	// Load the round count from the file
+	if util.LoadRoundCount(c.FolderDataFiles.String()+`/`+util.RoundCountFilename) == util.RoundCountMinimum {
 		gametime.SetToDay(-3)
 	}
 
@@ -148,7 +134,7 @@ func main() {
 	scripting.Setup(int(c.ScriptLoadTimeoutMs), int(c.ScriptRoomTimeoutMs))
 
 	//
-	slog.Info(`========================`)
+	mudlog.Info(`========================`)
 
 	//
 	// Generate initial leaderboard cache
@@ -191,7 +177,7 @@ func main() {
 
 	tplTxt, err := templates.Process("goodbye", nil)
 	if err != nil {
-		slog.Error("Template Error", "error", err)
+		mudlog.Error("Template Error", "error", err)
 	}
 
 	events.AddToQueue(events.Broadcast{
@@ -200,9 +186,11 @@ func main() {
 
 	serverAlive.Store(false) // immediately stop processing incoming connections
 
+	util.SaveRoundCount(c.FolderDataFiles.String() + `/` + util.RoundCountFilename)
+
 	// some last minute stats reporting
 	totalConnections, totalDisconnections := connections.Stats()
-	slog.Error(
+	mudlog.Error(
 		"shutting down server",
 		"LifetimeConnections", totalConnections,
 		"LifetimeDisconnects", totalDisconnections,
@@ -221,7 +209,7 @@ func main() {
 	// Just an ephemeral goroutine that spins its wheels until the program shuts down")
 	go func() {
 		for {
-			slog.Error("Waiting on workers")
+			mudlog.Error("Waiting on workers")
 			// sleep for 3 seconds
 			time.Sleep(time.Duration(3) * time.Second)
 		}
@@ -243,7 +231,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		wg.Done()
 	}()
 
-	slog.Info("New Connection", "connectionID", connDetails.ConnectionId(), "remoteAddr", connDetails.RemoteAddr().String())
+	mudlog.Info("New Connection", "connectionID", connDetails.ConnectionId(), "remoteAddr", connDetails.RemoteAddr().String())
 
 	// Add starting handlers
 
@@ -347,9 +335,9 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 	var userObject *users.UserRecord
 	var sug suggestions.Suggestions
 	lastInput := time.Now()
-	for {
+	c := configs.GetConfig()
 
-		c := configs.GetConfig()
+	for {
 
 		clientInput.EnterPressed = false // Default state is always false
 		clientInput.TabPressed = false   // Default state is always false
@@ -357,8 +345,6 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 		n, err := connDetails.Read(inputBuffer)
 		if err != nil {
-
-			slog.Error("TELNET", "ReadERR", err)
 
 			// If failed to read from the connection, switch to zombie state
 			if userObject != nil {
@@ -376,9 +362,10 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 					worldManager.SendLogoutConnectionId(connDetails.ConnectionId())
 
 				}
+
 			}
 
-			slog.Warn("Conn Read Error", "error", err)
+			mudlog.Warn("Telnet", "error", err)
 
 			connections.Remove(connDetails.ConnectionId())
 
@@ -396,7 +383,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 		// Was there an error? If so, we should probably just stop processing input
 		if err != nil {
-			slog.Warn("InputHandler", "error", err)
+			mudlog.Warn("InputHandler", "error", err)
 			continue
 		}
 
@@ -486,10 +473,8 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 			}
 
 			if userObject.Permission == users.PermissionAdmin {
-				connDetails.AddInputHandler("AdminCommandInputHandler", inputhandlers.AdminCommandInputHandler)
+				connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
 			}
-
-			connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
 
 			// Add a signal handler (shortcut ctrl combos) after the AnsiHandler
 			// This captures signals and replaces user input so should happen after AnsiHandler to ensure it happens before other processes.
@@ -503,6 +488,10 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 		// If they have pressed enter (submitted their input), and nothing else has handled/aborted
 		if clientInput.EnterPressed {
+
+			// Update config after enter presses
+			// No need to update it every loop
+			c = configs.GetConfig()
 
 			if time.Since(lastInput) < time.Duration(c.TurnMs)*time.Millisecond {
 				/*
@@ -601,12 +590,14 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		)
 	}
 
+	c := configs.GetConfig()
+
 	for {
 		_, message, err := conn.ReadMessage()
 
-		c := configs.GetConfig()
-
 		if err != nil {
+
+			userObject.EventLog.Add(`conn`, `Disconnected`)
 
 			// If failed to read from the connection, switch to zombie state
 			if userObject != nil {
@@ -622,9 +613,10 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 					worldManager.SendLogoutConnectionId(connDetails.ConnectionId())
 
 				}
+
 			}
 
-			slog.Error("WS Read", "error", err)
+			mudlog.Error("WS Read", "error", err)
 			break
 		}
 
@@ -652,10 +644,8 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 			}
 
 			if userObject.Permission == users.PermissionAdmin {
-				connDetails.AddInputHandler("AdminCommandInputHandler", inputhandlers.AdminCommandInputHandler)
+				connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
 			}
-
-			connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
 
 			// Add a signal handler (shortcut ctrl combos) after the AnsiHandler
 			// This captures signals and replaces user input so should happen after AnsiHandler to ensure it happens before other processes.
@@ -676,6 +666,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		// Buffer should be processed as an in-game command
 		worldManager.SendInput(wi)
 
+		c = configs.GetConfig()
 	}
 }
 
@@ -683,7 +674,7 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 
 	server, err := net.Listen("tcp", fmt.Sprintf("%s:%d", hostname, portNum))
 	if err != nil {
-		slog.Error("Error creating server", "error", err)
+		mudlog.Error("Error creating server", "error", err)
 		return nil
 	}
 
@@ -695,12 +686,12 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 			conn, err := server.Accept()
 
 			if !serverAlive.Load() {
-				slog.Error("Connections disabled.")
+				mudlog.Error("Connections disabled.")
 				return
 			}
 
 			if err != nil {
-				slog.Error("Connection error", "error", err)
+				mudlog.Error("Connection error", "error", err)
 				continue
 			}
 
@@ -725,81 +716,13 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 	return server
 }
 
-func setupLogger() {
-
-	logLevel := strings.ToUpper(strings.TrimSpace(os.Getenv(`LOG_LEVEL`)))
-	if logLevel == `` {
-		logLevel = `HIGH`
-	}
-
-	var slogLevel slog.Level
-	if logLevel[0:1] == `L` {
-		slogLevel = slog.LevelDebug
-	} else if logLevel[0:1] == `M` {
-		slogLevel = slog.LevelInfo
-	} else {
-		slogLevel = slog.LevelDebug
-	}
-
-	logPath := os.Getenv(`LOG_PATH`)
-	if logPath != `` {
-
-		fileInfo, err := os.Stat(logPath)
-		if err == nil {
-			if fileInfo.IsDir() {
-				panic(fmt.Errorf("log file path is a directory: %s", logPath))
-			}
-
-		} else if os.IsNotExist(err) {
-			// File does not exist; check if the directory exists
-			dir := filepath.Dir(logPath)
-			if _, err := os.Stat(dir); os.IsNotExist(err) {
-				panic(fmt.Errorf("directory for log file does not exist: %s", dir))
-			}
-		} else {
-			// Some other error
-			panic(fmt.Errorf("error accessing log file path: %v", err))
-		}
-
-		lj := &lumberjack.Logger{
-			Filename:   logPath,
-			MaxSize:    100,  // Maximum size in megabytes before rotation
-			MaxBackups: 10,   // Maximum number of old log files to retain
-			Compress:   true, // Compress rotated files
-		}
-
-		// Open or create the log file
-		file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			panic(fmt.Errorf("failed to open log file: %v", err))
-		}
-		defer file.Close()
-
-		fileLogger := slog.New(
-			util.GetColorLogHandler(lj, slogLevel),
-		)
-
-		// Setup the default logger
-		slog.SetDefault(fileLogger)
-
-	} else {
-
-		localLogger := slog.New(
-			util.GetColorLogHandler(os.Stderr, slogLevel),
-		)
-
-		slog.SetDefault(localLogger)
-	}
-
-}
-
 func loadAllDataFiles(isReload bool) {
 
 	if isReload {
 
 		defer func() {
 			if r := recover(); r != nil {
-				slog.Error("RELOAD FAILED", "err", r)
+				mudlog.Error("RELOAD FAILED", "err", r)
 			}
 		}()
 

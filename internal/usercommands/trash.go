@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Trash(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Trash(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// Check whether the user has an item in their inventory that matches
 	matchItem, found := user.Character.FindInBackpack(rest)
@@ -21,6 +21,12 @@ func Trash(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 		isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 
 		user.Character.RemoveItem(matchItem)
+
+		events.AddToQueue(events.ItemOwnership{
+			UserId: user.UserId,
+			Item:   matchItem,
+			Gained: false,
+		})
 
 		user.SendText(
 			fmt.Sprintf(`You trash the <ansi fg="item">%s</ansi> for good.`, matchItem.DisplayName()))
@@ -38,9 +44,6 @@ func Trash(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 			xpGrant = 1
 		}
 		user.GrantXP(xpGrant, `trash cleanup`)
-
-		// Trigger lost event
-		scripting.TryItemScriptEvent(`onLost`, matchItem, user.UserId)
 
 	}
 

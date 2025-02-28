@@ -66,15 +66,17 @@ func Give(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 			targetUser.Character.StoreItem(giveItem)
 			mob.Character.RemoveItem(giveItem)
 
-			iSpec := giveItem.GetSpec()
-			if iSpec.QuestToken != `` {
+			events.AddToQueue(events.ItemOwnership{
+				MobInstanceId: mob.InstanceId,
+				Item:          giveItem,
+				Gained:        false,
+			})
 
-				events.AddToQueue(events.Quest{
-					UserId:     targetUser.UserId,
-					QuestToken: iSpec.QuestToken,
-				})
-
-			}
+			events.AddToQueue(events.ItemOwnership{
+				UserId: targetUser.UserId,
+				Item:   giveItem,
+				Gained: true,
+			})
 
 			targetUser.SendText(
 				fmt.Sprintf(`<ansi fg="mobname">%s</ansi> gives you their <ansi fg="item">%s</ansi>.`, mob.Character.Name, giveItem.DisplayName()),
@@ -110,6 +112,18 @@ func Give(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 			if giveItem.ItemId > 0 {
 				m.Character.StoreItem(giveItem)
 				mob.Character.RemoveItem(giveItem)
+
+				events.AddToQueue(events.ItemOwnership{
+					MobInstanceId: mob.InstanceId,
+					Item:          giveItem,
+					Gained:        false,
+				})
+
+				events.AddToQueue(events.ItemOwnership{
+					MobInstanceId: m.InstanceId,
+					Item:          giveItem,
+					Gained:        true,
+				})
 
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="mobname">%s</ansi> gave their <ansi fg="item">%s</ansi> to <ansi fg="mobname">%s</ansi>.`, mob.Character.Name, giveItem.DisplayName(), m.Character.Name),

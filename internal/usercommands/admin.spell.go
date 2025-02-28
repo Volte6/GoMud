@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/spells"
 	"github.com/volte6/gomud/internal/templates"
@@ -15,7 +16,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Spell(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Spell(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if user.Permission != users.PermissionAdmin {
 		user.SendText(`<ansi fg="alert-4">Only admins can use this command</ansi>`)
@@ -43,7 +44,7 @@ func Spell(rest string, user *users.UserRecord, room *rooms.Room, flags UserComm
 	return true, nil
 }
 
-func spell_List(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func spell_List(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	spellNames := []templates.NameDescription{}
 
@@ -75,7 +76,7 @@ func spell_List(rest string, user *users.UserRecord, room *rooms.Room, flags Use
 	return true, nil
 }
 
-func spell_Create(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func spell_Create(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	var newSpell = spells.SpellData{}
 

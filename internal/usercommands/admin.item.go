@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/quests"
 	"github.com/volte6/gomud/internal/rooms"
@@ -16,7 +17,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Item(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Item(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if user.Permission != users.PermissionAdmin {
 		user.SendText(`<ansi fg="alert-4">Only admins can use this command</ansi>`)
@@ -49,7 +50,7 @@ func Item(rest string, user *users.UserRecord, room *rooms.Room, flags UserComma
 	return true, nil
 }
 
-func item_List(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func item_List(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	itmNames := []templates.NameDescription{}
 
@@ -80,7 +81,7 @@ func item_List(rest string, user *users.UserRecord, room *rooms.Room, flags User
 	return true, nil
 }
 
-func item_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func item_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	itemId := items.FindItem(rest)
 	if itemId != 0 {
@@ -109,7 +110,7 @@ func item_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags Use
 	return true, nil
 }
 
-func item_Create(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func item_Create(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	var newItemSpec = items.ItemSpec{}
 

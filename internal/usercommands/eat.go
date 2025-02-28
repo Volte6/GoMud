@@ -7,11 +7,10 @@ import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Eat(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Eat(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// Check whether the user has an item in their inventory that matches
 	matchItem, found := user.Character.FindInBackpack(rest)
@@ -36,7 +35,13 @@ func Eat(rest string, user *users.UserRecord, room *rooms.Room, flags UserComman
 
 		// If no more uses, will be lost, so trigger event
 		if usesLeft := user.Character.UseItem(matchItem); usesLeft < 1 {
-			scripting.TryItemScriptEvent(`onLost`, matchItem, user.UserId)
+
+			events.AddToQueue(events.ItemOwnership{
+				UserId: user.UserId,
+				Item:   matchItem,
+				Gained: false,
+			})
+
 		}
 
 		for _, buffId := range itemSpec.BuffIds {

@@ -2,10 +2,11 @@ package connections
 
 import (
 	"errors"
-	"github.com/gorilla/websocket"
-	"log/slog"
 	"sync"
 	"time"
+
+	"github.com/gorilla/websocket"
+	"github.com/volte6/gomud/internal/mudlog"
 )
 
 type HeartbeatConfig struct {
@@ -46,11 +47,11 @@ func (cd *ConnectionDetails) StartHeartbeat(config HeartbeatConfig) error {
 	}
 
 	hm := newHeartbeatManager(cd, config)
-	slog.Info("Heartbeat::Start", "connectionId", cd.connectionId)
+	mudlog.Info("Heartbeat::Start", "connectionId", cd.connectionId)
 	// set up pong handler
 	cd.wsConn.SetReadDeadline(time.Now().Add(hm.config.PongWait))
 	cd.wsConn.SetPongHandler(func(string) error {
-		slog.Debug("Heartbeat::Pong", "connectionId", hm.cd.connectionId)
+		mudlog.Debug("Heartbeat::Pong", "connectionId", hm.cd.connectionId)
 		cd.wsConn.SetReadDeadline(time.Now().Add(hm.config.PongWait))
 		return nil
 	})
@@ -73,7 +74,7 @@ func (hm *heartbeatManager) runPingLoop() {
 			return
 		case <-ticker.C:
 			if err := hm.writePing(); err != nil {
-				slog.Error("Heartbeat::Error",
+				mudlog.Error("Heartbeat::Error",
 					"connectionId", hm.cd.connectionId,
 					"error", err)
 				return
@@ -87,7 +88,7 @@ func (hm *heartbeatManager) writePing() error {
 	defer hm.cd.wsLock.Unlock()
 
 	deadline := time.Now().Add(hm.config.WriteWait)
-	slog.Debug("Heartbeat::Ping", "connectionId", hm.cd.connectionId)
+	mudlog.Debug("Heartbeat::Ping", "connectionId", hm.cd.connectionId)
 
 	if err := hm.cd.wsConn.WriteControl(
 		websocket.PingMessage,

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
@@ -42,8 +43,14 @@ func Alchemy(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	matchItem, found := mob.Character.FindInBackpack(rest)
 
 	if found {
-
 		mob.Character.RemoveItem(matchItem)
+
+		events.AddToQueue(events.ItemOwnership{
+			MobInstanceId: mob.InstanceId,
+			Item:          matchItem,
+			Gained:        false,
+		})
+
 		mob.Character.Gold += 1
 		room.SendText(
 			fmt.Sprintf(`<ansi fg="mobname">%s</ansi> chants softly. Their <ansi fg="item">%s</ansi> slowly levitates in the air, trembles briefly and then in a flash of light becomes a gold coin!`, mob.Character.Name, matchItem.DisplayName()))

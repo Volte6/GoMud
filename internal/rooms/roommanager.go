@@ -13,16 +13,14 @@ import (
 
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/connections"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
-
-	"log/slog"
 
 	"gopkg.in/yaml.v2"
 )
@@ -311,146 +309,11 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		}
 	}
 
-	//
-	// Send GMCP Updates
-	//
-	if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-
-		newRoomPlayers := strings.Builder{}
-
-		// Send to everyone in the new room that a player arrived
-		for _, uid := range newRoom.GetPlayers() {
-
-			if uid == user.UserId {
-				continue
-			}
-
-			if u := users.GetByUserId(uid); u != nil {
-
-				if newRoomPlayers.Len() > 0 {
-					newRoomPlayers.WriteString(`, `)
-				}
-
-				newRoomPlayers.WriteString(`"` + u.Character.Name + `": ` + `"` + u.Character.Name + `"`)
-
-				if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
-
-					bytesOut := []byte(fmt.Sprintf(`Room.AddPlayer {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name))
-					connections.SendTo(
-						term.GmcpPayload.BytesWithPayload(bytesOut),
-						user.ConnectionId(),
-					)
-				}
-			}
-		}
-
-		// Send to everyone in the old room that a player left
-		for _, uid := range currentRoom.GetPlayers() {
-
-			if uid == user.UserId {
-				continue
-			}
-
-			if u := users.GetByUserId(uid); u != nil {
-				if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
-
-					bytesOut := []byte(fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name))
-					connections.SendTo(
-						term.GmcpPayload.BytesWithPayload(bytesOut),
-						user.ConnectionId(),
-					)
-				}
-			}
-		}
-
-		roomInfoStr := strings.Builder{}
-		roomInfoStr.WriteString(`{ `)
-		roomInfoStr.WriteString(`"num": ` + strconv.Itoa(newRoom.RoomId) + `, `)
-		roomInfoStr.WriteString(`"name": "` + newRoom.Title + `", `)
-		roomInfoStr.WriteString(`"area": "` + newRoom.Zone + `", `)
-		roomInfoStr.WriteString(`"environment": "` + newRoom.GetBiome().Name() + `", `)
-
-		// build exits
-		roomInfoStr.WriteString(`"exits": {`)
-		exitCt := 0
-		for name, exitInfo := range newRoom.Exits {
-			if exitInfo.Secret {
-				continue
-			}
-			if exitCt > 0 {
-				roomInfoStr.WriteString(`, `)
-			}
-
-			roomInfoStr.WriteString(`"` + name + `": ` + strconv.Itoa(exitInfo.RoomId))
-
-			exitCt++
-		}
-		roomInfoStr.WriteString(`}, `)
-		// End exits
-
-		// build details
-		roomInfoStr.WriteString(`"details": [`)
-
-		detailCt := 0
-		if len(newRoom.GetMobs(FindMerchant)) > 0 || len(newRoom.GetPlayers(FindMerchant)) > 0 {
-			if detailCt > 0 {
-				roomInfoStr.WriteString(`, `)
-			}
-			detailCt++
-			roomInfoStr.WriteString(`"shop"`)
-		}
-		if len(newRoom.SkillTraining) > 0 {
-			if detailCt > 0 {
-				roomInfoStr.WriteString(`, `)
-			}
-			detailCt++
-			roomInfoStr.WriteString(`"trainer"`)
-		}
-		if newRoom.IsBank {
-			if detailCt > 0 {
-				roomInfoStr.WriteString(`, `)
-			}
-			detailCt++
-			roomInfoStr.WriteString(`"bank"`)
-		}
-		if newRoom.IsStorage {
-			if detailCt > 0 {
-				roomInfoStr.WriteString(`, `)
-			}
-			detailCt++
-			roomInfoStr.WriteString(`"storage"`)
-		}
-		roomInfoStr.WriteString(`]`)
-		// end details
-
-		roomInfoStr.WriteString(` }`)
-		// End room info
-
-		// send big 'ol room info object
-		connections.SendTo(
-			term.GmcpPayload.BytesWithPayload([]byte("Room.Info "+roomInfoStr.String())),
-			user.ConnectionId(),
-		)
-
-		// send player list for room
-		connections.SendTo(
-			term.GmcpPayload.BytesWithPayload([]byte("Room.Players {"+newRoomPlayers.String()+`}`)),
-			user.ConnectionId(),
-		)
-	}
-
-	// If this zone has music, play it.
-	// Room music takes priority.
-	if newRoom.MusicFile != `` {
-		user.PlayMusic(newRoom.MusicFile)
-	} else {
-		zoneInfo := GetZoneConfig(newRoom.Zone)
-		if zoneInfo.MusicFile != `` {
-			user.PlayMusic(zoneInfo.MusicFile)
-		} else if currentRoom.MusicFile != `` {
-			user.PlayMusic(`Off`)
-		}
-	}
+	events.AddToQueue(events.RoomChange{
+		UserId:     userId,
+		FromRoomId: currentRoom.RoomId,
+		ToRoomId:   newRoom.RoomId,
+	})
 
 	return nil
 }
@@ -571,7 +434,7 @@ func SaveAllRooms() error {
 
 	saveCt, err := fileloader.SaveAllFlatFiles[int, *Room](configs.GetConfig().FolderDataFiles.String()+`/rooms`, roomManager.rooms, saveModes...)
 
-	slog.Info("SaveAllRooms()", "savedCount", saveCt, "expectedCt", len(roomManager.rooms), "Time Taken", time.Since(start))
+	mudlog.Info("SaveAllRooms()", "savedCount", saveCt, "expectedCt", len(roomManager.rooms), "Time Taken", time.Since(start))
 
 	return err
 }
@@ -619,7 +482,7 @@ func loadAllRoomZones() error {
 			continue
 		}
 
-		slog.Warn("No Entrance", "roomId", roomId, "filePath", filePath)
+		mudlog.Warn("No Entrance", "roomId", roomId, "filePath", filePath)
 	}
 
 	for _, loadedRoom := range loadedRooms {
@@ -656,7 +519,7 @@ func loadAllRoomZones() error {
 		roomManager.zones[loadedRoom.Zone] = zoneInfo
 	}
 
-	slog.Info("rooms.loadAllRoomZones()", "loadedCount", len(loadedRooms), "Time Taken", time.Since(start))
+	mudlog.Info("rooms.loadAllRoomZones()", "loadedCount", len(loadedRooms), "Time Taken", time.Since(start))
 
 	return nil
 }
@@ -697,7 +560,7 @@ func removeRoomFromMemory(r *Room) {
 
 	afterCt := len(roomManager.rooms)
 
-	slog.Info("Removing from memory", "RoomId", r.RoomId, "Title", r.Title, "beforeCt", beforeCt, "afterCt", afterCt)
+	mudlog.Info("Removing from memory", "RoomId", r.RoomId, "Title", r.Title, "beforeCt", beforeCt, "afterCt", afterCt)
 }
 
 // Loads a room from disk and stores in memory
@@ -775,7 +638,7 @@ func loadRoomFromFile(roomFilePath string) (*Room, error) {
 
 	roomPtr, err := fileloader.LoadFlatFile[*Room](roomFilePath)
 	if err != nil {
-		slog.Error("loadRoomFromFile()", "error", err.Error())
+		mudlog.Error("loadRoomFromFile()", "error", err.Error())
 		return roomPtr, err
 	}
 
@@ -832,6 +695,10 @@ func LoadRoom(roomId int) *Room {
 	}
 
 	filename := findRoomFile(roomId)
+	if len(filename) == 0 {
+		return nil
+	}
+
 	retRoom, _ := loadRoomFromFile(util.FilePath(configs.GetConfig().FolderDataFiles.String(), `/`, `rooms`, `/`, filename))
 
 	return retRoom
@@ -859,7 +726,7 @@ func SaveRoom(r Room) error {
 		return err
 	}
 
-	slog.Info("Saved room", "room", r.RoomId)
+	mudlog.Info("Saved room", "room", r.RoomId)
 
 	return nil
 }
@@ -1045,7 +912,7 @@ func BuildRoom(fromRoomId int, exitName string, mapDirection ...string) (room *R
 		//newRoom.IdleMessages = fromRoom.IdleMessages
 	}
 
-	slog.Info("Connection room", "fromRoom", fromRoom.RoomId, "newRoom", newRoom.RoomId, "exitName", exitName)
+	mudlog.Info("Connection room", "fromRoom", fromRoom.RoomId, "newRoom", newRoom.RoomId, "exitName", exitName)
 
 	// connect the old room to the new room
 	newExit := exit.RoomExit{RoomId: newRoom.RoomId, Secret: false}
@@ -1303,7 +1170,7 @@ func GetSpecificMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, 
 		}
 
 		if err != nil {
-			slog.Error("Map Prop", "error", err.Error())
+			mudlog.Error("Map Prop", "error", err.Error())
 			return ``
 		}
 
@@ -1326,7 +1193,7 @@ func GetRoomCount(zoneName string) int {
 func LoadDataFiles() {
 
 	if len(roomManager.zones) > 0 {
-		slog.Info("rooms.LoadDataFiles()", "msg", "skipping reload of room files, rooms shouldn't be hot reloaded from flatfiles.")
+		mudlog.Info("rooms.LoadDataFiles()", "msg", "skipping reload of room files, rooms shouldn't be hot reloaded from flatfiles.")
 		return
 	}
 

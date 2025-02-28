@@ -4,13 +4,13 @@ import (
 	"fmt"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/users"
 )
 
-func Sell(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Sell(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	item, found := user.Character.FindInBackpack(rest)
 
@@ -56,6 +56,12 @@ func Sell(rest string, user *users.UserRecord, room *rooms.Room, flags UserComma
 		user.Character.Gold += sellValue
 		user.Character.RemoveItem(item)
 
+		events.AddToQueue(events.ItemOwnership{
+			UserId: user.UserId,
+			Item:   item,
+			Gained: false,
+		})
+
 		mob.Character.Shop.StockItem(item.ItemId)
 
 		user.EventLog.Add(`shop`, fmt.Sprintf(`Sold your <ansi fg="itemname">%s</ansi> to <ansi fg="mobname">%s</ansi> for <ansi fg="gold">%d gold</ansi>`, item.DisplayName(), mob.Character.Name, sellValue))
@@ -67,9 +73,6 @@ func Sell(rest string, user *users.UserRecord, room *rooms.Room, flags UserComma
 			fmt.Sprintf(`<ansi fg="username">%s</ansi> sells a <ansi fg="itemname">%s</ansi>.`, user.Character.Name, item.DisplayName()),
 			user.UserId,
 		)
-
-		// Trigger lost event
-		scripting.TryItemScriptEvent(`onLost`, item, user.UserId)
 
 		break
 	}

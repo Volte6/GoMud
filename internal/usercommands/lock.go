@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 )
 
-func Lock(rest string, user *users.UserRecord, room *rooms.Room, flags UserCommandFlag) (bool, error) {
+func Lock(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
 
@@ -58,6 +59,12 @@ func Lock(rest string, user *users.UserRecord, room *rooms.Room, flags UserComma
 			user.Character.SetKey(`key-`+lockId, fmt.Sprintf(`%d`, backpackKeyItm.ItemId))
 			user.Character.RemoveItem(backpackKeyItm)
 
+			events.AddToQueue(events.ItemOwnership{
+				UserId: user.UserId,
+				Item:   backpackKeyItm,
+				Gained: false,
+			})
+
 			user.SendText(fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to lock the <ansi fg="container">%s</ansi>, and add it to your key ring for the future.`, itmSpec.Name, containerName))
 			room.SendText(
 				fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to lock the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName),
@@ -103,6 +110,12 @@ func Lock(rest string, user *users.UserRecord, room *rooms.Room, flags UserComma
 			// "key-<roomid>-<exitname>": "<itemid>"
 			user.Character.SetKey(`key-`+lockId, fmt.Sprintf(`%d`, backpackKeyItm.ItemId))
 			user.Character.RemoveItem(backpackKeyItm)
+
+			events.AddToQueue(events.ItemOwnership{
+				UserId: user.UserId,
+				Item:   backpackKeyItm,
+				Gained: false,
+			})
 
 			user.SendText(fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to lock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName))
 			room.SendText(

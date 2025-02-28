@@ -2,10 +2,10 @@ package rooms
 
 import (
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/volte6/gomud/internal/exit"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/users"
 )
 
@@ -651,7 +651,7 @@ func (r *RoomGraph) Changed() bool {
 	}
 
 	if totalRooms == len(r.trackedRoomIds) {
-		slog.Info("RoomGraph::Changed()", "error", "Updated needed, mismatched room counts", "totalRooms", totalRooms, "trackedRoomIds", len(r.trackedRoomIds))
+		mudlog.Info("RoomGraph::Changed()", "error", "Updated needed, mismatched room counts", "totalRooms", totalRooms, "trackedRoomIds", len(r.trackedRoomIds))
 		//	return true
 	}
 

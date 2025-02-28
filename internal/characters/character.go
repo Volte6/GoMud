@@ -7,11 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"log/slog"
-
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/items"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/pets"
 	"github.com/volte6/gomud/internal/quests"
 	"github.com/volte6/gomud/internal/races"
@@ -446,7 +445,7 @@ func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
 
 	c.Experience += actualXP
 
-	slog.Info(`GrantXP()`, `username`, c.Name, `xp`, xp, `xpscale`, xpScale, `actualXP`, actualXP)
+	mudlog.Debug(`GrantXP()`, `username`, c.Name, `xp`, xp, `xpscale`, xpScale, `actualXP`, actualXP)
 
 	return actualXP, xpScale
 }
@@ -1592,7 +1591,7 @@ func (c *Character) Validate(recalcPermaBuffs ...bool) error {
 
 				if !itemFoundInDisabledSlot.IsDisabled() {
 					c.StoreItem(itemFoundInDisabledSlot)
-					slog.Debug("Disabled Check", "error", "Item found in disabled slot", "name", itemFoundInDisabledSlot.Name(), "slot", disabledSlot, "character", c.Name)
+					mudlog.Debug("Disabled Check", "error", "Item found in disabled slot", "name", itemFoundInDisabledSlot.Name(), "slot", disabledSlot, "character", c.Name)
 				}
 			}
 

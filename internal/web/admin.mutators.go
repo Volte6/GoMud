@@ -1,7 +1,6 @@
 package web
 
 import (
-	"log/slog"
 	"net/http"
 	"sort"
 	"text/template"
@@ -9,6 +8,7 @@ import (
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/mutators"
 )
 
@@ -16,7 +16,7 @@ func mutatorsIndex(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String()+"/admin/_header.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/mutators/index.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/_footer.html")
 	if err != nil {
-		slog.Error("HTML Template", "error", err)
+		mudlog.Error("HTML Template", "error", err)
 	}
 
 	mutSpecs := mutators.GetAllMutatorSpecs()
@@ -32,7 +32,7 @@ func mutatorsIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := tmpl.Execute(w, mutatorIndexData); err != nil {
-		slog.Error("HTML Execute", "error", err)
+		mudlog.Error("HTML Execute", "error", err)
 	}
 
 }
@@ -41,7 +41,7 @@ func mutatorData(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.New("mutator.data.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/admin/mutators/mutator.data.html")
 	if err != nil {
-		slog.Error("HTML Template", "error", err)
+		mudlog.Error("HTML Template", "error", err)
 	}
 
 	urlVals := r.URL.Query()
@@ -78,7 +78,7 @@ func mutatorData(w http.ResponseWriter, r *http.Request) {
 	tplData[`colorPatterns`] = colorPatterns
 
 	if err := tmpl.Execute(w, tplData); err != nil {
-		slog.Error("HTML Execute", "error", err)
+		mudlog.Error("HTML Execute", "error", err)
 	}
 
 }

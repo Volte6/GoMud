@@ -2,7 +2,6 @@ package buffs
 
 import (
 	"fmt"
-	"log/slog"
 	"math"
 	"os"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/gametime"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/statmods"
 	"github.com/volte6/gomud/internal/util"
 )
@@ -228,5 +228,5 @@ func LoadDataFiles() {
 
 	buffs = tmpBuffs
 
-	slog.Info("buffSpec.LoadDataFiles()", "loadedCount", len(buffs), "Time Taken", time.Since(start))
+	mudlog.Info("buffSpec.LoadDataFiles()", "loadedCount", len(buffs), "Time Taken", time.Since(start))
 }

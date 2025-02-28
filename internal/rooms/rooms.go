@@ -773,13 +773,21 @@ func (r *Room) CleanupMobSpawns(noCooldown bool) {
 
 func (r *Room) AddMob(mobInstanceId int) {
 
-	// Do before lock
+	mob := mobs.GetInstance(mobInstanceId)
+	if mob == nil {
+		return
+	}
+
 	r.MarkVisited(mobInstanceId, VisitorMob)
 
-	if mob := mobs.GetInstance(mobInstanceId); mob != nil {
-		mob.Character.RoomId = r.RoomId
-		mob.Character.Zone = r.Zone
-	}
+	events.AddToQueue(events.RoomChange{
+		MobInstanceId: mobInstanceId,
+		FromRoomId:    mob.Character.RoomId,
+		ToRoomId:      r.RoomId,
+	})
+
+	mob.Character.RoomId = r.RoomId
+	mob.Character.Zone = r.Zone
 
 	r.mobs = append(r.mobs, mobInstanceId)
 
@@ -788,7 +796,6 @@ func (r *Room) AddMob(mobInstanceId int) {
 
 func (r *Room) RemoveMob(mobInstanceId int) {
 
-	// Do before lock
 	r.MarkVisited(mobInstanceId, VisitorMob, 1)
 
 	mobLen := len(r.mobs)

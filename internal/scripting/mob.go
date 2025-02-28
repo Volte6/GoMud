@@ -3,10 +3,10 @@ package scripting
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/dop251/goja"
+	"github.com/volte6/gomud/internal/mudlog"
 )
 
 var (
@@ -36,7 +36,7 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, source
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TryMobScriptEvent()", "eventName", eventName, "MobId", sMob.MobTypeId(), "time", time.Since(timestart))
+		mudlog.Debug("TryMobScriptEvent()", "eventName", eventName, "MobId", sMob.MobTypeId(), "time", time.Since(timestart))
 	}()
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 
@@ -67,14 +67,14 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, source
 			finalErr := fmt.Errorf("%s(): %w", eventName, err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -101,7 +101,7 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 
 	timestart := time.Now()
 	defer func() {
-		slog.Debug("TryMobCommand()", "cmd", cmd, "MobId", sMob.MobTypeId(), "time", time.Since(timestart))
+		mudlog.Debug("TryMobCommand()", "cmd", cmd, "MobId", sMob.MobTypeId(), "time", time.Since(timestart))
 	}()
 
 	if onCommandFunc, ok := vmw.GetFunction(`onCommand_` + cmd); ok {
@@ -131,14 +131,14 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 			finalErr := fmt.Errorf("onCommand_%s(): %w", cmd, err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -174,14 +174,14 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 			finalErr := fmt.Errorf("onCommand(): %w", err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return false, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return false, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return false, finalErr
 		}
 
@@ -231,14 +231,14 @@ func getMobVM(mobActor *ScriptActor) (*VMWrapper, error) {
 		finalErr := fmt.Errorf("RunProgram: %w", err)
 
 		if _, ok := finalErr.(*goja.Exception); ok {
-			slog.Error("JSVM", "exception", finalErr)
+			mudlog.Error("JSVM", "exception", finalErr)
 			return nil, finalErr
 		} else if errors.Is(finalErr, errTimeout) {
-			slog.Error("JSVM", "interrupted", finalErr)
+			mudlog.Error("JSVM", "interrupted", finalErr)
 			return nil, finalErr
 		}
 
-		slog.Error("JSVM", "error", finalErr)
+		mudlog.Error("JSVM", "error", finalErr)
 		return nil, finalErr
 	}
 	vm.ClearInterrupt()
@@ -257,14 +257,14 @@ func getMobVM(mobActor *ScriptActor) (*VMWrapper, error) {
 			finalErr := fmt.Errorf("onLoad: %w", err)
 
 			if _, ok := finalErr.(*goja.Exception); ok {
-				slog.Error("JSVM", "exception", finalErr)
+				mudlog.Error("JSVM", "exception", finalErr)
 				return nil, finalErr
 			} else if errors.Is(finalErr, errTimeout) {
-				slog.Error("JSVM", "interrupted", finalErr)
+				mudlog.Error("JSVM", "interrupted", finalErr)
 				return nil, finalErr
 			}
 
-			slog.Error("JSVM", "error", finalErr)
+			mudlog.Error("JSVM", "error", finalErr)
 			return nil, finalErr
 		}
 	}
