@@ -73,13 +73,6 @@ func SetupLogger(inGameLogger teeLogger, logLevel string, logPath string, colorL
 		Compress:   true, // Compress rotated files
 	}
 
-	// Open or create the log file
-	file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		panic(fmt.Errorf("failed to open log file: %v", err))
-	}
-	defer file.Close()
-
 	slogInstance = slog.New(
 		getLogHandler(lj, inGameLogger, colorLogs),
 	)

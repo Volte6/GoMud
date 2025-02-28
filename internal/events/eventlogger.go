@@ -1,11 +1,11 @@
 package events
 
-type EventLogger struct{}
+type eventLogger struct{}
 
-func (e EventLogger) Println(level string, v ...any) {
+func (e eventLogger) Println(level string, v ...any) {
 	AddToQueue(Log{Level: level, Data: v})
 }
 
-func GetLogger() EventLogger {
-	return EventLogger{}
+func GetLogger() eventLogger {
+	return eventLogger{}
 }
