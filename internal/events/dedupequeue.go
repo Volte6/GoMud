@@ -2,29 +2,35 @@ package events
 
 import "sync"
 
-type queueNode[T any] struct {
+type dedupeQNode[T UniqueNode[R], R comparable] struct {
 	data T
-	next *queueNode[T]
+	next *dedupeQNode[T, R]
+}
+
+type UniqueNode[R comparable] interface {
+	UniqueId() R
 }
 
 // A go-routine safe FIFO (first in first out) data stucture.
-type Queue[T any] struct {
-	head  *queueNode[T]
-	tail  *queueNode[T]
-	count int
-	lock  *sync.Mutex
+type DedupeQueue[T UniqueNode[R], R comparable] struct {
+	head    *dedupeQNode[T, R]
+	tail    *dedupeQNode[T, R]
+	count   int
+	lock    *sync.Mutex
+	inQueue map[R]struct{}
 }
 
 // Creates a new pointer to a new queue.
-func NewQueue[T any]() *Queue[T] {
-	q := &Queue[T]{}
+func NewDedupeQueue[T UniqueNode[R], R comparable]() *DedupeQueue[T, R] {
+	q := &DedupeQueue[T, R]{}
 	q.lock = &sync.Mutex{}
+	q.inQueue = map[R]struct{}{}
 	return q
 }
 
 // Returns the number of elements in the queue (i.e. size/length)
 // go-routine safe.
-func (q *Queue[T]) Len() int {
+func (q *DedupeQueue[T, R]) Len() int {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	return q.count
@@ -33,11 +39,16 @@ func (q *Queue[T]) Len() int {
 // Pushes/inserts a value at the end/tail of the queue.
 // Note: this function does mutate the queue.
 // go-routine safe.
-func (q *Queue[T]) Push(item T) {
+func (q *DedupeQueue[T, R]) Push(item T) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
-	n := &queueNode[T]{data: item}
+	// Skip if already present
+	if _, ok := q.inQueue[item.UniqueId()]; ok {
+		return
+	}
+
+	n := &dedupeQNode[T, R]{data: item}
 
 	if q.tail == nil {
 		q.tail = n
@@ -46,14 +57,16 @@ func (q *Queue[T]) Push(item T) {
 		q.tail.next = n
 		q.tail = n
 	}
+
 	q.count++
+	q.inQueue[item.UniqueId()] = struct{}{}
 }
 
 // Returns the value at the front of the queue.
 // i.e. the oldest value in the queue.
 // Note: this function does mutate the queue.
 // go-routine safe.
-func (q *Queue[T]) Poll() T {
+func (q *DedupeQueue[T, R]) Poll() T {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
@@ -68,7 +81,9 @@ func (q *Queue[T]) Poll() T {
 	if q.head == nil {
 		q.tail = nil
 	}
+
 	q.count--
+	delete(q.inQueue, n.data.UniqueId())
 
 	return n.data
 }
@@ -77,7 +92,7 @@ func (q *Queue[T]) Poll() T {
 // i.e. the oldest value in the queue.
 // Note: this function does NOT mutate the queue.
 // go-routine safe.
-func (q *Queue[T]) Peek() T {
+func (q *DedupeQueue[T, R]) Peek() T {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
@@ -93,11 +108,16 @@ func (q *Queue[T]) Peek() T {
 // Shifts/inserts a value at the front/head of the queue.
 // Note: this function does mutate the queue.
 // go-routine safe.
-func (q *Queue[T]) Shift(item T) {
+func (q *DedupeQueue[T, R]) Shift(item T) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
-	n := &queueNode[T]{data: item}
+	// Skip if already present
+	if _, ok := q.inQueue[item.UniqueId()]; ok {
+		return
+	}
+
+	n := &dedupeQNode[T, R]{data: item}
 
 	if q.head == nil {
 		// If the queue is empty, both head and tail should point to the new node
@@ -110,4 +130,5 @@ func (q *Queue[T]) Shift(item T) {
 	}
 
 	q.count++
+	q.inQueue[item.UniqueId()] = struct{}{}
 }
