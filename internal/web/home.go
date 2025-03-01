@@ -10,13 +10,13 @@ import (
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/public/index.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String()+"/public/_header.html", configs.GetConfig().FolderHtmlFiles.String()+"/public/index.html", configs.GetConfig().FolderHtmlFiles.String()+"/public/_footer.html")
 	if err != nil {
 		mudlog.Error("HTML ERROR", "error", err)
 	}
 
-	tmpl.Execute(w, GetStats())
-
+	tmpl.Execute(w, configs.GetConfig())
+	//GetStats()
 }
 
 func serveClient(w http.ResponseWriter, r *http.Request) {

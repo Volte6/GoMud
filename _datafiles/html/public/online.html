@@ -1,0 +1,59 @@
+{{template "header" .}}
+
+<style>
+    .online td {
+        font-size: 1.5em;
+    }
+    table.online  {
+        width: 100%;
+    }
+    table.online th {
+        background-color:#ccc;
+        color:#000;
+    }
+    table.online tr {
+        border-bottom: 1px solid #ddd;
+        background-color: #ffffff;
+    }
+    table.online tr:nth-child(even) {
+        background-color: #D6EEEE;
+    }
+    table.online td {
+        font-family: monospace;
+        color:#000;
+    }
+</style>
+
+    <div class="overlay">
+        <h3>Users Online: </h3>
+
+        {{if gt (len .OnlineUsers) 0 }}
+        <table class="online" border="1" cellspacing="0" cellpadding="3">
+            <tr>
+                <th>#</th>
+                <th>Character</th>
+                <th>Level</th>
+                <th>Alignment</th>
+                <th>Profession</th>
+                <th>Time Online</th>
+                <th>Permission</th>
+            </tr>
+            {{range $index, $uInfo := .OnlineUsers}}
+            <tr>
+                <td align="right">{{ add $index 1 }}.</td>
+                <td align="center"><b>{{ $uInfo.CharacterName }}</b></td>
+                <td align="center">{{ $uInfo.Level }}</td>
+                <td align="center">{{ $uInfo.Alignment }}</td>
+                <td align="center">{{ $uInfo.Profession }}</td>
+                <td align="center">{{ $uInfo.OnlineTimeStr }}{{ if $uInfo.IsAFK }} (AFK){{end}}</td>
+                <td align="center">{{ $uInfo.Permission }}</td>
+            </tr>
+            {{end}}
+        </table>
+        {{else}}
+            None.
+        {{end}}
+    </div>
+        <p>&nbsp;</p>
+
+{{template "footer" .}}
