@@ -5,6 +5,8 @@ import (
 	"html"
 	"strings"
 	"text/template"
+
+	"github.com/volte6/gomud/internal/configs"
 )
 
 var (
@@ -96,6 +98,9 @@ var (
 		},
 		"lowercase": func(str string) string {
 			return strings.ToLower(str)
+		},
+		"mudname": func() string {
+			return string(configs.GetConfig().MudName)
 		},
 	}
 )

@@ -4,14 +4,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GoMud: The Open-source MUD server, written in Go</title>
+  <title>Welcome to {{ mudname }}</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" />
   <link rel="stylesheet" href="/static/public/css/gomud.css">
 </head>
 <body>
   <header>
     <div>
-      <a class="gomud-btn" href="/">GoMud</a>
+      <a class="gomud-btn" href="/">{{ mudname }}</a>
     </div>
     <div class="nav-toggle" onclick="toggleMenu()">
       <div></div>
@@ -22,7 +22,7 @@
 
   <nav>
     <div class="nav-container">
-      <a href="/">Home</a>
+      <a href="/">Go Home</a>
       <a href="/online">Who's Online</a>
       <a href="/webclient">Web Client</a>
       <a href="/viewconfig">See Configuration</a>

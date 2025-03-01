@@ -32,6 +32,7 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 
 	// HTTP Server
 	httpServer = &http.Server{Addr: fmt.Sprintf(`:%d`, webPort)}
+
 	// Routing
 	// Basic homepage
 	http.HandleFunc("/", serveHome)

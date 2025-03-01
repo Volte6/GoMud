@@ -23,6 +23,10 @@
 #   overwrite your changes.
 #
 ################################################################################
+# - MudName - 
+#   Display name of the MUD.
+#   This will be used a few places by default (such as the web pages).
+MudName: "GoMud"
 # - Version - 
 #   Latest semantic version of the datafiles (MAJOR.MINOR.PATCH)
 #   Do not change this value, it will be handled by the server when updated

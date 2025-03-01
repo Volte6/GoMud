@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GoMud Web Terminal</title>
+    <title>{{ mudname }} Web Terminal</title>
     <style>
         * {
             box-sizing: border-box;
@@ -190,7 +190,7 @@
     </div>
 
     <!-- CONNECT BUTTON FLOATED IN CENTER -->
-    <button id="connect-button">Connect</button>
+    <button id="connect-button">Connect to {{ .MudName }}</button>
 
     <div id="input-area">
         <input type="text" id="command-input" placeholder="Enter command...">
@@ -298,8 +298,8 @@
                 socket.close();
                 return;
             }
-            debugLog("Connecting to: " + 'ws://'+location.host +':80/ws');
-            socket = new WebSocket('ws://'+location.host +':80/ws');
+            debugLog("Connecting to: " + 'ws://'+location.host +':{{ .WebPort }}/ws');
+            socket = new WebSocket('ws://'+location.host +':{{ .WebPort }}/ws');
 
             socket.onopen = function() {
                 term.writeln("Connected to the server!");
