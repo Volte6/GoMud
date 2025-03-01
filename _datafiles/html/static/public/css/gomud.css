@@ -28,16 +28,13 @@ header {
   color: #c9e2db;
   background-color: #6c7682;
   border: 2px solid #c9e2db;
-  position: relative;
   text-transform: uppercase;
   letter-spacing: 2px;
-  border-radius: 0;
   transition: all 0.2s ease; 
 }
 
 .gomud-btn:hover {
   box-shadow: 6px 6px 0px 0px #80a5a9;
-  background-color: #6c7682;
   color: #80a5a9;
 }
 
@@ -59,7 +56,6 @@ nav {
 .nav-container a {
   color: #c9e2db;
   text-decoration: none;
-  transition: transform 0.2s ease, color 0.2s ease;
   padding: 8px 16px;
   border-radius: 4px;
   background-color: rgba(255, 255, 255, 0.1);
@@ -69,7 +65,39 @@ nav {
 .nav-container a:hover {
   color: #80a5a9;
   background-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
+}
+
+/* Mobile Navigation */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.nav-toggle div {
+  width: 30px;
+  height: 4px;
+  background: #c9e2db;
+  margin: 5px;
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    display: none;
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+    padding: 12px 0;
+  }
+
+  .nav-container a {
+    display: block;
+    padding: 12px;
+  }
+
+  .nav-toggle {
+    display: flex;
+  }
 }
 
 .content-container {
@@ -78,37 +106,32 @@ nav {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  padding: 20px;
 }
 
-.overlay {
-  width: 80%;
+.overlay, .underlay {
+  width: 90%;
   max-width: 1200px;
-  height: 800px;
-  overflow-y: auto;
   background-color: rgba(0, 0, 0, 0.7);
   padding: 20px;
   border-radius: 8px;
-
-}
-
-.overlay.play-button {
   text-align: center;
 }
 
-.underlay {
-  width: 80%;
-  max-width: 1200px;
-  height: 200px;
+.overlay {
+  height: auto;
+  max-height: 800px;
   overflow-y: auto;
-  background-color: rgba(0, 0, 0, 0.7);
-  padding: 20px;
-  border-radius: 8px;
-  
 }
 
-.play-button img:hover {
-  transform: scale(1.1);
+.underlay {
+  height: auto;
+  max-height: 200px;
+}
+
+.play-button img {
+  width: 100%;
+  max-width: 300px;
 }
 
 footer {

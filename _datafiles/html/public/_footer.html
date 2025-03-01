@@ -1,13 +1,20 @@
 {{define "footer"}}
-  </div>
+    </div>
 
-  <footer>
-    <p>Powered by <b>GoMud</b> - Available free at 
-      <a target="_blank" href="http://github.com/Volte6/GoMud">
-        github.com/Volte6/GoMud
-      </a>
-    </p>
-  </footer>
-</body>
+    <footer>
+      <p>Powered by <b>GoMud</b> - Available free at 
+        <a target="_blank" href="http://github.com/Volte6/GoMud">
+          github.com/Volte6/GoMud
+        </a>
+      </p>
+    </footer>
+
+    <script>
+      function toggleMenu() {
+        const navContainer = document.querySelector('.nav-container');
+        navContainer.style.display = navContainer.style.display === 'flex' ? 'none' : 'flex';
+      }
+    </script>
+  </body>
 </html>
 {{end}}
