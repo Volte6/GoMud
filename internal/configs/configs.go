@@ -23,7 +23,8 @@ const (
 )
 
 type Config struct {
-	Version              ConfigString `yaml:"Version"` // Cuurrent version of all datafiles
+	MudName              ConfigString `yaml:"MudName"` // Name of the MUD
+	Version              ConfigString `yaml:"Version"` // Current version of all datafiles
 	MaxCPUCores          ConfigInt    `yaml:"MaxCPUCores"`
 	FolderDataFiles      ConfigString `yaml:"FolderDataFiles"`
 	FolderHtmlFiles      ConfigString `yaml:"FolderHtmlFiles"`

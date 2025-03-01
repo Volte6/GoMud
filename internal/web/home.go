@@ -21,5 +21,12 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 func serveClient(w http.ResponseWriter, r *http.Request) {
 	// read contents of webclient.html and print it out
-	http.ServeFile(w, r, configs.GetConfig().FolderHtmlFiles.String()+"/public/webclient.html")
+
+	tmpl, err := template.New("webclient.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/public/webclient.html")
+	if err != nil {
+		mudlog.Error("HTML ERROR", "error", err)
+	}
+
+	tmpl.Execute(w, configs.GetConfig())
+
 }
