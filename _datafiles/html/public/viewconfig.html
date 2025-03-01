@@ -1,31 +1,34 @@
-<html>
-    <head>
-        <title>GoMud Configuration</title>
-        <style>
-            body {
-                font-family: Verdana, sans-serif;
-            }
-            th {
-                background-color:#ccc;
-            }
-            tr {
-                border-bottom: 1px solid #ddd;
-            }
-            tr:nth-child(even) {
-                background-color: #D6EEEE;
-            }
-            td {
-                font-family: monospace;
-            }
-            .footer{
-                text-align:center;
-            }
-        </style>
-    </head>
-    <body>
+{{template "header" .}}
+
+<style>
+    .config td {
+        font-size: 1.5em;
+    }
+    table.config  {
+        width: 100%;
+    }
+    table.config th {
+        background-color:#ccc;
+        color:#000;
+    }
+    table.config tr {
+        border-bottom: 1px solid #ddd;
+        background-color: #ffffff;
+    }
+    table.config tr:nth-child(even) {
+        background-color: #D6EEEE;
+    }
+    table.config td {
+        font-family: monospace;
+        color:#000;
+    }
+
+</style>
+
+    <div class="overlay">
         <h3>Server Config: </h3>
 
-        <table border="1" cellspacing="0" cellpadding="3">
+        <table class="config" border="1" cellspacing="0" cellpadding="3">
             <tr>
                 <th>Name</th>
                 <th>Value</th>
@@ -37,12 +40,7 @@
             </tr>
             {{end}}
         </table>
-
+    </div>
         <p>&nbsp;</p>
 
-        <p class="footer">
-            Powered by <b>GoMud</b> - Available free at <a target="_blank" href="http://github.com/Volte6/GoMud">github.com/Volte6/GoMud</a>
-        </p>
-
-    </body>
-</html>
+{{template "footer" .}}

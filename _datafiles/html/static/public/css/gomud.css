@@ -1,0 +1,129 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: url('/static/public/images/gomud_bg.webp') center center / cover no-repeat fixed;
+  color: #c9e2db;
+  font-family: 'Press Start 2P', monospace;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+header {
+  background-color: #495659;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+}
+
+.gomud-btn {
+  font-size: 1.5rem;
+  padding: 6px 10px;
+  color: #c9e2db;
+  background-color: #6c7682;
+  border: 2px solid #c9e2db;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-radius: 0;
+  transition: all 0.2s ease; 
+}
+
+.gomud-btn:hover {
+  box-shadow: 6px 6px 0px 0px #80a5a9;
+  background-color: #6c7682;
+  color: #80a5a9;
+}
+
+nav {
+  background-color: #6c7682;
+  padding: 12px 0;
+}
+
+.nav-container {
+  max-width: 72rem;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.nav-container a {
+  color: #c9e2db;
+  text-decoration: none;
+  transition: transform 0.2s ease, color 0.2s ease;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 2px 2px 0px 0px #80a5a9;
+}
+
+.nav-container a:hover {
+  color: #80a5a9;
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.content-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.overlay {
+  width: 80%;
+  max-width: 1200px;
+  height: 800px;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  border-radius: 8px;
+
+}
+
+.overlay.play-button {
+  text-align: center;
+}
+
+.underlay {
+  width: 80%;
+  max-width: 1200px;
+  height: 200px;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  border-radius: 8px;
+  
+}
+
+.play-button img:hover {
+  transform: scale(1.1);
+}
+
+footer {
+  background-color: #495659;
+  text-align: center;
+  color: #c9e2db;
+  padding: 16px 0;
+  font-size: 0.875rem;
+}
+
+footer a {
+  color: #6c869f;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
