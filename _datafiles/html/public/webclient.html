@@ -47,16 +47,31 @@
             color: white;
             border-radius: 0px 5px 5px 0px;
         }
+        #command-input:focus {
+            outline: none;
+        }
+
+        /* FLOATING CONNECT BUTTON IN THE CENTER */
         #connect-button {
-            padding: 10px 20px;
-            font-size: 16px;
+            position: absolute;
+            /* Center in viewport */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+
+            /* Larger styling */
+            padding: 20px 40px;
+            font-size: 20px;
+
             background-color: #555;
             color: white;
             border: none;
             cursor: pointer;
-            margin-left: 10px;
-            animation: pulse 1s infinite alternate;
             border-radius: 5px;
+
+            /* Keep the original pulsing effect */
+            animation: pulse 1s infinite alternate;
         }
         #connect-button:disabled {
             color: #888;
@@ -74,10 +89,6 @@
                 color: #d17a7a;
                 background-color: #9f4a4a;
             }
-        }
-
-        #command-input:focus {
-            outline: none;
         }
 
         /* Sound icon in top-right corner */
@@ -147,6 +158,7 @@
             transform: scale(1.2);
             cursor: pointer;
         }
+
     </style>
 
     <link rel="stylesheet" href="/static/public/css/xterm.css" />
@@ -176,9 +188,12 @@
     <div id="main-container">
         <div id="terminal"></div>
     </div>
+
+    <!-- CONNECT BUTTON FLOATED IN CENTER -->
+    <button id="connect-button">Connect</button>
+
     <div id="input-area">
         <input type="text" id="command-input" placeholder="Enter command...">
-        <button id="connect-button">Connect</button>
     </div>
 
     <script>
@@ -289,6 +304,11 @@
             socket.onopen = function() {
                 term.writeln("Connected to the server!");
                 term.clear();
+
+                // Hide the button when connected
+                connectButton.style.display = 'none';
+
+                // We also disable it right away to prevent double-click confusion
                 connectButton.disabled = true;
                 textInput.focus();
             };
@@ -393,7 +413,10 @@
                 } else {
                     term.writeln("Connection died");
                 }
+                // Show the button again when disconnected
+                connectButton.style.display = 'block';
                 connectButton.disabled = false;
+
                 if (textInput.type === "password") {
                     textInput.value = '';
                     textInput.type = "text";
