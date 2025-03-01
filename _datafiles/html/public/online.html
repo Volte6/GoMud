@@ -1,34 +1,14 @@
 {{template "header" .}}
 
 <style>
-    .online td {
-        font-size: 1.5em;
-    }
-    table.online  {
-        width: 100%;
-    }
-    table.online th {
-        background-color:#ccc;
-        color:#000;
-    }
-    table.online tr {
-        border-bottom: 1px solid #ddd;
-        background-color: #ffffff;
-    }
-    table.online tr:nth-child(even) {
-        background-color: #D6EEEE;
-    }
-    table.online td {
-        font-family: monospace;
-        color:#000;
-    }
+
 </style>
 
     <div class="overlay">
         <h3>Users Online: </h3>
 
         {{if gt (len .OnlineUsers) 0 }}
-        <table class="online" border="1" cellspacing="0" cellpadding="3">
+        <table>
             <tr>
                 <th>#</th>
                 <th>Character</th>
