@@ -597,10 +597,10 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 		if err != nil {
 
-			userObject.EventLog.Add(`conn`, `Disconnected`)
-
 			// If failed to read from the connection, switch to zombie state
 			if userObject != nil {
+
+				userObject.EventLog.Add(`conn`, `Disconnected`)
 
 				if c.ZombieSeconds > 0 {
 
