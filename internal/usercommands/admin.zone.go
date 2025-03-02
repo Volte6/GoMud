@@ -252,7 +252,7 @@ func zone_Edit(rest string, user *users.UserRecord, room *rooms.Room, flags even
 
 		if question.Response == `yes` {
 
-			relativeString := configs.GetConfig().MspFileUrl.String()
+			relativeString := configs.GetConfig().PublicFileUrl.String()
 			if len(relativeString) > 0 {
 				user.SendText(`   <ansi fg="red">Note:</ansi> Music file path must be relative to: <ansi fg="red">` + relativeString + `</ansi>`)
 			}

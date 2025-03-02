@@ -1,4 +1,5 @@
 {{template "header" .}}
+{{- $config := getconfig -}}
 
     <div class="overlay">
         <h3>Server Config: </h3>
@@ -8,7 +9,7 @@
                 <th>Name</th>
                 <th>Value</th>
             </tr>
-            {{range $name, $value := .}}
+            {{range $name, $value := ($config.AllConfigData "*port" "seed*" "folder*" "file*" "seedint") }}
             <tr>
                 <td>{{ $name }}</td>
                 <td>{{ $value }}</td>

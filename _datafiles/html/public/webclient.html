@@ -1,7 +1,8 @@
+{{- $config := getconfig -}}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ mudname }} Web Terminal</title>
+    <title>{{ $config.MudName }} Web Terminal</title>
     <style>
         * {
             box-sizing: border-box;
@@ -190,7 +191,7 @@
     </div>
 
     <!-- CONNECT BUTTON FLOATED IN CENTER -->
-    <button id="connect-button">Connect to {{ .MudName }}</button>
+    <button id="connect-button">Connect to {{ $config.MudName }}</button>
 
     <div id="input-area">
         <input type="text" id="command-input" placeholder="Enter command...">

@@ -15,8 +15,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 		mudlog.Error("HTML ERROR", "error", err)
 	}
 
-	tmpl.Execute(w, configs.GetConfig())
-	//GetStats()
+	tmpl.Execute(w, nil)
 }
 
 func serveClient(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +26,6 @@ func serveClient(w http.ResponseWriter, r *http.Request) {
 		mudlog.Error("HTML ERROR", "error", err)
 	}
 
-	tmpl.Execute(w, configs.GetConfig())
+	tmpl.Execute(w, nil)
 
 }

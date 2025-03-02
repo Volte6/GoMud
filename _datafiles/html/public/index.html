@@ -1,11 +1,12 @@
 {{template "header" .}}
+{{- $config := getconfig -}}
   <div class="play-button">
     <a href="/webclient">
-      <img src="/static/public/images/btn_play.png" alt="Play" />
+      <img src="{{ $config.PublicFileUrl }}images/btn_play.png" alt="Play" />
     </a>
   </div>
   <p>&nbsp;</p>
   <div class="underlay">
-    <h3>Telnet Port{{ if gt (len .TelnetPort) 1 }}s{{end}}: {{ join .TelnetPort ", " }}</h3>
+    <h3>Telnet Port{{ if gt (len $config.TelnetPort) 1 }}s{{end}}: {{ join $config.TelnetPort ", " }}</h3>
   </div>
 {{template "footer" .}}

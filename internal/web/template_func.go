@@ -99,8 +99,8 @@ var (
 		"lowercase": func(str string) string {
 			return strings.ToLower(str)
 		},
-		"mudname": func() string {
-			return string(configs.GetConfig().MudName)
+		"getconfig": func() configs.Config {
+			return configs.GetConfig()
 		},
 	}
 )
