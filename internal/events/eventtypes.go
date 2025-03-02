@@ -159,14 +159,20 @@ func (s ScriptedEvent) Type() string { return `ScriptedEvent` }
 
 // Entered the world
 type PlayerSpawn struct {
-	UserId int
+	UserId        int
+	RoomId        int
+	Username      string
+	CharacterName string
 }
 
 func (p PlayerSpawn) Type() string { return `PlayerSpawn` }
 
 // Left the world
 type PlayerDespawn struct {
-	UserId int
+	UserId        int
+	RoomId        int
+	Username      string
+	CharacterName string
 }
 
 func (p PlayerDespawn) Type() string { return `PlayerDespawn` }

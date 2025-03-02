@@ -19,13 +19,13 @@ func HandleJoin(e events.Event) bool {
 
 	evt, typeOk := e.(events.PlayerSpawn)
 	if !typeOk {
-		mudlog.Error("Event", "Expected Type", "Spawned", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "PlayerSpawn", "Actual Type", e.Type())
 		return false
 	}
 
 	user := users.GetByUserId(evt.UserId)
 	if user == nil {
-		mudlog.Error("EnterWorld", "error", fmt.Sprintf(`user %d not found`, user.Character.RoomId))
+		mudlog.Error("HandleJoin", "error", fmt.Sprintf(`user %d not found`, evt.UserId))
 		return false
 	}
 
