@@ -9,7 +9,7 @@
                 <th>Name</th>
                 <th>Value</th>
             </tr>
-            {{range $name, $value := ($config.AllConfigData "*port" "seed*" "folder*" "file*" "seedint") }}
+            {{range $name, $value := ($config.AllConfigData "bannednames" "*startroom*" "script*" "publicfileurl" "onlogin*" "nextroomid*" "mob*" "*port" "seed*" "folder*" "file*" "seedint" "carefulsavefiles" "lootgoblin*" "maxcpucores" "*roommessagewrapper" "logintervalroundcount" ) }}
             <tr>
                 <td>{{ $name }}</td>
                 <td>{{ $value }}</td>

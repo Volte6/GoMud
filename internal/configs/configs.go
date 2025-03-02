@@ -234,14 +234,8 @@ func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
 			continue
 		}
 
-		mapName := name
-
-		if _, ok := lockedLoookup[strings.ToLower(name)]; ok {
-			mapName = fmt.Sprintf(`%s (locked)`, name)
-		}
-
 		if len(excludeStrings) > 0 {
-			testName := strings.ToLower(mapName)
+			testName := strings.ToLower(name)
 			skip := false
 			for _, s := range excludeStrings {
 				if util.StringWildcardMatch(testName, s) {
@@ -252,6 +246,10 @@ func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
 			if skip {
 				continue
 			}
+		}
+
+		if _, ok := lockedLoookup[strings.ToLower(name)]; ok {
+			name = fmt.Sprintf(`%s (locked)`, name)
 		}
 
 		itm := items.Field(i)
@@ -284,7 +282,7 @@ func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
 			}
 
 		} else {
-			output[mapName] = itm.Interface()
+			output[name] = itm.Interface()
 		}
 
 	}
