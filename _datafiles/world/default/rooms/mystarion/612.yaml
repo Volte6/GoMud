@@ -2,7 +2,7 @@ roomid: 612
 zone: Mystarion
 zoneconfig:
   roomid: 612
-  musicfile: music/mystarion.mp3
+  musicfile: audio/music/mystarion.mp3
 title: Main road
 description: The road itself becomes a cobblestone path, the stones worn smooth by
   centuries of use, each one seemingly placed with intention, leading inexorably towards

@@ -1,29 +1,29 @@
 # Sound that plays when a "change" confirmation/activation occurs
 change: 
-  filepath: sound/other/change.mp3
+  filepath: audio/sound/other/change.mp3
   volume: 80
 # When a target is hit in combat
 hit-other: 
-  filepath: sound/combat/hit-other.mp3
+  filepath: audio/sound/combat/hit-other.mp3
 # When receiving a hit in combat
 hit-self: 
-  filepath: sound/combat/hit-self.mp3
+  filepath: audio/sound/combat/hit-self.mp3
 # Plays at login screen
 intro: 
-  filepath: music/intro.mp3
+  filepath: audio/music/intro.mp3
   volume: 20
 # When Leveling up
 levelup: 
-  filepath: sound/other/levelup.mp3
+  filepath: audio/sound/other/levelup.mp3
 # When missing a hit in combat
 miss: 
-  filepath: sound/combat/miss1.mp3
+  filepath: audio/sound/combat/miss1.mp3
 # When a purchase is made
 purchase: 
-  filepath: sound/other/buy.mp3
+  filepath: audio/sound/other/buy.mp3
 # When someone leaves the room
 room-exit: 
-  filepath: sound/movement/room-exit.mp3
+  filepath: audio/sound/movement/room-exit.mp3
 # When someone enters the room
 room-enter: 
-  filepath: sound/movement/room-enter.mp3
+  filepath: audio/sound/movement/room-enter.mp3
