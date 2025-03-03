@@ -9,6 +9,7 @@ import (
 type ConfigInt int
 type ConfigUInt64 uint64
 type ConfigString string
+type ConfigSecret string // special case string
 type ConfigFloat float64
 type ConfigBool bool
 type ConfigSliceString []string
@@ -30,6 +31,10 @@ func (c ConfigInt) String() string {
 
 func (c ConfigString) String() string {
 	return string(c)
+}
+
+func (c ConfigSecret) String() string {
+	return `*** REDACTED ***`
 }
 
 func (c ConfigFloat) String() string {
@@ -73,6 +78,11 @@ func (c *ConfigInt) Set(value string) error {
 
 func (c *ConfigString) Set(value string) error {
 	*c = ConfigString(value)
+	return nil
+}
+
+func (c *ConfigSecret) Set(value string) error {
+	*c = ConfigSecret(value)
 	return nil
 }
 
