@@ -103,7 +103,7 @@ type Config struct {
 	LeaderboardSize  ConfigInt `yaml:"LeaderboardSize"`  // Maximum size of leaderboard
 	ContainerSizeMax ConfigInt `yaml:"ContainerSizeMax"` // How many objects containers can hold before overflowing
 
-	DiscordWebhookUrl ConfigSecret `yaml:"DiscordWebhookUrl"` // Optional Discord URL to post updates to
+	DiscordWebhookUrl ConfigSecret `yaml:"DiscordWebhookUrl" env:"DISCORD_WEBHOOK_URL"` // Optional Discord URL to post updates to
 
 	seedInt int64 `yaml:"-"`
 
@@ -541,7 +541,7 @@ func (c *Config) Validate() {
 	c.validated = true
 }
 
-func (c *Config) getEnvValueForSecrets() {
+func (c *Config) setEnvAssignments(clear bool) {
 
 	// We use reflect.Indirect to handle if cfg is a pointer or not
 	v := reflect.ValueOf(c).Elem()
@@ -553,21 +553,25 @@ func (c *Config) getEnvValueForSecrets() {
 		fieldVal := v.Field(i)
 		fieldType := t.Field(i)
 
-		// 1) Check if the field is our custom type
-		//    (ConfigSecret is basically a "string" under the hood).
-		if fieldVal.Type() == reflect.TypeOf(ConfigSecret("")) {
-			// 2) Get environment variable using the field's name
-			envVarName := fieldType.Name
-			envValue := os.Getenv(strings.ToUpper(envVarName))
+		if fieldVal.Type().Kind() != reflect.String {
+			continue
+		}
 
-			// 3) Set the field to the retrieved value (if any)
-			//    Note: We wrap in ConfigSecret(...) so the type matches.
+		if envName := fieldType.Tag.Get(`env`); envName != `` {
 			if fieldVal.CanSet() {
-				fieldVal.Set(reflect.ValueOf(ConfigSecret(envValue)))
+				if envVal := os.Getenv(envName); envVal != `` {
+
+					if clear {
+						envVal = ``
+					}
+
+					fieldVal.Set(reflect.ValueOf(ConfigSecret(envVal)))
+
+				}
 			}
 		}
-	}
 
+	}
 }
 
 func (c Config) GetDeathXPPenalty() (setting string, pct float64) {
@@ -701,7 +705,7 @@ func ReloadConfig() error {
 		tmpConfigData.SetOverrides(map[string]any{})
 	}
 
-	tmpConfigData.getEnvValueForSecrets()
+	tmpConfigData.setEnvAssignments(false)
 
 	tmpConfigData.Validate()
 
