@@ -69,11 +69,6 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 // Send input to the world.
 // Just sends via a channel. Will block until read.
 func (w *World) SendInput(i WorldInput) {
-	/*
-		if _, ok := w.ignoreInput[i.FromId]; ok {
-			return // discard
-		}
-	*/
 	w.worldInput <- i
 }
 
