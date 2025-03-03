@@ -25,6 +25,7 @@ import (
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/hooks"
 	"github.com/volte6/gomud/internal/inputhandlers"
+	"github.com/volte6/gomud/internal/integrations/discord"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/leaderboard"
@@ -117,6 +118,14 @@ func main() {
 	if err := util.ValidateWorldFiles(`_datafiles/world/default`, c.FolderDataFiles.String()); err != nil {
 		mudlog.Error("World Validation", "error", err)
 		os.Exit(1)
+	}
+
+	// Discord integration
+	if webhookUrl := os.Getenv("DISCORD_WEBHOOK_URL"); webhookUrl != "" {
+		discord.Init(webhookUrl)
+		mudlog.Info("Discord", "info", "integration is enabled")
+	} else {
+		mudlog.Warn("Discord", "info", "integration is disabled")
 	}
 
 	hooks.RegisterListeners()

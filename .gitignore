@@ -3,3 +3,4 @@ private-notes.txt
 _datafiles/**/users/*
 **/config-overrides.yaml
 **/.roundcount
+vendor/
