@@ -10,7 +10,8 @@
   /* Table Specific Colors */
   --table-border-color: #000;
   --table-header-color: var(--header-background);
-  --table-text-color: #000;
+  --table-cell-text-color: #000;
+  --table-header-text-color: var(--text-primary-color);
   --table-cell-color: #c9e2db;
   --table-cell-alt-color: #80a5a9;
 }
@@ -171,10 +172,10 @@ footer a:hover {
 
 table  {
   width: 100%;
-  color:var(--table-text-color)
 }
 table th {
   background-color:var(--header-background);
+  color:var(--table-header-text-color);
   padding:1em;
 }
 table tr {
@@ -188,4 +189,10 @@ table td {
   padding:.1em;
   font-family: monospace;
   text-align:left;
+  color:var(--table-cell-text-color)
+}
+@media (max-width: 768px) {
+  table td {
+    font-size: 3.2vw;
+  }
 }

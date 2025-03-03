@@ -6,6 +6,14 @@ import (
 
 type ListenerId uint64
 
+type ListenerWrapper struct {
+	id      ListenerId
+	listner Listener
+}
+
+// Return false to stop further handling of this event.
+type Listener func(Event) bool
+
 var (
 	listenerLock = sync.RWMutex{}
 	// listeners that want to handle an event first.
@@ -116,11 +124,3 @@ func DoListeners(e Event) bool {
 
 	return true
 }
-
-type ListenerWrapper struct {
-	id      ListenerId
-	listner Listener
-}
-
-// Return false to stop further handling of this event.
-type Listener func(Event) bool

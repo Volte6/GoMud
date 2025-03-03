@@ -36,10 +36,15 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 
 	if user.Character.RaceId == 0 {
 
-		raceOptions := []races.Race{}
+		raceOptions := []templates.NameDescription{}
+
 		for _, r := range races.GetRaces() {
 			if r.Selectable {
-				raceOptions = append(raceOptions, r)
+				raceOptions = append(raceOptions, templates.NameDescription{
+					Id:          r.RaceId,
+					Name:        r.Name,
+					Description: r.Description,
+				})
 			}
 		}
 		sort.SliceStable(raceOptions, func(i, j int) bool {

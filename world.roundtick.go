@@ -3,11 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
 )
 
@@ -19,19 +16,12 @@ func (w *World) logOff(userId int) {
 
 		users.SaveUser(*user)
 
-		events.AddToQueue(events.PlayerDespawn{UserId: userId})
-
-		connId := user.ConnectionId()
-
-		tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
-
-		connections.SendTo([]byte(tplTxt), connId)
-
-		if err := users.LogOutUserByConnectionId(connId); err != nil {
-			mudlog.Error("Log Out Error", "connectionId", connId, "error", err)
-		}
-
-		connections.Remove(connId)
+		events.AddToQueue(events.PlayerDespawn{
+			UserId:        user.UserId,
+			RoomId:        user.Character.RoomId,
+			Username:      user.Username,
+			CharacterName: user.Character.Name,
+		})
 
 	}
 

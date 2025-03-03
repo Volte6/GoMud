@@ -69,11 +69,6 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 // Send input to the world.
 // Just sends via a channel. Will block until read.
 func (w *World) SendInput(i WorldInput) {
-	/*
-		if _, ok := w.ignoreInput[i.FromId]; ok {
-			return // discard
-		}
-	*/
 	w.worldInput <- i
 }
 
@@ -106,7 +101,14 @@ func (w *World) logOutUserByConnectionId(connectionId connections.ConnectionId) 
 
 func (w *World) enterWorld(userId int, roomId int) {
 
-	events.AddToQueue(events.PlayerSpawn{UserId: userId})
+	if userInfo := users.GetByUserId(userId); userInfo != nil {
+		events.AddToQueue(events.PlayerSpawn{
+			UserId:        userInfo.UserId,
+			RoomId:        userInfo.Character.RoomId,
+			Username:      userInfo.Username,
+			CharacterName: userInfo.Character.Name,
+		})
+	}
 
 	w.UpdateStats()
 
@@ -647,7 +649,14 @@ loop:
 		case leaveWorldUserId := <-w.leaveWorldUserId: // int
 
 			util.LockMud()
-			events.AddToQueue(events.PlayerDespawn{UserId: leaveWorldUserId})
+			if userInfo := users.GetByUserId(leaveWorldUserId); userInfo != nil {
+				events.AddToQueue(events.PlayerDespawn{
+					UserId:        userInfo.UserId,
+					RoomId:        userInfo.Character.RoomId,
+					Username:      userInfo.Username,
+					CharacterName: userInfo.Character.Name,
+				})
+			}
 			util.UnlockMud()
 
 		case logoutConnectionId := <-w.logoutConnectionId: //  connections.ConnectionId
@@ -1048,7 +1057,14 @@ func (w *World) EventLoop() {
 			w.Kick(sys.Data.(int))
 		} else if sys.Command == `leaveworld` {
 
-			events.AddToQueue(events.PlayerDespawn{UserId: sys.Data.(int)})
+			if userInfo := users.GetByUserId(sys.Data.(int)); userInfo != nil {
+				events.AddToQueue(events.PlayerDespawn{
+					UserId:        userInfo.UserId,
+					RoomId:        userInfo.Character.RoomId,
+					Username:      userInfo.Username,
+					CharacterName: userInfo.Character.Name,
+				})
+			}
 
 		} else if sys.Command == `logoff` {
 			w.logOff(sys.Data.(int))

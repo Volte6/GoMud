@@ -21,12 +21,13 @@ func HandleLeave(e events.Event) bool {
 
 	evt, typeOk := e.(events.PlayerDespawn)
 	if !typeOk {
-		mudlog.Error("Event", "Expected Type", "DeSpawned", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "PlayerDespawn", "Actual Type", e.Type())
 		return false
 	}
 
 	user := users.GetByUserId(evt.UserId)
 	if user == nil {
+		mudlog.Error("HandleLeave", "error", fmt.Sprintf(`user %d not found`, evt.UserId))
 		return false
 	}
 
@@ -77,9 +78,13 @@ func HandleLeave(e events.Event) bool {
 		}
 	}
 
+	tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
+	connections.SendTo([]byte(tplTxt), connId)
+
 	if err := users.LogOutUserByConnectionId(connId); err != nil {
 		mudlog.Error("Log Out Error", "connectionId", connId, "error", err)
 	}
+	connections.Remove(connId)
 
 	return true
 }
