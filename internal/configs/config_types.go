@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -11,6 +12,7 @@ type ConfigString string
 type ConfigFloat float64
 type ConfigBool bool
 type ConfigSliceString []string
+type ConfigMap map[string]string
 
 type ConfigValue interface {
 	String() string
@@ -39,7 +41,14 @@ func (c ConfigBool) String() string {
 }
 
 func (c ConfigSliceString) String() string {
+	if len(c) == 0 {
+		return `[]`
+	}
 	return `["` + strings.Join(c, `", "`) + `"]`
+}
+
+func (c ConfigMap) String() string {
+	return fmt.Sprintf(`%+v`, map[string]string(c))
 }
 
 // Set
