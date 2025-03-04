@@ -39,7 +39,6 @@ func RegisterListeners() {
 	events.RegisterListener(events.NewTurn{}, AutoSave)
 	events.RegisterListener(events.NewTurn{}, PruneBuffs)
 	events.RegisterListener(events.NewTurn{}, ActionPoints)
-	events.RegisterListener(events.NewTurn{}, LevelUp)
 
 	// ItemOwnership
 	events.RegisterListener(events.ItemOwnership{}, CheckItemQuests)
@@ -51,6 +50,10 @@ func RegisterListeners() {
 	// Spawn events
 	events.RegisterListener(events.PlayerSpawn{}, HandleJoin)
 	events.RegisterListener(events.PlayerDespawn{}, HandleLeave, events.Last) // This is a final listener, has to happen last
+
+	// Levelup Notifications
+	events.RegisterListener(events.LevelUp{}, SendLevelNotifications)
+	events.RegisterListener(events.LevelUp{}, CheckGuide)
 
 	// Listener for debugging some stuff (catches all events)
 	/*

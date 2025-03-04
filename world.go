@@ -1006,6 +1006,22 @@ func (w *World) EventLoop() {
 	}
 
 	//
+	// Player Levelup Notifications
+	//
+	eq = events.GetQueue(events.LevelUp{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
+	// Death Notifications
+	//
+	eq = events.GetQueue(events.PlayerDeath{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
 	// ScriptedEvents
 	//
 	eq = events.GetQueue(events.ScriptedEvent{})

@@ -54,6 +54,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events
 		user.Character.KD.AddMobDeath()
 	}
 
+	killedByUserIds := []int{}
 	killedBy := ``
 	for uid, _ := range user.Character.PlayerDamage {
 
@@ -73,6 +74,8 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events
 			killedBy += `<ansi fg="username">` + u.Character.Name + `</ansi>`
 			i++
 		}
+
+		killedByUserIds = append(killedByUserIds, uid)
 	}
 
 	msg := fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> has <ansi fg="red-bold">DIED!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, user.Character.Name, term.CRLFStr)
@@ -85,6 +88,15 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events
 	})
 
 	allowPenalties := user.Character.Level > int(config.OnDeathProtectionLevels)
+
+	events.AddToQueue(events.PlayerDeath{
+		UserId:        user.UserId,
+		RoomId:        user.Character.RoomId,
+		Username:      user.Username,
+		CharacterName: user.Character.Name,
+		Permanent:     allowPenalties && bool(config.PermaDeath) && user.Character.ExtraLives == 0,
+		KilledByUsers: killedByUserIds,
+	})
 
 	// If permadeath is enabled, do some extra bookkeeping
 	if allowPenalties && bool(config.PermaDeath) {
