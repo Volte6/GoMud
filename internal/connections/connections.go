@@ -192,7 +192,7 @@ func SendTo(b []byte, ids ...ConnectionId) {
 		if cd, ok := netConnections[id]; ok {
 
 			if _, err := cd.Write(b); err != nil {
-				mudlog.Error("SentTo()", "connectionId", id, "remoteAddr", cd.RemoteAddr().String(), "error", err)
+				mudlog.Warn("SendTo()", "connectionId", id, "remoteAddr", cd.RemoteAddr().String(), "error", err)
 				// Remove from the connections
 				removeIds = append(removeIds, id)
 				continue
