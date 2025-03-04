@@ -135,6 +135,36 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 		u.EventLog.Add(`xp`, fmt.Sprintf(`Gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source))
 	}
 
+	if newLevel, statsDelta := u.Character.LevelUp(); newLevel {
+
+		c := configs.GetConfig()
+
+		livesBefore := u.Character.ExtraLives
+
+		if c.PermaDeath && c.LivesOnLevelUp > 0 {
+			u.Character.ExtraLives += int(c.LivesOnLevelUp)
+			if u.Character.ExtraLives > int(c.LivesMax) {
+				u.Character.ExtraLives = int(c.LivesMax)
+			}
+		}
+
+		u.EventLog.Add(`xp`, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now <ansi fg="magenta-bold">level %d</ansi>!`, u.Character.Name, u.Character.Level))
+
+		SaveUser(*u)
+
+		events.AddToQueue(events.LevelUp{
+			UserId:         u.UserId,
+			RoomId:         u.Character.RoomId,
+			Username:       u.Username,
+			CharacterName:  u.Character.Name,
+			NewLevel:       u.Character.Level,
+			StatsDelta:     statsDelta,
+			TrainingPoints: 1,
+			StatPoints:     1,
+			LivesGained:    u.Character.ExtraLives - livesBefore,
+		})
+
+	}
 }
 
 func (u *UserRecord) PlayMusic(musicFileOrId string) {

@@ -237,6 +237,9 @@ func main() {
 	// Otherwise we end up getting flushed file saves incomplete.
 	wg.Wait()
 
+	// Give it a second to disaptch any final messages in the event queue
+	// Example: discord server shutdown
+	time.Sleep(1 * time.Second)
 }
 
 func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync.WaitGroup) {

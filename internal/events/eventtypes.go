@@ -6,6 +6,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/items"
+	"github.com/volte6/gomud/internal/stats"
 )
 
 // Used to apply or remove buffs
@@ -185,3 +186,28 @@ type Log struct {
 }
 
 func (l Log) Type() string { return `Log` }
+
+type LevelUp struct {
+	UserId         int
+	RoomId         int
+	Username       string
+	CharacterName  string
+	NewLevel       int
+	StatsDelta     stats.Statistics
+	TrainingPoints int
+	StatPoints     int
+	LivesGained    int
+}
+
+func (l LevelUp) Type() string { return `LevelUp` }
+
+type PlayerDeath struct {
+	UserId        int
+	RoomId        int
+	Username      string
+	CharacterName string
+	Permanent     bool
+	KilledByUsers []int
+}
+
+func (l PlayerDeath) Type() string { return `PlayerDeath` }

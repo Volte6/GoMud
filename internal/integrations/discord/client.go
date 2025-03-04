@@ -51,6 +51,8 @@ func registerListeners() {
 	events.RegisterListener(events.PlayerSpawn{}, HandlePlayerSpawn)
 	events.RegisterListener(events.PlayerDespawn{}, HandlePlayerDespawn)
 	events.RegisterListener(events.Log{}, HandleLogs)
+	events.RegisterListener(events.LevelUp{}, HandleLevelup)
+	events.RegisterListener(events.PlayerDeath{}, HandleDeath)
 }
 
 // Sends an embed message to discord which includes a colored bar to the left

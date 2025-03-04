@@ -65,9 +65,37 @@ func HandleLogs(e events.Event) bool {
 		return true
 	}
 
-	msgOut = strings.Replace(msgOut, evt.Level, `**`+evt.Level+`**`, 1)
+	if strings.Contains(msgOut, `Stopping server`) || strings.Contains(msgOut, `Starting server`) {
+		msgOut = strings.Replace(msgOut, evt.Level, `**NOTICE**`, 1)
+	} else {
+		msgOut = strings.Replace(msgOut, evt.Level, `**`+evt.Level+`**`, 1)
+	}
 
-	message := fmt.Sprintf(":bangbang: %s :bangbang:", msgOut)
+	message := fmt.Sprintf(":bangbang: %s", msgOut)
+	SendMessage(message)
+
+	return true
+}
+
+func HandleLevelup(e events.Event) bool {
+	evt, typeOk := e.(events.LevelUp)
+	if !typeOk {
+		return false
+	}
+
+	message := fmt.Sprintf(`:crown: **%s** *has leveled up to **level %d**!*`, evt.CharacterName, evt.NewLevel)
+	SendMessage(message)
+
+	return true
+}
+
+func HandleDeath(e events.Event) bool {
+	evt, typeOk := e.(events.PlayerDeath)
+	if !typeOk {
+		return false
+	}
+
+	message := fmt.Sprintf(`:skull: **%s** *has **DIED**!*`, evt.CharacterName)
 	SendMessage(message)
 
 	return true
