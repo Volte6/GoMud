@@ -103,11 +103,21 @@ jobs:
   message:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/github-script@v6
+      id: get_pr_data
+      with:
+        script: |
+            return (
+              await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                commit_sha: context.sha,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              })
+            ).data[0];
     - name: Discord Webhook Action
       uses: tsickert/discord-webhook@v7.0.0
       with:
         webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        embed-author-name: "${{ github.event.pull_request.user.login }}"
-        embed-title: "🎉 New update on `master` branch: ${{ github.event.pull_request.title }}"
-        embed-description: "${{ github.event.pull_request.body }}"
-        embed-footer-text: "[View PR](${{ github.event.pull_request.html_url }})"
+        embed-title: "🎉 New update on `master` branch: ${{ fromJson(steps.get_pr_data.outputs.result).title }}"
+        embed-description: "${{ fromJson(steps.get_pr_data.outputs.result).body }}"
+        embed-footer-text: "[View PR #${{ fromJson(steps.get_pr_data.outputs.result).number }}](${{ fromJson(steps.get_pr_data.outputs.result).html_url }})"
