@@ -99,3 +99,15 @@ jobs:
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+  message:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Discord Webhook Action
+      uses: tsickert/discord-webhook@v7.0.0
+      with:
+        webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        embed-author-name: ${{ github.event.pull_request.user.login }}
+        message: "🎉 New update on `master` branch !\n\n**${{ github.event.pull_request.title }}**\n\n${{ github.event.pull_request.body }}."
+        embed-description: ${{ github.event.pull_request.body }}
+        embed-url: ${{ github.event.pull_request.html_url }}
