@@ -79,7 +79,7 @@ func HandleLeave(e events.Event) bool {
 	}
 
 	tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
-	connections.SendTo([]byte(tplTxt), connId)
+	connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connId)
 
 	if err := users.LogOutUserByConnectionId(connId); err != nil {
 		mudlog.Error("Log Out Error", "connectionId", connId, "error", err)

@@ -7,12 +7,14 @@ import (
 type ListenerId uint64
 
 type ListenerWrapper struct {
-	id      ListenerId
-	listner Listener
+	id       ListenerId
+	listener Listener
+	isFinal  bool
 }
 
 // Return false to stop further handling of this event.
 type Listener func(Event) bool
+type QueueFlag int
 
 var (
 	listenerLock = sync.RWMutex{}
@@ -22,6 +24,11 @@ var (
 	hasWildcardListener bool = false
 )
 
+const (
+	First QueueFlag = 1
+	Last  QueueFlag = 2
+)
+
 func ClearListeners() {
 	listenerLock.Lock()
 	defer listenerLock.Unlock()
@@ -29,7 +36,7 @@ func ClearListeners() {
 }
 
 // Returns an ID for the listener which can be used to unregister later.
-func RegisterListener(emptyEvent Event, cbFunc Listener, addToFront ...bool) ListenerId {
+func RegisterListener(emptyEvent Event, cbFunc Listener, qFlag ...QueueFlag) ListenerId {
 	listenerLock.Lock()
 	defer listenerLock.Unlock()
 
@@ -48,10 +55,34 @@ func RegisterListener(emptyEvent Event, cbFunc Listener, addToFront ...bool) Lis
 		eventListeners[eType] = []ListenerWrapper{}
 	}
 
-	if len(addToFront) > 0 && addToFront[0] {
-		eventListeners[eType] = append([]ListenerWrapper{{listenerCt, cbFunc}}, eventListeners[eType]...)
+	listenerDetails := ListenerWrapper{
+		id:       listenerCt,
+		listener: cbFunc,
+		isFinal:  len(qFlag) > 0 && qFlag[0] == Last,
+	}
+
+	frontOfQueue := len(qFlag) > 0 && qFlag[0] == First
+
+	if frontOfQueue {
+		eventListeners[eType] = append([]ListenerWrapper{listenerDetails}, eventListeners[eType]...)
+
+	} else if listenerDetails.isFinal {
+		eventListeners[eType] = append(eventListeners[eType], listenerDetails)
+
 	} else {
-		eventListeners[eType] = append(eventListeners[eType], ListenerWrapper{listenerCt, cbFunc})
+
+		insertPosition := 0
+		for idx := 0; idx < len(eventListeners[eType]); idx++ {
+			if !eventListeners[eType][idx].isFinal {
+				insertPosition = idx
+				continue
+			}
+			break
+		}
+
+		eventListeners[eType] = append(eventListeners[eType], ListenerWrapper{})
+		copy(eventListeners[eType][insertPosition+1:], eventListeners[eType][insertPosition:])
+		eventListeners[eType][insertPosition] = listenerDetails
 	}
 
 	// Write it to debug out
@@ -107,16 +138,17 @@ func DoListeners(e Event) bool {
 	if hasWildcardListener {
 		if vals, ok := eventListeners[`*`]; ok {
 			for _, lw := range vals {
-				if !lw.listner(e) {
+				if !lw.listener(e) {
 					return false
 				}
 			}
 		}
+
 	}
 
 	if vals, ok := eventListeners[e.Type()]; ok {
 		for _, lw := range vals {
-			if !lw.listner(e) {
+			if !lw.listener(e) {
 				return false
 			}
 		}
