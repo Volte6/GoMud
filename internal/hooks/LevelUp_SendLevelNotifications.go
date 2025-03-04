@@ -37,7 +37,7 @@ func SendLevelNotifications(e events.Event) bool {
 	user.PlaySound(`levelup`, `other`)
 
 	events.AddToQueue(events.Broadcast{
-		Text: fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has leveled up to level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, evt.CharacterName, evt.NewLevel, term.CRLFStr),
+		Text: fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has reached level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, evt.CharacterName, evt.NewLevel, term.CRLFStr),
 	})
 
 	return true
