@@ -20,4 +20,4 @@ scp ./${RPI_BIN} ${RPI_HOST}:${RPI_HOST_PATH}/mud/${RPI_BIN} && \
 
 echo "Starting Server on RaspPi: ${RPI_HOST}"
 rm ${RPI_BIN} && \
-ssh ${RPI_HOST} -f 'cd ${RPI_HOST_PATH}; ./startup-run-mud.sh'
+ssh ${RPI_HOST} -f 'cd ${RPI_HOST_PATH}; sudo ./startup-run-mud.sh'
