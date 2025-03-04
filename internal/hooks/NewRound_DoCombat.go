@@ -20,11 +20,6 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-//
-// Watches the rounds go by
-// Applies autohealing where appropriate
-//
-
 func DoCombat(e events.Event) bool {
 
 	evt := e.(events.NewRound)

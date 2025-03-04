@@ -55,6 +55,9 @@ func RegisterListeners() {
 	events.RegisterListener(events.LevelUp{}, SendLevelNotifications)
 	events.RegisterListener(events.LevelUp{}, CheckGuide)
 
+	// Day/Night cycle
+	events.RegisterListener(events.DayNightCycle{}, NotifySunriseSunset)
+
 	// Listener for debugging some stuff (catches all events)
 	/*
 		events.RegisterListener(nil, func(e events.Event) bool {

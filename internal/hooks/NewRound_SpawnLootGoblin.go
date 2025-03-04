@@ -6,11 +6,6 @@ import (
 	"github.com/volte6/gomud/internal/rooms"
 )
 
-//
-// Watches the rounds go by
-// Applies autohealing where appropriate
-//
-
 func SpawnLootGoblin(e events.Event) bool {
 
 	evt := e.(events.NewRound)

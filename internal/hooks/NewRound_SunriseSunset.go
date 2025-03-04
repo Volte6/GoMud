@@ -3,7 +3,6 @@ package hooks
 import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/gametime"
-	"github.com/volte6/gomud/internal/templates"
 )
 
 //
@@ -20,20 +19,15 @@ func SunriseSunset(e events.Event) bool {
 	gdNow := gametime.GetDate()
 
 	if gdBefore.Night != gdNow.Night {
-		if gdNow.Night {
-			sunsetTxt, _ := templates.Process("generic/sunset", nil)
 
-			events.AddToQueue(events.Broadcast{
-				Text: sunsetTxt,
-			})
+		events.AddToQueue(events.DayNightCycle{
+			IsSunrise: !gdNow.Night,
+			Day:       gdNow.Day,
+			Month:     gdNow.Month,
+			Year:      gdNow.Year,
+			Time:      gdNow.String(),
+		})
 
-		} else {
-			sunriseTxt, _ := templates.Process("generic/sunrise", gdNow)
-			events.AddToQueue(events.Broadcast{
-				Text: sunriseTxt,
-			})
-
-		}
 	}
 
 	return true

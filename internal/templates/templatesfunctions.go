@@ -208,8 +208,8 @@ var (
 		"permadeath": func() bool {
 			return bool(configs.GetConfig().PermaDeath)
 		},
-		"zodiac": func(month int) string {
-			return gametime.GetZodiac(month)
+		"zodiac": func(year int) string {
+			return gametime.GetZodiac(year)
 		},
 		"month": func(month int) string {
 			return gametime.MonthName(month)
