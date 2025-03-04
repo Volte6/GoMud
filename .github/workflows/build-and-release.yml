@@ -108,6 +108,6 @@ jobs:
       with:
         webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
         embed-author-name: ${{ github.event.pull_request.user.login }}
-        message: "🎉 New update on `master` branch !\n\n**${{ github.event.pull_request.title }}**\n\n${{ github.event.pull_request.body }}."
+        embed-title: "🎉 New update on `master` branch ! **${{ github.event.pull_request.title }}**"
         embed-description: ${{ github.event.pull_request.body }}
         embed-url: ${{ github.event.pull_request.html_url }}
