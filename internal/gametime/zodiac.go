@@ -237,7 +237,7 @@ func GetZodiac(year int) string {
 }
 
 func randomizeZodiac() {
-	r := rand.New(rand.NewSource(configs.GetConfig().SeedInt))
+	r := rand.New(rand.NewSource(configs.GetConfig().SeedInt()))
 	r.Shuffle(len(zodiacAnimals), func(i, j int) { zodiacAnimals[i], zodiacAnimals[j] = zodiacAnimals[j], zodiacAnimals[i] })
 	randomized = true
 }

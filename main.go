@@ -175,13 +175,13 @@ func main() {
 	// block until a signal comes in
 	<-sigChan
 
-	tplTxt, err := templates.Process("goodbye", nil)
+	tplTxt, err := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
 	if err != nil {
 		mudlog.Error("Template Error", "error", err)
 	}
 
 	events.AddToQueue(events.Broadcast{
-		Text: tplTxt,
+		Text: templates.AnsiParse(tplTxt),
 	})
 
 	serverAlive.Store(false) // immediately stop processing incoming connections

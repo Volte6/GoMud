@@ -420,9 +420,10 @@ Locked:
 
 ################################################################################
 #
-#   ChatGPT Configurations
+#   Secrets
 #
 ################################################################################
-# - ChatGPTKey - 
-#   Your OpenAI Key. If empty, will not use ChatGPT.
-ChatGPTKey: ''
+# - DiscordWebhookUrl - 
+# Optional webhook URL to send mud event messages to, such as joins/disconnects
+# Can also be set via environment variable: DISCORD_WEBHOOK_URL
+DiscordWebhookUrl: ''

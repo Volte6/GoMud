@@ -103,7 +103,9 @@ type Config struct {
 	LeaderboardSize  ConfigInt `yaml:"LeaderboardSize"`  // Maximum size of leaderboard
 	ContainerSizeMax ConfigInt `yaml:"ContainerSizeMax"` // How many objects containers can hold before overflowing
 
-	SeedInt int64 `yaml:"-"`
+	DiscordWebhookUrl ConfigSecret `yaml:"DiscordWebhookUrl" env:"DISCORD_WEBHOOK_URL"` // Optional Discord URL to post updates to
+
+	seedInt int64 `yaml:"-"`
 
 	// Protected values
 	turnsPerRound   int     // calculated and cached when data is validated.
@@ -253,36 +255,36 @@ func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
 		}
 
 		itm := items.Field(i)
-		if itm.Type().Kind() == reflect.Slice {
 
-			v := reflect.Indirect(itm)
-			list := []string{}
-			for j := 0; j < v.Len(); j++ {
-
-				cmd := itm.Index(j).Interface().(string)
-
-				if len(excludeStrings) > 0 {
-
-				}
-				/*
-					if len(cmd) > 27 {
-						cmd = cmd[0:27]
-					}
-				*/
-				list = append(list, cmd)
-				//output[fmt.Sprintf(`%s.%d`, name, j)] = cmd
-			}
-			output[name] = strings.Join(list, `; `)
-
-		} else if itm.Type().Kind() == reflect.Map {
-			// iterate the map
-			keys := itm.MapKeys()
-			for _, key := range keys {
-				output[fmt.Sprintf(`%s.%d`, name, key.Int())] = itm.MapIndex(key).Float()
-			}
-
+		if stringerVal, ok := itm.Interface().(fmt.Stringer); ok {
+			output[name] = stringerVal.String()
 		} else {
-			output[name] = itm.Interface()
+			if itm.Type().Kind() == reflect.Slice {
+
+				v := reflect.Indirect(itm)
+				list := []string{}
+				for j := 0; j < v.Len(); j++ {
+
+					cmd := itm.Index(j).Interface().(string)
+
+					if len(excludeStrings) > 0 {
+
+					}
+					list = append(list, cmd)
+					//output[fmt.Sprintf(`%s.%d`, name, j)] = cmd
+				}
+				output[name] = strings.Join(list, `; `)
+
+			} else if itm.Type().Kind() == reflect.Map {
+				// iterate the map
+				keys := itm.MapKeys()
+				for _, key := range keys {
+					output[fmt.Sprintf(`%s.%d`, name, key.Int())] = itm.MapIndex(key).Float()
+				}
+
+			} else {
+				output[name] = itm.Interface()
+			}
 		}
 
 	}
@@ -531,12 +533,45 @@ func (c *Config) Validate() {
 	c.turnsPerSecond = int(1000 / c.TurnMs)
 	c.roundsPerMinute = 60 / float64(c.RoundSeconds)
 
-	c.SeedInt = 0
+	c.seedInt = 0
 	for i, num := range util.Md5Bytes([]byte(string(c.Seed))) {
-		c.SeedInt += int64(num) << i
+		c.seedInt += int64(num) << i
 	}
 
 	c.validated = true
+}
+
+func (c *Config) setEnvAssignments(clear bool) {
+
+	// We use reflect.Indirect to handle if cfg is a pointer or not
+	v := reflect.ValueOf(c).Elem()
+
+	// We'll need the struct type as well (to get field names).
+	t := v.Type()
+
+	for i := 0; i < v.NumField(); i++ {
+		fieldVal := v.Field(i)
+		fieldType := t.Field(i)
+
+		if fieldVal.Type().Kind() != reflect.String {
+			continue
+		}
+
+		if envName := fieldType.Tag.Get(`env`); envName != `` {
+			if fieldVal.CanSet() {
+				if envVal := os.Getenv(envName); envVal != `` {
+
+					if clear {
+						envVal = ``
+					}
+
+					fieldVal.Set(reflect.ValueOf(ConfigSecret(envVal)))
+
+				}
+			}
+		}
+
+	}
 }
 
 func (c Config) GetDeathXPPenalty() (setting string, pct float64) {
@@ -605,6 +640,10 @@ func (c Config) IsBannedName(name string) (string, bool) {
 	return "", false
 }
 
+func (c Config) SeedInt() int64 {
+	return c.seedInt
+}
+
 func GetConfig() Config {
 	configDataLock.RLock()
 	defer configDataLock.RUnlock()
@@ -666,6 +705,8 @@ func ReloadConfig() error {
 		tmpConfigData.SetOverrides(map[string]any{})
 	}
 
+	tmpConfigData.setEnvAssignments(false)
+
 	tmpConfigData.Validate()
 
 	configDataLock.Lock()
@@ -674,4 +715,9 @@ func ReloadConfig() error {
 	configData = tmpConfigData
 
 	return nil
+}
+
+// Usage: configs.GetSecret(c.DiscordWebhookUrl)
+func GetSecret(v ConfigSecret) string {
+	return string(v)
 }

@@ -80,3 +80,166 @@ func Config_Typed(c Config) uint64 {
 func Config_Interface(c interface{}) uint64 {
 	return uint64(c.(Config).turnsPerRound)
 }
+
+func TestConfigUInt64String(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    ConfigUInt64
+		expected string
+	}{
+		{name: "Zero", value: 0, expected: "0"},
+		{name: "SmallNumber", value: 123, expected: "123"},
+		{name: "LargeNumber", value: 9223372036854775808, expected: "9223372036854775808"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.value.String()
+			if got != tt.expected {
+				t.Errorf("ConfigUInt64.String() = %q, want %q", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestConfigIntString(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    ConfigInt
+		expected string
+	}{
+		{name: "Zero", value: 0, expected: "0"},
+		{name: "Positive", value: 42, expected: "42"},
+		{name: "Negative", value: -100, expected: "-100"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.value.String()
+			if got != tt.expected {
+				t.Errorf("ConfigInt.String() = %q, want %q", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestConfigStringString(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    ConfigString
+		expected string
+	}{
+		{name: "Empty", value: "", expected: ""},
+		{name: "Hello", value: "Hello, world!", expected: "Hello, world!"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.value.String()
+			if got != tt.expected {
+				t.Errorf("ConfigString.String() = %q, want %q", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestConfigFloatString(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    ConfigFloat
+		expected string
+	}{
+		{name: "Zero", value: 0.0, expected: "0"},
+		{name: "Pi", value: 3.14, expected: "3.14"},
+		{name: "WholeNumber", value: 2.0, expected: "2"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.value.String()
+			if got != tt.expected {
+				t.Errorf("ConfigFloat.String() = %q, want %q", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestConfigBoolString(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    ConfigBool
+		expected string
+	}{
+		{name: "True", value: true, expected: "true"},
+		{name: "False", value: false, expected: "false"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.value.String()
+			if got != tt.expected {
+				t.Errorf("ConfigBool.String() = %q, want %q", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestConfigSliceStringString(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    ConfigSliceString
+		expected string
+	}{
+		{name: "EmptySlice", value: ConfigSliceString{}, expected: `[]`},
+		{name: "SingleElement", value: ConfigSliceString{"one"}, expected: `["one"]`},
+		{name: "MultipleElements", value: ConfigSliceString{"one", "two", "three"}, expected: `["one", "two", "three"]`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.value.String()
+			if got != tt.expected {
+				t.Errorf("ConfigSliceString.String() = %q, want %q", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestConfigMapString(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    ConfigMap
+		expected string
+	}{
+		{
+			name:     "EmptyMap",
+			value:    ConfigMap{},
+			expected: `map[]`,
+		},
+		{
+			name:  "SingleKeyValue",
+			value: ConfigMap{"key": "value"},
+			// fmt.Sprintf("%+v", map[string]string{"key":"value"}) => "map[key:value]"
+			expected: `map[key:value]`,
+		},
+		{
+			name:  "MultipleKeyValue",
+			value: ConfigMap{"one": "1", "two": "2"},
+			// fmt.Sprintf("%+v", map[string]string{"one":"1","two":"2"}) => "map[one:1 two:2]"
+			// The order of map iteration is not guaranteed. If order is important,
+			// consider sorting the keys before formatting. For the default test:
+			// "map[one:1 two:2]" or "map[two:2 one:1]" are both possible.
+			// You might need a more robust comparison if order varies.
+			expected: `map[one:1 two:2]`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.value.String()
+			if got != tt.expected {
+				t.Errorf("ConfigMap.String() = %q, want %q", got, tt.expected)
+			}
+		})
+	}
+}

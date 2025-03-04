@@ -50,7 +50,7 @@ func RegisterListeners() {
 	events.RegisterListener(events.Quest{}, HandleQuestUpdate)
 	// Spawn events
 	events.RegisterListener(events.PlayerSpawn{}, HandleJoin)
-	events.RegisterListener(events.PlayerDespawn{}, HandleLeave)
+	events.RegisterListener(events.PlayerDespawn{}, HandleLeave, events.Last) // This is a final listener, has to happen last
 
 	// Listener for debugging some stuff (catches all events)
 	/*
