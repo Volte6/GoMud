@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	WebhookUrl string
+	WebhookUrl  string
 	initialized bool
 )
 
@@ -33,12 +33,13 @@ func Init(webhookUrl string) {
 
 	WebhookUrl = webhookUrl
 	registerListeners()
-	initialized = true	
+	initialized = true
 }
 
 func registerListeners() {
 	events.RegisterListener(events.PlayerSpawn{}, HandlePlayerSpawn)
 	events.RegisterListener(events.PlayerDespawn{}, HandlePlayerDespawn)
+	events.RegisterListener(events.Log{}, HandleLogs)
 }
 
 // Sends an embed message to discord which includes a colored bar to the left
@@ -62,10 +63,10 @@ func SendRichMessage(message string, hexColor string) error {
 		Embeds: []embed{
 			{
 				Description: message,
-				Color: int32(color),
+				Color:       int32(color),
 			},
 		},
-	}		
+	}
 
 	marshalled, err := json.Marshal(payload)
 	if err != nil {
@@ -81,7 +82,7 @@ func SendMessage(message string) error {
 	if !initialized {
 		return errors.New("Discord client was not initialized.")
 	}
-		
+
 	payload := simpleMessage{
 		Content: message,
 	}
@@ -111,6 +112,6 @@ func send(marshalled []byte) error {
 		message := fmt.Sprintf("Expected discord to send status code 204, got %v.", response.StatusCode)
 		return errors.New(message)
 	}
-	
+
 	return nil
 }
