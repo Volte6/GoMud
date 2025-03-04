@@ -6,7 +6,6 @@ import (
 
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 )
@@ -44,10 +43,7 @@ func HandlePlayerDespawn(e events.Event) bool {
 	}
 
 	message := fmt.Sprintf(":x: **%s** disconnected", evt.CharacterName)
-	err := SendMessage(message)
-	if err != nil {
-		mudlog.Warn(`Discord`, `error`, err)
-	}
+	SendMessage(message)
 
 	return true
 }
@@ -71,11 +67,8 @@ func HandleLogs(e events.Event) bool {
 
 	msgOut = strings.Replace(msgOut, evt.Level, `**`+evt.Level+`**`, 1)
 
-	message := fmt.Sprintf(":sos: %s", msgOut)
-	err := SendMessage(message)
-	if err != nil {
-		mudlog.Warn(`Discord`, `error`, err)
-	}
+	message := fmt.Sprintf(":bangbang: %s :bangbang:", msgOut)
+	SendMessage(message)
 
 	return true
 }
