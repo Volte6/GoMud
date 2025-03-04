@@ -120,4 +120,4 @@ jobs:
         webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
         embed-title: "🎉 New update on `master` branch: ${{ fromJson(steps.get_pr_data.outputs.result).title }}"
         embed-description: "${{ fromJson(steps.get_pr_data.outputs.result).body }}"
-        embed-footer-text: "[View PR #${{ fromJson(steps.get_pr_data.outputs.result).number }}](${{ fromJson(steps.get_pr_data.outputs.result).html_url }})"
+        embed-url: "${{ fromJson(steps.get_pr_data.outputs.result).html_url }}"
