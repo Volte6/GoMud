@@ -990,6 +990,14 @@ func (w *World) EventLoop() {
 	}
 
 	//
+	// Day/Night handling
+	//
+	eq = events.GetQueue(events.DayNightCycle{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
 	// Player joined the world
 	//
 	eq = events.GetQueue(events.PlayerSpawn{})

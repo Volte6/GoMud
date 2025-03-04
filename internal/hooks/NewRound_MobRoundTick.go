@@ -9,11 +9,6 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-//
-// Watches the rounds go by
-// Applies autohealing where appropriate
-//
-
 func MobRoundTick(e events.Event) bool {
 
 	//

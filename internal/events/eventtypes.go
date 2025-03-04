@@ -211,3 +211,13 @@ type PlayerDeath struct {
 }
 
 func (l PlayerDeath) Type() string { return `PlayerDeath` }
+
+type DayNightCycle struct {
+	IsSunrise bool
+	Day       int
+	Month     int
+	Year      int
+	Time      string
+}
+
+func (l DayNightCycle) Type() string { return `DayNightCycle` }

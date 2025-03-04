@@ -132,6 +132,7 @@ func main() {
 
 	mudlog.Error(
 		"Starting server",
+		"name", string(c.MudName),
 	)
 
 	// Load all the data files up front.
