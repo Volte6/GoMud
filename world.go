@@ -846,7 +846,7 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 		handled, err = mobcommands.TryCommand(command, remains, mobInstanceId)
 		if err != nil {
-			mudlog.Error("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
+			mudlog.Warn("mob-TryCommand", "command", command, "remains", remains, "error", err.Error())
 		}
 
 	}

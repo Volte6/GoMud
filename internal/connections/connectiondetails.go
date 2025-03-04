@@ -277,7 +277,7 @@ func NewConnectionDetails(connId ConnectionId, c net.Conn, wsC *websocket.Conn, 
 
 	if wsC != nil {
 		if err := cd.StartHeartbeat(*config); err != nil {
-			mudlog.Error("failed to start heartbeat",
+			mudlog.Error("Heartbeat",
 				"connectionId", connId,
 				"error", err)
 		}

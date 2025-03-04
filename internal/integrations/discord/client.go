@@ -5,6 +5,7 @@
 // References:
 // https://leovoel.github.io/embed-visualizer/
 // https://birdie0.github.io/discord-webhooks-guide/discord_webhook.html
+// https://gist.github.com/rxaviers/7360908
 package discord
 
 import (

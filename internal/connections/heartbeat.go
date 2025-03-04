@@ -74,7 +74,7 @@ func (hm *heartbeatManager) runPingLoop() {
 			return
 		case <-ticker.C:
 			if err := hm.writePing(); err != nil {
-				mudlog.Error("Heartbeat::Error",
+				mudlog.Warn("Heartbeat::Error",
 					"connectionId", hm.cd.connectionId,
 					"error", err)
 				return
