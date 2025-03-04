@@ -299,8 +299,8 @@
                 socket.close();
                 return;
             }
-            debugLog("Connecting to: " + 'ws://'+location.host +':{{ .WebPort }}/ws');
-            socket = new WebSocket('ws://'+location.host +':{{ .WebPort }}/ws');
+            debugLog("Connecting to: " + 'ws://'+location.host +':{{ $config.WebPort }}/ws');
+            socket = new WebSocket('ws://'+location.host +':{{ $config.WebPort }}/ws');
 
             socket.onopen = function() {
                 term.writeln("Connected to the server!");
