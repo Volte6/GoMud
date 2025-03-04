@@ -408,7 +408,6 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 					toAttackerRoomMsg = msgs.Separate.ToAttackerRoom.Get(msgSeed)
 					toDefenderRoomMsg = msgs.Separate.ToDefenderRoom.Get(msgSeed)
 
-					mudlog.Error("toDefenderRoomMsg", "msg", toDefenderRoomMsg)
 					// Find the exit that leads to the target from the source (if any)
 					if atkRoom := rooms.LoadRoom(sourceChar.RoomId); atkRoom != nil {
 						for exitName, exit := range atkRoom.Exits {

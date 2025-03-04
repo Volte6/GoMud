@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/users"
@@ -22,7 +23,14 @@ func HandlePlayerSpawn(e events.Event) bool {
 		return false
 	}
 
-	message := fmt.Sprintf(":white_check_mark: **%v** connected", user.Character.Name)
+	connDetails := connections.Get(user.ConnectionId())
+
+	message := fmt.Sprintf(":white_check_mark: **%s** connected", user.Character.Name)
+
+	if connDetails.IsWebsocket() {
+		message += ` (via websocket)`
+	}
+
 	SendMessage(message)
 
 	return true
@@ -35,12 +43,7 @@ func HandlePlayerDespawn(e events.Event) bool {
 		return false
 	}
 
-	user := users.GetByUserId(evt.UserId)
-	if user == nil {
-		return false
-	}
-
-	message := fmt.Sprintf(":x: **%v** disconnected", user.Character.Name)
+	message := fmt.Sprintf(":x: **%s** disconnected", evt.CharacterName)
 	err := SendMessage(message)
 	if err != nil {
 		mudlog.Warn(`Discord`, `error`, err)
@@ -60,6 +63,12 @@ func HandleLogs(e events.Event) bool {
 	}
 
 	msgOut := util.StripANSI(fmt.Sprintln(evt.Data[1:]...))
+
+	// Skip script timeout messages
+	if strings.Contains(msgOut, `JSVM`) && strings.Contains(msgOut, `script timeout`) {
+		return true
+	}
+
 	msgOut = strings.Replace(msgOut, evt.Level, `**`+evt.Level+`**`, 1)
 
 	message := fmt.Sprintf(":sos: %s", msgOut)
