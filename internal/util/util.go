@@ -906,3 +906,8 @@ func LoadRoundCount(fpath string) uint64 {
 
 	return roundCount
 }
+
+func StripANSI(str string) string {
+	ansi := regexp.MustCompile(`\x1b\[[0-9;]*m`)
+	return ansi.ReplaceAllString(str, "")
+}

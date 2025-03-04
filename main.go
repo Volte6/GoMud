@@ -120,15 +120,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	hooks.RegisterListeners()
+
 	// Discord integration
-	if webhookUrl := os.Getenv("DISCORD_WEBHOOK_URL"); webhookUrl != "" {
+	if webhookUrl := string(c.DiscordWebhookUrl); webhookUrl != "" {
 		discord.Init(webhookUrl)
 		mudlog.Info("Discord", "info", "integration is enabled")
 	} else {
 		mudlog.Warn("Discord", "info", "integration is disabled")
 	}
 
-	hooks.RegisterListeners()
+	mudlog.Error(
+		"Starting server",
+	)
 
 	// Load all the data files up front.
 	loadAllDataFiles(false)
@@ -200,7 +204,7 @@ func main() {
 	// some last minute stats reporting
 	totalConnections, totalDisconnections := connections.Stats()
 	mudlog.Error(
-		"shutting down server",
+		"Stopping server",
 		"LifetimeConnections", totalConnections,
 		"LifetimeDisconnects", totalDisconnections,
 		"ActiveConnections", totalConnections-totalDisconnections,
@@ -218,7 +222,7 @@ func main() {
 	// Just an ephemeral goroutine that spins its wheels until the program shuts down")
 	go func() {
 		for {
-			mudlog.Error("Waiting on workers")
+			mudlog.Warn("Waiting on workers")
 			// sleep for 3 seconds
 			time.Sleep(time.Duration(3) * time.Second)
 		}
@@ -625,7 +629,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 			}
 
-			mudlog.Error("WS Read", "error", err)
+			mudlog.Warn("WS Read", "error", err)
 			break
 		}
 
@@ -695,12 +699,12 @@ func TelnetListenOnPort(hostname string, portNum int, wg *sync.WaitGroup, maxCon
 			conn, err := server.Accept()
 
 			if !serverAlive.Load() {
-				mudlog.Error("Connections disabled.")
+				mudlog.Warn("Connections disabled.")
 				return
 			}
 
 			if err != nil {
-				mudlog.Error("Connection error", "error", err)
+				mudlog.Warn("Connection error", "error", err)
 				continue
 			}
 

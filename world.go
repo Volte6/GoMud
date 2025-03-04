@@ -540,7 +540,7 @@ func (w *World) MainWorker(shutdown chan bool, wg *sync.WaitGroup) {
 
 	mudlog.Info("MainWorker", "state", "Started")
 	defer func() {
-		mudlog.Error("MainWorker", "state", "Stopped")
+		mudlog.Warn("MainWorker", "state", "Stopped")
 		wg.Done()
 	}()
 
@@ -564,7 +564,7 @@ loop:
 		select {
 		case <-shutdown:
 
-			mudlog.Error(`MainWorker`, `action`, `shutdown received`)
+			mudlog.Warn(`MainWorker`, `action`, `shutdown received`)
 
 			util.LockMud()
 			if err := rooms.SaveAllRooms(); err != nil {
@@ -686,7 +686,7 @@ func (w *World) InputWorker(shutdown chan bool, wg *sync.WaitGroup) {
 
 	mudlog.Info("InputWorker", "state", "Started")
 	defer func() {
-		mudlog.Error("InputWorker", "state", "Stopped")
+		mudlog.Warn("InputWorker", "state", "Stopped")
 		wg.Done()
 	}()
 
@@ -694,7 +694,7 @@ loop:
 	for {
 		select {
 		case <-shutdown:
-			mudlog.Error(`InputWorker`, `action`, `shutdown received`)
+			mudlog.Warn(`InputWorker`, `action`, `shutdown received`)
 			break loop
 		case wi := <-w.worldInput:
 
@@ -788,7 +788,7 @@ func (w *World) processInput(userId int, inputText string, flags events.EventFla
 
 			handled, err = usercommands.TryCommand(command, remains, userId, flags)
 			if err != nil {
-				mudlog.Error("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
+				mudlog.Warn("user-TryCommand", "command", command, "remains", remains, "error", err.Error())
 			}
 		}
 
