@@ -6,7 +6,6 @@ import (
 
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 )
@@ -102,25 +101,6 @@ func HandleDeath(e events.Event) bool {
 
 	message := fmt.Sprintf(`:skull: **%s** *has **DIED**!*`, evt.CharacterName)
 	SendMessage(message)
-
-	return true
-}
-
-func HandleNewDay(e events.Event) bool {
-	evt, typeOk := e.(events.DayNightCycle)
-	if !typeOk {
-		return false
-	}
-
-	if evt.IsSunrise {
-		message := fmt.Sprintf(`:sunny: **Day %d begins.**`, evt.Day)
-		if lastMonth != evt.Month {
-			message += fmt.Sprintf(` *It is the month **%s** in the year of the **%s**.*`, gametime.MonthName(evt.Month), gametime.GetZodiac(evt.Year))
-			lastMonth = evt.Month
-		}
-
-		SendMessage(message)
-	}
 
 	return true
 }
