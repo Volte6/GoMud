@@ -59,7 +59,7 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 	// Check if the file exists, else 404
 	fInfo, err := os.Stat(fullPath)
 	if err != nil || len(fileBase) > 0 && fileBase[0] == '_' {
-		mudlog.Info("HTTP", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "Serve File", fullPath, "fileExtension", fileExt, "error", "Not found")
+		mudlog.Info("HTTP", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "filePath", fullPath, "fileExtension", fileExt, "error", "Not found")
 
 		fullPath = filepath.Join(httpRoot, `404.html`)
 		fInfo, err = os.Stat(fullPath)
@@ -72,7 +72,7 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log the request
-	mudlog.Info("HTTP", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "Serve File", fullPath, "fileExtension", fileExt, "size", fmt.Sprintf(`%.2fk`, float64(fInfo.Size())/1024))
+	mudlog.Info("HTTP", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "filePath", fullPath, "fileExtension", fileExt, "size", fmt.Sprintf(`%.2fk`, float64(fInfo.Size())/1024))
 
 	// For non-HTML files, serve them statically.
 	if fileExt != ".html" {
