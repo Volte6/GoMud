@@ -1548,7 +1548,7 @@ func (w *World) EventLoop() {
 				if message.IsCommunication && user.Deafened {
 					continue
 				}
-				mudlog.Warn("MSGOUT", "type", "events.Message", "userid", message.UserId, "txt", message.Text)
+
 				connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
 				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
 					redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))
