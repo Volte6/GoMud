@@ -54,10 +54,11 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fileExt := filepath.Ext(fullPath)
+	fileBase := filepath.Base(fullPath)
 
 	// Check if the file exists, else 404
 	fInfo, err := os.Stat(fullPath)
-	if err != nil {
+	if err != nil || len(fileBase) > 0 && fileBase[0] == '_' {
 		mudlog.Info("HTTP", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "Serve File", fullPath, "fileExtension", fileExt, "error", "Not found")
 
 		fullPath = filepath.Join(httpRoot, `404.html`)
