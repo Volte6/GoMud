@@ -1459,15 +1459,32 @@ func (w *World) EventLoop() {
 
 		var sentToConnectionIds []connections.ConnectionId
 
+		//
+		// If it's communication, respect deafeaning rules
+		//
+		skipConnectionIds := []connections.ConnectionId{}
+		if broadcast.IsCommunication {
+			for _, u := range users.GetAllActiveUsers() {
+				if u.Deafened && !broadcast.SourceIsMod {
+					skipConnectionIds = append(skipConnectionIds, u.ConnectionId())
+				}
+			}
+		}
+
 		if broadcast.SkipLineRefresh {
+
 			sentToConnectionIds = connections.Broadcast(
 				[]byte(messageColorized),
+				skipConnectionIds...,
 			)
+
 		} else {
 
 			sentToConnectionIds = connections.Broadcast(
-				[]byte(term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + messageColorized),
+				[]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized),
+				skipConnectionIds...,
 			)
+
 		}
 
 		for _, connId := range sentToConnectionIds {
@@ -1531,7 +1548,7 @@ func (w *World) EventLoop() {
 				if message.IsCommunication && user.Deafened {
 					continue
 				}
-
+				mudlog.Warn("MSGOUT", "type", "events.Message", "userid", message.UserId, "txt", message.Text)
 				connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
 				if _, ok := redrawPrompts[user.ConnectionId()]; !ok {
 					redrawPrompts[user.ConnectionId()] = templates.AnsiParse(user.GetCommandPrompt(true))

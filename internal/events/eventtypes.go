@@ -52,6 +52,8 @@ func (i Input) Type() string { return `Input` }
 // Messages that are intended to reach all users on the system
 type Broadcast struct {
 	Text            string
+	IsCommunication bool
+	SourceIsMod     bool
 	SkipLineRefresh bool
 }
 
