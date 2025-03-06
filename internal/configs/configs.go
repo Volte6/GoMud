@@ -311,11 +311,13 @@ func (c *Config) SetOverrides(overrides map[string]any) error {
 		structFieldValue := structValue.FieldByName(name)
 
 		if !structFieldValue.IsValid() {
-			return fmt.Errorf("No such field: %s in obj", name)
+			mudlog.Error("SetOverrides()", "error", fmt.Sprintf("No such field: %s in obj", name))
+			continue
 		}
 
 		if !structFieldValue.CanSet() {
-			return fmt.Errorf("Cannot set %s field value", name)
+			mudlog.Error("SetOverrides()", "error", fmt.Sprint("Cannot set %s field value", name))
+			continue
 		}
 
 		// Get the reflect.Value of instance
@@ -325,19 +327,22 @@ func (c *Config) SetOverrides(overrides map[string]any) error {
 		fieldVal := val.FieldByName(name)
 
 		if !fieldVal.IsValid() {
-			return fmt.Errorf("no such field: %s in obj", name)
+			mudlog.Error("SetOverrides()", "error", fmt.Sprint("no such field: %s in obj", name))
+			continue
 		}
 
 		// If fieldVal is struct and Set has a pointer receiver, you need to get the address of fieldVal
 		if !fieldVal.CanAddr() {
-			return fmt.Errorf("field is not addressable")
+			mudlog.Error("SetOverrides()", "error", "field is not addressable")
+			continue
 		}
 
 		fieldValPtr := fieldVal.Addr() // Get a pointer to the field
 		method := fieldValPtr.MethodByName("Set")
 
 		if !method.IsValid() {
-			return fmt.Errorf("Set method missing")
+			mudlog.Error("SetOverrides()", "error", fmt.Sprint("Set method missing: %s", name))
+			continue
 		}
 		// Prepare arguments and call the method as before
 		args := []reflect.Value{reflect.ValueOf(fmt.Sprintf(`%v`, value))}
