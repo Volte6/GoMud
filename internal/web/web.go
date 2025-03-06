@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"sync"
+	"text/template"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -22,7 +25,95 @@ var (
 			return true
 		},
 	}
+
+	httpRoot string
 )
+
+// serveTemplate searches for the requested file in the HTTP_ROOT,
+// parses it as a template, and serves it.
+func serveTemplate(w http.ResponseWriter, r *http.Request) {
+
+	if httpRoot == "" {
+		httpRoot = configs.GetConfig().FolderPublicHtml.String()
+	}
+
+	// Clean the path to prevent directory traversal.
+	reqPath := filepath.Clean(r.URL.Path) // Example: / or /info/faq
+
+	// Build the full file path.
+	fullPath := filepath.Join(httpRoot, reqPath)
+
+	// If the path is a directory, look for an index.html.
+	info, err := os.Stat(fullPath)
+	if err != nil {
+		if filepath.Ext(fullPath) != ".html" {
+			fullPath += ".html"
+		}
+	} else if info.IsDir() {
+		fullPath = filepath.Join(fullPath, "index.html")
+	}
+
+	fileExt := filepath.Ext(fullPath)
+
+	// Check if the file exists, else 404
+	fInfo, err := os.Stat(fullPath)
+	if err != nil {
+		mudlog.Info("HTTP", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "Serve File", fullPath, "fileExtension", fileExt, "error", "Not found")
+
+		fullPath = filepath.Join(httpRoot, `404.html`)
+		fInfo, err = os.Stat(fullPath)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		w.WriteHeader(http.StatusNotFound)
+	}
+
+	// Log the request
+	mudlog.Info("HTTP", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "Serve File", fullPath, "fileExtension", fileExt, "size", fmt.Sprintf(`%.2fk`, float64(fInfo.Size())/1024))
+
+	// For non-HTML files, serve them statically.
+	if fileExt != ".html" {
+		http.ServeFile(w, r, fullPath)
+		return
+	}
+
+	templateData := map[string]interface{}{
+		"REQUEST": r,
+		"CONFIG":  configs.GetConfig(),
+		"STATS":   GetStats(),
+	}
+
+	templateFiles := []string{}
+
+	if _, err := os.Stat(filepath.Join(filepath.Dir(fullPath), `_header.html`)); err == nil {
+		templateFiles = append(templateFiles, filepath.Join(filepath.Dir(fullPath), `_header.html`))
+	} else if _, err := os.Stat(filepath.Join(httpRoot, `_header.html`)); err == nil {
+		templateFiles = append(templateFiles, filepath.Join(httpRoot, `_header.html`))
+	}
+
+	if _, err := os.Stat(filepath.Join(filepath.Dir(fullPath), `_footer.html`)); err == nil {
+		templateFiles = append(templateFiles, filepath.Join(filepath.Dir(fullPath), `_footer.html`))
+	} else if _, err := os.Stat(filepath.Join(httpRoot, `_footer.html`)); err == nil {
+		templateFiles = append(templateFiles, filepath.Join(httpRoot, `_footer.html`))
+	}
+
+	// Add the final (actual) file
+	templateFiles = append(templateFiles, fullPath)
+
+	tmpl, err := template.New(filepath.Base(fullPath)).Funcs(funcMap).ParseFiles(templateFiles...)
+	if err != nil {
+		mudlog.Error("HTML ERROR", "action", "ParseFiles", "error", err)
+		http.Error(w, "Error executing template", http.StatusInternalServerError)
+	}
+
+	// Execute the template and write it to the response.
+	if err := tmpl.Execute(w, templateData); err != nil {
+		mudlog.Error("HTML ERROR", "action", "Execute", "error", err)
+		http.Error(w, "Error executing template", http.StatusInternalServerError)
+	}
+}
 
 func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
 
@@ -35,14 +126,8 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 
 	// Routing
 	// Basic homepage
-	http.HandleFunc("/", serveHome)
-	// config view page
-	http.HandleFunc("/viewconfig", viewConfig)
-	// who's online
-	http.HandleFunc("/online", serveOnline)
+	http.HandleFunc("/", serveTemplate)
 
-	// websocket client
-	http.HandleFunc("/webclient", serveClient)
 	// websocket upgrade
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 
@@ -56,15 +141,10 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 		webSocketHandler(conn)
 	})
 
-	// Static resources
-	http.Handle("GET /static/public/", handlerToHandlerFunc(
-		http.StripPrefix("/static/public/", http.FileServer(http.Dir(configs.GetConfig().FolderHtmlFiles.String()+"/static/public"))),
-	))
-
-	http.Handle("GET /static/admin/", RunWithMUDLocked(
+	http.Handle("GET /admin/static/", RunWithMUDLocked(
 		doBasicAuth(
 			handlerToHandlerFunc(
-				http.StripPrefix("/static/admin/", http.FileServer(http.Dir(configs.GetConfig().FolderHtmlFiles.String()+"/static/admin"))),
+				http.StripPrefix("/admin/static/", http.FileServer(http.Dir(configs.GetConfig().FolderAdminHtml.String()+"/static"))),
 			),
 		),
 	))
@@ -148,4 +228,11 @@ func Shutdown() {
 
 func DataFiles() string {
 	return configs.GetConfig().FolderDataFiles.String()
+}
+
+func sendError(w http.ResponseWriter, r *http.Request, status int) {
+	w.WriteHeader(status)
+	if status == http.StatusNotFound {
+		fmt.Fprint(w, "custom 404")
+	}
 }

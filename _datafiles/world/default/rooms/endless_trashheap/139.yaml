@@ -22,13 +22,6 @@ exits:
     roomid: 155
   west:
     roomid: 145
-items:
-- itemid: 20001
-- itemid: 8
-  uses: 3
-- itemid: 20011
-- itemid: 20011
-gold: 1
 spawninfo:
 - mobid: 13
   message: The trash pile trembles, and as bits and pieces of garbage slide away,

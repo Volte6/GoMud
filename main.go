@@ -592,7 +592,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 	inputhandlers.LoginInputHandler(clientInput, sharedState)
 
 	connections.SendTo(
-		[]byte("!!SOUND(Off U="+configs.GetConfig().PublicFileUrl.String()+")"),
+		[]byte("!!SOUND(Off U="+configs.GetConfig().WebCDNLocation.String()+")"),
 		clientInput.ConnectionId,
 	)
 

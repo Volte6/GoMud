@@ -15,7 +15,7 @@ import (
 
 func itemsIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String()+"/admin/_header.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/items/index.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderAdminHtml.String()+"/_header.html", configs.GetConfig().FolderAdminHtml.String()+"/items/index.html", configs.GetConfig().FolderAdminHtml.String()+"/_footer.html")
 	if err != nil {
 		mudlog.Error("HTML Template", "error", err)
 	}
@@ -73,7 +73,7 @@ func itemsIndex(w http.ResponseWriter, r *http.Request) {
 
 func itemData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("item.data.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String() + "/admin/items/item.data.html")
+	tmpl, err := template.New("item.data.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderAdminHtml.String() + "/items/item.data.html")
 	if err != nil {
 		mudlog.Error("HTML Template", "error", err)
 	}

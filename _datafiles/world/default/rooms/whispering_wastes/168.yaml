@@ -7,7 +7,7 @@ zoneconfig:
     maximum: 15
   mutators:
   - mutatorid: freezing-cold
-  musicfile: music/whispering-wastes.mp3
+  musicfile: static/audio/music/whispering-wastes.mp3
 title: Frozen Wasteland
 description: The relentless blizzard swallows the world in a veil of white. The sky,
   a perpetual twilight, casts a surreal glow over the endless expanse of snow and
