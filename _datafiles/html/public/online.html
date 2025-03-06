@@ -1,13 +1,9 @@
 {{template "header" .}}
-{{- $config := getconfig -}}
-<style>
-
-</style>
 
     <div class="overlay">
         <h3>Users Online: </h3>
 
-        {{if gt (len .OnlineUsers) 0 }}
+        {{if gt (len .STATS.OnlineUsers) 0 }}
         <table>
             <tr>
                 <th>#</th>
@@ -18,7 +14,7 @@
                 <th>Time Online</th>
                 <th>Permission</th>
             </tr>
-            {{range $index, $uInfo := .OnlineUsers}}
+            {{range $index, $uInfo := .STATS.OnlineUsers}}
             <tr>
                 <td align="right">{{ add $index 1 }}.</td>
                 <td align="center"><b>{{ $uInfo.CharacterName }}</b></td>

@@ -2,7 +2,7 @@ roomid: 218
 zone: Mirror Caves
 zoneconfig:
   roomid: 218
-  musicfile: audio/music/mirror-caves.mp3
+  musicfile: static/audio/music/mirror-caves.mp3
 title: Cave Entrance
 description: "As you cautiously step into the entrance of the mirror caves, a chilling
   draft greets you, carrying the faint scent of earth and ancient stone. The cave's

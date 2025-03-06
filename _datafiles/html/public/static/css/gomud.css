@@ -19,7 +19,7 @@
 body {
   margin: 0;
   padding: 0;
-  background: var(--background-image, url('/static/public/images/web_bg.webp') center center / cover no-repeat fixed); /* This var is defined in _header.html so we can pull from config */
+  background: var(--background-image, url('/static/images/web_bg.webp') center center / cover no-repeat fixed); /* This var is defined in _header.html so we can pull from config */
   color: var(--text-primary-color);
   font-family: 'Press Start 2P', monospace;
   display: flex;

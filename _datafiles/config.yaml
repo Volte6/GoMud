@@ -27,21 +27,22 @@
 #   Display name of the MUD.
 #   This will be used a few places by default (such as the web pages).
 MudName: "GoMud"
-# - Version - 
-#   Latest semantic version of the datafiles (MAJOR.MINOR.PATCH)
-#   Do not change this value, it will be handled by the server when updated
-#   MAJOR version - incompatible API changes. Will attempt to upgrade datafiles.
-#   MINOR version - added functionality (backward compatible)
-#   PATCH version - bug fix (backward compatible)
-Version: "1.0.0"
+# - WebCDNLocation - 
+#   Optional alternative location to serve static files from such as audio
+#   Example: http://files.gomud.net
+#   Leave blank if no CDN config or similar desired
+WebCDNLocation: ""
 # - FolderDataFiles - 
 #   The folder where all datafiles reside.
 #   If you are planning to create your own world, copying the current folder
 #   and its entire tree of content is a good place to start.
 FolderDataFiles: _datafiles/world/default
-# - FolderHtmlFiles - 
-#   The folder where all web html files reside.
-FolderHtmlFiles: _datafiles/html
+# - FolderPublicHtml - 
+#   The folder where all web html files/templates reside.
+FolderPublicHtml: _datafiles/html/public
+# - FolderPublicHtml - 
+#   The folder where all web ADMIN files/templates reside.
+FolderAdminHtml: _datafiles/html/admin
 # - AllowItemBuffRemoval - 
 #   Whether to allow the removal of buffs assigned by items using spells etc. 
 #   By default, once an item has buffed a player, the player cannot remove the 
@@ -287,9 +288,6 @@ LocalPort: 9999
 # - WebPort -
 #   The port the server listens on for web requests
 WebPort: 80
-# - PublicFileUrl -
-#   The base URL files are served from (music, images, etc)
-PublicFileUrl: http://localhost/static/public/
 ################################################################################
 #
 #   LOOT GOBLIN CONFIGURATIONS

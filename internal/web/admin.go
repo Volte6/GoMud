@@ -10,7 +10,7 @@ import (
 
 func adminIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderHtmlFiles.String()+"/admin/_header.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/index.html", configs.GetConfig().FolderHtmlFiles.String()+"/admin/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderAdminHtml.String()+"/_header.html", configs.GetConfig().FolderAdminHtml.String()+"/index.html", configs.GetConfig().FolderAdminHtml.String()+"/_footer.html")
 	if err != nil {
 		mudlog.Error("HTML ERROR", "error", err)
 	}

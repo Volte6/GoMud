@@ -24,10 +24,11 @@ const (
 
 type Config struct {
 	MudName              ConfigString `yaml:"MudName"` // Name of the MUD
-	Version              ConfigString `yaml:"Version"` // Current version of all datafiles
 	MaxCPUCores          ConfigInt    `yaml:"MaxCPUCores"`
+	WebCDNLocation       ConfigString `yaml:"WebCDNLocation"`
 	FolderDataFiles      ConfigString `yaml:"FolderDataFiles"`
-	FolderHtmlFiles      ConfigString `yaml:"FolderHtmlFiles"`
+	FolderPublicHtml     ConfigString `yaml:"FolderPublicHtml"`
+	FolderAdminHtml      ConfigString `yaml:"FolderAdminHtml"`
 	AllowItemBuffRemoval ConfigBool   `yaml:"AllowItemBuffRemoval"`
 	CarefulSaveFiles     ConfigBool   `yaml:"CarefulSaveFiles"`
 	AuctionsEnabled      ConfigBool   `yaml:"AuctionsEnabled"`
@@ -54,7 +55,6 @@ type Config struct {
 	TelnetPort                   ConfigSliceString `yaml:"TelnetPort"`                   // One or more Ports used to accept telnet connections
 	LocalPort                    ConfigInt         `yaml:"LocalPort"`                    // Port used for admin connections, localhost only
 	WebPort                      ConfigInt         `yaml:"WebPort"`                      // Port used for web requests
-	PublicFileUrl                ConfigString      `yaml:"PublicFileUrl"`                // Where static files are served from
 	NextRoomId                   ConfigInt         `yaml:"NextRoomId"`                   // The next room id to use when creating a new room
 	LootGoblinRoom               ConfigInt         `yaml:"LootGoblinRoom"`               // The room the loot goblin spawns in
 	LootGoblinRoundCount         ConfigInt         `yaml:"LootGoblinRoundCount"`         // How often to spawn a loot goblin
