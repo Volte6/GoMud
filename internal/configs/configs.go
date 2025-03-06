@@ -316,7 +316,7 @@ func (c *Config) SetOverrides(overrides map[string]any) error {
 		}
 
 		if !structFieldValue.CanSet() {
-			mudlog.Error("SetOverrides()", "error", fmt.Sprint("Cannot set %s field value", name))
+			mudlog.Error("SetOverrides()", "error", fmt.Sprintf("Cannot set %s field value", name))
 			continue
 		}
 
@@ -327,7 +327,7 @@ func (c *Config) SetOverrides(overrides map[string]any) error {
 		fieldVal := val.FieldByName(name)
 
 		if !fieldVal.IsValid() {
-			mudlog.Error("SetOverrides()", "error", fmt.Sprint("no such field: %s in obj", name))
+			mudlog.Error("SetOverrides()", "error", fmt.Sprintf("no such field: %s in obj", name))
 			continue
 		}
 
@@ -341,7 +341,7 @@ func (c *Config) SetOverrides(overrides map[string]any) error {
 		method := fieldValPtr.MethodByName("Set")
 
 		if !method.IsValid() {
-			mudlog.Error("SetOverrides()", "error", fmt.Sprint("Set method missing: %s", name))
+			mudlog.Error("SetOverrides()", "error", fmt.Sprintf("Set method missing: %s", name))
 			continue
 		}
 		// Prepare arguments and call the method as before
