@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ .CONFIG.MudName }} Web Terminal</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+ 
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: 'DejaVu Sans Mono', monospace;
+            display: flex;
+            flex-direction: column;
+            background-color: #1e1e1e;
+            position: relative; /* So absolutely positioned children can be placed relative to <body> */
+        }
+
+        #main-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        #terminal {
+            flex: 1;
+        }
+
+        #input-area {
+            display: flex;
+            padding: 10px;
+            background-color: #1e1e1e;
+        }
+        #command-input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            background-color: #333;
+            color: white;
+            border-radius: 0px 5px 5px 0px;
+        }
+        #command-input:focus {
+            outline: none;
+        }
+
+        /* FLOATING CONNECT BUTTON IN THE CENTER */
+        #connect-button {
+            position: absolute;
+            /* Center in viewport */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+
+            /* Larger styling */
+            padding: 20px 40px;
+            font-size: 20px;
+
+            background-color: #555;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+
+            /* Keep the original pulsing effect */
+            animation: pulse 1s infinite alternate;
+        }
+        #connect-button:disabled {
+            color: #888;
+            pointer-events: none;
+            animation: none;
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        @keyframes pulse {
+            0% {
+                background-color: #555;
+                color: white;
+            }
+            100% {
+                color: #d17a7a;
+                background-color: #9f4a4a;
+            }
+        }
+
+        /* Sound icon in top-right corner */
+        #menu-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 26px;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 9999;
+            background-color: rgba(30,30,30, 0.8);
+            border-radius: 5px;
+        }
+
+        /* The floating menu container */
+        #floating-menu {
+            position: absolute;
+            top: 60px; /* Just below the icon */
+            right: 10px;
+            width: 450px;
+            padding: 10px;
+            background-color: #2e2e2e;
+            border: 1px solid #444;
+            border-radius: 5px;
+            display: none; /* hidden by default */
+            z-index: 9999;
+        }
+        #floating-menu h3 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .slider-container {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .slider-container label {
+            color: #ccc;
+            width: 150px;
+        }
+        .slider-container input[type="range"] {
+            flex: 1;
+            margin: 0 10px;
+        }
+        .slider-icon {
+            width: 32px;
+            text-align: center;
+            font-size: 20px;
+            color: #ccc;
+        }
+
+        /* Mute Checkbox */
+        #mute-container {
+            margin-bottom: 15px;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+        }
+        #mute-container label {
+            cursor: pointer;
+        }
+        #mute-container input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="{{ .CONFIG.WebCDNLocation }}/static/css/xterm.css" />
+    <script src="{{ .CONFIG.WebCDNLocation }}/static/js/xterm.4.19.0.js"></script>
+    <script src="{{ .CONFIG.WebCDNLocation }}/static/js/xterm-addon-fit.js"></script>
+    <script src="{{ .CONFIG.WebCDNLocation }}/static/js/mp3.js"></script>
+</head>
+<body onLoad="init(); return false;">
+
+    <!-- SOUND ICON (top-right). Click to toggle the volume sliders panel. -->
+    <div id="menu-icon" onclick="toggleMenu()">🔊</div>
+
+    <!-- FLOATING MENU - MULTIPLE SLIDERS -->
+    <div id="floating-menu">
+        <h3>Volume Controls</h3>
+
+        <div id="mute-container">
+            <input type="checkbox" id="mute-checkbox" onchange="toggleMuteAll()">
+            <label for="mute-checkbox"><span id="mute-icon">🔊</span> Mute All Sound</label>
+        </div>
+
+        <div id="sliders-container">
+            <!-- Multiple sliders get built here -->
+        </div>
+    </div>
+
+    <div id="main-container">
+        <div id="terminal"></div>
+    </div>
+
+    <!-- CONNECT BUTTON FLOATED IN CENTER -->
+    <button id="connect-button">Connect to {{ .CONFIG.MudName }}</button>
+
+    <div id="input-area">
+        <input type="text" id="command-input" placeholder="Enter command...">
+    </div>
+
+    <script>
+        /////////////////////////////////////////////
+        //
+        // Music/Sound players:
+        //
+        /////////////////////////////////////////////
+        let baseMp3Url = "";
+        const MusicPlayer = new MP3Player(false);
+        const SoundPlayer = new MP3Player(true);
+
+        /////////////////////////////////////////////
+        //
+        // Terminal Setup
+        //
+        /////////////////////////////////////////////
+        const term = new window.Terminal({
+            cols: 80,
+            rows: 60,
+            cursorBlink: true,
+            fontSize: 20
+        });
+        const fitAddon = new window.FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.open(document.getElementById('terminal'));
+
+        function resizeTerminal() {
+            fitAddon.fit();
+        }
+        window.addEventListener('resize', resizeTerminal);
+        resizeTerminal();
+
+        /////////////////////////////////////////////
+        //
+        // Misc
+        //
+        /////////////////////////////////////////////
+        let payloadsReceived = 0;
+        let totalBytesReceived = 0;
+        let payloadsSent = 0;
+        let totalBytesSent = 0;
+        let commandHistory = [];
+        let historyPosition = 0;
+        let commandHistoryMaxLength = 30;
+
+        /////////////////////////////////////////////
+        //
+        // WebSocket
+        //
+        /////////////////////////////////////////////
+        let socket = null;
+        let debugOutput = false;
+        let isDragging = false;
+
+        const connectButton = document.getElementById('connect-button');
+        const textOutput = document.getElementById('terminal');
+        const textInput = document.getElementById('command-input');
+
+        const codeShortcuts = {
+            "Numpad1": "southwest",
+            "Numpad2": "south",
+            "Numpad3": "southeast",
+            "Numpad4": "west",
+            "Numpad5": "default",
+            "Numpad6": "east",
+            "Numpad7": "northwest",
+            "Numpad8": "north",
+            "Numpad9": "northeast",
+            "F1": "=1",
+            "F2": "=2",
+            "F3": "=3",
+            "F4": "=4",
+            "F5": "=5",
+            "F6": "=6",
+            "F7": "=7",
+            "F8": "=8",
+            "F9": "=9",
+            "F10": "=10",
+            "ArrowUp": "north",
+            "ArrowDown": "south",
+            "ArrowLeft": "west",
+            "ArrowRight": "east",
+        };
+
+        function handleWebclientCommand(cmdString) {
+            const cmd = cmdString.substring(0, 9);
+            if (cmd === "TEXTMASK:") {
+                debugLog(cmdString);
+                if (cmdString.substring(9) === "true") {
+                    textInput.type = "password";
+                } else {
+                    textInput.type = "text";
+                }
+                return true;
+            }
+            return false;
+        }
+
+        connectButton.addEventListener('click', () => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.close();
+                return;
+            }
+
+            debugLog("Connecting to: " + 'ws://'+location.host +'/ws');
+            socket = new WebSocket('ws://'+location.host +'/ws');
+
+            socket.onopen = function() {
+                term.writeln("Connected to the server!");
+                term.clear();
+
+                // Hide the button when connected
+                connectButton.style.display = 'none';
+
+                // We also disable it right away to prevent double-click confusion
+                connectButton.disabled = true;
+                textInput.focus();
+            };
+
+            socket.onmessage = function(event) {
+                payloadsReceived++;
+                totalBytesReceived += event.data.length;
+
+                // Check if it's a webclient command
+                if (event.data.length > 9 && event.data.substring(8, 9) === ':') {
+                    if (handleWebclientCommand(event.data)) {
+                        return;
+                    }
+                }
+
+                // MSP commands
+                if (event.data.length > 9 && event.data.slice(0, 2) === "!!") {
+                    if (event.data.slice(0, 8) === "!!MUSIC(") {
+                        const parts = event.data.slice(8, event.data.length - 1).split(" ");
+                        let fileName = parts[0];
+                        let obj = {};
+                        for (let i = 1; i < parts.length; i++) {
+                            const prop = parts[i].split("=");
+                            if (prop.length == 2) {
+                                obj[prop[0]] = prop[1];
+                            }
+                        }
+                        if (fileName === "Off") {
+                            if (obj.U) {
+                                baseMp3Url = obj.U;
+                                if (baseMp3Url[baseMp3Url.length - 1] !== "/") {
+                                    baseMp3Url += "/";
+                                }
+                            } else {
+                                MusicPlayer.stop();
+                            }
+                        } else {
+                            let soundLevel = 1.0;
+                            let loopMusic = true;
+
+                            if (obj.L && obj.L !== "-1") {
+                                loopMusic = false;
+                            }
+                            if (obj.V) {
+                                soundLevel = Number(obj.V)/100;
+                            }
+
+                            if (!MusicPlayer.isPlaying(baseMp3Url + fileName)) {
+                                MusicPlayer.play(baseMp3Url + fileName, loopMusic, soundLevel*(sliderValues["music"] / 100));
+                            }
+                        }
+                    }
+                    else if (event.data.slice(0, 8) === "!!SOUND(") {
+                        const parts = event.data.slice(8, event.data.length - 1).split(" ");
+                        let fileName = parts[0];
+                        let obj = {};
+                        for (let i = 1; i < parts.length; i++) {
+                            const prop = parts[i].split("=");
+                            if (prop.length == 2) {
+                                obj[prop[0]] = prop[1];
+                            }
+                        }
+
+                        if (fileName === "Off") {
+                            if (obj.U) {
+                                baseMp3Url = obj.U;
+                                if (baseMp3Url[baseMp3Url.length - 1] !== "/") {
+                                    baseMp3Url += "/";
+                                }
+                            } else {
+                                SoundPlayer.stop();
+                            }
+                        } else {
+                            let soundLevel = 1.0;
+                            let loopSound = true;
+
+                            if (obj.L && obj.L !== "-1") {
+                                loopSound = false;
+                            }
+                            if (obj.V) {
+                                soundLevel = Number(obj.V)/100;
+                            }
+
+                            const typeKey = (obj.T || "other").toLowerCase() + " sounds";
+                            SoundPlayer.play(baseMp3Url + fileName, false, soundLevel*(sliderValues[typeKey] / 100));
+                        }
+                    }
+                    return;
+                }
+
+                // Otherwise, just write to terminal
+                term.write(event.data);
+            };
+
+            socket.onerror = function(error) {
+                term.writeln("Error: " + error.message);
+            };
+
+            socket.onclose = function(event) {
+                if (event.wasClean) {
+                    term.writeln(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
+                } else {
+                    term.writeln("Connection died");
+                }
+                // Show the button again when disconnected
+                connectButton.style.display = 'block';
+                connectButton.disabled = false;
+
+                if (textInput.type === "password") {
+                    textInput.value = '';
+                    textInput.type = "text";
+                }
+            };
+        });
+
+        textInput.addEventListener('keydown', function(event) {
+            // Macro support: F-keys
+            if (event.key.substring(0, 1) === "F" && event.key.length === 2) {
+                let macroNum = event.key.substring(1);
+                SendData("=" + macroNum);
+                if (event.preventDefault) event.preventDefault();
+                return false;
+            }
+
+            // ArrowUp / ArrowDown for command history
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                if (event.key === 'ArrowUp') {
+                    historyPosition += 1;
+                } else {
+                    historyPosition -= 1;
+                }
+                if (historyPosition < 1) historyPosition = 1;
+                if (historyPosition > commandHistory.length) historyPosition = commandHistory.length;
+                event.target.value = commandHistory[ commandHistory.length - historyPosition ];
+            }
+
+            // If input is empty, check for numeric keypad / arrow key shortcuts
+            if ( textInput.value.length === 0 && codeShortcuts[event.code] ) {
+                SendData(codeShortcuts[event.code]);
+                if (event.preventDefault) event.preventDefault();
+                return false;
+            }
+
+            // ENTER key
+            if (event.key === 'Enter') {
+                if (event.target.value !== '') {
+                    if (textInput.type !== "password") {
+                        commandHistory.push(event.target.value);
+                        historyPosition = 0;
+                        if (commandHistory.length > commandHistoryMaxLength) {
+                            commandHistory = commandHistory.slice(commandHistory.length - commandHistoryMaxLength);
+                        }
+                    }
+                }
+
+                if ( event.target.value === "!net" ) {
+                    printNetStats();
+                    event.target.value = '';
+                    return;
+                }
+
+                if ( SendData(event.target.value) ) {
+                    event.target.value = '';
+                } else {
+                    term.writeln("Not connected to the server. Did you click the Connect button?");
+                }
+            }
+        });
+
+        function SendData(dataToSend) {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                return false;
+            }
+            payloadsSent++;
+            totalBytesSent += dataToSend.length;
+            socket.send(dataToSend);
+            return true;
+        }
+
+        function printNetStats() {
+            term.writeln("");
+            term.writeln(" Request Ct: " + String(payloadsSent));
+            term.writeln(" Bytes Sent: " + String(Math.round(totalBytesSent/1024 * 100) / 100) + "kb");
+            term.writeln("Response Ct: " + String(payloadsReceived));
+            term.writeln(" Bytes Rcvd: " + String(Math.round(totalBytesReceived/1024 * 100) / 100) + "kb");
+            term.writeln("");
+        }
+
+        function debugLog(message) {
+            if (debugOutput) {
+                console.log(message);
+            }
+        }
+
+        // Keep focus on terminal if user clicks inside
+        textOutput.addEventListener('mousedown', () => { isDragging = false; });
+        textOutput.addEventListener('mousemove', () => { isDragging = true; });
+        textOutput.addEventListener('mouseup', () => {
+            const selectedText = window.getSelection().toString();
+            if (!isDragging && !selectedText) {
+                textInput.focus();
+            }
+            isDragging = false;
+        });
+
+        /////////////////////////////////////////////
+        //
+        // Volume Sliders + Mute
+        //
+        /////////////////////////////////////////////
+
+        // 1) Define default sliders (and new ones if needed!)
+        const defaultSliders = {
+            "music": 75,
+            "combat sounds": 75,
+            "movement sounds": 75,
+            "environment sounds": 75,
+            "other sounds": 75,
+        };
+
+        // 2) We'll store final slider values
+        let sliderValues = { ...defaultSliders };
+
+        // 3) We'll also store unmuted slider values if user checks "Mute"
+        let unmutedSliderValues = null;
+
+        // Return speaker icon
+        function getSpeakerIcon(value) {
+            value = Number(value);
+            if (value === 0) {
+                return "🔇";
+            } else if (value < 33) {
+                return "🔈";
+            } else if (value < 66) {
+                return "🔉";
+            } else {
+                return "🔊";
+            }
+        }
+
+        // Build the sliders from sliderValues
+        function buildSliders() {
+            const container = document.getElementById('sliders-container');
+            container.innerHTML = "";
+
+            Object.keys(sliderValues).forEach(function(key) {
+                const wrapper = document.createElement('div');
+                wrapper.className = "slider-container";
+
+                const label = document.createElement('label');
+                label.textContent = key.toLowerCase().split(' ').map(function(word) {
+                    return word.charAt(0).toUpperCase() + word.slice(1);
+                }).join(' ');
+
+                const slider = document.createElement('input');
+                slider.type = "range";
+                slider.min = 0;
+                slider.max = 100;
+                slider.value = sliderValues[key];
+
+                const iconSpan = document.createElement('span');
+                iconSpan.className = "slider-icon";
+                iconSpan.textContent = getSpeakerIcon(sliderValues[key]);
+
+                // On slider change
+                slider.addEventListener('input', function(e) {
+                    const val = e.target.value;
+                    sliderValues[key] = Number(val);
+                    iconSpan.textContent = getSpeakerIcon(val);
+
+                    // Update local storage
+                    localStorage.setItem('sliderValues', JSON.stringify(sliderValues));
+
+                    // Update music volume
+                    MusicPlayer.setGlobalVolume(sliderValues["music"] / 100);
+
+                    // If user moves any slider up from 0, uncheck Mute
+                    const muteCheckbox = document.getElementById('mute-checkbox');
+                    if (muteCheckbox.checked && val > 0) {
+                        muteCheckbox.checked = false;
+                        localStorage.setItem('muteAllSound', JSON.stringify(false));
+                        document.getElementById('mute-icon').textContent = "🔊";
+                    }
+                });
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(slider);
+                wrapper.appendChild(iconSpan);
+                container.appendChild(wrapper);
+            });
+        }
+
+        // Handle Mute
+        function toggleMuteAll() {
+            const muteCheckbox = document.getElementById('mute-checkbox');
+            const isChecked = muteCheckbox.checked;
+            const muteIcon = document.getElementById('mute-icon');
+
+            if (isChecked) {
+                // Save the unmuted state
+                unmutedSliderValues = { ...sliderValues };
+                localStorage.setItem('unmutedSliderValues', JSON.stringify(unmutedSliderValues));
+
+                // Set all to 0
+                Object.keys(sliderValues).forEach(key => {
+                    sliderValues[key] = 0;
+                });
+                localStorage.setItem('sliderValues', JSON.stringify(sliderValues));
+
+                buildSliders();
+
+                muteIcon.textContent = "🔇";
+                MusicPlayer.setGlobalVolume(0);
+                localStorage.setItem('muteAllSound', JSON.stringify(true));
+            } else {
+                // Restore from unmuted
+                const savedUnmuted = localStorage.getItem('unmutedSliderValues');
+                if (savedUnmuted) {
+                    // Merge defaultSliders just in case new keys appear
+                    let loadedUnmuted = JSON.parse(savedUnmuted) || {};
+                    loadedUnmuted = { ...defaultSliders, ...loadedUnmuted };
+                    unmutedSliderValues = { ...loadedUnmuted };
+
+                    sliderValues = { ...unmutedSliderValues };
+                    localStorage.setItem('sliderValues', JSON.stringify(sliderValues));
+                }
+                buildSliders();
+
+                muteIcon.textContent = "🔊";
+                MusicPlayer.setGlobalVolume(sliderValues["music"] / 100);
+                localStorage.setItem('muteAllSound', JSON.stringify(false));
+            }
+        }
+
+        // Show/hide the floating menu
+        function toggleMenu() {
+            const menu = document.getElementById('floating-menu');
+            if (menu.style.display === "none" || menu.style.display === "") {
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        }
+
+        /////////////////////////////////////////////
+        //
+        // Initialization
+        //
+        /////////////////////////////////////////////
+        const specialCommands = {
+            "!net": "Print out network traffic stats"
+        };
+
+        function init() {
+            console.log("%cterminal commands:", "font-weight:bold;");
+            let longest = 0;
+            for (let i in specialCommands) {
+                if (i.length > longest) longest = i.length;
+            }
+            for (let i in specialCommands) {
+                console.log("  " + i.padEnd(longest) + " - " + specialCommands[i]);
+            }
+            console.log("%cconsole commands:", "font-weight:bold;");
+
+            // 1) Load from localStorage, if available
+            const savedValues = localStorage.getItem('sliderValues');
+            if (savedValues) {
+                try {
+                    // Merge existing local storage with defaultSliders
+                    const loaded = JSON.parse(savedValues);
+                    sliderValues = { ...defaultSliders, ...loaded };
+                } catch (e) {
+                    console.warn("Could not parse saved sliderValues, using defaults.");
+                }
+            } else {
+                // If no localStorage, ensure we set the defaults
+                localStorage.setItem('sliderValues', JSON.stringify(sliderValues));
+            }
+
+            // 2) Check if we have a "muteAllSound" property
+            const savedMute = localStorage.getItem('muteAllSound');
+            if (savedMute) {
+                try {
+                    const isMuted = JSON.parse(savedMute);
+                    document.getElementById('mute-checkbox').checked = isMuted;
+                } catch (e) {
+                    console.warn("Could not parse muteAllSound, ignoring.");
+                }
+            }
+
+            // 3) Build the sliders
+            buildSliders();
+
+            // 4) If currently muted, re-apply zero volumes
+            const muteCheckbox = document.getElementById('mute-checkbox');
+            const muteIcon = document.getElementById('mute-icon');
+
+            if (muteCheckbox.checked) {
+                // Possibly retrieve unmuted values from storage
+                const savedUnmuted = localStorage.getItem('unmutedSliderValues');
+                if (savedUnmuted) {
+                    // Merge defaultSliders here, too
+                    try {
+                        let loadedUnmuted = JSON.parse(savedUnmuted) || {};
+                        unmutedSliderValues = { ...defaultSliders, ...loadedUnmuted };
+                    } catch(e) {
+                        console.warn("Could not parse unmutedSliderValues.");
+                    }
+                }
+                // Force all current sliders to 0
+                Object.keys(sliderValues).forEach(key => {
+                    sliderValues[key] = 0;
+                });
+                localStorage.setItem('sliderValues', JSON.stringify(sliderValues));
+                buildSliders();
+
+                muteIcon.textContent = "🔇";
+                MusicPlayer.setGlobalVolume(0);
+            } else {
+                // If not muted, set music volume from slider
+                MusicPlayer.setGlobalVolume(sliderValues["music"] / 100);
+                muteIcon.textContent = "🔊";
+            }
+        }
+    </script>
+</body>
+</html>

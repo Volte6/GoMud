@@ -62,7 +62,6 @@ nav {
 }
 
 .nav-container {
-  max-width: 72rem;
   margin: 0 auto;
   display: flex;
   justify-content: center;
@@ -75,9 +74,14 @@ nav {
   color: var(--text-primary-color);
   text-decoration: none;
   padding: 8px 16px;
+  height: 18px;
   border-radius: 4px;
   background-color: rgba(255, 255, 255, 0.1);
   box-shadow: 2px 2px 0px 0px var(--button-shadow);
+}
+
+.nav-container a.selected  {
+  background-color: rgba(85, 85, 85, 1) !important
 }
 
 .nav-container a:hover {
