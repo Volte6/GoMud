@@ -135,7 +135,8 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 		u.EventLog.Add(`xp`, fmt.Sprintf(`Gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source))
 	}
 
-	if newLevel, statsDelta := u.Character.LevelUp(); newLevel {
+	newLevel, statsDelta := u.Character.LevelUp()
+	for newLevel {
 
 		c := configs.GetConfig()
 
@@ -164,6 +165,7 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 			LivesGained:    u.Character.ExtraLives - livesBefore,
 		})
 
+		newLevel, statsDelta = u.Character.LevelUp()
 	}
 }
 
