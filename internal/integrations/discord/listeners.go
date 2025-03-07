@@ -35,7 +35,7 @@ func HandlePlayerSpawn(e events.Event) bool {
 		message += ` (via websocket)`
 	}
 
-	SendMessage(message)
+	SendRichMessage(message, Green)
 
 	return true
 }
@@ -48,7 +48,8 @@ func HandlePlayerDespawn(e events.Event) bool {
 	}
 
 	message := fmt.Sprintf(":x: **%s** disconnected", evt.CharacterName)
-	SendMessage(message)
+
+	SendRichMessage(message, Grey)
 
 	return true
 }
@@ -77,7 +78,8 @@ func HandleLogs(e events.Event) bool {
 	}
 
 	message := fmt.Sprintf(":bangbang: %s", msgOut)
-	SendMessage(message)
+
+	SendRichMessage(message, Red)
 
 	return true
 }
@@ -88,8 +90,12 @@ func HandleLevelup(e events.Event) bool {
 		return false
 	}
 
-	message := fmt.Sprintf(`:crown: **%s** *has reached **level %d**!*`, evt.CharacterName, evt.NewLevel)
-	SendMessage(message)
+	message := fmt.Sprintf(`:crown: **%s** *has gained a level and reached **level %d**!*`, evt.CharacterName, evt.NewLevel)
+	if evt.LevelsGained > 1 {
+		message = fmt.Sprintf(`:crown: **%s** *has gained **%d levels** and reached **level %d**!*`, evt.CharacterName, evt.LevelsGained, evt.NewLevel)
+	}
+
+	SendRichMessage(message, Gold)
 
 	return true
 }
@@ -101,7 +107,7 @@ func HandleDeath(e events.Event) bool {
 	}
 
 	message := fmt.Sprintf(`:skull: **%s** *has **DIED**!*`, evt.CharacterName)
-	SendMessage(message)
+	SendRichMessage(message, DarkOrange)
 
 	return true
 }
@@ -125,7 +131,7 @@ func HandleBroadcast(e events.Event) bool {
 
 	message := fmt.Sprintf(`:speech_balloon: %s`, textOut)
 
-	SendMessage(message)
+	SendRichMessage(message, Purple)
 
 	return true
 }

@@ -34,7 +34,7 @@ var (
 func serveTemplate(w http.ResponseWriter, r *http.Request) {
 
 	if httpRoot == "" {
-		httpRoot = configs.GetConfig().FolderPublicHtml.String()
+		httpRoot = filepath.Clean(configs.GetConfig().FolderPublicHtml.String())
 	}
 
 	// Clean the path to prevent directory traversal.
@@ -88,22 +88,27 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 
 	templateFiles := []string{}
 
-	if _, err := os.Stat(filepath.Join(filepath.Dir(fullPath), `_header.html`)); err == nil {
-		templateFiles = append(templateFiles, filepath.Join(filepath.Dir(fullPath), `_header.html`))
-	} else if _, err := os.Stat(filepath.Join(httpRoot, `_header.html`)); err == nil {
-		templateFiles = append(templateFiles, filepath.Join(httpRoot, `_header.html`))
+	// Parse special files intended to be used as template includes
+	globFiles, err := filepath.Glob(filepath.Join(httpRoot, "_*.html"))
+	if err == nil {
+		templateFiles = append(templateFiles, globFiles...)
 	}
 
-	if _, err := os.Stat(filepath.Join(filepath.Dir(fullPath), `_footer.html`)); err == nil {
-		templateFiles = append(templateFiles, filepath.Join(filepath.Dir(fullPath), `_footer.html`))
-	} else if _, err := os.Stat(filepath.Join(httpRoot, `_footer.html`)); err == nil {
-		templateFiles = append(templateFiles, filepath.Join(httpRoot, `_footer.html`))
+	// Parse special files intended to be used as template includes (from the request folder)
+	requestDir := filepath.Dir(fullPath)
+	if httpRoot != requestDir {
+		globFiles, err = filepath.Glob(filepath.Join(requestDir, "_*.html"))
+		if err == nil {
+			templateFiles = append(templateFiles, globFiles...)
+		}
 	}
 
 	// Add the final (actual) file
 	templateFiles = append(templateFiles, fullPath)
 
+	// Parse
 	tmpl, err := template.New(filepath.Base(fullPath)).Funcs(funcMap).ParseFiles(templateFiles...)
+
 	if err != nil {
 		mudlog.Error("HTML ERROR", "action", "ParseFiles", "error", err)
 		http.Error(w, "Error executing template", http.StatusInternalServerError)

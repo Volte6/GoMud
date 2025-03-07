@@ -59,27 +59,17 @@ func registerListeners() {
 
 // Sends an embed message to discord which includes a colored bar to the left
 // hexColor should be specified as a string in this format "#000000"
-func SendRichMessage(message string, hexColor string) {
+func SendRichMessage(message string, color Color) {
 	if !initialized {
 		mudlog.Error(`discord`, `error`, "Discord client was not initialized.")
 		return
 	}
 
-	if strings.HasPrefix(hexColor, "#") {
-		hexColor = hexColor[1:]
-	}
-
-	color, err := strconv.ParseInt(hexColor, 16, 32)
-	if err != nil {
-		mudlog.Error(`discord`, `error`, fmt.Sprintf("Invalid color specified, expected format #000000"))
-		return
-	}
-
-	payload := richMessage{
+	payload := webHookPayload{
 		Embeds: []embed{
 			{
 				Description: message,
-				Color:       int32(color),
+				Color:       color,
 			},
 		},
 	}
@@ -101,8 +91,24 @@ func SendMessage(message string) {
 		return
 	}
 
-	payload := simpleMessage{
+	payload := webHookPayload{
 		Content: message,
+	}
+
+	marshalled, err := json.Marshal(payload)
+	if err != nil {
+		mudlog.Error(`discord`, `error`, fmt.Sprintf("Couldn't marshal discord message"))
+		return
+	}
+
+	send(marshalled)
+}
+
+// Sends a simple message to discord
+func SendPayload(payload webHookPayload) {
+	if !initialized {
+		mudlog.Error(`discord`, `error`, errors.New("Discord client was not initialized."))
+		return
 	}
 
 	marshalled, err := json.Marshal(payload)
@@ -169,4 +175,17 @@ func doRequestBackoff() {
 	waitMutex.Lock()
 	waitUntil = time.Now().Add(RequestFailureBackoffSeconds * time.Second)
 	waitMutex.Unlock()
+}
+
+func hexToColor(hexColor string) Color {
+	if strings.HasPrefix(hexColor, "#") {
+		hexColor = hexColor[1:]
+	}
+
+	color, err := strconv.ParseInt(hexColor, 16, 32)
+	if err != nil {
+		mudlog.Error(`discord`, `error`, fmt.Sprintf("Invalid color specified, expected format #000000"))
+		return Default
+	}
+	return Color(color)
 }

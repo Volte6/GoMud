@@ -24,6 +24,7 @@ func SendLevelNotifications(e events.Event) bool {
 	}
 
 	levelUpData := map[string]interface{}{
+		"levelsGained":   evt.LevelsGained,
 		"level":          evt.NewLevel,
 		"statsDelta":     evt.StatsDelta,
 		"trainingPoints": evt.TrainingPoints,
