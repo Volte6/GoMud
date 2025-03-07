@@ -13,6 +13,24 @@
     }
   </style>
   <link rel="stylesheet" href="{{ .CONFIG.WebCDNLocation }}/static/css/gomud.css">
+  <script type="text/javascript">
+    window.addEventListener("load", function(){
+      const link = document.getElementById('hide-header-footer');
+
+      // Add a click event listener
+      link.addEventListener('click', function(event) {
+        // Prevent the default link behavior (e.g., navigating to a new page)
+        event.preventDefault();
+
+        document.getElementsByTagName('header')[0].style.display = "none";
+        document.getElementsByTagName('nav')[0].style.display = "none";
+        document.getElementsByTagName('footer')[0].style.display = "none";
+        if ( resizeClientIFrame ) {
+          resizeClientIFrame();
+        }
+      });
+    });
+  </script>
 </head>
 <body>
   <header>
@@ -28,12 +46,13 @@
 
   <nav>
     <div class="nav-container">
-      <a href="/">Go Home</a>
-      <a href="/online">Who's Online</a>
-      <a href="/webclient">Web Client</a>
-      <a href="/viewconfig">See Configuration</a>
+      <a href="/" {{ if eq .REQUEST.RequestURI "/" }}class="selected"{{end}}>Home</a>
+      <a href="/online" {{ if eq .REQUEST.RequestURI "/online" }}class="selected"{{end}}>Who's Online</a>
+      <a href="/webclient" {{ if eq .REQUEST.RequestURI "/webclient" }}class="selected"{{end}}>Web Client</a>
+      <a href="/viewconfig" {{ if eq .REQUEST.RequestURI "/viewconfig" }}class="selected"{{end}}>See Configuration</a>
+      {{ if eq .REQUEST.RequestURI "/webclient" }}<a id="hide-header-footer" href="/webclient-pure">⛶</a>{{ end }}
     </div>
   </nav>
 
-  <div class="content-container">
+  <div id="content-container" class="content-container">
 {{end}}

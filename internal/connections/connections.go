@@ -144,7 +144,7 @@ func Remove(id ConnectionId) (err error) {
 	return errors.New("connection not found")
 }
 
-func Broadcast(colorizedText []byte) []ConnectionId {
+func Broadcast(colorizedText []byte, skipConnectionIds ...ConnectionId) []ConnectionId {
 
 	lock.Lock()
 
@@ -155,6 +155,19 @@ func Broadcast(colorizedText []byte) []ConnectionId {
 
 		if cd.state == Login {
 			continue
+		}
+
+		if len(skipConnectionIds) > 0 {
+			skip := false
+			for _, cId := range skipConnectionIds {
+				if cId == id {
+					skip = true
+					break
+				}
+			}
+			if skip {
+				continue
+			}
 		}
 
 		// Write the message to the connection

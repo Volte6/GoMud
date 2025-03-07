@@ -1459,15 +1459,32 @@ func (w *World) EventLoop() {
 
 		var sentToConnectionIds []connections.ConnectionId
 
+		//
+		// If it's communication, respect deafeaning rules
+		//
+		skipConnectionIds := []connections.ConnectionId{}
+		if broadcast.IsCommunication {
+			for _, u := range users.GetAllActiveUsers() {
+				if u.Deafened && !broadcast.SourceIsMod {
+					skipConnectionIds = append(skipConnectionIds, u.ConnectionId())
+				}
+			}
+		}
+
 		if broadcast.SkipLineRefresh {
+
 			sentToConnectionIds = connections.Broadcast(
 				[]byte(messageColorized),
+				skipConnectionIds...,
 			)
+
 		} else {
 
 			sentToConnectionIds = connections.Broadcast(
-				[]byte(term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + messageColorized),
+				[]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized),
+				skipConnectionIds...,
 			)
+
 		}
 
 		for _, connId := range sentToConnectionIds {

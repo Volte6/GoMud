@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Volte6/ansitags"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/users"
@@ -100,6 +101,30 @@ func HandleDeath(e events.Event) bool {
 	}
 
 	message := fmt.Sprintf(`:skull: **%s** *has **DIED**!*`, evt.CharacterName)
+	SendMessage(message)
+
+	return true
+}
+
+func HandleBroadcast(e events.Event) bool {
+	evt, typeOk := e.(events.Broadcast)
+	if !typeOk {
+		return false
+	}
+
+	if !evt.IsCommunication {
+		return true
+	}
+
+	textOut := ansitags.Parse(evt.Text, ansitags.StripTags)
+
+	textOut = strings.ReplaceAll(textOut, "\n", "")
+	textOut = strings.ReplaceAll(textOut, "\r", "")
+	textOut = strings.Replace(textOut, `(broadcast) `, `(broadcast) **`, 1)
+	textOut = strings.Replace(textOut, `:`, `:** `, 1)
+
+	message := fmt.Sprintf(`:speech_balloon: %s`, textOut)
+
 	SendMessage(message)
 
 	return true
