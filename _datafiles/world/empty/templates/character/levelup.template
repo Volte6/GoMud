@@ -2,7 +2,7 @@
 <ansi fg="yellow-bold">*******************************************************************************</ansi>
 <ansi fg="yellow-bold">*******************************************************************************</ansi>
 
- <ansi fg="yellow-bold">You have gained a level!</ansi> You are now <ansi fg="magenta-bold">level {{ .level }}</ansi>!
+ <ansi fg="yellow-bold">You have gained {{ if gt .levelsGained 1 }}{{ .levelsGained }} levels{{ else }}a level{{ end }}!</ansi> You are now <ansi fg="magenta-bold">level {{ .level }}</ansi>!
 
  <ansi fg="yellow">Stat Gains:</ansi>
 

@@ -194,6 +194,7 @@ type LevelUp struct {
 	RoomId         int
 	Username       string
 	CharacterName  string
+	LevelsGained   int
 	NewLevel       int
 	StatsDelta     stats.Statistics
 	TrainingPoints int

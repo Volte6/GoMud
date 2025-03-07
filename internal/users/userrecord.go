@@ -14,6 +14,7 @@ import (
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/prompt"
 	"github.com/volte6/gomud/internal/skills"
+	"github.com/volte6/gomud/internal/stats"
 	"github.com/volte6/gomud/internal/util"
 	//
 )
@@ -135,37 +136,57 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 		u.EventLog.Add(`xp`, fmt.Sprintf(`Gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source))
 	}
 
-	newLevel, statsDelta := u.Character.LevelUp()
-	for newLevel {
+	if newLevel, statsDelta := u.Character.LevelUp(); newLevel {
 
 		c := configs.GetConfig()
 
 		livesBefore := u.Character.ExtraLives
 
-		if c.PermaDeath && c.LivesOnLevelUp > 0 {
-			u.Character.ExtraLives += int(c.LivesOnLevelUp)
-			if u.Character.ExtraLives > int(c.LivesMax) {
-				u.Character.ExtraLives = int(c.LivesMax)
-			}
-		}
-
-		u.EventLog.Add(`xp`, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now <ansi fg="magenta-bold">level %d</ansi>!`, u.Character.Name, u.Character.Level))
-
-		SaveUser(*u)
-
-		events.AddToQueue(events.LevelUp{
+		levelUpEvent := events.LevelUp{
 			UserId:         u.UserId,
 			RoomId:         u.Character.RoomId,
 			Username:       u.Username,
 			CharacterName:  u.Character.Name,
+			LevelsGained:   0,
 			NewLevel:       u.Character.Level,
-			StatsDelta:     statsDelta,
-			TrainingPoints: 1,
-			StatPoints:     1,
-			LivesGained:    u.Character.ExtraLives - livesBefore,
-		})
+			StatsDelta:     stats.Statistics{},
+			TrainingPoints: 0,
+			StatPoints:     0,
+			LivesGained:    0,
+		}
 
-		newLevel, statsDelta = u.Character.LevelUp()
+		for newLevel {
+
+			if c.PermaDeath && c.LivesOnLevelUp > 0 {
+				u.Character.ExtraLives += int(c.LivesOnLevelUp)
+			}
+
+			u.EventLog.Add(`xp`, fmt.Sprintf(`<ansi fg="username">%s</ansi> is now <ansi fg="magenta-bold">level %d</ansi>!`, u.Character.Name, u.Character.Level))
+
+			levelUpEvent.LevelsGained += 1
+			levelUpEvent.StatsDelta.Strength.Value += statsDelta.Strength.Value
+			levelUpEvent.StatsDelta.Speed.Value += statsDelta.Speed.Value
+			levelUpEvent.StatsDelta.Smarts.Value += statsDelta.Smarts.Value
+			levelUpEvent.StatsDelta.Vitality.Value += statsDelta.Vitality.Value
+			levelUpEvent.StatsDelta.Mysticism.Value += statsDelta.Mysticism.Value
+			levelUpEvent.StatsDelta.Perception.Value += statsDelta.Perception.Value
+
+			levelUpEvent.TrainingPoints += 1
+			levelUpEvent.StatPoints += 1
+
+			newLevel, statsDelta = u.Character.LevelUp()
+		}
+
+		if u.Character.ExtraLives > int(c.LivesMax) {
+			u.Character.ExtraLives = int(c.LivesMax)
+		}
+
+		levelUpEvent.LivesGained = u.Character.ExtraLives - livesBefore
+		levelUpEvent.NewLevel = u.Character.Level
+
+		events.AddToQueue(levelUpEvent)
+
+		SaveUser(*u)
 	}
 }
 

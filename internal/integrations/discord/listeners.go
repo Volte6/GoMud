@@ -88,7 +88,10 @@ func HandleLevelup(e events.Event) bool {
 		return false
 	}
 
-	message := fmt.Sprintf(`:crown: **%s** *has reached **level %d**!*`, evt.CharacterName, evt.NewLevel)
+	message := fmt.Sprintf(`:crown: **%s** *has gained a level and reached **level %d**!*`, evt.CharacterName, evt.NewLevel)
+	if evt.LevelsGained > 1 {
+		message = fmt.Sprintf(`:crown: **%s** *has gained **%d levels** and reached **level %d**!*`, evt.CharacterName, evt.LevelsGained, evt.NewLevel)
+	}
 	SendMessage(message)
 
 	return true
