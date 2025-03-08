@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/term"
@@ -23,8 +24,7 @@ import (
 //
 
 var (
-	PromptDefault         = `{8}[{t} {T} {255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:`
-	promptDefaultCompiled = util.ConvertColorShortTags(PromptDefault)
+	promptDefaultCompiled = ``
 	promptColorRegex      = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
 	promptFindTagsRegex   = regexp.MustCompile(`\{[a-zA-Z%:\-]+\}`)
 )
@@ -46,6 +46,10 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 	}
 
 	if len(promptOut) == 0 {
+
+		if promptDefaultCompiled == `` {
+			promptDefaultCompiled = util.ConvertColorShortTags(configs.GetConfig().PromptFormat.String())
+		}
 
 		var customPrompt any = nil
 		var inCombat bool = u.Character.Aggro != nil
