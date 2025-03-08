@@ -824,7 +824,9 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 	mob := mobs.GetInstance(mobInstanceId)
 	if mob == nil { // Something went wrong. User not found.
-		mudlog.Error("Mob not found", "mobId", mobInstanceId, "where", "processMobInput()")
+		if !mobs.RecentlyDied(mobInstanceId) {
+			mudlog.Error("Mob not found", "mobId", mobInstanceId, "where", "processMobInput()")
+		}
 		return
 	}
 
