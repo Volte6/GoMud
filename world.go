@@ -808,7 +808,7 @@ func (w *World) processInput(userId int, inputText string, flags events.EventFla
 	}
 
 	// If they had an input prompt, but now they don't, lets make sure to resend a status prompt
-	if hadPrompt {
+	if hadPrompt || (!hadPrompt && user.GetPrompt() != nil) {
 		connId := user.ConnectionId()
 		connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
 	}

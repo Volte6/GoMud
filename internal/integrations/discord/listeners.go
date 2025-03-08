@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Volte6/ansitags"
@@ -151,8 +152,31 @@ func HandleAuction(e events.Event) bool {
 
 		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
 
-		message := fmt.Sprintf(`:moneybag: **%s** *has bid **%d** on the **"%s"** auction!*`, evt.BuyerName, evt.BidAmount, itemName)
-		SendRichMessage(message, Gold)
+		payload := webHookPayload{
+			Embeds: []embed{{
+				Color:       Gold,
+				Description: fmt.Sprintf(`:moneybag: **%s** has bid on the auction!`, evt.BuyerName),
+				Fields: []embedField{
+					{
+						Name:   `Amount`,
+						Value:  strconv.Itoa(evt.BidAmount),
+						Inline: false,
+					},
+					{
+						Name:   `Item`,
+						Value:  itemName,
+						Inline: true,
+					},
+					{
+						Name:   `Description`,
+						Value:  evt.ItemDescription,
+						Inline: true,
+					},
+				},
+			}},
+		}
+
+		SendPayload(payload)
 
 		return true
 	}
@@ -161,8 +185,26 @@ func HandleAuction(e events.Event) bool {
 
 		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
 
-		message := fmt.Sprintf(`:moneybag: **%s** *is auctioning their **"%s"**!*`, evt.SellerName, itemName)
-		SendRichMessage(message, Gold)
+		payload := webHookPayload{
+			Embeds: []embed{{
+				Color:       Gold,
+				Description: fmt.Sprintf(`:moneybag: **%s** has started a new auction!`, evt.SellerName),
+				Fields: []embedField{
+					{
+						Name:   `Item`,
+						Value:  itemName,
+						Inline: true,
+					},
+					{
+						Name:   `Description`,
+						Value:  evt.ItemDescription,
+						Inline: true,
+					},
+				},
+			}},
+		}
+
+		SendPayload(payload)
 
 		return true
 	}
@@ -171,15 +213,49 @@ func HandleAuction(e events.Event) bool {
 
 		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
 
-		if evt.BidAmount == 0 {
-			// No winner
-			message := fmt.Sprintf(`:moneybag: *The **"%s"** auction by **%s** has ended with no bids.*`, itemName, evt.SellerName)
-			SendRichMessage(message, Gold)
+		auctionWinner := `No Winner`
+		highestBid := `No Bids`
 
-		} else {
-			message := fmt.Sprintf(`:moneybag: **%s** *won the **"%s"** on auction with a **%d** bid!*`, evt.BuyerName, itemName, evt.BidAmount)
-			SendRichMessage(message, Gold)
+		if evt.BidAmount > 0 {
+			auctionWinner = evt.BuyerName
+			highestBid = strconv.Itoa(evt.BidAmount)
 		}
+
+		payload := webHookPayload{
+			Embeds: []embed{{
+				Color:       Gold,
+				Description: `:moneybag: The auction has ended!`,
+				Fields: []embedField{
+					{
+						Name:   `Highest Bid`,
+						Value:  highestBid,
+						Inline: true,
+					},
+					{
+						Name:   `Winner`,
+						Value:  auctionWinner,
+						Inline: true,
+					},
+					{
+						Name:   ` `,
+						Value:  ` `,
+						Inline: false,
+					},
+					{
+						Name:   `Item`,
+						Value:  itemName,
+						Inline: true,
+					},
+					{
+						Name:   `Description`,
+						Value:  evt.ItemDescription,
+						Inline: true,
+					},
+				},
+			}},
+		}
+
+		SendPayload(payload)
 
 		return true
 	}

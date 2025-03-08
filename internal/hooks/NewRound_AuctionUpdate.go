@@ -150,16 +150,17 @@ func AuctionUpdate(e events.Event) bool {
 		sellerName := a.SellerName
 		buyerName := a.HighestBidderName
 		if a.Anonymous {
-			sellerName = `Someone`
-			buyerName = `Someone`
+			sellerName = `(Anonymous)`
+			buyerName = `(Anonymous)`
 		}
 
 		events.AddToQueue(events.Auction{
-			State:      `END`,
-			ItemName:   a.ItemData.NameComplex(),
-			SellerName: sellerName,
-			BuyerName:  buyerName,
-			BidAmount:  a.HighestBid,
+			State:           `END`,
+			ItemName:        a.ItemData.NameComplex(),
+			ItemDescription: a.ItemData.GetSpec().Description,
+			SellerName:      sellerName,
+			BuyerName:       buyerName,
+			BidAmount:       a.HighestBid,
 		})
 
 	} else if a.LastUpdate.IsZero() {
@@ -179,16 +180,17 @@ func AuctionUpdate(e events.Event) bool {
 		sellerName := a.SellerName
 		buyerName := a.HighestBidderName
 		if a.Anonymous {
-			sellerName = `Someone`
-			buyerName = `Someone`
+			sellerName = `(Anonymous)`
+			buyerName = `(Anonymous)`
 		}
 
 		events.AddToQueue(events.Auction{
-			State:      `START`,
-			ItemName:   a.ItemData.NameComplex(),
-			SellerName: sellerName,
-			BuyerName:  buyerName,
-			BidAmount:  a.HighestBid,
+			State:           `START`,
+			ItemName:        a.ItemData.NameComplex(),
+			ItemDescription: a.ItemData.GetSpec().Description,
+			SellerName:      sellerName,
+			BuyerName:       buyerName,
+			BidAmount:       a.HighestBid,
 		})
 
 	} else if time.Since(a.LastUpdate) > time.Second*time.Duration(c.AuctionUpdateSeconds) {
@@ -208,16 +210,17 @@ func AuctionUpdate(e events.Event) bool {
 		sellerName := a.SellerName
 		buyerName := a.HighestBidderName
 		if a.Anonymous {
-			sellerName = `Someone`
-			buyerName = `Someone`
+			sellerName = `(Anonymous)`
+			buyerName = `(Anonymous)`
 		}
 
 		events.AddToQueue(events.Auction{
-			State:      `UPDATE`,
-			ItemName:   a.ItemData.NameComplex(),
-			SellerName: sellerName,
-			BuyerName:  buyerName,
-			BidAmount:  a.HighestBid,
+			State:           `REMINDER`,
+			ItemName:        a.ItemData.NameComplex(),
+			ItemDescription: a.ItemData.GetSpec().Description,
+			SellerName:      sellerName,
+			BuyerName:       buyerName,
+			BidAmount:       a.HighestBid,
 		})
 
 	}

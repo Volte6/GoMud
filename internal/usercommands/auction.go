@@ -144,11 +144,12 @@ func Auction(rest string, user *users.UserRecord, room *rooms.Room, flags events
 		}
 
 		events.AddToQueue(events.Auction{
-			State:      `BID`,
-			ItemName:   currentAuction.ItemData.NameComplex(),
-			SellerName: sellerName,
-			BuyerName:  buyerName,
-			BidAmount:  currentAuction.HighestBid,
+			State:           `BID`,
+			ItemName:        currentAuction.ItemData.NameComplex(),
+			ItemDescription: currentAuction.ItemData.GetSpec().Description,
+			SellerName:      sellerName,
+			BuyerName:       buyerName,
+			BidAmount:       currentAuction.HighestBid,
 		})
 
 		return true, nil
