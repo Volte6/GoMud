@@ -36,7 +36,9 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, source
 
 	timestart := time.Now()
 	defer func() {
-		mudlog.Debug("TryMobScriptEvent()", "eventName", eventName, "MobId", sMob.MobTypeId(), "time", time.Since(timestart))
+		if eventName != "onIdle" {
+			mudlog.Debug("TryMobScriptEvent()", "eventName", eventName, "MobId", sMob.MobTypeId(), "time", time.Since(timestart))
+		}
 	}()
 	if onCommandFunc, ok := vmw.GetFunction(eventName); ok {
 

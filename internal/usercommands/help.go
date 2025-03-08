@@ -88,9 +88,12 @@ func Help(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		}
 
 		// replace any non alpha/numeric characters in "rest"
-		helpName = regexp.MustCompile(`[^a-zA-Z0-9\\-]+`).ReplaceAllString(helpName, ``)
-
-		helpName = keywords.TryHelpAlias(helpName)
+		if fullSearchAlias := keywords.TryHelpAlias(rest); fullSearchAlias != rest {
+			helpName = fullSearchAlias
+		} else {
+			helpName = regexp.MustCompile(`[^a-zA-Z0-9\\-]+`).ReplaceAllString(helpName, ``)
+			helpName = keywords.TryHelpAlias(helpName)
+		}
 
 		var helpVars any = nil
 

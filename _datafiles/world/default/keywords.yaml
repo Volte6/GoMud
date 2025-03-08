@@ -27,6 +27,7 @@ help:
       - character
       - pets
       - train
+      - stat-train
       - bury
     communication:
       - emote
@@ -185,6 +186,7 @@ help-aliases:
   time:             ['date']
   pvp:              ['pk']
   about:            ['gomud']
+  stat-train:       ['stat train', 'status train', 'stat points']
 # Default aliases for commands
 # For example: inv -> inventory
 # They can be command + argument aliases
