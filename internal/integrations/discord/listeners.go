@@ -135,3 +135,54 @@ func HandleBroadcast(e events.Event) bool {
 
 	return true
 }
+
+func HandleAuction(e events.Event) bool {
+	evt, typeOk := e.(events.Auction)
+	if !typeOk {
+		return false
+	}
+
+	// Don't spam the reminders.
+	if evt.State == `REMINDER` {
+		return true
+	}
+
+	if evt.State == `BID` {
+
+		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
+
+		message := fmt.Sprintf(`:moneybag: **%s** *has bid **%d** on the **"%s"** auction!*`, evt.BuyerName, evt.BidAmount, itemName)
+		SendRichMessage(message, Gold)
+
+		return true
+	}
+
+	if evt.State == `START` {
+
+		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
+
+		message := fmt.Sprintf(`:moneybag: **%s** *is auctioning their **"%s"**!*`, evt.SellerName, itemName)
+		SendRichMessage(message, Gold)
+
+		return true
+	}
+
+	if evt.State == `END` {
+
+		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
+
+		if evt.BidAmount == 0 {
+			// No winner
+			message := fmt.Sprintf(`:moneybag: *The **"%s"** auction by **%s** has ended with no bids.*`, itemName, evt.SellerName)
+			SendRichMessage(message, Gold)
+
+		} else {
+			message := fmt.Sprintf(`:moneybag: **%s** *won the **"%s"** on auction with a **%d** bid!*`, evt.BuyerName, itemName, evt.BidAmount)
+			SendRichMessage(message, Gold)
+		}
+
+		return true
+	}
+
+	return true
+}

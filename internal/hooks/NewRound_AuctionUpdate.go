@@ -8,7 +8,6 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 )
 
@@ -56,12 +55,12 @@ func AuctionUpdate(e events.Event) bool {
 						Gained: true,
 					})
 
-					msg := fmt.Sprintf(`<ansi fg="yellow">You have won the auction for the <ansi fg="item">%s</ansi>! It has been added to your backpack.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr)
+					msg := fmt.Sprintf(`<ansi fg="yellow">You have won the auction for the <ansi fg="item">%s</ansi>! It has been added to your backpack.</ansi>`, a.ItemData.DisplayName())
 					user.SendText(msg)
 				}
 			} else {
 
-				msg := fmt.Sprintf(`Your won the auction for the <ansi fg="item">%s</ansi> while you were offline.%s`, a.ItemData.DisplayName(), term.CRLFStr)
+				msg := fmt.Sprintf(`You won the auction for the <ansi fg="item">%s</ansi> while you were offline.`, a.ItemData.DisplayName())
 
 				users.SearchOfflineUsers(func(u *users.UserRecord) bool {
 					if u.UserId == a.HighestBidUserId {
@@ -86,12 +85,14 @@ func AuctionUpdate(e events.Event) bool {
 
 			if a.SellerUserId > 0 {
 
-				msg := fmt.Sprintf(`Your auction of the <ansi fg="item">%s</ansi> has ended while you were offline. The highest bid was made by <ansi fg="username">%s</ansi> for <ansi fg="gold">%d gold</ansi>.%s`, a.ItemData.DisplayName(), a.HighestBidderName, a.HighestBid, term.CRLFStr)
+				msg := fmt.Sprintf(`Your auction of the <ansi fg="item">%s</ansi> has ended. The highest bid was made by <ansi fg="username">%s</ansi> for <ansi fg="gold">%d gold</ansi>.`, a.ItemData.DisplayName(), a.HighestBidderName, a.HighestBid)
 
 				if sellerUser := users.GetByUserId(a.SellerUserId); sellerUser != nil {
 					sellerUser.Character.Bank += a.HighestBid
 					sellerUser.SendText(`<ansi fg="yellow">` + msg + `</ansi>`)
 				} else {
+
+					msg := fmt.Sprintf(`Your auction of the <ansi fg="item">%s</ansi> has ended while you were offline. The highest bid was made by <ansi fg="username">%s</ansi> for <ansi fg="gold">%d gold</ansi>.`, a.ItemData.DisplayName(), a.HighestBidderName, a.HighestBid)
 
 					users.SearchOfflineUsers(func(u *users.UserRecord) bool {
 						if u.UserId == a.SellerUserId {
@@ -126,11 +127,40 @@ func AuctionUpdate(e events.Event) bool {
 						Gained: true,
 					})
 
-					msg := fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>%s`, a.ItemData.DisplayName(), term.CRLFStr)
+					msg := fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to you.</ansi>`, a.ItemData.DisplayName())
 					user.SendText(msg)
 				}
 			}
+
+			for _, uid := range users.GetOnlineUserIds() {
+				if uid == a.SellerUserId {
+					continue
+				}
+				if u := users.GetByUserId(uid); u != nil {
+					auctionOn := u.GetConfigOption(`auction`)
+					if auctionOn == nil || auctionOn.(bool) {
+						msg := fmt.Sprintf(`<ansi fg="yellow">The auction for the <ansi fg="item">%s</ansi> has ended without a winner. It has been returned to the seller.</ansi>`, a.ItemData.DisplayName())
+						u.SendText(msg)
+					}
+				}
+			}
+
 		}
+
+		sellerName := a.SellerName
+		buyerName := a.HighestBidderName
+		if a.Anonymous {
+			sellerName = `Someone`
+			buyerName = `Someone`
+		}
+
+		events.AddToQueue(events.Auction{
+			State:      `END`,
+			ItemName:   a.ItemData.NameComplex(),
+			SellerName: sellerName,
+			BuyerName:  buyerName,
+			BidAmount:  a.HighestBid,
+		})
 
 	} else if a.LastUpdate.IsZero() {
 
@@ -146,6 +176,21 @@ func AuctionUpdate(e events.Event) bool {
 			}
 		}
 
+		sellerName := a.SellerName
+		buyerName := a.HighestBidderName
+		if a.Anonymous {
+			sellerName = `Someone`
+			buyerName = `Someone`
+		}
+
+		events.AddToQueue(events.Auction{
+			State:      `START`,
+			ItemName:   a.ItemData.NameComplex(),
+			SellerName: sellerName,
+			BuyerName:  buyerName,
+			BidAmount:  a.HighestBid,
+		})
+
 	} else if time.Since(a.LastUpdate) > time.Second*time.Duration(c.AuctionUpdateSeconds) {
 
 		a.LastUpdate = evt.TimeNow
@@ -159,6 +204,21 @@ func AuctionUpdate(e events.Event) bool {
 				}
 			}
 		}
+
+		sellerName := a.SellerName
+		buyerName := a.HighestBidderName
+		if a.Anonymous {
+			sellerName = `Someone`
+			buyerName = `Someone`
+		}
+
+		events.AddToQueue(events.Auction{
+			State:      `UPDATE`,
+			ItemName:   a.ItemData.NameComplex(),
+			SellerName: sellerName,
+			BuyerName:  buyerName,
+			BidAmount:  a.HighestBid,
+		})
 
 	}
 

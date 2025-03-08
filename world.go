@@ -990,6 +990,14 @@ func (w *World) EventLoop() {
 	}
 
 	//
+	// Auctions
+	//
+	eq = events.GetQueue(events.Auction{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
 	// Day/Night handling
 	//
 	eq = events.GetQueue(events.DayNightCycle{})

@@ -63,9 +63,11 @@ func StartAuction(item items.Item, userId int, minimumBid int) bool {
 			HighestBidUserId:  0,
 			HighestBidderName: ``,
 		}
+
+		return true
 	}
 
-	return true
+	return false
 }
 
 func GetCurrentAuction() *AuctionItem {
@@ -140,4 +142,12 @@ func GetAuctionHistory(totalItems int) []PastAuctionItem {
 	}
 
 	return PastAuctions[len(PastAuctions)-totalItems : totalItems]
+}
+
+func GetLastAuction() PastAuctionItem {
+	if len(PastAuctions) == 0 {
+		return PastAuctionItem{}
+	}
+
+	return PastAuctions[len(PastAuctions)-1]
 }
