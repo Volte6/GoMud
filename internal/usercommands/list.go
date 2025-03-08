@@ -30,6 +30,8 @@ func List(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			continue
 		}
 
+		user.DidTip(`list`, true)
+
 		/// Run restock routine
 		mob.Character.Shop.Restock()
 

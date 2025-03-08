@@ -38,10 +38,11 @@ type UserRecord struct {
 	AdminCommands  []string              `yaml:"admincommands,omitempty"`
 	ConfigOptions  map[string]any        `yaml:"configoptions,omitempty"`
 	Inbox          Inbox                 `yaml:"inbox,omitempty"`
-	Muted          bool                  `yaml:"muted,omitempty"`    // Cannot SEND custom communications to anyone but admin/mods
-	Deafened       bool                  `yaml:"deafened,omitempty"` // Cannot HEAR custom communications from anyone but admin/mods
-	EventLog       UserLog               `yaml:"-"`                  // Do not retain in user file (for now)
-	LastMusic      string                `yaml:"-"`                  // Keeps track of the last music that was played
+	Muted          bool                  `yaml:"muted,omitempty"`        // Cannot SEND custom communications to anyone but admin/mods
+	Deafened       bool                  `yaml:"deafened,omitempty"`     // Cannot HEAR custom communications from anyone but admin/mods
+	TipsComplete   map[string]bool       `yaml:"tipscomplete,omitempty"` // Tips the user has followed/completed so they can be quiet
+	EventLog       UserLog               `yaml:"-"`                      // Do not retain in user file (for now)
+	LastMusic      string                `yaml:"-"`                      // Keeps track of the last music that was played
 	connectionId   uint64
 	unsentText     string
 	suggestText    string
@@ -188,6 +189,24 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 
 		SaveUser(*u)
 	}
+}
+
+func (u *UserRecord) DidTip(tipName string, completed ...bool) bool {
+
+	if u.TipsComplete == nil {
+		u.TipsComplete = map[string]bool{}
+	}
+
+	if len(completed) > 0 {
+		if completed[0] {
+			u.TipsComplete[tipName] = completed[0]
+		} else {
+			delete(u.TipsComplete, tipName)
+		}
+		return completed[0]
+	}
+
+	return u.TipsComplete[tipName]
 }
 
 func (u *UserRecord) PlayMusic(musicFileOrId string) {

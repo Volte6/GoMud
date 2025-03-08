@@ -235,3 +235,12 @@ type Auction struct {
 }
 
 func (l Auction) Type() string { return `Auction` }
+
+type Looking struct {
+	UserId int
+	RoomId int
+	Target string
+	Hidden bool
+}
+
+func (l Looking) Type() string { return `Looking` }

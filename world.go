@@ -992,6 +992,14 @@ func (w *World) EventLoop() {
 	}
 
 	//
+	// Looking
+	//
+	eq = events.GetQueue(events.Looking{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
 	// Auctions
 	//
 	eq = events.GetQueue(events.Auction{})
