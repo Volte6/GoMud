@@ -58,6 +58,9 @@ func RegisterListeners() {
 	// Day/Night cycle
 	events.RegisterListener(events.DayNightCycle{}, NotifySunriseSunset)
 
+	// Looking
+	events.RegisterListener(events.Looking{}, HandleLookHints)
+
 	// Listener for debugging some stuff (catches all events)
 	/*
 		events.RegisterListener(nil, func(e events.Event) bool {

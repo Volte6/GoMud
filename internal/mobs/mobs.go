@@ -11,9 +11,8 @@ import (
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/conversations"
-	"github.com/volte6/gomud/internal/mudlog"
-
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mudlog"
 
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/items"
@@ -29,6 +28,8 @@ var (
 	mobInstances        = map[int]*Mob{}
 	mobsHatePlayers     = map[string]map[int]int{}
 	mobNameCache        = map[MobId]string{}
+
+	recentlyDied = map[int]int{}
 )
 
 type ItemTrade struct {
@@ -96,6 +97,25 @@ func GetAllMobInfo() []Mob {
 
 func GetAllMobNames() []string {
 	return append([]string{}, allMobNames...)
+}
+
+func TrackRecentDeath(instanceId int) {
+	recentlyDied[instanceId] = int(util.GetRoundCount())
+}
+func RecentlyDied(instanceId int) bool {
+
+	if len(recentlyDied) > 30 {
+		roundNow := int(util.GetRoundCount())
+		for k, v := range recentlyDied {
+			if roundNow-v > 15 {
+				delete(recentlyDied, k)
+			}
+		}
+	}
+
+	_, ok := recentlyDied[instanceId]
+
+	return ok
 }
 
 func MobIdByName(mobName string) MobId {

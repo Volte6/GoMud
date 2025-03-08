@@ -13,5 +13,7 @@
  <ansi fg="yellow">Bonus Stat Points:</ansi> <ansi fg="yellow-bold">+{{ .statPoints }}</ansi>{{ if .livesUp }}
  <ansi fg="yellow">Extra Lives:</ansi>       <ansi fg="yellow-bold">+{{ .livesUp }}</ansi>{{ end }}
 
+ Type <ansi fg="command">stat train</ansi> to spend your extra Stat Points and improve your character.
+
 <ansi fg="yellow-bold">*******************************************************************************</ansi>
 <ansi fg="yellow-bold">*******************************************************************************</ansi>

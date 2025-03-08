@@ -33,6 +33,9 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		return true, nil
 	}
 
+	// Useful to know sometimes
+	mobs.TrackRecentDeath(mob.InstanceId)
+
 	mudlog.Debug(`Mob Death`, `name`, mob.Character.Name, `rest`, rest)
 
 	// Make sure to clean up any charm stuff if it's being removed

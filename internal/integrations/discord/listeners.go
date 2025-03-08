@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Volte6/ansitags"
@@ -132,6 +133,132 @@ func HandleBroadcast(e events.Event) bool {
 	message := fmt.Sprintf(`:speech_balloon: %s`, textOut)
 
 	SendRichMessage(message, Purple)
+
+	return true
+}
+
+func HandleAuction(e events.Event) bool {
+	evt, typeOk := e.(events.Auction)
+	if !typeOk {
+		return false
+	}
+
+	// Don't spam the reminders.
+	if evt.State == `REMINDER` {
+		return true
+	}
+
+	if evt.State == `BID` {
+
+		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
+
+		payload := webHookPayload{
+			Embeds: []embed{{
+				Color:       Gold,
+				Description: fmt.Sprintf(`:moneybag: **%s** has bid on the auction!`, evt.BuyerName),
+				Fields: []embedField{
+					{
+						Name:   `Amount`,
+						Value:  strconv.Itoa(evt.BidAmount),
+						Inline: false,
+					},
+					{
+						Name:   `Item`,
+						Value:  itemName,
+						Inline: true,
+					},
+					{
+						Name:   `Description`,
+						Value:  evt.ItemDescription,
+						Inline: true,
+					},
+				},
+			}},
+		}
+
+		SendPayload(payload)
+
+		return true
+	}
+
+	if evt.State == `START` {
+
+		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
+
+		payload := webHookPayload{
+			Embeds: []embed{{
+				Color:       Gold,
+				Description: fmt.Sprintf(`:moneybag: **%s** has started a new auction!`, evt.SellerName),
+				Fields: []embedField{
+					{
+						Name:   `Item`,
+						Value:  itemName,
+						Inline: true,
+					},
+					{
+						Name:   `Description`,
+						Value:  evt.ItemDescription,
+						Inline: true,
+					},
+				},
+			}},
+		}
+
+		SendPayload(payload)
+
+		return true
+	}
+
+	if evt.State == `END` {
+
+		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
+
+		auctionWinner := `No Winner`
+		highestBid := `No Bids`
+
+		if evt.BidAmount > 0 {
+			auctionWinner = evt.BuyerName
+			highestBid = strconv.Itoa(evt.BidAmount)
+		}
+
+		payload := webHookPayload{
+			Embeds: []embed{{
+				Color:       Gold,
+				Description: `:moneybag: The auction has ended!`,
+				Fields: []embedField{
+					{
+						Name:   `Highest Bid`,
+						Value:  highestBid,
+						Inline: true,
+					},
+					{
+						Name:   `Winner`,
+						Value:  auctionWinner,
+						Inline: true,
+					},
+					{
+						Name:   ` `,
+						Value:  ` `,
+						Inline: false,
+					},
+					{
+						Name:   `Item`,
+						Value:  itemName,
+						Inline: true,
+					},
+					{
+						Name:   `Description`,
+						Value:  evt.ItemDescription,
+						Inline: true,
+					},
+				},
+			}},
+		}
+
+		SendPayload(payload)
+
+		return true
+	}
 
 	return true
 }

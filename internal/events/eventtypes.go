@@ -224,3 +224,23 @@ type DayNightCycle struct {
 }
 
 func (l DayNightCycle) Type() string { return `DayNightCycle` }
+
+type Auction struct {
+	State           string // START, REMINDER, BID, END
+	ItemName        string
+	ItemDescription string
+	SellerName      string
+	BuyerName       string
+	BidAmount       int
+}
+
+func (l Auction) Type() string { return `Auction` }
+
+type Looking struct {
+	UserId int
+	RoomId int
+	Target string
+	Hidden bool
+}
+
+func (l Looking) Type() string { return `Looking` }

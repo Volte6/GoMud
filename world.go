@@ -808,7 +808,7 @@ func (w *World) processInput(userId int, inputText string, flags events.EventFla
 	}
 
 	// If they had an input prompt, but now they don't, lets make sure to resend a status prompt
-	if hadPrompt {
+	if hadPrompt || (!hadPrompt && user.GetPrompt() != nil) {
 		connId := user.ConnectionId()
 		connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
 	}
@@ -824,7 +824,9 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 
 	mob := mobs.GetInstance(mobInstanceId)
 	if mob == nil { // Something went wrong. User not found.
-		mudlog.Error("Mob not found", "mobId", mobInstanceId, "where", "processMobInput()")
+		if !mobs.RecentlyDied(mobInstanceId) {
+			mudlog.Error("Mob not found", "mobId", mobInstanceId, "where", "processMobInput()")
+		}
 		return
 	}
 
@@ -985,6 +987,22 @@ func (w *World) EventLoop() {
 	// Player joined the world
 	//
 	eq := events.GetQueue(events.Log{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
+	// Looking
+	//
+	eq = events.GetQueue(events.Looking{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
+	// Auctions
+	//
+	eq = events.GetQueue(events.Auction{})
 	for eq.Len() > 0 {
 		events.DoListeners(eq.Poll())
 	}

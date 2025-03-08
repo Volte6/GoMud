@@ -44,6 +44,13 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 	lookAt := rest
 
+	events.AddToQueue(events.Looking{
+		UserId: user.UserId,
+		RoomId: room.RoomId,
+		Target: lookAt,
+		Hidden: isSneaking,
+	})
+
 	// Handle an ordinary look with no target
 	if len(lookAt) == 0 {
 
