@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"math"
 	"strings"
-	"unicode/utf8"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/users"
 )
@@ -250,9 +250,9 @@ func DrawZoneMap(rGraph *RoomGraph, title string, mapDisplayWidth int, mapDispla
 		//Zone:         zone,
 		DisplayLines: mapLines,
 		Height:       len(mapLines),
-		Width:        utf8.RuneCountInString(mapLines[0]),
+		Width:        runewidth.StringWidth(mapLines[0]),
 		Legend:       legend, //make(map[string]string),
-		LegendWidth:  utf8.RuneCountInString(mapLines[0]),
+		LegendWidth:  runewidth.StringWidth(mapLines[0]),
 		LeftBorder: MapBorder{
 			Top:    ".-=~=-.",
 			Mid:    []string{"( _ __)", "(__  _)"},
@@ -398,7 +398,7 @@ func DrawZoneMapWide(rGraph *RoomGraph, title string, mapDisplayWidth int, mapDi
 		Title:        title,
 		DisplayLines: mapLines,
 		Height:       len(mapLines),
-		Width:        utf8.RuneCountInString(mapLines[0]),
+		Width:        runewidth.StringWidth(mapLines[0]),
 		Legend:       legend,
 		LeftBorder: MapBorder{
 			Top:    ".-=~=-.",

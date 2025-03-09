@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/Volte6/ansitags"
+	"github.com/mattn/go-runewidth"
 	"github.com/pkg/errors"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mudlog"
@@ -180,7 +180,7 @@ func ApplyColors(input string, patternValues []int, method ...ColorizeStyle) str
 	} else if method[0] == Stretch {
 		// Spread the whole pattern to fit the string
 		subCounter := 0
-		stretchAmount := int(math.Floor(float64(utf8.RuneCountInString(input)) / float64(len(patternValues))))
+		stretchAmount := int(math.Floor(float64(runewidth.StringWidth(input)) / float64(len(patternValues))))
 		if stretchAmount < 1 {
 			stretchAmount = 1
 		}
