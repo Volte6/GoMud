@@ -8,9 +8,9 @@ import (
 	"sync"
 	"text/template"
 	"time"
-	"unicode/utf8"
 
 	"github.com/Volte6/ansitags"
+	"github.com/mattn/go-runewidth"
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mudlog"
@@ -191,7 +191,7 @@ func GetTable(title string, headers []string, rows [][]string, formatting ...[]s
 	// Get the longest element
 	for i := 0; i < hdrColCt; i++ {
 		if len(headers[i])+1 > table.ColumnWidths[i] {
-			table.ColumnWidths[i] = utf8.RuneCountInString(headers[i])
+			table.ColumnWidths[i] = runewidth.StringWidth(headers[i])
 		}
 	}
 
@@ -208,7 +208,7 @@ func GetTable(title string, headers []string, rows [][]string, formatting ...[]s
 		}
 
 		for c := 0; c < hdrColCt; c++ {
-			sz := utf8.RuneCountInString(ansitags.Parse(rows[r][c], ansitags.StripTags))
+			sz := runewidth.StringWidth(ansitags.Parse(rows[r][c], ansitags.StripTags))
 			if sz+1 > table.ColumnWidths[c] {
 				table.ColumnWidths[c] = sz
 			}

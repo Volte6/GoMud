@@ -7,8 +7,8 @@ import (
 	"strings"
 	"text/template"
 	"time"
-	"unicode/utf8"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/colorpatterns"
@@ -281,8 +281,8 @@ func padRight(totalWidth int, stringArgs ...string) string {
 
 func padRightX(input, padding string, length int) string {
 
-	padLen := utf8.RuneCountInString(padding)
-	inputLen := utf8.RuneCountInString(input)
+	padLen := runewidth.StringWidth(padding)
+	inputLen := runewidth.StringWidth(input)
 
 	// Calculate how many times the padding string should be repeated
 	paddingRepeats := int(math.Ceil((float64(length) - float64(inputLen)) / float64(padLen)))
@@ -291,7 +291,7 @@ func padRightX(input, padding string, length int) string {
 	// Repeat the padding string to fill the gap
 	pad := strings.Repeat(padding, paddingRepeats)
 
-	if utf8.RuneCountInString(pad)+inputLen > length {
+	if runewidth.StringWidth(pad)+inputLen > length {
 		pad = string([]rune(pad)[:finalPadLength])
 	}
 

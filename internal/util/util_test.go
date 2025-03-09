@@ -11,7 +11,8 @@ import (
 	"sync"
 	"testing"
 	"time"
-	"unicode/utf8"
+
+	"github.com/mattn/go-runewidth"
 )
 
 // Because turnCount, roundCount and timeTrackers are package-level globals,
@@ -516,7 +517,7 @@ func TestGetMyIP(t *testing.T) {
 func TestProgressBar(t *testing.T) {
 	full, empty := ProgressBar(0.5, 10)
 
-	if utf8.RuneCountInString(full) != 5 || utf8.RuneCountInString(empty) != 5 {
+	if runewidth.StringWidth(full) != 5 || runewidth.StringWidth(empty) != 5 {
 		t.Errorf("ProgressBar(0.5,10) got %d full, %d empty; want 5,5", len(full), len(empty))
 	}
 
