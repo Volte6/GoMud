@@ -210,6 +210,10 @@ TimeFormat: 'Monday, 02-Jan-2006 3:04:05PM'
 # - TimeFormatShort - 
 #   Same as TimeFormat, but shorter form
 TimeFormatShort: 'Jan 2 ''06 3:04PM'
+# - PromptFormat - 
+#   Default prompt formatting.
+#   See: "help prompt" in game to learn more about this.
+PromptFormat: '{8}[{t} {T} {255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:'
 # - RoundsPerDay -
 #   How many rounds are in a day? This is used to calculate the time of day.
 #   The lower this number, the faster the day/night cycle will be.
