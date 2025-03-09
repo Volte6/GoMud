@@ -143,14 +143,26 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 const cellPadding int = 1
 
 type TemplateTable struct {
-	Title          string
-	Header         []string
-	Rows           [][]string
-	TrueCellSize   [][]int
-	ColumnCount    int
-	ColumnWidths   []int
-	Formatting     [][]string
-	formatRowCount int
+	Title              string
+	Header             []string
+	Rows               [][]string
+	TrueHeaderCellSize []int
+	TrueCellSize       [][]int
+	ColumnCount        int
+	ColumnWidths       []int
+	Formatting         [][]string
+	formatRowCount     int
+}
+
+func (t TemplateTable) GetHeaderCell(column int) string {
+
+	cellStr := t.Header[column]
+	repeatCt := t.ColumnWidths[column] - t.TrueHeaderCellSize[column]
+	if repeatCt > 0 {
+		cellStr += strings.Repeat(` `, repeatCt)
+	}
+
+	return cellStr
 }
 
 func (t TemplateTable) GetCell(row int, column int) string {
@@ -174,25 +186,29 @@ func (t TemplateTable) GetCell(row int, column int) string {
 func GetTable(title string, headers []string, rows [][]string, formatting ...[]string) TemplateTable {
 
 	var table TemplateTable = TemplateTable{
-		Title:        title,
-		Header:       headers,
-		Rows:         rows,
-		TrueCellSize: [][]int{},
-		ColumnCount:  len(headers),
-		ColumnWidths: make([]int, len(headers)),
-		Formatting:   formatting,
+		Title:              title,
+		Header:             headers,
+		Rows:               rows,
+		TrueHeaderCellSize: []int{},
+		TrueCellSize:       [][]int{},
+		ColumnCount:        len(headers),
+		ColumnWidths:       make([]int, len(headers)),
+		Formatting:         formatting,
 	}
 
 	hdrColCt := len(headers)
 	rowCt := len(rows)
 	table.formatRowCount = len(formatting)
+	table.TrueHeaderCellSize = make([]int, hdrColCt)
 	table.TrueCellSize = make([][]int, rowCt)
 
 	// Get the longest element
 	for i := 0; i < hdrColCt; i++ {
-		if len(headers[i])+1 > table.ColumnWidths[i] {
-			table.ColumnWidths[i] = runewidth.StringWidth(headers[i])
+		sz := runewidth.StringWidth(headers[i])
+		if sz+1 > table.ColumnWidths[i] {
+			table.ColumnWidths[i] = sz
 		}
+		table.TrueHeaderCellSize[i] = sz
 	}
 
 	// Get the longest element
