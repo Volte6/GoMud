@@ -20,9 +20,11 @@ const (
 )
 
 var (
-	configData Config            = Config{}
-	overrides  map[string]any    = make(map[string]any)
-	keyLookups map[string]string = map[string]string{}
+	configData Config         = Config{}
+	overrides  map[string]any = make(map[string]any)
+
+	keyLookups  map[string]string = map[string]string{}
+	typeLookups map[string]string = map[string]string{}
 
 	configDataLock       sync.RWMutex
 	ErrInvalidConfigName = errors.New("invalid config name")
@@ -233,12 +235,10 @@ func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
 
 func SetVal(propertyPath string, newVal string) error {
 
-	if k, ok := keyLookups[strings.ToLower(propertyPath)]; ok {
-		propertyPath = k
-	}
+	propertyPath, propertyType := FindFullPath(propertyPath)
 
 	quickMap := make(map[string]any)
-	quickMap[propertyPath] = newVal
+	quickMap[propertyPath] = StringToConfigValue(newVal, propertyType)
 
 	flatOverrides := flatten(overrides)
 	flatQuickmap := flatten(quickMap)
@@ -299,7 +299,8 @@ func ReloadConfig() error {
 
 	// Build a special lookup to attempt to match old data or even some minor typos
 	keyLookups = map[string]string{}
-	for k, _ := range configData.AllConfigData() {
+	typeLookups = map[string]string{}
+	for k, v := range configData.AllConfigData() {
 
 		if strings.Index(k, `.`) != -1 {
 
@@ -317,6 +318,8 @@ func ReloadConfig() error {
 		} else {
 			keyLookups[strings.ToLower(k)] = k
 		}
+
+		typeLookups[k] = reflect.TypeOf(v).String()
 	}
 
 	overridePath := overridePath()
@@ -341,7 +344,7 @@ func ReloadConfig() error {
 
 			// Attempt a correction for bad names
 			for k, v := range tmpOverrides {
-				if newKey := FindFullPath(k); newKey != k {
+				if newKey, _ := FindFullPath(k); newKey != k {
 					tmpOverrides[newKey] = v
 					delete(tmpOverrides, k)
 				}
@@ -365,12 +368,12 @@ func ReloadConfig() error {
 	return nil
 }
 
-func FindFullPath(inputKey string) string {
+func FindFullPath(inputKey string) (properKey string, typeName string) {
 
 	if v, ok := keyLookups[strings.ToLower(inputKey)]; ok {
-		return v
+		return v, typeLookups[v]
 	}
-	return inputKey
+	return inputKey, typeLookups[inputKey]
 }
 
 // Usage: configs.GetSecret(c.DiscordWebhookUrl)
