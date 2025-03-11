@@ -1,7 +1,6 @@
 package configs
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -13,11 +12,47 @@ type ConfigSecret string // special case string
 type ConfigFloat float64
 type ConfigBool bool
 type ConfigSliceString []string
-type ConfigMap map[string]string
 
 type ConfigValue interface {
 	String() string
 	Set(string) error
+}
+
+func StringToConfigValue(strVal string, typeName string) ConfigValue {
+
+	switch typeName {
+	case "configs.ConfigInt":
+		v := ConfigInt(0)
+		v.Set(strVal)
+		return &v
+	case "configs.ConfigUInt64":
+		var v ConfigUInt64 = 0
+		v.Set(strVal)
+		return &v
+	case "configs.ConfigString":
+		var v ConfigString = ""
+		v.Set(strVal)
+		return &v
+	case "configs.ConfigSecret":
+		var v ConfigSecret = ""
+		v.Set(strVal)
+		return &v
+	case "configs.ConfigFloat":
+		var v ConfigFloat = 0
+		v.Set(strVal)
+		return &v
+	case "configs.ConfigBool":
+		var v ConfigBool = false
+		v.Set(strVal)
+		return &v
+	case "configs.ConfigSliceString":
+		var v ConfigSliceString = []string{}
+		v.Set(strVal)
+		return &v
+	default:
+		return nil
+	}
+
 }
 
 //
@@ -53,10 +88,6 @@ func (c ConfigSliceString) String() string {
 		return `[]`
 	}
 	return `["` + strings.Join(c, `", "`) + `"]`
-}
-
-func (c ConfigMap) String() string {
-	return fmt.Sprintf(`%+v`, map[string]string(c))
 }
 
 //

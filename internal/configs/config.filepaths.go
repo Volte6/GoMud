@@ -5,6 +5,8 @@ type FilePaths struct {
 	FolderDataFiles  ConfigString `yaml:"FolderDataFiles"`
 	FolderPublicHtml ConfigString `yaml:"FolderPublicHtml"`
 	FolderAdminHtml  ConfigString `yaml:"FolderAdminHtml"`
+	HttpsCertFile    ConfigString `yaml:"HttpsCertFile"`
+	HttpsKeyFile     ConfigString `yaml:"HttpsKeyFile"`
 	CarefulSaveFiles ConfigBool   `yaml:"CarefulSaveFiles"`
 }
 
