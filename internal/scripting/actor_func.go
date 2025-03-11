@@ -476,7 +476,7 @@ func (a ScriptActor) CancelBuffWithFlag(buffFlag string) bool {
 // Remove a buff silently
 func (a ScriptActor) RemoveBuff(buffId int) bool {
 
-	if !configs.GetConfig().AllowItemBuffRemoval {
+	if !configs.GetGamePlayConfig().AllowItemBuffRemoval {
 		buffList := a.characterRecord.GetBuffs(buffId)
 		if len(buffList) > 0 {
 			if buffList[0].PermaBuff {
@@ -615,7 +615,7 @@ func (a ScriptActor) GiveStatPoints(ct int) {
 }
 
 func (a ScriptActor) GiveExtraLife() {
-	c := configs.GetConfig()
+	c := configs.GetGamePlayConfig()
 	a.characterRecord.ExtraLives += 1
 	if a.characterRecord.ExtraLives > int(c.LivesMax) {
 		a.characterRecord.ExtraLives = int(c.LivesMax)

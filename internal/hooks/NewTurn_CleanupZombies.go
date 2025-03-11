@@ -2,6 +2,7 @@
 package hooks
 
 import (
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/users"
@@ -20,7 +21,10 @@ func CleanupZombies(e events.Event) bool {
 		return false
 	}
 
-	expTurns := uint64(evt.Config.SecondsToTurns(int(evt.Config.ZombieSeconds)))
+	et := configs.GetTimingConfig()
+	gp := configs.GetNetworkConfig()
+
+	expTurns := uint64(et.SecondsToTurns(int(gp.ZombieSeconds)))
 
 	if expTurns < evt.TurnNumber {
 

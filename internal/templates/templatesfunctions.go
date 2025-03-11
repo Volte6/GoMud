@@ -161,7 +161,7 @@ var (
 			if rounds >= buffs.TriggersLeftUnlimited {
 				return `Unlimited`
 			}
-			return formatDuration(rounds * int(configs.GetConfig().RoundSeconds))
+			return formatDuration(rounds * int(configs.GetTimingConfig().RoundSeconds))
 		},
 		"secondsFrom": func(t time.Time) int {
 			// return the number of seconds unti the given time
@@ -206,7 +206,7 @@ var (
 			return colorpatterns.ApplyColorPattern(s, pattern)
 		},
 		"permadeath": func() bool {
-			return bool(configs.GetConfig().PermaDeath)
+			return bool(configs.GetGamePlayConfig().Death.PermaDeath)
 		},
 		"zodiac": func(year int) string {
 			return gametime.GetZodiac(year)

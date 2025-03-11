@@ -200,15 +200,15 @@ func (r *Room) RemoveCorpse(c Corpse) bool {
 
 func (r *Room) UpdateCorpses(roundNow uint64) {
 
-	c := configs.GetConfig()
+	c := configs.GetGamePlayConfig()
 
-	if !c.CorpsesEnabled {
+	if !c.Death.CorpsesEnabled {
 		return
 	}
 
 	removeIdx := []int{}
 	for idx, corpse := range r.Corpses {
-		corpse.Update(roundNow, c.CorpseDecayTime.String())
+		corpse.Update(roundNow, c.Death.CorpseDecayTime.String())
 		if corpse.Prunable {
 			removeIdx = append(removeIdx, idx)
 			if corpse.MobId > 0 {
@@ -389,7 +389,7 @@ func (r *Room) GetScript() string {
 func (r *Room) GetScriptPath() string {
 
 	// Load any script for the room
-	return strings.Replace(configs.GetConfig().FolderDataFiles.String()+`/rooms/`+r.Filepath(), `.yaml`, `.js`, 1)
+	return strings.Replace(configs.GetFilePathsConfig().FolderDataFiles.String()+`/rooms/`+r.Filepath(), `.yaml`, `.js`, 1)
 }
 
 func (r *Room) FindTemporaryExitByUserId(userId int) (exit.TemporaryRoomExit, bool) {
@@ -1038,7 +1038,7 @@ func (r *Room) MarkVisited(id int, vType VisitorType, subtrackTurns ...int) {
 		r.visitors[vType] = make(map[int]uint64)
 	}
 
-	lastSeen := util.GetTurnCount() + uint64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
+	lastSeen := util.GetTurnCount() + uint64(visitorTrackingTimeout*configs.GetTimingConfig().TurnsPerSecond())
 
 	if len(subtrackTurns) > 0 {
 		if uint64(subtrackTurns[0]) > lastSeen {
@@ -1298,9 +1298,10 @@ func (r *Room) Visitors(vType VisitorType) map[int]float64 {
 
 	ret := make(map[int]float64)
 
+	tps := configs.GetTimingConfig().TurnsPerSecond()
 	if _, ok := r.visitors[vType]; ok {
 		for userId, expires := range r.visitors[vType] {
-			ret[userId] = float64(expires-util.GetTurnCount()) / float64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
+			ret[userId] = float64(expires-util.GetTurnCount()) / float64(visitorTrackingTimeout*tps)
 		}
 
 	}
@@ -1842,16 +1843,18 @@ func (r *Room) PruneVisitors() int {
 		return 0
 	}
 
+	c := configs.GetTimingConfig()
+
 	// Make sure whoever is here has the freshest mark.
 	for _, userId := range r.players {
 		if _, ok := r.visitors[VisitorUser]; ok {
-			r.visitors[VisitorUser][userId] = util.GetTurnCount() + uint64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
+			r.visitors[VisitorUser][userId] = util.GetTurnCount() + uint64(visitorTrackingTimeout*c.TurnsPerSecond())
 		}
 	}
 
 	for _, mobId := range r.mobs {
 		if _, ok := r.visitors[VisitorMob]; ok {
-			r.visitors[VisitorMob][mobId] = util.GetTurnCount() + uint64(visitorTrackingTimeout*configs.GetConfig().TurnsPerSecond())
+			r.visitors[VisitorMob][mobId] = util.GetTurnCount() + uint64(visitorTrackingTimeout*c.TurnsPerSecond())
 		}
 	}
 
@@ -2287,11 +2290,11 @@ func (r *Room) IsPvp() bool {
 // Returns an error with a reason why they cannot PVP, or nil
 func (r *Room) CanPvp(attUser *users.UserRecord, defUser *users.UserRecord) error {
 
-	if attUser.Character.RoomId == -1 || attUser.Character.RoomId == int(configs.GetConfig().DeathRecoveryRoom) {
+	if attUser.Character.RoomId == -1 || attUser.Character.RoomId == int(configs.GetSpecialRoomsConfig().DeathRecoveryRoom) {
 		return errors.New(`Fighting is not allowed here.`)
 	}
 
-	c := configs.GetConfig()
+	c := configs.GetGamePlayConfig()
 
 	// Possible settings are `enabled`, `disabled`, `limited`
 	pvpSetting := string(c.PVP)

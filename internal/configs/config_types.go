@@ -20,7 +20,10 @@ type ConfigValue interface {
 	Set(string) error
 }
 
+//
 // String
+//
+
 func (c ConfigUInt64) String() string {
 	return strconv.FormatUint(uint64(c), 10)
 }
@@ -56,7 +59,9 @@ func (c ConfigMap) String() string {
 	return fmt.Sprintf(`%+v`, map[string]string(c))
 }
 
+//
 // Set
+//
 
 func (c *ConfigUInt64) Set(value string) error {
 	v, err := strconv.ParseUint(value, 10, 64)
@@ -105,6 +110,6 @@ func (c *ConfigBool) Set(value string) error {
 }
 
 func (c *ConfigSliceString) Set(value string) error {
-	*c = strings.Split(value, `;`)
+	*c = strings.Split(value, `,`)
 	return nil
 }

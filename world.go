@@ -545,7 +545,7 @@ func (w *World) MainWorker(shutdown chan bool, wg *sync.WaitGroup) {
 	roomUpdateTimer := time.NewTimer(roomMaintenancePeriod)
 	ansiAliasTimer := time.NewTimer(ansiAliasReloadPeriod)
 	eventLoopTimer := time.NewTimer(time.Millisecond)
-	turnTimer := time.NewTimer(time.Duration(c.TurnMs) * time.Millisecond)
+	turnTimer := time.NewTimer(time.Duration(c.Timing.TurnMs) * time.Millisecond)
 	statsTimer := time.NewTimer(time.Duration(10) * time.Second)
 
 loop:
@@ -577,7 +577,7 @@ loop:
 
 			w.UpdateStats()
 			// save the round counter.
-			util.SaveRoundCount(c.FolderDataFiles.String() + `/` + util.RoundCountFilename)
+			util.SaveRoundCount(c.FilePaths.FolderDataFiles.String() + `/` + util.RoundCountFilename)
 
 			util.UnlockMud()
 
@@ -613,23 +613,18 @@ loop:
 		case <-turnTimer.C:
 
 			util.LockMud()
-			turnTimer.Reset(time.Duration(c.TurnMs) * time.Millisecond)
+			turnTimer.Reset(time.Duration(c.Timing.TurnMs) * time.Millisecond)
 
 			turnCt := util.IncrementTurnCount()
-			c := configs.GetConfig()
 
-			events.AddToQueue(events.NewTurn{TurnNumber: turnCt, TimeNow: time.Now(), Config: c})
+			events.AddToQueue(events.NewTurn{TurnNumber: turnCt, TimeNow: time.Now()})
 
 			// After a full round of turns, we can do a round tick.
-			if turnCt%uint64(c.TurnsPerRound()) == 0 {
+			if turnCt%uint64(c.Timing.TurnsPerRound()) == 0 {
 
 				roundNumber := util.IncrementRoundCount()
 
-				if c.LogIntervalRoundCount > 0 && roundNumber%uint64(c.LogIntervalRoundCount) == 0 {
-					mudlog.Info("World::RoundTick()", "roundNumber", roundNumber)
-				}
-
-				events.AddToQueue(events.NewRound{RoundNumber: roundNumber, TimeNow: time.Now(), Config: c})
+				events.AddToQueue(events.NewRound{RoundNumber: roundNumber, TimeNow: time.Now()})
 			}
 
 			w.EventLoopTurns()
@@ -977,7 +972,7 @@ func (w *World) UpdateStats() {
 	s := web.GetStats()
 	s.Reset()
 
-	c := configs.GetConfig()
+	c := configs.GetNetworkConfig()
 
 	for _, u := range users.GetAllActiveUsers() {
 		s.OnlineUsers = append(s.OnlineUsers, u.GetOnlineInfo())

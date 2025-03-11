@@ -2,11 +2,8 @@ package configs
 
 import (
 	"errors"
-	"fmt"
-	"math"
 	"os"
 	"reflect"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -22,334 +19,110 @@ const (
 	PVPLimited  = `limited`
 )
 
-type Config struct {
-	MudName              ConfigString `yaml:"MudName"` // Name of the MUD
-	MaxCPUCores          ConfigInt    `yaml:"MaxCPUCores"`
-	WebCDNLocation       ConfigString `yaml:"WebCDNLocation"`
-	FolderDataFiles      ConfigString `yaml:"FolderDataFiles"`
-	FolderPublicHtml     ConfigString `yaml:"FolderPublicHtml"`
-	FolderAdminHtml      ConfigString `yaml:"FolderAdminHtml"`
-	AllowItemBuffRemoval ConfigBool   `yaml:"AllowItemBuffRemoval"`
-	CarefulSaveFiles     ConfigBool   `yaml:"CarefulSaveFiles"`
-	AuctionsEnabled      ConfigBool   `yaml:"AuctionsEnabled"`
-	AuctionsAnonymous    ConfigBool   `yaml:"AuctionsAnonymous"`
-	AuctionSeconds       ConfigInt    `yaml:"AuctionSeconds"`
-	AuctionUpdateSeconds ConfigInt    `yaml:"AuctionUpdateSeconds"`
-	PVP                  ConfigString `yaml:"PVP"`
-	PVPMinimumLevel      ConfigInt    `yaml:"PVPMinimumLevel"`
-	XPScale              ConfigFloat  `yaml:"XPScale"`
-	TurnMs               ConfigInt    `yaml:"TurnMs"`
-	RoundSeconds         ConfigInt    `yaml:"RoundSeconds"`
-	RoundsPerAutoSave    ConfigInt    `yaml:"RoundsPerAutoSave"`
-	RoundsPerDay         ConfigInt    `yaml:"RoundsPerDay"` // How many rounds are in a day
-	NightHours           ConfigInt    `yaml:"NightHours"`   // How many hours of night
-	MaxMobBoredom        ConfigInt    `yaml:"MaxMobBoredom"`
-	MobConverseChance    ConfigInt    `yaml:"MobConverseChance"` // Chance 1-100 of attempting to converse when idle
-
-	MobUnloadThreshold           ConfigInt         `yaml:"MobUnloadThreshold"`
-	RoomUnloadRounds             ConfigInt         `yaml:"RoomUnloadRounds"`
-	RoomUnloadThreshold          ConfigInt         `yaml:"RoomUnloadThreshold"`
-	ScriptLoadTimeoutMs          ConfigInt         `yaml:"ScriptLoadTimeoutMs"`          // How long to spend the first time a script is loaded into memory
-	ScriptRoomTimeoutMs          ConfigInt         `yaml:"ScriptRoomTimeoutMs"`          // How many milliseconds to allow a script to run before it is interrupted
-	MaxTelnetConnections         ConfigInt         `yaml:"MaxTelnetConnections"`         // Maximum number of telnet connections to accept
-	TelnetPort                   ConfigSliceString `yaml:"TelnetPort"`                   // One or more Ports used to accept telnet connections
-	LocalPort                    ConfigInt         `yaml:"LocalPort"`                    // Port used for admin connections, localhost only
-	WebPort                      ConfigInt         `yaml:"WebPort"`                      // Port used for web requests
-	NextRoomId                   ConfigInt         `yaml:"NextRoomId"`                   // The next room id to use when creating a new room
-	LootGoblinRoom               ConfigInt         `yaml:"LootGoblinRoom"`               // The room the loot goblin spawns in
-	LootGoblinRoundCount         ConfigInt         `yaml:"LootGoblinRoundCount"`         // How often to spawn a loot goblin
-	LootGoblinMinimumItems       ConfigInt         `yaml:"LootGoblinMinimumItems"`       // How many items on the ground to attract the loot goblin
-	LootGoblinMinimumGold        ConfigInt         `yaml:"LootGoblinMinimumGold"`        // How much gold on the ground to attract the loot goblin
-	LootGoblinIncludeRecentRooms ConfigBool        `yaml:"LootGoblinIncludeRecentRooms"` // should the goblin include rooms that have been visited recently?
-	LogIntervalRoundCount        ConfigInt         `yaml:"LogIntervalRoundCount"`        // How often to report the current round number.
-	Locked                       ConfigSliceString `yaml:"Locked"`                       // List of locked config properties that cannot be changed without editing the file directly.
-	Seed                         ConfigString      `yaml:"Seed"`                         // Seed that may be used for generating content
-	OnLoginCommands              ConfigSliceString `yaml:"OnLoginCommands"`              // Commands to run when a user logs in
-	Motd                         ConfigString      `yaml:"Motd"`                         // Message of the day to display when a user logs in
-	BannedNames                  ConfigSliceString `yaml:"BannedNames"`                  // List of names that are not allowed to be used
-
-	TimeFormat      ConfigString `yaml:"TimeFormat"`      // How to format time when displaying real time
-	TimeFormatShort ConfigString `yaml:"TimeFormatShort"` // How to format time when displaying real time (shortform)
-	PromptFormat    ConfigString `yaml:"PromptFormat"`
-
-	OnDeathEquipmentDropChance ConfigFloat  `yaml:"OnDeathEquipmentDropChance"` // Chance a player will drop a given piece of equipment on death
-	OnDeathAlwaysDropBackpack  ConfigBool   `yaml:"OnDeathAlwaysDropBackpack"`  // If true, players will always drop their backpack items on death
-	OnDeathXPPenalty           ConfigString `yaml:"OnDeathXPPenalty"`           // Possible values are: none, level, 10%, 25%, 50%, 75%, 90%, 100%
-	OnDeathProtectionLevels    ConfigInt    `yaml:"OnDeathProtectionLevels"`    // How many levels is the user protected from death penalties for?
-	EnterRoomMessageWrapper    ConfigString `yaml:"EnterRoomMessageWrapper"`
-	ExitRoomMessageWrapper     ConfigString `yaml:"ExitRoomMessageWrapper"`
-
-	TimeoutMods        ConfigBool        `yaml:"TimeoutMods"`        // Whether to kick admin/mods when idle too long.
-	ZombieSeconds      ConfigInt         `yaml:"ZombieSeconds"`      // How many seconds a player will be a zombie allowing them to reconnect.
-	LogoutRounds       ConfigInt         `yaml:"LogoutRounds"`       // How many rounds of uninterrupted meditation must be completed to log out.
-	StartRoom          ConfigInt         `yaml:"StartRoom"`          // Default starting room.
-	DeathRecoveryRoom  ConfigInt         `yaml:"DeathRecoveryRoom"`  // Recovery room after dying.
-	TutorialStartRooms ConfigSliceString `yaml:"TutorialStartRooms"` // List of all rooms that can be used to begin the tutorial process
-	MaxIdleSeconds     ConfigInt         `yaml:"MaxIdleSeconds"`     // How many seconds a player can go without a command in game before being kicked.
-
-	// Perma-death related configs
-	PermaDeath     ConfigBool `yaml:"PermaDeath"`     // Is permadeath enabled?
-	LivesStart     ConfigInt  `yaml:"LivesStart"`     // Starting permadeath lives
-	LivesMax       ConfigInt  `yaml:"LivesMax"`       // Maximum permadeath lives
-	LivesOnLevelUp ConfigInt  `yaml:"LivesOnLevelUp"` // # lives gained on level up
-	PricePerLife   ConfigInt  `yaml:"PricePerLife"`   // Price in gold to buy new lives
-
-	ShopRestockRate          ConfigString `yaml:"ShopRestockRate"`          // Default time it takes to restock 1 quantity in shops
-	MaxAltCharacters         ConfigInt    `yaml:"MaxAltCharacters"`         // How many characters beyond the default character can they create?
-	AfkSeconds               ConfigInt    `yaml:"AfkSeconds"`               // How long until a player is marked as afk?
-	ConsistentAttackMessages ConfigBool   `yaml:"ConsistentAttackMessages"` // Whether each weapon has consistent attack messages
-	CorpsesEnabled           ConfigBool   `yaml:"CorpsesEnabled"`           // Whether corpses are left behind after mob/player deaths
-	CorpseDecayTime          ConfigString `yaml:"CorpseDecayTime"`          // How long until corpses decay to dust (go away)
-
-	LeaderboardSize  ConfigInt `yaml:"LeaderboardSize"`  // Maximum size of leaderboard
-	ContainerSizeMax ConfigInt `yaml:"ContainerSizeMax"` // How many objects containers can hold before overflowing
-
-	DiscordWebhookUrl ConfigSecret `yaml:"DiscordWebhookUrl" env:"DISCORD_WEBHOOK_URL"` // Optional Discord URL to post updates to
-
-	seedInt int64 `yaml:"-"`
-
-	// Protected values
-	turnsPerRound   int     // calculated and cached when data is validated.
-	turnsPerSave    int     // calculated and cached when data is validated.
-	turnsPerSecond  int     // calculated and cached when data is validated.
-	roundsPerMinute float64 // calculated and cached when data is validated.
-
-	overrides map[string]any
-
-	validated bool
-}
-
 var (
-	configData           Config = Config{overrides: map[string]any{}}
+	configData Config            = Config{}
+	overrides  map[string]any    = make(map[string]any)
+	keyLookups map[string]string = map[string]string{}
+
 	configDataLock       sync.RWMutex
 	ErrInvalidConfigName = errors.New("invalid config name")
 	ErrLockedConfig      = errors.New("config name is locked")
 )
 
-// Expects a string as the value. Will do the conversion on its own.
-func SetVal(propName string, propVal string, force ...bool) error {
+type Config struct {
+	// Start config subsections
+	Server       Server       `yaml:"Server"`
+	Memory       Memory       `yaml:"Memory"`
+	Auctions     Auctions     `yaml:"Auctions"`
+	LootGoblin   LootGoblin   `yaml:"LootGoblin"`
+	Timing       Timing       `yaml:"Timing"`
+	FilePaths    FilePaths    `yaml:"FilePaths"`
+	GamePlay     GamePlay     `yaml:"GamePlay"`
+	Integrations Integrations `yaml:"Integrations"`
+	TextFormats  TextFormats  `yaml:"TextFormats"`
+	Network      Network      `yaml:"Network"`
+	Scripting    Scripting    `yaml:"Scripting"`
+	SpecialRooms SpecialRooms `yaml:"SpecialRooms"`
+	Statistics   Statistics   `yaml:"Statistics"`
+	// End config subsections
 
-	if strings.EqualFold(propName, `locked`) {
-		return ErrLockedConfig
-	}
+	seedInt int64 `yaml:"-"`
 
-	for _, lockedProp := range configData.Locked {
-		if strings.EqualFold(lockedProp, propName) {
-			if len(force) < 1 || !force[0] {
-				return ErrLockedConfig
-			}
-		}
-	}
+	validated bool
+}
 
-	overrides := configData.GetOverrides()
+// OverlayDotMap overlays values from a dot-syntax map onto the Config.
+func (c *Config) OverlayOverrides(dotMap map[string]any) error {
+	// First unflatten the dot map into a nested map.
+	nestedMap := unflattenMap(dotMap)
 
-	typeSearchStructVal := reflect.ValueOf(configData)
-	// Get the value and type of the struct
-	//val := reflect.ValueOf(configData)
-	typ := typeSearchStructVal.Type()
-	// Iterate over all fields of the struct to find the correct name
-	for i := 0; i < typeSearchStructVal.NumField(); i++ {
-		if strings.EqualFold(typ.Field(i).Name, propName) {
-			propName = typ.Field(i).Name
-			break
-		}
-	}
-
-	// Get the reflect.Value of instance
-	val := reflect.ValueOf(&configData).Elem() // Use Elem() because we start with a pointer
-
-	// Find the field by name
-	fieldVal := val.FieldByName(propName)
-
-	if !fieldVal.IsValid() {
-		return fmt.Errorf("no such field: %s in obj", propName)
-	}
-
-	// If fieldVal is struct and Set has a pointer receiver, you need to get the address of fieldVal
-	if !fieldVal.CanAddr() {
-		return fmt.Errorf("field is not addressable")
-	}
-
-	fieldValPtr := fieldVal.Addr() // Get a pointer to the field
-	method := fieldValPtr.MethodByName("Set")
-
-	if !method.IsValid() {
-		return fmt.Errorf("Set method missing")
-	}
-	// Prepare arguments and call the method as before
-	args := []reflect.Value{reflect.ValueOf(propVal)}
-	returnValues := method.Call(args)
-
-	// Assuming the method returns an error as its last return value
-	if len(returnValues) > 0 { // Check there is at least one return value
-		errVal := returnValues[len(returnValues)-1] // Get the last return value
-		if errVal.Interface() != nil {              // Check if the returned value is not nil
-			if err, ok := errVal.Interface().(error); ok {
-				return err
-			}
-		}
-	}
-
-	// set the map value
-	reflect.ValueOf(overrides).SetMapIndex(reflect.ValueOf(propName), fieldVal)
-
-	if err := configData.SetOverrides(overrides); err != nil {
-		mudlog.Error("SetVal()", "error", err)
-	}
-
-	configData.Validate()
-
-	// save the new config.
-	writeBytes, err := yaml.Marshal(configData.GetOverrides())
+	// Marshal the nested map into YAML bytes.
+	b, err := yaml.Marshal(nestedMap)
 	if err != nil {
 		return err
 	}
 
-	overridePath := overridePath()
-	return util.Save(overridePath, writeBytes, bool(configData.CarefulSaveFiles))
-
+	// Unmarshal the YAML bytes into the existing Config struct.
+	return yaml.Unmarshal(b, c)
 }
 
-// Get all config data in a map with the field name as the key for easy iteration
-func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
+func (c *Config) DotPaths() map[string]interface{} {
+	result := make(map[string]interface{})
+	// Get the underlying value of c (we assume c is a pointer).
+	v := reflect.ValueOf(c).Elem()
+	c.buildDotPaths(v, "", result)
+	return result
+}
 
-	lockedLoookup := map[string]struct{}{
-		`locked`: {},
-	}
-	for _, lockedProp := range configData.Locked {
-		lockedLoookup[strings.ToLower(lockedProp)] = struct{}{}
-	}
-
-	output := map[string]any{}
-
-	// Get the value and type of the struct
-	items := reflect.ValueOf(c)
-	typ := items.Type()
-
-	// Iterate over all fields of the struct
-	for i := 0; i < items.NumField(); i++ {
-		if !items.Field(i).CanInterface() {
-			continue
+func (c *Config) buildDotPaths(v reflect.Value, prefix string, result map[string]interface{}) {
+	// If the value is a pointer, dereference it.
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return
 		}
+		c.buildDotPaths(v.Elem(), prefix, result)
+		return
+	}
 
-		name := typ.Field(i).Name
-		if name == `Locked` {
-			continue
-		}
-
-		if len(excludeStrings) > 0 {
-			testName := strings.ToLower(name)
-			skip := false
-			for _, s := range excludeStrings {
-				if util.StringWildcardMatch(testName, s) {
-					skip = true
-					break
-				}
-			}
-			if skip {
+	switch v.Kind() {
+	case reflect.Struct:
+		t := v.Type()
+		for i := 0; i < v.NumField(); i++ {
+			field := t.Field(i)
+			// Skip unexported fields.
+			if field.PkgPath != "" {
 				continue
 			}
-		}
-
-		if _, ok := lockedLoookup[strings.ToLower(name)]; ok {
-			name = fmt.Sprintf(`%s (locked)`, name)
-		}
-
-		itm := items.Field(i)
-
-		if stringerVal, ok := itm.Interface().(fmt.Stringer); ok {
-			output[name] = stringerVal.String()
-		} else {
-			if itm.Type().Kind() == reflect.Slice {
-
-				v := reflect.Indirect(itm)
-				list := []string{}
-				for j := 0; j < v.Len(); j++ {
-
-					cmd := itm.Index(j).Interface().(string)
-
-					if len(excludeStrings) > 0 {
-
-					}
-					list = append(list, cmd)
-					//output[fmt.Sprintf(`%s.%d`, name, j)] = cmd
+			fieldVal := v.Field(i)
+			// Determine the key name using the YAML tag if available.
+			key := field.Name
+			if yamlTag, ok := field.Tag.Lookup("yaml"); ok {
+				if tagName := strings.Split(yamlTag, ",")[0]; tagName != "" {
+					key = tagName
 				}
-				output[name] = strings.Join(list, `; `)
-
-			} else if itm.Type().Kind() == reflect.Map {
-				// iterate the map
-				keys := itm.MapKeys()
-				for _, key := range keys {
-					output[fmt.Sprintf(`%s.%d`, name, key.Int())] = itm.MapIndex(key).Float()
-				}
-
-			} else {
-				output[name] = itm.Interface()
 			}
+			// Construct the new prefix.
+			newPrefix := key
+			if prefix != "" {
+				newPrefix = prefix + "." + key
+			}
+			// Recursively build paths.
+			c.buildDotPaths(fieldVal, newPrefix, result)
 		}
-
+	default:
+		// For non-struct fields, store the value using the accumulated prefix.
+		result[prefix] = v.Interface()
 	}
-
-	return output
 }
 
-func (c *Config) GetOverrides() map[string]any {
-	return c.overrides
+func GetOverrides() map[string]any {
+	return overrides
 }
 
-func (c *Config) SetOverrides(overrides map[string]any) error {
+func (c *Config) SetOverrides(newOverrides map[string]any) error {
 
-	c.overrides = map[string]any{}
-	for k, v := range overrides {
-		c.overrides[k] = v
-	}
-
-	structValue := reflect.ValueOf(c).Elem()
-	for name, value := range c.overrides {
-
-		mudlog.Debug("SetOverrides()", "name", name, "value", value)
-
-		structFieldValue := structValue.FieldByName(name)
-
-		if !structFieldValue.IsValid() {
-			mudlog.Error("SetOverrides()", "error", fmt.Sprintf("No such field: %s in obj", name))
-			continue
-		}
-
-		if !structFieldValue.CanSet() {
-			mudlog.Error("SetOverrides()", "error", fmt.Sprintf("Cannot set %s field value", name))
-			continue
-		}
-
-		// Get the reflect.Value of instance
-		val := reflect.ValueOf(c).Elem() // Use Elem() because we start with a pointer
-
-		// Find the field by name
-		fieldVal := val.FieldByName(name)
-
-		if !fieldVal.IsValid() {
-			mudlog.Error("SetOverrides()", "error", fmt.Sprintf("no such field: %s in obj", name))
-			continue
-		}
-
-		// If fieldVal is struct and Set has a pointer receiver, you need to get the address of fieldVal
-		if !fieldVal.CanAddr() {
-			mudlog.Error("SetOverrides()", "error", "field is not addressable")
-			continue
-		}
-
-		fieldValPtr := fieldVal.Addr() // Get a pointer to the field
-		method := fieldValPtr.MethodByName("Set")
-
-		if !method.IsValid() {
-			mudlog.Error("SetOverrides()", "error", fmt.Sprintf("Set method missing: %s", name))
-			continue
-		}
-		// Prepare arguments and call the method as before
-		args := []reflect.Value{reflect.ValueOf(fmt.Sprintf(`%v`, value))}
-		method.Call(args)
-
-	}
+	overrides = newOverrides
+	c.OverlayOverrides(overrides)
 
 	return nil
 }
@@ -357,190 +130,26 @@ func (c *Config) SetOverrides(overrides map[string]any) error {
 // Ensures certain ranges and defaults are observed
 func (c *Config) Validate() {
 
-	if c.MaxCPUCores < 0 {
-		c.MaxCPUCores = 0 // default
-	}
-
-	if c.FolderDataFiles == `` {
-		c.FolderDataFiles = `_datafiles` // default
-	}
-
-	if c.TimeFormat == `` {
-		c.TimeFormat = `Monday, 02-Jan-2006 03:04:05PM`
-	}
-
-	// Nothing to do with CarefulSaveFiles
-
-	if c.AuctionSeconds < 30 {
-		c.AuctionSeconds = 30 // minimum
-	}
-
-	if c.AuctionUpdateSeconds < 15 {
-		c.AuctionUpdateSeconds = 15 // default
-	} else if c.AuctionUpdateSeconds > c.AuctionSeconds>>1 {
-		c.AuctionUpdateSeconds = c.AuctionSeconds >> 1 // default
-	}
-
-	// Validate PVP setting
-	if c.PVP != PVPEnabled && c.PVP != PVPDisabled && c.PVP != PVPLimited {
-		if c.PVP == PVPOff {
-			c.PVP = PVPDisabled
-		} else {
-			c.PVP = PVPEnabled
-		}
-	}
-
-	if int(c.PVPMinimumLevel) < 0 {
-		c.PVPMinimumLevel = 0
-	}
-
-	if c.XPScale <= 0 {
-		c.XPScale = 100.0 // default
-	}
-
-	if c.TurnMs < 10 {
-		c.TurnMs = 100 // default
-	}
-
-	if c.RoundSeconds < 1 {
-		c.RoundSeconds = 4 // default
-	}
-
-	if c.OnDeathEquipmentDropChance < 0.0 || c.OnDeathEquipmentDropChance > 1.0 {
-		c.OnDeathEquipmentDropChance = 0.0 // default
-	}
-
-	// Nothing to do with OnDeathAlwaysDropBackpack
-
-	c.OnDeathXPPenalty.Set(strings.ToLower(string(c.OnDeathXPPenalty)))
-
-	if c.OnDeathXPPenalty != `none` && c.OnDeathXPPenalty != `level` {
-		// If not a valid percent, set to default
-		if !strings.HasSuffix(string(c.OnDeathXPPenalty), `%`) {
-			c.OnDeathXPPenalty = `none` // default
-		} else {
-			// If not a valid percent, set to default
-			percent, err := strconv.ParseInt(string(c.OnDeathXPPenalty)[0:len(c.OnDeathXPPenalty)-1], 10, 64)
-			if err != nil || percent < 0 || percent > 100 {
-				c.OnDeathXPPenalty = `none` // default
-			}
-		}
-	}
-
-	if c.OnDeathProtectionLevels < 0 {
-		c.OnDeathProtectionLevels = 0 // default
-	}
-
-	// Must have a message wrapper...
-	if c.EnterRoomMessageWrapper == `` {
-		c.EnterRoomMessageWrapper = `%s` // default
-	}
-	if strings.LastIndex(string(c.EnterRoomMessageWrapper), `%s`) < 0 {
-		c.EnterRoomMessageWrapper += `%s` // default
-	}
-
-	// Must have a message wrapper...
-	if c.ExitRoomMessageWrapper == `` {
-		c.ExitRoomMessageWrapper = `%s` // default
-	}
-	if strings.LastIndex(string(c.ExitRoomMessageWrapper), `%s`) < 0 {
-		c.ExitRoomMessageWrapper += `%s` // default
-	}
-
-	// Zombie configs
-	if c.ZombieSeconds < 0 {
-		c.ZombieSeconds = 0 // default
-	}
-	if c.LogoutRounds < 0 {
-		c.LogoutRounds = 3 // default
-	}
-
-	if c.RoundsPerAutoSave < 1 {
-		c.RoundsPerAutoSave = 900 // default of 15 minutes worth of rounds
-	}
-
-	if c.RoundsPerDay < 10 {
-		c.RoundsPerDay = 20 // default of 24 hours worth of rounds
-	}
-
-	if c.NightHours < 0 {
-		c.NightHours = 0
-	} else if c.NightHours > 24 {
-		c.NightHours = 24
-	}
-
-	if c.MaxMobBoredom < 1 {
-		c.MaxMobBoredom = 150 // default
-	}
-
-	if c.MobConverseChance < 0 {
-		c.MobConverseChance = 0
-	} else if c.MobConverseChance > 100 {
-		c.MobConverseChance = 100
-	}
-
-	if c.MobUnloadThreshold < 0 {
-		c.MobUnloadThreshold = 0
-	}
-
-	if c.RoomUnloadRounds < 5 {
-		c.RoomUnloadRounds = 5
-	}
-
-	if c.RoomUnloadThreshold < 0 {
-		c.RoomUnloadThreshold = 0
-	}
-
-	if c.ScriptLoadTimeoutMs < 1 {
-		c.ScriptLoadTimeoutMs = 1000 // default
-	}
-
-	if c.ScriptRoomTimeoutMs < 1 {
-		c.ScriptRoomTimeoutMs = 10
-	}
-
-	if c.MaxTelnetConnections < 1 {
-		c.MaxTelnetConnections = 50 // default
-	}
-
-	if c.WebPort < 1 {
-		c.WebPort = 80 // default
-	}
-
-	if c.Seed == `` {
-		c.Seed = `Mud` // default
-	}
-
-	// Nothing to do with NextRoomId
-
-	if c.LootGoblinRoundCount < 10 {
-		c.LootGoblinRoundCount = 10 // default
-	}
-
-	if c.LootGoblinMinimumItems < 1 {
-		c.LootGoblinMinimumItems = 2 // default
-	}
-
-	if c.LootGoblinMinimumGold < 1 {
-		c.LootGoblinMinimumGold = 100 // default
-	}
+	c.Server.Validate()
+	c.Memory.Validate()
+	c.Auctions.Validate()
+	c.LootGoblin.Validate()
+	c.Timing.Validate()
+	c.FilePaths.Validate()
+	c.GamePlay.Validate()
+	c.Integrations.Validate()
+	c.TextFormats.Validate()
+	c.Network.Validate()
+	c.Scripting.Validate()
+	c.SpecialRooms.Validate()
+	c.Statistics.Validate()
 
 	// nothing to do with LootGoblinIncludeRecentRooms
 
-	if c.LogIntervalRoundCount < 0 {
-		c.LogIntervalRoundCount = 0
-	}
-
 	// Nothing to do with Locked
 
-	// Pre-calculate and cache useful values
-	c.turnsPerRound = int((c.RoundSeconds * 1000) / c.TurnMs)
-	c.turnsPerSave = int(c.RoundsPerAutoSave) * c.turnsPerRound
-	c.turnsPerSecond = int(1000 / c.TurnMs)
-	c.roundsPerMinute = 60 / float64(c.RoundSeconds)
-
 	c.seedInt = 0
-	for i, num := range util.Md5Bytes([]byte(string(c.Seed))) {
+	for i, num := range util.Md5Bytes([]byte(string(c.Server.Seed))) {
 		c.seedInt += int64(num) << i
 	}
 
@@ -580,64 +189,11 @@ func (c *Config) setEnvAssignments(clear bool) {
 	}
 }
 
-func (c Config) GetDeathXPPenalty() (setting string, pct float64) {
-
-	setting = string(c.OnDeathXPPenalty)
-	pct = 0.0
-
-	if c.OnDeathXPPenalty == `none` || c.OnDeathXPPenalty == `level` {
-		return setting, pct
-	}
-
-	percent, err := strconv.ParseInt(string(c.OnDeathXPPenalty)[0:len(c.OnDeathXPPenalty)-1], 10, 64)
-	if err != nil || percent < 0 || percent > 100 {
-		setting = `none`
-		pct = 0.0
-		return setting, pct
-	}
-
-	pct = float64(percent) / 100.0
-
-	return setting, pct
-}
-
-func (c Config) TurnsPerRound() int {
-	return c.turnsPerRound
-}
-
-func (c Config) TurnsPerAutoSave() int {
-	return c.turnsPerSave
-}
-
-func (c Config) TurnsPerSecond() int {
-	return c.turnsPerSecond
-}
-
-func (c Config) MinutesToRounds(minutes int) int {
-	return int(math.Ceil(c.roundsPerMinute * float64(minutes)))
-}
-
-func (c Config) SecondsToRounds(seconds int) int {
-	return int(math.Ceil(float64(seconds) / float64(c.RoundSeconds)))
-}
-
-func (c Config) MinutesToTurns(minutes int) int {
-	return int(math.Ceil(float64(minutes*60*1000) / float64(c.TurnMs)))
-}
-
-func (c Config) SecondsToTurns(seconds int) int {
-	return int(math.Ceil(float64(seconds*1000) / float64(c.TurnMs)))
-}
-
-func (c Config) RoundsToSeconds(rounds int) int {
-	return int(math.Ceil(float64(rounds) * float64(c.RoundSeconds)))
-}
-
 func (c Config) IsBannedName(name string) (string, bool) {
 
 	name = strings.ToLower(strings.TrimSpace(name))
 
-	for _, bannedName := range c.BannedNames {
+	for _, bannedName := range c.Server.BannedNames {
 		if util.StringWildcardMatch(name, strings.ToLower(bannedName)) {
 			return bannedName, true
 		}
@@ -648,6 +204,63 @@ func (c Config) IsBannedName(name string) (string, bool) {
 
 func (c Config) SeedInt() int64 {
 	return c.seedInt
+}
+
+func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
+
+	finalOutput := make(map[string]any)
+
+	for name, value := range c.DotPaths() {
+
+		if len(excludeStrings) > 0 {
+			testName := strings.ToLower(name)
+			skip := false
+			for _, s := range excludeStrings {
+				if util.StringWildcardMatch(testName, s) {
+					skip = true
+					break
+				}
+			}
+			if skip {
+				continue
+			}
+		}
+
+		finalOutput[name] = value
+	}
+	return finalOutput
+}
+
+func SetVal(propertyPath string, newVal string) error {
+
+	if k, ok := keyLookups[strings.ToLower(propertyPath)]; ok {
+		propertyPath = k
+	}
+
+	quickMap := make(map[string]any)
+	quickMap[propertyPath] = newVal
+
+	flatOverrides := flatten(overrides)
+	flatQuickmap := flatten(quickMap)
+
+	for k, v := range flatQuickmap {
+		flatOverrides[k] = v
+	}
+
+	overrides = unflattenMap(flatOverrides)
+
+	// save the new config.
+	writeBytes, err := yaml.Marshal(overrides)
+	if err != nil {
+		return err
+	}
+
+	overridePath := overridePath()
+	if err := util.Save(overridePath, writeBytes, bool(configData.FilePaths.CarefulSaveFiles)); err != nil {
+		return err
+	}
+
+	return configData.OverlayOverrides(overrides)
 }
 
 func GetConfig() Config {
@@ -663,8 +276,9 @@ func GetConfig() Config {
 func overridePath() string {
 	overridePath := os.Getenv(`CONFIG_PATH`)
 	if overridePath == `` {
-		overridePath = GetConfig().FolderDataFiles.String() + `/config-overrides.yaml`
+		overridePath = GetConfig().FilePaths.FolderDataFiles.String() + `/config-overrides.yaml`
 	}
+
 	return overridePath
 }
 
@@ -682,6 +296,29 @@ func ReloadConfig() error {
 	if err != nil {
 		return err
 	}
+
+	// Build a special lookup to attempt to match old data or even some minor typos
+	keyLookups = map[string]string{}
+	for k, _ := range configData.AllConfigData() {
+
+		if strings.Index(k, `.`) != -1 {
+
+			parts := strings.Split(k, `.`)
+
+			for i := len(parts) - 1; i >= 0; i-- {
+				tmpKey := strings.Join(parts[i:], `.`)
+				keyLookups[strings.ToLower(tmpKey)] = k
+
+				tmpKey = strings.Join(parts[i:], ``)
+				keyLookups[strings.ToLower(tmpKey)] = k
+
+			}
+
+		} else {
+			keyLookups[strings.ToLower(k)] = k
+		}
+	}
+
 	overridePath := overridePath()
 
 	mudlog.Info("ReloadConfig()", "overridePath", overridePath)
@@ -696,19 +333,24 @@ func ReloadConfig() error {
 				return err
 			}
 
-			overrides := map[string]any{}
-			err = yaml.Unmarshal(overrideBytes, &overrides)
+			tmpOverrides := map[string]any{}
+			err = yaml.Unmarshal(overrideBytes, &tmpOverrides)
 			if err != nil {
 				return err
 			}
 
-			if err := tmpConfigData.SetOverrides(overrides); err != nil {
-				mudlog.Error("ReloadConfig()", "error", err)
+			// Attempt a correction for bad names
+			for k, v := range tmpOverrides {
+				if newKey := FindFullPath(k); newKey != k {
+					tmpOverrides[newKey] = v
+					delete(tmpOverrides, k)
+				}
 			}
+
+			tmpConfigData.SetOverrides(tmpOverrides)
 		}
 	} else {
 		mudlog.Info("ReloadConfig()", "Loading overrides", false)
-		tmpConfigData.SetOverrides(map[string]any{})
 	}
 
 	tmpConfigData.setEnvAssignments(false)
@@ -723,7 +365,54 @@ func ReloadConfig() error {
 	return nil
 }
 
+func FindFullPath(inputKey string) string {
+
+	if v, ok := keyLookups[strings.ToLower(inputKey)]; ok {
+		return v
+	}
+	return inputKey
+}
+
 // Usage: configs.GetSecret(c.DiscordWebhookUrl)
 func GetSecret(v ConfigSecret) string {
 	return string(v)
+}
+
+// flatten recursively flattens a map[string]interface{}.
+// It supports both map[string]interface{} and map[interface{}]interface{} values,
+// which is useful when unmarshaling YAML.
+func flatten(input map[string]interface{}) map[string]interface{} {
+	flatMap := make(map[string]interface{})
+	flattenHelper("", input, flatMap)
+	return flatMap
+}
+
+// flattenHelper is a recursive helper that constructs the flattened map.
+func flattenHelper(prefix string, input map[string]interface{}, flatMap map[string]interface{}) {
+	for key, value := range input {
+		// Construct the new key path.
+		var newKey string
+		if prefix == "" {
+			newKey = key
+		} else {
+			newKey = prefix + "." + key
+		}
+
+		// Handle nested maps from YAML unmarshaling, which can be of type map[interface{}]interface{}.
+		switch v := value.(type) {
+		case map[string]interface{}:
+			flattenHelper(newKey, v, flatMap)
+		case map[interface{}]interface{}:
+			// Convert map[interface{}]interface{} to map[string]interface{}.
+			converted := make(map[string]interface{})
+			for k, val := range v {
+				if strKey, ok := k.(string); ok {
+					converted[strKey] = val
+				}
+			}
+			flattenHelper(newKey, converted, flatMap)
+		default:
+			flatMap[newKey] = value
+		}
+	}
 }

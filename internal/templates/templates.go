@@ -47,7 +47,7 @@ var (
 
 func Exists(name string) bool {
 
-	var fullPath string = util.FilePath(string(configs.GetConfig().FolderDataFiles)+`/templates`, `/`, name+`.template`)
+	var fullPath string = util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles)+`/templates`, `/`, name+`.template`)
 	_, err := os.Stat(fullPath)
 
 	return err == nil
@@ -85,7 +85,7 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 	}
 
 	// All templates must end with .template
-	var fullPath string = util.FilePath(string(configs.GetConfig().FolderDataFiles), `/`, `templates`, `/`, name+`.template`)
+	var fullPath string = util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `templates`, `/`, name+`.template`)
 
 	fInfo, err := os.Stat(fullPath)
 	if err != nil {
@@ -282,7 +282,7 @@ func AnsiParse(input string) string {
 func LoadAliases() {
 
 	// Get the file info
-	fInfo, err := os.Stat(util.FilePath(string(configs.GetConfig().FolderDataFiles) + `/ansi-aliases.yaml`))
+	fInfo, err := os.Stat(util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles) + `/ansi-aliases.yaml`))
 	// check if filemtime is not ansiAliasFileModTime
 	if err != nil || fInfo.ModTime() == ansiAliasFileModTime {
 		return
@@ -297,7 +297,7 @@ func LoadAliases() {
 	start := time.Now()
 
 	ansiAliasFileModTime = fInfo.ModTime()
-	if err = ansitags.LoadAliases(util.FilePath(string(configs.GetConfig().FolderDataFiles) + `/ansi-aliases.yaml`)); err != nil {
+	if err = ansitags.LoadAliases(util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles) + `/ansi-aliases.yaml`)); err != nil {
 		mudlog.Info("ansitags.LoadAliases()", "changed", true, "Time Taken", time.Since(start), "error", err.Error())
 	}
 

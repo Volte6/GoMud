@@ -94,7 +94,7 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room, flags event
 	//
 	keyring_sequence := user.Character.GetKey(lockId)
 
-	sequence := util.GetLockSequence(lockId, lockStrength, string(configs.GetConfig().Seed))
+	sequence := util.GetLockSequence(lockId, lockStrength, string(configs.GetServerConfig().Seed))
 
 	// Calculate any presolve from buffs, gear, pet perks, etc.
 	if len(keyring_sequence) == 0 {

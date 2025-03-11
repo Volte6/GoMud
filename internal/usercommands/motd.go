@@ -9,7 +9,7 @@ import (
 
 func Motd(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
-	user.SendText(string(configs.GetConfig().Motd))
+	user.SendText(string(configs.GetServerConfig().Motd))
 
 	return true, nil
 }

@@ -25,8 +25,6 @@ func AuctionUpdate(e events.Event) bool {
 		return true
 	}
 
-	c := configs.GetConfig()
-
 	if a.IsEnded() {
 
 		auctions.EndAuction()
@@ -193,7 +191,7 @@ func AuctionUpdate(e events.Event) bool {
 			BidAmount:       a.HighestBid,
 		})
 
-	} else if time.Since(a.LastUpdate) > time.Second*time.Duration(c.AuctionUpdateSeconds) {
+	} else if time.Since(a.LastUpdate) > time.Second*time.Duration(configs.GetAuctionsConfig().UpdateSeconds) {
 
 		a.LastUpdate = evt.TimeNow
 		auctionTxt, _ := templates.Process("auctions/auction-update", a)

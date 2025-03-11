@@ -86,11 +86,11 @@ func mob_List(rest string, user *users.UserRecord, room *rooms.Room, flags event
 
 func mob_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
-	c := configs.GetConfig()
+	c := configs.GetLootGoblinConfig()
 
 	// special handling of loot goblin
-	if rest == `loot goblin` && c.LootGoblinRoom != 0 {
-		if gRoom := rooms.LoadRoom(int(c.LootGoblinRoom)); gRoom != nil { // loot goblin room
+	if rest == `loot goblin` && c.RoomId != 0 {
+		if gRoom := rooms.LoadRoom(int(c.RoomId)); gRoom != nil { // loot goblin room
 			user.SendText(`Somewhere in the realm, a <ansi fg="mobname">loot goblin</ansi> appears!`)
 			mudlog.Info(`Loot Goblin Spawn`, `roundNumber`, util.GetRoundCount(), `forced`, true)
 			gRoom.Prepare(false) // Make sure the loot goblin spawns.

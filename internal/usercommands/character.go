@@ -36,8 +36,9 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 		user.Character = characters.New()
 		rooms.MoveToRoom(user.UserId, -1)
 	*/
+	c := configs.GetGamePlayConfig()
 
-	if configs.GetConfig().MaxAltCharacters == 0 {
+	if c.MaxAltCharacters == 0 {
 		user.SendText(`<ansi fg="203">Alt character are disabled on this server.</ansi>`)
 		return true, errors.New(`alt characters disabled`)
 	}
@@ -106,7 +107,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 	/////////////////////////
 	if question.Response == `new` {
 
-		if len(altNames) >= int(configs.GetConfig().MaxAltCharacters) {
+		if len(altNames) >= int(c.MaxAltCharacters) {
 			user.SendText(`<ansi fg="203">You already have too many alts.</ansi>`)
 			user.SendText(`<ansi fg="203">You'll need to delete one to create a new one.</ansi>`)
 
@@ -482,7 +483,7 @@ func getAltTable(nameToAlt map[string]characters.Character, charmedChars map[str
 		return num1 < num2
 	})
 
-	altTableData := templates.GetTable(fmt.Sprintf(`Your alt characters (%d/%d)`, len(nameToAlt), configs.GetConfig().MaxAltCharacters), headers, rows)
+	altTableData := templates.GetTable(fmt.Sprintf(`Your alt characters (%d/%d)`, len(nameToAlt), configs.GetGamePlayConfig().MaxAltCharacters), headers, rows)
 	tplTxt, _ := templates.Process("tables/generic", altTableData)
 
 	return tplTxt

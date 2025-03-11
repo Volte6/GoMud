@@ -14,7 +14,7 @@ import (
 
 func mutatorsIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderAdminHtml.String()+"/_header.html", configs.GetConfig().FolderAdminHtml.String()+"/mutators/index.html", configs.GetConfig().FolderAdminHtml.String()+"/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetFilePathsConfig().FolderAdminHtml.String()+"/_header.html", configs.GetFilePathsConfig().FolderAdminHtml.String()+"/mutators/index.html", configs.GetFilePathsConfig().FolderAdminHtml.String()+"/_footer.html")
 	if err != nil {
 		mudlog.Error("HTML Template", "error", err)
 	}
@@ -39,7 +39,7 @@ func mutatorsIndex(w http.ResponseWriter, r *http.Request) {
 
 func mutatorData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("mutator.data.html").Funcs(funcMap).ParseFiles(configs.GetConfig().FolderAdminHtml.String() + "/mutators/mutator.data.html")
+	tmpl, err := template.New("mutator.data.html").Funcs(funcMap).ParseFiles(configs.GetFilePathsConfig().FolderAdminHtml.String() + "/mutators/mutator.data.html")
 	if err != nil {
 		mudlog.Error("HTML Template", "error", err)
 	}

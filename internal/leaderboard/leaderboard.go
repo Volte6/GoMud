@@ -42,7 +42,7 @@ func Update() map[string]Leaderboard {
 	userCount := 0
 	characterCount := 0
 
-	lSize := int(configs.GetConfig().LeaderboardSize)
+	lSize := int(configs.GetStatisticsConfig().LeaderboardSize)
 
 	// Check online users
 	for _, u := range users.GetAllActiveUsers() {
@@ -98,7 +98,7 @@ func Get() map[string]Leaderboard {
 
 func considerUser(u *users.UserRecord) bool {
 
-	lSize := int(configs.GetConfig().LeaderboardSize)
+	lSize := int(configs.GetStatisticsConfig().LeaderboardSize)
 
 	allChars := []characters.Character{}
 	allChars = append(allChars, *u.Character)

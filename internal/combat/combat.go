@@ -122,7 +122,7 @@ func GetWaitMessages(stepType items.Intensity, sourceChar *characters.Character,
 
 	// zero means randomly selected, otherwise use the ItemId to consistently choose a message
 	msgSeed := 0
-	if configs.GetConfig().ConsistentAttackMessages {
+	if configs.GetGamePlayConfig().ConsistentAttackMessages {
 		msgSeed = sourceChar.Equipment.Weapon.ItemId
 	}
 
@@ -337,7 +337,7 @@ func calculateCombat(sourceChar characters.Character, targetChar characters.Char
 
 			// zero means randomly selected, otherwise use the ItemId to consistently choose a message
 			msgSeed := 0
-			if configs.GetConfig().ConsistentAttackMessages {
+			if configs.GetGamePlayConfig().ConsistentAttackMessages {
 				msgSeed = weapon.ItemId
 			}
 

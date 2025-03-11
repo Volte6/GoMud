@@ -2,12 +2,12 @@
 
   <div class="play-button">
     <a href="/webclient">
-      <img src="{{ .CONFIG.WebCDNLocation }}/static/images/btn_play.png" alt="Play" />
+      <img src="{{ .CONFIG.FilePaths.WebCDNLocation }}/static/images/btn_play.png" alt="Play" />
     </a>
   </div>
   <p>&nbsp;</p>
   <div class="underlay">
-    <h3>Telnet Port{{ if gt (len .CONFIG.TelnetPort) 1 }}s{{end}}: {{ join .CONFIG.TelnetPort ", " }}</h3>
+    <h3>Telnet Port{{ if gt (len .CONFIG.Network.TelnetPort) 1 }}s{{end}}: {{ join .CONFIG.Network.TelnetPort ", " }}</h3>
   </div>
 
 {{template "footer" .}}

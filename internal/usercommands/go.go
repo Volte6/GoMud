@@ -170,7 +170,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 
 			scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId)
 
-			c := configs.GetConfig()
+			c := configs.GetTextFormatsConfig()
 
 			// Tell the player they are moving
 			if isSneaking {
@@ -348,10 +348,8 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 			user.SendText("You're bumping into walls.")
 			if !user.Character.HasBuffFlag(buffs.Hidden) {
 
-				c := configs.GetConfig()
-
 				room.SendText(
-					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
+					fmt.Sprintf(string(configs.GetTextFormatsConfig().ExitRoomMessageWrapper),
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> is bumping into walls.`, user.Character.Name),
 					),
 					user.UserId)

@@ -88,7 +88,7 @@ func Put(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> places their <ansi fg="itemname">%s</ansi> into the <ansi fg="container">%s</ansi>`, mob.Character.Name, item.DisplayName(), containerName))
 
 		// Enforce container size limits
-		if len(container.Items) > int(configs.GetConfig().ContainerSizeMax) {
+		if len(container.Items) > int(configs.GetGamePlayConfig().ContainerSizeMax) {
 
 			randItemToRemove := util.Rand(len(container.Items))
 			oopsItem := container.Items[randItemToRemove]

@@ -11,7 +11,7 @@ import (
 )
 
 func AltsExists(username string) bool {
-	_, err := os.Stat(util.FilePath(string(configs.GetConfig().FolderDataFiles), `/users/`, strings.ToLower(username)+`-alts.yaml`))
+	_, err := os.Stat(util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strings.ToLower(username)+`-alts.yaml`))
 
 	return !os.IsNotExist(err)
 }
@@ -22,7 +22,7 @@ func LoadAlts(username string) []Character {
 		return nil
 	}
 
-	altsFilePath := util.FilePath(string(configs.GetConfig().FolderDataFiles), `/users/`, strings.ToLower(username)+`-alts.yaml`)
+	altsFilePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strings.ToLower(username)+`-alts.yaml`)
 
 	altsFileBytes, err := os.ReadFile(altsFilePath)
 	if err != nil {
@@ -57,9 +57,9 @@ func SaveAlts(username string, alts []Character) bool {
 		return false
 	}
 
-	carefulSave := configs.GetConfig().CarefulSaveFiles
+	carefulSave := configs.GetFilePathsConfig().CarefulSaveFiles
 
-	path := util.FilePath(string(configs.GetConfig().FolderDataFiles), `/users/`, strings.ToLower(username)+`-alts.yaml`)
+	path := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strings.ToLower(username)+`-alts.yaml`)
 
 	saveFilePath := path
 	if carefulSave { // careful save first saves a {filename}.new file

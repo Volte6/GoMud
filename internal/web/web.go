@@ -34,7 +34,8 @@ var (
 func serveTemplate(w http.ResponseWriter, r *http.Request) {
 
 	if httpRoot == "" {
-		httpRoot = filepath.Clean(configs.GetConfig().FolderPublicHtml.String())
+
+		httpRoot = filepath.Clean(configs.GetFilePathsConfig().FolderPublicHtml.String())
 	}
 
 	// Clean the path to prevent directory traversal.
@@ -150,7 +151,7 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 	http.Handle("GET /admin/static/", RunWithMUDLocked(
 		doBasicAuth(
 			handlerToHandlerFunc(
-				http.StripPrefix("/admin/static/", http.FileServer(http.Dir(configs.GetConfig().FolderAdminHtml.String()+"/static"))),
+				http.StripPrefix("/admin/static/", http.FileServer(http.Dir(configs.GetFilePathsConfig().FolderAdminHtml.String()+"/static"))),
 			),
 		),
 	))
@@ -230,10 +231,6 @@ func Shutdown() {
 		log.Printf("HTTP server shutdown failed:%+v", err)
 	}
 
-}
-
-func DataFiles() string {
-	return configs.GetConfig().FolderDataFiles.String()
 }
 
 func sendError(w http.ResponseWriter, r *http.Request, status int) {

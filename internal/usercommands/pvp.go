@@ -9,7 +9,7 @@ import (
 
 func Pvp(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
-	setting := configs.GetConfig().PVP
+	setting := configs.GetGamePlayConfig().PVP
 
 	user.SendText("")
 	if setting == configs.PVPDisabled {

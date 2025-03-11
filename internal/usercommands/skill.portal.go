@@ -25,7 +25,9 @@ Level 4 - Create a physical portal that you can share with players, or return th
 */
 func Portal(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
-	if user.Character.RoomId == int(configs.GetConfig().DeathRecoveryRoom) {
+	c := configs.GetSpecialRoomsConfig()
+
+	if user.Character.RoomId == int(c.DeathRecoveryRoom) {
 		return false, errors.New(`portal command ignored in death recovery`)
 	}
 
@@ -48,8 +50,8 @@ func Portal(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 
 	if skillLevel >= 2 { // Defaults to root of current zone
 		portalTargetRoomId, _ = rooms.GetZoneRoot(user.Character.Zone)
-		if portalTargetRoomId == int(configs.GetConfig().DeathRecoveryRoom) {
-			portalTargetRoomId = int(configs.GetConfig().StartRoom) // If they are in the holding zone, send htem back to start
+		if portalTargetRoomId == int(c.DeathRecoveryRoom) {
+			portalTargetRoomId = int(c.StartRoom) // If they are in the holding zone, send htem back to start
 		}
 	}
 

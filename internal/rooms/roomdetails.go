@@ -42,7 +42,7 @@ type RoomTemplateDetails struct {
 
 func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 
-	c := configs.GetConfig()
+	c := configs.GetGamePlayConfig()
 
 	var roomSymbol string = r.MapSymbol
 	var roomLegend string = r.MapLegend

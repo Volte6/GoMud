@@ -23,11 +23,11 @@ func CreateNewSpellFile(newSpellInfo SpellData) (string, error) {
 
 	saveModes := []fileloader.SaveOption{}
 
-	if configs.GetConfig().CarefulSaveFiles {
+	if configs.GetFilePathsConfig().CarefulSaveFiles {
 		saveModes = append(saveModes, fileloader.SaveCareful)
 	}
 
-	if err := fileloader.SaveFlatFile[*SpellData](string(configs.GetConfig().FolderDataFiles)+`/spells`, &newSpellInfo, saveModes...); err != nil {
+	if err := fileloader.SaveFlatFile[*SpellData](string(configs.GetFilePathsConfig().FolderDataFiles)+`/spells`, &newSpellInfo, saveModes...); err != nil {
 		return ``, err
 	}
 

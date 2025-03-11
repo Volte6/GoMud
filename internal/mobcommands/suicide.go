@@ -19,7 +19,6 @@ import (
 
 func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
-	config := configs.GetConfig()
 	currentRound := util.GetRoundCount()
 
 	if rest != `vanish` && mob.Character.HasBuffFlag(buffs.ReviveOnDeath) {
@@ -323,7 +322,9 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	// Remove from current room
 	room.RemoveMob(mob.InstanceId)
 
-	if config.CorpsesEnabled {
+	config := configs.GetGamePlayConfig()
+
+	if config.Death.CorpsesEnabled {
 		room.AddCorpse(rooms.Corpse{
 			MobId:        int(mob.MobId),
 			Character:    mob.Character,
