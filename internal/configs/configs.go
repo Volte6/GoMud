@@ -241,7 +241,14 @@ func SetVal(propertyPath string, newVal string) error {
 	quickMap := make(map[string]any)
 	quickMap[propertyPath] = newVal
 
-	// Do a merge/union here?
+	flatOverrides := flatten(overrides)
+	flatQuickmap := flatten(quickMap)
+
+	for k, v := range flatQuickmap {
+		flatOverrides[k] = v
+	}
+
+	overrides = unflattenMap(flatOverrides)
 
 	// save the new config.
 	writeBytes, err := yaml.Marshal(overrides)
@@ -251,7 +258,6 @@ func SetVal(propertyPath string, newVal string) error {
 
 	overridePath := overridePath()
 	if err := util.Save(overridePath, writeBytes, bool(configData.FilePaths.CarefulSaveFiles)); err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -273,6 +279,7 @@ func overridePath() string {
 	if overridePath == `` {
 		overridePath = GetConfig().FilePaths.FolderDataFiles.String() + `/config-overrides.yaml`
 	}
+	fmt.Println("PATH", overridePath)
 	return overridePath
 }
 
@@ -343,4 +350,43 @@ func FindFullPath(inputKey string) string {
 // Usage: configs.GetSecret(c.DiscordWebhookUrl)
 func GetSecret(v ConfigSecret) string {
 	return string(v)
+}
+
+// flatten recursively flattens a map[string]interface{}.
+// It supports both map[string]interface{} and map[interface{}]interface{} values,
+// which is useful when unmarshaling YAML.
+func flatten(input map[string]interface{}) map[string]interface{} {
+	flatMap := make(map[string]interface{})
+	flattenHelper("", input, flatMap)
+	return flatMap
+}
+
+// flattenHelper is a recursive helper that constructs the flattened map.
+func flattenHelper(prefix string, input map[string]interface{}, flatMap map[string]interface{}) {
+	for key, value := range input {
+		// Construct the new key path.
+		var newKey string
+		if prefix == "" {
+			newKey = key
+		} else {
+			newKey = prefix + "." + key
+		}
+
+		// Handle nested maps from YAML unmarshaling, which can be of type map[interface{}]interface{}.
+		switch v := value.(type) {
+		case map[string]interface{}:
+			flattenHelper(newKey, v, flatMap)
+		case map[interface{}]interface{}:
+			// Convert map[interface{}]interface{} to map[string]interface{}.
+			converted := make(map[string]interface{})
+			for k, val := range v {
+				if strKey, ok := k.(string); ok {
+					converted[strKey] = val
+				}
+			}
+			flattenHelper(newKey, converted, flatMap)
+		default:
+			flatMap[newKey] = value
+		}
+	}
 }

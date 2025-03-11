@@ -16,7 +16,7 @@ func (f *FilePaths) Validate() {
 	// Ignore CarefulSaveFiles
 
 	if f.FolderDataFiles == `` {
-		f.FolderDataFiles = `_datafiles` // default
+		f.FolderDataFiles = `_datafiles/world/default` // default
 	}
 
 }
