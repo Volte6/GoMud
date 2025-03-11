@@ -59,6 +59,7 @@ func ConfigCopy(c Config) uint64 {
 func Benchmark_Config_Typed(b *testing.B) {
 
 	c := GetConfig()
+
 	for n := 0; n < b.N; n++ {
 		Config_Typed(c)
 	}

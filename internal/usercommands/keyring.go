@@ -58,7 +58,7 @@ func KeyRing(rest string, user *users.UserRecord, room *rooms.Room, flags events
 	pickFormatting := [][]string{}
 	pickRowsIncomplete := [][]string{}
 
-	cfgSeed := string(configs.GetConfig().Seed)
+	cfgSeed := string(configs.GetServerConfig().Seed)
 
 	for lockId, seq := range user.Character.KeyRing {
 

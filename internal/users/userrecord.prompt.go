@@ -48,7 +48,7 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 	if len(promptOut) == 0 {
 
 		if promptDefaultCompiled == `` {
-			promptDefaultCompiled = util.ConvertColorShortTags(configs.GetConfig().PromptFormat.String())
+			promptDefaultCompiled = util.ConvertColorShortTags(configs.GetTextFormatsConfig().Prompt.String())
 		}
 
 		var customPrompt any = nil

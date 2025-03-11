@@ -180,14 +180,14 @@ func (s *SpellData) GetScript() string {
 
 func (s *SpellData) GetScriptPath() string {
 	// Load any script for the room
-	return strings.Replace(string(configs.GetConfig().FolderDataFiles)+`/spells/`+s.Filepath(), `.yaml`, `.js`, 1)
+	return strings.Replace(string(configs.GetFilePathsConfig().FolderDataFiles)+`/spells/`+s.Filepath(), `.yaml`, `.js`, 1)
 }
 
 func LoadSpellFiles() {
 
 	start := time.Now()
 
-	tmpAllSpells, err := fileloader.LoadAllFlatFiles[string, *SpellData](string(configs.GetConfig().FolderDataFiles) + `/spells`)
+	tmpAllSpells, err := fileloader.LoadAllFlatFiles[string, *SpellData](string(configs.GetFilePathsConfig().FolderDataFiles) + `/spells`)
 	if err != nil {
 		panic(err)
 	}

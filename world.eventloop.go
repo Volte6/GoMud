@@ -313,7 +313,7 @@ func (w *World) EventLoop() {
 				for _, uid := range room.GetPlayers() {
 
 					// If not hitting self and pvp is disabled, skip
-					if action.SourceUserId > 0 && action.SourceUserId != uid && configs.GetConfig().PVP != `enabled` {
+					if action.SourceUserId > 0 && action.SourceUserId != uid && configs.GetGamePlayConfig().PVP != `enabled` {
 						continue
 					}
 

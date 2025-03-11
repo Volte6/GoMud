@@ -121,7 +121,7 @@ func Go(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		room.RemoveMob(mob.InstanceId)
 		destRoom.AddMob(mob.InstanceId)
 
-		c := configs.GetConfig()
+		c := configs.GetTextFormatsConfig()
 
 		// Tell the old room they are leaving
 		room.SendText(

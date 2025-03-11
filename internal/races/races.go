@@ -164,7 +164,7 @@ func (r *Race) Save() error {
 		return err
 	}
 
-	saveFilePath := util.FilePath(configs.GetConfig().FolderDataFiles.String(), `/`, `races`, `/`, r.Filename())
+	saveFilePath := util.FilePath(configs.GetFilePathsConfig().FolderDataFiles.String(), `/`, `races`, `/`, r.Filename())
 
 	err = os.WriteFile(saveFilePath, bytes, 0644)
 	if err != nil {
@@ -179,7 +179,7 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpRaces, err := fileloader.LoadAllFlatFiles[int, *Race](configs.GetConfig().FolderDataFiles.String() + `/races`)
+	tmpRaces, err := fileloader.LoadAllFlatFiles[int, *Race](configs.GetFilePathsConfig().FolderDataFiles.String() + `/races`)
 	if err != nil {
 		panic(err)
 	}

@@ -15,7 +15,7 @@ import (
 func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))
-	c := configs.GetConfig()
+	c := configs.GetTextFormatsConfig()
 
 	if len(args) == 0 {
 
@@ -52,7 +52,7 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 		currentPrompt := user.GetConfigOption(`prompt`)
 		if currentPrompt == nil {
-			currentPrompt = c.PromptFormat.String()
+			currentPrompt = c.Prompt.String()
 		}
 		user.SendText(`<ansi fg="yellow-bold">prompt: </ansi> `)
 		user.SendText(currentPrompt.(string))
@@ -60,7 +60,7 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 		currentPrompt = user.GetConfigOption(`fprompt`)
 		if currentPrompt == nil {
-			currentPrompt = c.PromptFormat.String()
+			currentPrompt = c.Prompt.String()
 		}
 		user.SendText(`<ansi fg="yellow-bold">fprompt:</ansi> `)
 		user.SendText(currentPrompt.(string))
@@ -150,7 +150,7 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		if len(args) < 1 {
 			currentPrompt := user.GetConfigOption(`prompt`)
 			if currentPrompt == nil {
-				currentPrompt = c.PromptFormat.String()
+				currentPrompt = c.Prompt.String()
 			}
 			user.SendText("Your current prompt:\n")
 			user.SendText(currentPrompt.(string))
@@ -163,8 +163,8 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		if promptStr == `default` {
 			user.SetConfigOption(`prompt`, nil)
 			user.SetConfigOption(`prompt-compiled`, nil)
-			user.SetConfigOption(`prompt`, c.PromptFormat.String())
-			user.SetConfigOption(`prompt-compiled`, util.ConvertColorShortTags(c.PromptFormat.String()))
+			user.SetConfigOption(`prompt`, c.Prompt.String())
+			user.SetConfigOption(`prompt-compiled`, util.ConvertColorShortTags(c.Prompt.String()))
 		} else if promptStr == `none` {
 			user.SetConfigOption(`prompt`, ``)
 			user.SetConfigOption(`prompt-compiled`, ``)
@@ -183,7 +183,7 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		if len(args) < 1 {
 			currentPrompt := user.GetConfigOption(`fprompt`)
 			if currentPrompt == nil {
-				currentPrompt = c.PromptFormat.String()
+				currentPrompt = c.Prompt.String()
 			}
 			user.SendText("Your current fprompt:\n")
 			user.SendText(currentPrompt.(string))

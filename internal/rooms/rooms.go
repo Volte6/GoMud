@@ -200,15 +200,15 @@ func (r *Room) RemoveCorpse(c Corpse) bool {
 
 func (r *Room) UpdateCorpses(roundNow uint64) {
 
-	c := configs.GetConfig()
+	c := configs.GetGamePlayConfig()
 
-	if !c.CorpsesEnabled {
+	if !c.Death.CorpsesEnabled {
 		return
 	}
 
 	removeIdx := []int{}
 	for idx, corpse := range r.Corpses {
-		corpse.Update(roundNow, c.CorpseDecayTime.String())
+		corpse.Update(roundNow, c.Death.CorpseDecayTime.String())
 		if corpse.Prunable {
 			removeIdx = append(removeIdx, idx)
 			if corpse.MobId > 0 {
@@ -389,7 +389,7 @@ func (r *Room) GetScript() string {
 func (r *Room) GetScriptPath() string {
 
 	// Load any script for the room
-	return strings.Replace(configs.GetConfig().FolderDataFiles.String()+`/rooms/`+r.Filepath(), `.yaml`, `.js`, 1)
+	return strings.Replace(configs.GetFilePathsConfig().FolderDataFiles.String()+`/rooms/`+r.Filepath(), `.yaml`, `.js`, 1)
 }
 
 func (r *Room) FindTemporaryExitByUserId(userId int) (exit.TemporaryRoomExit, bool) {
@@ -2287,11 +2287,11 @@ func (r *Room) IsPvp() bool {
 // Returns an error with a reason why they cannot PVP, or nil
 func (r *Room) CanPvp(attUser *users.UserRecord, defUser *users.UserRecord) error {
 
-	if attUser.Character.RoomId == -1 || attUser.Character.RoomId == int(configs.GetConfig().DeathRecoveryRoom) {
+	if attUser.Character.RoomId == -1 || attUser.Character.RoomId == int(configs.GetSpecialRoomsConfig().DeathRecoveryRoom) {
 		return errors.New(`Fighting is not allowed here.`)
 	}
 
-	c := configs.GetConfig()
+	c := configs.GetGamePlayConfig()
 
 	// Possible settings are `enabled`, `disabled`, `limited`
 	pvpSetting := string(c.PVP)

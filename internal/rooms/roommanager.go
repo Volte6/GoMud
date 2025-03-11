@@ -57,7 +57,7 @@ type ZoneInfo struct {
 }
 
 func GetNextRoomId() int {
-	return int(configs.GetConfig().NextRoomId)
+	return int(configs.GetServerConfig().NextRoomId)
 }
 
 func SetNextRoomId(nextRoomId int) {
@@ -96,7 +96,7 @@ func RoomMaintenance() bool {
 		util.TrackTime(`RoomMaintenance()`, time.Since(start).Seconds())
 	}()
 
-	c := configs.GetConfig()
+	c := configs.GetMemoryConfig()
 
 	roundCount := util.GetRoundCount()
 	// Get the current round count
@@ -192,7 +192,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		return fmt.Errorf(`room %d not found`, user.Character.RoomId)
 	}
 
-	cfg := configs.GetConfig()
+	cfg := configs.GetSpecialRoomsConfig()
 
 	if toRoomId == StartRoomIdAlias {
 
@@ -273,7 +273,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 			}
 
 			spawnGuide := false
-			if (roundNow - lastGuideRound) > uint64(cfg.SecondsToRounds(300)) {
+			if (roundNow - lastGuideRound) > uint64(configs.GetConfig().SecondsToRounds(300)) {
 				spawnGuide = true
 			}
 
@@ -322,9 +322,10 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 // minimumItemCt is the minimum items in the room to care about it
 func GetRoomWithMostItems(skipRecentlyVisited bool, minimumItemCt int, minimumGoldCt int) (roomId int, itemCt int) {
 
+	lgConfig := configs.GetLootGoblinConfig()
 	goblinZone := ``
-	if goblinRoomId := int(configs.GetConfig().LootGoblinRoom); goblinRoomId != 0 {
-		if goblinRoom := LoadRoom(int(configs.GetConfig().LootGoblinRoom)); goblinRoom != nil {
+	if goblinRoomId := int(lgConfig.RoomId); goblinRoomId != 0 {
+		if goblinRoom := LoadRoom(int(lgConfig.RoomId)); goblinRoom != nil {
 			goblinZone = goblinRoom.Zone
 		}
 	}
@@ -428,11 +429,11 @@ func SaveAllRooms() error {
 
 	saveModes := []fileloader.SaveOption{}
 
-	if configs.GetConfig().CarefulSaveFiles {
+	if configs.GetFilePathsConfig().CarefulSaveFiles {
 		saveModes = append(saveModes, fileloader.SaveCareful)
 	}
 
-	saveCt, err := fileloader.SaveAllFlatFiles[int, *Room](configs.GetConfig().FolderDataFiles.String()+`/rooms`, roomManager.rooms, saveModes...)
+	saveCt, err := fileloader.SaveAllFlatFiles[int, *Room](configs.GetFilePathsConfig().FolderDataFiles.String()+`/rooms`, roomManager.rooms, saveModes...)
 
 	mudlog.Info("SaveAllRooms()", "savedCount", saveCt, "expectedCt", len(roomManager.rooms), "Time Taken", time.Since(start))
 
@@ -450,7 +451,7 @@ func loadAllRoomZones() error {
 		}
 	}()
 
-	loadedRooms, err := fileloader.LoadAllFlatFiles[int, *Room](configs.GetConfig().FolderDataFiles.String() + `/rooms`)
+	loadedRooms, err := fileloader.LoadAllFlatFiles[int, *Room](configs.GetFilePathsConfig().FolderDataFiles.String() + `/rooms`)
 	if err != nil {
 		return err
 	}
@@ -460,7 +461,7 @@ func loadAllRoomZones() error {
 	for _, loadedRoom := range loadedRooms {
 
 		// configs.GetConfig().DeathRecoveryRoom is the death/shadow realm and gets a pass
-		if loadedRoom.RoomId == int(configs.GetConfig().DeathRecoveryRoom) {
+		if loadedRoom.RoomId == int(configs.GetSpecialRoomsConfig().DeathRecoveryRoom) {
 			continue
 		}
 
@@ -613,7 +614,7 @@ func findRoomFile(roomId int) string {
 	foundFilePath := ``
 	searchFileName := filepath.FromSlash(fmt.Sprintf(`/%d.yaml`, roomId))
 
-	walkPath := filepath.FromSlash(configs.GetConfig().FolderDataFiles.String() + `/rooms`)
+	walkPath := filepath.FromSlash(configs.GetFilePathsConfig().FolderDataFiles.String() + `/rooms`)
 
 	filepath.Walk(walkPath, func(path string, info os.FileInfo, err error) error {
 
@@ -683,7 +684,7 @@ func LoadRoom(roomId int) *Room {
 
 	// Room 0 aliases to start room
 	if roomId == StartRoomIdAlias {
-		if roomId = int(configs.GetConfig().StartRoom); roomId == 0 {
+		if roomId = int(configs.GetSpecialRoomsConfig().StartRoom); roomId == 0 {
 			roomId = 1
 		}
 	}
@@ -699,7 +700,7 @@ func LoadRoom(roomId int) *Room {
 		return nil
 	}
 
-	retRoom, _ := loadRoomFromFile(util.FilePath(configs.GetConfig().FolderDataFiles.String(), `/`, `rooms`, `/`, filename))
+	retRoom, _ := loadRoomFromFile(util.FilePath(configs.GetFilePathsConfig().FolderDataFiles.String(), `/`, `rooms`, `/`, filename))
 
 	return retRoom
 }
@@ -720,7 +721,7 @@ func SaveRoom(r Room) error {
 
 	zone := ZoneToFolder(r.Zone)
 
-	roomFilePath := util.FilePath(configs.GetConfig().FolderDataFiles.String(), `/`, `rooms`, `/`, fmt.Sprintf("%s%d.yaml", zone, r.RoomId))
+	roomFilePath := util.FilePath(configs.GetFilePathsConfig().FolderDataFiles.String(), `/`, `rooms`, `/`, fmt.Sprintf("%s%d.yaml", zone, r.RoomId))
 
 	if err = os.WriteFile(roomFilePath, data, 0777); err != nil {
 		return err
@@ -805,7 +806,7 @@ func MoveToZone(roomId int, newZoneName string) error {
 	if !ok {
 		return errors.New("old zone doesn't exist")
 	}
-	oldFilePath := fmt.Sprintf("%s/rooms/%s", configs.GetConfig().FolderDataFiles.String(), room.Filepath())
+	oldFilePath := fmt.Sprintf("%s/rooms/%s", configs.GetFilePathsConfig().FolderDataFiles.String(), room.Filepath())
 
 	newZoneInfo, ok := roomManager.zones[newZoneName]
 	if !ok {
@@ -817,7 +818,7 @@ func MoveToZone(roomId int, newZoneName string) error {
 	}
 
 	room.Zone = newZoneName
-	newFilePath := fmt.Sprintf("%s/rooms/%s", configs.GetConfig().FolderDataFiles.String(), room.Filepath())
+	newFilePath := fmt.Sprintf("%s/rooms/%s", configs.GetFilePathsConfig().FolderDataFiles.String(), room.Filepath())
 
 	if err := os.Rename(oldFilePath, newFilePath); err != nil {
 		return err
@@ -849,7 +850,7 @@ func CreateZone(zoneName string) (roomId int, err error) {
 		return zoneInfo.RootRoomId, errors.New("zone already exists")
 	}
 
-	zoneFolder := util.FilePath(configs.GetConfig().FolderDataFiles.String(), "/", "rooms", "/", ZoneToFolder(zoneName))
+	zoneFolder := util.FilePath(configs.GetFilePathsConfig().FolderDataFiles.String(), "/", "rooms", "/", ZoneToFolder(zoneName))
 	if err := os.Mkdir(zoneFolder, 0755); err != nil {
 		return 0, err
 	}

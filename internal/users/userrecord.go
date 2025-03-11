@@ -56,7 +56,7 @@ type UserRecord struct {
 
 func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 
-	c := configs.GetConfig()
+	c := configs.GetGamePlayConfig()
 
 	u := &UserRecord{
 		connectionId:   connectionId,
@@ -73,7 +73,7 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 		EventLog:       UserLog{},
 	}
 
-	if c.PermaDeath {
+	if c.Death.PermaDeath {
 		u.Character.ExtraLives = int(c.LivesStart)
 	}
 
@@ -139,7 +139,7 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 
 	if newLevel, statsDelta := u.Character.LevelUp(); newLevel {
 
-		c := configs.GetConfig()
+		c := configs.GetGamePlayConfig()
 
 		livesBefore := u.Character.ExtraLives
 
@@ -158,7 +158,7 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 
 		for newLevel {
 
-			if c.PermaDeath && c.LivesOnLevelUp > 0 {
+			if c.Death.PermaDeath && c.LivesOnLevelUp > 0 {
 				u.Character.ExtraLives += int(c.LivesOnLevelUp)
 			}
 
@@ -496,7 +496,7 @@ func (u *UserRecord) ClearPrompt() {
 func (u *UserRecord) GetOnlineInfo() OnlineInfo {
 
 	c := configs.GetConfig()
-	afkRounds := uint64(c.SecondsToRounds(int(c.AfkSeconds)))
+	afkRounds := uint64(c.SecondsToRounds(int(c.Network.AfkSeconds)))
 	roundNow := util.GetRoundCount()
 
 	connTime := u.GetConnectTime()

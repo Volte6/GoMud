@@ -112,10 +112,10 @@ func main() {
 
 	//
 	// System Configurations
-	runtime.GOMAXPROCS(int(c.MaxCPUCores))
+	runtime.GOMAXPROCS(int(c.Server.MaxCPUCores))
 
 	// Validate chosen world:
-	if err := util.ValidateWorldFiles(`_datafiles/world/default`, c.FolderDataFiles.String()); err != nil {
+	if err := util.ValidateWorldFiles(`_datafiles/world/default`, c.FilePaths.FolderDataFiles.String()); err != nil {
 		mudlog.Error("World Validation", "error", err)
 		os.Exit(1)
 	}
@@ -123,7 +123,7 @@ func main() {
 	hooks.RegisterListeners()
 
 	// Discord integration
-	if webhookUrl := string(c.DiscordWebhookUrl); webhookUrl != "" {
+	if webhookUrl := string(c.Integrations.Discord.WebhookUrl); webhookUrl != "" {
 		discord.Init(webhookUrl)
 		mudlog.Info("Discord", "info", "integration is enabled")
 	} else {
@@ -132,20 +132,20 @@ func main() {
 
 	mudlog.Error(
 		"Starting server",
-		"name", string(c.MudName),
+		"name", string(c.Server.MudName),
 	)
 
 	// Load all the data files up front.
 	loadAllDataFiles(false)
 
 	// Load the round count from the file
-	if util.LoadRoundCount(c.FolderDataFiles.String()+`/`+util.RoundCountFilename) == util.RoundCountMinimum {
+	if util.LoadRoundCount(c.FilePaths.FolderDataFiles.String()+`/`+util.RoundCountFilename) == util.RoundCountMinimum {
 		gametime.SetToDay(-3)
 	}
 
 	gametime.GetZodiac(1) // The first time this is called it randomizes all zodiacs
 
-	scripting.Setup(int(c.ScriptLoadTimeoutMs), int(c.ScriptRoomTimeoutMs))
+	scripting.Setup(int(c.Scripting.LoadTimeoutMs), int(c.Scripting.RoomTimeoutMs))
 
 	//
 	mudlog.Info(`========================`)
@@ -166,19 +166,19 @@ func main() {
 	// Set the server to be alive
 	serverAlive.Store(true)
 
-	web.Listen(int(c.WebPort), &wg, HandleWebSocketConnection)
+	web.Listen(int(c.Network.WebPort), &wg, HandleWebSocketConnection)
 
-	allServerListeners := make([]net.Listener, 0, len(c.TelnetPort))
-	for _, port := range c.TelnetPort {
+	allServerListeners := make([]net.Listener, 0, len(c.Network.TelnetPort))
+	for _, port := range c.Network.TelnetPort {
 		if p, err := strconv.Atoi(port); err == nil {
-			if s := TelnetListenOnPort(``, p, &wg, int(c.MaxTelnetConnections)); s != nil {
+			if s := TelnetListenOnPort(``, p, &wg, int(c.Network.MaxTelnetConnections)); s != nil {
 				allServerListeners = append(allServerListeners, s)
 			}
 		}
 	}
 
-	if c.LocalPort > 0 {
-		TelnetListenOnPort(`127.0.0.1`, int(c.LocalPort), &wg, 0)
+	if c.Network.LocalPort > 0 {
+		TelnetListenOnPort(`127.0.0.1`, int(c.Network.LocalPort), &wg, 0)
 	}
 
 	go worldManager.InputWorker(workerShutdownChan, &wg)
@@ -200,7 +200,7 @@ func main() {
 
 	serverAlive.Store(false) // immediately stop processing incoming connections
 
-	util.SaveRoundCount(c.FolderDataFiles.String() + `/` + util.RoundCountFilename)
+	util.SaveRoundCount(c.FilePaths.FolderDataFiles.String() + `/` + util.RoundCountFilename)
 
 	// some last minute stats reporting
 	totalConnections, totalDisconnections := connections.Stats()
@@ -368,7 +368,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 				userObject.EventLog.Add(`conn`, `Disconnected`)
 
-				if c.ZombieSeconds > 0 {
+				if c.Network.ZombieSeconds > 0 {
 
 					connDetails.SetState(connections.Zombie)
 					worldManager.SendSetZombie(userObject.UserId, true)
@@ -510,7 +510,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 			// No need to update it every loop
 			c = configs.GetConfig()
 
-			if time.Since(lastInput) < time.Duration(c.TurnMs)*time.Millisecond {
+			if time.Since(lastInput) < time.Duration(c.EngineTiming.TurnMs)*time.Millisecond {
 				/*
 					connections.SendTo(
 						[]byte("Slow down! You're typing too fast! "+time.Since(lastInput).String()+"\n"),
@@ -592,7 +592,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 	inputhandlers.LoginInputHandler(clientInput, sharedState)
 
 	connections.SendTo(
-		[]byte("!!SOUND(Off U="+configs.GetConfig().WebCDNLocation.String()+")"),
+		[]byte("!!SOUND(Off U="+configs.GetConfig().FilePaths.WebCDNLocation.String()+")"),
 		clientInput.ConnectionId,
 	)
 
@@ -619,7 +619,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 				userObject.EventLog.Add(`conn`, `Disconnected`)
 
-				if c.ZombieSeconds > 0 {
+				if c.Network.ZombieSeconds > 0 {
 
 					connDetails.SetState(connections.Zombie)
 					worldManager.SendSetZombie(userObject.UserId, true)

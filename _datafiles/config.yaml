@@ -15,283 +15,158 @@
 #   overwritten.
 #
 ################################################################################
+
 ################################################################################
 #
-#   FILE AND FOLDER CONFIGURATIONS
-#   If you want to customize some of this data, for whatever reason,
-#   you can change the folder paths here so that future updates don't
-#   overwrite your changes.
+#   SERVER CUSTOMIZATIONS
+#   Small changes such as login commands and the seed can ensure your mud has
+#   differences from others on the same code base.
 #
 ################################################################################
-# - MudName - 
-#   Display name of the MUD.
-#   This will be used a few places by default (such as the web pages).
-MudName: "GoMud"
-# - WebCDNLocation - 
-#   Optional alternative location to serve static files from such as audio
-#   Example: http://files.gomud.net
-#   Leave blank if no CDN config or similar desired
-WebCDNLocation: ""
-# - FolderDataFiles - 
-#   The folder where all datafiles reside.
-#   If you are planning to create your own world, copying the current folder
-#   and its entire tree of content is a good place to start.
-FolderDataFiles: _datafiles/world/default
-# - FolderPublicHtml - 
-#   The folder where all web html files/templates reside.
-FolderPublicHtml: _datafiles/html/public
-# - FolderPublicHtml - 
-#   The folder where all web ADMIN files/templates reside.
-FolderAdminHtml: _datafiles/html/admin
-# - AllowItemBuffRemoval - 
-#   Whether to allow the removal of buffs assigned by items using spells etc. 
-#   By default, once an item has buffed a player, the player cannot remove the 
-#   buff unless they removing the item. However, if set to true, players can 
-#   temporarily remove the buff with spells, items, etc. and the buff will not 
-#   return until the player re-equips the item, or logs out and back in.
-AllowItemBuffRemoval: false
-# - CarefulSaveFiles -
-#   If true, save files will be written to a temporary file and then saved over
-#   the actual file. This takes longer, but helps prevent file corruption if
-#   the server crashes during a save.
-CarefulSaveFiles: true
-################################################################################
-#
-#   GAMEPLAY CONFIGURATIONS
-#   These modify the way the game players, the pace/speed of the game, etc.
-#
-################################################################################
-# - AuctionsEnabled -
-#   If true, players can globally auction off items.
-AuctionsEnabled: true
-# - AuctionsAnonymous -
-#   If true, seller/buyer names are not revealed.
-AuctionsAnonymous: false
-# - AuctionSeconds -
-#   How may seconds until an auction closes.
-AuctionSeconds: 180
-# - AuctionUpdateSeconds -
-#   How may seconds (roughly) between updates on current auction.
-AuctionUpdateSeconds: 30
-# - PVP -
-#   Possible Values:
-#     enabled   - PVP is enabled everywhere
-#     disabled  - PVP is disabled eveywhere
-#     limited   - PVP is enabled for all players but only in PVP enabled rooms
-PVP: limited
-# - PVPMinimumLevel -
-#   Minimum level one must be to be targetted or to target other players in PVP
-PVPMinimumLevel: 15
-# - XPScale -
-#   Scales how much XP is gained when characters gain XP. Number is a percentage
-#   Example: 100 = 100%
-XPScale: 100
-# - TurnMs -
-#   How many milliseconds per turn. While lower is generally better, this can
-#   greatly increase overhead on the server - a command per mob or user is
-#   processed per turn. This is not the same as rounds, which is how often the
-#   mobs choose their actions, but if multiple actions are queued up, they will
-#   be processed in order once per turn. 
-#   50 is a good balance between handling input from players and not bogging
-#   down the server.
-#   Note: If your automapper/walker seems slow, this is probably the culprit.
-TurnMs: 50
-# - RoundSeconds - 
-#   How many seconds per round. Anything gated by rounds will be affected by
-#   this. This is the main setting for controlling the pace of the game.
-RoundSeconds: 4
-# - OnDeathEquipmentDropChance -
-#   The chance that a player will drop a piece of worn/backpack equipment when 
-#   they die. This is a percentage, so 0.5 is 50% chance.
-OnDeathEquipmentDropChance: 0.25
-# - OnDeathAlwaysDropBackpack -
-#   If true, players will always drop their backpack contents when they die. 
-#   If false, it will failover to OnDeathEquipmentDropChance.
-OnDeathAlwaysDropBackpack: false
-# - OnDeathXPPenalty -
-#   What penalty is applies to a players XP when they die.
-#   none - no penalty
-#   level - lose all XP gained over their current level.
-#   10% - lose 10% of XP
-#   50% - lose 50% of XP
-OnDeathXPPenalty: none
-# - OnDeathProtectionLevels -
-#   Players do not incur death penalties up to and including this level.
-OnDeathProtectionLevels: 5
-# - EnterRoomMessageWrapper -
-#   Decorate entrance text with this. Put a %s where the message should be.
-EnterRoomMessageWrapper: "   <ansi fg=\"enters-message\"> >>> </ansi>%s\n"
-# - ExitRoomMessageWrapper -
-#   Decorate exit text with this. Put a %s where the message should be.
-ExitRoomMessageWrapper: "   <ansi fg=\"leaves-message\"> >>> </ansi>%s\n"
-# - MaxIdleSeconds -
-#   How long players can go without any input, before being kicked.
-#   A value of 0 (zero) means never kick inactive players.
-#   1800 seconds = 30 minutes
-MaxIdleSeconds: 1800
-# - TimeoutMods -
-#   Whether Admin/Mod users get timed out when reaching MaxIdleSeconds
-#   If set to false, Admins & Mods never get force disconnected.
-TimeoutMods: false
-# - AfkSeconds -
-#   If this many seconds pass without player input, they are flagged as afk
-#   Set to zero to never mark anyone as AFK
-AfkSeconds: 120
-# - ZombieSeconds -
-#   How many seconds a character stays active/in game after a network connection
-#   is lost. Set to 0 to instantly log out characters (exploitable).
-ZombieSeconds: 30
-# - LogoutRounds - 
-#   How many rounds of meditation a player must complete before they are
-#   logged out. If interrupted, they must start over.
-LogoutRounds: 3
-# - StartRoom -
-#   This is the default starting room for the game. It only matters when there
-#   is code that explicitely tries to send the player to the "starting room"
-#   The default of 1 is Town Square
-StartRoom: 1
-# - DeathRecoveryRoom -
-#   This is the room players are sent to when they die.
-#   This should have some way of healing them and (eventually)
-#   sending them back into the main world.
-DeathRecoveryRoom: 75
-# - TutorialStartRooms - 
-#   RoomIds players will be put in when starting the game/tutorial
-#   RoomIds 900-999 are reserved for Tutorial rooms.
-TutorialStartRooms: [900, 910, 920, 930, 940, 990]
-# - PermaDeath - 
-#   If true, players lose their character if they die with zero lives left.
-PermaDeath: false
-# - LivesStart - 
-#   (Req: PermaDeath) How many lives players start with before being reset.
-LivesStart: 3
-# - LivesMax - 
-#   (Req: PermaDeath) The maximum lives a player can have.
-LivesMax: 3
-# - LivesOnLevelUp -
-#   (Req: PermaDeath) If non zero, players gain this many lives per level.
-LivesOnLevelUp: 1
-# - PricePerLife - 
-#   (Req: PermaDeath) If non-zero, players can buy extra lives for this amount.
-PricePerLife: 1000000
-# - ShopRestockRate - 
-#   The default time for a shops to restock 1 item. This can still be 
-#   overriden in character shop definitions if desired.
-#   Should be in the format of: {num} {unit}
-#   Unit can be: rounds, hours, days, weeks, months, years
-#   Default is in-game time, not real time. To use real time, use the following
-#   format: {num} real {unit} - Example: 1 real day
-ShopRestockRate: 6 hours
-# - ConsistentAttackMessages - 
-#   If true, each weapon ID will consistently use the same message for each type
-#   of attack. If false, it will randomize messages. Setting this to true gives
-#   each weapon a more consistent feel in battle, though combat may feel less 
-#   varied. 
-#   Note: see _datafiles/combat-messages/*
-ConsistentAttackMessages: true
-# - CorpsesEnabled - 
-#   If set to true, corpses are left behind by players or mobs that are killed.
-CorpsesEnabled: true
-# - CorpseDecayTime - 
-#   How long until corpses crumble to dust (Go away).
-#   See ShopRestockRate comments for time format.
-CorpseDecayTime: 1 hour
-# - MaxAltCharacters - 
-#   How many characters beyond their original character can they create? Players
-#   can swap between characters and work on them independently if this is set
-#   greater than 0. Otherwise they are locked to a signle character and have to
-#   sign up with a new user login if they intend to create a new character.
-MaxAltCharacters: 3
-# - TimeFormat - 
-#   When real world time is shown, what format should be used?
-#   This uses a Go time format string, which is kinda weird.
-#   See: https://go.dev/src/time/format.go
-TimeFormat: 'Monday, 02-Jan-2006 3:04:05PM'
-# - TimeFormatShort - 
-#   Same as TimeFormat, but shorter form
-TimeFormatShort: 'Jan 2 ''06 3:04PM'
-# - PromptFormat - 
-#   Default prompt formatting.
-#   See: "help prompt" in game to learn more about this.
-PromptFormat: '{8}[{t} {T} {255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:'
-# - RoundsPerDay -
-#   How many rounds are in a day? This is used to calculate the time of day.
-#   The lower this number, the faster the day/night cycle will be.
-#   A 4 second round and a 900 round day means the day/night cycle is 1 hour.
-RoundsPerDay: 900
-# - NightHours -
-#   How many hours of each 24 hour day will be nighttime?
-NightHours: 8
-# - LeaderboardSize -
-#   Maximum size of each leaderboard. 0 to disable.
-LeaderboardSize: 10
-# - ContainerSizeMax -
-#   Maximum number of objects a container can hold before stuff overflows
-ContainerSizeMax: 10
+Server:
+  # - MudName - 
+  #   Display name of the MUD.
+  #   This will be used a few places by default (such as the web pages).
+  MudName: "GoMud"
+  # - Seed -
+  #   The seed used for certain types of content generation
+  #   To prevent certain secrets or content from being spoiled, you can set this
+  #   to a random string.
+  #   Note: Once the Mud has been played and data saved, changing this will
+  #   probably break certain things that get saved to files, such as user KeyRings, 
+  #   so only set it before the first time you run the server.
+  Seed: "Mud"
+  # - MaxCPUCores -
+  #   Maximum CPU cores to use. 0 for all available cores.
+  #   Most of the game is single threaded, but there are a few things that can
+  #   benefit from multiple cores, such as the web server and telnet server.
+  MaxCPUCores: 0
+  # - OnLoginCommands -
+  #   Commands to run when a user logs in. These commands are run by the user
+  #   and can be anything they have access to.
+  OnLoginCommands:
+  - 'emote @appears before you in a flash of <ansi fg="yellow-bold">⚡l<ansi fg="white-bold">i</ansi>gh<ansi fg="white-bold">tn</ansi>i<ansi fg="white-bold">n</ansi>g⚡</ansi>!'
+  - print
+  - motd 
+  - print
+  - online
+  - print
+  - inbox check
+  - print 
+  # - Motd -
+  #   Message of the day. This is displayed when the motd command is run.
+  Motd: Welcome to the Mud!
+  # - BannedNames -
+  #   Names that are not allowed to be used by players. This is a good place to
+  #   put names that are used by the game itself, such as "admin".
+  #   Note: This is not case sensitive.
+  #   You can add a * to the end of a name to ban all names that start with that
+  #   name. For example, "admin*" would ban "admin", "administrator", etc.
+  #   You can also use * at the beginning of a name to ban all names that
+  #   end with that name. For example, "*admin" would ban "admin", "superadmin",
+  #   Finally, you can use * at the beginning and end of a name to ban all names
+  #   that contain that name. For example, "*admin*" would ban "admin", "superadmin",
+  #   "administrator", etc.
+  BannedNames:
+  - "*admin*"
+  - "*moderator*"
+  - "player*"
+  - "user*"
+  - "me"
+  - "myself"
+  - "self"
+  - "us"
+  - "you"
+  - "them"
+  - "everyone"
+  - "someone"
+  - "anyone"
+  - "nobody"
+  - "somebody"
+  - "anybody"
+  - "none"
+  - "nothing"
+  - "something"
+  - "anything"
+  - "everything"
+  - "all"
+  - "north*"
+  - "south*"
+  - "east*"
+  - "west*"
+  - "up"
+  - "down"
+  - "chest"
+  - "door"
+  - "new"
+  - "join"
+  - "register"
+  # - NextRoomID -
+  # This number is auto-updated to the highest number of rooms in the game. 
+  #   If creating your own rooms but don't want to risk an update conflicting, 
+  #   update this to a large number (like 100000), so that as new rooms are 
+  #   created they will be far beyond the range of any room id's expected through
+  #   a code update.
+  NextRoomId: 1002
+  # - Locked -
+  #   All config names defined here are immutable to the `server set` admin 
+  #   command. They can only be changed by editing the config file directly.
+  #   It is a good idea to lock configs related to folder/file paths to prevent
+  #   accidental changes that could break the game.
+  Locked: 
+  - FolderDataFiles
+  - FolderHtmlFiles
+  - NextRoomId
+  - Seed
+  - OnLoginCommands
+  - BannedNames
+
 ################################################################################
 #
 #   MEMORY/CPU OPTIMIZATIONS
 #   Changes that can help reduce memory and CPU usage.
 #
 ################################################################################
-# - MaxCPUCores -
-#   Maximum CPU cores to use. 0 for all available cores.
-#   Most of the game is single threaded, but there are a few things that can
-#   benefit from multiple cores, such as the web server and telnet server.
-MaxCPUCores: 0
-# - RoundsPerAutoSave -
-#   How often the server will automatically save the game state. This is a
-#   backup feature in case the server crashes. The game state is also saved
-#   whenever the server is shut down.
-RoundsPerAutoSave: 450
-# - RoomUnloadRounds -
-#   How many rounds must pass without a visitor before a room is considered
-#   for unloading from memory.
-RoomUnloadRounds: 450
-# - RoomUnloadThreshold -
-#   Do not unload any rooms if the in-memory count is under this threshold.
-RoomUnloadThreshold: 200
-# - MaxMobBoredom -
-#   How many rounds a mob can go without seeing a player before a mob despawns. 
-#   This is mainly a resource management feature to keep the game from getting 
-#   bogged down with too many mobs in memory. If you want mobs to stick around 
-#   indefinitely, set this to 0. Certain mobs may never despawn, however.
-MaxMobBoredom: 250
-# - MobUnloadThreshold -
-#   Do not unload any bots if the in-memory count is under this threshold.
-MobUnloadThreshold: 100
-# - MobConverseChance -
-#   Chance in 100 that the mob will attempt to converse when idle.
-MobConverseChance: 3
-# - ScriptLoadTimeoutMs -
-#   When a script is first loaded, compiled, and run, it is given this long to
-#   complete. If it takes longer, it is killed. This includes the onLoad() function
-#   in scripts. Allowing a script to take longer to load might be okay to prepare some
-#   heavier data.
-ScriptLoadTimeoutMs: 1000
-# - ScriptRoomTimeoutMs - 
-#   How long a room script can run before it is killed. This is a safety feature to
-#   prevent long running scripts from bogging down the server.
-ScriptRoomTimeoutMs: 50
+Memory:
+  # - MaxMobBoredom -
+  #   How many rounds a mob can go without seeing a player before a mob despawns. 
+  #   This is mainly a resource management feature to keep the game from getting 
+  #   bogged down with too many mobs in memory. If you want mobs to stick around 
+  #   indefinitely, set this to 0. Certain mobs may never despawn, however.
+  MaxMobBoredom: 250
+  # - MobUnloadThreshold -
+  #   Do not unload any bots if the in-memory count is under this threshold.
+  MobUnloadThreshold: 100
+  # - RoomUnloadRounds -
+  #   How many rounds must pass without a visitor before a room is considered
+  #   for unloading from memory.
+  RoomUnloadRounds: 450
+  # - RoomUnloadThreshold -
+  #   Do not unload any rooms if the in-memory count is under this threshold.
+  RoomUnloadThreshold: 200
+
 ################################################################################
 #
-#   NETWORK SETTINGS
-#   Custom network settings for the server. If you are running the server
+#   AUCTIONS
+#   Settings for global auctions
 #
 ################################################################################
-# - MaxTelnetConnections - 
-#   The maximum number of telnet connections the server will accept.
-MaxTelnetConnections: 50
-# - TelnetPort -
-#   The port the server listens on for telnet connections. Listen on multiple 
-#   ports by separating them with commas. For example, [33333, 33334, 33335]
-TelnetPort: [33333, 44444]
-# - LocalPort -
-#   A port that can only be accessed via localhost, but will not limit based on connection count
-LocalPort: 9999
-# - WebPort -
-#   The port the server listens on for web requests
-WebPort: 80
+Auctions:
+  # - Enabled -
+  #   If true, players can globally auction off items.
+  Enabled: true
+  # - Anonymous -
+  #   If true, seller/buyer names are not revealed.
+  Anonymous: false
+  # - Seconds -
+  #   How may seconds until an auction closes.
+  Seconds: 180
+  # - UpdateSeconds -
+  #   How may seconds (roughly) between updates on current auction.
+  UpdateSeconds: 30
+
+
+
 ################################################################################
 #
 #   LOOT GOBLIN CONFIGURATIONS
@@ -302,130 +177,329 @@ WebPort: 80
 #   treasure.
 #
 ################################################################################
-# - LootGoblinRoom -
-#   The room the loot goblin spawns in (per its spawninfo). Also the room it returns
-#   to to drop off loot it finds. If zero (0), no loot goblin spawning.
-LootGoblinRoom: 139
-# - LootGoblinRoundCount -
-#   How often the Loot Goblin will spawn. It is a good idea to keep this 
-#   number low to keep the game from getting bogged down with too many items 
-#   on the ground. At 4 seconds per round, 900 rounds is 1 hour.
-LootGoblinRoundCount: 900
-# - LootGoblinMinimumItems -
-#   How many items there must be on the room to attract the loot goblin
-LootGoblinMinimumItems: 2
-# - LootGoblinMinimumGold -
-#   How much gold there must be on the room to attract the loot goblin
-LootGoblinMinimumGold: 100
-# - LootGoblinIncludeRecentRooms -
-#   If true, the loot goblin will also clean recently visited by players rooms 
-#   If allowed, this could create a situation where a lot of loot drops and the 
-#   suddenly the goblin shows up.
-LootGoblinIncludeRecentRooms: false
-################################################################################
-#
-#   SERVER CUSTOMIZATIONS
-#   Small changes such as login commands and the seed can ensure your mud has
-#   differences from others on the same code base.
-#
-################################################################################
-# - Seed -
-#   The seed used for certain types of content generation
-#   To prevent certain secrets or content from being spoiled, you can set this
-#   to a random string.
-#   Note: Once the Mud has been played and data saved, changing this will
-#   probably break certain things that get saved to files, such as user KeyRings, 
-#   so only set it before the first time you run the server.
-Seed: "Mud"
-# - OnLoginCommands -
-#   Commands to run when a user logs in. These commands are run by the user
-#   and can be anything they have access to.
-OnLoginCommands:
-- 'emote @appears before you in a flash of <ansi fg="yellow-bold">⚡l<ansi fg="white-bold">i</ansi>gh<ansi fg="white-bold">tn</ansi>i<ansi fg="white-bold">n</ansi>g⚡</ansi>!'
-- print
-- motd 
-- print
-- online
-- print
-- inbox check
-- print 
-# - Motd -
-#   Message of the day. This is displayed when the motd command is run.
-Motd: Welcome to the Mud!
-# - BannedNames -
-#   Names that are not allowed to be used by players. This is a good place to
-#   put names that are used by the game itself, such as "admin".
-#   Note: This is not case sensitive.
-#   You can add a * to the end of a name to ban all names that start with that
-#   name. For example, "admin*" would ban "admin", "administrator", etc.
-#   You can also use * at the beginning of a name to ban all names that
-#   end with that name. For example, "*admin" would ban "admin", "superadmin",
-#   Finally, you can use * at the beginning and end of a name to ban all names
-#   that contain that name. For example, "*admin*" would ban "admin", "superadmin",
-#   "administrator", etc.
-BannedNames:
-- "*admin*"
-- "*moderator*"
-- "player*"
-- "user*"
-- "me"
-- "myself"
-- "self"
-- "us"
-- "you"
-- "them"
-- "everyone"
-- "someone"
-- "anyone"
-- "nobody"
-- "somebody"
-- "anybody"
-- "none"
-- "nothing"
-- "something"
-- "anything"
-- "everything"
-- "all"
-- "north*"
-- "south*"
-- "east*"
-- "west*"
-- "up"
-- "down"
-- "chest"
-- "door"
-- "new"
-- "join"
-- "register"
-# - NextRoomID -
-# This number is auto-updated to the highest number of rooms in the game. 
-#   If creating your own rooms but don't want to risk an update conflicting, 
-#   update this to a large number (like 100000), so that as new rooms are 
-#   created they will be far beyond the range of any room id's expected through
-#   a code update.
-NextRoomId: 1002
-# - LogIntervalRoundCount - 
-#   How often to log the round count. Can help judge logs a little better.
-LogIntervalRoundCount: 15
-# - Locked -
-#   All config names defined here are immutable to the `server set` admin 
-#   command. They can only be changed by editing the config file directly.
-#   It is a good idea to lock configs related to folder/file paths to prevent
-#   accidental changes that could break the game.
-Locked: 
-- FolderDataFiles
-- FolderHtmlFiles
-- NextRoomId
-- Seed
-- OnLoginCommands
-- BannedNames
+LootGoblin:
+  # - RoomId -
+  #   The room the loot goblin spawns in (per its spawninfo). Also the room it returns
+  #   to to drop off loot it finds. If zero (0), no loot goblin spawning.
+  RoomId: 139
+  # - RoundCount -
+  #   How often the Loot Goblin will spawn. It is a good idea to keep this 
+  #   number low to keep the game from getting bogged down with too many items 
+  #   on the ground. At 4 seconds per round, 900 rounds is 1 hour.
+  RoundCount: 900
+  # - MinimumItems -
+  #   How many items there must be on the room to attract the loot goblin
+  MinimumItems: 2
+  # - MinimumGold -
+  #   How much gold there must be on the room to attract the loot goblin
+  MinimumGold: 100
+  # - IncludeRecentRooms -
+  #   If true, the loot goblin will also clean recently visited by players rooms 
+  #   If allowed, this could create a situation where a lot of loot drops and the 
+  #   suddenly the goblin shows up.
+  IncludeRecentRooms: false
+
 
 ################################################################################
 #
-#   Secrets
+#   ENGINE TIMING
+#   Fine tuning for input throttling, round time, day length etc.
 #
 ################################################################################
-# - DiscordWebhookUrl - 
-# Optional webhook URL to send mud event messages to, such as joins/disconnects
-# Can also be set via environment variable: DISCORD_WEBHOOK_URL
-DiscordWebhookUrl: ''
+EngineTiming:
+  # - TurnMs -
+  #   How many milliseconds per turn. While lower is generally better, this can
+  #   greatly increase overhead on the server - a command per mob or user is
+  #   processed per turn. This is not the same as rounds, which is how often the
+  #   mobs choose their actions, but if multiple actions are queued up, they will
+  #   be processed in order once per turn. 
+  #   50 is a good balance between handling input from players and not bogging
+  #   down the server.
+  #   Note: If your automapper/walker seems slow, this is probably the culprit.
+  TurnMs: 50
+  # - RoundSeconds - 
+  #   How many seconds per round. Anything gated by rounds will be affected by
+  #   this. This is the main setting for controlling the pace of the game.
+  RoundSeconds: 4
+  # - RoundsPerAutoSave -
+  #   How often the server will automatically save the game state. This is a
+  #   backup feature in case the server crashes. The game state is also saved
+  #   whenever the server is shut down.
+  RoundsPerAutoSave: 450
+  # - RoundsPerDay -
+  #   How many rounds are in a day? This is used to calculate the time of day.
+  #   The lower this number, the faster the day/night cycle will be.
+  #   A 4 second round and a 900 round day means the day/night cycle is 1 hour.
+  RoundsPerDay: 900
+  # - NightHours -
+  #   How many hours of each 24 hour day will be nighttime?
+  NightHours: 8
+
+################################################################################
+#
+#   FILEPATH CONFIGURATIONS
+#   Relative or absolute filepaths, and sometimes URI's
+#
+################################################################################
+FilePaths:
+  # - WebCDNLocation - 
+  #   Optional alternative location to serve static files from such as audio
+  #   Example: http://files.gomud.net
+  #   Leave blank if no CDN config or similar desired
+  WebCDNLocation: ""
+  # - FolderDataFiles - 
+  #   The folder where all datafiles reside.
+  #   If you are planning to create your own world, copying the current folder
+  #   and its entire tree of content is a good place to start.
+  FolderDataFiles: _datafiles/world/default
+  # - FolderPublicHtml - 
+  #   The folder where all web html files/templates reside.
+  FolderPublicHtml: _datafiles/html/public
+  # - FolderPublicHtml - 
+  #   The folder where all web ADMIN files/templates reside.
+  FolderAdminHtml: _datafiles/html/admin
+  # - CarefulSaveFiles -
+  #   If true, save files will be written to a temporary file and then saved over
+  #   the actual file. This takes longer, but helps prevent file corruption if
+  #   the server crashes during a save.
+  CarefulSaveFiles: true
+
+################################################################################
+#
+#   GAMEPLAY CONFIGURATIONS
+#   These modify the way the game players, the pace/speed of the game, etc.
+#
+################################################################################
+GamePlay:
+  # - AllowItemBuffRemoval - 
+  #   Whether to allow the removal of buffs assigned by items using spells etc. 
+  #   By default, once an item has buffed a player, the player cannot remove the 
+  #   buff unless they removing the item. However, if set to true, players can 
+  #   temporarily remove the buff with spells, items, etc. and the buff will not 
+  #   return until the player re-equips the item, or logs out and back in.
+  AllowItemBuffRemoval: false
+  # Death settings
+  Death:
+    # - EquipmentDropChance -
+    #   The chance that a player will drop a piece of worn/backpack equipment when 
+    #   they die. This is a percentage, so 0.5 is 50% chance.
+    EquipmentDropChance: 0.25
+    # - AlwaysDropBackpack -
+    #   If true, players will always drop their backpack contents when they die. 
+    #   If false, it will failover to EquipmentDropChance.
+    AlwaysDropBackpack: false
+    # - XPPenalty -
+    #   What penalty is applies to a players XP when they die.
+    #   none - no penalty
+    #   level - lose all XP gained over their current level.
+    #   10% - lose 10% of XP
+    #   50% - lose 50% of XP
+    XPPenalty: none
+    # - ProtectionLevels -
+    #   Players do not incur death penalties up to and including this level.
+    ProtectionLevels: 5
+    # - PermaDeath - 
+    #   If true, players lose their character if they die with zero lives left.
+    PermaDeath: false
+    # - CorpsesEnabled - 
+    #   If set to true, corpses are left behind by players or mobs that are killed.
+    CorpsesEnabled: true
+    # - CorpseDecayTime - 
+    #   How long until corpses crumble to dust (Go away).
+    #   See ShopRestockRate comments for time format.
+    CorpseDecayTime: 1 hour
+  # - LivesStart - 
+  #   (Req: PermaDeath) How many lives players start with before being reset.
+  LivesStart: 3
+  # - LivesMax - 
+  #   (Req: PermaDeath) The maximum lives a player can have.
+  LivesMax: 3
+  # - LivesOnLevelUp -
+  #   (Req: PermaDeath) If non zero, players gain this many lives per level.
+  LivesOnLevelUp: 1
+  # - PricePerLife - 
+  #   (Req: PermaDeath) If non-zero, players can buy extra lives for this amount.
+  PricePerLife: 1000000
+  # - ShopRestockRate - 
+  #   The default time for a shops to restock 1 item. This can still be 
+  #   overriden in character shop definitions if desired.
+  #   Should be in the format of: {num} {unit}
+  #   Unit can be: rounds, hours, days, weeks, months, years
+  #   Default is in-game time, not real time. To use real time, use the following
+  #   format: {num} real {unit} - Example: 1 real day
+  ShopRestockRate: 6 hours
+  # - ContainerSizeMax -
+  #   Maximum number of objects a container can hold before stuff overflows
+  ContainerSizeMax: 10
+  # - MaxAltCharacters - 
+  #   How many characters beyond their original character can they create? Players
+  #   can swap between characters and work on them independently if this is set
+  #   greater than 0. Otherwise they are locked to a signle character and have to
+  #   sign up with a new user login if they intend to create a new character.
+  MaxAltCharacters: 3
+  # - ConsistentAttackMessages - 
+  #   If true, each weapon ID will consistently use the same message for each type
+  #   of attack. If false, it will randomize messages. Setting this to true gives
+  #   each weapon a more consistent feel in battle, though combat may feel less 
+  #   varied. 
+  #   Note: see _datafiles/combat-messages/*
+  ConsistentAttackMessages: true
+  # - PVP -
+  #   Possible Values:
+  #     enabled   - PVP is enabled everywhere
+  #     disabled  - PVP is disabled eveywhere
+  #     limited   - PVP is enabled for all players but only in PVP enabled rooms
+  PVP: limited
+  # - PVPMinimumLevel -
+  #   Minimum level one must be to be targetted or to target other players in PVP
+  PVPMinimumLevel: 15
+  # - XPScale -
+  #   Scales how much XP is gained when characters gain XP. Number is a percentage
+  #   Example: 100 = 100%
+  XPScale: 100
+  # - MobConverseChance -
+  #   Chance in 100 that the mob will attempt to converse when idle.
+  MobConverseChance: 3
+
+################################################################################
+#
+#   INTEGRATIONS
+#   Special settings for third party integrations such as discord messages
+#
+################################################################################
+Integrations:
+  # - Discord settings - 
+  Discord:
+    # Optional webhook URL to send mud event messages to, such as joins/disconnects
+    # Can also be set via environment variable: DISCORD_WEBHOOK_URL
+    WebhookUrl: ''
+
+
+################################################################################
+#
+#   TEXT FORMATS
+#   Basic text strings that occur often, and may need customization
+#
+################################################################################
+TextFormats:
+  # - Prompt - 
+  #   Default prompt formatting.
+  #   See: "help prompt" in game to learn more about this.
+  Prompt: '{8}[{t} {T} {255}HP:{hp}{8}/{HP} {255}MP:{13}{mp}{8}/{13}{MP}{8}]{239}{h}{8}:'
+  # - TimeFormat - 
+  #   When real world time is shown, what format should be used?
+  #   This uses a Go time format string, which is kinda weird.
+  #   See: https://go.dev/src/time/format.go
+  Time: 'Monday, 02-Jan-2006 3:04:05PM'
+  # - TimeFormatShort - 
+  #   Same as TimeFormat, but shorter form
+  TimeShort: 'Jan 2 ''06 3:04PM'
+  # - EnterRoomMessageWrapper -
+  #   Decorate entrance text with this. Put a %s where the message should be.
+  EnterRoomMessageWrapper: "   <ansi fg=\"enters-message\"> >>> </ansi>%s\n"
+  # - ExitRoomMessageWrapper -
+  #   Decorate exit text with this. Put a %s where the message should be.
+  ExitRoomMessageWrapper: "   <ansi fg=\"leaves-message\"> >>> </ansi>%s\n"
+
+################################################################################
+#
+#   NETWORK SETTINGS
+#   Custom network settings for the server. If you are running the server
+#
+################################################################################
+Network:
+  # - MaxTelnetConnections - 
+  #   The maximum number of telnet connections the server will accept.
+  MaxTelnetConnections: 50
+  # - TelnetPort -
+  #   The port the server listens on for telnet connections. Listen on multiple 
+  #   ports by separating them with commas. For example, [33333, 33334, 33335]
+  TelnetPort: [33333, 44444]
+  # - LocalPort -
+  #   A port that can only be accessed via localhost, but will not limit based on connection count
+  LocalPort: 9999
+  # - WebPort -
+  #   The port the server listens on for web requests
+  WebPort: 80
+  # - AfkSeconds -
+  #   If this many seconds pass without player input, they are flagged as afk
+  #   Set to zero to never mark anyone as AFK
+  AfkSeconds: 120
+  # - MaxIdleSeconds -
+  #   How long players can go without any input, before being kicked.
+  #   A value of 0 (zero) means never kick inactive players.
+  #   1800 seconds = 30 minutes
+  MaxIdleSeconds: 1800
+  # - TimeoutMods -
+  #   Whether Admin/Mod users get timed out when reaching MaxIdleSeconds
+  #   If set to false, Admins & Mods never get force disconnected.
+  TimeoutMods: false
+    # - ZombieSeconds -
+  #   How many seconds a character stays active/in game after a network connection
+  #   is lost. Set to 0 to instantly log out characters (exploitable).
+  ZombieSeconds: 30
+  # - LogoutRounds - 
+  #   How many rounds of meditation a player must complete before they are
+  #   logged out. If interrupted, they must start over.
+  LogoutRounds: 3
+
+################################################################################
+#
+#   SCRIPTING
+#   Configurations to put limits on run away scripts etc.
+#
+################################################################################
+Scripting:
+  # - LoadTimeoutMs -
+  #   When a script is first loaded, compiled, and run, it is given this long to
+  #   complete. If it takes longer, it is killed. This includes the onLoad() function
+  #   in scripts. Allowing a script to take longer to load might be okay to prepare some
+  #   heavier data.
+  LoadTimeoutMs: 1000
+  # - RoomTimeoutMs - 
+  #   How long a room script can run before it is killed. This is a safety feature to
+  #   prevent long running scripts from bogging down the server.
+  RoomTimeoutMs: 50
+
+################################################################################
+#
+#   Special Rooms
+#   You probably won't need to change these.
+#
+################################################################################
+SpecialRooms:
+  # - StartRoom -
+  #   This is the default starting room for the game. It only matters when there
+  #   is code that explicitely tries to send the player to the "starting room"
+  #   The default of 1 is Town Square
+  StartRoom: 1
+  # - DeathRecoveryRoom -
+  #   This is the room players are sent to when they die.
+  #   This should have some way of healing them and (eventually)
+  #   sending them back into the main world.
+  DeathRecoveryRoom: 75
+  # - TutorialStartRooms - 
+  #   RoomIds players will be put in when starting the game/tutorial
+  #   RoomIds 900-999 are reserved for Tutorial rooms.
+  TutorialStartRooms: [900, 910, 920, 930, 940, 990]
+
+################################################################################
+#
+#   Statistics
+#   Configurations for stat tracking
+#
+################################################################################
+Statistics:
+  # - LeaderboardSize -
+  #   Maximum size of each leaderboard. 0 to disable.
+  LeaderboardSize: 10
+
+
+
+
+
+
+
+
+
+

@@ -2,14 +2,11 @@ package usercommands
 
 import (
 	"fmt"
-	"slices"
 	"sort"
 	"strings"
 	"time"
 
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
@@ -31,58 +28,60 @@ func Server(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 	args := util.SplitButRespectQuotes(rest)
 	if args[0] == "set" {
 
-		args = args[1:]
+		user.SendText(`set disabled for now.`)
+		/*
+			args = args[1:]
 
-		if len(args) < 1 {
+			if len(args) < 1 {
 
-			headers := []string{"Name", "Value"}
-			rows := [][]string{}
-			formatting := []string{`<ansi fg="yellow-bold">%s</ansi>`, `<ansi fg="red-bold">%s</ansi>`}
+				headers := []string{"Name", "Value"}
+				rows := [][]string{}
+				formatting := []string{`<ansi fg="yellow-bold">%s</ansi>`, `<ansi fg="red-bold">%s</ansi>`}
 
-			user.SendText(``)
+				user.SendText(``)
 
-			cfgData := configs.GetConfig().AllConfigData()
-			cfgKeys := make([]string, 0, len(cfgData))
-			for k := range cfgData {
-				cfgKeys = append(cfgKeys, k)
+				cfgData := configs.GetConfig().AllConfigData()
+				cfgKeys := make([]string, 0, len(cfgData))
+				for k := range cfgData {
+					cfgKeys = append(cfgKeys, k)
+				}
+
+				// sort the keys
+				slices.Sort(cfgKeys)
+
+				for _, k := range cfgKeys {
+					rows = append(rows, []string{k, fmt.Sprintf(`%v`, cfgData[k])})
+				}
+
+				settingsTable := templates.GetTable("Server Settings", headers, rows, formatting)
+				tplTxt, _ := templates.Process("tables/generic", settingsTable)
+				user.SendText(tplTxt)
+
+				return true, nil
 			}
 
-			// sort the keys
-			slices.Sort(cfgKeys)
-
-			for _, k := range cfgKeys {
-				rows = append(rows, []string{k, fmt.Sprintf(`%v`, cfgData[k])})
+			if args[0] == "day" {
+				gametime.SetToDay(-1)
+				gd := gametime.GetDate()
+				user.SendText(`Time set to ` + gd.String())
+				return true, nil
+			} else if args[0] == "night" {
+				gametime.SetToNight(-1)
+				gd := gametime.GetDate()
+				user.SendText(`Time set to ` + gd.String())
+				return true, nil
 			}
 
-			settingsTable := templates.GetTable("Server Settings", headers, rows, formatting)
-			tplTxt, _ := templates.Process("tables/generic", settingsTable)
-			user.SendText(tplTxt)
+			configName := strings.ToLower(args[0])
+			configValue := strings.Join(args[1:], ` `)
 
-			return true, nil
-		}
+			if err := configs.SetVal(configName, configValue); err != nil {
+				user.SendText(fmt.Sprintf(`config change error: %s=%s (%s)`, configName, configValue, err))
+				return true, nil
+			}
 
-		if args[0] == "day" {
-			gametime.SetToDay(-1)
-			gd := gametime.GetDate()
-			user.SendText(`Time set to ` + gd.String())
-			return true, nil
-		} else if args[0] == "night" {
-			gametime.SetToNight(-1)
-			gd := gametime.GetDate()
-			user.SendText(`Time set to ` + gd.String())
-			return true, nil
-		}
-
-		configName := strings.ToLower(args[0])
-		configValue := strings.Join(args[1:], ` `)
-
-		if err := configs.SetVal(configName, configValue); err != nil {
-			user.SendText(fmt.Sprintf(`config change error: %s=%s (%s)`, configName, configValue, err))
-			return true, nil
-		}
-
-		user.SendText(fmt.Sprintf(`config changed: %s=%s`, configName, configValue))
-
+			user.SendText(fmt.Sprintf(`config changed: %s=%s`, configName, configValue))
+		*/
 		return true, nil
 	}
 

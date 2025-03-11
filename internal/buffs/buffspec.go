@@ -208,7 +208,7 @@ func (b *BuffSpec) GetScriptPath() string {
 	buffFilePath := b.Filename()
 	scriptFilePath := strings.Replace(buffFilePath, `.yaml`, `.js`, 1)
 
-	fullScriptPath := strings.Replace(string(configs.GetConfig().FolderDataFiles)+`/buffs/`+b.Filepath(),
+	fullScriptPath := strings.Replace(string(configs.GetFilePathsConfig().FolderDataFiles)+`/buffs/`+b.Filepath(),
 		buffFilePath,
 		scriptFilePath,
 		1)
@@ -221,7 +221,7 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpBuffs, err := fileloader.LoadAllFlatFiles[int, *BuffSpec](string(configs.GetConfig().FolderDataFiles) + `/buffs`)
+	tmpBuffs, err := fileloader.LoadAllFlatFiles[int, *BuffSpec](string(configs.GetFilePathsConfig().FolderDataFiles) + `/buffs`)
 	if err != nil {
 		panic(err)
 	}

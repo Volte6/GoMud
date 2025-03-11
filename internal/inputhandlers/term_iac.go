@@ -148,7 +148,7 @@ func TelnetIACHandler(clientInput *connections.ClientInput, sharedState map[stri
 				connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
 
 				connections.SendTo(
-					term.MspCommand.BytesWithPayload([]byte("!!SOUND(Off U="+configs.GetConfig().WebCDNLocation.String()+")")),
+					term.MspCommand.BytesWithPayload([]byte("!!SOUND(Off U="+configs.GetFilePathsConfig().WebCDNLocation.String()+")")),
 					clientInput.ConnectionId,
 				)
 

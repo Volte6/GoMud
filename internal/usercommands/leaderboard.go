@@ -15,7 +15,7 @@ import (
 
 func Leaderboards(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
-	if configs.GetConfig().LeaderboardSize == 0 {
+	if configs.GetStatisticsConfig().LeaderboardSize == 0 {
 		user.SendText(`Leaderboards are disabled.`)
 		return true, nil
 	}

@@ -39,10 +39,10 @@ func Portal(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	// Portal to the highest loot room
 	if rest == `loot` {
 
-		config := configs.GetConfig()
+		config := configs.GetLootGoblinConfig()
 
 		// Only interest in rooms where players haven't visited in a while and have at least 1
-		mostItemRoomId, qty := rooms.GetRoomWithMostItems(bool(config.LootGoblinIncludeRecentRooms), int(config.LootGoblinMinimumItems), int(config.LootGoblinMinimumGold))
+		mostItemRoomId, qty := rooms.GetRoomWithMostItems(bool(config.IncludeRecentRooms), int(config.MinimumItems), int(config.MinimumGold))
 		if qty == 0 { // could't find any
 			// No more rooms with items? Our job is done i guess.
 

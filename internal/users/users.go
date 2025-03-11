@@ -363,7 +363,7 @@ func LoadUser(username string, skipValidation ...bool) (*UserRecord, error) {
 		return nil, errors.New("user already exists")
 	}
 
-	userFilePath := util.FilePath(string(configs.GetConfig().FolderDataFiles), `/`, `users`, `/`, strings.ToLower(username)+`.yaml`)
+	userFilePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strings.ToLower(username)+`.yaml`)
 
 	userFileTxt, err := os.ReadFile(userFilePath)
 	if err != nil {
@@ -395,7 +395,7 @@ func LoadUser(username string, skipValidation ...bool) (*UserRecord, error) {
 // Stops searching if false is returned.
 func SearchOfflineUsers(searchFunc func(u *UserRecord) bool) {
 
-	basePath := util.FilePath(string(configs.GetConfig().FolderDataFiles), `/`, `users`)
+	basePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`)
 
 	filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
 
@@ -498,9 +498,9 @@ func SaveUser(u UserRecord, isAutoSave ...bool) error {
 		return err
 	}
 
-	carefulSave := configs.GetConfig().CarefulSaveFiles
+	carefulSave := configs.GetFilePathsConfig().CarefulSaveFiles
 
-	path := util.FilePath(string(configs.GetConfig().FolderDataFiles), `/`, `users`, `/`, strings.ToLower(u.Username)+`.yaml`)
+	path := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strings.ToLower(u.Username)+`.yaml`)
 
 	saveFilePath := path
 	if carefulSave { // careful save first saves a {filename}.new file
@@ -563,6 +563,6 @@ func GetUniqueUserId() int {
 }
 
 func Exists(name string) bool {
-	_, err := os.Stat(util.FilePath(string(configs.GetConfig().FolderDataFiles), `/`, `users`, `/`, strings.ToLower(name)+`.yaml`))
+	_, err := os.Stat(util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strings.ToLower(name)+`.yaml`))
 	return !os.IsNotExist(err)
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
@@ -19,7 +20,7 @@ import (
 
 func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
-	config := configs.GetConfig()
+	config := configs.GetGamePlayConfig()
 	currentRound := util.GetRoundCount()
 
 	if user.Character.Zone == `Shadow Realm` {
@@ -87,19 +88,19 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events
 		Text: msg,
 	})
 
-	allowPenalties := user.Character.Level > int(config.OnDeathProtectionLevels)
+	allowPenalties := user.Character.Level > int(config.Death.ProtectionLevels)
 
 	events.AddToQueue(events.PlayerDeath{
 		UserId:        user.UserId,
 		RoomId:        user.Character.RoomId,
 		Username:      user.Username,
 		CharacterName: user.Character.Name,
-		Permanent:     allowPenalties && bool(config.PermaDeath) && user.Character.ExtraLives == 0,
+		Permanent:     allowPenalties && bool(config.Death.PermaDeath) && user.Character.ExtraLives == 0,
 		KilledByUsers: killedByUserIds,
 	})
 
 	// If permadeath is enabled, do some extra bookkeeping
-	if allowPenalties && bool(config.PermaDeath) {
+	if allowPenalties && bool(config.Death.PermaDeath) {
 
 		if user.Character.ExtraLives > 0 {
 
@@ -134,8 +135,8 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events
 	// Only apply penalties if they were above the threshold
 	if allowPenalties {
 
-		if config.OnDeathEquipmentDropChance >= 0 {
-			chanceInt := int(config.OnDeathEquipmentDropChance * 100)
+		if config.Death.EquipmentDropChance >= 0 {
+			chanceInt := int(config.Death.EquipmentDropChance * 100)
 			for _, itm := range user.Character.GetAllWornItems() {
 				if util.Rand(100) < chanceInt {
 
@@ -152,13 +153,13 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events
 			Drop(fmt.Sprintf(`%d gold`, user.Character.Gold), user, room, flags)
 		}
 
-		if config.OnDeathAlwaysDropBackpack {
+		if config.Death.AlwaysDropBackpack {
 			Drop("all", user, room, flags)
 
 			user.EventLog.Add(`death`, `Dropped <ansi fg="alert-3">everthing in your backpack</ansi> on death`)
 
-		} else if config.OnDeathEquipmentDropChance >= 0 {
-			chanceInt := int(config.OnDeathEquipmentDropChance * 100)
+		} else if config.Death.EquipmentDropChance >= 0 {
+			chanceInt := int(config.Death.EquipmentDropChance * 100)
 			for _, itm := range user.Character.GetAllBackpackItems() {
 				if util.Rand(100) < chanceInt {
 					Drop(itm.Name(), user, room, flags)
@@ -169,10 +170,9 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events
 
 		if user.Character.Level > 1 {
 
-			setting, lossPct := config.GetDeathXPPenalty()
-			if setting != `none` {
+			if config.Death.XPPenalty != `none` {
 
-				if setting == `level` { // are they being brought down to the base of their current level?
+				if config.Death.XPPenalty == `level` { // are they being brought down to the base of their current level?
 					user.Character.Level--
 					oldExperience := user.Character.Experience
 					user.Character.Experience = user.Character.XPTNL()
@@ -182,9 +182,18 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events
 
 					user.EventLog.Add(`death`, fmt.Sprintf(`Lost <ansi fg="yellow">%d experience points</ansi> on death`, oldExperience-user.Character.Experience))
 
-				} else if lossPct > 0 { // Are they losing a set %?
+				} else {
 
-					loss := int(math.Floor(float64(user.Character.Experience) * lossPct))
+					var pct float64 = 0.0
+
+					percent, err := strconv.ParseInt(string(config.Death.XPPenalty)[0:len(config.Death.XPPenalty)-1], 10, 64)
+					if err != nil || percent < 0 || percent > 100 {
+						pct = 0.0
+					}
+
+					pct = float64(percent) / 100.0
+
+					loss := int(math.Floor(float64(user.Character.Experience) * pct))
 					user.Character.Experience -= loss
 
 					user.SendText(fmt.Sprintf(`You lost <ansi fg="yellow">%d experience points</ansi>.`, loss))
@@ -204,9 +213,9 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events
 
 	clear(user.Character.PlayerDamage)
 
-	rooms.MoveToRoom(user.UserId, int(config.DeathRecoveryRoom))
+	rooms.MoveToRoom(user.UserId, int(configs.GetSpecialRoomsConfig().DeathRecoveryRoom))
 
-	if config.CorpsesEnabled {
+	if config.Death.CorpsesEnabled {
 		room.AddCorpse(rooms.Corpse{
 			UserId:       user.UserId,
 			Character:    *user.Character,

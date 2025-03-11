@@ -20,13 +20,32 @@ type ConfigValue interface {
 	Set(string) error
 }
 
+//
 // String
+//
+
 func (c ConfigUInt64) String() string {
 	return strconv.FormatUint(uint64(c), 10)
 }
 
 func (c ConfigInt) String() string {
 	return strconv.Itoa(int(c))
+}
+
+func (i *ConfigInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var value int
+	fmt.Println("TEST")
+	fmt.Println("TEST")
+	fmt.Println("TEST")
+	fmt.Println("TEST")
+	fmt.Println("TEST")
+	fmt.Println("TEST")
+
+	if err := unmarshal(&value); err != nil {
+		return err
+	}
+	*i = ConfigInt(value)
+	return nil
 }
 
 func (c ConfigString) String() string {
@@ -56,7 +75,9 @@ func (c ConfigMap) String() string {
 	return fmt.Sprintf(`%+v`, map[string]string(c))
 }
 
+//
 // Set
+//
 
 func (c *ConfigUInt64) Set(value string) error {
 	v, err := strconv.ParseUint(value, 10, 64)
