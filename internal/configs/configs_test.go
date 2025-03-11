@@ -45,11 +45,11 @@ func Benchmark_Config_Copy(b *testing.B) {
 }
 
 func ConfigPointer(c *Config) uint64 {
-	return uint64(c.turnsPerRound)
+	return uint64(c.Timing.turnsPerRound)
 }
 
 func ConfigCopy(c Config) uint64 {
-	return uint64(c.turnsPerRound)
+	return uint64(c.Timing.turnsPerRound)
 }
 
 //
@@ -75,11 +75,11 @@ func Benchmark_Config_Interface(b *testing.B) {
 }
 
 func Config_Typed(c Config) uint64 {
-	return uint64(c.turnsPerRound)
+	return uint64(c.Timing.turnsPerRound)
 }
 
 func Config_Interface(c interface{}) uint64 {
-	return uint64(c.(Config).turnsPerRound)
+	return uint64(c.(Config).Timing.turnsPerRound)
 }
 
 func TestConfigUInt64String(t *testing.T) {

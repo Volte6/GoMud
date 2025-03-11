@@ -108,7 +108,7 @@ func Drop(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				SourceUserId: user.UserId,
 				SourceMobId:  0,
 				Action:       fmt.Sprintf("detonate %s", matchItem.ShorthandId()),
-				ReadyTurn:    util.GetTurnCount() + uint64(configs.GetConfig().TurnsPerRound()*3),
+				ReadyTurn:    util.GetTurnCount() + uint64(configs.GetTimingConfig().TurnsPerRound()*3),
 			})
 
 		}

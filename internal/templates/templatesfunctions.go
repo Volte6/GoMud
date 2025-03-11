@@ -161,7 +161,7 @@ var (
 			if rounds >= buffs.TriggersLeftUnlimited {
 				return `Unlimited`
 			}
-			return formatDuration(rounds * int(configs.GetEngineTimingConfig().RoundSeconds))
+			return formatDuration(rounds * int(configs.GetTimingConfig().RoundSeconds))
 		},
 		"secondsFrom": func(t time.Time) int {
 			// return the number of seconds unti the given time

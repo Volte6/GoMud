@@ -302,7 +302,7 @@ func (c *Character) FindKeyInBackpack(lockId string) (items.Item, bool) {
 
 func (c *Character) HasKey(lockId string, difficulty int) (hasKey bool, hasSequence bool) {
 
-	sequence := util.GetLockSequence(lockId, difficulty, string(configs.GetConfig().Seed))
+	sequence := util.GetLockSequence(lockId, difficulty, string(configs.GetServerConfig().Seed))
 
 	// Check whether they ahve a key for this lock
 	return c.GetKey(`key-`+lockId) != ``, c.GetKey(lockId) == sequence
@@ -426,7 +426,7 @@ func (c *Character) GrantXP(xp int) (actualXP int, xpScale int) {
 		return 0, 100
 	}
 
-	preScale := float64(configs.GetConfig().XPScale) / 100
+	preScale := float64(configs.GetGamePlayConfig().XPScale) / 100
 	xp = int(math.Round(preScale * float64(xp)))
 
 	xpScale = c.StatMod(string(statmods.XPScale)) + 100

@@ -103,7 +103,7 @@ func SetToDay(roundAdjustment ...int) {
 // Between 0 and 23
 func SetTime(setToHour int, setToMinutes ...int) {
 
-	c := configs.GetConfig()
+	c := configs.GetTimingConfig()
 
 	setToHour = setToHour % 24
 	roundsPerHour := float64(c.RoundsPerDay) / 24
@@ -150,7 +150,7 @@ func GetDate(forceRound ...uint64) GameDate {
 
 func getDate(currentRound uint64) GameDate {
 
-	c := configs.GetConfig()
+	c := configs.GetTimingConfig()
 
 	gd := GameDate{
 		RoundNumber:      currentRound,
@@ -290,20 +290,22 @@ func (g GameDate) AddPeriod(str string) uint64 {
 			qty = 1
 		}
 
+		c := configs.GetTimingConfig()
+
 		if parts[1] == `real` || parts[1] == `irl` { // e.g. - 2 irl days
 			realTime = true
-			roundsPerRealDay = 84600 / int(configs.GetConfig().RoundSeconds)
-			roundsPerRealHour = 3600 / int(configs.GetConfig().RoundSeconds)
-			roundsPerRealMinute = 60 / int(configs.GetConfig().RoundSeconds)
+			roundsPerRealDay = 84600 / int(c.RoundSeconds)
+			roundsPerRealHour = 3600 / int(c.RoundSeconds)
+			roundsPerRealMinute = 60 / int(c.RoundSeconds)
 
 			timeStr = parts[2]
 		} else if parts[1] == `game` || parts[1] == `gametime` { // e.g. - 2 game days
 			timeStr = parts[2]
 		} else if parts[2] == `real` || parts[2] == `irl` { // e.g. - 2 days irl
 			realTime = true
-			roundsPerRealDay = 84600 / int(configs.GetConfig().RoundSeconds)
-			roundsPerRealHour = 3600 / int(configs.GetConfig().RoundSeconds)
-			roundsPerRealMinute = 60 / int(configs.GetConfig().RoundSeconds)
+			roundsPerRealDay = 84600 / int(c.RoundSeconds)
+			roundsPerRealHour = 3600 / int(c.RoundSeconds)
+			roundsPerRealMinute = 60 / int(c.RoundSeconds)
 
 			timeStr = parts[1]
 		} else if parts[2] == `game` || parts[2] == `gametime` { // e.g. - 2 days gametime
@@ -448,7 +450,7 @@ func (g GameDate) AddPeriod(str string) uint64 {
 
 func GetLastPeriod(periodName string, roundNumber uint64) uint64 {
 
-	c := configs.GetConfig()
+	c := configs.GetTimingConfig()
 
 	roundsPerDay := uint64(c.RoundsPerDay)
 	nightHoursPerDay := uint64(c.NightHours)

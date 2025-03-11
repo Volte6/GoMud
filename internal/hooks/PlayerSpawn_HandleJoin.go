@@ -47,7 +47,7 @@ func HandleJoin(e events.Event) bool {
 	}
 
 	// TODO HERE
-	loginCmds := configs.GetConfig().OnLoginCommands
+	loginCmds := configs.GetConfig().Server.OnLoginCommands
 	if len(loginCmds) > 0 {
 
 		for _, cmd := range loginCmds {

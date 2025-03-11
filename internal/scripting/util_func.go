@@ -89,19 +89,19 @@ func UtilFindMatchIn(search string, items []string) map[string]any {
 }
 
 func UtilGetSecondsToRounds(seconds int) int {
-	return configs.GetConfig().SecondsToRounds(seconds)
+	return configs.GetTimingConfig().SecondsToRounds(seconds)
 }
 
 func UtilGetMinutesToRounds(minutes int) int {
-	return configs.GetConfig().MinutesToRounds(minutes)
+	return configs.GetTimingConfig().MinutesToRounds(minutes)
 }
 
 func UtilGetSecondsToTurns(seconds int) int {
-	return configs.GetConfig().SecondsToTurns(seconds)
+	return configs.GetTimingConfig().SecondsToTurns(seconds)
 }
 
 func UtilGetMinutesToTurns(minutes int) int {
-	return configs.GetConfig().MinutesToTurns(minutes)
+	return configs.GetTimingConfig().MinutesToTurns(minutes)
 }
 
 func UtilStripPrepositions(input string) string {

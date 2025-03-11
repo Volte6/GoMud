@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to {{ .CONFIG.MudName }}</title>
+  <title>Welcome to {{ .CONFIG.Server.MudName }}</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" />
   <style>
     :root {
       /* Setting CSS var here so we can prepend WebCDNLocation */
-      --background-image: url('{{ .CONFIG.WebCDNLocation }}/static/images/web_bg.webp') center center / cover no-repeat fixed;
+      --background-image: url('{{ .CONFIG.FilePaths.WebCDNLocation }}/static/images/web_bg.webp') center center / cover no-repeat fixed;
     }
   </style>
-  <link rel="stylesheet" href="{{ .CONFIG.WebCDNLocation }}/static/css/gomud.css">
+  <link rel="stylesheet" href="{{ .CONFIG.FilePaths.WebCDNLocation }}/static/css/gomud.css">
   <script type="text/javascript">
     window.addEventListener("load", function(){
       const link = document.getElementById('hide-header-footer');
@@ -35,7 +35,7 @@
 <body>
   <header>
     <div>
-      <a class="gomud-btn" href="/">{{ .CONFIG.MudName }}</a>
+      <a class="gomud-btn" href="/">{{ .CONFIG.Server.MudName }}</a>
     </div>
     <div class="nav-toggle" onclick="toggleMenu()">
       <div></div>

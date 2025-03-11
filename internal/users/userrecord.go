@@ -252,7 +252,7 @@ func (u *UserRecord) Command(inputTxt string, waitSeconds ...float64) {
 
 	readyTurn := util.GetTurnCount()
 	if len(waitSeconds) > 0 {
-		readyTurn += uint64(float64(configs.GetConfig().SecondsToTurns(1)) * waitSeconds[0])
+		readyTurn += uint64(float64(configs.GetTimingConfig().SecondsToTurns(1)) * waitSeconds[0])
 	}
 
 	events.AddToQueue(events.Input{
@@ -279,7 +279,7 @@ func (u *UserRecord) CommandFlagged(inputTxt string, flagData events.EventFlag, 
 
 	readyTurn := util.GetTurnCount()
 	if len(waitSeconds) > 0 {
-		readyTurn += uint64(float64(configs.GetConfig().SecondsToTurns(1)) * waitSeconds[0])
+		readyTurn += uint64(float64(configs.GetTimingConfig().SecondsToTurns(1)) * waitSeconds[0])
 	}
 
 	if flagData&events.CmdBlockInput == events.CmdBlockInput {
@@ -494,9 +494,8 @@ func (u *UserRecord) ClearPrompt() {
 }
 
 func (u *UserRecord) GetOnlineInfo() OnlineInfo {
-
-	c := configs.GetConfig()
-	afkRounds := uint64(c.SecondsToRounds(int(c.Network.AfkSeconds)))
+	c := configs.GetTimingConfig()
+	afkRounds := uint64(c.SecondsToRounds(int(configs.GetNetworkConfig().AfkSeconds)))
 	roundNow := util.GetRoundCount()
 
 	connTime := u.GetConnectTime()

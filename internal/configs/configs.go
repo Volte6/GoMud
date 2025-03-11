@@ -2,7 +2,7 @@ package configs
 
 import (
 	"errors"
-	"math"
+	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -21,8 +21,9 @@ const (
 )
 
 var (
-	configData Config         = Config{}
-	overrides  map[string]any = make(map[string]any)
+	configData Config            = Config{}
+	overrides  map[string]any    = make(map[string]any)
+	allKeys    map[string]string = map[string]string{}
 
 	configDataLock       sync.RWMutex
 	ErrInvalidConfigName = errors.New("invalid config name")
@@ -35,7 +36,7 @@ type Config struct {
 	Memory       Memory       `yaml:"Memory"`
 	Auctions     Auctions     `yaml:"Auctions"`
 	LootGoblin   LootGoblin   `yaml:"LootGoblin"`
-	EngineTiming EngineTiming `yaml:"EngineTiming"`
+	Timing       Timing       `yaml:"Timing"`
 	FilePaths    FilePaths    `yaml:"FilePaths"`
 	GamePlay     GamePlay     `yaml:"GamePlay"`
 	Integrations Integrations `yaml:"Integrations"`
@@ -47,12 +48,6 @@ type Config struct {
 	// End config subsections
 
 	seedInt int64 `yaml:"-"`
-
-	// Protected values
-	turnsPerRound   int     // calculated and cached when data is validated.
-	turnsPerSave    int     // calculated and cached when data is validated.
-	turnsPerSecond  int     // calculated and cached when data is validated.
-	roundsPerMinute float64 // calculated and cached when data is validated.
 
 	validated bool
 }
@@ -126,7 +121,10 @@ func GetOverrides() map[string]any {
 }
 
 func (c *Config) SetOverrides(newOverrides map[string]any) error {
+
 	overrides = newOverrides
+	c.OverlayOverrides(overrides)
+
 	return nil
 }
 
@@ -137,7 +135,7 @@ func (c *Config) Validate() {
 	c.Memory.Validate()
 	c.Auctions.Validate()
 	c.LootGoblin.Validate()
-	c.EngineTiming.Validate()
+	c.Timing.Validate()
 	c.FilePaths.Validate()
 	c.GamePlay.Validate()
 	c.Integrations.Validate()
@@ -150,12 +148,6 @@ func (c *Config) Validate() {
 	// nothing to do with LootGoblinIncludeRecentRooms
 
 	// Nothing to do with Locked
-
-	// Pre-calculate and cache useful values
-	c.turnsPerRound = int((c.EngineTiming.RoundSeconds * 1000) / c.EngineTiming.TurnMs)
-	c.turnsPerSave = int(c.EngineTiming.RoundsPerAutoSave) * c.turnsPerRound
-	c.turnsPerSecond = int(1000 / c.EngineTiming.TurnMs)
-	c.roundsPerMinute = 60 / float64(c.EngineTiming.RoundSeconds)
 
 	c.seedInt = 0
 	for i, num := range util.Md5Bytes([]byte(string(c.Server.Seed))) {
@@ -198,38 +190,6 @@ func (c *Config) setEnvAssignments(clear bool) {
 	}
 }
 
-func (c Config) TurnsPerRound() int {
-	return c.turnsPerRound
-}
-
-func (c Config) TurnsPerAutoSave() int {
-	return c.turnsPerSave
-}
-
-func (c Config) TurnsPerSecond() int {
-	return c.turnsPerSecond
-}
-
-func (c Config) MinutesToRounds(minutes int) int {
-	return int(math.Ceil(c.roundsPerMinute * float64(minutes)))
-}
-
-func (c Config) SecondsToRounds(seconds int) int {
-	return int(math.Ceil(float64(seconds) / float64(c.EngineTiming.RoundSeconds)))
-}
-
-func (c Config) MinutesToTurns(minutes int) int {
-	return int(math.Ceil(float64(minutes*60*1000) / float64(c.EngineTiming.TurnMs)))
-}
-
-func (c Config) SecondsToTurns(seconds int) int {
-	return int(math.Ceil(float64(seconds*1000) / float64(c.EngineTiming.TurnMs)))
-}
-
-func (c Config) RoundsToSeconds(rounds int) int {
-	return int(math.Ceil(float64(rounds) * float64(c.EngineTiming.RoundSeconds)))
-}
-
 func (c Config) IsBannedName(name string) (string, bool) {
 
 	name = strings.ToLower(strings.TrimSpace(name))
@@ -270,6 +230,32 @@ func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
 		finalOutput[name] = value
 	}
 	return finalOutput
+}
+
+func SetVal(propertyPath string, newVal string) error {
+
+	if k, ok := allKeys[strings.ToLower(propertyPath)]; ok {
+		propertyPath = k
+	}
+
+	quickMap := make(map[string]any)
+	quickMap[propertyPath] = newVal
+
+	// Do a merge/union here?
+
+	// save the new config.
+	writeBytes, err := yaml.Marshal(overrides)
+	if err != nil {
+		return err
+	}
+
+	overridePath := overridePath()
+	if err := util.Save(overridePath, writeBytes, bool(configData.FilePaths.CarefulSaveFiles)); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return configData.OverlayOverrides(overrides)
 }
 
 func GetConfig() Config {
@@ -318,19 +304,15 @@ func ReloadConfig() error {
 				return err
 			}
 
-			overrides := map[string]any{}
-			err = yaml.Unmarshal(overrideBytes, &overrides)
+			tmpOverrides := map[string]any{}
+			err = yaml.Unmarshal(overrideBytes, &tmpOverrides)
 			if err != nil {
 				return err
 			}
-
-			if err := tmpConfigData.SetOverrides(overrides); err != nil {
-				mudlog.Error("ReloadConfig()", "error", err)
-			}
+			tmpConfigData.SetOverrides(tmpOverrides)
 		}
 	} else {
 		mudlog.Info("ReloadConfig()", "Loading overrides", false)
-		tmpConfigData.SetOverrides(map[string]any{})
 	}
 
 	tmpConfigData.setEnvAssignments(false)
@@ -342,7 +324,20 @@ func ReloadConfig() error {
 	// Assign it
 	configData = tmpConfigData
 
+	allKeys = map[string]string{}
+	for k, _ := range configData.AllConfigData() {
+		allKeys[strings.ToLower(k)] = k
+	}
+
 	return nil
+}
+
+func FindFullPath(inputKey string) string {
+
+	if v, ok := allKeys[strings.ToLower(inputKey)]; ok {
+		return v
+	}
+	return inputKey
 }
 
 // Usage: configs.GetSecret(c.DiscordWebhookUrl)

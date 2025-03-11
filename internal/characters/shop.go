@@ -33,7 +33,7 @@ func (s *Shop) Restock() bool {
 		return false
 	}
 
-	defaultRestockRate := configs.GetConfig().ShopRestockRate.String()
+	defaultRestockRate := configs.GetGamePlayConfig().ShopRestockRate.String()
 	roundNow := util.GetRoundCount()
 	restocked := false
 	pruneItems := []int{}

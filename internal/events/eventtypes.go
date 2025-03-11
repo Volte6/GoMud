@@ -3,7 +3,6 @@ package events
 import (
 	"time"
 
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/stats"
@@ -128,7 +127,6 @@ func (r RoomChange) Type() string { return `RoomChange` }
 type NewRound struct {
 	RoundNumber uint64
 	TimeNow     time.Time
-	Config      configs.Config
 }
 
 func (n NewRound) Type() string { return `NewRound` }
@@ -137,7 +135,6 @@ func (n NewRound) Type() string { return `NewRound` }
 type NewTurn struct {
 	TurnNumber uint64
 	TimeNow    time.Time
-	Config     configs.Config
 }
 
 func (n NewTurn) Type() string { return `NewTurn` }

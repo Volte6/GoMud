@@ -61,7 +61,7 @@ func GetNextRoomId() int {
 }
 
 func SetNextRoomId(nextRoomId int) {
-	configs.SetVal(`nextroomid`, strconv.Itoa(nextRoomId), true)
+	configs.SetVal(`Server.NextRoomId`, strconv.Itoa(nextRoomId))
 }
 
 func GetAllRoomIds() []int {
@@ -273,7 +273,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 			}
 
 			spawnGuide := false
-			if (roundNow - lastGuideRound) > uint64(configs.GetConfig().SecondsToRounds(300)) {
+			if (roundNow - lastGuideRound) > uint64(configs.GetTimingConfig().SecondsToRounds(300)) {
 				spawnGuide = true
 			}
 

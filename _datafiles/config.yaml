@@ -206,7 +206,7 @@ LootGoblin:
 #   Fine tuning for input throttling, round time, day length etc.
 #
 ################################################################################
-EngineTiming:
+Timing:
   # - TurnMs -
   #   How many milliseconds per turn. While lower is generally better, this can
   #   greatly increase overhead on the server - a command per mob or user is

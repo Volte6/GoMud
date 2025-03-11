@@ -103,9 +103,8 @@ func main() {
 
 	// sort the keys
 	slices.Sort(cfgKeys)
-
 	for _, k := range cfgKeys {
-		mudlog.Info("Config", k, cfgData[k])
+		mudlog.Info("Config", "name", k, "value", cfgData[k])
 	}
 	//
 	mudlog.Info(`========================`)
@@ -510,7 +509,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 			// No need to update it every loop
 			c = configs.GetConfig()
 
-			if time.Since(lastInput) < time.Duration(c.EngineTiming.TurnMs)*time.Millisecond {
+			if time.Since(lastInput) < time.Duration(c.Timing.TurnMs)*time.Millisecond {
 				/*
 					connections.SendTo(
 						[]byte("Slow down! You're typing too fast! "+time.Since(lastInput).String()+"\n"),

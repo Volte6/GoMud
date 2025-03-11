@@ -329,7 +329,7 @@ func (m *Mob) Command(inputTxt string, waitSeconds ...float64) {
 
 	readyTurn := util.GetTurnCount()
 	if len(waitSeconds) > 0 {
-		readyTurn += uint64(float64(configs.GetConfig().SecondsToTurns(1)) * waitSeconds[0])
+		readyTurn += uint64(float64(configs.GetTimingConfig().SecondsToTurns(1)) * waitSeconds[0])
 	}
 
 	for _, cmd := range strings.Split(inputTxt, `;`) {

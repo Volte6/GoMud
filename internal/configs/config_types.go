@@ -32,22 +32,6 @@ func (c ConfigInt) String() string {
 	return strconv.Itoa(int(c))
 }
 
-func (i *ConfigInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var value int
-	fmt.Println("TEST")
-	fmt.Println("TEST")
-	fmt.Println("TEST")
-	fmt.Println("TEST")
-	fmt.Println("TEST")
-	fmt.Println("TEST")
-
-	if err := unmarshal(&value); err != nil {
-		return err
-	}
-	*i = ConfigInt(value)
-	return nil
-}
-
 func (c ConfigString) String() string {
 	return string(c)
 }

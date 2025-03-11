@@ -184,7 +184,7 @@ func (w *World) EventLoop() {
 
 		if action.ReadyTurn > turnNow {
 
-			if int(action.ReadyTurn-turnNow)%c.TurnsPerRound() == 0 {
+			if int(action.ReadyTurn-turnNow)%c.Timing.TurnsPerRound() == 0 {
 				// Get the parts of the command
 				parts := strings.SplitN(action.Action, ` `, 3)
 				if parts[0] == `detonate` {
