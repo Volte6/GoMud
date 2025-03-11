@@ -14,6 +14,12 @@
 #   This way when you update the server, your custom config file will not be
 #   overwritten.
 #
+#   Note: The name/value pairs are hierarchical, nested under other values.
+#   This means you must tab out values that belong under a namespace.
+#   For example: MudName is tabbed out two spaces from Server
+#   Alternatively, you can specify it using a dot-syntax in your overrides file:
+#   Server.MudName: "GoMud" 
+#
 ################################################################################
 
 ################################################################################

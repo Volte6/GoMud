@@ -2,7 +2,6 @@ package configs
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -23,7 +22,7 @@ const (
 var (
 	configData Config            = Config{}
 	overrides  map[string]any    = make(map[string]any)
-	allKeys    map[string]string = map[string]string{}
+	keyLookups map[string]string = map[string]string{}
 
 	configDataLock       sync.RWMutex
 	ErrInvalidConfigName = errors.New("invalid config name")
@@ -234,7 +233,7 @@ func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
 
 func SetVal(propertyPath string, newVal string) error {
 
-	if k, ok := allKeys[strings.ToLower(propertyPath)]; ok {
+	if k, ok := keyLookups[strings.ToLower(propertyPath)]; ok {
 		propertyPath = k
 	}
 
@@ -279,7 +278,7 @@ func overridePath() string {
 	if overridePath == `` {
 		overridePath = GetConfig().FilePaths.FolderDataFiles.String() + `/config-overrides.yaml`
 	}
-	fmt.Println("PATH", overridePath)
+
 	return overridePath
 }
 
@@ -297,6 +296,29 @@ func ReloadConfig() error {
 	if err != nil {
 		return err
 	}
+
+	// Build a special lookup to attempt to match old data or even some minor typos
+	keyLookups = map[string]string{}
+	for k, _ := range configData.AllConfigData() {
+
+		if strings.Index(k, `.`) != -1 {
+
+			parts := strings.Split(k, `.`)
+
+			for i := len(parts) - 1; i >= 0; i-- {
+				tmpKey := strings.Join(parts[i:], `.`)
+				keyLookups[strings.ToLower(tmpKey)] = k
+
+				tmpKey = strings.Join(parts[i:], ``)
+				keyLookups[strings.ToLower(tmpKey)] = k
+
+			}
+
+		} else {
+			keyLookups[strings.ToLower(k)] = k
+		}
+	}
+
 	overridePath := overridePath()
 
 	mudlog.Info("ReloadConfig()", "overridePath", overridePath)
@@ -316,6 +338,15 @@ func ReloadConfig() error {
 			if err != nil {
 				return err
 			}
+
+			// Attempt a correction for bad names
+			for k, v := range tmpOverrides {
+				if newKey := FindFullPath(k); newKey != k {
+					tmpOverrides[newKey] = v
+					delete(tmpOverrides, k)
+				}
+			}
+
 			tmpConfigData.SetOverrides(tmpOverrides)
 		}
 	} else {
@@ -331,17 +362,12 @@ func ReloadConfig() error {
 	// Assign it
 	configData = tmpConfigData
 
-	allKeys = map[string]string{}
-	for k, _ := range configData.AllConfigData() {
-		allKeys[strings.ToLower(k)] = k
-	}
-
 	return nil
 }
 
 func FindFullPath(inputKey string) string {
 
-	if v, ok := allKeys[strings.ToLower(inputKey)]; ok {
+	if v, ok := keyLookups[strings.ToLower(inputKey)]; ok {
 		return v
 	}
 	return inputKey
