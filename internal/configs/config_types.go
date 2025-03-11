@@ -110,6 +110,6 @@ func (c *ConfigBool) Set(value string) error {
 }
 
 func (c *ConfigSliceString) Set(value string) error {
-	*c = strings.Split(value, `;`)
+	*c = strings.Split(value, `,`)
 	return nil
 }
