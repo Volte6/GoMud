@@ -2,7 +2,7 @@ package configs
 
 type Server struct {
 	MudName         ConfigString      `yaml:"MudName"`         // Name of the MUD
-	Seed            ConfigString      `yaml:"Seed"`            // Seed that may be used for generating content
+	Seed            ConfigSecret      `yaml:"Seed"`            // Seed that may be used for generating content
 	MaxCPUCores     ConfigInt         `yaml:"MaxCPUCores"`     // How many cores to allow for multi-core operations
 	OnLoginCommands ConfigSliceString `yaml:"OnLoginCommands"` // Commands to run when a user logs in
 	Motd            ConfigString      `yaml:"Motd"`            // Message of the day to display when a user logs in
