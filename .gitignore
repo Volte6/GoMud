@@ -4,3 +4,5 @@ _datafiles/**/users/*
 **/config-overrides.yaml
 **/.roundcount
 vendor/
+server.crt
+server.key

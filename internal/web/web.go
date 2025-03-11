@@ -18,7 +18,8 @@ import (
 )
 
 var (
-	httpServer *http.Server
+	httpServer  *http.Server
+	httpsServer *http.Server
 
 	upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
@@ -60,7 +61,7 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 	// Check if the file exists, else 404
 	fInfo, err := os.Stat(fullPath)
 	if err != nil || len(fileBase) > 0 && fileBase[0] == '_' {
-		mudlog.Info("HTTP", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "filePath", fullPath, "fileExtension", fileExt, "error", "Not found")
+		mudlog.Info("Web", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "filePath", fullPath, "fileExtension", fileExt, "error", "Not found")
 
 		fullPath = filepath.Join(httpRoot, `404.html`)
 		fInfo, err = os.Stat(fullPath)
@@ -73,7 +74,7 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log the request
-	mudlog.Info("HTTP", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "filePath", fullPath, "fileExtension", fileExt, "size", fmt.Sprintf(`%.2fk`, float64(fInfo.Size())/1024))
+	mudlog.Info("Web", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "filePath", fullPath, "fileExtension", fileExt, "size", fmt.Sprintf(`%.2fk`, float64(fInfo.Size())/1024))
 
 	// For non-HTML files, serve them statically.
 	if fileExt != ".html" {
@@ -122,14 +123,7 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
-
-	mudlog.Info("Starting web server", "webport", webPort)
-
-	wg.Add(1)
-
-	// HTTP Server
-	httpServer = &http.Server{Addr: fmt.Sprintf(`:%d`, webPort)}
+func Listen(webPort int, webHttpsPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
 
 	// Routing
 	// Basic homepage
@@ -201,12 +195,47 @@ func Listen(webPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Co
 		doBasicAuth(roomData),
 	))
 
+	// HTTP Server
+	wg.Add(1)
+	httpServer = &http.Server{Addr: fmt.Sprintf(`:%d`, webPort)}
 	go func() {
+
+		mudlog.Info("Starting http server", "webport", webPort)
+
 		defer wg.Done()
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			mudlog.Error("Error starting web server", "error", err)
 		}
 	}()
+
+	if webHttpsPort > 0 {
+
+		filePaths := configs.GetFilePathsConfig()
+
+		certFile := ``
+		keyFile := ``
+
+		if _, err := os.Stat(string(filePaths.HttpsCertFile)); err == nil {
+			certFile = string(filePaths.HttpsCertFile)
+		}
+		if _, err := os.Stat(string(filePaths.HttpsKeyFile)); err == nil {
+			keyFile = string(filePaths.HttpsKeyFile)
+		}
+
+		if certFile != `` && keyFile != `` {
+			wg.Add(1)
+			httpsServer = &http.Server{Addr: fmt.Sprintf(`:%d`, webHttpsPort)}
+			go func() {
+
+				mudlog.Info("Starting https server", "webHttpsPort", webHttpsPort)
+
+				defer wg.Done()
+				if err := httpsServer.ListenAndServeTLS(certFile, keyFile); err != nil && err != http.ErrServerClosed {
+					mudlog.Error("Error starting HTTPS web server", "error", err)
+				}
+			}()
+		}
+	}
 
 }
 
@@ -227,10 +256,17 @@ func Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := httpServer.Shutdown(ctx); err != nil {
-		log.Printf("HTTP server shutdown failed:%+v", err)
+	if httpServer != nil {
+		if err := httpServer.Shutdown(ctx); err != nil {
+			log.Printf("HTTP server shutdown failed:%+v", err)
+		}
 	}
 
+	if httpsServer != nil {
+		if err := httpsServer.Shutdown(ctx); err != nil {
+			log.Printf("HTTPS server shutdown failed:%+v", err)
+		}
+	}
 }
 
 func sendError(w http.ResponseWriter, r *http.Request, status int) {

@@ -269,6 +269,10 @@ FilePaths:
   #   the actual file. This takes longer, but helps prevent file corruption if
   #   the server crashes during a save.
   CarefulSaveFiles: true
+  # - HttpsCertFile/HttpsKeyFile -
+  #   Used to negotiate TLS/https requests
+  HttpsCertFile: ""
+  HttpsKeyFile: ""
 
 ################################################################################
 #
@@ -427,6 +431,10 @@ Network:
   # - WebPort -
   #   The port the server listens on for web requests
   WebPort: 80
+  # - HttpsPort -
+  #   The port the server listens on for web requests
+  #   Note: Must have a cert/key file (See FilePaths)
+  HttpsPort: 443
   # - AfkSeconds -
   #   If this many seconds pass without player input, they are flagged as afk
   #   Set to zero to never mark anyone as AFK
