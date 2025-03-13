@@ -134,6 +134,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 
 		// Send them back to start with a fresh/empty character
 		user.Character = characters.New()
+		room.RemovePlayer(user.UserId)
 		rooms.MoveToRoom(user.UserId, -1)
 
 	}

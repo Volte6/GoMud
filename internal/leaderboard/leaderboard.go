@@ -33,18 +33,16 @@ type LeaderboardEntry struct {
 }
 
 type Leaderboard struct {
-	Name         string
-	Top          []LeaderboardEntry
-	MaxSize      int
-	HighestValue int
-	LowestValue  int
+	Name        string
+	Top         []LeaderboardEntry
+	MaxSize     int
+	LowestValue int
 }
 
 func (l *Leaderboard) Reset(size int) {
 	l.MaxSize = size
-	l.HighestValue = 0
-	l.LowestValue = 0
 	l.Top = make([]LeaderboardEntry, l.MaxSize)
+	l.LowestValue = 0
 }
 
 func (l *Leaderboard) Consider(userId int, char characters.Character, val int) {
@@ -52,7 +50,7 @@ func (l *Leaderboard) Consider(userId int, char characters.Character, val int) {
 		return
 	}
 
-	if val < l.LowestValue && len(l.Top) >= l.MaxSize {
+	if val < l.LowestValue && l.Top[l.MaxSize-1].UserId != 0 {
 		return
 	}
 
@@ -73,6 +71,10 @@ func (l *Leaderboard) Consider(userId int, char characters.Character, val int) {
 
 	if addPosition > -1 {
 
+		for i := l.MaxSize - 2; i >= addPosition; i-- {
+			l.Top[i+1] = l.Top[i]
+		}
+
 		// just accept it
 		l.Top[addPosition] = LeaderboardEntry{
 			UserId:         userId,
@@ -80,6 +82,10 @@ func (l *Leaderboard) Consider(userId int, char characters.Character, val int) {
 			CharacterClass: skills.GetProfession(char.GetAllSkillRanks()),
 			Level:          char.Level,
 			ScoreValue:     val,
+		}
+
+		if l.LowestValue == 0 || val < l.LowestValue {
+			l.LowestValue = val
 		}
 
 	}
@@ -110,16 +116,26 @@ func Update() {
 		userCount++
 		characterCount++
 
+		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "gold", u.Character.Gold+u.Character.Bank)
 		lbGold.Consider(u.UserId, *u.Character, u.Character.Gold+u.Character.Bank)
+
+		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "xp", u.Character.Experience)
 		lbExperience.Consider(u.UserId, *u.Character, u.Character.Experience)
+
+		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "kills", u.Character.KD.TotalKills)
 		lbKills.Consider(u.UserId, *u.Character, u.Character.KD.TotalKills)
 
 		for _, char := range characters.LoadAlts(u.UserId) {
 
 			characterCount++
 
+			mudlog.Debug("Leaderboard", "Consider", char.Name, "gold", char.Gold+char.Bank)
 			lbGold.Consider(u.UserId, char, char.Gold+char.Bank)
+
+			mudlog.Debug("Leaderboard", "Consider", char.Name, "xp", char.Experience)
 			lbExperience.Consider(u.UserId, char, char.Experience)
+
+			mudlog.Debug("Leaderboard", "Consider", char.Name, "kills", char.KD.TotalKills)
 			lbKills.Consider(u.UserId, char, char.KD.TotalKills)
 
 		}
@@ -132,16 +148,26 @@ func Update() {
 		userCount++
 		characterCount++
 
+		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "gold", u.Character.Gold+u.Character.Bank)
 		lbGold.Consider(u.UserId, *u.Character, u.Character.Gold+u.Character.Bank)
+
+		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "xp", u.Character.Experience)
 		lbExperience.Consider(u.UserId, *u.Character, u.Character.Experience)
+
+		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "kills", u.Character.KD.TotalKills)
 		lbKills.Consider(u.UserId, *u.Character, u.Character.KD.TotalKills)
 
 		for _, char := range characters.LoadAlts(u.UserId) {
 
 			characterCount++
 
+			mudlog.Debug("Leaderboard", "Consider", char.Name, "gold", char.Gold+char.Bank)
 			lbGold.Consider(u.UserId, char, char.Gold+char.Bank)
+
+			mudlog.Debug("Leaderboard", "Consider", char.Name, "xp", char.Experience)
 			lbExperience.Consider(u.UserId, char, char.Experience)
+
+			mudlog.Debug("Leaderboard", "Consider", char.Name, "kills", char.KD.TotalKills)
 			lbKills.Consider(u.UserId, char, char.KD.TotalKills)
 
 		}

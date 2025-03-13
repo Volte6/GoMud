@@ -58,6 +58,7 @@ func Leaderboards(rest string, user *users.UserRecord, room *rooms.Room, flags e
 
 		searchResultsTable := templates.GetTable(title, headers, rows, formatting)
 		tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
+		user.SendText("\n")
 		user.SendText(tplTxt)
 
 	}
