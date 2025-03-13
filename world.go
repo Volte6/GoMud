@@ -646,6 +646,7 @@ loop:
 					RoomId:        userInfo.Character.RoomId,
 					Username:      userInfo.Username,
 					CharacterName: userInfo.Character.Name,
+					TimeOnline:    userInfo.GetOnlineInfo().OnlineTimeStr,
 				})
 			}
 			util.UnlockMud()

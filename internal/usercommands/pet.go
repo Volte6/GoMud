@@ -35,7 +35,7 @@ func Pet(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 		newName := strings.Join(args[1:], ` `)
 
-		if err := util.ValidateName(newName); err != nil {
+		if err := users.ValidateName(newName); err != nil {
 			user.SendText(`That name is not allowed: ` + err.Error())
 			return true, nil
 		}

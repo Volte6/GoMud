@@ -2,7 +2,7 @@ package characters
 
 import (
 	"os"
-	"strings"
+	"strconv"
 
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mudlog"
@@ -10,19 +10,19 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func AltsExists(username string) bool {
-	_, err := os.Stat(util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strings.ToLower(username)+`-alts.yaml`))
+func AltsExists(userId int) bool {
+	_, err := os.Stat(util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strconv.Itoa(userId)+`.alts.yaml`))
 
 	return !os.IsNotExist(err)
 }
 
-func LoadAlts(username string) []Character {
+func LoadAlts(userId int) []Character {
 
-	if !AltsExists(username) {
+	if !AltsExists(userId) {
 		return nil
 	}
 
-	altsFilePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strings.ToLower(username)+`-alts.yaml`)
+	altsFilePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strconv.Itoa(userId)+`.alts.yaml`)
 
 	altsFileBytes, err := os.ReadFile(altsFilePath)
 	if err != nil {
@@ -40,7 +40,7 @@ func LoadAlts(username string) []Character {
 
 }
 
-func SaveAlts(username string, alts []Character) bool {
+func SaveAlts(userId int, alts []Character) bool {
 
 	fileWritten := false
 	tmpSaved := false
@@ -48,7 +48,7 @@ func SaveAlts(username string, alts []Character) bool {
 	completed := false
 
 	defer func() {
-		mudlog.Info("SaveAlts()", "username", username, "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
+		mudlog.Info("SaveAlts()", "userId", strconv.Itoa(userId), "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
 	}()
 
 	data, err := yaml.Marshal(&alts)
@@ -59,7 +59,7 @@ func SaveAlts(username string, alts []Character) bool {
 
 	carefulSave := configs.GetFilePathsConfig().CarefulSaveFiles
 
-	path := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strings.ToLower(username)+`-alts.yaml`)
+	path := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strconv.Itoa(userId)+`.alts.yaml`)
 
 	saveFilePath := path
 	if carefulSave { // careful save first saves a {filename}.new file

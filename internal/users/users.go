@@ -2,8 +2,10 @@ package users
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -18,11 +20,6 @@ import (
 	//
 	"gopkg.in/yaml.v2"
 )
-
-const minimumUsernameLength = 2
-const maximumUsernameLength = 16
-const minimumPasswordLength = 4
-const maximumPasswordLength = 16
 
 var (
 	highestUserId int          = -1
@@ -325,7 +322,7 @@ func LogOutUserByConnectionId(connectionId connections.ConnectionId) error {
 // First time creating a user.
 func CreateUser(u *UserRecord) error {
 
-	if err := util.ValidateName(u.Username); err != nil {
+	if err := ValidateName(u.Username); err != nil {
 		return errors.New("that username is not allowed: " + err.Error())
 	}
 
@@ -359,11 +356,15 @@ func CreateUser(u *UserRecord) error {
 }
 
 func LoadUser(username string, skipValidation ...bool) (*UserRecord, error) {
-	if !Exists(strings.ToLower(username)) {
-		return nil, errors.New("user already exists")
+
+	idx := NewUserIndex()
+	userId, found := idx.FindByUsername(username)
+
+	if !found {
+		return nil, errors.New("user doesn't exist")
 	}
 
-	userFilePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strings.ToLower(username)+`.yaml`)
+	userFilePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strconv.Itoa(int(userId))+`.yaml`)
 
 	userFileTxt, err := os.ReadFile(userFilePath)
 	if err != nil {
@@ -407,7 +408,7 @@ func SearchOfflineUsers(searchFunc func(u *UserRecord) bool) {
 			return nil
 		}
 
-		if len(path) > 10 && path[len(path)-10:] == `-alts.yaml` {
+		if len(path) > 10 && path[len(path)-10:] == `.alts.yaml` {
 			return nil
 		}
 
@@ -440,6 +441,23 @@ func SearchOfflineUsers(searchFunc func(u *UserRecord) bool) {
 
 }
 
+func ValidateName(name string) error {
+
+	validation := configs.GetValidationConfig()
+
+	if len(name) < int(validation.NameSizeMin) || len(name) > int(validation.NameSizeMax) {
+		return fmt.Errorf("name must be between %d and %d characters long", validation.NameSizeMin, validation.NameSizeMax)
+	}
+
+	if validation.NameRejectRegex != `` {
+		if !regexp.MustCompile(validation.NameRejectRegex.String()).MatchString(name) {
+			return errors.New(validation.NameRejectReason.String())
+		}
+	}
+
+	return nil
+}
+
 // searches for a character name and returns the user that owns it
 // Slow and possibly memory intensive - use strategically
 func CharacterNameSearch(nameToFind string) (foundUserId int, foundUserName string) {
@@ -457,7 +475,7 @@ func CharacterNameSearch(nameToFind string) (foundUserId int, foundUserName stri
 
 		// Not found? Search alts...
 
-		for _, char := range characters.LoadAlts(u.Username) {
+		for _, char := range characters.LoadAlts(u.UserId) {
 			if strings.EqualFold(char.Name, nameToFind) {
 				foundUserId = u.UserId
 				foundUserName = u.Username
@@ -500,7 +518,7 @@ func SaveUser(u UserRecord, isAutoSave ...bool) error {
 
 	carefulSave := configs.GetFilePathsConfig().CarefulSaveFiles
 
-	path := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strings.ToLower(u.Username)+`.yaml`)
+	path := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strconv.Itoa(u.UserId)+`.yaml`)
 
 	saveFilePath := path
 	if carefulSave { // careful save first saves a {filename}.new file
@@ -538,21 +556,30 @@ func GetUniqueUserId() int {
 
 		highestUserId = 0
 
-		// Check all user id's of offline users
-		SearchOfflineUsers(func(u *UserRecord) bool {
+		idx := NewUserIndex()
+		if idx.Exists() {
 
-			if u.UserId > highestUserId {
-				highestUserId = u.UserId
+			highestUserId = int(idx.GetMetaData().RecordCount)
+
+		} else {
+
+			// Check all user id's of offline users
+			SearchOfflineUsers(func(u *UserRecord) bool {
+
+				if u.UserId > highestUserId {
+					highestUserId = u.UserId
+				}
+
+				return true
+			})
+
+			// Check all user id's of online users
+			for _, u := range GetAllActiveUsers() {
+				if u.UserId > highestUserId {
+					highestUserId = u.UserId
+				}
 			}
 
-			return true
-		})
-
-		// Check all user id's of online users
-		for _, u := range GetAllActiveUsers() {
-			if u.UserId > highestUserId {
-				highestUserId = u.UserId
-			}
 		}
 	}
 
@@ -563,6 +590,10 @@ func GetUniqueUserId() int {
 }
 
 func Exists(name string) bool {
-	_, err := os.Stat(util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strings.ToLower(name)+`.yaml`))
-	return !os.IsNotExist(err)
+
+	idx := NewUserIndex()
+
+	_, found := idx.FindByUsername(name)
+
+	return found
 }

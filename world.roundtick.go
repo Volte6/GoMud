@@ -21,6 +21,7 @@ func (w *World) logOff(userId int) {
 			RoomId:        user.Character.RoomId,
 			Username:      user.Username,
 			CharacterName: user.Character.Name,
+			TimeOnline:    user.GetOnlineInfo().OnlineTimeStr,
 		})
 
 	}

@@ -65,7 +65,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 	altNames := []string{}
 	nameToAlt := map[string]characters.Character{}
 
-	for _, char := range characters.LoadAlts(user.Username) {
+	for _, char := range characters.LoadAlts(user.UserId) {
 		altNames = append(altNames, char.Name)
 		nameToAlt[char.Name] = char
 	}
@@ -130,7 +130,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 			newAlts = append(newAlts, char)
 		}
 		newAlts = append(newAlts, *user.Character)
-		characters.SaveAlts(user.Username, newAlts)
+		characters.SaveAlts(user.UserId, newAlts)
 
 		// Send them back to start with a fresh/empty character
 		user.Character = characters.New()
@@ -187,7 +187,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 					newAlts = append(newAlts, char)
 				}
 			}
-			characters.SaveAlts(user.Username, newAlts)
+			characters.SaveAlts(user.UserId, newAlts)
 
 			user.EventLog.Add(`char`, `Deleted alt character: <ansi fg="username">`+match+`</ansi>`)
 
@@ -256,7 +256,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 				}
 			}
 			newAlts = append(newAlts, *user.Character)
-			characters.SaveAlts(user.Username, newAlts)
+			characters.SaveAlts(user.UserId, newAlts)
 
 			char.Validate()
 			user.Character = &char

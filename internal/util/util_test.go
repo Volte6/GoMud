@@ -816,30 +816,6 @@ func TestPercentOfTotal(t *testing.T) {
 	}
 }
 
-// TestValidateName checks the rules for name validation.
-func TestValidateName(t *testing.T) {
-	err := ValidateName("A")
-	if err == nil {
-		t.Error("ValidateName('A') expected error for length < 2")
-	}
-	err = ValidateName("thisIsMoreThan16CharsLong")
-	if err == nil {
-		t.Error("ValidateName(...) expected error for length > 16")
-	}
-	err = ValidateName("1abc")
-	if err == nil {
-		t.Error("ValidateName('1abc') expected error for non-alpha first character")
-	}
-	err = ValidateName("Name!")
-	if err == nil {
-		t.Error("ValidateName('Name!') expected error for non-alphanumeric characters")
-	}
-	err = ValidateName("Hello_World")
-	if err != nil {
-		t.Errorf("ValidateName('Hello_World') got unexpected error: %v", err)
-	}
-}
-
 // TestConvertForFilename ensures special chars are replaced with underscores, lowercased, etc.
 func TestConvertForFilename(t *testing.T) {
 	in := "Hello! This's a Test? 123"

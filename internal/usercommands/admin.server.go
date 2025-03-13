@@ -35,10 +35,6 @@ func Server(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 
 		if len(args) < 1 {
 
-			headers := []string{"Name", "Value"}
-			rows := [][]string{}
-			formatting := []string{`<ansi fg="yellow-bold">%s</ansi>`, `<ansi fg="red-bold">%s</ansi>`}
-
 			user.SendText(``)
 
 			cfgData := configs.GetConfig().AllConfigData()
@@ -50,13 +46,36 @@ func Server(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 			// sort the keys
 			slices.Sort(cfgKeys)
 
+			lastPrefix := ``
+			longestKey := 0
+
 			for _, k := range cfgKeys {
-				rows = append(rows, []string{k, fmt.Sprintf(`%v`, cfgData[k])})
+				if len(k) > longestKey {
+					longestKey = len(k)
+				}
 			}
 
-			settingsTable := templates.GetTable("Server Settings", headers, rows, formatting)
-			tplTxt, _ := templates.Process("tables/generic", settingsTable)
-			user.SendText(tplTxt)
+			lineLength := 158 - longestKey
+
+			for _, k := range cfgKeys {
+				displayName := k
+				nameColorized := ``
+				if strings.Index(k, `.`) != -1 {
+					parts := strings.Split(k, `.`)
+					if len(parts) > 1 {
+						if lastPrefix != parts[0] {
+							lastPrefix = parts[0]
+							user.SendText(``)
+						}
+						nameColorized = `<ansi fg="yellow">` + parts[0] + `.</ansi>`
+						displayName = strings.Join(parts[1:], `.`)
+					}
+				}
+				extraSpace := strings.Repeat(` `, longestKey-len(k))
+
+				user.SendText(`<ansi fg="yellow-bold">` + nameColorized + displayName + `</ansi>: <ansi fg="red-bold">` + extraSpace + util.SplitStringNL(fmt.Sprintf(`%v`, cfgData[k]), lineLength, strings.Repeat(` `, longestKey+2)) + `</ansi>`)
+
+			}
 
 			return true, nil
 		}

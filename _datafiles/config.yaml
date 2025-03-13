@@ -62,51 +62,6 @@ Server:
   # - Motd -
   #   Message of the day. This is displayed when the motd command is run.
   Motd: Welcome to the Mud!
-  # - BannedNames -
-  #   Names that are not allowed to be used by players. This is a good place to
-  #   put names that are used by the game itself, such as "admin".
-  #   Note: This is not case sensitive.
-  #   You can add a * to the end of a name to ban all names that start with that
-  #   name. For example, "admin*" would ban "admin", "administrator", etc.
-  #   You can also use * at the beginning of a name to ban all names that
-  #   end with that name. For example, "*admin" would ban "admin", "superadmin",
-  #   Finally, you can use * at the beginning and end of a name to ban all names
-  #   that contain that name. For example, "*admin*" would ban "admin", "superadmin",
-  #   "administrator", etc.
-  BannedNames:
-  - "*admin*"
-  - "*moderator*"
-  - "player*"
-  - "user*"
-  - "me"
-  - "myself"
-  - "self"
-  - "us"
-  - "you"
-  - "them"
-  - "everyone"
-  - "someone"
-  - "anyone"
-  - "nobody"
-  - "somebody"
-  - "anybody"
-  - "none"
-  - "nothing"
-  - "something"
-  - "anything"
-  - "everything"
-  - "all"
-  - "north*"
-  - "south*"
-  - "east*"
-  - "west*"
-  - "up"
-  - "down"
-  - "chest"
-  - "door"
-  - "new"
-  - "join"
-  - "register"
   # - NextRoomID -
   # This number is auto-updated to the highest number of rooms in the game. 
   #   If creating your own rooms but don't want to risk an update conflicting, 
@@ -508,8 +463,73 @@ Statistics:
   #   Maximum size of each leaderboard. 0 to disable.
   LeaderboardSize: 10
 
-
-
+################################################################################
+#
+#   Validation
+#   Special rules or filters for validation purposes
+#
+################################################################################
+Validation:
+  # - NameLengthMin / NameLengthMax -
+  #   Min/Max size of names allowed.
+  NameSizeMin: 2
+  NameSizeMax: 32
+  # - PasswordSizeMin / PasswordSizeMax -
+  #   Min/Max size of passwords allowed.
+  PasswordSizeMin: 4
+  PasswordSizeMax: 16
+  # - NameRejectRegex -
+  #   A special pattern to reject usernames that match it.
+  #   (This is a regular expression, you must understand how to create them)
+  #   Set to empty to disable. If the regex is invalid it will revert to the 
+  #   default of '^[a-zA-Z0-9_]+$'
+  NameRejectRegex: '^[a-zA-Z0-9_]+$'
+  NameRejectReason: "Must only contain Alpha-numeric and underscores."
+  # - BannedNames -
+  #   Names that are not allowed to be used by players. This is a good place to
+  #   put names that are used by the game itself, such as "admin".
+  #   Note: This is not case sensitive.
+  #   You can add a * to the end of a name to ban all names that start with that
+  #   name. For example, "admin*" would ban "admin", "administrator", etc.
+  #   You can also use * at the beginning of a name to ban all names that
+  #   end with that name. For example, "*admin" would ban "admin", "superadmin",
+  #   Finally, you can use * at the beginning and end of a name to ban all names
+  #   that contain that name. For example, "*admin*" would ban "admin", "superadmin",
+  #   "administrator", etc.
+  BannedNames:
+  - "*admin*"
+  - "*moderator*"
+  - "player*"
+  - "user*"
+  - "me"
+  - "myself"
+  - "self"
+  - "us"
+  - "you"
+  - "them"
+  - "everyone"
+  - "someone"
+  - "anyone"
+  - "nobody"
+  - "somebody"
+  - "anybody"
+  - "none"
+  - "nothing"
+  - "something"
+  - "anything"
+  - "everything"
+  - "all"
+  - "north*"
+  - "south*"
+  - "east*"
+  - "west*"
+  - "up"
+  - "down"
+  - "chest"
+  - "door"
+  - "new"
+  - "join"
+  - "register"
 
 
 

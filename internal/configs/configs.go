@@ -46,6 +46,8 @@ type Config struct {
 	Scripting    Scripting    `yaml:"Scripting"`
 	SpecialRooms SpecialRooms `yaml:"SpecialRooms"`
 	Statistics   Statistics   `yaml:"Statistics"`
+	Validation   Validation   `yaml:"Validation"`
+
 	// End config subsections
 
 	seedInt int64 `yaml:"-"`
@@ -145,6 +147,7 @@ func (c *Config) Validate() {
 	c.Scripting.Validate()
 	c.SpecialRooms.Validate()
 	c.Statistics.Validate()
+	c.Validation.Validate()
 
 	// nothing to do with LootGoblinIncludeRecentRooms
 
@@ -195,7 +198,7 @@ func (c Config) IsBannedName(name string) (string, bool) {
 
 	name = strings.ToLower(strings.TrimSpace(name))
 
-	for _, bannedName := range c.Server.BannedNames {
+	for _, bannedName := range c.Validation.BannedNames {
 		if util.StringWildcardMatch(name, strings.ToLower(bannedName)) {
 			return bannedName, true
 		}

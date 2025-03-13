@@ -137,6 +137,16 @@ func main() {
 	// Load all the data files up front.
 	loadAllDataFiles(false)
 
+	// Create the user index
+	idx := users.NewUserIndex()
+	if !idx.Exists() {
+		// Since it doesn't exist yet, that's a good indication we should do a quick format migration check
+		users.DoUserMigrations()
+	}
+	idx.Create()
+	idx.Rebuild()
+	mudlog.Info("UserIndex", "info", "User index recreated.")
+
 	// Load the round count from the file
 	if util.LoadRoundCount(c.FilePaths.FolderDataFiles.String()+`/`+util.RoundCountFilename) == util.RoundCountMinimum {
 		gametime.SetToDay(-3)

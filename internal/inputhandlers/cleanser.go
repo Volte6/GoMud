@@ -43,8 +43,7 @@ func CleanserInputHandler(clientInput *connections.ClientInput, sharedState map[
 	}
 
 	// Remove non printing chars
-	clientInput.DataIn = trimNonPrintingBytes(clientInput.DataIn)
-
+	//clientInput.DataIn = trimNonPrintingBytes(clientInput.DataIn)
 	// Add all input to the currentBuffer
 	clientInput.Buffer = append(clientInput.Buffer, clientInput.DataIn...)
 

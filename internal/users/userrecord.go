@@ -1,10 +1,8 @@
 package users
 
 import (
-	"errors"
 	"fmt"
 	"math"
-	"regexp"
 	"time"
 
 	"github.com/volte6/gomud/internal/audio"
@@ -413,16 +411,8 @@ func (u *UserRecord) ReplaceCharacter(replacement *characters.Character) {
 
 func (u *UserRecord) SetUsername(un string) error {
 
-	if len(un) < minimumUsernameLength || len(un) > maximumUsernameLength {
-		return fmt.Errorf("username must be between %d and %d characters long", minimumUsernameLength, maximumUsernameLength)
-	}
-
-	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(un[:1]) {
-		return errors.New("username starts with a non alpha character")
-	}
-
-	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(un) {
-		return errors.New("username contains non alphanumeric or underscore characters")
+	if err := ValidateName(un); err != nil {
+		return err
 	}
 
 	u.Username = un
@@ -437,16 +427,8 @@ func (u *UserRecord) SetUsername(un string) error {
 
 func (u *UserRecord) SetCharacterName(cn string) error {
 
-	if len(cn) < minimumUsernameLength || len(cn) > maximumUsernameLength {
-		return fmt.Errorf("username must be between %d and %d characters long", minimumUsernameLength, maximumUsernameLength)
-	}
-
-	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(cn[:1]) {
-		return errors.New("username starts with a non alpha character")
-	}
-
-	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(cn) {
-		return errors.New("username contains non alphanumeric or underscore characters")
+	if err := ValidateName(cn); err != nil {
+		return err
 	}
 
 	u.Character.Name = cn
@@ -456,8 +438,10 @@ func (u *UserRecord) SetCharacterName(cn string) error {
 
 func (u *UserRecord) SetPassword(pw string) error {
 
-	if len(pw) < minimumPasswordLength || len(pw) > maximumPasswordLength {
-		return fmt.Errorf("password must be between %d and %d characters long", minimumPasswordLength, maximumPasswordLength)
+	validation := configs.GetValidationConfig()
+
+	if len(pw) < int(validation.PasswordSizeMin) || len(pw) > int(validation.PasswordSizeMax) {
+		return fmt.Errorf("password must be between %d and %d characters long", validation.PasswordSizeMin, validation.PasswordSizeMax)
 	}
 
 	u.Password = util.Hash(pw)

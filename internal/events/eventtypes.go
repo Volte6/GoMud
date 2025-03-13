@@ -173,6 +173,7 @@ type PlayerDespawn struct {
 	RoomId        int
 	Username      string
 	CharacterName string
+	TimeOnline    string
 }
 
 func (p PlayerDespawn) Type() string { return `PlayerDespawn` }
