@@ -12,11 +12,18 @@ import (
 
 func Online(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
-	headers := []string{`Name`, `Level`, `Alignment`, `Profession`, `Online`, `Role`}
+	headers := []string{
+		templates.T(`User.Name`),
+		templates.T(`Level`),
+		templates.T(`Alignment`),
+		templates.T(`Profession`),
+		templates.T(`Online`),
+		templates.T(`Role`),
+	}
 
 	if user.Permission != users.PermissionUser {
-		headers = append([]string{`UserId`}, headers...)
-		headers = append(headers, []string{`Zone`, `RoomId`}...)
+		headers = append([]string{templates.T(`User.Id`)}, headers...)
+		headers = append(headers, []string{templates.T(`Zone`), templates.T(`Room.Id`)}...)
 	}
 
 	allFormatting := [][]string{}
@@ -71,9 +78,9 @@ func Online(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 		}
 	}
 
-	tableTitle := fmt.Sprintf(`%d users online`, userCt)
+	tableTitle := fmt.Sprintf(templates.T(`%d users online`), userCt)
 	if userCt == 1 {
-		tableTitle = fmt.Sprintf(`%d user online`, userCt)
+		tableTitle = fmt.Sprintf(templates.T(`%d user online`), userCt)
 	}
 
 	onlineResultsTable := templates.GetTable(tableTitle, headers, rows, allFormatting...)
