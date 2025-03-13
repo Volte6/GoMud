@@ -139,6 +139,10 @@ func main() {
 
 	// Create the user index
 	idx := users.NewUserIndex()
+	if !idx.Exists() {
+		// Since it doesn't exist yet, that's a good indication we should do a quick format migration check
+		users.DoUserMigrations()
+	}
 	idx.Create()
 	idx.Rebuild()
 	mudlog.Info("UserIndex", "info", "User index recreated.")
