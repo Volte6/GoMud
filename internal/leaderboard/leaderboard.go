@@ -1,7 +1,6 @@
 package leaderboard
 
 import (
-	"math"
 	"sync"
 	"time"
 
@@ -17,177 +16,180 @@ var (
 	// Key is type of leaderboard
 	leaderboardCache = map[string]Leaderboard{}
 
+	updated      = false
+	lbGold       = Leaderboard{Name: `Gold`}
+	lbExperience = Leaderboard{Name: `Experience`}
+	lbKills      = Leaderboard{Name: `Kills`}
+
 	lbLock = sync.RWMutex{}
 )
 
 type LeaderboardEntry struct {
-	Username       string
+	UserId         int
 	CharacterName  string
 	CharacterClass string
-	Experience     int
 	Level          int
-	Gold           int
-	Kills          int
+	ScoreValue     int
 }
 
-type Leaderboard []LeaderboardEntry
+type Leaderboard struct {
+	Name         string
+	Top          []LeaderboardEntry
+	MaxSize      int
+	HighestValue int
+	LowestValue  int
+}
 
-func Update() map[string]Leaderboard {
+func (l *Leaderboard) Reset(size int) {
+	l.MaxSize = size
+	l.HighestValue = 0
+	l.LowestValue = 0
+	l.Top = make([]LeaderboardEntry, l.MaxSize)
+}
+
+func (l *Leaderboard) Consider(userId int, char characters.Character, val int) {
+	if val == 0 {
+		return
+	}
+
+	if val < l.LowestValue && len(l.Top) >= l.MaxSize {
+		return
+	}
+
+	addPosition := -1
+	for i := 0; i < l.MaxSize; i++ {
+
+		if l.Top[i].UserId == 0 {
+			addPosition = i
+			break
+		}
+
+		if val > l.Top[i].ScoreValue {
+			addPosition = i
+			break
+		}
+
+	}
+
+	if addPosition > -1 {
+
+		// just accept it
+		l.Top[addPosition] = LeaderboardEntry{
+			UserId:         userId,
+			CharacterName:  char.Name,
+			CharacterClass: skills.GetProfession(char.GetAllSkillRanks()),
+			Level:          char.Level,
+			ScoreValue:     val,
+		}
+
+	}
+}
+
+func Reset(maxSize int) {
+	lbGold.Reset(maxSize)
+	lbExperience.Reset(maxSize)
+	lbKills.Reset(maxSize)
+}
+
+func Update() {
 
 	start := time.Now()
 
 	lbLock.Lock()
-	defer lbLock.Unlock()
+	defer func() {
+		lbLock.Unlock()
+	}()
+
+	Reset(int(configs.GetStatisticsConfig().LeaderboardSize))
 
 	userCount := 0
 	characterCount := 0
 
-	lSize := int(configs.GetStatisticsConfig().LeaderboardSize)
-
 	// Check online users
+	var highestGold characters.Character
+	var highestExperience characters.Character
+	var highestKills characters.Character
+
 	for _, u := range users.GetAllActiveUsers() {
-		considerUser(u)
+
+		userCount++
+		characterCount++
+
+		highestGold = *u.Character
+		highestExperience = *u.Character
+		highestKills = *u.Character
+
+		for _, char := range characters.LoadAlts(u.UserId) {
+
+			characterCount++
+
+			if char.Gold+char.Bank > highestGold.Gold+highestGold.Bank {
+				highestGold = char
+			}
+			if char.Experience > highestExperience.Experience {
+				highestExperience = char
+			}
+			if char.KD.TotalKills > highestKills.KD.TotalKills {
+				highestKills = char
+			}
+
+		}
+
+		lbGold.Consider(u.UserId, highestGold, highestGold.Gold+highestGold.Bank)
+		lbExperience.Consider(u.UserId, highestExperience, highestExperience.Experience)
+		lbKills.Consider(u.UserId, highestKills, highestKills.KD.TotalKills)
+
 	}
 
 	// Check offline users
-	users.SearchOfflineUsers(considerUser)
+	users.SearchOfflineUsers(func(u *users.UserRecord) bool {
 
-	for lbName, _ := range leaderboardCache {
+		userCount++
+		characterCount++
 
-		if len(leaderboardCache[lbName]) < lSize {
+		highestGold = *u.Character
+		highestExperience = *u.Character
+		highestKills = *u.Character
 
-			newEntry := LeaderboardEntry{}
+		for _, char := range characters.LoadAlts(u.UserId) {
 
-			for i := len(leaderboardCache[lbName]); i < lSize; i++ {
-				leaderboardCache[lbName] = append(leaderboardCache[lbName], newEntry)
+			characterCount++
+
+			if char.Gold+char.Bank > highestGold.Gold+highestGold.Bank {
+				highestGold = char
 			}
+			if char.Experience > highestExperience.Experience {
+				highestExperience = char
+			}
+			if char.KD.TotalKills > highestKills.KD.TotalKills {
+				highestKills = char
+			}
+
 		}
 
-	}
+		lbGold.Consider(u.UserId, highestGold, highestGold.Gold+highestGold.Bank)
+		lbExperience.Consider(u.UserId, highestExperience, highestExperience.Experience)
+		lbKills.Consider(u.UserId, highestKills, highestKills.KD.TotalKills)
 
-	lbCopy := map[string]Leaderboard{}
-	for name, lbEntries := range leaderboardCache {
-		lbCopy[name] = append(Leaderboard{}, lbEntries...)
-	}
+		return true
+	})
 
 	mudlog.Info("leaderboard.Update()", "user-processed", userCount, "characters-processed", characterCount, "Time Taken", time.Since(start))
 
-	return lbCopy
+	updated = true
 }
 
-func Get() map[string]Leaderboard {
+func Get() []Leaderboard {
 
 	lbLock.RLock()
-	lbSize := len(leaderboardCache)
-	lbLock.RUnlock()
 
-	if lbSize == 0 {
-		return Update()
+	if !updated {
+		lbLock.RUnlock()
+		Update()
+		lbLock.RLock()
 	}
 
-	lbLock.RLock()
 	defer lbLock.RUnlock()
 
-	lbCopy := map[string]Leaderboard{}
-	for name, lbEntries := range leaderboardCache {
-		lbCopy[name] = append(Leaderboard{}, lbEntries...)
-	}
-
-	return lbCopy
-}
-
-func considerUser(u *users.UserRecord) bool {
-
-	lSize := int(configs.GetStatisticsConfig().LeaderboardSize)
-
-	allChars := []characters.Character{}
-	allChars = append(allChars, *u.Character)
-	allChars = append(allChars, characters.LoadAlts(u.UserId)...)
-
-	for _, char := range allChars {
-
-		lbTypes := map[string]int{
-			"experience": char.Experience,
-			"gold":       char.Gold + char.Bank,
-			"kills":      char.KD.TotalKills,
-		}
-
-		for lbName, lbValue := range lbTypes {
-
-			if leaderboardCache[lbName] == nil {
-				leaderboardCache[lbName] = Leaderboard{}
-			}
-
-			lbLowest := math.MaxInt
-			if len(leaderboardCache[lbName]) > 0 {
-
-				if lbName == `experience` {
-					lbLowest = leaderboardCache[lbName][len(leaderboardCache[lbName])-1].Experience
-				} else if lbName == `gold` {
-					lbLowest = leaderboardCache[lbName][len(leaderboardCache[lbName])-1].Gold
-				} else if lbName == `kills` {
-					lbLowest = leaderboardCache[lbName][len(leaderboardCache[lbName])-1].Kills
-				}
-
-			}
-
-			if char.Experience == lbLowest && len(leaderboardCache[lbName]) >= lSize {
-				return true
-			}
-
-			// Add to the list
-			addAt := -1
-			for i, entry := range leaderboardCache[lbName] {
-
-				if lbName == `experience` {
-					if entry.Experience >= lbValue {
-						continue
-					}
-				} else if lbName == `gold` {
-					if entry.Gold >= lbValue {
-						continue
-					}
-				} else if lbName == `kills` {
-					if entry.Kills >= lbValue {
-						continue
-					}
-				}
-
-				addAt = i
-				break
-			}
-
-			newEntry := LeaderboardEntry{
-				Username:       u.Username,
-				CharacterName:  char.Name,
-				CharacterClass: skills.GetProfession(char.GetAllSkillRanks()),
-				Experience:     char.Experience,
-				Level:          char.Level,
-				Gold:           char.Gold + char.Bank,
-				Kills:          char.KD.TotalKills,
-			}
-
-			if addAt == -1 {
-
-				if len(leaderboardCache[lbName]) >= lSize {
-					continue
-				}
-
-				leaderboardCache[lbName] = append(leaderboardCache[lbName], newEntry)
-
-			} else {
-
-				leaderboardCache[lbName] = append(leaderboardCache[lbName][0:addAt], append(Leaderboard{newEntry}, leaderboardCache[lbName][addAt:]...)...)
-				if len(leaderboardCache[lbName]) > lSize {
-					leaderboardCache[lbName] = leaderboardCache[lbName][:lSize]
-				}
-
-			}
-
-		}
-
-	}
-
-	return true
-
+	return []Leaderboard{lbGold, lbExperience, lbKills}
 }

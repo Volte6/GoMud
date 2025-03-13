@@ -3,7 +3,6 @@ package usercommands
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
@@ -20,14 +19,13 @@ func Leaderboards(rest string, user *users.UserRecord, room *rooms.Room, flags e
 		return true, nil
 	}
 
-	allLeaderboards := leaderboard.Get()
+	leaderboard.Update()
 
-	for lbName, entries := range allLeaderboards {
+	for _, lb := range leaderboard.Get() {
 
-		valueName := strings.Title(lbName)
-		title := fmt.Sprintf(`%s Leaderboard`, valueName)
+		title := fmt.Sprintf(`%s Leaderboard`, lb.Name)
 
-		headers := []string{`Rank`, `Character`, `Profession`, `Level`, valueName}
+		headers := []string{`Rank`, `Character`, `Profession`, `Level`, lb.Name}
 
 		rows := [][]string{}
 
@@ -36,31 +34,24 @@ func Leaderboards(rest string, user *users.UserRecord, room *rooms.Room, flags e
 			`<ansi fg="username">%s</ansi>`,
 			`<ansi fg="white-bold">%s</ansi>`,
 			`<ansi fg="157">%s</ansi>`,
+			``,
 		}
 
-		if lbName == "experience" {
-			formatting = append(formatting, `<ansi fg="experience">%s</ansi>`)
-		} else if lbName == "gold" {
-			formatting = append(formatting, `<ansi fg="gold">%s</ansi>`)
-		} else if lbName == "kills" {
-			formatting = append(formatting, `<ansi fg="red">%s</ansi>`)
+		if lb.Name == "Experience" {
+			formatting[4] = `<ansi fg="experience">%s</ansi>`
+		} else if lb.Name == "Gold" {
+			formatting[4] = `<ansi fg="gold">%s</ansi>`
+		} else if lb.Name == "Kills" {
+			formatting[4] = `<ansi fg="red-bold">%s</ansi>`
 		}
 
-		for i, entry := range entries {
+		for i, entry := range lb.Top {
 
-			if entry.CharacterName == `` {
+			if entry.UserId == 0 {
 				continue
 			}
 
-			newRow := []string{`#` + strconv.Itoa(i+1), entry.CharacterName, entry.CharacterClass, strconv.Itoa(entry.Level)}
-
-			if lbName == "experience" {
-				newRow = append(newRow, strconv.Itoa(entry.Experience))
-			} else if lbName == "gold" {
-				newRow = append(newRow, strconv.Itoa(entry.Gold))
-			} else if lbName == "kills" {
-				newRow = append(newRow, strconv.Itoa(entry.Kills))
-			}
+			newRow := []string{`#` + strconv.Itoa(i+1), entry.CharacterName, entry.CharacterClass, strconv.Itoa(entry.Level), strconv.Itoa(entry.ScoreValue)}
 
 			rows = append(rows, newRow)
 		}

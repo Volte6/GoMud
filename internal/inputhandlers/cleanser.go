@@ -1,6 +1,9 @@
 package inputhandlers
 
 import (
+	"strings"
+	"unicode"
+
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/term"
 )
@@ -44,6 +47,14 @@ func CleanserInputHandler(clientInput *connections.ClientInput, sharedState map[
 
 	// Remove non printing chars
 	//clientInput.DataIn = trimNonPrintingBytes(clientInput.DataIn)
+
+	clientInput.DataIn = []byte(strings.Map(func(r rune) rune {
+		if unicode.IsPrint(r) {
+			return r
+		}
+		return -1
+	}, string(clientInput.DataIn)))
+
 	// Add all input to the currentBuffer
 	clientInput.Buffer = append(clientInput.Buffer, clientInput.DataIn...)
 
