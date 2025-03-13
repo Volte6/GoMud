@@ -2,8 +2,10 @@ package users
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -320,7 +322,7 @@ func LogOutUserByConnectionId(connectionId connections.ConnectionId) error {
 // First time creating a user.
 func CreateUser(u *UserRecord) error {
 
-	if err := util.ValidateName(u.Username); err != nil {
+	if err := ValidateName(u.Username); err != nil {
 		return errors.New("that username is not allowed: " + err.Error())
 	}
 
@@ -437,6 +439,23 @@ func SearchOfflineUsers(searchFunc func(u *UserRecord) bool) {
 		return nil
 	})
 
+}
+
+func ValidateName(name string) error {
+
+	validation := configs.GetValidationConfig()
+
+	if len(name) < int(validation.NameSizeMin) || len(name) > int(validation.NameSizeMax) {
+		return fmt.Errorf("name must be between %d and %d characters long", validation.NameSizeMin, validation.NameSizeMax)
+	}
+
+	if validation.NameRejectRegex != `` {
+		if !regexp.MustCompile(validation.NameRejectRegex.String()).MatchString(name) {
+			return errors.New(validation.NameRejectReason.String())
+		}
+	}
+
+	return nil
 }
 
 // searches for a character name and returns the user that owns it

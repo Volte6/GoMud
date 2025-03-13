@@ -1,10 +1,8 @@
 package users
 
 import (
-	"errors"
 	"fmt"
 	"math"
-	"regexp"
 	"time"
 
 	"github.com/volte6/gomud/internal/audio"
@@ -413,16 +411,8 @@ func (u *UserRecord) ReplaceCharacter(replacement *characters.Character) {
 
 func (u *UserRecord) SetUsername(un string) error {
 
-	validation := configs.GetValidationConfig()
-
-	if len(un) < int(validation.NameSizeMin) || len(un) > int(validation.NameSizeMax) {
-		return fmt.Errorf("name must be between %d and %d characters long", validation.NameSizeMin, validation.NameSizeMax)
-	}
-
-	if validation.NameRejectRegex != `` {
-		if !regexp.MustCompile(validation.NameRejectRegex.String()).MatchString(un) {
-			return errors.New(validation.NameRejectReason.String())
-		}
+	if err := ValidateName(un); err != nil {
+		return err
 	}
 
 	u.Username = un
@@ -437,16 +427,8 @@ func (u *UserRecord) SetUsername(un string) error {
 
 func (u *UserRecord) SetCharacterName(cn string) error {
 
-	validation := configs.GetValidationConfig()
-
-	if len(cn) < int(validation.NameSizeMin) || len(cn) > int(validation.NameSizeMax) {
-		return fmt.Errorf("name must be between %d and %d characters long", validation.NameSizeMin, validation.NameSizeMax)
-	}
-
-	if validation.NameRejectRegex != `` {
-		if !regexp.MustCompile(validation.NameRejectRegex.String()).MatchString(cn) {
-			return errors.New(validation.NameRejectReason.String())
-		}
+	if err := ValidateName(cn); err != nil {
+		return err
 	}
 
 	u.Character.Name = cn

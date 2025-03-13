@@ -17,7 +17,6 @@ import (
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
 )
 
 func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
@@ -137,7 +136,7 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			}
 		}
 
-		if err := util.ValidateName(question.Response); err != nil {
+		if err := users.ValidateName(question.Response); err != nil {
 			user.SendText(`that name is not allowed: ` + err.Error())
 			question.RejectResponse()
 			return true, nil
