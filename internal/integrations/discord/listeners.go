@@ -48,7 +48,7 @@ func HandlePlayerDespawn(e events.Event) bool {
 		return false
 	}
 
-	message := fmt.Sprintf(":x: **%s** disconnected", evt.CharacterName)
+	message := fmt.Sprintf(":x: **%s** disconnected (online %s)", evt.CharacterName, evt.TimeOnline)
 
 	SendRichMessage(message, Grey)
 
