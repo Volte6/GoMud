@@ -14,11 +14,13 @@ import (
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/gametime"
+	"github.com/volte6/gomud/internal/i18n"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
+	"golang.org/x/text/language"
 )
 
 var (
@@ -213,6 +215,9 @@ var (
 		},
 		"month": func(month int) string {
 			return gametime.MonthName(month)
+		},
+		"t": func(msgID string, tplData ...map[string]string) string {
+			return T(msgID, tplData...)
 		},
 	}
 )
@@ -444,4 +449,10 @@ func formatDuration(seconds int) string {
 	}
 
 	return strings.TrimSpace(result)
+}
+
+func T(msgID string, tplData ...map[string]string) string {
+	lng := language.Make(configs.GetTextFormatsConfig().Language.String())
+
+	return i18n.Translate(lng, msgID, tplData...)
 }

@@ -1,0 +1,15 @@
+# English
+
+User.Id: 'UserId'
+User.Name: 'Name'
+Level: 'Level'
+Alignment: 'Alignment'
+Profession: 'Profession'
+Online: 'Online'
+Role: 'Role'
+Zone: 'Zone'
+Room.Id: 'RoomId'
+'%d users online': '%d users online'
+'%d user online': '%d users online'
+
+'Would you like to create a new user?': 'Would you like to create a new user?'

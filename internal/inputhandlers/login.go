@@ -155,7 +155,7 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 			})
 
 			newUserPromptPrompt, _ := templates.Process("generic/prompt.yn", map[string]any{
-				"prompt":  "Would you like to create a new user?",
+				"prompt":  templates.T("Would you like to create a new user?"),
 				"options": []string{"y", "n"},
 				"default": "n",
 			})

@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path"
 	"runtime"
 	"runtime/debug"
 	"slices"
@@ -26,6 +27,7 @@ import (
 	"github.com/volte6/gomud/internal/flags"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/hooks"
+	"github.com/volte6/gomud/internal/i18n"
 	"github.com/volte6/gomud/internal/inputhandlers"
 	"github.com/volte6/gomud/internal/integrations/discord"
 	"github.com/volte6/gomud/internal/items"
@@ -47,6 +49,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 	"github.com/volte6/gomud/internal/web"
+	"golang.org/x/text/language"
 )
 
 const (
@@ -92,6 +95,14 @@ func main() {
 	configs.ReloadConfig()
 	c := configs.GetConfig()
 
+	// Default i18n localize folders
+	if len(c.TextFormats.LanguagePaths) == 0 {
+		c.TextFormats.LanguagePaths = []string{
+			path.Join("_datafiles", "localize"),
+			path.Join(c.FilePaths.FolderDataFiles.String(), "localize"),
+		}
+	}
+
 	mudlog.Info(`========================`)
 	//
 	mudlog.Info(`  ___  ____   _______   `)
@@ -126,6 +137,12 @@ func main() {
 		mudlog.Error("World Validation", "error", err)
 		os.Exit(1)
 	}
+
+	i18n.Init(i18n.BundleCfg{
+		DefaultLanguage: language.Make(c.TextFormats.DefaultLanguage.String()),
+		Language:        language.Make(c.TextFormats.Language.String()),
+		LanguagePaths:   c.TextFormats.LanguagePaths,
+	})
 
 	hooks.RegisterListeners()
 

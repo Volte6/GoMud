@@ -1,0 +1,3 @@
+welcome: hallo
+welcomeWithName: hallo {{ .name }}
+welcomeWithAge: ich bin {{ .age }} Jahre alt
