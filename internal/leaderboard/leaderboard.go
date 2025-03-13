@@ -105,39 +105,24 @@ func Update() {
 	userCount := 0
 	characterCount := 0
 
-	// Check online users
-	var highestGold characters.Character
-	var highestExperience characters.Character
-	var highestKills characters.Character
-
 	for _, u := range users.GetAllActiveUsers() {
 
 		userCount++
 		characterCount++
 
-		highestGold = *u.Character
-		highestExperience = *u.Character
-		highestKills = *u.Character
+		lbGold.Consider(u.UserId, *u.Character, u.Character.Gold+u.Character.Bank)
+		lbExperience.Consider(u.UserId, *u.Character, u.Character.Experience)
+		lbKills.Consider(u.UserId, *u.Character, u.Character.KD.TotalKills)
 
 		for _, char := range characters.LoadAlts(u.UserId) {
 
 			characterCount++
 
-			if char.Gold+char.Bank > highestGold.Gold+highestGold.Bank {
-				highestGold = char
-			}
-			if char.Experience > highestExperience.Experience {
-				highestExperience = char
-			}
-			if char.KD.TotalKills > highestKills.KD.TotalKills {
-				highestKills = char
-			}
+			lbGold.Consider(u.UserId, char, char.Gold+char.Bank)
+			lbExperience.Consider(u.UserId, char, char.Experience)
+			lbKills.Consider(u.UserId, char, char.KD.TotalKills)
 
 		}
-
-		lbGold.Consider(u.UserId, highestGold, highestGold.Gold+highestGold.Bank)
-		lbExperience.Consider(u.UserId, highestExperience, highestExperience.Experience)
-		lbKills.Consider(u.UserId, highestKills, highestKills.KD.TotalKills)
 
 	}
 
@@ -147,29 +132,19 @@ func Update() {
 		userCount++
 		characterCount++
 
-		highestGold = *u.Character
-		highestExperience = *u.Character
-		highestKills = *u.Character
+		lbGold.Consider(u.UserId, *u.Character, u.Character.Gold+u.Character.Bank)
+		lbExperience.Consider(u.UserId, *u.Character, u.Character.Experience)
+		lbKills.Consider(u.UserId, *u.Character, u.Character.KD.TotalKills)
 
 		for _, char := range characters.LoadAlts(u.UserId) {
 
 			characterCount++
 
-			if char.Gold+char.Bank > highestGold.Gold+highestGold.Bank {
-				highestGold = char
-			}
-			if char.Experience > highestExperience.Experience {
-				highestExperience = char
-			}
-			if char.KD.TotalKills > highestKills.KD.TotalKills {
-				highestKills = char
-			}
+			lbGold.Consider(u.UserId, char, char.Gold+char.Bank)
+			lbExperience.Consider(u.UserId, char, char.Experience)
+			lbKills.Consider(u.UserId, char, char.KD.TotalKills)
 
 		}
-
-		lbGold.Consider(u.UserId, highestGold, highestGold.Gold+highestGold.Bank)
-		lbExperience.Consider(u.UserId, highestExperience, highestExperience.Experience)
-		lbKills.Consider(u.UserId, highestKills, highestKills.KD.TotalKills)
 
 		return true
 	})
