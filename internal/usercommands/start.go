@@ -129,7 +129,7 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			return true, nil
 		}
 
-		for _, c := range characters.LoadAlts(user.Username) {
+		for _, c := range characters.LoadAlts(user.UserId) {
 			if strings.EqualFold(question.Response, c.Name) {
 				user.SendText(`Your already have a character named that!`)
 				question.RejectResponse()

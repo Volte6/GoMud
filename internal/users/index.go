@@ -132,6 +132,8 @@ func (idx *UserIndex) FindByUsername(username string) (int64, bool) {
 	}
 	defer f.Close()
 
+	username = strings.ToLower(username)
+
 	for i := uint64(0); i < idx.metaData.RecordCount; i++ {
 		offset := int64(idx.metaData.MetaDataSize) + int64(i*idx.metaData.RecordSize)
 		if _, err := f.Seek(offset, io.SeekStart); err != nil {
@@ -239,6 +241,9 @@ func (idx *UserIndex) getMetaDataFromFile() IndexMetaData {
 // AppendUserRecord appends a new record to the index file and updates the header.
 func (idx *UserIndex) AddUser(userId int, username string) error {
 
+	// We lowercase username so that we can ensure uniqueness
+	username = strings.ToLower(username)
+
 	// Create the new record
 	newRecord := IndexUserRecord{
 		UserID: int64(userId),
@@ -288,6 +293,8 @@ func (idx *UserIndex) RemoveByUsername(username string) error {
 		return err
 	}
 	defer f.Close()
+
+	username = strings.ToLower(username)
 
 	records := make([]IndexUserRecord, 0, idx.metaData.RecordCount)
 	recordFound := false

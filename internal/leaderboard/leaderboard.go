@@ -102,7 +102,7 @@ func considerUser(u *users.UserRecord) bool {
 
 	allChars := []characters.Character{}
 	allChars = append(allChars, *u.Character)
-	allChars = append(allChars, characters.LoadAlts(u.Username)...)
+	allChars = append(allChars, characters.LoadAlts(u.UserId)...)
 
 	for _, char := range allChars {
 
