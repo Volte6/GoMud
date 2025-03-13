@@ -116,26 +116,16 @@ func Update() {
 		userCount++
 		characterCount++
 
-		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "gold", u.Character.Gold+u.Character.Bank)
 		lbGold.Consider(u.UserId, *u.Character, u.Character.Gold+u.Character.Bank)
-
-		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "xp", u.Character.Experience)
 		lbExperience.Consider(u.UserId, *u.Character, u.Character.Experience)
-
-		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "kills", u.Character.KD.TotalKills)
 		lbKills.Consider(u.UserId, *u.Character, u.Character.KD.TotalKills)
 
 		for _, char := range characters.LoadAlts(u.UserId) {
 
 			characterCount++
 
-			mudlog.Debug("Leaderboard", "Consider", char.Name, "gold", char.Gold+char.Bank)
 			lbGold.Consider(u.UserId, char, char.Gold+char.Bank)
-
-			mudlog.Debug("Leaderboard", "Consider", char.Name, "xp", char.Experience)
 			lbExperience.Consider(u.UserId, char, char.Experience)
-
-			mudlog.Debug("Leaderboard", "Consider", char.Name, "kills", char.KD.TotalKills)
 			lbKills.Consider(u.UserId, char, char.KD.TotalKills)
 
 		}
@@ -148,26 +138,16 @@ func Update() {
 		userCount++
 		characterCount++
 
-		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "gold", u.Character.Gold+u.Character.Bank)
 		lbGold.Consider(u.UserId, *u.Character, u.Character.Gold+u.Character.Bank)
-
-		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "xp", u.Character.Experience)
 		lbExperience.Consider(u.UserId, *u.Character, u.Character.Experience)
-
-		mudlog.Debug("Leaderboard", "Consider", u.Character.Name, "kills", u.Character.KD.TotalKills)
 		lbKills.Consider(u.UserId, *u.Character, u.Character.KD.TotalKills)
 
 		for _, char := range characters.LoadAlts(u.UserId) {
 
 			characterCount++
 
-			mudlog.Debug("Leaderboard", "Consider", char.Name, "gold", char.Gold+char.Bank)
 			lbGold.Consider(u.UserId, char, char.Gold+char.Bank)
-
-			mudlog.Debug("Leaderboard", "Consider", char.Name, "xp", char.Experience)
 			lbExperience.Consider(u.UserId, char, char.Experience)
-
-			mudlog.Debug("Leaderboard", "Consider", char.Name, "kills", char.KD.TotalKills)
 			lbKills.Consider(u.UserId, char, char.KD.TotalKills)
 
 		}
