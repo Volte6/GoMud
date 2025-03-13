@@ -355,32 +355,7 @@ func pct(a, b int) int {
 }
 
 func numberFormat(num int) string {
-	str := strconv.FormatInt(int64(num), 10)
-	n := len(str)
-
-	if n <= 3 {
-		return str
-	}
-
-	var result []byte
-	remainder := n % 3
-	if remainder != 0 {
-		result = append(result, str[:remainder]...)
-		if n > 3 {
-			result = append(result, ',')
-		}
-		str = str[remainder:]
-	}
-
-	for len(str) > 0 {
-		result = append(result, str[:3]...)
-		str = str[3:]
-		if len(str) > 0 {
-			result = append(result, ',')
-		}
-	}
-
-	return string(result)
+	return util.FormatNumber(num)
 }
 
 func TplAnsiParse(input string) string {

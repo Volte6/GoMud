@@ -33,18 +33,16 @@ type LeaderboardEntry struct {
 }
 
 type Leaderboard struct {
-	Name         string
-	Top          []LeaderboardEntry
-	MaxSize      int
-	HighestValue int
-	LowestValue  int
+	Name        string
+	Top         []LeaderboardEntry
+	MaxSize     int
+	LowestValue int
 }
 
 func (l *Leaderboard) Reset(size int) {
 	l.MaxSize = size
-	l.HighestValue = 0
-	l.LowestValue = 0
 	l.Top = make([]LeaderboardEntry, l.MaxSize)
+	l.LowestValue = 0
 }
 
 func (l *Leaderboard) Consider(userId int, char characters.Character, val int) {
@@ -52,7 +50,7 @@ func (l *Leaderboard) Consider(userId int, char characters.Character, val int) {
 		return
 	}
 
-	if val < l.LowestValue && len(l.Top) >= l.MaxSize {
+	if val < l.LowestValue && l.Top[l.MaxSize-1].UserId != 0 {
 		return
 	}
 
@@ -73,6 +71,10 @@ func (l *Leaderboard) Consider(userId int, char characters.Character, val int) {
 
 	if addPosition > -1 {
 
+		for i := l.MaxSize - 2; i >= addPosition; i-- {
+			l.Top[i+1] = l.Top[i]
+		}
+
 		// just accept it
 		l.Top[addPosition] = LeaderboardEntry{
 			UserId:         userId,
@@ -80,6 +82,10 @@ func (l *Leaderboard) Consider(userId int, char characters.Character, val int) {
 			CharacterClass: skills.GetProfession(char.GetAllSkillRanks()),
 			Level:          char.Level,
 			ScoreValue:     val,
+		}
+
+		if l.LowestValue == 0 || val < l.LowestValue {
+			l.LowestValue = val
 		}
 
 	}
