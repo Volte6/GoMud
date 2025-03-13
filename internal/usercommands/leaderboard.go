@@ -10,6 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
+	"github.com/volte6/gomud/internal/util"
 )
 
 func Leaderboards(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
@@ -51,7 +52,7 @@ func Leaderboards(rest string, user *users.UserRecord, room *rooms.Room, flags e
 				continue
 			}
 
-			newRow := []string{`#` + strconv.Itoa(i+1), entry.CharacterName, entry.CharacterClass, strconv.Itoa(entry.Level), strconv.Itoa(entry.ScoreValue)}
+			newRow := []string{`#` + strconv.Itoa(i+1), entry.CharacterName, entry.CharacterClass, strconv.Itoa(entry.Level), util.FormatNumber(entry.ScoreValue)}
 
 			rows = append(rows, newRow)
 		}
