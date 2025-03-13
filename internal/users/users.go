@@ -19,11 +19,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const minimumUsernameLength = 2
-const maximumUsernameLength = 16
-const minimumPasswordLength = 4
-const maximumPasswordLength = 16
-
 var (
 	highestUserId int          = -1
 	userManager   *ActiveUsers = newUserManager()
