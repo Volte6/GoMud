@@ -10,7 +10,7 @@ func TestTranslate(t *testing.T) {
 	type args struct {
 		lng     language.Tag
 		msgID   string
-		tplData map[string]string
+		tplData map[any]any
 	}
 	tests := []struct {
 		name string
@@ -30,7 +30,7 @@ func TestTranslate(t *testing.T) {
 			args: args{
 				lng:   language.English,
 				msgID: "welcomeWithName",
-				tplData: map[string]string{
+				tplData: map[any]any{
 					"name": "alex",
 				},
 			},
@@ -41,7 +41,7 @@ func TestTranslate(t *testing.T) {
 			args: args{
 				lng:   language.English,
 				msgID: "welcomeWithAge",
-				tplData: map[string]string{
+				tplData: map[any]any{
 					"age": "18",
 				},
 			},
@@ -61,7 +61,7 @@ func TestTranslate(t *testing.T) {
 			args: args{
 				lng:   language.German,
 				msgID: "welcomeWithName",
-				tplData: map[string]string{
+				tplData: map[any]any{
 					"name": "alex",
 				},
 			},
@@ -72,7 +72,7 @@ func TestTranslate(t *testing.T) {
 			args: args{
 				lng:   language.German,
 				msgID: "welcomeWithAge",
-				tplData: map[string]string{
+				tplData: map[any]any{
 					"age": "18",
 				},
 			},
@@ -92,7 +92,7 @@ func TestTranslate(t *testing.T) {
 			args: args{
 				lng:   language.French,
 				msgID: "welcomeWithName",
-				tplData: map[string]string{
+				tplData: map[any]any{
 					"name": "alex",
 				},
 			},
@@ -103,7 +103,7 @@ func TestTranslate(t *testing.T) {
 			args: args{
 				lng:   language.French,
 				msgID: "welcomeWithAge",
-				tplData: map[string]string{
+				tplData: map[any]any{
 					"age": "18",
 				},
 			},

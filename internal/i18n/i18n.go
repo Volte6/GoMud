@@ -72,12 +72,12 @@ func (i *I18n) newLocalizer(lng language.Tag) *i18n.Localizer {
 }
 
 // Translate message.
-func Translate(lng language.Tag, msgID string, tplData ...map[string]string) string {
+func Translate(lng language.Tag, msgID string, tplData ...map[any]any) string {
 	return TranslateWithConfig(i18, lng, msgID, tplData...)
 }
 
 // Translate message.
-func TranslateWithConfig(i *I18n, lng language.Tag, msgID string, tplData ...map[string]string) string {
+func TranslateWithConfig(i *I18n, lng language.Tag, msgID string, tplData ...map[any]any) string {
 	localizer, ok := i.localizerByLng[lng]
 	if !ok {
 		localizer = i.localizerByLng[i.defaultLanguage]
