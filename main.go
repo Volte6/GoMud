@@ -96,8 +96,8 @@ func main() {
 	c := configs.GetConfig()
 
 	// Default i18n localize folders
-	if len(c.TextFormats.LanguagePaths) == 0 {
-		c.TextFormats.LanguagePaths = []string{
+	if len(c.Translation.LanguagePaths) == 0 {
+		c.Translation.LanguagePaths = []string{
 			path.Join("_datafiles", "localize"),
 			path.Join(c.FilePaths.FolderDataFiles.String(), "localize"),
 		}
@@ -139,9 +139,9 @@ func main() {
 	}
 
 	i18n.Init(i18n.BundleCfg{
-		DefaultLanguage: language.Make(c.TextFormats.DefaultLanguage.String()),
-		Language:        language.Make(c.TextFormats.Language.String()),
-		LanguagePaths:   c.TextFormats.LanguagePaths,
+		DefaultLanguage: language.Make(c.Translation.DefaultLanguage.String()),
+		Language:        language.Make(c.Translation.Language.String()),
+		LanguagePaths:   c.Translation.LanguagePaths,
 	})
 
 	hooks.RegisterListeners()

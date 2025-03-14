@@ -452,7 +452,7 @@ func formatDuration(seconds int) string {
 }
 
 func T(msgID string, tplData ...map[string]string) string {
-	lng := language.Make(configs.GetTextFormatsConfig().Language.String())
+	lng := language.Make(configs.GetTranslationConfig().Language.String())
 
 	return i18n.Translate(lng, msgID, tplData...)
 }

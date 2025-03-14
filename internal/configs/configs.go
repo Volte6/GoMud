@@ -42,6 +42,7 @@ type Config struct {
 	GamePlay     GamePlay     `yaml:"GamePlay"`
 	Integrations Integrations `yaml:"Integrations"`
 	TextFormats  TextFormats  `yaml:"TextFormats"`
+	Translation  Translation  `yaml:"Translation"`
 	Network      Network      `yaml:"Network"`
 	Scripting    Scripting    `yaml:"Scripting"`
 	SpecialRooms SpecialRooms `yaml:"SpecialRooms"`
@@ -143,6 +144,7 @@ func (c *Config) Validate() {
 	c.GamePlay.Validate()
 	c.Integrations.Validate()
 	c.TextFormats.Validate()
+	c.Translation.Validate()
 	c.Network.Validate()
 	c.Scripting.Validate()
 	c.SpecialRooms.Validate()

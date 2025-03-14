@@ -365,6 +365,14 @@ TextFormats:
   # - ExitRoomMessageWrapper -
   #   Decorate exit text with this. Put a %s where the message should be.
   ExitRoomMessageWrapper: "   <ansi fg=\"leaves-message\"> >>> </ansi>%s\n"
+
+################################################################################
+#
+#   TRANSLATION SETTINGS
+#   Custom game language translation settings.
+#
+################################################################################
+Translation:
   # - DefaultLanguage -
   # Specify the default game language (fallback)
   DefaultLanguage: 'en'
@@ -504,7 +512,7 @@ Validation:
   # - NameRejectRegex -
   #   A special pattern to reject usernames that match it.
   #   (This is a regular expression, you must understand how to create them)
-  #   Set to empty to disable. If the regex is invalid it will revert to the 
+  #   Set to empty to disable. If the regex is invalid it will revert to the
   #   default of '^[a-zA-Z0-9_]+$'
   NameRejectRegex: '^[a-zA-Z0-9_]+$'
   NameRejectReason: "Must only contain Alpha-numeric and underscores."
