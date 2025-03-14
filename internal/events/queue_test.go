@@ -159,3 +159,23 @@ func TestQueueConcurrency(t *testing.T) {
 	t.Logf("Final queue length (could be anything >= 0): %d", q.Len())
 	assert.True(t, q.Len() >= 0, "Queue should have non-negative length")
 }
+
+// Benchmark using the custom Queue implementation.
+func BenchmarkQueuePushPoll(b *testing.B) {
+	q := NewQueue[int]()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+
+		for j := 0; j < 100; j++ {
+
+			q.Push(i)
+			if j%3 == 0 {
+				_ = q.Poll()
+			}
+		}
+
+		for q.Len() > 0 {
+			_ = q.Poll()
+		}
+	}
+}

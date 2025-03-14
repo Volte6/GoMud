@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"slices"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -29,6 +30,7 @@ import (
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/leaderboard"
+	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/mutators"
@@ -155,6 +157,51 @@ func main() {
 	gametime.GetZodiac(1) // The first time this is called it randomizes all zodiacs
 
 	scripting.Setup(int(c.Scripting.LoadTimeoutMs), int(c.Scripting.RoomTimeoutMs))
+
+	// /////////// TEST //////////////
+	// /////////// TEST //////////////
+	// /////////// TEST //////////////
+
+	crawler := mapper.NewMapper(1)
+
+	tStart := time.Now()
+	crawler.Start()
+	fmt.Println("Rooms Crawled in", time.Since(tStart))
+
+	//mapData := crawler.GetMap(1, 35, 19, false)
+
+	tStart = time.Now()
+	mapData := crawler.GetMap(1, 80, 40, false)
+	fmt.Println("Map retrieved in", time.Since(tStart))
+
+	legendAliases := mapData.GetLegend(keywords.GetAllLegendAliases(`frostfang`))
+
+	str := ``
+
+	str = `<ansi fg="map-default">+` + strings.Repeat("-", len(mapData.Render[0])) + `+</ansi>`
+	fmt.Println(templates.AnsiParse(str))
+
+	for y := 0; y < len(mapData.Render); y++ {
+		str = `|<ansi fg="map-default">` + string(mapData.Render[y]) + `</ansi>|`
+		for sym, txt := range legendAliases {
+			txtLc := strings.ToLower(txt)
+			str = strings.Replace(str, string(sym), fmt.Sprintf(`<ansi fg="map-room"><ansi fg="map-%s" bg="mapbg-%s">%c</ansi></ansi>`, txtLc, txtLc, sym), -1)
+		}
+		fmt.Println(templates.AnsiParse(str))
+	}
+	str = `<ansi fg="map-default">+` + strings.Repeat("-", len(mapData.Render[0])) + `+</ansi>`
+	fmt.Println(templates.AnsiParse(str))
+
+	for k, v := range legendAliases {
+		fmt.Printf("[%c]%s    ", k, v)
+	}
+	fmt.Println()
+
+	os.Exit(0)
+
+	// /////////// TEST //////////////
+	// /////////// TEST //////////////
+	// /////////// TEST //////////////
 
 	//
 	mudlog.Info(`========================`)

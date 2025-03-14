@@ -95,9 +95,6 @@ server.crt server.key:
 		-keyout server.key -out server.crt \
 		-days 365 -subj "/CN=localhost"
 
-# Clean up generated certificate and key.
-cert-clean:
-	rm -f server.crt server.key
 
 #
 #

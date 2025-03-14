@@ -250,3 +250,17 @@ direction-aliases:
   ne: northeast
   sw: southwest
   se: southeast
+
+# Special map symbols that will always show this exact text if found on a map.
+# Group under zone names.
+# '*' entries apply everywhere, unless overridden by a zone entry
+legend-overrides:
+  '*':
+    '$': 'Shop'
+    '★': 'Bank'
+    'G': 'Gate'
+    '✗': 'Target'
+    '%': 'Trainer'
+    '?': 'Secret'
+  'Frostfang':
+    '!': 'Throne Room'
