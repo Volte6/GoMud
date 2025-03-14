@@ -1,6 +1,6 @@
 # English
 
-User.Id: 'UserId'
+UserId: 'UserId'
 User.Name: 'Name'
 Level: 'Level'
 Alignment: 'Alignment'
@@ -8,7 +8,7 @@ Profession: 'Profession'
 Online: 'Online'
 Role: 'Role'
 Zone: 'Zone'
-Room.Id: 'RoomId'
+RoomId: 'RoomId'
 '%d users online': '%d users online'
 '%d user online': '%d users online'
 

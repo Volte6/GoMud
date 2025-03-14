@@ -1,6 +1,6 @@
 # Chinese
 
-User.Id: '用户ID'
+UserId: '用户ID'
 User.Name: '姓名'
 Level: '等级'
 Alignment: '阵营'
@@ -8,7 +8,7 @@ Profession: '职业'
 Online: '在线'
 Role: '角色'
 Zone: '区域'
-Room.Id: '房间ID'
+RoomId: '房间ID'
 '%d users online': '在线用户 %d 人'
 '%d user online': '在线用户 %d 人'
 

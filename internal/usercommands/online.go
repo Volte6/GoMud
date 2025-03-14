@@ -22,8 +22,8 @@ func Online(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 	}
 
 	if user.Permission != users.PermissionUser {
-		headers = append([]string{templates.T(`User.Id`)}, headers...)
-		headers = append(headers, []string{templates.T(`Zone`), templates.T(`Room.Id`)}...)
+		headers = append([]string{templates.T(`UserId`)}, headers...)
+		headers = append(headers, []string{templates.T(`Zone`), templates.T(`RoomId`)}...)
 	}
 
 	allFormatting := [][]string{}
