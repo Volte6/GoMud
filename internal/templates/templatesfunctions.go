@@ -216,9 +216,8 @@ var (
 		"month": func(month int) string {
 			return gametime.MonthName(month)
 		},
-		"t": func(msgID string, tplData ...map[string]string) string {
-			return T(msgID, tplData...)
-		},
+		"map": makeMap,
+		"t":   T,
 	}
 )
 
@@ -451,7 +450,16 @@ func formatDuration(seconds int) string {
 	return strings.TrimSpace(result)
 }
 
-func T(msgID string, tplData ...map[string]string) string {
+func makeMap(kvs ...any) map[any]any {
+	m := make(map[any]any)
+	for i := 0; i < len(kvs)-1; i += 2 {
+		m[kvs[i]] = kvs[i+1]
+	}
+
+	return m
+}
+
+func T(msgID string, tplData ...map[any]any) string {
 	lng := language.Make(configs.GetTranslationConfig().Language.String())
 
 	return i18n.Translate(lng, msgID, tplData...)
