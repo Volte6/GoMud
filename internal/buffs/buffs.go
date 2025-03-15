@@ -1,5 +1,9 @@
 package buffs
 
+import (
+	"github.com/volte6/gomud/internal/mudlog"
+)
+
 const (
 	TriggersLeftExpired   = 0 // When it hits this number it will be pruned ASAP
 	TriggersLeftUnlimited = 1000000000
@@ -59,6 +63,10 @@ func (bs *Buffs) Validate(forceRebuild ...bool) {
 		for idx, b := range bs.List {
 			bs.buffIds[b.BuffId] = idx
 			bSpec := GetBuffSpec(b.BuffId)
+			if bSpec == nil {
+				mudlog.Warn("buffs.Validate()", "buffId", b.BuffId, "error", "invalid character buffId")
+				continue
+			}
 			for _, flag := range bSpec.Flags {
 				if _, ok := bs.buffFlags[flag]; !ok {
 					bs.buffFlags[flag] = []int{}
