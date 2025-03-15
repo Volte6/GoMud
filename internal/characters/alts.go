@@ -7,7 +7,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 func AltsExists(userId int) bool {
@@ -51,7 +51,7 @@ func SaveAlts(userId int, alts []Character) bool {
 		mudlog.Info("SaveAlts()", "userId", strconv.Itoa(userId), "wrote-file", fileWritten, "tmp-file", tmpSaved, "tmp-copied", tmpCopied, "completed", completed)
 	}()
 
-	data, err := yaml.Marshal(&alts)
+	data, err := util.MarshalYAML(&alts)
 	if err != nil {
 		mudlog.Error("SaveAlts", "error", err.Error())
 		return false

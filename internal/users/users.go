@@ -18,7 +18,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 
 	//
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -511,7 +511,7 @@ func SaveUser(u UserRecord, isAutoSave ...bool) error {
 		}
 	}
 
-	data, err := yaml.Marshal(&u)
+	data, err := util.MarshalYAML(&u)
 	if err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@
 - [Playing GoMud](playing/README.md)
 - [World Building](building/README.md)
   - [Scripting](building/scripting/README.md)
+- [Translation](translation/README.md)
 
 ## TODO
 

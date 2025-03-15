@@ -6,3 +6,4 @@ _datafiles/**/users/*
 vendor/
 server.crt
 server.key
+__debug*

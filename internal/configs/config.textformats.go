@@ -1,6 +1,8 @@
 package configs
 
-import "strings"
+import (
+	"strings"
+)
 
 type TextFormats struct {
 	Prompt                  ConfigString `yaml:"Prompt"`                  // The in-game status prompt style

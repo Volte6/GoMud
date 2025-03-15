@@ -1,1 +1,1 @@
-<ansi fg="39">username</ansi><ansi fg="black-bold">: </ansi>
+<ansi fg="39">{{ t "Login.username" }}</ansi><ansi fg="black-bold">: </ansi>
