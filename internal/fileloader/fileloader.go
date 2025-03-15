@@ -13,6 +13,7 @@ import (
 	"sync/atomic"
 
 	"github.com/pkg/errors"
+	"github.com/volte6/gomud/internal/util"
 	"gopkg.in/yaml.v3"
 )
 
@@ -259,7 +260,7 @@ func SaveFlatFile[T LoadableSimple](basePath string, dataUnit T, saveOptions ...
 
 	// Use filepath to determine file marshal type
 	if fpathLower == `.yaml` {
-		bytes, err = yaml.Marshal(dataUnit)
+		bytes, err = util.MarshalYAML(dataUnit)
 	} else if fpathLower == `.json` {
 		bytes, err = json.Marshal(dataUnit)
 	} else {
@@ -336,7 +337,7 @@ func SaveAllFlatFiles[K comparable, T Loadable[K]](basePath string, data map[K]T
 
 				// Use filepath to determine file marshal type
 				if fpathLower == `.yaml` {
-					bytes, err = yaml.Marshal(dataUnit)
+					bytes, err = util.MarshalYAML(dataUnit)
 				} else if fpathLower == `.json` {
 					bytes, err = json.Marshal(dataUnit)
 				} else {

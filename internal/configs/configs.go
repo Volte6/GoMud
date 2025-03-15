@@ -255,7 +255,7 @@ func SetVal(propertyPath string, newVal string) error {
 	overrides = unflattenMap(flatOverrides)
 
 	// save the new config.
-	writeBytes, err := yaml.Marshal(overrides)
+	writeBytes, err := util.MarshalYAML(overrides)
 	if err != nil {
 		return err
 	}

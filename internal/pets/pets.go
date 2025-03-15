@@ -13,7 +13,6 @@ import (
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/statmods"
 	"github.com/volte6/gomud/internal/util"
-	"gopkg.in/yaml.v3"
 )
 
 type Pet struct {
@@ -137,7 +136,7 @@ func (p *Pet) Filepath() string {
 func (p *Pet) Save() error {
 	fileName := strings.ToLower(p.Name)
 
-	bytes, err := yaml.Marshal(p)
+	bytes, err := util.MarshalYAML(p)
 	if err != nil {
 		return err
 	}

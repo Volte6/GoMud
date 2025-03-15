@@ -511,7 +511,7 @@ func SaveUser(u UserRecord, isAutoSave ...bool) error {
 		}
 	}
 
-	data, err := yaml.Marshal(&u)
+	data, err := util.MarshalYAML(&u)
 	if err != nil {
 		return err
 	}

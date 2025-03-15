@@ -22,6 +22,7 @@ import (
 
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/term"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -916,4 +917,18 @@ func FormatNumber(n int) string {
 			out[j] = ','
 		}
 	}
+}
+
+// YAMLMarshal with indent 2 (yaml.v3 indent default is 4)
+func MarshalYAML(v any) ([]byte, error) {
+	buf := bytes.Buffer{}
+	enc := yaml.NewEncoder(&buf)
+	defer enc.Close()
+
+	enc.SetIndent(2)
+	if err := enc.Encode(&v); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }

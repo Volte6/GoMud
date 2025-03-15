@@ -12,7 +12,6 @@ import (
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -282,7 +281,7 @@ func (m *MutatorSpec) Filepath() string {
 func (m *MutatorSpec) Save() error {
 	fileName := strings.ToLower(m.MutatorId)
 
-	bytes, err := yaml.Marshal(m)
+	bytes, err := util.MarshalYAML(m)
 	if err != nil {
 		return err
 	}

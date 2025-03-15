@@ -21,8 +21,6 @@ import (
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
-
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -714,7 +712,7 @@ func SaveRoom(r Room) error {
 		}
 	}
 
-	data, err := yaml.Marshal(&r)
+	data, err := util.MarshalYAML(&r)
 	if err != nil {
 		return err
 	}

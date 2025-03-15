@@ -18,7 +18,6 @@ import (
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/util"
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -611,7 +610,7 @@ func (r *Mob) Save() error {
 
 	fileName := r.Filename()
 
-	bytes, err := yaml.Marshal(r)
+	bytes, err := util.MarshalYAML(r)
 	if err != nil {
 		return err
 	}
