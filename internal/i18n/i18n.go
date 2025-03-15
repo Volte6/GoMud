@@ -98,6 +98,12 @@ func TranslateWithConfig(i *I18n, lng language.Tag, msgID string, tplData ...map
 
 	msg, l, err := localizer.LocalizeWithTag(cfg)
 	if err != nil {
+		// Fallback to English
+		if !l.IsRoot() {
+			return msg, ErrMessageFallback
+		}
+
+		// Fallback to language.Und
 		return msgID, err
 	}
 

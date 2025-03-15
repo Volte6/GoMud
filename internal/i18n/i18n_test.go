@@ -49,6 +49,31 @@ func TestTranslate(t *testing.T) {
 			want: "I am 18 years old",
 		},
 		{
+			name: "fallback to english",
+			args: args{
+				lng:   language.English,
+				msgID: "fallbackToEnglish",
+			},
+			want: "fallback to english",
+		},
+		{
+			name: "fallback to english2",
+			args: args{
+				lng:   language.English,
+				msgID: "fallbackToEnglish2",
+			},
+			want: "fallback to english2",
+		},
+		{
+			name: "fallback to msgID",
+			args: args{
+				lng:   language.English,
+				msgID: "fallbackToMsgID",
+			},
+			want:    "fallbackToMsgID",
+			errFunc: IsMessageNotFoundErr,
+		},
+		{
 			name: "not exist msgID",
 			args: args{
 				lng:   language.English,
@@ -89,6 +114,33 @@ func TestTranslate(t *testing.T) {
 			want: "ich bin 18 Jahre alt",
 		},
 		{
+			name: "fallback to english",
+			args: args{
+				lng:   language.German,
+				msgID: "fallbackToEnglish",
+			},
+			want:    "fallback to english",
+			errFunc: IsMessageFallbackErr,
+		},
+		{
+			name: "fallback to english2",
+			args: args{
+				lng:   language.German,
+				msgID: "fallbackToEnglish2",
+			},
+			want:    "fallback to english2",
+			errFunc: IsMessageFallbackErr,
+		},
+		{
+			name: "fallback to msgID",
+			args: args{
+				lng:   language.German,
+				msgID: "fallbackToMsgID",
+			},
+			want:    "fallbackToMsgID",
+			errFunc: IsMessageNotFoundErr,
+		},
+		{
 			name: "not exist msgID",
 			args: args{
 				lng:   language.German,
@@ -97,7 +149,7 @@ func TestTranslate(t *testing.T) {
 			want:    "notExistMsgID",
 			errFunc: IsMessageNotFoundErr,
 		},
-		// French (fallback)
+		// French (not exist language fallback)
 		{
 			name: "hello",
 			args: args{
@@ -132,9 +184,36 @@ func TestTranslate(t *testing.T) {
 			errFunc: IsMessageFallbackErr,
 		},
 		{
+			name: "fallback to english",
+			args: args{
+				lng:   language.French,
+				msgID: "fallbackToEnglish",
+			},
+			want:    "fallback to english",
+			errFunc: IsMessageFallbackErr,
+		},
+		{
+			name: "fallback to english2",
+			args: args{
+				lng:   language.French,
+				msgID: "fallbackToEnglish2",
+			},
+			want:    "fallback to english2",
+			errFunc: IsMessageFallbackErr,
+		},
+		{
+			name: "fallback to msgID",
+			args: args{
+				lng:   language.French,
+				msgID: "fallbackToMsgID",
+			},
+			want:    "fallbackToMsgID",
+			errFunc: IsMessageNotFoundErr,
+		},
+		{
 			name: "not exist msgID",
 			args: args{
-				lng:   language.German,
+				lng:   language.French,
 				msgID: "notExistMsgID",
 			},
 			want:    "notExistMsgID",
@@ -157,11 +236,11 @@ func TestTranslate(t *testing.T) {
 
 			if tt.errFunc == nil {
 				if err != nil {
-					t.Errorf("TranslateWithConfig() unexpected error: %v", err)
+					t.Errorf("TranslateWithConfig(),  msgID = %v, unexpected error: %v", tt.args.msgID, err)
 				}
 			} else {
 				if !tt.errFunc(err) {
-					t.Errorf("TranslateWithConfig() unexpected error: %v", err)
+					t.Errorf("TranslateWithConfig(),  msgID = %v, unexpected error: %v", tt.args.msgID, err)
 				}
 			}
 		})
