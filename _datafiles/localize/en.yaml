@@ -1,15 +1,19 @@
 # English
+#
+# Format: `msgID: translated value`, quotation marks are sometimes required
+# Empty translated value will fallback to it's msgID
+# If the msgID used in the translation function is not in this file, it will also falls back to the msgID.
 
-UserId: 'UserId'
+UserId:
 User.Name: 'Name'
-Level: 'Level'
-Alignment: 'Alignment'
-Profession: 'Profession'
-Online: 'Online'
-Role: 'Role'
-Zone: 'Zone'
-RoomId: 'RoomId'
-'%d users online': '%d users online'
-'%d user online': '%d users online'
+Level:
+Alignment:
+Profession:
+Online:
+Role:
+Zone:
+RoomId:
+'%d users online':
+'%d user online':
 
-'Would you like to create a new user?': 'Would you like to create a new user?'
+'Would you like to create a new user?':

@@ -1,5 +1,9 @@
 # English
+#
+# Format: `msgID: translated value`, quotation marks are sometimes required
+# Empty translated value will fallback to it's msgID
+# If the msgID used in the translation function is not in this file, it will also falls back to the msgID.
 
 Login.username: 'username'
 Login.password: 'password'
-'Create new user?': 'Create new user?'
+'Create new user?':
