@@ -466,7 +466,7 @@ func T(msgID string, tplData ...map[any]any) string {
 	msg, err := i18n.Translate(lng, msgID, tplData...)
 	if err != nil {
 		if !i18n.IsMessageNotFoundErr(err) && !i18n.IsMessageFallbackErr(err) {
-			mudlog.Error(`Translation`, `error`, err, "msgID", msgID)
+			mudlog.Error(`Translation`, "msgID", msgID, `error`, err)
 		}
 	}
 
