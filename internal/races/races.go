@@ -13,7 +13,7 @@ import (
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/stats"
 	"github.com/volte6/gomud/internal/util"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type Size string

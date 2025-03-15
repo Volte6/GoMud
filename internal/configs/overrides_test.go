@@ -3,7 +3,7 @@ package configs
 import (
 	"testing"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // TestOverlay tests overlaying a nested map into the Config struct.

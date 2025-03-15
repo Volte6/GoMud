@@ -3,7 +3,7 @@ module github.com/volte6/gomud
 go 1.24
 
 require (
-	github.com/Volte6/ansitags v0.0.0-20240205002851-61e010ad9511
+	github.com/Volte6/ansitags v0.0.0-20250314163508-7f225ff9aaf3
 	github.com/dop251/goja v0.0.0-20231027120936-b396bb4c349d
 	github.com/gorilla/websocket v1.5.3
 	github.com/natefinch/lumberjack v2.0.0+incompatible
@@ -26,6 +26,4 @@ require (
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/nicksnyder/go-i18n/v2 v2.5.1
 	github.com/pkg/errors v0.9.1
-	//golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
-	gopkg.in/yaml.v2 v2.4.0
 )
