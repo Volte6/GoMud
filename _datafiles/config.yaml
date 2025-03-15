@@ -61,7 +61,7 @@ Server:
   - print
   # - Motd -
   #   Message of the day. This is displayed when the motd command is run.
-  Motd: Welcome to the Mud!
+  Motd: '{{ t "Motd" }}'
   # - NextRoomID -
   # This number is auto-updated to the highest number of rooms in the game.
   #   If creating your own rooms but don't want to risk an update conflicting,
