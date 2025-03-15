@@ -135,7 +135,7 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 				}
 
 				if len(msg) > 0 {
-					connections.SendTo([]byte(msg), clientInput.ConnectionId)
+					connections.SendTo([]byte(templates.T(msg)), clientInput.ConnectionId)
 					connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
 				}
 

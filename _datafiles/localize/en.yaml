@@ -4,6 +4,9 @@
 # Empty translated value will fallback to it's msgID
 # If the msgID used in the translation function is not in this file, it will also falls back to the msgID.
 
+'Reconnecting...':
+'That user is already logged in.':
+
 UserId:
 User.Name: 'Name'
 Level:
@@ -17,3 +20,13 @@ RoomId:
 '%d user online':
 
 'Would you like to create a new user?':
+
+Inbox.UnreadMessageWithCheck: >-
+  <ansi fg="159">You have <ansi fg="alert-4">%d</ansi> unread messages and <ansi fg="alert-4">%d</ansi> old messages.
+  Type <ansi fg="command">inbox</ansi> to view your messages.</ansi>
+Inbox.UnreadMessage: >-
+  <ansi fg="159">You have <ansi fg="alert-4">%d</ansi> unread messages and <ansi fg="alert-4">%d</ansi> old messages.</ansi>
+Inbox.ReadOldMessages: >-
+  <ansi fg="159">Type <ansi fg="command">inbox old</ansi> to read old messages.</ansi>
+Inbox.ClearMessages: >-
+  <ansi fg="159">Type <ansi fg="command">inbox clear</ansi> to clear all messages in your inbox.</ansi>
