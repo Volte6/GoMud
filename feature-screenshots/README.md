@@ -248,3 +248,11 @@ _Server configuration, room definitions, spells, buffs, items... it's all define
 ## Offline Message Inbox
 
 <a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/mudmail.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/mudmail.png" width="600" alt="accessibility text"></a>
+
+## Translations
+
+Documentation: [Translation](../_datafiles/guides/translation/README.md)
+
+_For example: Chinese translations._
+
+<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/i18n-translation-zh.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/i18n-translation-zh.png" width="600" alt="accessibility text"></a>
