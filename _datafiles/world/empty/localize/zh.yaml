@@ -14,4 +14,4 @@ Inbox.Note: '备注:     '
 Inbox.NoteGold: >-
   该信息附有 <ansi fg="gold">{{ .Gold }} 金币</ansi>, 已添加到您的银行余额中.
 Inbox.NoteItem: >-
-  该信息附有一个 <ansi fg="itemname">{{ .Item.DisplayName }}</ansi>, 添加到您的库存中.
+  该信息附有一个 <ansi fg="itemname">{{ .Item.DisplayName }}</ansi>, 已添加到您的库存中.
