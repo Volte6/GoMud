@@ -1,11 +1,16 @@
 package i18n
 
 import (
+	"errors"
 	"path"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 	"gopkg.in/yaml.v3"
+)
+
+var (
+	ErrMessageFallback = errors.New("i18n message fallback to default language")
 )
 
 var i18 *I18n
@@ -72,12 +77,12 @@ func (i *I18n) newLocalizer(lng language.Tag) *i18n.Localizer {
 }
 
 // Translate message.
-func Translate(lng language.Tag, msgID string, tplData ...map[any]any) string {
+func Translate(lng language.Tag, msgID string, tplData ...map[any]any) (string, error) {
 	return TranslateWithConfig(i18, lng, msgID, tplData...)
 }
 
 // Translate message.
-func TranslateWithConfig(i *I18n, lng language.Tag, msgID string, tplData ...map[any]any) string {
+func TranslateWithConfig(i *I18n, lng language.Tag, msgID string, tplData ...map[any]any) (string, error) {
 	localizer, ok := i.localizerByLng[lng]
 	if !ok {
 		localizer = i.localizerByLng[i.defaultLanguage]
@@ -91,10 +96,24 @@ func TranslateWithConfig(i *I18n, lng language.Tag, msgID string, tplData ...map
 		cfg.TemplateData = tplData[0]
 	}
 
-	msg, err := localizer.Localize(cfg)
+	msg, l, err := localizer.LocalizeWithTag(cfg)
 	if err != nil {
-		return msgID
+		return msgID, err
 	}
 
-	return msg
+	if l != lng {
+		return msg, ErrMessageFallback
+	}
+
+	return msg, nil
+}
+
+func IsMessageNotFoundErr(err error) bool {
+	_, ok := err.(*i18n.MessageNotFoundErr)
+
+	return ok
+}
+
+func IsMessageFallbackErr(err error) bool {
+	return errors.Is(err, ErrMessageFallback)
 }

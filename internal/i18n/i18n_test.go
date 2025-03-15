@@ -13,9 +13,10 @@ func TestTranslate(t *testing.T) {
 		tplData map[any]any
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		errFunc func(error) bool
 	}{
 		{
 			name: "hello",
@@ -46,6 +47,15 @@ func TestTranslate(t *testing.T) {
 				},
 			},
 			want: "I am 18 years old",
+		},
+		{
+			name: "not exist msgID",
+			args: args{
+				lng:   language.English,
+				msgID: "notExistMsgID",
+			},
+			want:    "notExistMsgID",
+			errFunc: IsMessageNotFoundErr,
 		},
 		// German
 		{
@@ -78,6 +88,15 @@ func TestTranslate(t *testing.T) {
 			},
 			want: "ich bin 18 Jahre alt",
 		},
+		{
+			name: "not exist msgID",
+			args: args{
+				lng:   language.German,
+				msgID: "notExistMsgID",
+			},
+			want:    "notExistMsgID",
+			errFunc: IsMessageNotFoundErr,
+		},
 		// French (fallback)
 		{
 			name: "hello",
@@ -85,7 +104,8 @@ func TestTranslate(t *testing.T) {
 				lng:   language.French,
 				msgID: "welcome",
 			},
-			want: "hello",
+			want:    "hello",
+			errFunc: IsMessageFallbackErr,
 		},
 		{
 			name: "hello alex",
@@ -96,7 +116,8 @@ func TestTranslate(t *testing.T) {
 					"name": "alex",
 				},
 			},
-			want: "hello alex",
+			want:    "hello alex",
+			errFunc: IsMessageFallbackErr,
 		},
 		{
 			name: "18 years old",
@@ -107,7 +128,17 @@ func TestTranslate(t *testing.T) {
 					"age": "18",
 				},
 			},
-			want: "I am 18 years old",
+			want:    "I am 18 years old",
+			errFunc: IsMessageFallbackErr,
+		},
+		{
+			name: "not exist msgID",
+			args: args{
+				lng:   language.German,
+				msgID: "notExistMsgID",
+			},
+			want:    "notExistMsgID",
+			errFunc: IsMessageNotFoundErr,
 		},
 	}
 
@@ -119,8 +150,19 @@ func TestTranslate(t *testing.T) {
 				LanguagePaths:   []string{"testdata/localize"},
 			})
 
-			if got := TranslateWithConfig(i18, tt.args.lng, tt.args.msgID, tt.args.tplData); got != tt.want {
-				t.Errorf("Translate() = %v, want %v", got, tt.want)
+			got, err := TranslateWithConfig(i18, tt.args.lng, tt.args.msgID, tt.args.tplData)
+			if got != tt.want {
+				t.Errorf("TranslateWithConfig() = %v, want %v", got, tt.want)
+			}
+
+			if tt.errFunc == nil {
+				if err != nil {
+					t.Errorf("TranslateWithConfig() unexpected error: %v", err)
+				}
+			} else {
+				if !tt.errFunc(err) {
+					t.Errorf("TranslateWithConfig() unexpected error: %v", err)
+				}
 			}
 		})
 	}

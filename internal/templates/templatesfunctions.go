@@ -16,6 +16,7 @@ import (
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/i18n"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
@@ -462,5 +463,12 @@ func makeMap(kvs ...any) map[any]any {
 func T(msgID string, tplData ...map[any]any) string {
 	lng := language.Make(configs.GetTranslationConfig().Language.String())
 
-	return i18n.Translate(lng, msgID, tplData...)
+	msg, err := i18n.Translate(lng, msgID, tplData...)
+	if err != nil {
+		if !i18n.IsMessageNotFoundErr(err) && !i18n.IsMessageFallbackErr(err) {
+			mudlog.Error(`Translation`, `error`, err, "msgID", msgID)
+		}
+	}
+
+	return msg
 }
