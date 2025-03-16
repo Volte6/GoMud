@@ -7,7 +7,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/util"
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v2"
 )
 
 func AltsExists(userId int) bool {

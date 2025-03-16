@@ -18,7 +18,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 
 	//
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v2"
 )
 
 var (
