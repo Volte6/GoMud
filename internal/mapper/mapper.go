@@ -1,10 +1,12 @@
 package mapper
 
 import (
+	"math"
+
 	"github.com/volte6/gomud/internal/rooms"
 )
 
-const defaultMapSymbol = `•`
+const defaultMapSymbol = '•'
 
 var (
 	posDeltas = map[string]positionDelta{
@@ -80,39 +82,86 @@ func (p positionDelta) Combine(p2 positionDelta) positionDelta {
 	return p
 }
 
+type RoomGrid struct {
+	size       positionDelta
+	roomOffset positionDelta
+	rooms      [][][]*mapNode // All rooms in a relative position
+}
+
+func (r *RoomGrid) initialize(minX, maxX, minY, maxY, minZ, maxZ int) {
+
+	r.size.x = maxX - minX + 1
+	r.size.y = maxY - minY + 1
+	r.size.z = maxZ - minZ + 1
+
+	r.roomOffset.x = minX * -1
+	r.roomOffset.y = minY * -1
+	r.roomOffset.z = minZ * -1
+
+	r.rooms = make([][][]*mapNode, r.size.z)
+	for z := 0; z < r.size.z; z++ {
+		r.rooms[z] = make([][]*mapNode, r.size.y)
+		for y := 0; y < r.size.y; y++ {
+			r.rooms[z][y] = make([]*mapNode, r.size.x)
+		}
+	}
+
+}
+
+func (r *RoomGrid) addNode(n *mapNode) {
+
+	adjX := n.Pos.x + r.roomOffset.x
+	adjY := n.Pos.y + r.roomOffset.y
+	adjZ := n.Pos.z + r.roomOffset.z
+
+	r.rooms[adjZ][adjY][adjX] = n
+
+}
+
 type mapper struct {
 	rootRoomId   int              // The room the crawler starts from
-	crawlQueue   []int            // A stack of rooms to crawl
+	crawlQueue   []crawlRoom      // A stack of rooms to crawl
 	crawledRooms map[int]*mapNode // A look up table of rooms already crawled
+	gridOffsets  positionDelta
+
+	roomGrid RoomGrid
 }
 
 func NewMapper(rootRoomId int) *mapper {
 	return &mapper{
 		rootRoomId:   rootRoomId,
 		crawledRooms: make(map[int]*mapNode, 100), // pre-allocate 100
+		roomGrid: RoomGrid{
+			rooms: [][][]*mapNode{},
+		},
 	}
+}
+
+type crawlRoom struct {
+	RoomId int
+	Pos    positionDelta // Its x/y/z position relative to the root node
 }
 
 func (r *mapper) Start() {
 
-	newRoomCrawlCounter := 0
+	minX, maxX, minY, maxY, minZ, maxZ := 0, 0, 0, 0, 0, 0
 
-	r.crawlQueue = make([]int, 0, 100) // pre-allocate 100 capacity
+	r.crawlQueue = make([]crawlRoom, 0, 100) // pre-allocate 100 capacity
 
-	r.crawlQueue = append(r.crawlQueue, r.rootRoomId)
+	//var lastNode *mapNode = nil
+	r.crawlQueue = append(r.crawlQueue, crawlRoom{RoomId: r.rootRoomId, Pos: positionDelta{}})
 	for len(r.crawlQueue) > 0 {
 
-		roomId := r.crawlQueue[0]
+		roomNow := r.crawlQueue[0]
 
 		r.crawlQueue = r.crawlQueue[1:]
 
-		if _, ok := r.crawledRooms[roomId]; ok {
+		if _, ok := r.crawledRooms[roomNow.RoomId]; ok {
 			continue
 		}
 
-		node := r.getMapNode(roomId)
-
-		newRoomCrawlCounter++
+		node := r.getMapNode(roomNow.RoomId)
+		node.Pos = roomNow.Pos
 
 		// Add to crawled list so we don't revisit it
 		r.crawledRooms[node.RoomId] = node
@@ -122,10 +171,212 @@ func (r *mapper) Start() {
 			if _, ok := r.crawledRooms[exitInfo.RoomId]; ok {
 				continue
 			}
-			r.crawlQueue = append(r.crawlQueue, exitInfo.RoomId)
+
+			newCrawl := crawlRoom{
+				RoomId: exitInfo.RoomId,
+				Pos:    roomNow.Pos.Combine(exitInfo.Direction),
+			}
+
+			if newCrawl.Pos.x < minX {
+				minX = newCrawl.Pos.x
+			} else if newCrawl.Pos.x > maxX {
+				maxX = newCrawl.Pos.x
+			}
+
+			if newCrawl.Pos.y < minY {
+				minY = newCrawl.Pos.y
+			} else if newCrawl.Pos.y > maxY {
+				maxY = newCrawl.Pos.y
+			}
+
+			if newCrawl.Pos.y < minZ {
+				minZ = newCrawl.Pos.z
+			} else if newCrawl.Pos.y > maxZ {
+				maxZ = newCrawl.Pos.z
+			}
+
+			r.crawlQueue = append(r.crawlQueue, newCrawl)
 		}
 
 	}
+
+	// calculate the final array length.
+
+	r.roomGrid.initialize(minX, maxX, minY, maxY, minZ, maxZ)
+
+	for _, node := range r.crawledRooms {
+		r.roomGrid.addNode(node)
+	}
+}
+
+func (r *mapper) GetMap(centerRoomId int, mapWidth int, mapHeight int, zoomLevel int) mapRender {
+
+	if zoomLevel < 0 {
+		zoomLevel = 0
+	}
+	zoomLevel++
+
+	/*
+		+-----------+
+		|     ••&   |
+		|    %••••••|
+		|⌂⌂⌂⌂%••⌂⌂⌂⌂|
+		|•••••••••••|
+		|  •★•• $⌂$ |
+		|•••••@•••••|
+		|  •  • $ I•|
+		|•••  ••••• |
+		|••P• ••+ • |
+		| ••  ••••• |
+		|     ••••••|
+		+-----------+
+
+		+-----------+
+		|• • • • • •|
+		|           |
+		|★ • •   $ ⌂|
+		|           |
+		|• • @ • • •|
+		|           |
+		|    •   $  |
+		|           |
+		|    • • • •|
+		|           |
+		|•   • • +  |
+		+-----------+
+	*/
+	out := newMapRender(mapWidth, mapHeight)
+
+	node := r.crawledRooms[centerRoomId]
+
+	if node == nil {
+		return out
+	}
+
+	srcPos := positionDelta{
+		x: node.Pos.x + r.roomGrid.roomOffset.x - int(math.Ceil(float64(mapWidth)/float64(zoomLevel)))>>1,
+		y: node.Pos.y + r.roomGrid.roomOffset.y - int(math.Ceil(float64(mapHeight)/float64(zoomLevel)))>>1,
+		z: 0,
+	}
+
+	dstPos := positionDelta{
+		x: 0,
+		y: 0,
+		z: 0,
+	}
+
+	srcEndX := srcPos.x + int(math.Ceil(float64(mapWidth)/float64(zoomLevel)))
+	srcEndY := srcPos.y + int(math.Ceil(float64(mapHeight)/float64(zoomLevel)))
+
+	// Make sure we don't try and draw from beyond the grid
+	if srcPos.x < 0 {
+		dstPos.x = (srcPos.x * -1) * zoomLevel
+		srcPos.x = 0
+	}
+
+	if srcPos.y < 0 {
+		dstPos.y = srcPos.y * -1 * zoomLevel
+		srcPos.y = 0
+	}
+
+	if srcEndX > r.roomGrid.size.x-1 {
+		srcEndX = r.roomGrid.size.x - 1
+
+	}
+
+	if srcEndY > r.roomGrid.size.y-1 {
+		srcEndY = r.roomGrid.size.y - 1
+	}
+
+	drawX, drawY := 0, 0
+	z := 0
+
+	for y := srcPos.y; y < srcEndY; y++ {
+
+		drawX = 0
+		for x := srcPos.x; x < srcEndX; x++ {
+
+			if node = r.roomGrid.rooms[z][y][x]; node != nil {
+
+				if _, ok := out.legend[node.Symbol]; !ok {
+					out.legend[node.Symbol] = node.Legend
+				}
+
+				if centerRoomId == node.RoomId {
+					out.Render[dstPos.y+drawY][dstPos.x+drawX] = '@'
+				} else {
+					out.Render[dstPos.y+drawY][dstPos.x+drawX] = node.Symbol
+				}
+
+				// draw any exits... only if zoom level is > 1
+				if zoomLevel > 1 {
+
+					xStart, yStart := dstPos.x+drawX, dstPos.y+drawY
+					for _, exitInfo := range node.Exits {
+
+						maxSteps := zoomLevel
+
+						xStepDir := 0
+						if exitInfo.Direction.x < 0 {
+							if exitInfo.Direction.x < -1 {
+								maxSteps += 1
+							}
+							xStepDir = -1
+						} else if exitInfo.Direction.x > 0 {
+							if exitInfo.Direction.x > 1 {
+								maxSteps += 1
+							}
+							xStepDir = 1
+						}
+
+						yStepDir := 0
+						if exitInfo.Direction.y < 0 {
+							if exitInfo.Direction.y < -1 {
+								maxSteps += 1
+							}
+							yStepDir = -1
+						} else if exitInfo.Direction.y > 0 {
+							if exitInfo.Direction.y > 1 {
+								maxSteps += 1
+							}
+							yStepDir = 1
+						}
+
+						drawX2, drawY2 := 0, 0
+						for step := 1; step < maxSteps; step++ {
+
+							drawY2 = yStart + yStepDir*step
+							drawX2 = xStart + xStepDir*step
+
+							if drawY2 < 0 || drawY2 >= mapHeight {
+								continue
+							}
+							if drawX2 < 0 || drawX2 >= mapWidth {
+								continue
+							}
+
+							if exitInfo.Secret {
+								out.Render[drawY2][drawX2] = '?'
+							} else if exitInfo.Locked {
+								out.Render[drawY2][drawX2] = '⚷'
+							} else {
+								if out.Render[drawY2][drawX2] == ' ' {
+									out.Render[drawY2][drawX2] = exitInfo.Direction.arrow
+								}
+							}
+
+						}
+
+					}
+
+				}
+			}
+			drawX += zoomLevel
+		}
+		drawY += zoomLevel
+	}
+
+	return out
 
 }
 
@@ -146,15 +397,17 @@ func (r *mapper) getMapNode(roomId int) *mapNode {
 		SecretExits: make(map[string]struct{}),
 	}
 
-	if len(room.MapSymbol) > 0 {
+	if room.MapSymbol != `` {
 		mNode.Symbol = []rune(room.MapSymbol)[0]
-		if len(room.MapLegend) > 0 {
+		if room.MapLegend != `` {
 			mNode.Legend = room.MapLegend
 		}
 	} else {
 		b := room.GetBiome()
 		if b.Symbol() != 0 {
 			mNode.Symbol = b.Symbol()
+		} else {
+			mNode.Symbol = defaultMapSymbol
 		}
 		if b.Name() != `` {
 			mNode.Legend = b.Name()
@@ -180,168 +433,6 @@ func (r *mapper) getMapNode(roomId int) *mapNode {
 	}
 
 	return mNode
-}
-
-func (r *mapper) GetMap(centerRoomId int, mapWidth int, mapHeight int, zoomOut bool) mapRender {
-
-	out := newMapRender(mapWidth, mapHeight)
-
-	multiplier := 2
-	if zoomOut {
-		multiplier = 1
-	}
-
-	centerY := mapHeight >> 1
-	centerX := mapWidth >> 1
-	centerZ := 0
-
-	//	mapRender[centerY][centerX] = 'X'
-
-	startNode := r.crawledRooms[centerRoomId]
-	if startNode == nil {
-		return out
-	}
-
-	visited := make(map[int]map[int]struct{}, 100)
-	mappingQueue := make([]WalkStep, 0, 100) // pre-allocate 100 capacity
-
-	mappingQueue = append(mappingQueue, WalkStep{RoomId: centerRoomId, FromPos: positionDelta{centerX, centerY, centerZ, '¿'}, RelativePos: positionDelta{0, 0, 0, '?'}})
-	for len(mappingQueue) > 0 {
-
-		roomStep := mappingQueue[0]
-
-		mappingQueue = mappingQueue[1:]
-
-		if _, ok := visited[roomStep.FromRoomId][roomStep.RoomId]; ok {
-			continue
-		}
-
-		node := r.crawledRooms[roomStep.RoomId]
-		if node == nil {
-			continue
-		}
-
-		adjustedY := roomStep.RelativePos.y*multiplier + centerY
-		adjustedX := roomStep.RelativePos.x*multiplier + centerX
-		adjustedZ := roomStep.RelativePos.z*multiplier + centerZ
-
-		if adjustedZ == 0 {
-
-			travelDistance := 0
-			if roomStep.FromPos.x != adjustedX || roomStep.FromPos.y != adjustedY {
-
-				yDir := 0
-				if adjustedY < roomStep.FromPos.y {
-					yDir = -1
-				} else if adjustedY > roomStep.FromPos.y {
-					yDir = 1
-				}
-
-				xDir := 0
-				if adjustedX < roomStep.FromPos.x {
-					xDir = -1
-				} else if adjustedX > roomStep.FromPos.x {
-					xDir = 1
-				}
-
-				y := roomStep.FromPos.y
-				x := roomStep.FromPos.x
-				for y != adjustedY || x != adjustedX {
-
-					if x != adjustedX {
-						x += xDir
-					}
-					if y != adjustedY {
-						y += yDir
-					}
-
-					// Don't let it run out of control
-					travelDistance++
-					if travelDistance > 5 {
-						break
-					}
-
-					if y == adjustedY && x == adjustedX {
-						continue
-					}
-
-					if y < 0 || y >= mapHeight || x < 0 || x >= mapWidth {
-						continue
-					}
-
-					if roomStep.SecretPath {
-						out.Render[y][x] = '?'
-					} else if roomStep.LockedPath {
-						out.Render[y][x] = '⚷'
-					} else {
-						out.Render[y][x] = roomStep.RelativePos.arrow
-					}
-				}
-
-			}
-
-			if adjustedY < 0 || adjustedY >= mapHeight {
-				continue
-			}
-
-			if adjustedX < 0 || adjustedX >= mapWidth {
-				continue
-			}
-
-			out.Render[adjustedY][adjustedX] = node.Symbol
-
-			if node.Symbol != 0 {
-				if _, ok := out.legend[node.Symbol]; !ok {
-					out.legend[node.Symbol] = node.Legend
-				}
-			}
-
-		}
-
-		// Add to crawled list so we don't revisit it
-		if _, ok := visited[roomStep.FromRoomId]; !ok {
-			visited[roomStep.FromRoomId] = map[int]struct{}{}
-			visited[roomStep.FromRoomId][roomStep.RoomId] = struct{}{}
-
-			if _, ok := visited[roomStep.FromRoomId]; !ok {
-				visited[roomStep.RoomId] = map[int]struct{}{}
-				visited[roomStep.RoomId][roomStep.FromRoomId] = struct{}{}
-			}
-		}
-
-		// Now process it
-		for _, exitInfo := range node.Exits {
-
-			if _, ok := visited[exitInfo.RoomId]; ok {
-				continue
-			}
-
-			newPos := positionDelta{
-				roomStep.RelativePos.x + exitInfo.Direction.x,
-				roomStep.RelativePos.y + exitInfo.Direction.y,
-				roomStep.RelativePos.z + exitInfo.Direction.z,
-				exitInfo.Direction.arrow,
-			}
-			mappingQueue = append(
-				mappingQueue,
-				WalkStep{
-					RoomId:      exitInfo.RoomId,
-					FromRoomId:  node.RoomId,
-					SecretPath:  exitInfo.Secret,
-					LockedPath:  exitInfo.Locked,
-					FromPos:     positionDelta{adjustedX, adjustedY, adjustedZ, 0},
-					RelativePos: newPos, //roomStep.RelativePos.Combine(exitInfo.Direction),
-				},
-			)
-
-		}
-
-	}
-
-	out.Render[centerY][centerX] = 'X'
-
-	return out
-
 }
 
 type WalkStep struct {

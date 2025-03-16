@@ -168,10 +168,8 @@ func main() {
 	crawler.Start()
 	fmt.Println("Rooms Crawled in", time.Since(tStart))
 
-	//mapData := crawler.GetMap(1, 35, 19, false)
-
 	tStart = time.Now()
-	mapData := crawler.GetMap(1, 80, 40, false)
+	mapData := crawler.GetMap(1, 80, 32, 1)
 	fmt.Println("Map retrieved in", time.Since(tStart))
 
 	legendAliases := mapData.GetLegend(keywords.GetAllLegendAliases(`frostfang`))
