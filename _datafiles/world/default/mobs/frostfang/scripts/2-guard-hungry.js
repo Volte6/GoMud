@@ -17,11 +17,17 @@ function onAsk(mob, room, eventDetails) {
     match = UtilFindMatchIn(eventDetails.askText, nouns);
     if ( match.found ) {
 
-        mob.Command("emote rubs his belly.")
-        mob.Command("say I forgot my lunch today, and I'm so hungry.")
-        mob.Command("say Do you think you could find a cheese sandwich for me?")
+        if ( user.HasQuest("4-start") ) {
 
-        user.GiveQuest("4-start")
+            mob.Command("sayto @" + String(user.UserId()) + " Thanks, but you've done enough. Too much, really.");
+
+        } else {
+            mob.Command("emote rubs his belly.")
+            mob.Command("say I forgot my lunch today, and I'm so hungry.")
+            mob.Command("say Do you think you could find a cheese sandwich for me?")
+
+            user.GiveQuest("4-start")
+        }
 
         return true;
     }
@@ -105,9 +111,13 @@ function onIdle(mob, room) {
                     grumbled = true;
                 }
                 mob.Command("sayto @" + String(userIds[i]) + " I'm so hungry.");
+            } else {
+                playersTold[userIds[i]] = round + 500;
             }
 
             playersTold[userIds[i]] = round + 5;
+            // Don't need to repeat to every player.
+            break;
         }
 
         if ( Object.keys(playersTold).length > 0 ) {
