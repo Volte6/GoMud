@@ -211,7 +211,6 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		}
 
 		if _, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, int(rid)); err == nil {
-			user.SetConfigOption(`tinymap`, true)
 			rooms.MoveToRoom(user.UserId, int(rid))
 			return true, nil
 		}
