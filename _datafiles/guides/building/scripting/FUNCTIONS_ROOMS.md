@@ -15,7 +15,7 @@
   - [RoomObject.GetPlayers() \[\]int](#roomobjectgetplayers-int)
   - [RoomObject.GetContainers() \[\]string](#roomobjectgetcontainers-string)
   - [RoomObject.GetExits() \[\]object](#roomobjectgetexits-object)
-  - [GetMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool \[,mapMarker string, mapMarker string\]) string](#getmapmaproomid-int-mapsize-string-mapheight-int-mapwidth-int-mapname-string-showsecrets-bool-mapmarker-string-mapmarker-string-string)
+  - [GetMap(mapRoomId int, mapZoom, mapHeight int, mapWidth int, mapName string, showSecrets bool \[,mapMarker string, mapMarker string\]) string](#getmapmaproomid-int-mapzoom-mapheight-int-mapwidth-int-mapname-string-showsecrets-bool-mapmarker-string-mapmarker-string-string)
   - [RoomObject.HasQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjecthasquestquestid-string-partyuserid-int-int)
   - [RoomObject.MissingQuest(questId string \[,partyUserId int\]) \[\]int](#roomobjectmissingquestquestid-string-partyuserid-int-int)
   - [RoomObject.SpawnMob(mobId int) Actor](#roomobjectspawnmobmobid-int-actor)
@@ -121,13 +121,13 @@ Each `object` in the returned array has the following properties:
 | Lock.Difficulty | Difficulty rating of the lock |
 | Lock.Sequence | Lockpicking sequence of the lock such as `UUDU` |
 
-## [GetMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool [,mapMarker string, mapMarker string]) string](/internal/scripting/room_func.go)
+## [GetMap(mapRoomId int, mapZoom, mapHeight int, mapWidth int, mapName string, showSecrets bool [,mapMarker string, mapMarker string]) string](/internal/scripting/room_func.go)
 Gets a rendered map of an area.
 
 |  Argument | Explanation |
 | --- | --- |
 | mapRoomId | The room id center the map on. |
-| mapSize | `wide` or `normal`. Wide maps fit more rooms but don't show the connections. |
+| mapZoom | 0-x. How much to zoom in the map. The more zoomed, the fewer visible areas. |
 | mapHeight | How many lines high the map should be |
 | mapWidth | How many lines wide the map should be |
 | mapName | The title to display at the top of the map |

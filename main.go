@@ -6,8 +6,10 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"runtime/debug"
 	"slices"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -29,6 +31,7 @@ import (
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/leaderboard"
+	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/mutators"
@@ -65,9 +68,14 @@ var (
 
 func main() {
 
+	// Capture panic and write msg/stack to logs
 	defer func() {
 		if r := recover(); r != nil {
 			mudlog.Error("PANIC", "error", r)
+			s := string(debug.Stack())
+			for _, str := range strings.Split(s, "\n") {
+				mudlog.Error("PANIC", "stack", str)
+			}
 		}
 	}()
 
@@ -136,6 +144,11 @@ func main() {
 
 	// Load all the data files up front.
 	loadAllDataFiles(false)
+
+	mudlog.Info("Mapper", "status", "precaching")
+	timeStart := time.Now()
+	mapper.PreCacheMaps()
+	mudlog.Info("Mapper", "status", "done", "time taken", time.Since(timeStart))
 
 	// Create the user index
 	idx := users.NewUserIndex()

@@ -3,7 +3,6 @@ package rooms
 import (
 	"errors"
 	"fmt"
-	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -18,7 +17,6 @@ import (
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 
@@ -646,8 +644,6 @@ func loadRoomFromFile(roomFilePath string) (*Room, error) {
 	// Automatically set the last visitor to now (reset the timer)
 	roomPtr.lastVisited = util.GetRoundCount()
 
-	addRoomToMemory(roomPtr)
-
 	return roomPtr, err
 }
 
@@ -701,6 +697,8 @@ func LoadRoom(roomId int) *Room {
 	}
 
 	retRoom, _ := loadRoomFromFile(util.FilePath(configs.GetFilePathsConfig().FolderDataFiles.String(), `/`, `rooms`, `/`, filename))
+
+	addRoomToMemory(retRoom)
 
 	return retRoom
 }
@@ -968,219 +966,44 @@ func ConnectRoom(fromRoomId int, toRoomId int, exitName string, mapDirection ...
 	return nil
 }
 
-func GetMapForDataString(dataStr string) string {
-	// roomid:[1]/size:[wide/normal]/secrets:false/height:[18]/name:[Map of Frostfang]
-	mapProperties := map[string]string{
-		`roomid`:  ``,
-		`size`:    `normal`, // wide?
-		`height`:  `18`,
-		`width`:   `65`,
-		`name`:    `A useful map`,
-		`secrets`: `false`,
-		`markers`: ``,
-	}
-	mapDetails := strings.Split(dataStr, `/`)
-
-	for _, mapDetail := range mapDetails {
-		mapDetailParts := strings.Split(mapDetail, `=`)
-		if len(mapDetailParts) == 2 {
-			if _, ok := mapProperties[mapDetailParts[0]]; ok {
-				mapProperties[mapDetailParts[0]] = mapDetailParts[1]
-			}
-		}
-	}
-
-	if len(mapDetails) > 0 {
-
-		mapRoomId, _ := strconv.Atoi(mapProperties[`roomid`])
-		mapSize := mapProperties[`size`]
-		mapHeight, _ := strconv.Atoi(mapProperties[`height`])
-		mapWidth, _ := strconv.Atoi(mapProperties[`width`])
-		mapName := mapProperties[`name`]
-		showAll, _ := strconv.ParseBool(mapProperties[`secrets`])
-
-		mapMarkers := []string{mapProperties[`markers`]}
-
-		return GetSpecificMap(mapRoomId, mapSize, mapHeight, mapWidth, mapName, showAll, mapMarkers)
-
-	}
-	return ""
-}
-
+/*
 func GetTinyMap(mapRoomId int) []string {
 
-	result := [][]string{
-		{` `, ` `, ` `, ` `, ` `},
-		{` `, ` `, ` `, ` `, ` `},
-		{` `, ` `, ` `, ` `, ` `},
-		{` `, ` `, ` `, ` `, ` `},
-		{` `, ` `, ` `, ` `, ` `},
-	}
+		returnResult := []string{}
 
-	originX := 2
-	originY := 2
-
-	result[originY][originX] = "@"
-
-	if room := LoadRoom(mapRoomId); room != nil {
-
-		var deltas directionDelta
-		var ok bool
-
-		for direction, exit := range room.Exits {
-			if exit.Secret {
-				continue
-			}
-
-			targetSymbol := `•`
-			if targetRoom := LoadRoom(exit.RoomId); targetRoom != nil {
-				if len(targetRoom.MapSymbol) > 0 {
-					targetSymbol = targetRoom.MapSymbol
-				}
-				if len(targetRoom.players) > 0 || len(targetRoom.mobs) > 0 {
-					targetSymbol = `⚠`
-				}
-			}
-
-			if len(exit.MapDirection) > 0 {
-				if deltas, ok = DirectionDeltas[exit.MapDirection]; !ok {
-					continue
-				}
-			} else if deltas, ok = DirectionDeltas[direction]; !ok {
-				continue
-			}
-
-			targetX := originX + (deltas.Dx * 2)
-			stepX := 0
-			if deltas.Dx < 0 {
-				stepX = -1
-			} else if deltas.Dx > 0 {
-				stepX = 1
-			}
-			totalXSteps := stepX * (deltas.Dx * 2)
-
-			targetY := originY + (deltas.Dy * 2)
-			stepY := 0
-			if deltas.Dy < 0 {
-				stepY = -1
-			} else if deltas.Dy > 0 {
-				stepY = 1
-			}
-			totalYSteps := stepY * (deltas.Dy * 2)
-
-			if stepX == 0 && stepY == 0 {
-				continue
-			}
-
-			posX := originX
-			posY := originY
-			for totalXSteps > 0 || totalYSteps > 0 {
-				if totalXSteps > 0 {
-					totalXSteps--
-				}
-				if totalYSteps > 0 {
-					totalYSteps--
-				}
-				posX += stepX
-				posY += stepY
-
-				if posY == originY && posX == originX {
-					continue
-				}
-				// out of bounds
-				if posY < 0 || posX < 0 || posY > len(result)-1 || posX > len(result[posY])-1 {
-					continue
-				}
-
-				if posX == targetX && posY == targetY {
-					result[posY][posX] = targetSymbol
-				} else {
-					result[posY][posX] = string(deltas.Arrow)
-				}
-			}
-
+		room := LoadRoom(mapRoomId)
+		if room == nil {
+			return returnResult
 		}
-	}
 
-	returnResult := []string{}
-	returnResult = append(returnResult, `╔═════╗`)
-	for y := 0; y < len(result); y++ {
-		returnResult = append(returnResult, `║`+strings.Join(result[y], ``)+`║`)
-	}
-	returnResult = append(returnResult, `╚═════╝`)
+		zMapper := mapper.GetZoneMapper(room.Zone)
+		if zMapper == nil {
 
-	return returnResult
-}
+			mudlog.Error("Map", "error", "Could not find mapper for zone:"+room.Zone)
 
-func GetSpecificMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool, mapMarkers []string) string {
-
-	mapMode := MapModeAllButSecrets
-	if showSecrets {
-		mapMode = MapModeAll
-	}
-
-	var mapData MapData
-	var err error
-
-	if mapRoom := LoadRoom(mapRoomId); mapRoom != nil {
-
-		if mapSize == "wide" {
-
-			rGraph := GenerateZoneMap(mapRoom.Zone, mapRoomId, 0, mapWidth, mapHeight, mapMode)
-
-			if len(mapMarkers) > 0 {
-				for _, overrideString := range mapMarkers {
-					parts := strings.Split(overrideString, `,`)
-					if len(parts) == 3 {
-						roomId, _ := strconv.Atoi(parts[0])
-						symbol := parts[1]
-						legend := parts[2]
-
-						if roomId > 0 && len(symbol) > 0 && len(legend) > 0 {
-							rGraph.AddRoomSymbolOverrides([]rune(symbol)[0], legend, roomId)
-						}
-					}
-				}
-			}
-
-			mapData, err = DrawZoneMap(rGraph, mapName, mapWidth, mapHeight)
 		} else {
 
-			rGraph := GenerateZoneMap(mapRoom.Zone, mapRoomId, 0, int(math.Ceil(float64(mapWidth)/2)), int(math.Ceil(float64(mapHeight)/2)), mapMode)
-
-			if len(mapMarkers) > 0 {
-				for _, overrideString := range mapMarkers {
-					parts := strings.Split(overrideString, `,`)
-					if len(parts) == 3 {
-						roomId, _ := strconv.Atoi(parts[0])
-						symbol := parts[1]
-						legend := parts[2]
-
-						if roomId > 0 && len(symbol) > 0 && len(legend) > 0 {
-							rGraph.AddRoomSymbolOverrides([]rune(symbol)[0], legend, roomId)
-						}
-					}
-				}
+			c := mapper.Config{
+				ZoomLevel: 1,
+				Width:     5,
+				Height:    5,
 			}
 
-			mapData, err = DrawZoneMap(rGraph, mapName, mapWidth, mapHeight)
+			c.OverrideSymbol(mapRoomId, '@', ``)
+
+			output := zMapper.GetLimitedMap(mapRoomId, c)
+
+			returnResult = append(returnResult, `╔═════╗`)
+			for y := 0; y < len(output.Render); y++ {
+				returnResult = append(returnResult, `║`+string(output.Render[y])+`║`)
+			}
+			returnResult = append(returnResult, `╚═════╝`)
+
 		}
 
-		if mapData.LegendWidth < 72 { // 80 - " Legend "
-			mapData.LegendWidth = 72
-		}
-
-		if err != nil {
-			mudlog.Error("Map Prop", "error", err.Error())
-			return ``
-		}
-
-		mapTxt, _ := templates.Process("maps/map", mapData)
-		return mapTxt
+		return returnResult
 	}
-	return ``
-}
-
+*/
 func GetRoomCount(zoneName string) int {
 
 	zoneInfo, ok := roomManager.zones[zoneName]

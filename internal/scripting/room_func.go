@@ -2,15 +2,22 @@ package scripting
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/dop251/goja"
+	"github.com/mattn/go-runewidth"
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/items"
+	"github.com/volte6/gomud/internal/keywords"
+	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
+	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 )
@@ -317,7 +324,7 @@ func GetRoom(roomId int) *ScriptRoom {
 //
 //	[roomId],[symbol],[legend text]
 //	1,×,Here
-func GetMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName string, showSecrets bool, mapMarkers ...string) string {
+func GetMap(mapRoomId int, zoomLevel int, mapHeight int, mapWidth int, mapName string, showSecrets bool, mapMarkers ...string) string {
 	// mapRoomId    - Room the map is centered on
 	// mapSize      - wide or normal
 	// mapHeight	- Height of the map
@@ -327,5 +334,84 @@ func GetMap(mapRoomId int, mapSize string, mapHeight int, mapWidth int, mapName 
 	// mapMarkers   - A list of strings representing custom map markers:
 	//                [roomId],[symbol],[legend text]
 	//                1,×,Here
-	return rooms.GetSpecificMap(mapRoomId, mapSize, mapHeight, mapWidth, mapName, showSecrets, mapMarkers)
+
+	room := rooms.LoadRoom(mapRoomId)
+	if room == nil {
+		return ""
+	}
+
+	zMapper := mapper.GetZoneMapper(room.Zone)
+	if zMapper == nil {
+		mudlog.Error("Map", "error", "Could not find mapper for zone:"+room.Zone)
+		return "Could not find mapper for zone:" + room.Zone
+	}
+
+	c := mapper.Config{
+		ZoomLevel: zoomLevel,
+		Width:     mapWidth,
+		Height:    mapHeight,
+	}
+
+	if showSecrets {
+		c.UserId = -1
+	}
+
+	if len(mapMarkers) > 0 {
+		for _, overrideString := range mapMarkers {
+			parts := strings.Split(overrideString, `,`)
+			if len(parts) == 3 {
+				roomId, _ := strconv.Atoi(parts[0])
+				symbol := parts[1]
+				legend := parts[2]
+
+				if roomId > 0 && len(symbol) > 0 && len(legend) > 0 {
+					c.OverrideSymbol(roomId, []rune(symbol)[0], legend)
+				}
+			}
+		}
+	}
+
+	mapOutput := zMapper.GetLimitedMap(mapRoomId, c)
+
+	legend := mapOutput.GetLegend(keywords.GetAllLegendAliases(room.Zone))
+
+	displayLines := []string{}
+	for i, line := range mapOutput.Render {
+		displayLines = append(displayLines, string(line))
+		for sym, txtLegend := range legend {
+			txtLc := strings.ToLower(txtLegend)
+			displayLines[i] = strings.Replace(displayLines[i], string(sym), fmt.Sprintf(`<ansi fg="map-room"><ansi fg="map-%s" bg="mapbg-%s">%c</ansi></ansi>`, txtLc, txtLc, sym), -1)
+		}
+	}
+
+	mapData := map[string]any{
+		"Title":        mapName,
+		"DisplayLines": displayLines,
+		"Height":       len(displayLines),
+		"Width":        runewidth.StringWidth(string(displayLines[0])),
+		"Legend":       legend,
+		"LegendWidth":  runewidth.StringWidth(string(displayLines[0])),
+		"LeftBorder": map[string]any{
+			"Top":    ".-=~=-.",
+			"Mid":    []string{"( _ __)", "(__  _)"},
+			"Bottom": "`-._.-'",
+		},
+		"MidBorder": map[string]any{
+			"Top":    "-._.-=",
+			"Bottom": "-._.-=",
+		},
+		"RightBorder": map[string]any{
+			"Top":    ".-=~=-.",
+			"Mid":    []string{"( _ __)", "(__  _)"},
+			"Bottom": "`-._.-'",
+		},
+	}
+
+	mapTxt, err := templates.Process("maps/map", mapData)
+	if err != nil {
+		mudlog.Error("Map", "error", err.Error())
+		return err.Error()
+	}
+
+	return mapTxt
 }

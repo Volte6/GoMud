@@ -15,8 +15,8 @@
 {{- $counter := 0 -}}
 {{- $strlen := 0 -}}
 {{ range $symbol, $name := .Legend -}}
-{{- $proposedLength := add $strlen 3 (len $name) (len $symbol) -}}
+{{- $proposedLength := add $strlen 3 (len $name) 1 -}}
 {{- if gt $proposedLength $legendWidth -}}{{- $strlen = 0 -}}{{ "\n       " }}{{- end -}}
-<ansi fg="map-legend"> [</ansi><ansi fg="map-room"><ansi fg="map-{{lowercase $name}}" bg="mapbg-{{lowercase $name}}">{{ $symbol }}</ansi></ansi> {{$name}}
-{{- $strlen = add $strlen 3 (len $name) (len $symbol) -}}
+<ansi fg="map-legend"> [</ansi><ansi fg="map-room"><ansi fg="map-{{lowercase $name}}" bg="mapbg-{{lowercase $name}}">{{ printf "%c" $symbol }}</ansi></ansi> {{$name}}
+{{- $strlen = add $strlen 3 (len $name) 1 -}}
 {{- end }}

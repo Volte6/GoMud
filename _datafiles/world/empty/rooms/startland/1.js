@@ -15,7 +15,7 @@ function onCommand(cmd, rest, user, room) {
 
         // Load the cached map, or re-generate and cache it if it's not there
         if ( mapSignData == "" ) {
-            mapSignData = GetMap(room.RoomId(), "normal", 22, 38, "Map of Startland", false, String(room.RoomId())+",×,Here")
+            mapSignData = GetMap(room.RoomId(), 1, 22, 38, "Map of Startland", false, String(room.RoomId())+",×,Here")
         }
 
         // Send the map to the user.
@@ -30,5 +30,5 @@ function onCommand(cmd, rest, user, room) {
 // Executes when the room first loads.
 function onLoad(room) {
     // Just running this to pre-cache the map so that if someone looks at the map it won't time out
-    mapSignData = GetMap(room.RoomId(), "normal", 22, 38, "Map of Startland", false, String(room.RoomId())+",×,Here")
+    mapSignData = GetMap(room.RoomId(), 1, 22, 38, "Map of Startland", false, String(room.RoomId())+",×,Here")
 }

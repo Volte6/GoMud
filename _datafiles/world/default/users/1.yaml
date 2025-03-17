@@ -7,14 +7,14 @@ macros:
   =1: e;e;e;e;e;e;e;e
 character:
   name: AdminAnt
-  description: AdminAnt possesses the ability to manipulate the very fabric of
-    the universe, bending it to his will with a mere thought. He can create and destroy,
+  description: AdminAnt possesses the ability to manipulate the very fabric of the
+    universe, bending it to his will with a mere thought. He can create and destroy,
     alter reality, and shape the world around him as he sees fit. His knowledge of
     the world is unparalleled, as he has access to its innermost workings and understands
-    its deepest secrets. With a wave of his hand, AdminAnt can bestow blessings
-    upon other adventurers, granting them strength, wisdom, or fortune beyond their
-    wildest dreams. Conversely, he can also mete out justice to those who would seek
-    to disrupt the balance of the world, swiftly and decisively.
+    its deepest secrets. With a wave of his hand, AdminAnt can bestow blessings upon
+    other adventurers, granting them strength, wisdom, or fortune beyond their wildest
+    dreams. Conversely, he can also mete out justice to those who would seek to disrupt
+    the balance of the world, swiftly and decisively.
   roomid: 1
   zone: Frostfang
   raceid: 2
@@ -61,17 +61,17 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 9
+      roundcounter: 20
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 32
+      roundcounter: 43
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
       permabuff: true
-      roundcounter: 6
+      roundcounter: 2
       triggersleft: 1000000000
   equipment:
     weapon:
@@ -91,7 +91,7 @@ character:
     dual-wield: 4
     enchant: 4
     inspect: 4
-    map: 5
+    map: 4
     peep: 4
     portal: 4
     protection: 4
@@ -143,3 +143,5 @@ character:
 itemstorage:
   items:
   - itemid: 20011
+configoptions:
+  tinymap: true

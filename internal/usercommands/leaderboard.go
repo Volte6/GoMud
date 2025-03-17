@@ -15,7 +15,7 @@ import (
 
 func Leaderboards(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
-	if configs.GetStatisticsConfig().LeaderboardSize == 0 {
+	if configs.GetStatisticsConfig().Leaderboards.Size == 0 {
 		user.SendText(`Leaderboards are disabled.`)
 		return true, nil
 	}
@@ -30,20 +30,17 @@ func Leaderboards(rest string, user *users.UserRecord, room *rooms.Room, flags e
 
 		rows := [][]string{}
 
+		valueFormatting := `%s`
+		if lb.ValueColor != `` {
+			valueFormatting = `<ansi fg="` + lb.ValueColor + `">%s</ansi>`
+		}
+
 		formatting := []string{
 			`<ansi fg="red">%s</ansi>`,
 			`<ansi fg="username">%s</ansi>`,
 			`<ansi fg="white-bold">%s</ansi>`,
 			`<ansi fg="157">%s</ansi>`,
-			``,
-		}
-
-		if lb.Name == "Experience" {
-			formatting[4] = `<ansi fg="experience">%s</ansi>`
-		} else if lb.Name == "Gold" {
-			formatting[4] = `<ansi fg="gold">%s</ansi>`
-		} else if lb.Name == "Kills" {
-			formatting[4] = `<ansi fg="red-bold">%s</ansi>`
+			valueFormatting,
 		}
 
 		for i, entry := range lb.Top {

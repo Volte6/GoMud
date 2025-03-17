@@ -16,10 +16,11 @@ type HelpTopic struct {
 }
 
 type Aliases struct {
-	Help             map[string]map[string][]string `yaml:"help"`
-	HelpAliases      map[string][]string            `yaml:"help-aliases"`
-	CommandAliases   map[string][]string            `yaml:"command-aliases"`
-	DirectionAliases map[string]string              `yaml:"direction-aliases"`
+	Help               map[string]map[string][]string `yaml:"help"`
+	HelpAliases        map[string][]string            `yaml:"help-aliases"`
+	CommandAliases     map[string][]string            `yaml:"command-aliases"`
+	DirectionAliases   map[string]string              `yaml:"direction-aliases"`
+	MapLegendOverrides map[string]map[string]string   `yaml:"legend-overrides"`
 
 	// helpTopics
 	// [skill/command/admin]
@@ -29,6 +30,8 @@ type Aliases struct {
 	helpAliases map[string]string
 	// Organized command aliases
 	commandAliases map[string]string
+	// Converted strings to runes
+	mapLegendOverrides map[string]map[rune]string
 }
 
 // Presumably to ensure the datafile hasn't messed something up.
@@ -81,6 +84,19 @@ func (a *Aliases) Validate() error {
 
 	for alias, direction := range a.DirectionAliases {
 		a.commandAliases[strings.ToLower(alias)] = direction
+	}
+
+	a.mapLegendOverrides = map[string]map[rune]string{}
+	for area, overrides := range a.MapLegendOverrides {
+
+		area := strings.ToLower(area)
+		if _, ok := a.mapLegendOverrides[area]; !ok {
+			a.mapLegendOverrides[area] = map[rune]string{}
+		}
+
+		for symbol, name := range overrides {
+			a.mapLegendOverrides[area][[]rune(symbol)[0]] = name
+		}
 	}
 
 	return nil
@@ -136,6 +152,23 @@ func GetAllHelpAliases() map[string]string {
 	ret := map[string]string{}
 	for alias, command := range loadedKeywords.helpAliases {
 		ret[alias] = command
+	}
+
+	return ret
+}
+
+func GetAllLegendAliases(area ...string) map[rune]string {
+
+	ret := map[rune]string{}
+
+	for symbol, name := range loadedKeywords.mapLegendOverrides[`*`] {
+		ret[symbol] = name
+	}
+
+	if len(area) > 0 {
+		for symbol, name := range loadedKeywords.mapLegendOverrides[strings.ToLower(area[0])] {
+			ret[symbol] = name
+		}
 	}
 
 	return ret
