@@ -10,6 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/mutators"
 	"github.com/volte6/gomud/internal/rooms"
@@ -187,7 +188,7 @@ func roomData(w http.ResponseWriter, r *http.Request) {
 
 	mapDirections := []string{}
 
-	for name := range rooms.DirectionDeltas {
+	for _, name := range mapper.GetDirectionDeltaNames() {
 		mapDirections = append(mapDirections, name)
 	}
 	sort.SliceStable(mapDirections, func(i, j int) bool {

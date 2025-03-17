@@ -3,9 +3,12 @@ package usercommands
 import (
 	"errors"
 	"fmt"
-	"math"
+	"strings"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/keywords"
+	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/parties"
@@ -69,43 +72,19 @@ func Map(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		return true, nil
 	}
 
-	var mapData rooms.MapData
 	var err error
 
 	mapWidth := 65
-	mapHeight := 18
-	//mapWidth := 200
-	//mapHeight := 56
+	mapHeight := 21
 	// assume 80x24 default?
 
 	// Admin mapping gets a giant map
 	borderWidth := 14
 	borderHeight := 6 // Title, map top, map bottom, 2 legend, blank line.
 
-	// level 1 map size
-	mapWidth = 5
-	mapHeight = 5
-
-	if skillLevel > 1 {
-		mapWidth = mapWidth + (skillLevel-1)*4   // 3 * 3 = 9 more coverage?
-		mapHeight = mapHeight + (skillLevel-1)*2 // 3 * 2 = 6 more coverage?
-	}
-
-	mapMaxWidth := 33
-	//mapWidthDelta := mapMaxWidth - mapWidth // 16/?
-	mapWidth += int(float64(user.Character.Stats.Perception.ValueAdj) / 5)
-	if mapWidth > mapMaxWidth {
-		mapWidth = mapMaxWidth
-	}
-
 	// Double the size
-	mapWidth = mapWidth << 1
-	mapHeight = mapHeight << 1
-
-	// lets max the height:
-	if mapHeight > 18 {
-		mapHeight = 18
-	}
+	//mapWidth = mapWidth << 1
+	//mapHeight = mapHeight << 1
 
 	if skillLevel > 4 {
 
@@ -131,31 +110,33 @@ func Map(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 	}
 
-	mapMode := rooms.MapModeAllButSecrets
-	if skillLevel > 4 {
-		mapMode = rooms.MapModeAll
+	zMapper := mapper.GetZoneMapper(zone)
+	if zMapper == nil {
+		mudlog.Error("Map", "error", "Could not find mapper for zone:"+zone)
+		user.SendText(`No map found (or an error occured)"`)
+		return true, err
 	}
 
-	var rGraph *rooms.RoomGraph
-	if rest == "wide" {
-		rGraph = rooms.GenerateZoneMap(zone, roomId, user.UserId, mapWidth, mapHeight, mapMode)
-	} else {
-		rGraph = rooms.GenerateZoneMap(zone, roomId, user.UserId, int(math.Ceil(float64(mapWidth)/2))<<1, int(math.Ceil(float64(mapHeight)/2))<<1, mapMode)
+	c := mapper.Config{
+		ZoomLevel: 5 - skillLevel,
+		Width:     mapWidth,
+		Height:    mapHeight,
+		UserId:    user.UserId,
 	}
 
 	if skillLevel > 4 {
 		for _, rid := range rooms.GetRoomsWithMobs() {
 			if roomInfo := rooms.LoadRoom(rid); roomInfo != nil {
 				if len(roomInfo.GetMobs(rooms.FindFighting|rooms.FindHostile)) > 0 {
-					rGraph.AddRoomSymbolOverrides('☠', "Mob", rid)
+					c.OverrideSymbol(rid, '☠', `Mob`)
 				} else {
-					rGraph.AddRoomSymbolOverrides('☺', "NPC", rid)
+					c.OverrideSymbol(rid, '☺', `NPC`)
 				}
 			}
 		}
 
 		for _, rid := range rooms.GetRoomsWithPlayers() {
-			rGraph.AddRoomSymbolOverrides('☺', "Player", rid)
+			c.OverrideSymbol(rid, '☺', `Player`)
 		}
 	}
 
@@ -166,30 +147,59 @@ func Map(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 				// Add any charmed mobs
 				for _, mid := range tmpUser.Character.GetCharmIds() {
 					if tmpMob := mobs.GetInstance(mid); tmpMob != nil {
-						rGraph.AddRoomSymbolOverrides('☹', "Friend", tmpMob.Character.RoomId)
+						c.OverrideSymbol(tmpMob.Character.RoomId, '☹', `Friend`)
 					}
 				}
 
-				rGraph.AddRoomSymbolOverrides('☺', "Player", tmpUser.Character.RoomId)
+				c.OverrideSymbol(tmpUser.Character.RoomId, '☺', `Party Member`)
 			}
 		}
 	}
 
-	rGraph.AddRoomSymbolOverrides('@', "You", user.Character.RoomId)
+	c.OverrideSymbol(user.Character.RoomId, '@', `You`)
 
-	if rest == "wide" {
-		mapData, err = rooms.DrawZoneMapWide(rGraph, zone, mapWidth, mapHeight)
-	} else {
-		mapData, err = rooms.DrawZoneMap(rGraph, zone, mapWidth, mapHeight)
+	mapOutput := zMapper.GetLimitedMap(roomId, c)
+	if skillLevel > 4 {
+		//mapRender = m.GetFullMap(roomId, c)
 	}
 
-	if mapData.LegendWidth < 72 { // 80 - " Legend "
-		mapData.LegendWidth = 72
+	legend := mapOutput.GetLegend(keywords.GetAllLegendAliases(room.Zone))
+
+	width := 0
+
+	displayLines := []string{}
+	for i, line := range mapOutput.Render {
+		displayLines = append(displayLines, string(line))
+		if width == 0 {
+			width = runewidth.StringWidth(displayLines[0])
+		}
+		for sym, txtLegend := range legend {
+			txtLc := strings.ToLower(txtLegend)
+			displayLines[i] = strings.Replace(displayLines[i], string(sym), fmt.Sprintf(`<ansi fg="map-room"><ansi fg="map-%s" bg="mapbg-%s">%c</ansi></ansi>`, txtLc, txtLc, sym), -1)
+		}
 	}
 
-	//mapData, err := rooms.GenerateZoneMapZoomedOut(zone, roomId, 0, 65, 18)
-	if err != nil {
-		return false, err
+	mapData := map[string]any{
+		"Title":        room.Zone,
+		"DisplayLines": displayLines,
+		"Height":       len(displayLines),
+		"Width":        width,
+		"Legend":       legend,
+		"LegendWidth":  width,
+		"LeftBorder": map[string]any{
+			"Top":    ".-=~=-.",
+			"Mid":    []string{"( _ __)", "(__  _)"},
+			"Bottom": "`-._.-'",
+		},
+		"MidBorder": map[string]any{
+			"Top":    "-._.-=",
+			"Bottom": "-._.-=",
+		},
+		"RightBorder": map[string]any{
+			"Top":    ".-=~=-.",
+			"Mid":    []string{"( _ __)", "(__  _)"},
+			"Bottom": "`-._.-'",
+		},
 	}
 
 	mapTxt, err := templates.Process("maps/map", mapData)

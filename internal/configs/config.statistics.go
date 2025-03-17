@@ -1,13 +1,20 @@
 package configs
 
 type Statistics struct {
-	LeaderboardSize ConfigInt `yaml:"LeaderboardSize"` // Maximum size of leaderboard
+	Leaderboards StatisticsLeaderboards `yaml:"Leaderboards"` // Maximum size of leaderboard
+}
+
+type StatisticsLeaderboards struct {
+	Size              ConfigInt  `yaml:"Size"`              // Maximum size of leaderboard
+	ExperienceEnabled ConfigBool `yaml:"ExperienceEnabled"` // Enable XP leaderboards?
+	GoldEnabled       ConfigBool `yaml:"GoldEnabled"`       // Enable Gold leaderboards?
+	KillsEnabled      ConfigBool `yaml:"KillsEnabled"`      // Enable Kills leaderboards?
 }
 
 func (s *Statistics) Validate() {
 
-	if s.LeaderboardSize < 0 {
-		s.LeaderboardSize = 0
+	if s.Leaderboards.Size < 0 {
+		s.Leaderboards.Size = 0
 	}
 
 }

@@ -17,9 +17,9 @@ var (
 	leaderboardCache = map[string]Leaderboard{}
 
 	updated      = false
-	lbGold       = Leaderboard{Name: `Gold`}
-	lbExperience = Leaderboard{Name: `Experience`}
-	lbKills      = Leaderboard{Name: `Kills`}
+	lbGold       = Leaderboard{Name: `Gold`, ValueColor: `experience`}
+	lbExperience = Leaderboard{Name: `Experience`, ValueColor: `gold`}
+	lbKills      = Leaderboard{Name: `Kills`, ValueColor: `red-bold`}
 
 	lbLock = sync.RWMutex{}
 )
@@ -34,6 +34,7 @@ type LeaderboardEntry struct {
 
 type Leaderboard struct {
 	Name        string
+	ValueColor  string // Numeric 256 color or ansitags alias
 	Top         []LeaderboardEntry
 	MaxSize     int
 	LowestValue int
@@ -106,7 +107,9 @@ func Update() {
 		lbLock.Unlock()
 	}()
 
-	Reset(int(configs.GetStatisticsConfig().LeaderboardSize))
+	lbConfig := configs.GetStatisticsConfig().Leaderboards
+
+	Reset(int(lbConfig.Size))
 
 	userCount := 0
 	characterCount := 0
@@ -116,17 +119,33 @@ func Update() {
 		userCount++
 		characterCount++
 
-		lbGold.Consider(u.UserId, *u.Character, u.Character.Gold+u.Character.Bank)
-		lbExperience.Consider(u.UserId, *u.Character, u.Character.Experience)
-		lbKills.Consider(u.UserId, *u.Character, u.Character.KD.TotalKills)
+		if lbConfig.GoldEnabled {
+			lbGold.Consider(u.UserId, *u.Character, u.Character.Gold+u.Character.Bank)
+		}
+
+		if lbConfig.ExperienceEnabled {
+			lbExperience.Consider(u.UserId, *u.Character, u.Character.Experience)
+		}
+
+		if lbConfig.KillsEnabled {
+			lbKills.Consider(u.UserId, *u.Character, u.Character.KD.TotalKills)
+		}
 
 		for _, char := range characters.LoadAlts(u.UserId) {
 
 			characterCount++
 
-			lbGold.Consider(u.UserId, char, char.Gold+char.Bank)
-			lbExperience.Consider(u.UserId, char, char.Experience)
-			lbKills.Consider(u.UserId, char, char.KD.TotalKills)
+			if lbConfig.GoldEnabled {
+				lbGold.Consider(u.UserId, char, char.Gold+char.Bank)
+			}
+
+			if lbConfig.ExperienceEnabled {
+				lbExperience.Consider(u.UserId, char, char.Experience)
+			}
+
+			if lbConfig.KillsEnabled {
+				lbKills.Consider(u.UserId, char, char.KD.TotalKills)
+			}
 
 		}
 
@@ -138,17 +157,33 @@ func Update() {
 		userCount++
 		characterCount++
 
-		lbGold.Consider(u.UserId, *u.Character, u.Character.Gold+u.Character.Bank)
-		lbExperience.Consider(u.UserId, *u.Character, u.Character.Experience)
-		lbKills.Consider(u.UserId, *u.Character, u.Character.KD.TotalKills)
+		if lbConfig.GoldEnabled {
+			lbGold.Consider(u.UserId, *u.Character, u.Character.Gold+u.Character.Bank)
+		}
+
+		if lbConfig.ExperienceEnabled {
+			lbExperience.Consider(u.UserId, *u.Character, u.Character.Experience)
+		}
+
+		if lbConfig.KillsEnabled {
+			lbKills.Consider(u.UserId, *u.Character, u.Character.KD.TotalKills)
+		}
 
 		for _, char := range characters.LoadAlts(u.UserId) {
 
 			characterCount++
 
-			lbGold.Consider(u.UserId, char, char.Gold+char.Bank)
-			lbExperience.Consider(u.UserId, char, char.Experience)
-			lbKills.Consider(u.UserId, char, char.KD.TotalKills)
+			if lbConfig.GoldEnabled {
+				lbGold.Consider(u.UserId, char, char.Gold+char.Bank)
+			}
+
+			if lbConfig.ExperienceEnabled {
+				lbExperience.Consider(u.UserId, char, char.Experience)
+			}
+
+			if lbConfig.KillsEnabled {
+				lbKills.Consider(u.UserId, char, char.KD.TotalKills)
+			}
 
 		}
 
@@ -172,5 +207,21 @@ func Get() []Leaderboard {
 
 	defer lbLock.RUnlock()
 
-	return []Leaderboard{lbGold, lbExperience, lbKills}
+	ret := []Leaderboard{}
+
+	lbConfig := configs.GetStatisticsConfig().Leaderboards
+
+	if lbConfig.GoldEnabled {
+		ret = append(ret, lbGold)
+	}
+
+	if lbConfig.ExperienceEnabled {
+		ret = append(ret, lbExperience)
+	}
+
+	if lbConfig.KillsEnabled {
+		ret = append(ret, lbKills)
+	}
+
+	return ret
 }

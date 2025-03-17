@@ -11,13 +11,15 @@ func TestOverlay(t *testing.T) {
 	// Start with a default config.
 	cfg := Config{
 		Statistics: Statistics{
-			LeaderboardSize: 5,
+			Leaderboards: StatisticsLeaderboards{Size: 5},
 		},
 	}
 
 	newValues := map[string]any{
 		"Statistics": map[string]any{
-			"LeaderboardSize": 10,
+			"Leaderboards": map[string]any{
+				"Size": 10,
+			},
 		},
 	}
 
@@ -25,8 +27,8 @@ func TestOverlay(t *testing.T) {
 		t.Fatalf("Overlay failed: %v", err)
 	}
 
-	if cfg.Statistics.LeaderboardSize != 10 {
-		t.Errorf("Expected LeaderboardSize to be 10, got %d", cfg.Statistics.LeaderboardSize)
+	if cfg.Statistics.Leaderboards.Size != 10 {
+		t.Errorf("Expected LeaderboardSize to be 10, got %d", cfg.Statistics.Leaderboards.Size)
 	}
 }
 
@@ -35,20 +37,20 @@ func TestOverlayDotMap(t *testing.T) {
 	// Start with a default config.
 	cfg := Config{
 		Statistics: Statistics{
-			LeaderboardSize: 5,
+			Leaderboards: StatisticsLeaderboards{Size: 5},
 		},
 	}
 
 	dotValues := map[string]any{
-		"Statistics.LeaderboardSize": 15,
+		"Statistics.Leaderboards.Size": 15,
 	}
 
 	if err := cfg.OverlayOverrides(dotValues); err != nil {
 		t.Fatalf("OverlayDotMap failed: %v", err)
 	}
 
-	if cfg.Statistics.LeaderboardSize != 15 {
-		t.Errorf("Expected LeaderboardSize to be 15, got %d", cfg.Statistics.LeaderboardSize)
+	if cfg.Statistics.Leaderboards.Size != 15 {
+		t.Errorf("Expected LeaderboardSize to be 15, got %d", cfg.Statistics.Leaderboards.Size)
 	}
 }
 

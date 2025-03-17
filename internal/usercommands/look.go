@@ -9,7 +9,9 @@ import (
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
+	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
@@ -450,7 +452,43 @@ func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 		}
 	}
 
-	details := rooms.GetDetails(room, user)
+	var details rooms.RoomTemplateDetails
+
+	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {
+
+		zMapper := mapper.GetZoneMapper(room.Zone)
+		if zMapper == nil {
+
+			mudlog.Error("Map", "error", "Could not find mapper for zone:"+room.Zone)
+
+			details = rooms.GetDetails(room, user)
+
+		} else {
+
+			c := mapper.Config{
+				ZoomLevel: 1,
+				Width:     5,
+				Height:    5,
+				UserId:    user.UserId,
+			}
+
+			c.OverrideSymbol(roomId, '@', ``)
+
+			output := zMapper.GetLimitedMap(room.RoomId, c)
+			tinyMap := []string{}
+			tinyMap = append(tinyMap, `╔═════╗`)
+			for _, mapLine := range output.Render {
+				tinyMap = append(tinyMap, `║`+string(mapLine)+`║`)
+			}
+			tinyMap = append(tinyMap, `╚═════╝`)
+
+			details = rooms.GetDetails(room, user, tinyMap)
+
+		}
+
+	} else {
+		details = rooms.GetDetails(room, user)
+	}
 
 	textOut, _ := templates.Process("descriptions/room-title", details)
 	user.SendText(textOut)

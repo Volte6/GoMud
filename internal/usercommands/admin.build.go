@@ -2,10 +2,11 @@ package usercommands
 
 import (
 	"fmt"
-	"math"
 	"strings"
 
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mapper"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
@@ -87,11 +88,10 @@ func IBuild(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 			return true, nil
 		}
 
-		if _, ok := rooms.DirectionDeltas[dirNameQ.Response]; !ok {
+		if !mapper.IsValidDirection(dirNameQ.Response) {
 			dirNameQ.RejectResponse()
 			user.SendText(`Invalid map direction.`)
 			return true, nil
-
 		}
 
 		mapDirection := dirNameQ.Response
@@ -165,45 +165,16 @@ func Build(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			var destinationRoom *rooms.Room = nil
 			// If it's a compass direction, reject it if a room already exists in that direction
 
-			deltaD, ok := rooms.DirectionDeltas[exitName]
-			if ok {
-				rGraph := rooms.NewRoomGraph(100, 100, 0, rooms.MapModeAll)
-				err := rGraph.Build(user.Character.RoomId, nil)
-				if err != nil {
-					user.SendText(err.Error())
-					return true, err
-				}
-
-				map2D, cX, cY := rGraph.Generate2DMap(11, 11, user.Character.RoomId)
-
-				if len(map2D) < 1 {
-					user.SendText("Error generating a 2d map")
-					return true, nil
-				}
-
-				// extra large exits get translated to their correct exit name, and the "mapdirection" updated to the specified one
-				if math.Abs(float64(deltaD.Dy)) > 1 || math.Abs(float64(deltaD.Dx)) > 1 {
-					if strings.Contains(exitName, `-`) {
-						mapDirection = exitName // mapDirection will be "north-x2" for example
-						parts := strings.Split(exitName, `-`)
-						exitName = parts[0] // exitname will be "north" for example
-					}
-				}
-
-				if cY+deltaD.Dy < len(map2D) && cX+deltaD.Dx < len(map2D[0]) {
-					if cY+deltaD.Dy >= 0 && cX+deltaD.Dx >= 0 {
-						if map2D[cY+deltaD.Dy][cX+deltaD.Dx] != nil {
-							destinationRoom = rooms.LoadRoom(map2D[cY+deltaD.Dy][cX+deltaD.Dx].RoomId)
-							user.SendText(fmt.Sprintf("Exiting room found at the %s direction. Connecting them.", exitName))
-							rooms.ConnectRoom(user.Character.RoomId, destinationRoom.RoomId, exitName, mapDirection) // north/north-x2
-						}
-					}
-				}
-
+			zMapper := mapper.GetZoneMapper(room.Zone)
+			if zMapper == nil {
+				err := fmt.Errorf("Could not find mapper for zone: %s", room.Zone)
+				mudlog.Error("Map", "error", err)
+				user.SendText(`No map found (or an error occured)"`)
+				return true, err
 			}
 
-			// Only build a new room if we don't already have a destination room from the above code tryin gto find/connect
-			if destinationRoom == nil {
+			if gotoRoomId, _ := zMapper.FindAdjacentRoom(user.Character.RoomId, exitName, 1); gotoRoomId == 0 {
+
 				if newRoom, err := rooms.BuildRoom(user.Character.RoomId, exitName, mapDirection); err != nil {
 					user.SendText(err.Error())
 				} else {
@@ -214,6 +185,7 @@ func Build(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 					user.SendText(fmt.Sprintf("Error building room %s.", exitName))
 					return false, nil
 				}
+
 			}
 
 			// Connect the exit back

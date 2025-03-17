@@ -12,7 +12,9 @@ import (
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/gamelock"
 	"github.com/volte6/gomud/internal/items"
+	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mobs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/mutators"
 	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
@@ -332,45 +334,22 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 	} else {
 
-		var gotoRoomId int = 0
-		var numError error = nil
+		var distance int
+		gotoRoomId, numError := strconv.Atoi(roomCmd)
+		if numError != nil {
 
-		if deltaD, ok := rooms.DirectionDeltas[roomCmd]; ok {
-
-			rGraph := rooms.NewRoomGraph(100, 100, 0, rooms.MapModeAll)
-			err := rGraph.Build(user.Character.RoomId, nil)
-			if err != nil {
-				user.SendText(err.Error())
-				return true, nil
+			zMapper := mapper.GetZoneMapper(room.Zone)
+			if zMapper == nil {
+				err := fmt.Errorf("Could not find mapper for zone: %s", room.Zone)
+				mudlog.Error("Map", "error", err)
+				user.SendText(`No map found (or an error occured)"`)
+				return true, err
 			}
 
-			map2D, cX, cY := rGraph.Generate2DMap(61, 61, user.Character.RoomId)
-			if len(map2D) < 1 {
-				user.SendText("Error generating a 2d map")
-				return true, nil
-			}
-
-			for i := 1; i <= 30; i++ {
-				dy := deltaD.Dy * i
-				dx := deltaD.Dx * i
-				if cY+dy < len(map2D) && cX+dx < len(map2D[0]) {
-					if cY+dy >= 0 && cX+dx >= 0 {
-						if map2D[cY+dy][cX+dx] != nil {
-							gotoRoomId = map2D[cY+dy][cX+dx].RoomId
-							break
-						}
-					}
-				}
-			}
-
-			//dirDelta.Dx
-			//dirDelta.Dy
-		} else {
-			// move to a new room
-			gotoRoomId, numError = strconv.Atoi(args[0])
+			gotoRoomId, distance = zMapper.FindAdjacentRoom(user.Character.RoomId, roomCmd)
 		}
 
-		if numError == nil {
+		if gotoRoomId > 0 {
 
 			previousRoomId := user.Character.RoomId
 
@@ -401,7 +380,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 							}
 
 							rooms.MoveToRoom(partyUser.UserId, gotoRoomId)
-							user.SendText(fmt.Sprintf("Moved to room %d.", gotoRoomId))
+							user.SendText(fmt.Sprintf("Moved to room %d (%d rooms away).", gotoRoomId, distance))
 							room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> appears in a flash of light!`, partyUser.Character.Name), partyUser.UserId)
 
 							for _, mInstanceId := range room.GetMobs(rooms.FindCharmed) {

@@ -40,7 +40,7 @@ type RoomTemplateDetails struct {
 	ShowPvp        bool     // Whether to display that the room is PVP
 }
 
-func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
+func GetDetails(r *Room, user *users.UserRecord, tinymap ...[]string) RoomTemplateDetails {
 
 	c := configs.GetGamePlayConfig()
 
@@ -109,25 +109,22 @@ func GetDetails(r *Room, user *users.UserRecord) RoomTemplateDetails {
 	//
 	// End Room Alerts
 	//
-
-	tinymap := GetTinyMap(r.RoomId)
-
 	renderNouns := user.Permission == users.PermissionAdmin
 	if user.Character.Pet.Exists() && user.Character.HasBuffFlag(buffs.SeeNouns) {
 		renderNouns = true
 	}
 
-	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {
+	if len(tinymap) > 0 {
 		desclineWidth := 80 - 7 // 7 is the width of the tinymap
 		padding := 1
 		description := util.SplitString(details.Description, desclineWidth-padding)
 
-		for i := 0; i < len(tinymap); i++ {
+		for i := 0; i < len(tinymap[0]); i++ {
 			if i > len(description)-1 {
 				description = append(description, strings.Repeat(` `, desclineWidth))
 			}
 
-			description[i] += strings.Repeat(` `, desclineWidth-len(description[i])) + tinymap[i]
+			description[i] += strings.Repeat(` `, desclineWidth-len(description[i])) + tinymap[0][i]
 		}
 
 		if renderNouns && len(r.Nouns) > 0 {

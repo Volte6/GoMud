@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"runtime/debug"
 	"slices"
 	"strconv"
 	"strings"
@@ -67,9 +68,14 @@ var (
 
 func main() {
 
+	// Capture panic and write msg/stack to logs
 	defer func() {
 		if r := recover(); r != nil {
 			mudlog.Error("PANIC", "error", r)
+			s := string(debug.Stack())
+			for _, str := range strings.Split(s, "\n") {
+				mudlog.Error("PANIC", "stack", str)
+			}
 		}
 	}()
 
@@ -139,6 +145,11 @@ func main() {
 	// Load all the data files up front.
 	loadAllDataFiles(false)
 
+	mudlog.Info("Mapper", "status", "precaching")
+	timeStart := time.Now()
+	mapper.PreCacheMaps()
+	mudlog.Info("Mapper", "status", "done", "time taken", time.Since(timeStart))
+
 	// Create the user index
 	idx := users.NewUserIndex()
 	if !idx.Exists() {
@@ -157,49 +168,6 @@ func main() {
 	gametime.GetZodiac(1) // The first time this is called it randomizes all zodiacs
 
 	scripting.Setup(int(c.Scripting.LoadTimeoutMs), int(c.Scripting.RoomTimeoutMs))
-
-	// /////////// TEST //////////////
-	// /////////// TEST //////////////
-	// /////////// TEST //////////////
-
-	crawler := mapper.NewMapper(1)
-
-	tStart := time.Now()
-	crawler.Start()
-	fmt.Println("Rooms Crawled in", time.Since(tStart))
-
-	tStart = time.Now()
-	mapData := crawler.GetMap(1, 80, 32, 1)
-	fmt.Println("Map retrieved in", time.Since(tStart))
-
-	legendAliases := mapData.GetLegend(keywords.GetAllLegendAliases(`frostfang`))
-
-	str := ``
-
-	str = `<ansi fg="map-default">+` + strings.Repeat("-", len(mapData.Render[0])) + `+</ansi>`
-	fmt.Println(templates.AnsiParse(str))
-
-	for y := 0; y < len(mapData.Render); y++ {
-		str = `|<ansi fg="map-default">` + string(mapData.Render[y]) + `</ansi>|`
-		for sym, txt := range legendAliases {
-			txtLc := strings.ToLower(txt)
-			str = strings.Replace(str, string(sym), fmt.Sprintf(`<ansi fg="map-room"><ansi fg="map-%s" bg="mapbg-%s">%c</ansi></ansi>`, txtLc, txtLc, sym), -1)
-		}
-		fmt.Println(templates.AnsiParse(str))
-	}
-	str = `<ansi fg="map-default">+` + strings.Repeat("-", len(mapData.Render[0])) + `+</ansi>`
-	fmt.Println(templates.AnsiParse(str))
-
-	for k, v := range legendAliases {
-		fmt.Printf("[%c]%s    ", k, v)
-	}
-	fmt.Println()
-
-	os.Exit(0)
-
-	// /////////// TEST //////////////
-	// /////////// TEST //////////////
-	// /////////// TEST //////////////
 
 	//
 	mudlog.Info(`========================`)

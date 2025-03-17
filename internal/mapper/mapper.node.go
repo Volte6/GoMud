@@ -11,8 +11,9 @@ type mapNode struct {
 }
 
 type nodeExit struct {
-	RoomId    int  // where it leads to
-	Secret    bool // is it secret?
-	Locked    bool // is it locked?
-	Direction positionDelta
+	RoomId         int    // where it leads to
+	Secret         bool   // is it secret?
+	LockDifficulty int    // If > 0, the lock difficulty.
+	LockId         string // What's the lock id?
+	Direction      positionDelta
 }
