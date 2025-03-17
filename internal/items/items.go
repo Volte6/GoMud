@@ -238,6 +238,11 @@ func (i *Item) GetLongDescription() string {
 
 		}
 
+	} else if iSpec.Subtype == Usable {
+
+		longDesc.WriteString("\n")
+		longDesc.WriteString(` - You could probably <ansi fg="command">use</ansi> this.`)
+
 	}
 
 	return longDesc.String()
