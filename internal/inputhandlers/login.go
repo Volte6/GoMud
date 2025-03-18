@@ -162,7 +162,9 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 			})
 
 			newUserPromptPrompt, _ := templates.Process("generic/prompt.yn", map[string]any{
-				"prompt":  "Would you like to create a new user?",
+				"prompt": "<ansi fg=\"alert-5\">CAUTION:</ansi> This will be your login username, NOT your character name!" +
+					"\nIf you choose this for your login name, you CANNOT use it as a character name." +
+					"\nWould you like to create a new user/login named <ansi fg=\"magenta\">" + state.UserObject.Username + "</ansi>?",
 				"options": []string{"y", "n"},
 				"default": "n",
 			})
