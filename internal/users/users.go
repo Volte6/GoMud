@@ -343,9 +343,12 @@ func CreateUser(u *UserRecord) error {
 	u.UserId = GetUniqueUserId()
 	u.Permission = PermissionUser
 
-	//if err := SaveUser(*u); err != nil {
-	//return err
-	//}
+	idx := NewUserIndex()
+	idx.AddUser(u.UserId, u.Username)
+
+	if err := SaveUser(*u); err != nil {
+		return err
+	}
 
 	userManager.Users[u.UserId] = u
 	userManager.Usernames[u.Username] = u.UserId
@@ -591,8 +594,13 @@ func GetUniqueUserId() int {
 
 func Exists(name string) bool {
 
-	idx := NewUserIndex()
+	for _, u := range GetAllActiveUsers() {
+		if strings.ToLower(u.Username) == strings.ToLower(name) {
+			return true
+		}
+	}
 
+	idx := NewUserIndex()
 	_, found := idx.FindByUsername(name)
 
 	return found

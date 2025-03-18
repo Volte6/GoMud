@@ -116,7 +116,7 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		}
 	}
 
-	if strings.EqualFold(user.Character.Name, user.Username) || len(user.Character.Name) == 0 || strings.ToLower(user.Character.Name) == `nameless` {
+	if strings.EqualFold(user.Character.Name, user.Username) || user.Character.Name == user.TempName() || len(user.Character.Name) == 0 || strings.ToLower(user.Character.Name) == `nameless` {
 
 		question := cmdPrompt.Ask(`What will your character be known as (name)?`, []string{})
 		if !question.Done {
