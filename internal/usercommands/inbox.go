@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/language"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
@@ -17,11 +18,11 @@ func Inbox(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 	}
 
 	if rest == `check` {
-		user.SendText(fmt.Sprintf(templates.T(`Inbox.UnreadMessageWithCheck`), user.Inbox.CountUnread(), user.Inbox.CountRead()))
+		user.SendText(fmt.Sprintf(language.T(`Inbox.UnreadMessageWithCheck`), user.Inbox.CountUnread(), user.Inbox.CountRead()))
 		return true, nil
 	}
 
-	user.SendText(fmt.Sprintf(templates.T(`Inbox.UnreadMessage`), user.Inbox.CountUnread(), user.Inbox.CountRead()))
+	user.SendText(fmt.Sprintf(language.T(`Inbox.UnreadMessage`), user.Inbox.CountUnread(), user.Inbox.CountRead()))
 
 	if len(user.Inbox) == 0 {
 		return true, nil
@@ -58,8 +59,8 @@ func Inbox(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 	}
 
 	user.SendText(``)
-	user.SendText(templates.T(`Inbox.ReadOldMessages`))
-	user.SendText(templates.T(`Inbox.ClearMessages`))
+	user.SendText(language.T(`Inbox.ReadOldMessages`))
+	user.SendText(language.T(`Inbox.ClearMessages`))
 	user.SendText(``)
 
 	return true, nil

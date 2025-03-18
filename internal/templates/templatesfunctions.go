@@ -14,14 +14,12 @@ import (
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/gametime"
-	"github.com/volte6/gomud/internal/i18n"
+	"github.com/volte6/gomud/internal/language"
 	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
-	"golang.org/x/text/language"
 )
 
 var (
@@ -218,7 +216,7 @@ var (
 			return gametime.MonthName(month)
 		},
 		"map": makeMap,
-		"t":   T,
+		"t":   language.T,
 	}
 )
 
@@ -458,17 +456,4 @@ func makeMap(kvs ...any) map[any]any {
 	}
 
 	return m
-}
-
-func T(msgID string, tplData ...map[any]any) string {
-	lng := language.Make(configs.GetTranslationConfig().Language.String())
-
-	msg, err := i18n.Translate(lng, msgID, tplData...)
-	if err != nil {
-		if !i18n.IsMessageNotFoundErr(err) && !i18n.IsMessageFallbackErr(err) {
-			mudlog.Error(`Translation`, "msgID", msgID, `error`, err)
-		}
-	}
-
-	return msg
 }

@@ -27,11 +27,11 @@ import (
 	"github.com/volte6/gomud/internal/flags"
 	"github.com/volte6/gomud/internal/gametime"
 	"github.com/volte6/gomud/internal/hooks"
-	"github.com/volte6/gomud/internal/i18n"
 	"github.com/volte6/gomud/internal/inputhandlers"
 	"github.com/volte6/gomud/internal/integrations/discord"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
+	"github.com/volte6/gomud/internal/language"
 	"github.com/volte6/gomud/internal/leaderboard"
 	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mobs"
@@ -49,7 +49,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 	"github.com/volte6/gomud/internal/web"
-	"golang.org/x/text/language"
+	textLang "golang.org/x/text/language"
 )
 
 const (
@@ -138,9 +138,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	i18n.Init(i18n.BundleCfg{
-		DefaultLanguage: language.Make(c.Translation.DefaultLanguage.String()),
-		Language:        language.Make(c.Translation.Language.String()),
+	language.InitTranslation(language.BundleCfg{
+		DefaultLanguage: textLang.Make(c.Translation.DefaultLanguage.String()),
+		Language:        textLang.Make(c.Translation.Language.String()),
 		LanguagePaths:   c.Translation.LanguagePaths,
 	})
 

@@ -1,19 +1,21 @@
-package i18n
+package language
 
 import (
 	"errors"
 	"path"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/mudlog"
 	"golang.org/x/text/language"
 	"gopkg.in/yaml.v2"
 )
 
 var (
-	ErrMessageFallback = errors.New("i18n message fallback to default language")
+	ErrMessageFallback = errors.New("translation message fallback to default language")
 )
 
-var i18 *I18n
+var trans *Translation
 
 type BundleCfg struct {
 	DefaultLanguage language.Tag
@@ -21,25 +23,25 @@ type BundleCfg struct {
 	LanguagePaths   []string
 }
 
-type I18n struct {
+type Translation struct {
 	bundle          *i18n.Bundle
 	localizerByLng  map[language.Tag]*i18n.Localizer
 	defaultLanguage language.Tag
 }
 
-func Init(c BundleCfg) {
-	i18 = New(c)
+func InitTranslation(c BundleCfg) {
+	trans = NewTranslation(c)
 }
 
-func New(c BundleCfg) *I18n {
-	i := &I18n{}
+func NewTranslation(c BundleCfg) *Translation {
+	t := &Translation{}
 
 	bundle := i18n.NewBundle(c.DefaultLanguage)
 	bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
 
-	i.bundle = bundle
-	i.defaultLanguage = c.DefaultLanguage
-	i.localizerByLng = map[language.Tag]*i18n.Localizer{}
+	t.bundle = bundle
+	t.defaultLanguage = c.DefaultLanguage
+	t.localizerByLng = map[language.Tag]*i18n.Localizer{}
 
 	for _, p := range c.LanguagePaths {
 		bundle.LoadMessageFile(path.Join(p, c.DefaultLanguage.String()+".yaml"))
@@ -48,18 +50,18 @@ func New(c BundleCfg) *I18n {
 		}
 	}
 
-	i.localizerByLng[c.Language] = i.newLocalizer(c.Language)
+	t.localizerByLng[c.Language] = t.newLocalizer(c.Language)
 
-	// set defaultLanguage if it isn't exist
-	if _, hasDefaultLng := i.localizerByLng[i.defaultLanguage]; !hasDefaultLng {
-		i.localizerByLng[i.defaultLanguage] = i.newLocalizer(i.defaultLanguage)
+	// Add defaultLanguage if it isn't exist
+	if _, hasDefaultLng := t.localizerByLng[t.defaultLanguage]; !hasDefaultLng {
+		t.localizerByLng[t.defaultLanguage] = t.newLocalizer(t.defaultLanguage)
 	}
 
-	return i
+	return t
 }
 
-func (i *I18n) newLocalizer(lng language.Tag) *i18n.Localizer {
-	lngDefault := i.defaultLanguage.String()
+func (t *Translation) newLocalizer(lng language.Tag) *i18n.Localizer {
+	lngDefault := t.defaultLanguage.String()
 	lngs := []string{
 		lng.String(),
 	}
@@ -69,23 +71,31 @@ func (i *I18n) newLocalizer(lng language.Tag) *i18n.Localizer {
 	}
 
 	localizer := i18n.NewLocalizer(
-		i.bundle,
+		t.bundle,
 		lngs...,
 	)
 
 	return localizer
 }
 
-// Translate message.
-func Translate(lng language.Tag, msgID string, tplData ...map[any]any) (string, error) {
-	return TranslateWithConfig(i18, lng, msgID, tplData...)
+func T(msgID string, tplData ...map[any]any) string {
+	lng := language.Make(configs.GetTranslationConfig().Language.String())
+
+	msg, err := trans.Translate(lng, msgID, tplData...)
+	if err != nil {
+		if !IsMessageNotFoundErr(err) && !IsMessageFallbackErr(err) {
+			mudlog.Error(`Translation`, "msgID", msgID, `error`, err)
+		}
+	}
+
+	return msg
 }
 
 // Translate message.
-func TranslateWithConfig(i *I18n, lng language.Tag, msgID string, tplData ...map[any]any) (string, error) {
-	localizer, ok := i.localizerByLng[lng]
+func (t *Translation) Translate(lng language.Tag, msgID string, tplData ...map[any]any) (string, error) {
+	localizer, ok := t.localizerByLng[lng]
 	if !ok {
-		localizer = i.localizerByLng[i.defaultLanguage]
+		localizer = t.localizerByLng[t.defaultLanguage]
 	}
 
 	cfg := &i18n.LocalizeConfig{

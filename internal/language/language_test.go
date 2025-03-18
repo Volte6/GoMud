@@ -1,4 +1,4 @@
-package i18n
+package language
 
 import (
 	"testing"
@@ -223,13 +223,13 @@ func TestTranslate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args.lng.String()+" - "+tt.args.msgID+" - "+tt.name, func(t *testing.T) {
-			i18 := New(BundleCfg{
+			trans := NewTranslation(BundleCfg{
 				DefaultLanguage: language.English,
 				Language:        tt.args.lng,
 				LanguagePaths:   []string{"testdata/localize"},
 			})
 
-			got, err := TranslateWithConfig(i18, tt.args.lng, tt.args.msgID, tt.args.tplData)
+			got, err := trans.Translate(tt.args.lng, tt.args.msgID, tt.args.tplData)
 			if got != tt.want {
 				t.Errorf("TranslateWithConfig() = %v, want %v", got, tt.want)
 			}

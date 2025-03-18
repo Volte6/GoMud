@@ -50,26 +50,26 @@ Hello:
 
 ```golang
 import (
-	"github.com/volte6/gomud/internal/templates"
+	"github.com/volte6/gomud/internal/language"
 )
 
 // Simple message
-templates.T(`Hello`)
+language.T(`Hello`)
 
 // Message with arguments
-templates.T(`Hello {{ .name }}`, map[string]string{
+language.T(`Hello {{ .name }}`, map[string]string{
 	"name": "alex",
 })
 
 // Message with string format
-fmt.Sprintf(templates.T(`%d users online`), userCt)
+fmt.Sprintf(language.T(`%d users online`), userCt)
 ```
 
 ### Invoke Translate Function in Templates
 
 ```golang
 import (
-	"github.com/volte6/gomud/internal/templates"
+	"github.com/volte6/gomud/internal/lauguage"
 )
 
 // Passing arguments to template
