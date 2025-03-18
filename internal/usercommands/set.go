@@ -101,10 +101,10 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		}
 		if !on.(bool) {
 			on = true
-			user.SendText(`Auctions turned <ansi fg="red">ON</ansi>.`)
+			user.SendText(`Auctions toggled <ansi fg="red">ON</ansi>.`)
 		} else {
 			on = false
-			user.SendText(`Auctions turned <ansi fg="red">OFF</ansi>.`)
+			user.SendText(`Auctions toggled <ansi fg="red">OFF</ansi>.`)
 		}
 
 		user.SetConfigOption(`auction`, on)
@@ -115,12 +115,15 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 	if setTarget == `shortadjectives` {
 		on := user.GetConfigOption(`shortadjectives`)
-		if on == nil || !on.(bool) {
+		if on == nil {
+			on = false
+		}
+		if !on.(bool) {
 			on = true
-			user.SendText(`Short Adjectives turned <ansi fg="red">ON</ansi>.`)
+			user.SendText(`Short Adjectives toggled <ansi fg="red">ON</ansi>.`)
 		} else {
 			on = false
-			user.SendText(`Short Adjectives turned <ansi fg="red">OFF</ansi>.`)
+			user.SendText(`Short Adjectives toggled <ansi fg="red">OFF</ansi>.`)
 		}
 
 		user.SetConfigOption(`shortadjectives`, on)
@@ -131,12 +134,15 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 	if setTarget == `tinymap` {
 		on := user.GetConfigOption(`tinymap`)
-		if on == nil || !on.(bool) {
+		if on == nil {
 			on = true
-			user.SendText(`Tinymap turned <ansi fg="red">ON</ansi>.`)
+		}
+		if !on.(bool) {
+			on = true
+			user.SendText(`Tinymap toggled <ansi fg="red">ON</ansi>.`)
 		} else {
 			on = false
-			user.SendText(`Tinymap turned <ansi fg="red">OFF</ansi>.`)
+			user.SendText(`Tinymap toggled <ansi fg="red">OFF</ansi>.`)
 		}
 
 		user.SetConfigOption(`tinymap`, on)

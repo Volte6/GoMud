@@ -3,6 +3,7 @@ package users
 import (
 	"fmt"
 	"math"
+	"math/big"
 	"time"
 
 	"github.com/volte6/gomud/internal/audio"
@@ -419,10 +420,15 @@ func (u *UserRecord) SetUsername(un string) error {
 
 	// If no character name, just set it to username for now.
 	if u.Character.Name == "" {
-		u.Character.Name = un
+		u.Character.Name = u.TempName()
 	}
 
 	return nil
+}
+
+func (u *UserRecord) TempName() string {
+	number := new(big.Int).SetBytes(util.Md5Bytes([]byte(u.Username)))
+	return fmt.Sprintf("nameless-%d", number.Uint64()%9087919)
 }
 
 func (u *UserRecord) SetCharacterName(cn string) error {

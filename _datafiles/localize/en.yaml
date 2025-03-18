@@ -19,7 +19,10 @@ RoomId:
 '%d users online':
 '%d user online':
 
-'Would you like to create a new user?':
+Login.CreateUser: |-
+  <ansi fg="alert-5">CAUTION:</ansi> This will be your login username, NOT your character name!
+  If you choose this for your login name, you CANNOT use it as a character name.
+  Would you like to create a new user/login named <ansi fg="magenta">{{ .Username }}</ansi>?
 
 Inbox.UnreadMessageWithCheck: >-
   <ansi fg="159">You have <ansi fg="alert-4">%d</ansi> unread messages and <ansi fg="alert-4">%d</ansi> old messages.

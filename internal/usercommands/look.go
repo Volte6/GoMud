@@ -273,15 +273,15 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 	//
 	// Check for anything in their backpack they might want to look at
 	//
-	lookItem, found := user.Character.FindInBackpack(lookAt)
+	lookItem, foundItem := user.Character.FindInBackpack(lookAt)
 	lookDestination := `in your backpack`
-	if !found {
+	if !foundItem {
 		// Check for any equipment they are wearing they might want to look at
-		lookItem, found = user.Character.FindOnBody(lookAt)
+		lookItem, foundItem = user.Character.FindOnBody(lookAt)
 		lookDestination = `you are wearing`
 	}
 
-	if found {
+	if foundItem {
 
 		user.SendText(``)
 
@@ -454,7 +454,12 @@ func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 
 	var details rooms.RoomTemplateDetails
 
-	if tinyMapOn := user.GetConfigOption(`tinymap`); tinyMapOn != nil && tinyMapOn.(bool) {
+	tinyMapOn := user.GetConfigOption(`tinymap`)
+	if tinyMapOn == nil {
+		tinyMapOn = true
+	}
+
+	if tinyMapOn.(bool) && roomId > 0 {
 
 		zMapper := mapper.GetZoneMapper(room.Zone)
 		if zMapper == nil {

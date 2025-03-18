@@ -116,7 +116,14 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 
 			tmpUser, err := users.LoadUser(state.UserObject.Username)
 			if err != nil {
-				panic(err)
+
+				// If the user exists, but there's no file for them, this condition can occur
+				// This is because users aren't necessarily saved immediately, being ephemeral until they finish the tutorial
+
+				connections.SendTo([]byte("Already logged in!"), clientInput.ConnectionId)
+				connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
+				connections.Remove(clientInput.ConnectionId)
+
 			} else if !tmpUser.PasswordMatches(state.UserObject.Password) {
 				connections.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
 				connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
@@ -156,7 +163,9 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 			})
 
 			newUserPromptPrompt, _ := templates.Process("generic/prompt.yn", map[string]any{
-				"prompt":  language.T("Would you like to create a new user?"),
+				"prompt": language.T("Login.CreateUser", map[any]any{
+					"Username": state.UserObject.Username,
+				}),
 				"options": []string{"y", "n"},
 				"default": "n",
 			})

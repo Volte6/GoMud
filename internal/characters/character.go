@@ -28,7 +28,7 @@ var (
 	startingMana     = 10
 	StartingRoomId   = -1
 	startingZone     = `Nowhere`
-	defaultName      = `Nameless`
+	defaultName      = `nameless`
 	descriptionCache = map[string]string{} // key is a hash, value is the description
 )
 
