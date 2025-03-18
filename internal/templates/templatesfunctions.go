@@ -14,6 +14,7 @@ import (
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/gametime"
+	"github.com/volte6/gomud/internal/language"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/term"
@@ -214,6 +215,8 @@ var (
 		"month": func(month int) string {
 			return gametime.MonthName(month)
 		},
+		"map": makeMap,
+		"t":   language.T,
 	}
 )
 
@@ -444,4 +447,13 @@ func formatDuration(seconds int) string {
 	}
 
 	return strings.TrimSpace(result)
+}
+
+func makeMap(kvs ...any) map[any]any {
+	m := make(map[any]any)
+	for i := 0; i < len(kvs)-1; i += 2 {
+		m[kvs[i]] = kvs[i+1]
+	}
+
+	return m
 }

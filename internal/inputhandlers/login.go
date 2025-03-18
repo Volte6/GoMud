@@ -3,6 +3,7 @@ package inputhandlers
 import (
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/language"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
@@ -142,7 +143,7 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 				}
 
 				if len(msg) > 0 {
-					connections.SendTo([]byte(msg), clientInput.ConnectionId)
+					connections.SendTo([]byte(language.T(msg)), clientInput.ConnectionId)
 					connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
 				}
 
@@ -162,9 +163,9 @@ func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[str
 			})
 
 			newUserPromptPrompt, _ := templates.Process("generic/prompt.yn", map[string]any{
-				"prompt": "<ansi fg=\"alert-5\">CAUTION:</ansi> This will be your login username, NOT your character name!" +
-					"\nIf you choose this for your login name, you CANNOT use it as a character name." +
-					"\nWould you like to create a new user/login named <ansi fg=\"magenta\">" + state.UserObject.Username + "</ansi>?",
+				"prompt": language.T("Login.CreateUser", map[any]any{
+					"Username": state.UserObject.Username,
+				}),
 				"options": []string{"y", "n"},
 				"default": "n",
 			})

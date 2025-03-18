@@ -13,12 +13,12 @@ import (
 	"github.com/volte6/gomud/internal/conversations"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mudlog"
+	"gopkg.in/yaml.v2"
 
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/util"
-	"gopkg.in/yaml.v2"
 )
 
 var (

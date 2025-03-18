@@ -1,0 +1,31 @@
+# Chinese
+
+'Reconnecting...': '重新连接中...'
+'That user is already logged in.': '该用户已经登录.'
+
+UserId: '用户ID'
+User.Name: '姓名'
+Level: '等级'
+Alignment: '阵营'
+Profession: '职业'
+Online: '在线'
+Role: '角色'
+Zone: '区域'
+RoomId: '房间ID'
+'%d users online': '在线用户 %d 人'
+'%d user online': '在线用户 %d 人'
+
+Login.CreateUser: |-
+  <ansi fg="alert-5">注意:</ansi> 这将是您的登录用户名, 而不是您的角色名!
+  如果您选择此名称作为登录名, 则不能将其用作角色名.
+  您想创建一个登录名为 <ansi fg="magenta">{{ .Username }}</ansi> 的新用户吗?
+
+Inbox.UnreadMessageWithCheck: >-
+  <ansi fg="159">您有 <ansi fg="alert-4">%d</ansi> 未读消息和 <ansi fg="alert-4">%d</ansi> 条旧信息.
+  输入 <ansi fg="command">inbox</ansi> 查看您的消息.</ansi>
+Inbox.UnreadMessage: >-
+  <ansi fg="159">您有 <ansi fg="alert-4">%d</ansi> 未读消息和 <ansi fg="alert-4">%d</ansi> 条旧信息.</ansi>
+Inbox.ReadOldMessages: >-
+  <ansi fg="159">输入 <ansi fg="command">inbox old</ansi> 查看旧信息.</ansi>
+Inbox.ClearMessages: >-
+  <ansi fg="159">输入 <ansi fg="command">inbox clear</ansi> 清除收件箱中的所有信息.</ansi>

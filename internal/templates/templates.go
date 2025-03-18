@@ -140,6 +140,55 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 	return buf.String(), nil
 }
 
+func ProcessText(text string, data any, ansiFlags ...AnsiFlag) (string, error) {
+	var parseAnsiTags bool = false
+	var preParseAnsiTags bool = false
+
+	var ansitagsParseBehavior []ansitags.ParseBehavior = make([]ansitags.ParseBehavior, 0, 5)
+
+	if forceAnsiFlags != AnsiTagsDefault {
+		//	ansiFlags = append(ansiFlags, forceAnsiFlags)
+	}
+
+	for _, flag := range ansiFlags {
+		switch flag {
+		case AnsiTagsStrip:
+			ansitagsParseBehavior = append(ansitagsParseBehavior, ansitags.StripTags)
+		case AnsiTagsMono:
+			ansitagsParseBehavior = append(ansitagsParseBehavior, ansitags.Monochrome)
+		case AnsiTagsParse:
+			parseAnsiTags = true
+		case AnsiTagsPreParse:
+			preParseAnsiTags = true
+		}
+	}
+
+	if parseAnsiTags && preParseAnsiTags {
+		text = ansitags.Parse(text, ansitagsParseBehavior...)
+	}
+
+	// parse the file contents as a template
+	tpl, err := template.New("").Funcs(funcMap).Parse(text)
+	if err != nil {
+		return text, err
+	}
+
+	// execute the template and store the results into a buffer
+	var buf bytes.Buffer
+	err = tpl.Execute(&buf, data)
+	if err != nil {
+		mudlog.Error("could not parse template text", "error", err)
+		return "[TEMPLATE TEXT ERROR]", err
+	}
+
+	// return the final data as a string, parse ansi tags if needed (No need to parse if it was preparsed)
+	if parseAnsiTags && !preParseAnsiTags {
+		return ansitags.Parse(buf.String(), ansitagsParseBehavior...), nil
+	}
+
+	return buf.String(), nil
+}
+
 const cellPadding int = 1
 
 type TemplateTable struct {

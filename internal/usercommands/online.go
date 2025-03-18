@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/language"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
@@ -12,11 +13,18 @@ import (
 
 func Online(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
-	headers := []string{`Name`, `Level`, `Alignment`, `Profession`, `Online`, `Role`}
+	headers := []string{
+		language.T(`User.Name`),
+		language.T(`Level`),
+		language.T(`Alignment`),
+		language.T(`Profession`),
+		language.T(`Online`),
+		language.T(`Role`),
+	}
 
 	if user.Permission != users.PermissionUser {
-		headers = append([]string{`UserId`}, headers...)
-		headers = append(headers, []string{`Zone`, `RoomId`}...)
+		headers = append([]string{language.T(`UserId`)}, headers...)
+		headers = append(headers, []string{language.T(`Zone`), language.T(`RoomId`)}...)
 	}
 
 	allFormatting := [][]string{}
@@ -71,9 +79,9 @@ func Online(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 		}
 	}
 
-	tableTitle := fmt.Sprintf(`%d users online`, userCt)
+	tableTitle := fmt.Sprintf(language.T(`%d users online`), userCt)
 	if userCt == 1 {
-		tableTitle = fmt.Sprintf(`%d user online`, userCt)
+		tableTitle = fmt.Sprintf(language.T(`%d user online`), userCt)
 	}
 
 	onlineResultsTable := templates.GetTable(tableTitle, headers, rows, allFormatting...)
