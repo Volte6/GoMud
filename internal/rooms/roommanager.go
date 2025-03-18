@@ -966,44 +966,6 @@ func ConnectRoom(fromRoomId int, toRoomId int, exitName string, mapDirection ...
 	return nil
 }
 
-/*
-func GetTinyMap(mapRoomId int) []string {
-
-		returnResult := []string{}
-
-		room := LoadRoom(mapRoomId)
-		if room == nil {
-			return returnResult
-		}
-
-		zMapper := mapper.GetZoneMapper(room.Zone)
-		if zMapper == nil {
-
-			mudlog.Error("Map", "error", "Could not find mapper for zone:"+room.Zone)
-
-		} else {
-
-			c := mapper.Config{
-				ZoomLevel: 1,
-				Width:     5,
-				Height:    5,
-			}
-
-			c.OverrideSymbol(mapRoomId, '@', ``)
-
-			output := zMapper.GetLimitedMap(mapRoomId, c)
-
-			returnResult = append(returnResult, `╔═════╗`)
-			for y := 0; y < len(output.Render); y++ {
-				returnResult = append(returnResult, `║`+string(output.Render[y])+`║`)
-			}
-			returnResult = append(returnResult, `╚═════╝`)
-
-		}
-
-		return returnResult
-	}
-*/
 func GetRoomCount(zoneName string) int {
 
 	zoneInfo, ok := roomManager.zones[zoneName]

@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
@@ -115,7 +116,7 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		}
 	}
 
-	if strings.EqualFold(user.Character.Name, user.Username) || len(user.Character.Name) == 0 || strings.ToLower(user.Character.Name) == `nameless` {
+	if strings.EqualFold(user.Character.Name, user.Username) || user.Character.Name == user.TempName() || len(user.Character.Name) == 0 || strings.ToLower(user.Character.Name) == `nameless` {
 
 		question := cmdPrompt.Ask(`What will your character be known as (name)?`, []string{})
 		if !question.Done {
@@ -180,14 +181,55 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			return true, nil
 		}
 
-		user.ClearPrompt()
-
 		user.SendText(fmt.Sprintf(`You will be known as <ansi fg="yellow-bold">%s</ansi>!%s`, user.Character.Name, term.CRLFStr))
 	}
 
 	user.Character.ExtraLives = int(configs.GetGamePlayConfig().LivesStart)
 
 	user.EventLog.Add(`char`, fmt.Sprintf(`Created a new character: <ansi fg="username">%s</ansi>`, user.Character.Name))
+
+	duration := time.Now().Sub(user.Joined)
+	if duration.Hours() > 1 {
+
+		question := cmdPrompt.Ask(`Skip tutorial?`, []string{`yes`, `no`}, `yes`)
+		if !question.Done {
+			return true, nil
+		}
+
+		if question.Response != `no` {
+
+			user.ClearPrompt()
+
+			user.SendText(fmt.Sprintf(`<ansi fg="magenta">Suddenly, a vortex appears before you, drawing you in before you have any chance to react!</ansi>%s`, term.CRLFStr))
+
+			if destRoom := rooms.LoadRoom(rooms.StartRoomIdAlias); destRoom != nil {
+
+				rooms.MoveToRoom(user.UserId, destRoom.RoomId)
+
+				// Tell the new room they have arrived
+
+				destRoom.SendText(
+					fmt.Sprintf(configs.GetTextFormatsConfig().EnterRoomMessageWrapper.String(),
+						fmt.Sprintf(`<ansi fg="username">%s</ansi> enters from <ansi fg="exit">somewhere</ansi>.`, user.Character.Name),
+					),
+					user.UserId,
+				)
+
+				Look(``, user, destRoom, events.CmdSecretly) // Do a secret look.
+
+				scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId)
+
+				room.PlaySound(`room-exit`, `movement`, user.UserId)
+				destRoom.PlaySound(`room-enter`, `movement`, user.UserId)
+
+				return true, nil
+			}
+
+		}
+
+	}
+
+	user.ClearPrompt()
 
 	user.SendText(fmt.Sprintf(`<ansi fg="magenta">Suddenly, a vortex appears before you, drawing you in before you have any chance to react!</ansi>%s`, term.CRLFStr))
 
@@ -211,7 +253,6 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		}
 
 		if _, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, int(rid)); err == nil {
-			user.SetConfigOption(`tinymap`, true)
 			rooms.MoveToRoom(user.UserId, int(rid))
 			return true, nil
 		}
