@@ -454,7 +454,12 @@ func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 
 	var details rooms.RoomTemplateDetails
 
-	if tinyMapSetting := user.GetConfigOption(`tinymap`); tinyMapSetting == nil || tinyMapSetting.(bool) == true {
+	tinyMapOn := user.GetConfigOption(`tinymap`)
+	if tinyMapOn == nil {
+		tinyMapOn = true
+	}
+
+	if tinyMapOn.(bool) && roomId > 0 {
 
 		zMapper := mapper.GetZoneMapper(room.Zone)
 		if zMapper == nil {
