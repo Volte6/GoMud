@@ -18,9 +18,7 @@ exits:
 nouns:
   island: A large island sits in the middle of the lake, but a closer rocky island
     sits to the northwest of here.
-  rocks: A large island sits in the middle of the lake, but a closer rocky island
-    sits to the northwest of here.
-  rocky island: A large island sits in the middle of the lake, but a closer rocky
-    island sits to the northwest of here.
+  rocks: :island
+  rocky island: :island
 idlemessages:
 - "304"
