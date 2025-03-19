@@ -11,7 +11,7 @@ import (
 )
 
 func AltsExists(userId int) bool {
-	_, err := os.Stat(util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strconv.Itoa(userId)+`.alts.yaml`))
+	_, err := os.Stat(util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/users/`, strconv.Itoa(userId)+`.alts.yaml`))
 
 	return !os.IsNotExist(err)
 }
@@ -22,7 +22,7 @@ func LoadAlts(userId int) []Character {
 		return nil
 	}
 
-	altsFilePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strconv.Itoa(userId)+`.alts.yaml`)
+	altsFilePath := util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/users/`, strconv.Itoa(userId)+`.alts.yaml`)
 
 	altsFileBytes, err := os.ReadFile(altsFilePath)
 	if err != nil {
@@ -59,7 +59,7 @@ func SaveAlts(userId int, alts []Character) bool {
 
 	carefulSave := configs.GetFilePathsConfig().CarefulSaveFiles
 
-	path := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strconv.Itoa(userId)+`.alts.yaml`)
+	path := util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/users/`, strconv.Itoa(userId)+`.alts.yaml`)
 
 	saveFilePath := path
 	if carefulSave { // careful save first saves a {filename}.new file

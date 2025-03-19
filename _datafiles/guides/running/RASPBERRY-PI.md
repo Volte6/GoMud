@@ -136,7 +136,7 @@ The server will start on the specified port (default: 33333).
 ### Starting your own empty MUD world
 Now that you've got the basics down, it's time to start a fresh world and begin your creation journey. 
 The ``_datafiles/world`` folder has a folder called ``empty`` inside of it. Make a copy of that folder and give it your own name (i.e. ``sudo cp -r empty/ myworld/``).
-Then edit your ``_datafiles/config.yaml`` ``FolderDataFiles:`` field to point to your new world folder.
+Then edit your ``_datafiles/config.yaml`` ``DataFiles:`` field to point to your new world folder.
 
 ## Updating from master branch
 To update your local GoMUD installation when new updates are available on the master branch of the GitHub repository:

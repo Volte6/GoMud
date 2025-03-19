@@ -66,7 +66,6 @@ var (
 		`eat`:         {Eat, false, false},
 		`emote`:       {Emote, true, false},
 		`enchant`:     {Enchant, false, false},
-		`exits`:       {Exits, true, false},
 		`experience`:  {Experience, true, false},
 		`equip`:       {Equip, false, false},
 		`flee`:        {Flee, false, false},
@@ -85,7 +84,6 @@ var (
 		`inventory`:   {Inventory, true, false},
 		`item`:        {Item, true, true}, // Admin only
 		`jobs`:        {Jobs, true, false},
-		`leaderboard`: {Leaderboards, true, false},
 		`list`:        {List, false, false},
 		`locate`:      {Locate, true, true}, // Admin only
 		`lock`:        {Lock, false, false},
@@ -375,10 +373,10 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 }
 
 // Register mob commands from outside of the package
-func RegisterCommand(command string, handlerFunc UserCommand, isBlockable bool, isAdminOnly bool) {
+func RegisterCommand(command string, handlerFunc UserCommand, disabledWhenDowned bool, isAdminOnly bool) {
 	userCommands[command] = CommandAccess{
 		handlerFunc,
-		isBlockable,
+		disabledWhenDowned,
 		isAdminOnly,
 	}
 }

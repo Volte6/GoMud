@@ -367,7 +367,7 @@ func LoadUser(username string, skipValidation ...bool) (*UserRecord, error) {
 		return nil, errors.New("user doesn't exist")
 	}
 
-	userFilePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strconv.Itoa(int(userId))+`.yaml`)
+	userFilePath := util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/`, `users`, `/`, strconv.Itoa(int(userId))+`.yaml`)
 
 	userFileTxt, err := os.ReadFile(userFilePath)
 	if err != nil {
@@ -399,7 +399,7 @@ func LoadUser(username string, skipValidation ...bool) (*UserRecord, error) {
 // Stops searching if false is returned.
 func SearchOfflineUsers(searchFunc func(u *UserRecord) bool) {
 
-	basePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`)
+	basePath := util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/`, `users`)
 
 	filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
 
@@ -521,7 +521,7 @@ func SaveUser(u UserRecord, isAutoSave ...bool) error {
 
 	carefulSave := configs.GetFilePathsConfig().CarefulSaveFiles
 
-	path := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strconv.Itoa(u.UserId)+`.yaml`)
+	path := util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/`, `users`, `/`, strconv.Itoa(u.UserId)+`.yaml`)
 
 	saveFilePath := path
 	if carefulSave { // careful save first saves a {filename}.new file

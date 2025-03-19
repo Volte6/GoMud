@@ -30,8 +30,8 @@ func DoFilenameMigrationV1() error {
 
 	SearchOfflineUsers(func(u *UserRecord) bool {
 
-		oldUserPath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strings.ToLower(u.Username)+`.yaml`)
-		newUserPath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, strconv.Itoa(u.UserId)+`.yaml`)
+		oldUserPath := util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/`, `users`, `/`, strings.ToLower(u.Username)+`.yaml`)
+		newUserPath := util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/`, `users`, `/`, strconv.Itoa(u.UserId)+`.yaml`)
 
 		_, err := os.Stat(oldUserPath)
 		oldUserPathExists := err == nil
@@ -52,8 +52,8 @@ func DoFilenameMigrationV1() error {
 			}
 		}
 
-		oldAltsFilePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strings.ToLower(u.Username)+`-alts.yaml`)
-		newAltsFilePath := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/users/`, strconv.Itoa(u.UserId)+`.alts.yaml`)
+		oldAltsFilePath := util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/users/`, strings.ToLower(u.Username)+`-alts.yaml`)
+		newAltsFilePath := util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/users/`, strconv.Itoa(u.UserId)+`.alts.yaml`)
 
 		_, err = os.Stat(oldAltsFilePath)
 		oldAltsPathExists := err == nil

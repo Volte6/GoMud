@@ -71,15 +71,15 @@ func (c *Config) OverlayOverrides(dotMap map[string]any) error {
 	return yaml.Unmarshal(b, c)
 }
 
-func (c *Config) DotPaths() map[string]interface{} {
-	result := make(map[string]interface{})
+func (c *Config) DotPaths() map[string]any {
+	result := make(map[string]any)
 	// Get the underlying value of c (we assume c is a pointer).
 	v := reflect.ValueOf(c).Elem()
 	c.buildDotPaths(v, "", result)
 	return result
 }
 
-func (c *Config) buildDotPaths(v reflect.Value, prefix string, result map[string]interface{}) {
+func (c *Config) buildDotPaths(v reflect.Value, prefix string, result map[string]any) {
 	// If the value is a pointer, dereference it.
 	if v.Kind() == reflect.Ptr {
 		if v.IsNil() {
@@ -281,7 +281,7 @@ func GetConfig() Config {
 func overridePath() string {
 	overridePath := os.Getenv(`CONFIG_PATH`)
 	if overridePath == `` {
-		overridePath = GetConfig().FilePaths.FolderDataFiles.String() + `/config-overrides.yaml`
+		overridePath = GetConfig().FilePaths.DataFiles.String() + `/config-overrides.yaml`
 	}
 
 	return overridePath
@@ -386,17 +386,17 @@ func GetSecret(v ConfigSecret) string {
 	return string(v)
 }
 
-// flatten recursively flattens a map[string]interface{}.
-// It supports both map[string]interface{} and map[interface{}]interface{} values,
+// flatten recursively flattens a map[string]any.
+// It supports both map[string]any and map[any]any values,
 // which is useful when unmarshaling YAML.
-func flatten(input map[string]interface{}) map[string]interface{} {
-	flatMap := make(map[string]interface{})
+func flatten(input map[string]any) map[string]any {
+	flatMap := make(map[string]any)
 	flattenHelper("", input, flatMap)
 	return flatMap
 }
 
 // flattenHelper is a recursive helper that constructs the flattened map.
-func flattenHelper(prefix string, input map[string]interface{}, flatMap map[string]interface{}) {
+func flattenHelper(prefix string, input map[string]any, flatMap map[string]any) {
 	for key, value := range input {
 		// Construct the new key path.
 		var newKey string
@@ -406,13 +406,13 @@ func flattenHelper(prefix string, input map[string]interface{}, flatMap map[stri
 			newKey = prefix + "." + key
 		}
 
-		// Handle nested maps from YAML unmarshaling, which can be of type map[interface{}]interface{}.
+		// Handle nested maps from YAML unmarshaling, which can be of type map[any]any.
 		switch v := value.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			flattenHelper(newKey, v, flatMap)
-		case map[interface{}]interface{}:
-			// Convert map[interface{}]interface{} to map[string]interface{}.
-			converted := make(map[string]interface{})
+		case map[any]any:
+			// Convert map[any]any to map[string]any.
+			converted := make(map[string]any)
 			for k, val := range v {
 				if strKey, ok := k.(string); ok {
 					converted[strKey] = val

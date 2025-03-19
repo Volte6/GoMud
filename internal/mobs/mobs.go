@@ -616,7 +616,7 @@ func (r *Mob) Save() error {
 		return err
 	}
 
-	saveFilePath := util.FilePath(configs.GetFilePathsConfig().FolderDataFiles.String(), `/`, `mobs`, `/`, fmt.Sprintf("%s.yaml", fileName))
+	saveFilePath := util.FilePath(configs.GetFilePathsConfig().DataFiles.String(), `/`, `mobs`, `/`, fmt.Sprintf("%s.yaml", fileName))
 
 	err = os.WriteFile(saveFilePath, bytes, 0644)
 	if err != nil {
@@ -661,7 +661,7 @@ func (m *Mob) GetScriptPath() string {
 	}
 
 	scriptFilePath := `scripts/` + strings.Replace(mobFilePath, `.yaml`, newExt, 1)
-	fullScriptPath := strings.Replace(configs.GetFilePathsConfig().FolderDataFiles.String()+`/mobs/`+m.Filepath(),
+	fullScriptPath := strings.Replace(configs.GetFilePathsConfig().DataFiles.String()+`/mobs/`+m.Filepath(),
 		mobFilePath,
 		scriptFilePath,
 		1)
@@ -727,7 +727,7 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpMobs, err := fileloader.LoadAllFlatFiles[int, *Mob](configs.GetFilePathsConfig().FolderDataFiles.String() + `/mobs`)
+	tmpMobs, err := fileloader.LoadAllFlatFiles[int, *Mob](configs.GetFilePathsConfig().DataFiles.String() + `/mobs`)
 	if err != nil {
 		panic(err)
 	}

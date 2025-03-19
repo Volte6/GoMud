@@ -287,7 +287,7 @@ func (m *MutatorSpec) Save() error {
 		return err
 	}
 
-	saveFilePath := util.FilePath(configs.GetFilePathsConfig().FolderDataFiles.String(), `/`, `mutators`, `/`, fmt.Sprintf("%s.yaml", fileName))
+	saveFilePath := util.FilePath(configs.GetFilePathsConfig().DataFiles.String(), `/`, `mutators`, `/`, fmt.Sprintf("%s.yaml", fileName))
 
 	err = os.WriteFile(saveFilePath, bytes, 0644)
 	if err != nil {
@@ -323,7 +323,7 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpMutators, err := fileloader.LoadAllFlatFiles[string, *MutatorSpec](configs.GetFilePathsConfig().FolderDataFiles.String() + `/mutators`)
+	tmpMutators, err := fileloader.LoadAllFlatFiles[string, *MutatorSpec](configs.GetFilePathsConfig().DataFiles.String() + `/mutators`)
 	if err != nil {
 		panic(err)
 	}

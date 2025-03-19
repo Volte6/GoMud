@@ -32,12 +32,13 @@ import (
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/language"
-	"github.com/volte6/gomud/internal/leaderboard"
+
 	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/mutators"
 	"github.com/volte6/gomud/internal/pets"
+	"github.com/volte6/gomud/internal/plugins"
 	"github.com/volte6/gomud/internal/quests"
 	"github.com/volte6/gomud/internal/races"
 	"github.com/volte6/gomud/internal/rooms"
@@ -49,6 +50,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 	"github.com/volte6/gomud/internal/web"
+	_ "github.com/volte6/gomud/modules"
 	textLang "golang.org/x/text/language"
 )
 
@@ -99,7 +101,7 @@ func main() {
 	if len(c.Translation.LanguagePaths) == 0 {
 		c.Translation.LanguagePaths = []string{
 			path.Join("_datafiles", "localize"),
-			path.Join(c.FilePaths.FolderDataFiles.String(), "localize"),
+			path.Join(c.FilePaths.DataFiles.String(), "localize"),
 		}
 	}
 
@@ -128,12 +130,15 @@ func main() {
 	//
 	mudlog.Info(`========================`)
 
+	// Register the plugin filesystem with the template system
+	templates.RegisterFS(plugins.GetRegistryFS())
+
 	//
 	// System Configurations
 	runtime.GOMAXPROCS(int(c.Server.MaxCPUCores))
 
 	// Validate chosen world:
-	if err := util.ValidateWorldFiles(`_datafiles/world/default`, c.FilePaths.FolderDataFiles.String()); err != nil {
+	if err := util.ValidateWorldFiles(`_datafiles/world/default`, c.FilePaths.DataFiles.String()); err != nil {
 		mudlog.Error("World Validation", "error", err)
 		os.Exit(1)
 	}
@@ -178,7 +183,7 @@ func main() {
 	mudlog.Info("UserIndex", "info", "User index recreated.")
 
 	// Load the round count from the file
-	if util.LoadRoundCount(c.FilePaths.FolderDataFiles.String()+`/`+util.RoundCountFilename) == util.RoundCountMinimum {
+	if util.LoadRoundCount(c.FilePaths.DataFiles.String()+`/`+util.RoundCountFilename) == util.RoundCountMinimum {
 		gametime.SetToDay(-3)
 	}
 
@@ -189,10 +194,10 @@ func main() {
 	//
 	mudlog.Info(`========================`)
 
-	//
-	// Generate initial leaderboard cache
-	//
-	leaderboard.Update()
+	// Trigger the load plugins event
+	plugins.Load(
+		configs.GetFilePathsConfig().DataFiles.String(),
+	)
 
 	//
 	// Capture OS signals to gracefully shutdown the server
@@ -239,7 +244,7 @@ func main() {
 
 	serverAlive.Store(false) // immediately stop processing incoming connections
 
-	util.SaveRoundCount(c.FilePaths.FolderDataFiles.String() + `/` + util.RoundCountFilename)
+	util.SaveRoundCount(c.FilePaths.DataFiles.String() + `/` + util.RoundCountFilename)
 
 	// some last minute stats reporting
 	totalConnections, totalDisconnections := connections.Stats()
@@ -258,6 +263,8 @@ func main() {
 	}
 
 	web.Shutdown()
+
+	plugins.Save()
 
 	// Just an ephemeral goroutine that spins its wheels until the program shuts down")
 	go func() {

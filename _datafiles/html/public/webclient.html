@@ -18,5 +18,9 @@
     }
     window.addEventListener("load", resizeClientIFrame);
     window.addEventListener('resize', resizeClientIFrame);
+    window.addEventListener('beforeunload', function(event) {
+        event.preventDefault();
+        event.returnValue = 'Leave/Disconnect from the MUD?';
+    });
 </script>
 {{template "footer" .}}

@@ -577,7 +577,7 @@ loop:
 
 			w.UpdateStats()
 			// save the round counter.
-			util.SaveRoundCount(c.FilePaths.FolderDataFiles.String() + `/` + util.RoundCountFilename)
+			util.SaveRoundCount(c.FilePaths.DataFiles.String() + `/` + util.RoundCountFilename)
 
 			util.UnlockMud()
 

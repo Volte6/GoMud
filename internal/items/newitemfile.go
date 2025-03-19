@@ -34,7 +34,7 @@ func CreateNewItemFile(newItemInfo ItemSpec) (int, error) {
 		saveModes = append(saveModes, fileloader.SaveCareful)
 	}
 
-	if err := fileloader.SaveFlatFile[*ItemSpec](configs.GetFilePathsConfig().FolderDataFiles.String()+`/items`, &newItemInfo, saveModes...); err != nil {
+	if err := fileloader.SaveFlatFile[*ItemSpec](configs.GetFilePathsConfig().DataFiles.String()+`/items`, &newItemInfo, saveModes...); err != nil {
 		return 0, err
 	}
 

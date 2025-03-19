@@ -2,9 +2,9 @@ package configs
 
 type FilePaths struct {
 	WebCDNLocation   ConfigString `yaml:"WebCDNLocation"`
-	FolderDataFiles  ConfigString `yaml:"FolderDataFiles"`
-	FolderPublicHtml ConfigString `yaml:"FolderPublicHtml"`
-	FolderAdminHtml  ConfigString `yaml:"FolderAdminHtml"`
+	DataFiles        ConfigString `yaml:"DataFiles"`
+	PublicHtml       ConfigString `yaml:"PublicHtml"`
+	AdminHtml        ConfigString `yaml:"AdminHtml"`
 	HttpsCertFile    ConfigString `yaml:"HttpsCertFile"`
 	HttpsKeyFile     ConfigString `yaml:"HttpsKeyFile"`
 	CarefulSaveFiles ConfigBool   `yaml:"CarefulSaveFiles"`
@@ -13,12 +13,12 @@ type FilePaths struct {
 func (f *FilePaths) Validate() {
 
 	// Ignore WebCDNLocation
-	// Ignore FolderPublicHtml
-	// Ignore FolderAdminHtml
+	// Ignore PublicHtml
+	// Ignore AdminHtml
 	// Ignore CarefulSaveFiles
 
-	if f.FolderDataFiles == `` {
-		f.FolderDataFiles = `_datafiles/world/default` // default
+	if f.DataFiles == `` {
+		f.DataFiles = `_datafiles/world/default` // default
 	}
 
 }
