@@ -1327,7 +1327,7 @@ func (r *Room) GetDescriptionFormatted(lineSplit int, highlightNouns bool) strin
 
 	if highlightNouns {
 		for noun, _ := range r.Nouns {
-			desc = strings.ReplaceAll(desc, noun, fmt.Sprintf("<ansi fg=\"187\">%s</ansi>", noun))
+			desc = strings.ReplaceAll(desc, noun, fmt.Sprintf(`<ansi fg="noun">%s</ansi>`, noun))
 		}
 	}
 
