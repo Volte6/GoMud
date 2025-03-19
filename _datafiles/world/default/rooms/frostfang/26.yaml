@@ -20,10 +20,10 @@ exits:
   south:
     roomid: 25
 nouns:
+  bird: :raven
   raven: Looking more closely, the eyes of the raven are made of onyx. They are clean
     and clear, as if polished.
   raven's eyes: :raven
-  bird: :raven
 spawninfo:
 - mobid: 1
   message: A rat scurries out from a dark hole and wiggles its whiskers.

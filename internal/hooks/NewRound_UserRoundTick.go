@@ -31,13 +31,25 @@ func UserRoundTick(e events.Event) bool {
 			}
 
 			if allowIdleMessages {
+
 				chanceIn100 := 5
 				if room.RoomId == -1 {
 					chanceIn100 = 20
 				}
 
-				idleMsgs := room.IdleMessages
-				idleMsgCt := len(room.IdleMessages)
+				var idleMsgs []string
+
+				if len(room.IdleMessages) > 0 {
+					idleMsgs = room.IdleMessages
+				} else {
+					if zCfg := rooms.GetZoneConfig(room.Zone); zCfg != nil {
+						if len(zCfg.IdleMessages) > 0 {
+							idleMsgs = zCfg.IdleMessages
+						}
+					}
+				}
+
+				idleMsgCt := len(idleMsgs)
 				if idleMsgCt > 0 && util.Rand(100) < chanceIn100 {
 
 					if targetRoomId, err := strconv.Atoi(idleMsgs[0]); err == nil {
