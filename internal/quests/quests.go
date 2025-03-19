@@ -184,7 +184,7 @@ func LoadDataFiles() {
 
 	start := time.Now()
 
-	tmpQuests, err := fileloader.LoadAllFlatFiles[int, *Quest](configs.GetFilePathsConfig().FolderDataFiles.String() + `/quests`)
+	tmpQuests, err := fileloader.LoadAllFlatFiles[int, *Quest](configs.GetFilePathsConfig().DataFiles.String() + `/quests`)
 	if err != nil {
 		panic(err)
 	}

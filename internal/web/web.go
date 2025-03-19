@@ -36,7 +36,7 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 
 	if httpRoot == "" {
 
-		httpRoot = filepath.Clean(configs.GetFilePathsConfig().FolderPublicHtml.String())
+		httpRoot = filepath.Clean(configs.GetFilePathsConfig().PublicHtml.String())
 	}
 
 	// Clean the path to prevent directory traversal.
@@ -145,7 +145,7 @@ func Listen(webPort int, webHttpsPort int, wg *sync.WaitGroup, webSocketHandler 
 	http.Handle("GET /admin/static/", RunWithMUDLocked(
 		doBasicAuth(
 			handlerToHandlerFunc(
-				http.StripPrefix("/admin/static/", http.FileServer(http.Dir(configs.GetFilePathsConfig().FolderAdminHtml.String()+"/static"))),
+				http.StripPrefix("/admin/static/", http.FileServer(http.Dir(configs.GetFilePathsConfig().AdminHtml.String()+"/static"))),
 			),
 		),
 	))

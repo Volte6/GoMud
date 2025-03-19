@@ -17,7 +17,7 @@ import (
 
 func mobsIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetFilePathsConfig().FolderAdminHtml.String()+"/_header.html", configs.GetFilePathsConfig().FolderAdminHtml.String()+"/mobs/index.html", configs.GetFilePathsConfig().FolderAdminHtml.String()+"/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetFilePathsConfig().AdminHtml.String()+"/_header.html", configs.GetFilePathsConfig().AdminHtml.String()+"/mobs/index.html", configs.GetFilePathsConfig().AdminHtml.String()+"/_footer.html")
 	if err != nil {
 		mudlog.Error("HTML Template", "error", err)
 	}
@@ -41,7 +41,7 @@ func mobsIndex(w http.ResponseWriter, r *http.Request) {
 
 func mobData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("mob.data.html").Funcs(funcMap).ParseFiles(configs.GetFilePathsConfig().FolderAdminHtml.String() + "/mobs/mob.data.html")
+	tmpl, err := template.New("mob.data.html").Funcs(funcMap).ParseFiles(configs.GetFilePathsConfig().AdminHtml.String() + "/mobs/mob.data.html")
 	if err != nil {
 		mudlog.Error("HTML Template", "error", err)
 	}

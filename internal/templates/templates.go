@@ -3,6 +3,7 @@ package templates
 import (
 	"bytes"
 	"fmt"
+	"io/fs"
 	"os"
 	"strings"
 	"sync"
@@ -14,6 +15,7 @@ import (
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mudlog"
+
 	"github.com/volte6/gomud/internal/util"
 )
 
@@ -43,11 +45,38 @@ var (
 	forceAnsiFlags       = AnsiTagsParse
 	ansiLock             sync.RWMutex
 	ansiAliasFileModTime time.Time
+
+	fileSystems []fs.ReadFileFS
 )
+
+func RegisterFS(f fs.ReadFileFS) {
+	fileSystems = append(fileSystems, f)
+}
+
+func readFile(path string) (b []byte, err error) {
+
+	for _, f := range fileSystems {
+		if b, err = f.ReadFile(path); err == nil {
+			return b, nil
+		}
+	}
+
+	return b, err
+}
 
 func Exists(name string) bool {
 
-	var fullPath string = util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles)+`/templates`, `/`, name+`.template`)
+	// First check registered file systems (plugins?)
+	path := util.FilePath(`templates`, `/`, name+`.template`)
+	for _, f := range fileSystems {
+		if fsFile, err := f.Open(path); err == nil {
+			fsFile.Close()
+			return true
+		}
+	}
+
+	// Now check datafiles
+	var fullPath string = util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/`, path)
 	_, err := os.Stat(fullPath)
 
 	return err == nil
@@ -84,57 +113,79 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 		}
 	}
 
-	// All templates must end with .template
-	var fullPath string = util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `templates`, `/`, name+`.template`)
+	var buf bytes.Buffer
 
-	fInfo, err := os.Stat(fullPath)
-	if err != nil {
-		//mudlog.Error("could not stat template file", "error", err)
-		return "[TEMPLATE READ ERROR]", err
-	}
+	if fileBytes, err := readFile(util.FilePath(`templates`, `/`, name+`.template`)); err == nil {
 
-	var cache cacheEntry
-	var ok bool
-
-	cacheLock.Lock()
-	defer cacheLock.Unlock()
-
-	// check if the template is in the cache
-	if cache, ok = templateCache[name]; !ok || cache.older(fInfo.ModTime()) {
-
-		// Get the file contents
-		fileContents, err := os.ReadFile(fullPath)
+		tpl, err := template.New(name).Funcs(funcMap).Parse(string(fileBytes))
 		if err != nil {
-			mudlog.Error("could not read template file", "error", err)
+			return string(fileBytes), err
+		}
+
+		err = tpl.Execute(&buf, data)
+		if err != nil {
+			mudlog.Error("could not parse template file", "error", err)
+			return "[TEMPLATE ERROR]", err
+		}
+
+		// return the final data as a string, parse ansi tags if needed (No need to parse if it was preparsed)
+		if parseAnsiTags {
+			return ansitags.Parse(buf.String(), ansitagsParseBehavior...), nil
+		}
+
+	} else {
+		// All templates must end with .template
+		var fullPath string = util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/`, `templates`, `/`, name+`.template`)
+
+		fInfo, err := os.Stat(fullPath)
+		if err != nil {
+			//mudlog.Error("could not stat template file", "error", err)
 			return "[TEMPLATE READ ERROR]", err
 		}
 
-		if parseAnsiTags && preParseAnsiTags {
-			fileContents = []byte(ansitags.Parse(string(fileContents), ansitagsParseBehavior...))
+		var cache cacheEntry
+		var ok bool
+
+		cacheLock.Lock()
+		defer cacheLock.Unlock()
+
+		// check if the template is in the cache
+		if cache, ok = templateCache[name]; !ok || cache.older(fInfo.ModTime()) {
+
+			// Get the file contents
+			fileContents, err := os.ReadFile(fullPath)
+			if err != nil {
+				mudlog.Error("could not read template file", "error", err)
+				return "[TEMPLATE READ ERROR]", err
+			}
+
+			if parseAnsiTags && preParseAnsiTags {
+				fileContents = []byte(ansitags.Parse(string(fileContents), ansitagsParseBehavior...))
+			}
+
+			// parse the file contents as a template
+			tpl, err := template.New(name).Funcs(funcMap).Parse(string(fileContents))
+			if err != nil {
+				return string(fileContents), err
+			}
+
+			// add the template to the cache
+			cache = cacheEntry{tpl: tpl, modified: fInfo.ModTime(), ansiPreparsed: preParseAnsiTags}
+			templateCache[name] = cache
 		}
 
-		// parse the file contents as a template
-		tpl, err := template.New(name).Funcs(funcMap).Parse(string(fileContents))
+		// execute the template and store the results into a buffer
+
+		err = cache.tpl.Execute(&buf, data)
 		if err != nil {
-			return string(fileContents), err
+			mudlog.Error("could not parse template file", "error", err)
+			return "[TEMPLATE ERROR]", err
 		}
 
-		// add the template to the cache
-		cache = cacheEntry{tpl: tpl, modified: fInfo.ModTime(), ansiPreparsed: preParseAnsiTags}
-		templateCache[name] = cache
-	}
-
-	// execute the template and store the results into a buffer
-	var buf bytes.Buffer
-	err = cache.tpl.Execute(&buf, data)
-	if err != nil {
-		mudlog.Error("could not parse template file", "error", err)
-		return "[TEMPLATE ERROR]", err
-	}
-
-	// return the final data as a string, parse ansi tags if needed (No need to parse if it was preparsed)
-	if parseAnsiTags && !cache.ansiPreparsed {
-		return ansitags.Parse(buf.String(), ansitagsParseBehavior...), nil
+		// return the final data as a string, parse ansi tags if needed (No need to parse if it was preparsed)
+		if parseAnsiTags && !cache.ansiPreparsed {
+			return ansitags.Parse(buf.String(), ansitagsParseBehavior...), nil
+		}
 	}
 
 	return buf.String(), nil
@@ -331,7 +382,7 @@ func AnsiParse(input string) string {
 func LoadAliases() {
 
 	// Get the file info
-	fInfo, err := os.Stat(util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles) + `/ansi-aliases.yaml`))
+	fInfo, err := os.Stat(util.FilePath(string(configs.GetFilePathsConfig().DataFiles) + `/ansi-aliases.yaml`))
 	// check if filemtime is not ansiAliasFileModTime
 	if err != nil || fInfo.ModTime() == ansiAliasFileModTime {
 		return
@@ -346,7 +397,7 @@ func LoadAliases() {
 	start := time.Now()
 
 	ansiAliasFileModTime = fInfo.ModTime()
-	if err = ansitags.LoadAliases(util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles) + `/ansi-aliases.yaml`)); err != nil {
+	if err = ansitags.LoadAliases(util.FilePath(string(configs.GetFilePathsConfig().DataFiles) + `/ansi-aliases.yaml`)); err != nil {
 		mudlog.Info("ansitags.LoadAliases()", "changed", true, "Time Taken", time.Since(start), "error", err.Error())
 	}
 

@@ -6,7 +6,6 @@ import (
 
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/leaderboard"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/term"
@@ -59,8 +58,6 @@ func AutoSave(e events.Event) bool {
 		})
 
 		tStart = time.Now()
-
-		leaderboard.Update()
 
 		util.TrackTime(`Leaderboards`, time.Since(tStart).Seconds())
 

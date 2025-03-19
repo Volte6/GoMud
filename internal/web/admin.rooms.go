@@ -25,7 +25,7 @@ type ZoneDetails struct {
 
 func roomsIndex(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetFilePathsConfig().FolderAdminHtml.String()+"/_header.html", configs.GetFilePathsConfig().FolderAdminHtml.String()+"/rooms/index.html", configs.GetFilePathsConfig().FolderAdminHtml.String()+"/_footer.html")
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFiles(configs.GetFilePathsConfig().AdminHtml.String()+"/_header.html", configs.GetFilePathsConfig().AdminHtml.String()+"/rooms/index.html", configs.GetFilePathsConfig().AdminHtml.String()+"/_footer.html")
 	if err != nil {
 		mudlog.Error("HTML Template", "error", err)
 	}
@@ -141,7 +141,7 @@ func roomsIndex(w http.ResponseWriter, r *http.Request) {
 
 func roomData(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.New("room.data.html").Funcs(funcMap).ParseFiles(configs.GetFilePathsConfig().FolderAdminHtml.String() + "/rooms/room.data.html")
+	tmpl, err := template.New("room.data.html").Funcs(funcMap).ParseFiles(configs.GetFilePathsConfig().AdminHtml.String() + "/rooms/room.data.html")
 	if err != nil {
 		mudlog.Error("HTML Template", "error", err)
 	}

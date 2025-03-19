@@ -30,7 +30,7 @@ func LoadAudioConfig() {
 
 	start := time.Now()
 
-	path := string(configs.GetFilePathsConfig().FolderDataFiles) + `/audio.yaml`
+	path := string(configs.GetFilePathsConfig().DataFiles) + `/audio.yaml`
 
 	bytes, err := os.ReadFile(path)
 	if err != nil {

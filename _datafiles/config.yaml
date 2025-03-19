@@ -75,8 +75,9 @@ Server:
   #   It is a good idea to lock configs related to folder/file paths to prevent
   #   accidental changes that could break the game.
   Locked:
-  - FolderDataFiles
-  - FolderHtmlFiles
+  - DataFiles
+  - PublicHtml
+  - AdminHtml
   - NextRoomId
   - Seed
   - OnLoginCommands
@@ -208,17 +209,17 @@ FilePaths:
   #   Example: http://files.gomud.net
   #   Leave blank if no CDN config or similar desired
   WebCDNLocation: ""
-  # - FolderDataFiles -
+  # - DataFiles -
   #   The folder where all datafiles reside.
   #   If you are planning to create your own world, copying the current folder
   #   and its entire tree of content is a good place to start.
-  FolderDataFiles: _datafiles/world/default
-  # - FolderPublicHtml -
+  DataFiles: _datafiles/world/default
+  # - PublicHtml -
   #   The folder where all web html files/templates reside.
-  FolderPublicHtml: _datafiles/html/public
-  # - FolderPublicHtml -
+  PublicHtml: _datafiles/html/public
+  # - PublicHtml -
   #   The folder where all web ADMIN files/templates reside.
-  FolderAdminHtml: _datafiles/html/admin
+  AdminHtml: _datafiles/html/admin
   # - CarefulSaveFiles -
   #   If true, save files will be written to a temporary file and then saved over
   #   the actual file. This takes longer, but helps prevent file corruption if

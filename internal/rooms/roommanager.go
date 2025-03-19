@@ -430,7 +430,7 @@ func SaveAllRooms() error {
 		saveModes = append(saveModes, fileloader.SaveCareful)
 	}
 
-	saveCt, err := fileloader.SaveAllFlatFiles[int, *Room](configs.GetFilePathsConfig().FolderDataFiles.String()+`/rooms`, roomManager.rooms, saveModes...)
+	saveCt, err := fileloader.SaveAllFlatFiles[int, *Room](configs.GetFilePathsConfig().DataFiles.String()+`/rooms`, roomManager.rooms, saveModes...)
 
 	mudlog.Info("SaveAllRooms()", "savedCount", saveCt, "expectedCt", len(roomManager.rooms), "Time Taken", time.Since(start))
 
@@ -448,7 +448,7 @@ func loadAllRoomZones() error {
 		}
 	}()
 
-	loadedRooms, err := fileloader.LoadAllFlatFiles[int, *Room](configs.GetFilePathsConfig().FolderDataFiles.String() + `/rooms`)
+	loadedRooms, err := fileloader.LoadAllFlatFiles[int, *Room](configs.GetFilePathsConfig().DataFiles.String() + `/rooms`)
 	if err != nil {
 		return err
 	}
@@ -551,14 +551,14 @@ func removeRoomFromMemory(r *Room) {
 		}
 	}
 
-	beforeCt := len(roomManager.rooms)
+	//beforeCt := len(roomManager.rooms)
 
 	SaveRoom(*room)
 	delete(roomManager.rooms, r.RoomId)
 
-	afterCt := len(roomManager.rooms)
+	//afterCt := len(roomManager.rooms)
 
-	mudlog.Info("Removing from memory", "RoomId", r.RoomId, "Title", r.Title, "beforeCt", beforeCt, "afterCt", afterCt)
+	//mudlog.Info("Removing from memory", "RoomId", r.RoomId, "Title", r.Title, "beforeCt", beforeCt, "afterCt", afterCt)
 }
 
 // Loads a room from disk and stores in memory
@@ -611,7 +611,7 @@ func findRoomFile(roomId int) string {
 	foundFilePath := ``
 	searchFileName := filepath.FromSlash(fmt.Sprintf(`/%d.yaml`, roomId))
 
-	walkPath := filepath.FromSlash(configs.GetFilePathsConfig().FolderDataFiles.String() + `/rooms`)
+	walkPath := filepath.FromSlash(configs.GetFilePathsConfig().DataFiles.String() + `/rooms`)
 
 	filepath.Walk(walkPath, func(path string, info os.FileInfo, err error) error {
 
@@ -695,7 +695,7 @@ func LoadRoom(roomId int) *Room {
 		return nil
 	}
 
-	retRoom, _ := loadRoomFromFile(util.FilePath(configs.GetFilePathsConfig().FolderDataFiles.String(), `/`, `rooms`, `/`, filename))
+	retRoom, _ := loadRoomFromFile(util.FilePath(configs.GetFilePathsConfig().DataFiles.String(), `/`, `rooms`, `/`, filename))
 
 	addRoomToMemory(retRoom)
 
@@ -718,13 +718,13 @@ func SaveRoom(r Room) error {
 
 	zone := ZoneToFolder(r.Zone)
 
-	roomFilePath := util.FilePath(configs.GetFilePathsConfig().FolderDataFiles.String(), `/`, `rooms`, `/`, fmt.Sprintf("%s%d.yaml", zone, r.RoomId))
+	roomFilePath := util.FilePath(configs.GetFilePathsConfig().DataFiles.String(), `/`, `rooms`, `/`, fmt.Sprintf("%s%d.yaml", zone, r.RoomId))
 
 	if err = os.WriteFile(roomFilePath, data, 0777); err != nil {
 		return err
 	}
 
-	mudlog.Info("Saved room", "room", r.RoomId)
+	//mudlog.Info("Saved room", "room", r.RoomId)
 
 	return nil
 }
@@ -803,7 +803,7 @@ func MoveToZone(roomId int, newZoneName string) error {
 	if !ok {
 		return errors.New("old zone doesn't exist")
 	}
-	oldFilePath := fmt.Sprintf("%s/rooms/%s", configs.GetFilePathsConfig().FolderDataFiles.String(), room.Filepath())
+	oldFilePath := fmt.Sprintf("%s/rooms/%s", configs.GetFilePathsConfig().DataFiles.String(), room.Filepath())
 
 	newZoneInfo, ok := roomManager.zones[newZoneName]
 	if !ok {
@@ -815,7 +815,7 @@ func MoveToZone(roomId int, newZoneName string) error {
 	}
 
 	room.Zone = newZoneName
-	newFilePath := fmt.Sprintf("%s/rooms/%s", configs.GetFilePathsConfig().FolderDataFiles.String(), room.Filepath())
+	newFilePath := fmt.Sprintf("%s/rooms/%s", configs.GetFilePathsConfig().DataFiles.String(), room.Filepath())
 
 	if err := os.Rename(oldFilePath, newFilePath); err != nil {
 		return err
@@ -847,7 +847,7 @@ func CreateZone(zoneName string) (roomId int, err error) {
 		return zoneInfo.RootRoomId, errors.New("zone already exists")
 	}
 
-	zoneFolder := util.FilePath(configs.GetFilePathsConfig().FolderDataFiles.String(), "/", "rooms", "/", ZoneToFolder(zoneName))
+	zoneFolder := util.FilePath(configs.GetFilePathsConfig().DataFiles.String(), "/", "rooms", "/", ZoneToFolder(zoneName))
 	if err := os.Mkdir(zoneFolder, 0755); err != nil {
 		return 0, err
 	}

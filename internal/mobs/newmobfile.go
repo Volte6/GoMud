@@ -46,7 +46,7 @@ func CreateNewMobFile(newMobInfo Mob, copyScript string) (MobId, error) {
 		saveModes = append(saveModes, fileloader.SaveCareful)
 	}
 
-	if err := fileloader.SaveFlatFile[*Mob](configs.GetFilePathsConfig().FolderDataFiles.String()+`/mobs`, &newMobInfo, saveModes...); err != nil {
+	if err := fileloader.SaveFlatFile[*Mob](configs.GetFilePathsConfig().DataFiles.String()+`/mobs`, &newMobInfo, saveModes...); err != nil {
 		return 0, err
 	}
 

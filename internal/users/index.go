@@ -51,7 +51,7 @@ type UserIndex struct {
 
 // NewUserIndex creates a new instance of UserIndex using the configured file path.
 func NewUserIndex() *UserIndex {
-	filename := util.FilePath(string(configs.GetFilePathsConfig().FolderDataFiles), `/`, `users`, `/`, `users.idx`)
+	filename := util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/`, `users`, `/`, `users.idx`)
 	idx := &UserIndex{Filename: filename}
 	if idx.Exists() {
 		idx.metaData = idx.getMetaDataFromFile()
