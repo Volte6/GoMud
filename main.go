@@ -264,6 +264,7 @@ func main() {
 
 	web.Shutdown()
 
+	// Final plugin save before shutting down
 	plugins.Save()
 
 	// Just an ephemeral goroutine that spins its wheels until the program shuts down")

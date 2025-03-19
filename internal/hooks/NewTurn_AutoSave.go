@@ -7,6 +7,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/volte6/gomud/internal/plugins"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
@@ -49,6 +50,9 @@ func AutoSave(e events.Event) bool {
 			Text:            `Done.` + term.CRLFStr,
 			SkipLineRefresh: true,
 		})
+
+		// Save plugin states if applicable
+		plugins.Save()
 
 		util.TrackTime(`Save Game State`, time.Since(tStart).Seconds())
 
