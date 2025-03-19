@@ -32,7 +32,7 @@ nouns:
     on ancient bones and forgotten relics. Dyed with natural pigments and crafted
     with unparalleled skill, these artworks serve as visual scriptures, illustrating
     religious teachings, historical legends, and mysterious tales.
-  walls: :tapestry
+  walls: :tapestries
 spawninfo:
 - mobid: 4
   message: A priest emerges from a confession booth

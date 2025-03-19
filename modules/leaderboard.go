@@ -167,7 +167,6 @@ func (l *LeaderboardModule) Reset(maxSize int) {
 }
 
 func (l *LeaderboardModule) Update() {
-	fmt.Println("RUNNING UPDATE")
 	start := time.Now()
 
 	lbConfig := configs.GetStatisticsConfig().Leaderboards

@@ -19,9 +19,7 @@ nouns:
   sarcophagus: The sarcophagus lies solemn and imposing, its ancient stone surface
     etched with enigmatic runes and the stern visage of the entombed sovereign, exuding
     an air of timeless dominion and whispered dread.
-  tomb: The sarcophagus lies solemn and imposing, its ancient stone surface etched
-    with enigmatic runes and the stern visage of the entombed sovereign, exuding an
-    air of timeless dominion and whispered dread.
+  tomb: :sarcophagus
 spawninfo:
 - mobid: 17
   message: A dark acolyte steps into the room.
