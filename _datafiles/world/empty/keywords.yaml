@@ -69,7 +69,6 @@ help:
       - races
       - who
       - time
-      - leaderboard
       - history
     items:
       - drop
@@ -181,7 +180,6 @@ help-aliases:
   trading:          [haggle]
   pets:             [pet]
   macros:           [macro]
-  leaderboard:      [leaderboards, highscore, topscore]
   history:          ['log']
   time:             ['date']
   pvp:              ['pk']
@@ -223,7 +221,6 @@ command-aliases:
   buy:              ['hire']
   trash:            ['junk']
   put:              ['place']
-  leaderboard:      ['leaderboards', 'highscore', 'topscore']
   history:          ['log']
   time:             ['date']
   noop:             ['wake']

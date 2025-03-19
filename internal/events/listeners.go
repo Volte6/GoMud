@@ -73,6 +73,7 @@ func RegisterListener(emptyEvent Event, cbFunc Listener, qFlag ...QueueFlag) Lis
 
 		insertPosition := 0
 		for idx := 0; idx < len(eventListeners[eType]); idx++ {
+			// If we're looking at a "final" listener, we can't go any farther down the list
 			if !eventListeners[eType][idx].isFinal {
 				insertPosition = idx
 				continue

@@ -213,6 +213,18 @@ type PlayerDeath struct {
 
 func (l PlayerDeath) Type() string { return `PlayerDeath` }
 
+type MobDeath struct {
+	MobId         int
+	InstanceId    int
+	RoomId        int
+	CharacterName string
+	Level         int
+	Experience    int
+	PlayerDamage  map[int]int
+}
+
+func (l MobDeath) Type() string { return `MobDeath` }
+
 type DayNightCycle struct {
 	IsSunrise bool
 	Day       int

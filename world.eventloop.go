@@ -83,9 +83,17 @@ func (w *World) EventLoop() {
 	}
 
 	//
-	// Death Notifications
+	// Player Death Notifications
 	//
 	eq = events.GetQueue(events.PlayerDeath{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
+	// Mob Death Notifications
+	//
+	eq = events.GetQueue(events.MobDeath{})
 	for eq.Len() > 0 {
 		events.DoListeners(eq.Poll())
 	}

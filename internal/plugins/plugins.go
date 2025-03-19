@@ -20,6 +20,10 @@ import (
 // To add new plugins, they must be dropped in this folder and the server re-compiled.
 //
 
+// pluginRegistry holds all plugins, provides a `fs.ReadFileFS` interface
+type pluginRegistry []*Plugin
+type FileType int
+
 var (
 	registrationOpen = true
 	registry         = pluginRegistry{}
@@ -28,18 +32,12 @@ var (
 )
 
 const (
-	dataFilesFolder = `datafiles` + string(filepath.Separator)
+	dataFilesFolder         = `datafiles` + string(filepath.Separator)
+	dataOverlaysFilesFolder = `data-overlays` + string(filepath.Separator)
 )
-
-// pluginRegistry holds all plugins, provides a `fs.ReadFileFS` interface
-type pluginRegistry []*Plugin
 
 func (p pluginRegistry) ReadFile(name string) ([]byte, error) {
 	for _, p := range registry {
-
-		if p.files.fileCount < 0 {
-			continue
-		}
 
 		if embedPath, ok := p.files.filePaths[name]; ok {
 			b, err := p.files.fileSystem.ReadFile(embedPath)
@@ -56,10 +54,6 @@ func (p pluginRegistry) Open(name string) (fs.File, error) {
 
 	for _, p := range registry {
 
-		if p.files.fileCount < 0 {
-			continue
-		}
-
 		if embedPath, ok := p.files.filePaths[name]; ok {
 			return p.files.fileSystem.Open(embedPath)
 
@@ -73,10 +67,6 @@ func (p pluginRegistry) Open(name string) (fs.File, error) {
 func (p pluginRegistry) Stat(name string) (fs.FileInfo, error) {
 
 	for _, p := range registry {
-
-		if p.files.fileCount < 0 {
-			continue
-		}
 
 		if embedPath, ok := p.files.filePaths[name]; ok {
 			return fs.Stat(p.files.fileSystem, embedPath)
@@ -106,7 +96,6 @@ type Plugin struct {
 	// helper for embedded files
 	files struct {
 		fileSystem embed.FS
-		fileCount  int
 		filePaths  map[string]string
 	}
 }
@@ -141,7 +130,6 @@ func (p *Plugin) AddUserCommand(command string, handlerFunc usercommands.UserCom
 		AllowedWhenDowned: allowWhenDowned,
 		AdminOnly:         isAdminOnly,
 	}
-
 }
 
 // Registers a MobCommand and callback
@@ -161,8 +149,9 @@ func (p *Plugin) AddMobCommand(command string, handlerFunc mobcommands.MobComman
 // Adds an embedded file system to the plugin
 func (p *Plugin) AttachFileSystem(f embed.FS) error {
 
-	p.files.filePaths = make(map[string]string)
 	p.files.fileSystem = f
+
+	p.files.filePaths = make(map[string]string)
 
 	// Walk the directory tree rooted at "datafiles"
 	err := fs.WalkDir(p.files.fileSystem, `.`, func(path string, d fs.DirEntry, err error) error {
@@ -177,15 +166,21 @@ func (p *Plugin) AttachFileSystem(f embed.FS) error {
 
 		// Handle datafiles folder.
 		dfPos := strings.Index(path, dataFilesFolder)
-
-		// Not found? Skip it. We only handle everything under datafiles.
-		if dfPos == -1 {
+		if dfPos != -1 {
+			// map the short path to long embedded path
+			p.files.filePaths[path[dfPos+len(dataFilesFolder):]] = path
 			return nil
 		}
 
-		// map the short path to long embedded path
-		p.files.filePaths[path[dfPos+len(dataFilesFolder):]] = path
-		p.files.fileCount++
+		// Handle data-overlays folder.
+		// This is a special folder that overlays data onto other data
+		dfPos = strings.Index(path, dataOverlaysFilesFolder)
+		if dfPos != -1 {
+			// map the short path to long embedded path
+			// Put data-overlays/ prefix on for purposes of filefinding later.
+			p.files.filePaths[dataOverlaysFilesFolder+path[dfPos+len(dataOverlaysFilesFolder):]] = path
+			return nil
+		}
 
 		return nil
 	})

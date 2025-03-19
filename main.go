@@ -804,7 +804,7 @@ func loadAllDataFiles(isReload bool) {
 	pets.LoadDataFiles()
 	quests.LoadDataFiles()
 	templates.LoadAliases()
-	keywords.LoadAliases()
+	keywords.LoadAliases(plugins.GetRegistryFS())
 	mutators.LoadDataFiles()
 	colorpatterns.LoadColorPatterns()
 	audio.LoadAudioConfig()
