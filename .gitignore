@@ -10,3 +10,4 @@ server.key
 .DS_Store
 logs/*
 WillowdaleMud
+WillowdaleMUD.pid
