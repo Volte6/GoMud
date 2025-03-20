@@ -483,6 +483,14 @@ func (w *World) EventLoop() {
 	}
 
 	//
+	// Handle PreRoomChange events (if any remain)
+	//
+	eq = events.GetQueue(events.PreRoomChange{})
+	for eq.Len() > 0 {
+		events.DoListeners(eq.Poll())
+	}
+
+	//
 	// Dispatch MSP events
 	//
 	eq = events.GetQueue(events.MSP{})
