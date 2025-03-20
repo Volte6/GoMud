@@ -1,0 +1,42 @@
+[90m[20:39:40][0m [33mWARN: [0m [36mDiscord[39;49m info=[33;49m"integration is disabled"[0m 
+[90m[20:39:40][0m [31mERROR:[0m [36mStarting server[39;49m name=[33;49m"GoMud"[0m              
+[90m[20:39:41][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m1000[0m               filePath=[33;49m"sun_anvil/1000.yaml"[0m 
+[90m[20:39:41][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m830[0m                filePath=[33;49m"dark_forest/830.yaml"[0m 
+[90m[20:39:41][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m1001[0m               filePath=[33;49m"stormshards/1001.yaml"[0m 
+[90m[20:39:41][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m432[0m                filePath=[33;49m"frostfang/432.yaml"[0m 
+[90m[20:39:41][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m828[0m                filePath=[33;49m"frost_lake/828.yaml"[0m 
+[90m[20:39:41][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m138[0m                filePath=[33;49m"catacombs/138.yaml"[0m 
+[90m[20:42:22][0m [31mERROR:[0m [36mStopping server[39;49m LifetimeConnections=[31;49m1[0m     LifetimeDisconnects=[31;49m0[0m     ActiveConnections=[31;49m1[0m       
+[90m[20:42:22][0m [33mWARN: [0m [36mConnections disabled.[39;49m 
+[90m[20:42:22][0m [33mWARN: [0m [36mTelnet               [39;49m error=[37;41mread tcp 127.0.0.1:33333->127.0.0.1:64882: use of closed network connection[0m 
+[90m[20:42:22][0m [33mWARN: [0m [36mConnections disabled.[39;49m 
+[90m[20:42:22][0m [33mWARN: [0m [36mMainWorker           [39;49m action=[33;49m"shutdown received"[0m 
+[90m[20:42:22][0m [33mWARN: [0m [36mWaiting on workers   [39;49m 
+[90m[20:42:22][0m [33mWARN: [0m [36mInputWorker          [39;49m action=[33;49m"shutdown received"[0m 
+[90m[20:42:22][0m [33mWARN: [0m [36mInputWorker          [39;49m state=[33;49m"Stopped"[0m           
+[90m[20:42:22][0m [33mWARN: [0m [36mMainWorker           [39;49m state=[33;49m"Stopped"[0m           
+[90m[20:42:31][0m [33mWARN: [0m [36mDiscord[39;49m info=[33;49m"integration is disabled"[0m 
+[90m[20:42:31][0m [31mERROR:[0m [36mStarting server[39;49m name=[33;49m"GoMud"[0m              
+[90m[20:42:32][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m1000[0m               filePath=[33;49m"sun_anvil/1000.yaml"[0m 
+[90m[20:42:32][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m138[0m                filePath=[33;49m"catacombs/138.yaml"[0m 
+[90m[20:42:32][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m830[0m                filePath=[33;49m"dark_forest/830.yaml"[0m 
+[90m[20:42:32][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m828[0m                filePath=[33;49m"frost_lake/828.yaml"[0m 
+[90m[20:42:32][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m432[0m                filePath=[33;49m"frostfang/432.yaml"[0m 
+[90m[20:42:32][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m1001[0m               filePath=[33;49m"stormshards/1001.yaml"[0m 
+[90m[20:43:45][0m [31mERROR:[0m [36mStopping server[39;49m LifetimeConnections=[31;49m1[0m     LifetimeDisconnects=[31;49m0[0m     ActiveConnections=[31;49m1[0m       
+[90m[20:43:45][0m [33mWARN: [0m [36mConnections disabled.[39;49m 
+[90m[20:43:45][0m [33mWARN: [0m [36mTelnet               [39;49m error=[37;41mread tcp 127.0.0.1:33333->127.0.0.1:64958: use of closed network connection[0m 
+[90m[20:43:45][0m [33mWARN: [0m [36mConnections disabled.[39;49m 
+[90m[20:43:45][0m [33mWARN: [0m [36mMainWorker           [39;49m action=[33;49m"shutdown received"[0m 
+[90m[20:43:45][0m [33mWARN: [0m [36mInputWorker          [39;49m action=[33;49m"shutdown received"[0m 
+[90m[20:43:45][0m [33mWARN: [0m [36mInputWorker          [39;49m state=[33;49m"Stopped"[0m           
+[90m[20:43:45][0m [33mWARN: [0m [36mWaiting on workers   [39;49m 
+[90m[20:43:46][0m [33mWARN: [0m [36mMainWorker           [39;49m state=[33;49m"Stopped"[0m           
+[90m[20:43:51][0m [33mWARN: [0m [36mDiscord[39;49m info=[33;49m"integration is disabled"[0m 
+[90m[20:43:51][0m [31mERROR:[0m [36mStarting server[39;49m name=[33;49m"GoMud"[0m              
+[90m[20:43:52][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m828[0m                filePath=[33;49m"frost_lake/828.yaml"[0m 
+[90m[20:43:52][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m1000[0m               filePath=[33;49m"sun_anvil/1000.yaml"[0m 
+[90m[20:43:52][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m1001[0m               filePath=[33;49m"stormshards/1001.yaml"[0m 
+[90m[20:43:52][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m432[0m                filePath=[33;49m"frostfang/432.yaml"[0m 
+[90m[20:43:52][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m138[0m                filePath=[33;49m"catacombs/138.yaml"[0m 
+[90m[20:43:52][0m [33mWARN: [0m [36mNo Entrance    [39;49m roomId=[31;49m830[0m                filePath=[33;49m"dark_forest/830.yaml"[0m 

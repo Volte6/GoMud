@@ -177,7 +177,7 @@ Timing:
   #   50 is a good balance between handling input from players and not bogging
   #   down the server.
   #   Note: If your automapper/walker seems slow, this is probably the culprit.
-  TurnMs: 50
+  TurnMs: 10
   # - RoundSeconds - 
   #   How many seconds per round. Anything gated by rounds will be affected by
   #   this. This is the main setting for controlling the pace of the game.
