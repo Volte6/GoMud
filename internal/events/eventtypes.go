@@ -123,6 +123,16 @@ type RoomChange struct {
 
 func (r RoomChange) Type() string { return `RoomChange` }
 
+// Fired before a mob or player changes rooms (before description is shown)
+type PreRoomChange struct {
+	UserId        int
+	MobInstanceId int
+	FromRoomId    int
+	ToRoomId      int
+}
+
+func (r PreRoomChange) Type() string { return `PreRoomChange` }
+
 // Fired every new round
 type NewRound struct {
 	RoundNumber uint64

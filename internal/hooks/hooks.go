@@ -10,6 +10,9 @@ func RegisterListeners() {
 	// Buffs
 	events.RegisterListener(events.Buff{}, ApplyBuffs)
 
+	// PreRoomChange Listeners - for Room.Info GMCP
+	events.RegisterListener(events.PreRoomChange{}, PreRoomChangeRoomInfoGMCP)
+
 	// RoomChange Listeners
 	events.RegisterListener(events.RoomChange{}, LocationGMCPUpdates)
 	events.RegisterListener(events.RoomChange{}, LocationMusicChange)

@@ -1,6 +1,7 @@
 package rooms
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -12,11 +13,13 @@ import (
 
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 
@@ -307,6 +310,60 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		}
 	}
 
+	// Send PreRoomChange event before room description
+	events.AddToQueue(events.PreRoomChange{
+		UserId:     userId,
+		FromRoomId: currentRoom.RoomId,
+		ToRoomId:   newRoom.RoomId,
+	})
+
+	// Process PreRoomChange events immediately
+	preRoomQueue := events.GetQueue(events.PreRoomChange{})
+	for preRoomQueue.Len() > 0 {
+		events.DoListeners(preRoomQueue.Poll())
+	}
+
+	// Process GMCP events immediately
+	gmcpQueue := events.GetQueue(events.GMCPOut{})
+	for gmcpQueue.Len() > 0 {
+		e := gmcpQueue.Poll()
+
+		gmcp, typeOk := e.(events.GMCPOut)
+		if !typeOk {
+			mudlog.Error("Event", "Expected Type", "GMCPOut", "Actual Type", e.Type())
+			continue
+		}
+
+		// Allow any handlers to handle the event
+		if !events.DoListeners(e) {
+			continue
+		}
+
+		if gmcp.UserId < 1 {
+			continue
+		}
+
+		connId := users.GetConnectionId(gmcp.UserId)
+		if connId == 0 {
+			continue
+		}
+
+		switch v := gmcp.Payload.(type) {
+		case []byte:
+			connections.SendTo(term.GmcpPayload.BytesWithPayload(v), connId)
+		case string:
+			connections.SendTo(term.GmcpPayload.BytesWithPayload([]byte(v)), connId)
+		default:
+			payload, err := json.Marshal(gmcp.Payload)
+			if err != nil {
+				mudlog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
+				continue
+			}
+			connections.SendTo(term.GmcpPayload.BytesWithPayload(payload), connId)
+		}
+	}
+
+	// Keep the existing RoomChange event for other hooks
 	events.AddToQueue(events.RoomChange{
 		UserId:     userId,
 		FromRoomId: currentRoom.RoomId,
