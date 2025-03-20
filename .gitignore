@@ -6,4 +6,3 @@ _datafiles/**/users/*
 vendor/
 server.crt
 server.key
-.DS_Store
