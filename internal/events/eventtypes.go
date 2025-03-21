@@ -219,7 +219,6 @@ type MobDeath struct {
 	RoomId        int
 	CharacterName string
 	Level         int
-	Experience    int
 	PlayerDamage  map[int]int
 }
 
