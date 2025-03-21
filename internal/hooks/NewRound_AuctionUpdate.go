@@ -16,7 +16,7 @@ import (
 // Performs auction status updates
 //
 
-func AuctionUpdate(e events.Event) events.EventReturn {
+func AuctionUpdate(e events.Event) events.ListenerReturn {
 
 	evt := e.(events.NewRound)
 

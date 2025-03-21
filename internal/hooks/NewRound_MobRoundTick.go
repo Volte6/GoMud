@@ -9,7 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func MobRoundTick(e events.Event) events.EventReturn {
+func MobRoundTick(e events.Event) events.ListenerReturn {
 
 	//
 	// Reduce existing hostility (if any)

@@ -10,7 +10,7 @@ import (
 )
 
 // Checks whether their level is too high for a guide
-func Broadcast_SendToAll(e events.Event) events.EventReturn {
+func Broadcast_SendToAll(e events.Event) events.ListenerReturn {
 
 	broadcast, typeOk := e.(events.Broadcast)
 	if !typeOk {

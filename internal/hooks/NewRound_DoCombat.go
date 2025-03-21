@@ -21,7 +21,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func DoCombat(e events.Event) events.EventReturn {
+func DoCombat(e events.Event) events.ListenerReturn {
 
 	evt := e.(events.NewRound)
 

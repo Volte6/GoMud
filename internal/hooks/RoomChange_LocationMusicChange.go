@@ -13,7 +13,7 @@ import (
 // Also sends music changes out
 //
 
-func LocationMusicChange(e events.Event) events.EventReturn {
+func LocationMusicChange(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.RoomChange)
 	if !typeOk {

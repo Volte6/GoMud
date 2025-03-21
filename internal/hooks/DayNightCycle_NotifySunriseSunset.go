@@ -11,7 +11,7 @@ import (
 // Spawns the loot goblin every so often
 //
 
-func NotifySunriseSunset(e events.Event) events.EventReturn {
+func NotifySunriseSunset(e events.Event) events.ListenerReturn {
 	evt, typeOk := e.(events.DayNightCycle)
 	if !typeOk {
 		return events.Cancel

@@ -17,7 +17,7 @@ import (
 // Some clean up
 //
 
-func HandleLeave(e events.Event) events.EventReturn {
+func HandleLeave(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.PlayerDespawn)
 	if !typeOk {

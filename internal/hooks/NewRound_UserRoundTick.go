@@ -15,7 +15,7 @@ import (
 // Player Round Tick
 //
 
-func UserRoundTick(e events.Event) events.EventReturn {
+func UserRoundTick(e events.Event) events.ListenerReturn {
 
 	evt := e.(events.NewRound)
 

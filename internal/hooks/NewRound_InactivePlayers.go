@@ -11,7 +11,7 @@ import (
 // Handle mobs that are bored
 //
 
-func InactivePlayers(e events.Event) events.EventReturn {
+func InactivePlayers(e events.Event) events.ListenerReturn {
 
 	evt := e.(events.NewRound)
 

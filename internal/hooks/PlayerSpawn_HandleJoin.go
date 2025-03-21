@@ -15,7 +15,7 @@ import (
 // Execute on join commands
 //
 
-func HandleJoin(e events.Event) events.EventReturn {
+func HandleJoin(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.PlayerSpawn)
 	if !typeOk {

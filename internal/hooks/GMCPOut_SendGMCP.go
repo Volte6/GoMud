@@ -11,7 +11,7 @@ import (
 )
 
 // Checks whether their level is too high for a guide
-func GMCPOut_SendGMCP(e events.Event) events.EventReturn {
+func GMCPOut_SendGMCP(e events.Event) events.ListenerReturn {
 
 	gmcp, typeOk := e.(events.GMCPOut)
 	if !typeOk {

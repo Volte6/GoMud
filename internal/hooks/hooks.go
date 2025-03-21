@@ -75,7 +75,7 @@ func RegisterListeners() {
 
 	// Listener for debugging some stuff (catches all events)
 	/*
-		events.RegisterListener(nil, func(e events.Event) events.EventReturn {
+		events.RegisterListener(nil, func(e events.Event) events.ListenerReturn {
 			t := e.Type()
 			if t != `NewTurn` && t != `Message` && t != `NewRound` && t != `Broadcast` {
 				mudlog.Info("Event", "e.Type", e.Type(), "e", e)

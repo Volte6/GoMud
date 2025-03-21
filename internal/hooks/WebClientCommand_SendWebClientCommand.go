@@ -7,7 +7,7 @@ import (
 )
 
 // Checks whether their level is too high for a guide
-func WebClientCommand_SendWebClientCommand(e events.Event) events.EventReturn {
+func WebClientCommand_SendWebClientCommand(e events.Event) events.ListenerReturn {
 
 	cmd, typeOk := e.(events.WebClientCommand)
 	if !typeOk {

@@ -10,7 +10,7 @@ import (
 // Checks for quests on the item
 //
 
-func CheckItemQuests(e events.Event) events.EventReturn {
+func CheckItemQuests(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.ItemOwnership)
 	if !typeOk {

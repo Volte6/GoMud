@@ -17,7 +17,7 @@ var (
 )
 
 // Player enters the world event
-func HandlePlayerSpawn(e events.Event) events.EventReturn {
+func HandlePlayerSpawn(e events.Event) events.ListenerReturn {
 	evt, typeOk := e.(events.PlayerSpawn)
 	if !typeOk {
 		return events.Cancel
@@ -42,7 +42,7 @@ func HandlePlayerSpawn(e events.Event) events.EventReturn {
 }
 
 // Player leaves the world event
-func HandlePlayerDespawn(e events.Event) events.EventReturn {
+func HandlePlayerDespawn(e events.Event) events.ListenerReturn {
 	evt, typeOk := e.(events.PlayerDespawn)
 	if !typeOk {
 		return events.Cancel
@@ -55,7 +55,7 @@ func HandlePlayerDespawn(e events.Event) events.EventReturn {
 	return events.Continue
 }
 
-func HandleLogs(e events.Event) events.EventReturn {
+func HandleLogs(e events.Event) events.ListenerReturn {
 	evt, typeOk := e.(events.Log)
 	if !typeOk {
 		return events.Cancel
@@ -85,7 +85,7 @@ func HandleLogs(e events.Event) events.EventReturn {
 	return events.Continue
 }
 
-func HandleLevelup(e events.Event) events.EventReturn {
+func HandleLevelup(e events.Event) events.ListenerReturn {
 	evt, typeOk := e.(events.LevelUp)
 	if !typeOk {
 		return events.Cancel
@@ -101,7 +101,7 @@ func HandleLevelup(e events.Event) events.EventReturn {
 	return events.Continue
 }
 
-func HandleDeath(e events.Event) events.EventReturn {
+func HandleDeath(e events.Event) events.ListenerReturn {
 	evt, typeOk := e.(events.PlayerDeath)
 	if !typeOk {
 		return events.Cancel
@@ -113,7 +113,7 @@ func HandleDeath(e events.Event) events.EventReturn {
 	return events.Continue
 }
 
-func HandleBroadcast(e events.Event) events.EventReturn {
+func HandleBroadcast(e events.Event) events.ListenerReturn {
 	evt, typeOk := e.(events.Broadcast)
 	if !typeOk {
 		return events.Cancel
@@ -137,7 +137,7 @@ func HandleBroadcast(e events.Event) events.EventReturn {
 	return events.Continue
 }
 
-func HandleAuction(e events.Event) events.EventReturn {
+func HandleAuction(e events.Event) events.ListenerReturn {
 	evt, typeOk := e.(events.Auction)
 	if !typeOk {
 		return events.Cancel

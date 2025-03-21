@@ -18,7 +18,7 @@ import (
 // Autosaves users/rooms every so often
 //
 
-func AutoSave(e events.Event) events.EventReturn {
+func AutoSave(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.NewTurn)
 	if !typeOk {

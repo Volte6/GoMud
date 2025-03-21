@@ -19,7 +19,7 @@ import (
 // Handles quest progress
 //
 
-func HandleQuestUpdate(e events.Event) events.EventReturn {
+func HandleQuestUpdate(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.Quest)
 	if !typeOk {

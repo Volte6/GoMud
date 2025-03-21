@@ -9,7 +9,7 @@ import (
 // Respawn any enemies that have been missing for too long
 //
 
-func HandleRespawns(e events.Event) events.EventReturn {
+func HandleRespawns(e events.Event) events.ListenerReturn {
 
 	for _, roomId := range rooms.GetRoomsWithPlayers() {
 

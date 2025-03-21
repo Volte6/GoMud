@@ -10,7 +10,7 @@ import (
 // TODO: Optimize this to avoid re-loops through users
 //
 
-func ActionPoints(e events.Event) events.EventReturn {
+func ActionPoints(e events.Event) events.ListenerReturn {
 
 	/*
 		evt, typeOk := e.(events.NewTurn)

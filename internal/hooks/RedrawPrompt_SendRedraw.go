@@ -9,7 +9,7 @@ import (
 )
 
 // Checks whether their level is too high for a guide
-func RedrawPrompt_SendRedraw(e events.Event) events.EventReturn {
+func RedrawPrompt_SendRedraw(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.RedrawPrompt)
 	if !typeOk {

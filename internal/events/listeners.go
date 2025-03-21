@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-type EventReturn int8
+type ListenerReturn int8
 
 type ListenerId uint64
 
@@ -15,7 +15,7 @@ type ListenerWrapper struct {
 }
 
 // Return false to stop further handling of this event.
-type Listener func(Event) EventReturn
+type Listener func(Event) ListenerReturn
 type QueueFlag int
 
 var (
@@ -33,11 +33,11 @@ const (
 	// Event return codes
 	//
 	// Allows the event to continu to the next listener
-	Continue EventReturn = 0b00000001
+	Continue ListenerReturn = 0b00000001
 	// Cancels any further processing of the event
-	Cancel EventReturn = 0b00000010
+	Cancel ListenerReturn = 0b00000010
 	// Cancels processing, but adds back into the queue for the next event loop.
-	CancelAndRequeue EventReturn = 0b00000100
+	CancelAndRequeue ListenerReturn = 0b00000100
 )
 
 func ClearListeners() {
@@ -137,7 +137,7 @@ func UnregisterListener(emptyEvent Event, id ListenerId) bool {
 
 }
 
-func DoListeners(e Event) EventReturn {
+func DoListeners(e Event) ListenerReturn {
 
 	listenerLock.Lock()
 	defer listenerLock.Unlock()

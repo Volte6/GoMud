@@ -10,7 +10,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func SendLevelNotifications(e events.Event) events.EventReturn {
+func SendLevelNotifications(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.LevelUp)
 	if !typeOk {

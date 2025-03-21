@@ -12,7 +12,7 @@ import (
 )
 
 // Checks whether their level is too high for a guide
-func Message_SendMessage(e events.Event) events.EventReturn {
+func Message_SendMessage(e events.Event) events.ListenerReturn {
 
 	message, typeOk := e.(events.Message)
 	if !typeOk {

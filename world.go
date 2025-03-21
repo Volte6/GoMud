@@ -73,7 +73,7 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 	return w
 }
 
-func (w *World) HandleInputEvents(e events.Event) events.EventReturn {
+func (w *World) HandleInputEvents(e events.Event) events.ListenerReturn {
 
 	input, typeOk := e.(events.Input)
 	if !typeOk {
@@ -161,7 +161,7 @@ func (w *World) HandleInputEvents(e events.Event) events.EventReturn {
 }
 
 // Checks whether their level is too high for a guide
-func (w *World) HandleSystemEvents(e events.Event) events.EventReturn {
+func (w *World) HandleSystemEvents(e events.Event) events.ListenerReturn {
 
 	sys, typeOk := e.(events.System)
 	if !typeOk {

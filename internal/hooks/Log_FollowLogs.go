@@ -24,7 +24,7 @@ var (
 	}
 )
 
-func FollowLogs(e events.Event) events.EventReturn {
+func FollowLogs(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.Log)
 	if !typeOk {

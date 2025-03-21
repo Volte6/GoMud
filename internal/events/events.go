@@ -161,7 +161,7 @@ func ProcessEvents() {
 	}
 	requeues = requeues[:0]
 
-	var evtResult EventReturn
+	var evtResult ListenerReturn
 	for {
 
 		if globalQueue.Len() < 1 {

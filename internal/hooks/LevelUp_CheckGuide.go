@@ -8,7 +8,7 @@ import (
 )
 
 // Checks whether their level is too high for a guide
-func CheckGuide(e events.Event) events.EventReturn {
+func CheckGuide(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.LevelUp)
 	if !typeOk {

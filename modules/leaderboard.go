@@ -261,7 +261,7 @@ func (l *LeaderboardModule) Update() {
 	l.lastCalculated = time.Now()
 }
 
-func (l *LeaderboardModule) newRoundHandler(e events.Event) events.EventReturn {
+func (l *LeaderboardModule) newRoundHandler(e events.Event) events.ListenerReturn {
 	/*
 		// Don't really care about the event data for this
 

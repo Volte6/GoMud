@@ -19,7 +19,7 @@ import (
 // Handle mobs that are bored
 //
 
-func IdleMobs(e events.Event) events.EventReturn {
+func IdleMobs(e events.Event) events.ListenerReturn {
 
 	// evt := e.(events.NewRound)
 

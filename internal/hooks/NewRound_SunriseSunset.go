@@ -10,7 +10,7 @@ import (
 // Performs auction status updates
 //
 
-func SunriseSunset(e events.Event) events.EventReturn {
+func SunriseSunset(e events.Event) events.ListenerReturn {
 
 	evt := e.(events.NewRound)
 

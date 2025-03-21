@@ -14,7 +14,7 @@ import (
 // Applies autohealing where appropriate
 //
 
-func AutoHeal(e events.Event) events.EventReturn {
+func AutoHeal(e events.Event) events.ListenerReturn {
 
 	evt := e.(events.NewRound)
 

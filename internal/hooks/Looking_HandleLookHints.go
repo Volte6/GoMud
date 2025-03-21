@@ -7,7 +7,7 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func HandleLookHints(e events.Event) events.EventReturn {
+func HandleLookHints(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.Looking)
 	if !typeOk {
