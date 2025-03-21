@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/mobcommands"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/usercommands"
@@ -22,7 +23,6 @@ import (
 
 // pluginRegistry holds all plugins, provides a `fs.ReadFileFS` interface
 type pluginRegistry []*Plugin
-type FileType int
 
 var (
 	registrationOpen = true
@@ -36,6 +36,20 @@ const (
 	dataOverlaysFilesFolder = `data-overlays` + string(filepath.Separator)
 )
 
+// Iterator for all plugin file systems.
+// This allows you to process each one individually.
+func (p pluginRegistry) AllFileSubSystems(yield func(fs.ReadFileFS) bool) {
+
+	for _, pItem := range p {
+		if !yield(pItem.files) {
+			return
+		}
+	}
+
+}
+
+// Reads the first available file found in a plugin and uses it.
+// This means only one plugin wins!
 func (p pluginRegistry) ReadFile(name string) ([]byte, error) {
 	for _, p := range registry {
 
@@ -94,10 +108,7 @@ type Plugin struct {
 	}
 
 	// helper for embedded files
-	files struct {
-		fileSystem embed.FS
-		filePaths  map[string]string
-	}
+	files PluginFiles
 }
 
 func New(name string, version string) *Plugin {
@@ -286,7 +297,7 @@ func Save() {
 	mudlog.Info("plugins", "saveCount", pluginCt)
 }
 
-func GetRegistryFS() fs.ReadFileFS {
+func GetRegistryFS() fileloader.ReadableGroupFS {
 	return registry
 }
 

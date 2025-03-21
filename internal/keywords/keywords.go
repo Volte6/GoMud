@@ -1,7 +1,6 @@
 package keywords
 
 import (
-	"io/fs"
 	"sort"
 	"strings"
 
@@ -12,7 +11,7 @@ import (
 
 var (
 	loadedKeywords *Aliases
-	fileSystems    []fs.ReadFileFS
+	fileSystems    []fileloader.ReadableGroupFS
 )
 
 type HelpTopic struct {
@@ -48,11 +47,14 @@ func (a *Aliases) Validate() error {
 
 	OLPath := `data-overlays/` + a.Filepath()
 	for _, f := range fileSystems {
-		if b, err := f.ReadFile(OLPath); err == nil {
 
-			a := Aliases{}
-			if err = yaml.Unmarshal(b, &a); err == nil {
-				mergeAliases = append(mergeAliases, a)
+		for fsub := range f.AllFileSubSystems {
+
+			if b, err := fsub.ReadFile(OLPath); err == nil {
+				a := Aliases{}
+				if err = yaml.Unmarshal(b, &a); err == nil {
+					mergeAliases = append(mergeAliases, a)
+				}
 			}
 
 		}
@@ -225,7 +227,7 @@ func TryHelpAlias(input string) string {
 
 // Loads the ansi aliases from the config file
 // Only if the file has been modified since the last load
-func LoadAliases(f ...fs.ReadFileFS) {
+func LoadAliases(f ...fileloader.ReadableGroupFS) {
 
 	if len(f) > 0 {
 		fileSystems = append(fileSystems, f...)
