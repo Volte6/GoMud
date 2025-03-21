@@ -68,7 +68,6 @@ help:
       - online
       - races
       - who
-      - time
       - history
     items:
       - drop
@@ -181,7 +180,6 @@ help-aliases:
   pets:             [pet]
   macros:           [macro]
   history:          ['log']
-  time:             ['date']
   pvp:              ['pk']
   about:            ['gomud']
   stat-train:       ['stat train', 'status train', 'stat points']
@@ -222,7 +220,6 @@ command-aliases:
   trash:            ['junk']
   put:              ['place']
   history:          ['log']
-  time:             ['date']
   noop:             ['wake']
   syslogs:          ['syslog']
   'party chat':     ['pchat', 'psay']

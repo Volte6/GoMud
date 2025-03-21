@@ -7,3 +7,15 @@ Extract any modules into this folder.
 * Module folders should container a `datafiles` folder that contains any datafiles needed.
   * Files within `datafiles` will be treated as though located within the actual `_datafiles`
   * These files are read-only.
+
+# Examples
+
+## Basic user command function
+
+* time.go
+* time/*
+
+## User command with maintained state and save/loading of data
+
+* leaderbaord.go
+* leaderboard/*

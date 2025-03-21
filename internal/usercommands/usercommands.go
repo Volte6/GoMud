@@ -146,7 +146,6 @@ var (
 		`suicide`:     {Suicide, true, false},
 		`syslogs`:     {SysLogs, true, true}, // Admin only
 		`tame`:        {Tame, false, false},
-		`time`:        {Time, true, false},
 		`throw`:       {Throw, false, false},
 		`track`:       {Track, false, false},
 		`trash`:       {Trash, false, false},
