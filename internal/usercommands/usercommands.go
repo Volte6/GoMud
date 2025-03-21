@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/mudlog"
@@ -235,7 +236,9 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 		}
 
 		if !skipScript {
-			handled, err := scripting.TryRoomCommand(alias, rest, userId)
+			// Instead of calling scripting.TryRoomCommand directly,
+			// use our new function that sends GMCP notifications for blocked directions
+			handled, err := TryRoomScripts(cmd+` `+rest, alias, rest, userId)
 			if handled {
 				return true, err
 			}
@@ -379,4 +382,32 @@ func RegisterCommand(command string, handlerFunc UserCommand, disabledWhenDowned
 		disabledWhenDowned,
 		isAdminOnly,
 	}
+}
+
+// TryRoomScripts is called to try both the onCommand_X direct route and also onCommand with a 'cmd' parameter.
+// Returns true if a script handled it. False if not.
+func TryRoomScripts(input, alias, rest string, userId int) (bool, error) {
+
+	// Try direct command room script first
+	cmdHandled, err := scripting.TryRoomCommand(alias, rest, userId)
+
+	if cmdHandled {
+
+		// Check if it's a directional command and send GMCP for wrong direction
+		user := users.GetByUserId(userId)
+		if user != nil && (alias == "north" || alias == "south" || alias == "east" || alias == "west" ||
+			alias == "up" || alias == "down" || alias == "northwest" || alias == "northeast" ||
+			alias == "southwest" || alias == "southeast") {
+
+			// Send GMCP message for script-blocked direction
+			if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
+				events.AddToQueue(events.GMCPOut{
+					UserId:  userId,
+					Payload: fmt.Sprintf(`Room.WrongDir "%s"`, alias),
+				})
+			}
+		}
+	}
+
+	return cmdHandled, err
 }
