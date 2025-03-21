@@ -2,6 +2,8 @@ package events
 
 import (
 	"sync"
+
+	"github.com/volte6/gomud/internal/mudlog"
 )
 
 type ListenerReturn int8
@@ -24,9 +26,13 @@ var (
 	listenerCt          ListenerId = 0
 	eventListeners      map[string][]ListenerWrapper
 	hasWildcardListener bool = false
+
+	eventsWithoutListeners map[string]int = map[string]int{}
 )
 
 const (
+	NoListenerSampleSize = 100
+
 	First QueueFlag = 1
 	Last  QueueFlag = 2
 	//
@@ -146,9 +152,11 @@ func DoListeners(e Event) ListenerReturn {
 		return Continue
 	}
 
+	listenerFound := false
 	// wildcard listener is really for debugging purpose
 	if hasWildcardListener {
 		if vals, ok := eventListeners[`*`]; ok {
+			listenerFound = true
 			for _, lw := range vals {
 				if result := lw.listener(e); result != Continue {
 					return result
@@ -159,10 +167,19 @@ func DoListeners(e Event) ListenerReturn {
 	}
 
 	if vals, ok := eventListeners[e.Type()]; ok {
+		listenerFound = true
 		for _, lw := range vals {
 			if result := lw.listener(e); result != Continue {
 				return result
 			}
+		}
+	}
+
+	if !listenerFound {
+		t := e.Type()
+		eventsWithoutListeners[t] = eventsWithoutListeners[t] + 1
+		if eventsWithoutListeners[t]%NoListenerSampleSize == 0 {
+			mudlog.Error(`DoListeners`, "Event", t, "error", "no listener for event", "sample-size", NoListenerSampleSize)
 		}
 	}
 
