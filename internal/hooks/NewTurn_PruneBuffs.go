@@ -13,13 +13,13 @@ import (
 // Prune all buffs that have expired.
 //
 
-func PruneBuffs(e events.Event) bool {
+func PruneBuffs(e events.Event) events.ListenerReturn {
 
 	/*
 		evt, typeOk := e.(events.NewTurn)
 		if !typeOk {
 			mudlog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
-			return false
+			return events.Cancel
 		}
 	*/
 
@@ -73,6 +73,6 @@ func PruneBuffs(e events.Event) bool {
 
 	}
 
-	return true
+	return events.Continue
 
 }

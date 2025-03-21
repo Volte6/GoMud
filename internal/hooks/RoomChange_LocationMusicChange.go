@@ -13,35 +13,35 @@ import (
 // Also sends music changes out
 //
 
-func LocationMusicChange(e events.Event) bool {
+func LocationMusicChange(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.RoomChange)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "RoomChange", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	// If this isn't a user changing rooms, just pass it along.
 	if evt.UserId == 0 {
-		return true
+		return events.Continue
 	}
 
 	// Get user... Make sure they still exist too.
 	user := users.GetByUserId(evt.UserId)
 	if user == nil {
-		return false
+		return events.Cancel
 	}
 
 	// Get the new room data... abort if doesn't exist.
 	newRoom := rooms.LoadRoom(evt.ToRoomId)
 	if newRoom == nil {
-		return false
+		return events.Cancel
 	}
 
 	// Get the old room data... abort if doesn't exist.
 	oldRoom := rooms.LoadRoom(evt.FromRoomId)
 	if oldRoom == nil {
-		return false
+		return events.Cancel
 	}
 
 	// If this zone has music, play it.
@@ -57,5 +57,5 @@ func LocationMusicChange(e events.Event) bool {
 		}
 	}
 
-	return true
+	return events.Continue
 }

@@ -1,6 +1,7 @@
 package events
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/volte6/gomud/internal/connections"
@@ -8,6 +9,13 @@ import (
 	"github.com/volte6/gomud/internal/stats"
 )
 
+// EVENT DEFINITIONS FOLLOW
+// NOTE: If you give an event the following receiver function: `UniqueID() string`
+//
+//	      It will become a "unique event", meaning only one can be in the event queue
+//			 at a time matching the string return value.
+//		 Example: See `RedrawPrompt`
+//
 // Used to apply or remove buffs
 type Buff struct {
 	UserId        int
@@ -213,6 +221,17 @@ type PlayerDeath struct {
 
 func (l PlayerDeath) Type() string { return `PlayerDeath` }
 
+type MobDeath struct {
+	MobId         int
+	InstanceId    int
+	RoomId        int
+	CharacterName string
+	Level         int
+	PlayerDamage  map[int]int
+}
+
+func (l MobDeath) Type() string { return `MobDeath` }
+
 type DayNightCycle struct {
 	IsSunrise bool
 	Day       int
@@ -242,3 +261,11 @@ type Looking struct {
 }
 
 func (l Looking) Type() string { return `Looking` }
+
+type RedrawPrompt struct {
+	UserId        int
+	OnlyIfChanged bool
+}
+
+func (l RedrawPrompt) Type() string     { return `RedrawPrompt` }
+func (l RedrawPrompt) UniqueID() string { return `RedrawPrompt-` + strconv.Itoa(l.UserId) }

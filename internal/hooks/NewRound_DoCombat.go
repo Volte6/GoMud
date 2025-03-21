@@ -21,7 +21,7 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
-func DoCombat(e events.Event) bool {
+func DoCombat(e events.Event) events.ListenerReturn {
 
 	evt := e.(events.NewRound)
 
@@ -35,7 +35,7 @@ func DoCombat(e events.Event) bool {
 	// Do any resolution or extra checks based on everyone that has been involved in combat this round.
 	handleAffected(append(affectedPlayers1, affectedPlayers2...), append(affectedMobs1, affectedMobs2...))
 
-	return true
+	return events.Continue
 }
 
 func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobInstanceIds []int) {

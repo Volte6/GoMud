@@ -19,7 +19,7 @@ import (
 // Handle mobs that are bored
 //
 
-func IdleMobs(e events.Event) bool {
+func IdleMobs(e events.Event) events.ListenerReturn {
 
 	// evt := e.(events.NewRound)
 
@@ -133,5 +133,5 @@ func IdleMobs(e events.Event) bool {
 
 	util.TrackTime(`IdleMobs()`, time.Since(tStart).Seconds())
 
-	return true
+	return events.Continue
 }

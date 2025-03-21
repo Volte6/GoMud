@@ -23,6 +23,8 @@ func Status(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 			return true, nil
 		}
 
+		user.DidTip(`status train`, true)
+
 		cmdPrompt, isNew := user.StartPrompt(`status`, rest)
 
 		if isNew {

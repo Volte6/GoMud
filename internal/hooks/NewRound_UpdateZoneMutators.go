@@ -9,7 +9,7 @@ import (
 // Check all zones and update their mutators.
 //
 
-func UpdateZoneMutators(e events.Event) bool {
+func UpdateZoneMutators(e events.Event) events.ListenerReturn {
 	evt := e.(events.NewRound)
 
 	// Update all zone based mutators once a round
@@ -20,5 +20,5 @@ func UpdateZoneMutators(e events.Event) bool {
 		}
 	}
 
-	return true
+	return events.Continue
 }

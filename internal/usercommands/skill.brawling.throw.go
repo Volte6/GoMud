@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/items"
@@ -81,17 +80,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			// If grenades are dropped, they explode and affect everyone in the room!
 			iSpec := itemMatch.GetSpec()
 			if iSpec.Type == items.Grenade {
-
-				itemMatch.SetAdjective(`exploding`, true)
-
-				events.AddToQueue(events.RoomAction{
-					RoomId:       user.Character.RoomId,
-					SourceUserId: user.UserId,
-					SourceMobId:  0,
-					Action:       fmt.Sprintf("detonate #%d %s", targetMob.InstanceId, itemMatch.ShorthandId()),
-					ReadyTurn:    util.GetTurnCount() + uint64(configs.GetTimingConfig().TurnsPerRound()*3),
-				})
-
+				// TODO: Grenade
 			}
 
 			room.AddItem(itemMatch, false)
@@ -136,17 +125,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		// If grenades are dropped, they explode and affect everyone in the room!
 		iSpec := itemMatch.GetSpec()
 		if iSpec.Type == items.Grenade {
-
-			itemMatch.SetAdjective(`exploding`, true)
-
-			events.AddToQueue(events.RoomAction{
-				RoomId:       user.Character.RoomId,
-				SourceUserId: user.UserId,
-				SourceMobId:  0,
-				Action:       fmt.Sprintf("detonate @%d %s", targetUser.UserId, itemMatch.ShorthandId()),
-				ReadyTurn:    util.GetTurnCount() + uint64(configs.GetTimingConfig().TurnsPerRound()*3),
-			})
-
+			// TODO: Grenade
 		}
 
 		room.AddItem(itemMatch, false)
@@ -215,17 +194,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			// If grenades are dropped, they explode and affect everyone in the room!
 			iSpec := itemMatch.GetSpec()
 			if iSpec.Type == items.Grenade {
-
-				itemMatch.SetAdjective(`exploding`, true)
-
-				events.AddToQueue(events.RoomAction{
-					RoomId:       throwToRoom.RoomId,
-					SourceUserId: user.UserId,
-					SourceMobId:  0,
-					Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
-					ReadyTurn:    util.GetTurnCount() + uint64(configs.GetTimingConfig().TurnsPerRound()*3),
-				})
-
+				// TODO: Grenade
 			}
 
 			throwToRoom.AddItem(itemMatch, false)
@@ -296,17 +265,7 @@ func Throw(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 					// If grenades are dropped, they explode and affect everyone in the room!
 					iSpec := itemMatch.GetSpec()
 					if iSpec.Type == items.Grenade {
-
-						itemMatch.SetAdjective(`exploding`, true)
-
-						events.AddToQueue(events.RoomAction{
-							RoomId:       throwToRoom.RoomId,
-							SourceUserId: user.UserId,
-							SourceMobId:  0,
-							Action:       fmt.Sprintf("detonate %s", itemMatch.ShorthandId()),
-							ReadyTurn:    util.GetTurnCount() + uint64(configs.GetTimingConfig().TurnsPerRound()*3),
-						})
-
+						// TODO: Grenade
 					}
 
 					throwToRoom.AddItem(itemMatch, false)

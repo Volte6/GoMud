@@ -7,6 +7,7 @@ import (
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/combat"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/parties"
@@ -77,6 +78,15 @@ func Suicide(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	}
 
 	mobXP := mob.Character.XPTL(mob.Character.Level - 1)
+
+	events.AddToQueue(events.MobDeath{
+		MobId:         int(mob.MobId),
+		InstanceId:    mob.InstanceId,
+		RoomId:        room.RoomId,
+		CharacterName: mob.Character.Name,
+		Level:         mob.Character.Level,
+		PlayerDamage:  mob.Character.PlayerDamage,
+	})
 
 	xpVal := mobXP / 90
 

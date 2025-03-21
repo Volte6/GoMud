@@ -6,6 +6,12 @@ import (
 
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
+	"gopkg.in/yaml.v2"
+)
+
+var (
+	loadedKeywords *Aliases
+	fileSystems    []fileloader.ReadableGroupFS
 )
 
 type HelpTopic struct {
@@ -37,66 +43,88 @@ type Aliases struct {
 // Presumably to ensure the datafile hasn't messed something up.
 func (a *Aliases) Validate() error {
 
+	mergeAliases := []Aliases{*a}
+
+	OLPath := `data-overlays/` + a.Filepath()
+	for _, f := range fileSystems {
+
+		for fsub := range f.AllFileSubSystems {
+
+			if b, err := fsub.ReadFile(OLPath); err == nil {
+				a := Aliases{}
+				if err = yaml.Unmarshal(b, &a); err == nil {
+					mergeAliases = append(mergeAliases, a)
+				}
+			}
+
+		}
+	}
+
 	//
 	// Unroll the data into structures that are quickly searched
 	//
 
 	a.helpTopics = map[string]HelpTopic{}
+	a.helpAliases = map[string]string{}
+	a.commandAliases = map[string]string{}
+	a.mapLegendOverrides = map[string]map[rune]string{}
 
-	// helpGroup = commands/skills/admin
-	for helpGroup, helpTypes := range a.Help {
+	for _, ma := range mergeAliases {
 
-		helpGroup = strings.ToLower(helpGroup)
+		// helpGroup = commands/skills/admin
+		for helpGroup, helpTypes := range ma.Help {
 
-		// helpType = configuration/character/shops/quests/combat
-		for helpCategory, helpList := range helpTypes {
-			for _, helpCommand := range helpList {
+			helpGroup = strings.ToLower(helpGroup)
 
-				helpCommand = strings.ToLower(helpCommand)
+			// helpType = configuration/character/shops/quests/combat
+			for helpCategory, helpList := range helpTypes {
+				helpCategory = strings.ToLower(helpCategory)
+				for _, helpCommand := range helpList {
 
-				entry := HelpTopic{
-					Command:   helpCommand,
-					Type:      helpGroup,
-					Category:  helpCategory,
-					AdminOnly: (helpGroup == `admin`),
+					helpCommand = strings.ToLower(helpCommand)
+
+					entry := HelpTopic{
+						Command:   helpCommand,
+						Type:      helpGroup,
+						Category:  helpCategory,
+						AdminOnly: (helpGroup == `admin`),
+					}
+
+					a.helpTopics[helpCommand] = entry
 				}
-
-				a.helpTopics[helpCommand] = entry
 			}
 		}
-	}
 
-	a.helpAliases = map[string]string{}
-	for helpTopic, aliasList := range a.HelpAliases {
-		helpTopic = strings.ToLower(helpTopic)
-		for _, alias := range aliasList {
-			a.helpAliases[alias] = helpTopic
-		}
-	}
-
-	a.commandAliases = map[string]string{}
-	for command, aliasList := range a.CommandAliases {
-		command = strings.ToLower(command)
-		for _, alias := range aliasList {
-			a.commandAliases[alias] = command
-		}
-	}
-
-	for alias, direction := range a.DirectionAliases {
-		a.commandAliases[strings.ToLower(alias)] = direction
-	}
-
-	a.mapLegendOverrides = map[string]map[rune]string{}
-	for area, overrides := range a.MapLegendOverrides {
-
-		area := strings.ToLower(area)
-		if _, ok := a.mapLegendOverrides[area]; !ok {
-			a.mapLegendOverrides[area] = map[rune]string{}
+		for helpTopic, aliasList := range ma.HelpAliases {
+			helpTopic = strings.ToLower(helpTopic)
+			for _, alias := range aliasList {
+				a.helpAliases[alias] = helpTopic
+			}
 		}
 
-		for symbol, name := range overrides {
-			a.mapLegendOverrides[area][[]rune(symbol)[0]] = name
+		for command, aliasList := range ma.CommandAliases {
+			command = strings.ToLower(command)
+			for _, alias := range aliasList {
+				a.commandAliases[alias] = command
+			}
 		}
+
+		for alias, direction := range ma.DirectionAliases {
+			a.commandAliases[strings.ToLower(alias)] = direction
+		}
+
+		for area, overrides := range ma.MapLegendOverrides {
+
+			area := strings.ToLower(area)
+			if _, ok := a.mapLegendOverrides[area]; !ok {
+				a.mapLegendOverrides[area] = map[rune]string{}
+			}
+
+			for symbol, name := range overrides {
+				a.mapLegendOverrides[area][[]rune(symbol)[0]] = name
+			}
+		}
+
 	}
 
 	return nil
@@ -197,13 +225,13 @@ func TryHelpAlias(input string) string {
 	return input
 }
 
-var (
-	loadedKeywords *Aliases
-)
-
 // Loads the ansi aliases from the config file
 // Only if the file has been modified since the last load
-func LoadAliases() {
+func LoadAliases(f ...fileloader.ReadableGroupFS) {
+
+	if len(f) > 0 {
+		fileSystems = append(fileSystems, f...)
+	}
 
 	tmpLoadedKeywords, err := fileloader.LoadFlatFile[*Aliases](string(configs.GetFilePathsConfig().DataFiles) + `/keywords.yaml`)
 	if err != nil {

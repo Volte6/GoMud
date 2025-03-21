@@ -1,88 +1,195 @@
 package events
 
 import (
+	"container/heap"
 	"sync"
 )
 
 type EventType string
 
 var (
-	qLock     = sync.RWMutex{}
+	qLock     = sync.Mutex{}
 	allQueues = map[string]*Queue[Event]{}
-	requeues  = map[string][]Event{}
+
+	requeues = []requeue{}
+
+	globalQueue  priorityQueue
+	orderCounter int                         // global counter to maintain insertion order.
+	uniqueMap    = make(map[string]struct{}) // map to enforce uniqueness
 )
 
+type requeue struct {
+	evt      Event
+	priority int
+}
+
+// Event is the common interface for events.
 type Event interface {
 	Type() string
 }
 
-// events added via Requeue() will only show up in the queue after a call to GetQueue()
-func Requeue(e Event) {
-	qLock.Lock()
-	defer qLock.Unlock()
-
-	t := e.Type()
-	if _, ok := requeues[t]; !ok {
-		requeues[t] = []Event{}
-	}
-
-	requeues[t] = append(requeues[t], e)
+// prioritizedEvent wraps an Event with a priority and an order field.
+type prioritizedEvent struct {
+	event    Event
+	priority int // Lower numbers indicate higher priority. Default is 0.
+	order    int // Used to preserve FIFO order among events with the same priority.
 }
 
-func AddToQueue(e Event, shiftToFront ...bool) {
-
-	qLock.Lock()
-	defer qLock.Unlock()
-
-	eventType := e.Type()
-
-	q, ok := allQueues[eventType]
-
-	if !ok {
-		q = NewQueue[Event]()
-		allQueues[eventType] = q
-	}
-
-	if len(shiftToFront) > 0 && shiftToFront[0] {
-		q.Shift(e)
-	} else {
-		q.Push(e)
-	}
+// UniqueEvent is implemented by events that should be unique in the queue.
+type uniqueEvent interface {
+	Event
+	UniqueID() string
 }
 
-func GetQueue(e Event) *Queue[Event] {
+// PriorityQueue implements heap.Interface for *PrioritizedEvent.
+type priorityQueue []*prioritizedEvent
 
-	qLock.Lock()
-	defer qLock.Unlock()
+func (pq priorityQueue) Len() int { return len(pq) }
 
-	eventType := e.Type()
-
-	if _, ok := allQueues[eventType]; !ok {
-		allQueues[eventType] = NewQueue[Event]()
-		requeues[eventType] = []Event{}
+// Less returns true if element i has a higher priority than element j.
+// Here, "higher priority" means a lower numeric value. If priorities are equal,
+// the one with the lower order (i.e. inserted earlier) is considered higher.
+func (pq priorityQueue) Less(i, j int) bool {
+	if pq[i].priority == pq[j].priority {
+		return pq[i].order < pq[j].order
 	}
-
-	for _, e := range requeues[eventType] {
-		allQueues[eventType].Shift(e)
-	}
-
-	requeues[eventType] = requeues[eventType][:0]
-
-	return allQueues[eventType]
+	return pq[i].priority < pq[j].priority
 }
 
-// Iterator
-/*
-	for q := range events.Queues {
-		events.DoListeners(q.Poll())
-	}
-*/
-func Queues(yield func(value *Queue[Event]) bool) {
+func (pq priorityQueue) Swap(i, j int) { pq[i], pq[j] = pq[j], pq[i] }
+
+func (pq *priorityQueue) Push(x interface{}) {
+	item := x.(*prioritizedEvent)
+	*pq = append(*pq, item)
+}
+
+func (pq *priorityQueue) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	*pq = old[0 : n-1]
+	return item
+}
+
+// Enqueue adds an event to the global queue.
+// The caller can optionally pass a priority value.
+// If omitted, the default priority is 0.
+func AddToQueue(e Event, priority ...int) {
+
 	qLock.Lock()
 	defer qLock.Unlock()
-	for _, eQueue := range allQueues {
-		if !yield(eQueue) {
+
+	prio := 0
+	if len(priority) > 0 {
+		prio = priority[0]
+	}
+
+	// Check for uniqueness if the event implements UniqueEvent.
+	if ue, ok := e.(uniqueEvent); ok {
+		uid := ue.UniqueID()
+		// If we already have an entry for this uniqueID, skip it!
+		if _, exists := uniqueMap[uid]; exists {
 			return
 		}
+
+		uniqueMap[ue.UniqueID()] = struct{}{}
 	}
+
+	orderCounter++
+	pe := &prioritizedEvent{
+		event:    e,
+		priority: prio,
+		order:    orderCounter,
+	}
+	heap.Push(&globalQueue, pe)
+}
+
+// Same as AddToQueue but avoids a mutex lock for optimization purposes
+// Should only be used when a mutex lock is already held
+func reAddToQueue(e Event, priority ...int) {
+
+	prio := 0
+	if len(priority) > 0 {
+		prio = priority[0]
+	}
+
+	// Check for uniqueness if the event implements UniqueEvent.
+	if ue, ok := e.(uniqueEvent); ok {
+		uid := ue.UniqueID()
+		// If we already have an entry for this uniqueID, skip it!
+		if _, exists := uniqueMap[uid]; exists {
+			return
+		}
+
+		uniqueMap[ue.UniqueID()] = struct{}{}
+	}
+
+	orderCounter++
+	pe := &prioritizedEvent{
+		event:    e,
+		priority: prio,
+		order:    orderCounter,
+	}
+	heap.Push(&globalQueue, pe)
+}
+
+func addToRequeue(e Event, priority ...int) {
+	qLock.Lock()
+	defer qLock.Unlock()
+
+	prio := 0
+	if len(priority) > 0 {
+		prio = priority[0]
+	}
+	requeues = append(requeues, requeue{
+		evt:      e,
+		priority: prio,
+	})
+}
+
+// ProcessEvents runs the event loop until the queue is empty.
+// It processes events one at a time in order of priority.
+// Any events enqueued (even from within a handler) will be picked up in order.
+func ProcessEvents() {
+
+	qLock.Lock()
+
+	// Requeues are a special group that has been deferred to the next processevents loop
+	// They are added back into the event queue at the top of the process events function
+	for _, itm := range requeues {
+		reAddToQueue(itm.evt, itm.priority)
+	}
+	requeues = requeues[:0]
+
+	var evtResult ListenerReturn
+	for {
+
+		if globalQueue.Len() < 1 {
+			break
+		}
+
+		pe := heap.Pop(&globalQueue).(*prioritizedEvent)
+
+		// If this is a unique event, remove it from the uniqueMap.
+		if ue, ok := pe.event.(uniqueEvent); ok {
+			delete(uniqueMap, ue.UniqueID())
+		}
+
+		qLock.Unlock()
+
+		evtResult = DoListeners(pe.event)
+		if evtResult == CancelAndRequeue {
+			addToRequeue(pe.event, pe.priority)
+		}
+
+		qLock.Lock()
+
+	}
+
+	qLock.Unlock()
+}
+
+// Initialize the priority queue.
+func init() {
+	heap.Init(&globalQueue)
 }

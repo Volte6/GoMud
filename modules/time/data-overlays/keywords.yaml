@@ -1,0 +1,8 @@
+help:
+  command:
+    information:
+      - time
+help-aliases:
+  time: ['date']
+command-aliases:
+  time: ['date']

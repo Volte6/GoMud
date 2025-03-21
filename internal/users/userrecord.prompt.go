@@ -29,7 +29,7 @@ var (
 	promptFindTagsRegex   = regexp.MustCompile(`\{[a-zA-Z%:\-]+\}`)
 )
 
-func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
+func (u *UserRecord) GetCommandPrompt() string {
 
 	promptOut := ``
 
@@ -63,27 +63,25 @@ func (u *UserRecord) GetCommandPrompt(fullRedraw bool) string {
 			customPrompt = u.GetConfigOption(`prompt-compiled`)
 		}
 
-		var ok bool
-		ansiPrompt := ``
-		if customPrompt == nil {
-			ansiPrompt = promptDefaultCompiled
-		} else if ansiPrompt, ok = customPrompt.(string); !ok {
-			ansiPrompt = promptDefaultCompiled
+		if customPrompt != nil {
+			if ansiPrompt, ok := customPrompt.(string); ok {
+				promptOut = u.ProcessPromptString(ansiPrompt)
+			}
 		}
 
-		promptOut = u.ProcessPromptString(ansiPrompt)
+		// Still nothing? Default to ... default
+		if len(promptOut) == 0 {
+			promptOut = u.ProcessPromptString(promptDefaultCompiled)
+		}
 
 	}
 
-	if fullRedraw {
-		unsent, suggested := u.GetUnsentText()
-		if len(suggested) > 0 {
-			suggested = `<ansi fg="suggested-text">` + suggested + `</ansi>`
-		}
-		return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + promptOut + unsent + suggested + goAhead
+	unsent, suggested := u.GetUnsentText()
+	if len(suggested) > 0 {
+		suggested = `<ansi fg="suggested-text">` + suggested + `</ansi>`
 	}
+	return term.AnsiMoveCursorColumn.String() + term.AnsiEraseLine.String() + promptOut + unsent + suggested + goAhead
 
-	return promptOut + goAhead
 }
 
 func (u *UserRecord) ProcessPromptString(promptStr string) string {

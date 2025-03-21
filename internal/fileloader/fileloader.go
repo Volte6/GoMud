@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -18,6 +19,13 @@ import (
 
 type FileType uint8
 type SaveOption uint8
+
+// implements fs.ReadFileFS
+// implements an iterator function as well
+type ReadableGroupFS interface {
+	fs.ReadFileFS
+	AllFileSubSystems(yield func(fs.ReadFileFS) bool)
+}
 
 type LoadableSimple interface {
 	Validate() error  // General validation (or none)

@@ -11,10 +11,10 @@ import (
 // Spawns the loot goblin every so often
 //
 
-func NotifySunriseSunset(e events.Event) bool {
+func NotifySunriseSunset(e events.Event) events.ListenerReturn {
 	evt, typeOk := e.(events.DayNightCycle)
 	if !typeOk {
-		return false
+		return events.Cancel
 	}
 
 	if evt.IsSunrise {
@@ -22,7 +22,7 @@ func NotifySunriseSunset(e events.Event) bool {
 		events.AddToQueue(events.Broadcast{
 			Text: sunriseTxt,
 		})
-		return true
+		return events.Continue
 	}
 
 	sunsetTxt, _ := templates.Process("generic/sunset", nil)
@@ -30,5 +30,5 @@ func NotifySunriseSunset(e events.Event) bool {
 		Text: sunsetTxt,
 	})
 
-	return true
+	return events.Continue
 }

@@ -4,6 +4,8 @@ import (
 	"sync"
 )
 
+type ListenerReturn int8
+
 type ListenerId uint64
 
 type ListenerWrapper struct {
@@ -13,7 +15,7 @@ type ListenerWrapper struct {
 }
 
 // Return false to stop further handling of this event.
-type Listener func(Event) bool
+type Listener func(Event) ListenerReturn
 type QueueFlag int
 
 var (
@@ -27,6 +29,15 @@ var (
 const (
 	First QueueFlag = 1
 	Last  QueueFlag = 2
+	//
+	// Event return codes
+	//
+	// Allows the event to continu to the next listener
+	Continue ListenerReturn = 0b00000001
+	// Cancels any further processing of the event
+	Cancel ListenerReturn = 0b00000010
+	// Cancels processing, but adds back into the queue for the next event loop.
+	CancelAndRequeue ListenerReturn = 0b00000100
 )
 
 func ClearListeners() {
@@ -73,6 +84,7 @@ func RegisterListener(emptyEvent Event, cbFunc Listener, qFlag ...QueueFlag) Lis
 
 		insertPosition := 0
 		for idx := 0; idx < len(eventListeners[eType]); idx++ {
+			// If we're looking at a "final" listener, we can't go any farther down the list
 			if !eventListeners[eType][idx].isFinal {
 				insertPosition = idx
 				continue
@@ -125,21 +137,21 @@ func UnregisterListener(emptyEvent Event, id ListenerId) bool {
 
 }
 
-func DoListeners(e Event) bool {
+func DoListeners(e Event) ListenerReturn {
 
 	listenerLock.Lock()
 	defer listenerLock.Unlock()
 
 	if len(eventListeners) == 0 {
-		return true
+		return Continue
 	}
 
 	// wildcard listener is really for debugging purpose
 	if hasWildcardListener {
 		if vals, ok := eventListeners[`*`]; ok {
 			for _, lw := range vals {
-				if !lw.listener(e) {
-					return false
+				if result := lw.listener(e); result != Continue {
+					return result
 				}
 			}
 		}
@@ -148,11 +160,11 @@ func DoListeners(e Event) bool {
 
 	if vals, ok := eventListeners[e.Type()]; ok {
 		for _, lw := range vals {
-			if !lw.listener(e) {
-				return false
+			if result := lw.listener(e); result != Continue {
+				return result
 			}
 		}
 	}
 
-	return true
+	return Continue
 }

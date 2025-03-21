@@ -24,12 +24,12 @@ var (
 	}
 )
 
-func FollowLogs(e events.Event) bool {
+func FollowLogs(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.Log)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "Log", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	if evt.FollowAdd > 0 {
@@ -41,14 +41,14 @@ func FollowLogs(e events.Event) bool {
 			sendLists[i] = append(sendLists[i], evt.FollowAdd)
 		}
 
-		return true
+		return events.Continue
 	}
 
 	if evt.FollowRemove > 0 {
 
 		removeFromSendLists(evt.FollowRemove)
 
-		return true
+		return events.Continue
 	}
 
 	if len(sendLists[logLevels[evt.Level]]) > 0 {
@@ -61,7 +61,7 @@ func FollowLogs(e events.Event) bool {
 		removeFromSendLists(0) // Force a prune.
 	}
 
-	return true
+	return events.Continue
 }
 
 func removeFromSendLists(connId connections.ConnectionId) {

@@ -68,8 +68,6 @@ help:
       - online
       - races
       - who
-      - time
-      - leaderboard
       - history
     items:
       - drop
@@ -181,9 +179,7 @@ help-aliases:
   trading:          [haggle]
   pets:             [pet]
   macros:           [macro]
-  leaderboard:      [leaderboards, highscore, topscore]
   history:          ['log']
-  time:             ['date']
   pvp:              ['pk']
   about:            ['gomud']
   stat-train:       ['stat train', 'status train', 'stat points']
@@ -223,9 +219,7 @@ command-aliases:
   buy:              ['hire']
   trash:            ['junk']
   put:              ['place']
-  leaderboard:      ['leaderboards', 'highscore', 'topscore']
   history:          ['log']
-  time:             ['date']
   noop:             ['wake']
   syslogs:          ['syslog']
   'party chat':     ['pchat', 'psay']

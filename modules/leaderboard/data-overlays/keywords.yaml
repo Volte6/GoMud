@@ -1,0 +1,8 @@
+help:
+  command:
+    information:
+      - leaderboard
+help-aliases:
+  leaderboard: [leaderboards, highscore, topscore]
+command-aliases:
+  leaderboard: ['leaderboards', 'highscore', 'topscore']

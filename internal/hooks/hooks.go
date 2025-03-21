@@ -61,17 +61,27 @@ func RegisterListeners() {
 	// Looking
 	events.RegisterListener(events.Looking{}, HandleLookHints)
 
+	// GMCPOut
+	events.RegisterListener(events.GMCPOut{}, GMCPOut_SendGMCP)
+	// Messages
+	events.RegisterListener(events.Message{}, Message_SendMessage)
+	// Prompt
+	events.RegisterListener(events.RedrawPrompt{}, RedrawPrompt_SendRedraw)
+
+	events.RegisterListener(events.WebClientCommand{}, WebClientCommand_SendWebClientCommand)
+
+	// Log tee to users
+	events.RegisterListener(events.Log{}, FollowLogs)
+
 	// Listener for debugging some stuff (catches all events)
 	/*
-		events.RegisterListener(nil, func(e events.Event) bool {
+		events.RegisterListener(nil, func(e events.Event) events.ListenerReturn {
 			t := e.Type()
 			if t != `NewTurn` && t != `Message` && t != `NewRound` && t != `Broadcast` {
 				mudlog.Info("Event", "e.Type", e.Type(), "e", e)
 			}
-			return true
+			return events.Continue
 		})
 	*/
 
-	// Log tee to users
-	events.RegisterListener(events.Log{}, FollowLogs)
 }

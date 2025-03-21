@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/rooms"
@@ -101,15 +100,7 @@ func Drop(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		// If grenades are dropped, they explode and affect everyone in the room!
 		if iSpec.Type == items.Grenade {
 
-			matchItem.SetAdjective(`exploding`, true)
-
-			events.AddToQueue(events.RoomAction{
-				RoomId:       user.Character.RoomId,
-				SourceUserId: user.UserId,
-				SourceMobId:  0,
-				Action:       fmt.Sprintf("detonate %s", matchItem.ShorthandId()),
-				ReadyTurn:    util.GetTurnCount() + uint64(configs.GetTimingConfig().TurnsPerRound()*3),
-			})
+			user.SendText(`Todo. Grenades disabled for now.`)
 
 		}
 

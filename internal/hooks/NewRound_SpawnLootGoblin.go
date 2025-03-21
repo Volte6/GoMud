@@ -7,7 +7,7 @@ import (
 	"github.com/volte6/gomud/internal/rooms"
 )
 
-func SpawnLootGoblin(e events.Event) bool {
+func SpawnLootGoblin(e events.Event) events.ListenerReturn {
 
 	evt := e.(events.NewRound)
 
@@ -25,5 +25,5 @@ func SpawnLootGoblin(e events.Event) bool {
 		}
 	}
 
-	return true
+	return events.Continue
 }

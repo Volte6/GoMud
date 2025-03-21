@@ -15,7 +15,9 @@ import (
 // Player Round Tick
 //
 
-func UserRoundTick(e events.Event) bool {
+func UserRoundTick(e events.Event) events.ListenerReturn {
+
+	evt := e.(events.NewRound)
 
 	roomsWithPlayers := rooms.GetRoomsWithPlayers()
 	for _, roomId := range roomsWithPlayers {
@@ -114,10 +116,22 @@ func UserRoundTick(e events.Event) bool {
 
 				// Recalculate all stats at the end of the round tick
 				user.Character.Validate()
+
+				// Only do this every 15 rounds to keep spam down.
+				if evt.RoundNumber%15 == 0 {
+
+					if !user.DidTip(`status train`) && user.Character.StatPoints > 0 {
+						user.SendText(`<ansi fg="alert-5">TIP:</ansi> <ansi fg="tip-text">Type <ansi fg="command">status train</ansi> to use the status points you've earned through leveling.</ansi>`)
+						user.SendText(``)
+					}
+
+				}
+
 			}
 
 		}
+
 	}
 
-	return true
+	return events.Continue
 }

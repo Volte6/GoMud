@@ -14,20 +14,20 @@ import (
 // Checks for quests on the item
 //
 
-func PlaySound(e events.Event) bool {
+func PlaySound(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.MSP)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "MSP", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	if evt.UserId < 1 {
-		return true
+		return events.Continue
 	}
 
 	if evt.SoundFile == `` {
-		return true
+		return events.Continue
 	}
 
 	if user := users.GetByUserId(evt.UserId); user != nil {
@@ -97,5 +97,5 @@ func PlaySound(e events.Event) bool {
 
 	}
 
-	return true
+	return events.Continue
 }

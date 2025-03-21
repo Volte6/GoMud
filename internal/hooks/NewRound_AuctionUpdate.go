@@ -16,13 +16,13 @@ import (
 // Performs auction status updates
 //
 
-func AuctionUpdate(e events.Event) bool {
+func AuctionUpdate(e events.Event) events.ListenerReturn {
 
 	evt := e.(events.NewRound)
 
 	a := auctions.GetCurrentAuction()
 	if a == nil {
-		return true
+		return events.Continue
 	}
 
 	if a.IsEnded() {
@@ -223,5 +223,5 @@ func AuctionUpdate(e events.Event) bool {
 
 	}
 
-	return true
+	return events.Continue
 }

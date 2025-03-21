@@ -18,12 +18,12 @@ import (
 // Autosaves users/rooms every so often
 //
 
-func AutoSave(e events.Event) bool {
+func AutoSave(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.NewTurn)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	if evt.TurnNumber%uint64(configs.GetTimingConfig().TurnsPerAutoSave()) == 0 {
@@ -71,5 +71,5 @@ func AutoSave(e events.Event) bool {
 		})
 	}
 
-	return true
+	return events.Continue
 }

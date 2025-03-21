@@ -19,12 +19,12 @@ import (
 // Handles quest progress
 //
 
-func HandleQuestUpdate(e events.Event) bool {
+func HandleQuestUpdate(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.Quest)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "Quest", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	//mudlog.Debug(`Event`, `type`, evt.Type(), `UserId`, evt.UserId, `QuestToken`, evt.QuestToken)
@@ -38,21 +38,21 @@ func HandleQuestUpdate(e events.Event) bool {
 
 	questInfo := quests.GetQuest(evt.QuestToken)
 	if questInfo == nil {
-		return true
+		return events.Continue
 	}
 
 	questUser := users.GetByUserId(evt.UserId)
 	if questUser == nil {
-		return true
+		return events.Continue
 	}
 
 	if remove {
 		questUser.Character.ClearQuestToken(evt.QuestToken)
-		return true
+		return events.Continue
 	}
 	// This only succees if the user doesn't have the quest yet or the quest is a later step of one they've started
 	if !questUser.Character.GiveQuestToken(evt.QuestToken) {
-		return true
+		return events.Continue
 	}
 
 	_, stepName := quests.TokenToParts(evt.QuestToken)
@@ -172,5 +172,5 @@ func HandleQuestUpdate(e events.Event) bool {
 		}
 	}
 
-	return true
+	return events.Continue
 }

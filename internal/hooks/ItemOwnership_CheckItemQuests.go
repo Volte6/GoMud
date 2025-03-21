@@ -10,17 +10,17 @@ import (
 // Checks for quests on the item
 //
 
-func CheckItemQuests(e events.Event) bool {
+func CheckItemQuests(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.ItemOwnership)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "ItemOwnership", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	// Only care about users for this stuff
 	if evt.UserId == 0 {
-		return true
+		return events.Continue
 	}
 
 	if evt.Gained {
@@ -41,5 +41,5 @@ func CheckItemQuests(e events.Event) bool {
 
 	}
 
-	return true
+	return events.Continue
 }
