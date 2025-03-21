@@ -18,7 +18,7 @@ func RegisterListeners() {
 	events.RegisterListener(events.NewRound{}, PruneVMs)
 	events.RegisterListener(events.NewRound{}, InactivePlayers)
 	events.RegisterListener(events.NewRound{}, UpdateZoneMutators)
-	events.RegisterListener(events.NewRound{}, SunriseSunset)
+	events.RegisterListener(events.NewRound{}, CheckNewDay)
 	events.RegisterListener(events.NewRound{}, AuctionUpdate)
 	events.RegisterListener(events.NewRound{}, SpawnLootGoblin)
 	events.RegisterListener(events.NewRound{}, UserRoundTick)
@@ -69,6 +69,8 @@ func RegisterListeners() {
 	events.RegisterListener(events.RedrawPrompt{}, RedrawPrompt_SendRedraw)
 
 	events.RegisterListener(events.WebClientCommand{}, WebClientCommand_SendWebClientCommand)
+
+	events.RegisterListener(events.Broadcast{}, Broadcast_SendToAll)
 
 	// Log tee to users
 	events.RegisterListener(events.Log{}, FollowLogs)

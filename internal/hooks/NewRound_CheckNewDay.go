@@ -7,10 +7,10 @@ import (
 
 //
 // Watches the rounds go by
-// Performs auction status updates
+// fires event when it's a new day
 //
 
-func SunriseSunset(e events.Event) events.ListenerReturn {
+func CheckNewDay(e events.Event) events.ListenerReturn {
 
 	evt := e.(events.NewRound)
 
