@@ -15,7 +15,7 @@ import (
 // Player Round Tick
 //
 
-func UserRoundTick(e events.Event) bool {
+func UserRoundTick(e events.Event) events.EventReturn {
 
 	evt := e.(events.NewRound)
 
@@ -133,5 +133,5 @@ func UserRoundTick(e events.Event) bool {
 
 	}
 
-	return true
+	return events.Continue
 }

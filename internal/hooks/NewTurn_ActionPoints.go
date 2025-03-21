@@ -10,13 +10,13 @@ import (
 // TODO: Optimize this to avoid re-loops through users
 //
 
-func ActionPoints(e events.Event) bool {
+func ActionPoints(e events.Event) events.EventReturn {
 
 	/*
 		evt, typeOk := e.(events.NewTurn)
 		if !typeOk {
 			mudlog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
-			return false
+			return events.Cancel
 		}
 	*/
 
@@ -27,5 +27,5 @@ func ActionPoints(e events.Event) bool {
 		}
 	}
 
-	return true
+	return events.Continue
 }

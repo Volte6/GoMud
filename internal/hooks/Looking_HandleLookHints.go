@@ -7,28 +7,28 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func HandleLookHints(e events.Event) bool {
+func HandleLookHints(e events.Event) events.EventReturn {
 
 	evt, typeOk := e.(events.Looking)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "Looking", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	if evt.Target == `` {
 
 		user := users.GetByUserId(evt.UserId)
 		if user == nil {
-			return false
+			return events.Cancel
 		}
 
 		if user.DidTip(`list`) {
-			return true
+			return events.Continue
 		}
 
 		room := rooms.LoadRoom(evt.RoomId)
 		if room == nil {
-			return false
+			return events.Cancel
 		}
 
 		showListTip := false
@@ -44,5 +44,5 @@ func HandleLookHints(e events.Event) bool {
 		}
 
 	}
-	return true
+	return events.Continue
 }

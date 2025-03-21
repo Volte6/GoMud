@@ -21,6 +21,7 @@ import (
 	"github.com/volte6/gomud/internal/prompt"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/templates"
+	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/usercommands"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
@@ -44,6 +45,9 @@ type World struct {
 	leaveWorldUserId   chan int
 	logoutConnectionId chan connections.ConnectionId
 	zombieFlag         chan [2]int
+	//
+	eventRequeue []events.Event
+	eventTracker map[int]struct{}
 }
 
 func NewWorld(osSignalChan chan os.Signal) *World {
@@ -55,11 +59,148 @@ func NewWorld(osSignalChan chan os.Signal) *World {
 		leaveWorldUserId:   make(chan int),
 		logoutConnectionId: make(chan connections.ConnectionId),
 		zombieFlag:         make(chan [2]int),
+		//
+		eventRequeue: []events.Event{},
+		eventTracker: map[int]struct{}{},
 	}
+
+	// System commands
+	events.RegisterListener(events.System{}, w.HandleSystemEvents)
+	events.RegisterListener(events.Input{}, w.HandleInputEvents)
 
 	connections.SetShutdownChan(osSignalChan)
 
 	return w
+}
+
+func (w *World) HandleInputEvents(e events.Event) events.EventReturn {
+
+	input, typeOk := e.(events.Input)
+	if !typeOk {
+		mudlog.Error("Event", "Expected Type", "Input", "Actual Type", e.Type())
+		return events.Continue
+	}
+
+	var turnCt uint64 = util.GetTurnCount()
+
+	//mudlog.Debug(`Event`, `type`, input.Type(), `UserId`, input.UserId, `MobInstanceId`, input.MobInstanceId, `WaitTurns`, input.WaitTurns, `InputText`, input.InputText)
+
+	// If it's a mob
+	if input.MobInstanceId > 0 {
+		if input.ReadyTurn <= turnCt {
+			w.processMobInput(input.MobInstanceId, input.InputText)
+		} else {
+			return events.CancelAndRequeue
+		}
+		return events.Continue
+	}
+
+	// 0 and below, process immediately and don't count towards limit
+	if input.ReadyTurn == 0 {
+
+		// If this command was potentially blocking input, unblock it now.
+		if input.Flags.Has(events.CmdUnBlockInput) {
+
+			if _, ok := w.ignoreInput[input.UserId]; ok {
+				delete(w.ignoreInput, input.UserId)
+				if user := users.GetByUserId(input.UserId); user != nil {
+					user.UnblockInput()
+				}
+			}
+
+		}
+
+		w.processInput(input.UserId, input.InputText, input.Flags)
+
+		return events.Continue
+	}
+
+	// If an event was already processed for this user this turn, skip
+	if _, ok := w.eventTracker[input.UserId]; ok {
+		return events.CancelAndRequeue
+	}
+
+	// 0 means process immediately
+	// however, process no further events from this user until next turn
+	if input.ReadyTurn > turnCt {
+
+		// If this is a multi-turn wait, block further input if flagged to do so
+		if input.Flags.Has(events.CmdBlockInput) {
+
+			if _, ok := w.ignoreInput[input.UserId]; !ok {
+				w.ignoreInput[input.UserId] = turnCt
+			}
+
+			input.Flags.Remove(events.CmdBlockInput)
+		}
+
+		return events.CancelAndRequeue
+	}
+
+	//
+	// Event ready to be processed
+	//
+
+	// If this command was potentially blocking input, unblock it now.
+	if input.Flags.Has(events.CmdUnBlockInput) {
+
+		if _, ok := w.ignoreInput[input.UserId]; ok {
+			delete(w.ignoreInput, input.UserId)
+			if user := users.GetByUserId(input.UserId); user != nil {
+				user.UnblockInput()
+			}
+		}
+
+	}
+
+	w.processInput(input.UserId, input.InputText, events.EventFlag(input.Flags))
+
+	w.eventTracker[input.UserId] = struct{}{}
+
+	return events.Continue
+}
+
+// Checks whether their level is too high for a guide
+func (w *World) HandleSystemEvents(e events.Event) events.EventReturn {
+
+	sys, typeOk := e.(events.System)
+	if !typeOk {
+		mudlog.Error("Event", "Expected Type", "System", "Actual Type", e.Type())
+		return events.Continue
+	}
+
+	if sys.Command == `reload` {
+
+		events.AddToQueue(events.Broadcast{
+			Text: `Reloading flat files...`,
+		})
+
+		loadAllDataFiles(true)
+
+		events.AddToQueue(events.Broadcast{
+			Text:            `Done.` + term.CRLFStr,
+			SkipLineRefresh: true,
+		})
+
+	} else if sys.Command == `kick` {
+		w.Kick(sys.Data.(int))
+	} else if sys.Command == `leaveworld` {
+
+		if userInfo := users.GetByUserId(sys.Data.(int)); userInfo != nil {
+			events.AddToQueue(events.PlayerDespawn{
+				UserId:        userInfo.UserId,
+				RoomId:        userInfo.Character.RoomId,
+				Username:      userInfo.Username,
+				CharacterName: userInfo.Character.Name,
+				TimeOnline:    userInfo.GetOnlineInfo().OnlineTimeStr,
+			})
+		}
+
+	} else if sys.Command == `logoff` {
+		w.logOff(sys.Data.(int))
+	}
+
+	return events.Continue
 }
 
 // Send input to the world.
@@ -627,8 +768,6 @@ loop:
 				events.AddToQueue(events.NewRound{RoundNumber: roundNumber, TimeNow: time.Now()})
 			}
 
-			w.EventLoopTurns()
-
 			util.UnlockMud()
 
 		case enterWorldUserId := <-w.enterWorldUserId: // [2]int
@@ -786,7 +925,7 @@ func (w *World) processInput(userId int, inputText string, flags events.EventFla
 
 	} else {
 		connId := user.ConnectionId()
-		connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
+		connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt())), connId)
 	}
 
 	if !handled {
@@ -802,7 +941,7 @@ func (w *World) processInput(userId int, inputText string, flags events.EventFla
 	// If they had an input prompt, but now they don't, lets make sure to resend a status prompt
 	if hadPrompt || (!hadPrompt && user.GetPrompt() != nil) {
 		connId := user.ConnectionId()
-		connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt(true))), connId)
+		connections.SendTo([]byte(templates.AnsiParse(user.GetCommandPrompt())), connId)
 	}
 	// Removing this as possibly redundant.
 	// Leaving in case I need to remember that I did it...
@@ -849,122 +988,6 @@ func (w *World) processMobInput(mobInstanceId int, inputText string) {
 		if len(command) > 0 {
 			mob.Command(fmt.Sprintf(`emote looks a little confused (%s %s).`, command, remains))
 		}
-	}
-
-}
-
-// Events that are throttled by TurnMs in config.yaml
-func (w *World) EventLoopTurns() {
-
-	var turnCt uint64 = util.GetTurnCount()
-
-	//
-	// Handle Input Queue
-	//
-	alreadyProcessed := make(map[int]struct{}) // Keep track of players who already had a command this turn, and what turn it was
-	eq := events.GetQueue(events.Input{})
-	for eq.Len() > 0 {
-
-		e := eq.Poll()
-
-		input, typeOk := e.(events.Input)
-		if !typeOk {
-			mudlog.Error("Event", "Expected Type", "Input", "Actual Type", e.Type())
-			continue
-		}
-
-		//mudlog.Debug(`Event`, `type`, input.Type(), `UserId`, input.UserId, `MobInstanceId`, input.MobInstanceId, `WaitTurns`, input.WaitTurns, `InputText`, input.InputText)
-
-		// If it's a mob
-		if input.MobInstanceId > 0 {
-			if input.ReadyTurn <= turnCt {
-
-				// Allow any handlers to handle the event
-				if !events.DoListeners(e) {
-					continue
-				}
-
-				w.processMobInput(input.MobInstanceId, input.InputText)
-			} else {
-				events.Requeue(input)
-			}
-			continue
-		}
-
-		// 0 and below, process immediately and don't count towards limit
-		if input.ReadyTurn == 0 {
-
-			// If this command was potentially blocking input, unblock it now.
-			if input.Flags.Has(events.CmdUnBlockInput) {
-
-				if _, ok := w.ignoreInput[input.UserId]; ok {
-					delete(w.ignoreInput, input.UserId)
-					if user := users.GetByUserId(input.UserId); user != nil {
-						user.UnblockInput()
-					}
-				}
-
-			}
-
-			// Allow any handlers to handle the event
-			if !events.DoListeners(e) {
-				continue
-			}
-
-			w.processInput(input.UserId, input.InputText, input.Flags)
-
-			continue
-		}
-
-		// If an event was already processed for this user this turn, skip
-		if _, ok := alreadyProcessed[input.UserId]; ok {
-			events.Requeue(input)
-			continue
-		}
-
-		// 0 means process immediately
-		// however, process no further events from this user until next turn
-		if input.ReadyTurn > turnCt {
-
-			// If this is a multi-turn wait, block further input if flagged to do so
-			if input.Flags.Has(events.CmdBlockInput) {
-
-				if _, ok := w.ignoreInput[input.UserId]; !ok {
-					w.ignoreInput[input.UserId] = turnCt
-				}
-
-				input.Flags.Remove(events.CmdBlockInput)
-			}
-
-			events.Requeue(input)
-
-			continue
-		}
-
-		//
-		// Event ready to be processed
-		//
-
-		// If this command was potentially blocking input, unblock it now.
-		if input.Flags.Has(events.CmdUnBlockInput) {
-
-			if _, ok := w.ignoreInput[input.UserId]; ok {
-				delete(w.ignoreInput, input.UserId)
-				if user := users.GetByUserId(input.UserId); user != nil {
-					user.UnblockInput()
-				}
-			}
-
-		}
-
-		// Allow any handlers to handle the event
-		if !events.DoListeners(e) {
-			continue
-		}
-
-		w.processInput(input.UserId, input.InputText, events.EventFlag(input.Flags))
-
-		alreadyProcessed[input.UserId] = struct{}{}
 	}
 
 }

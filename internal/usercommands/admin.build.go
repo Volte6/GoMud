@@ -57,7 +57,7 @@ func IBuild(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 				events.AddToQueue(events.Input{
 					UserId:    user.UserId,
 					InputText: `look`,
-				}, true)
+				}, -1)
 
 			}
 		}
@@ -145,7 +145,7 @@ func Build(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 					events.AddToQueue(events.Input{
 						UserId:    user.UserId,
 						InputText: `look`,
-					}, true)
+					}, -1)
 				}
 			}
 		}
@@ -209,7 +209,7 @@ func Build(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 				events.AddToQueue(events.Input{
 					UserId:    user.UserId,
 					InputText: `look`,
-				}, true)
+				}, -1)
 			}
 
 		}

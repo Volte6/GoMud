@@ -8,17 +8,17 @@ import (
 )
 
 // Checks whether their level is too high for a guide
-func CheckGuide(e events.Event) bool {
+func CheckGuide(e events.Event) events.EventReturn {
 
 	evt, typeOk := e.(events.LevelUp)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "LevelUp", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	user := users.GetByUserId(evt.UserId)
 	if user == nil {
-		return true
+		return events.Continue
 	}
 
 	if user.Character.Level >= 5 {
@@ -34,5 +34,5 @@ func CheckGuide(e events.Event) bool {
 		}
 	}
 
-	return true
+	return events.Continue
 }

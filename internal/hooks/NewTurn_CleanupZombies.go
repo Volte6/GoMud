@@ -13,12 +13,12 @@ import (
 // Zombie users are users who have disconnected but their user/character is still in game.
 //
 
-func CleanupZombies(e events.Event) bool {
+func CleanupZombies(e events.Event) events.EventReturn {
 
 	evt, typeOk := e.(events.NewTurn)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "NewTurn", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	et := configs.GetTimingConfig()
@@ -41,5 +41,5 @@ func CleanupZombies(e events.Event) bool {
 		}
 	}
 
-	return true
+	return events.Continue
 }

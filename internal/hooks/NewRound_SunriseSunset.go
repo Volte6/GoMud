@@ -10,7 +10,7 @@ import (
 // Performs auction status updates
 //
 
-func SunriseSunset(e events.Event) bool {
+func SunriseSunset(e events.Event) events.EventReturn {
 
 	evt := e.(events.NewRound)
 
@@ -30,5 +30,5 @@ func SunriseSunset(e events.Event) bool {
 
 	}
 
-	return true
+	return events.Continue
 }

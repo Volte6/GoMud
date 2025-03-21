@@ -9,7 +9,7 @@ import (
 // Respawn any enemies that have been missing for too long
 //
 
-func HandleRespawns(e events.Event) bool {
+func HandleRespawns(e events.Event) events.EventReturn {
 
 	for _, roomId := range rooms.GetRoomsWithPlayers() {
 
@@ -22,5 +22,5 @@ func HandleRespawns(e events.Event) bool {
 		room.Prepare(false)
 	}
 
-	return true
+	return events.Continue
 }

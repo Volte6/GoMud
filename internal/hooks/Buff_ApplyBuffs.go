@@ -14,19 +14,19 @@ import (
 // Checks for quests on the item
 //
 
-func ApplyBuffs(e events.Event) bool {
+func ApplyBuffs(e events.Event) events.EventReturn {
 
 	evt, typeOk := e.(events.Buff)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "Buff", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	//mudlog.Debug(`Event`, `type`, evt.Type(), `UserId`, evt.UserId, `MobInstanceId`, evt.MobInstanceId, `BuffId`, evt.BuffId)
 
 	buffInfo := buffs.GetBuffSpec(evt.BuffId)
 	if buffInfo == nil {
-		return false
+		return events.Cancel
 	}
 
 	var targetChar *characters.Character
@@ -35,7 +35,7 @@ func ApplyBuffs(e events.Event) bool {
 
 		buffMob := mobs.GetInstance(evt.MobInstanceId)
 		if buffMob == nil {
-			return false
+			return events.Cancel
 		}
 
 		targetChar = &buffMob.Character
@@ -44,7 +44,7 @@ func ApplyBuffs(e events.Event) bool {
 
 		buffUser := users.GetByUserId(evt.UserId)
 		if buffUser == nil {
-			return false
+			return events.Cancel
 		}
 
 		targetChar = buffUser.Character
@@ -52,7 +52,7 @@ func ApplyBuffs(e events.Event) bool {
 
 	if evt.BuffId < 0 {
 		targetChar.RemoveBuff(buffInfo.BuffId * -1)
-		return true
+		return events.Continue
 	}
 
 	// Apply the buff
@@ -80,5 +80,5 @@ func ApplyBuffs(e events.Event) bool {
 		}
 	}
 
-	return true
+	return events.Continue
 }

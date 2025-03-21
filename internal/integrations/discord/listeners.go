@@ -17,15 +17,15 @@ var (
 )
 
 // Player enters the world event
-func HandlePlayerSpawn(e events.Event) bool {
+func HandlePlayerSpawn(e events.Event) events.EventReturn {
 	evt, typeOk := e.(events.PlayerSpawn)
 	if !typeOk {
-		return false
+		return events.Cancel
 	}
 
 	user := users.GetByUserId(evt.UserId)
 	if user == nil {
-		return false
+		return events.Cancel
 	}
 
 	connDetails := connections.Get(user.ConnectionId())
@@ -38,38 +38,38 @@ func HandlePlayerSpawn(e events.Event) bool {
 
 	SendRichMessage(message, Green)
 
-	return true
+	return events.Continue
 }
 
 // Player leaves the world event
-func HandlePlayerDespawn(e events.Event) bool {
+func HandlePlayerDespawn(e events.Event) events.EventReturn {
 	evt, typeOk := e.(events.PlayerDespawn)
 	if !typeOk {
-		return false
+		return events.Cancel
 	}
 
 	message := fmt.Sprintf(":x: **%s** disconnected (online %s)", evt.CharacterName, evt.TimeOnline)
 
 	SendRichMessage(message, Grey)
 
-	return true
+	return events.Continue
 }
 
-func HandleLogs(e events.Event) bool {
+func HandleLogs(e events.Event) events.EventReturn {
 	evt, typeOk := e.(events.Log)
 	if !typeOk {
-		return false
+		return events.Cancel
 	}
 
 	if evt.Level != `ERROR` {
-		return true
+		return events.Continue
 	}
 
 	msgOut := util.StripANSI(fmt.Sprintln(evt.Data[1:]...))
 
 	// Skip script timeout messages
 	if strings.Contains(msgOut, `JSVM`) && strings.Contains(msgOut, `script timeout`) {
-		return true
+		return events.Continue
 	}
 
 	if strings.Contains(msgOut, `Stopping server`) || strings.Contains(msgOut, `Starting server`) {
@@ -82,13 +82,13 @@ func HandleLogs(e events.Event) bool {
 
 	SendRichMessage(message, Red)
 
-	return true
+	return events.Continue
 }
 
-func HandleLevelup(e events.Event) bool {
+func HandleLevelup(e events.Event) events.EventReturn {
 	evt, typeOk := e.(events.LevelUp)
 	if !typeOk {
-		return false
+		return events.Cancel
 	}
 
 	message := fmt.Sprintf(`:crown: **%s** *has gained a level and reached **level %d**!*`, evt.CharacterName, evt.NewLevel)
@@ -98,29 +98,29 @@ func HandleLevelup(e events.Event) bool {
 
 	SendRichMessage(message, Gold)
 
-	return true
+	return events.Continue
 }
 
-func HandleDeath(e events.Event) bool {
+func HandleDeath(e events.Event) events.EventReturn {
 	evt, typeOk := e.(events.PlayerDeath)
 	if !typeOk {
-		return false
+		return events.Cancel
 	}
 
 	message := fmt.Sprintf(`:skull: **%s** *has **DIED**!*`, evt.CharacterName)
 	SendRichMessage(message, DarkOrange)
 
-	return true
+	return events.Continue
 }
 
-func HandleBroadcast(e events.Event) bool {
+func HandleBroadcast(e events.Event) events.EventReturn {
 	evt, typeOk := e.(events.Broadcast)
 	if !typeOk {
-		return false
+		return events.Cancel
 	}
 
 	if !evt.IsCommunication {
-		return true
+		return events.Continue
 	}
 
 	textOut := ansitags.Parse(evt.Text, ansitags.StripTags)
@@ -134,18 +134,18 @@ func HandleBroadcast(e events.Event) bool {
 
 	SendRichMessage(message, Purple)
 
-	return true
+	return events.Continue
 }
 
-func HandleAuction(e events.Event) bool {
+func HandleAuction(e events.Event) events.EventReturn {
 	evt, typeOk := e.(events.Auction)
 	if !typeOk {
-		return false
+		return events.Cancel
 	}
 
 	// Don't spam the reminders.
 	if evt.State == `REMINDER` {
-		return true
+		return events.Continue
 	}
 
 	if evt.State == `BID` {
@@ -178,7 +178,7 @@ func HandleAuction(e events.Event) bool {
 
 		SendPayload(payload)
 
-		return true
+		return events.Continue
 	}
 
 	if evt.State == `START` {
@@ -206,7 +206,7 @@ func HandleAuction(e events.Event) bool {
 
 		SendPayload(payload)
 
-		return true
+		return events.Continue
 	}
 
 	if evt.State == `END` {
@@ -257,8 +257,8 @@ func HandleAuction(e events.Event) bool {
 
 		SendPayload(payload)
 
-		return true
+		return events.Continue
 	}
 
-	return true
+	return events.Continue
 }

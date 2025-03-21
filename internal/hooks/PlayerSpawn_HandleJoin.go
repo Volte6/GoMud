@@ -15,18 +15,18 @@ import (
 // Execute on join commands
 //
 
-func HandleJoin(e events.Event) bool {
+func HandleJoin(e events.Event) events.EventReturn {
 
 	evt, typeOk := e.(events.PlayerSpawn)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "PlayerSpawn", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	user := users.GetByUserId(evt.UserId)
 	if user == nil {
 		mudlog.Error("HandleJoin", "error", fmt.Sprintf(`user %d not found`, evt.UserId))
-		return false
+		return events.Cancel
 	}
 
 	user.EventLog.Add(`conn`, fmt.Sprintf(`<ansi fg="username">%s</ansi> entered the world`, user.Character.Name))
@@ -74,5 +74,5 @@ func HandleJoin(e events.Event) bool {
 
 	}
 
-	return true
+	return events.Continue
 }

@@ -10,17 +10,17 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
-func SendLevelNotifications(e events.Event) bool {
+func SendLevelNotifications(e events.Event) events.EventReturn {
 
 	evt, typeOk := e.(events.LevelUp)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "LevelUp", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	user := users.GetByUserId(evt.UserId)
 	if user == nil {
-		return true
+		return events.Continue
 	}
 
 	levelUpData := map[string]interface{}{
@@ -41,5 +41,5 @@ func SendLevelNotifications(e events.Event) bool {
 		Text: fmt.Sprintf(`<ansi fg="magenta-bold">***</ansi> <ansi fg="username">%s</ansi> <ansi fg="yellow">has reached level %d!</ansi> <ansi fg="magenta-bold">***</ansi>%s`, evt.CharacterName, evt.NewLevel, term.CRLFStr),
 	})
 
-	return true
+	return events.Continue
 }

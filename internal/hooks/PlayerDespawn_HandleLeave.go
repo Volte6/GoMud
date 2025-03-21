@@ -17,18 +17,18 @@ import (
 // Some clean up
 //
 
-func HandleLeave(e events.Event) bool {
+func HandleLeave(e events.Event) events.EventReturn {
 
 	evt, typeOk := e.(events.PlayerDespawn)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "PlayerDespawn", "Actual Type", e.Type())
-		return false
+		return events.Cancel
 	}
 
 	user := users.GetByUserId(evt.UserId)
 	if user == nil {
 		mudlog.Error("HandleLeave", "error", fmt.Sprintf(`user %d not found`, evt.UserId))
-		return false
+		return events.Cancel
 	}
 
 	connId := user.ConnectionId()
@@ -86,5 +86,5 @@ func HandleLeave(e events.Event) bool {
 	}
 	connections.Remove(connId)
 
-	return true
+	return events.Continue
 }

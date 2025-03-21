@@ -11,7 +11,7 @@ import (
 // Handle mobs that are bored
 //
 
-func InactivePlayers(e events.Event) bool {
+func InactivePlayers(e events.Event) events.EventReturn {
 
 	evt := e.(events.NewRound)
 
@@ -19,11 +19,11 @@ func InactivePlayers(e events.Event) bool {
 
 	maxIdleRounds := c.Timing.SecondsToRounds(int(c.Network.MaxIdleSeconds))
 	if maxIdleRounds == 0 {
-		return true
+		return events.Continue
 	}
 
 	if evt.RoundNumber < uint64(maxIdleRounds) {
-		return true
+		return events.Continue
 	}
 
 	kickMods := bool(c.Network.TimeoutMods)
@@ -55,6 +55,6 @@ func InactivePlayers(e events.Event) bool {
 
 	}
 
-	return true
+	return events.Continue
 
 }
