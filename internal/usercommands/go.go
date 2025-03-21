@@ -5,6 +5,7 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
@@ -129,6 +130,13 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 
 				if exitInfo.Lock.IsLocked() {
 					user.SendText(`There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.`)
+					// Send GMCP message
+					if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
+						events.AddToQueue(events.GMCPOut{
+							UserId:  user.UserId,
+							Payload: fmt.Sprintf(`Room.WrongDir "%s"`, exitName),
+						})
+					}
 					return true, nil
 				}
 			}
@@ -346,6 +354,15 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 
 		if rest == "north" || rest == "south" || rest == "east" || rest == "west" || rest == "up" || rest == "down" || rest == "northwest" || rest == "northeast" || rest == "southwest" || rest == "southeast" {
 			user.SendText("You're bumping into walls.")
+
+			// Send GMCP message
+			if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
+				events.AddToQueue(events.GMCPOut{
+					UserId:  user.UserId,
+					Payload: fmt.Sprintf(`Room.WrongDir "%s"`, rest),
+				})
+			}
+
 			if !user.Character.HasBuffFlag(buffs.Hidden) {
 
 				room.SendText(
