@@ -9,11 +9,13 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/mobcommands"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/usercommands"
 	"github.com/volte6/gomud/internal/util"
+	"gopkg.in/yaml.v2"
 )
 
 //
@@ -22,7 +24,6 @@ import (
 //
 
 // pluginRegistry holds all plugins, provides a `fs.ReadFileFS` interface
-type pluginRegistry []*Plugin
 
 var (
 	registrationOpen = true
@@ -35,6 +36,8 @@ const (
 	dataFilesFolder         = `datafiles` + string(filepath.Separator)
 	dataOverlaysFilesFolder = `data-overlays` + string(filepath.Separator)
 )
+
+type pluginRegistry []*Plugin
 
 // Iterator for all plugin file systems.
 // This allows you to process each one individually.
@@ -91,13 +94,17 @@ func (p pluginRegistry) Stat(name string) (fs.FileInfo, error) {
 
 }
 
-//
 // Plugin struct
-//
+type dependency struct {
+	name    string
+	version string
+}
 
 type Plugin struct {
 	name    string
 	version string
+
+	dependencies []dependency
 
 	callbacks struct {
 		userCommands map[string]usercommands.CommandAccess
@@ -106,6 +113,8 @@ type Plugin struct {
 		onLoad func()
 		onSave func()
 	}
+
+	Config PluginConfig
 
 	// helper for embedded files
 	files PluginFiles
@@ -118,8 +127,12 @@ func New(name string, version string) *Plugin {
 	}
 
 	p := &Plugin{
-		name:    name,
-		version: version,
+		name:         name,
+		version:      version,
+		dependencies: []dependency{},
+		Config: PluginConfig{
+			pluginName: name,
+		},
 	}
 
 	p.callbacks.userCommands = map[string]usercommands.CommandAccess{}
@@ -127,6 +140,10 @@ func New(name string, version string) *Plugin {
 
 	registry = append(registry, p)
 	return p
+}
+
+func (p *Plugin) Requires(modname string, modversion string) {
+	p.dependencies = append(p.dependencies, dependency{modname, modversion})
 }
 
 // Registers a UserCommand and callback
@@ -249,11 +266,38 @@ func (p *Plugin) ReadBytes(identifier string) ([]byte, error) {
 	fullPath := util.FilePath(folderPath, `/`, fileName)
 
 	bytes, err := os.ReadFile(fullPath)
-	if err != nil {
+	if err != nil && err != fs.ErrNotExist {
 		mudlog.Warn(`plugin.ReadBytes`, `name`, p.name, `path`, fullPath, `error`, err)
 	}
 
 	return bytes, err
+}
+
+func (p *Plugin) WriteStruct(identifier string, in any) error {
+
+	b, err := yaml.Marshal(in)
+	if err != nil {
+		return err
+	}
+
+	if err := p.WriteBytes(identifier, b); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *Plugin) ReadIntoStruct(identifier string, out any) error {
+	b, err := p.ReadBytes(identifier)
+	if err != nil {
+		return err
+	}
+
+	if err = yaml.Unmarshal(b, out); err == nil {
+		return err
+	}
+
+	return nil
 }
 
 func Load(dataFilesPath string) {
@@ -263,7 +307,35 @@ func Load(dataFilesPath string) {
 	registrationOpen = false
 
 	pluginCt := 0
-	for _, p := range registry {
+	for idx := len(registry) - 1; idx >= 0; idx-- {
+
+		p := registry[idx]
+
+		skipPlugin := false
+
+		for _, dep := range p.dependencies {
+
+			dependenciesMet := false
+
+			for _, regCheckPlugin := range registry {
+				// Later improve version matching.
+				if regCheckPlugin.name == dep.name && regCheckPlugin.version == dep.version {
+					dependenciesMet = true
+				}
+			}
+
+			if !dependenciesMet {
+				mudlog.Error("plugins", "Could not load plugin", p.name, "error", fmt.Sprintf("dependency not found: %s v%s", dep.name, dep.version))
+				registry = append(registry[:idx], registry[idx+1:]...)
+				skipPlugin = true
+				break
+			}
+
+		}
+
+		if skipPlugin {
+			continue
+		}
 
 		pluginCt++
 
@@ -273,6 +345,21 @@ func Load(dataFilesPath string) {
 
 		for cmd, info := range p.callbacks.mobCommands {
 			mobcommands.RegisterCommand(cmd, info.Func, info.AllowedWhenDowned)
+		}
+
+		// Check for config.yaml override and set missing values accordingly
+		OLPath := util.FilePath(`data-overlays`, `/`, `config.yaml`)
+		if b, err := p.files.ReadFile(OLPath); err == nil {
+			var dataMap map[string]any
+			if yaml.Unmarshal(b, &dataMap) == nil {
+
+				overlayMap := map[string]any{}
+				for k, v := range dataMap {
+					overlayMap[fmt.Sprintf(`Modules.%s.%s`, p.name, k)] = v
+				}
+				configs.AddOverlayOverrides(overlayMap)
+
+			}
 		}
 
 		if p.callbacks.onLoad != nil {

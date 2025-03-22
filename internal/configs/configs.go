@@ -2,6 +2,7 @@ package configs
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -35,7 +36,6 @@ type Config struct {
 	// Start config subsections
 	Server       Server       `yaml:"Server"`
 	Memory       Memory       `yaml:"Memory"`
-	Auctions     Auctions     `yaml:"Auctions"`
 	LootGoblin   LootGoblin   `yaml:"LootGoblin"`
 	Timing       Timing       `yaml:"Timing"`
 	FilePaths    FilePaths    `yaml:"FilePaths"`
@@ -49,11 +49,45 @@ type Config struct {
 	Statistics   Statistics   `yaml:"Statistics"`
 	Validation   Validation   `yaml:"Validation"`
 
+	// Plugins is a special case
+	Modules Modules `yaml:"Modules"`
+
 	// End config subsections
 
 	seedInt int64 `yaml:"-"`
 
 	validated bool
+}
+
+func AddOverlayOverrides(dotMap map[string]any) error {
+	configDataLock.RLock()
+	defer configDataLock.RUnlock()
+
+	for k, v := range dotMap {
+
+		if strings.Index(k, `.`) != -1 {
+
+			parts := strings.Split(k, `.`)
+
+			for i := len(parts) - 1; i >= 0; i-- {
+				tmpKey := strings.Join(parts[i:], `.`)
+				keyLookups[strings.ToLower(tmpKey)] = k
+
+				tmpKey = strings.Join(parts[i:], ``)
+				keyLookups[strings.ToLower(tmpKey)] = k
+
+			}
+
+		} else {
+			keyLookups[strings.ToLower(k)] = k
+		}
+
+		typeLookups[k] = reflect.TypeOf(v).String()
+
+		overrides[k] = v
+	}
+
+	return configData.OverlayOverrides(dotMap)
 }
 
 // OverlayDotMap overlays values from a dot-syntax map onto the Config.
@@ -114,6 +148,22 @@ func (c *Config) buildDotPaths(v reflect.Value, prefix string, result map[string
 			// Recursively build paths.
 			c.buildDotPaths(fieldVal, newPrefix, result)
 		}
+	case reflect.Map:
+		// If the map is nil, store nil for the current prefix.
+		if v.IsNil() {
+			result[prefix] = make(map[string]any)
+			return
+		}
+		// Iterate over each key in the map.
+		for _, key := range v.MapKeys() {
+			// Convert the key to string (works for string keys; for others, fmt.Sprintf is used).
+			keyStr := fmt.Sprintf("%v", key.Interface())
+			newPrefix := keyStr
+			if prefix != "" {
+				newPrefix = prefix + "." + keyStr
+			}
+			c.buildDotPaths(v.MapIndex(key), newPrefix, result)
+		}
 	default:
 		// For non-struct fields, store the value using the accumulated prefix.
 		result[prefix] = v.Interface()
@@ -137,7 +187,6 @@ func (c *Config) Validate() {
 
 	c.Server.Validate()
 	c.Memory.Validate()
-	c.Auctions.Validate()
 	c.LootGoblin.Validate()
 	c.Timing.Validate()
 	c.FilePaths.Validate()
@@ -150,6 +199,7 @@ func (c *Config) Validate() {
 	c.SpecialRooms.Validate()
 	c.Statistics.Validate()
 	c.Validation.Validate()
+	c.Modules.Validate()
 
 	// nothing to do with LootGoblinIncludeRecentRooms
 
@@ -241,12 +291,15 @@ func (c Config) AllConfigData(excludeStrings ...string) map[string]any {
 func SetVal(propertyPath string, newVal string) error {
 
 	propertyPath, propertyType := FindFullPath(propertyPath)
+	if propertyType == `` {
+		return errors.New(`invalid property name: ` + propertyPath)
+	}
 
 	quickMap := make(map[string]any)
 	quickMap[propertyPath] = StringToConfigValue(newVal, propertyType)
 
-	flatOverrides := flatten(overrides)
-	flatQuickmap := flatten(quickMap)
+	flatOverrides := Flatten(overrides)
+	flatQuickmap := Flatten(quickMap)
 
 	for k, v := range flatQuickmap {
 		flatOverrides[k] = v
@@ -389,7 +442,7 @@ func GetSecret(v ConfigSecret) string {
 // flatten recursively flattens a map[string]any.
 // It supports both map[string]any and map[any]any values,
 // which is useful when unmarshaling YAML.
-func flatten(input map[string]any) map[string]any {
+func Flatten(input map[string]any) map[string]any {
 	flatMap := make(map[string]any)
 	flattenHelper("", input, flatMap)
 	return flatMap
