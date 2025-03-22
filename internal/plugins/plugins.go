@@ -355,7 +355,7 @@ func Load(dataFilesPath string) {
 
 				overlayMap := map[string]any{}
 				for k, v := range dataMap {
-					overlayMap[fmt.Sprintf(`Plugins.%s.%s`, p.name, k)] = v
+					overlayMap[fmt.Sprintf(`Modules.%s.%s`, p.name, k)] = v
 				}
 				configs.AddOverlayOverrides(overlayMap)
 

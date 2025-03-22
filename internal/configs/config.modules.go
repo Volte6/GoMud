@@ -1,17 +1,17 @@
 package configs
 
-type Plugins map[string]any
+type Modules map[string]any
 
-func (p *Plugins) Validate() {
+func (p *Modules) Validate() {
 
 }
 
-func GetPluginConfig() Plugins {
+func GetModulesConfig() Modules {
 	configDataLock.RLock()
 	defer configDataLock.RUnlock()
 
 	if !configData.validated {
 		configData.Validate()
 	}
-	return configData.Plugins
+	return configData.Modules
 }

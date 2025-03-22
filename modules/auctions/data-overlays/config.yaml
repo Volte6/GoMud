@@ -1,14 +1,13 @@
 ################################################################################
 # If modified, these settings will be copied into your config overrides 
-# folder under `Plugins.Settings.auctions`:
+# folder under `Modules.auctions`:
 #
-# Plugins:
-#   Settings:
-#     auctions:
-#       Anonymous: false
-#       DurationSeconds: 12
-#       Enabled: true
-#       UpdateSeconds: 30
+# Modules:
+#   auctions:
+#     Anonymous: false
+#     DurationSeconds: 180
+#     Enabled: true
+#     UpdateSeconds: 90
 ################################################################################
 # - Enabled -
 #   If true, players can globally auction off items.

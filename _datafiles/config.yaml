@@ -543,11 +543,11 @@ Validation:
 
 ################################################################################
 #
-#   Plugins
-#   Empty here. Plugins provide data for this.
+#   Modules
+#   Empty here. Modules provide data for this.
 #
 ################################################################################
-Plugins: {}
+Modules: {}
 
 
 

@@ -11,10 +11,10 @@ type PluginConfig struct {
 }
 
 func (p *PluginConfig) Set(name string, val any) {
-	configs.SetVal(fmt.Sprintf(`Plugins.%s.%s`, p.pluginName, name), fmt.Sprintf(`%v`, val))
+	configs.SetVal(fmt.Sprintf(`Modules.%s.%s`, p.pluginName, name), fmt.Sprintf(`%v`, val))
 }
 
 func (p *PluginConfig) Get(name string) any {
-	m := configs.Flatten(configs.GetPluginConfig())
+	m := configs.Flatten(configs.GetModulesConfig())
 	return m[fmt.Sprintf(`%s.%s`, p.pluginName, name)]
 }

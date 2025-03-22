@@ -50,7 +50,7 @@ type Config struct {
 	Validation   Validation   `yaml:"Validation"`
 
 	// Plugins is a special case
-	Plugins Plugins `yaml:"Plugins"`
+	Modules Modules `yaml:"Modules"`
 
 	// End config subsections
 
@@ -199,7 +199,7 @@ func (c *Config) Validate() {
 	c.SpecialRooms.Validate()
 	c.Statistics.Validate()
 	c.Validation.Validate()
-	c.Plugins.Validate()
+	c.Modules.Validate()
 
 	// nothing to do with LootGoblinIncludeRecentRooms
 
