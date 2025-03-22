@@ -3,20 +3,14 @@ const asksubjects = ["quest", "bishop", "arch-bishop", "king"]
 
 function onAsk(mob, room, eventDetails) {
 
-    console.log("TEST");
-
     if ( (user = GetUser(eventDetails.sourceId)) == null ) {
-        console.log("FAIL 0");
         return false;
     }
 
     match = UtilFindMatchIn(eventDetails.askText, asksubjects);
     if ( !match.found ) {
-        console.log("FAIL");
         return false;
     }
-
-    console.log("SUCCESS");
 
     mob.Command("say I often see some priests snooping around in the alley behind the Sanctuary.")
     mob.Command("say I used to think they were just taking care of the rat problem, but now I'm not so sure.")
