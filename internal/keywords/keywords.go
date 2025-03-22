@@ -6,6 +6,7 @@ import (
 
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/fileloader"
+	"github.com/volte6/gomud/internal/util"
 	"gopkg.in/yaml.v2"
 )
 
@@ -45,7 +46,7 @@ func (a *Aliases) Validate() error {
 
 	mergeAliases := []Aliases{*a}
 
-	OLPath := `data-overlays/` + a.Filepath()
+	OLPath := util.FilePath(`data-overlays`, `/`, a.Filepath())
 	for _, f := range fileSystems {
 
 		for fsub := range f.AllFileSubSystems {

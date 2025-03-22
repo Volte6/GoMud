@@ -38,7 +38,6 @@ help:
       - inbox
     shops:
       - appraise
-      - auction
       - bank
       - bid
       - buy
@@ -174,7 +173,6 @@ help-aliases:
   set-prompt:       [prompt]
   set-wimpy:        [wimpy]
   colors:           [color, ansi]
-  auction:          [bid]
   killstats:        [kills, kd]
   trading:          [haggle]
   pets:             [pet]
@@ -229,7 +227,6 @@ command-aliases:
   'storage remove': ['unstore']
   'rank back':      ['backrank']
   'rank front':     ['frontrank']
-  'auction bid':    ['bid']
   'help about':     ['about']
   
   # Direction aliases

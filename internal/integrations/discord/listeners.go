@@ -137,29 +137,64 @@ func HandleBroadcast(e events.Event) events.ListenerReturn {
 	return events.Continue
 }
 
-func HandleAuction(e events.Event) events.ListenerReturn {
-	evt, typeOk := e.(events.Auction)
+func HandleAuctionUpdate(e events.Event) events.ListenerReturn {
+	evt, typeOk := e.(events.GenericEvent)
 	if !typeOk {
 		return events.Cancel
 	}
 
+	// Extract event details
+	var ok bool
+
+	var EventState string
+	if EventState, ok = evt.Data(`State`).(string); !ok {
+		EventState = ``
+	}
+
+	var EventItemName string
+	if EventItemName, ok = evt.Data(`ItemName`).(string); !ok {
+		EventItemName = `Unknown`
+	}
+
+	var EventItemDescription string
+	if EventItemDescription, ok = evt.Data(`ItemDescription`).(string); !ok {
+		EventItemDescription = `Unknown`
+	}
+
+	var EventSellerName string
+	if EventSellerName, ok = evt.Data(`SellerName`).(string); !ok {
+		EventSellerName = `Unknown`
+	}
+
+	var EventBuyerName string
+	if EventBuyerName, ok = evt.Data(`BuyerName`).(string); !ok {
+		EventBuyerName = `Unknown`
+	}
+
+	var EventBidAmount int
+	if EventBidAmount, ok = evt.Data(`BidAmount`).(int); !ok {
+		EventBidAmount = 0
+	}
+
+	// Process event
+
 	// Don't spam the reminders.
-	if evt.State == `REMINDER` {
+	if EventState == `REMINDER` {
 		return events.Continue
 	}
 
-	if evt.State == `BID` {
+	if EventState == `BID` {
 
-		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
+		itemName := ansitags.Parse(EventItemName, ansitags.StripTags)
 
 		payload := webHookPayload{
 			Embeds: []embed{{
 				Color:       Gold,
-				Description: fmt.Sprintf(`:moneybag: **%s** has bid on the auction!`, evt.BuyerName),
+				Description: fmt.Sprintf(`:moneybag: **%s** has bid on the auction!`, EventBuyerName),
 				Fields: []embedField{
 					{
 						Name:   `Amount`,
-						Value:  strconv.Itoa(evt.BidAmount),
+						Value:  strconv.Itoa(EventBidAmount),
 						Inline: false,
 					},
 					{
@@ -169,7 +204,7 @@ func HandleAuction(e events.Event) events.ListenerReturn {
 					},
 					{
 						Name:   `Description`,
-						Value:  evt.ItemDescription,
+						Value:  EventItemDescription,
 						Inline: true,
 					},
 				},
@@ -181,14 +216,14 @@ func HandleAuction(e events.Event) events.ListenerReturn {
 		return events.Continue
 	}
 
-	if evt.State == `START` {
+	if EventState == `START` {
 
-		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
+		itemName := ansitags.Parse(EventItemName, ansitags.StripTags)
 
 		payload := webHookPayload{
 			Embeds: []embed{{
 				Color:       Gold,
-				Description: fmt.Sprintf(`:moneybag: **%s** has started a new auction!`, evt.SellerName),
+				Description: fmt.Sprintf(`:moneybag: **%s** has started a new auction!`, EventSellerName),
 				Fields: []embedField{
 					{
 						Name:   `Item`,
@@ -197,7 +232,7 @@ func HandleAuction(e events.Event) events.ListenerReturn {
 					},
 					{
 						Name:   `Description`,
-						Value:  evt.ItemDescription,
+						Value:  EventItemDescription,
 						Inline: true,
 					},
 				},
@@ -209,16 +244,16 @@ func HandleAuction(e events.Event) events.ListenerReturn {
 		return events.Continue
 	}
 
-	if evt.State == `END` {
+	if EventState == `END` {
 
-		itemName := ansitags.Parse(evt.ItemName, ansitags.StripTags)
+		itemName := ansitags.Parse(EventItemName, ansitags.StripTags)
 
 		auctionWinner := `No Winner`
 		highestBid := `No Bids`
 
-		if evt.BidAmount > 0 {
-			auctionWinner = evt.BuyerName
-			highestBid = strconv.Itoa(evt.BidAmount)
+		if EventBidAmount > 0 {
+			auctionWinner = EventBuyerName
+			highestBid = strconv.Itoa(EventBidAmount)
 		}
 
 		payload := webHookPayload{
@@ -248,7 +283,7 @@ func HandleAuction(e events.Event) events.ListenerReturn {
 					},
 					{
 						Name:   `Description`,
-						Value:  evt.ItemDescription,
+						Value:  EventItemDescription,
 						Inline: true,
 					},
 				},

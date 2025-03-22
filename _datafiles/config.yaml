@@ -109,28 +109,6 @@ Memory:
 
 ################################################################################
 #
-#   AUCTIONS
-#   Settings for global auctions
-#
-################################################################################
-Auctions:
-  # - Enabled -
-  #   If true, players can globally auction off items.
-  Enabled: true
-  # - Anonymous -
-  #   If true, seller/buyer names are not revealed.
-  Anonymous: false
-  # - DurationSeconds -
-  #   How may seconds until an auction closes.
-  DurationSeconds: 180
-  # - UpdateSeconds -
-  #   How may seconds (roughly) between updates on current auction.
-  UpdateSeconds: 30
-
-
-
-################################################################################
-#
 #   LOOT GOBLIN CONFIGURATIONS
 #   This is a special mob that cleans up items and gold left on the ground.
 #   It portals in from a special zone and when it can't find any items or gold
@@ -563,7 +541,13 @@ Validation:
   - "join"
   - "register"
 
-
+################################################################################
+#
+#   Plugins
+#   Empty here. Plugins provide data for this.
+#
+################################################################################
+Plugins: {}
 
 
 

@@ -28,6 +28,12 @@ type Event interface {
 	Type() string
 }
 
+// Generic events are mostly used for plugins
+type GenericEvent interface {
+	Event
+	Data(name string) any
+}
+
 // prioritizedEvent wraps an Event with a priority and an order field.
 type prioritizedEvent struct {
 	event    Event

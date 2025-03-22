@@ -49,10 +49,31 @@ func StringToConfigValue(strVal string, typeName string) ConfigValue {
 		var v ConfigSliceString = []string{}
 		v.Set(strVal)
 		return &v
-	default:
-		return nil
 	}
 
+	// Don't know what it is, lets try and figure it out the lazy way
+
+	if _, err := strconv.ParseFloat(strVal, 64); err == nil {
+		var v ConfigFloat = 0
+		v.Set(strVal)
+		return &v
+	}
+
+	if _, err := strconv.Atoi(strVal); err == nil {
+		var v ConfigInt = 0
+		v.Set(strVal)
+		return &v
+	}
+
+	if _, err := strconv.ParseBool(strVal); err == nil {
+		var v ConfigBool = false
+		v.Set(strVal)
+		return &v
+	}
+
+	var v ConfigSliceString = []string{}
+	v.Set(strVal)
+	return &v
 }
 
 //

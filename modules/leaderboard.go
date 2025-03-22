@@ -16,7 +16,6 @@ import (
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
-	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -91,12 +90,7 @@ type LeaderboardModule struct {
 
 func (l *LeaderboardModule) loadLBs() {
 
-	if b, err := l.plug.ReadBytes(`lastcalculated`); err == nil {
-
-		if err = yaml.Unmarshal(b, l); err == nil {
-			return
-		}
-	}
+	l.plug.ReadIntoStruct(`lastcalculated`, &l)
 
 	l.GoldEnabled = true
 	l.LB_Gold = leaderboardData{Name: `Gold`, ValueColor: `experience`}
@@ -109,12 +103,7 @@ func (l *LeaderboardModule) loadLBs() {
 }
 
 func (l *LeaderboardModule) saveLBs() {
-
-	b, _ := yaml.Marshal(l)
-
-	if err := l.plug.WriteBytes(`lastcalculated`, b); err != nil {
-		panic(err)
-	}
+	l.plug.WriteStruct(`lastcalculated`, l)
 }
 
 func (t *LeaderboardModule) leaderboardCommand(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {

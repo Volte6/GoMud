@@ -54,7 +54,7 @@ func registerListeners() {
 	events.RegisterListener(events.LevelUp{}, HandleLevelup)
 	events.RegisterListener(events.PlayerDeath{}, HandleDeath)
 	events.RegisterListener(events.Broadcast{}, HandleBroadcast)
-	events.RegisterListener(events.Auction{}, HandleAuction)
+	events.RegisterListener(`AuctionUpdate`, HandleAuctionUpdate)
 }
 
 // Sends an embed message to discord which includes a colored bar to the left

@@ -39,7 +39,6 @@ var (
 		`appraise`:    {Appraise, false, false},
 		`ask`:         {Ask, false, false},
 		`attack`:      {Attack, false, false},
-		`auction`:     {Auction, true, false},
 		`backstab`:    {Backstab, false, false},
 		`badcommands`: {BadCommands, true, true}, // Admin only
 		`biome`:       {Biome, true, false},

@@ -31,7 +31,7 @@ var (
 )
 
 const (
-	NoListenerSampleSize = 100
+	NoListenerSampleSize = 20
 
 	First QueueFlag = 1
 	Last  QueueFlag = 2
@@ -53,7 +53,7 @@ func ClearListeners() {
 }
 
 // Returns an ID for the listener which can be used to unregister later.
-func RegisterListener(emptyEvent Event, cbFunc Listener, qFlag ...QueueFlag) ListenerId {
+func RegisterListener(emptyEvent any, cbFunc Listener, qFlag ...QueueFlag) ListenerId {
 	listenerLock.Lock()
 	defer listenerLock.Unlock()
 
@@ -64,8 +64,13 @@ func RegisterListener(emptyEvent Event, cbFunc Listener, qFlag ...QueueFlag) Lis
 	listenerCt++
 
 	eType := `*`
+
 	if emptyEvent != nil {
-		eType = emptyEvent.Type()
+		if evt, ok := emptyEvent.(Event); ok {
+			eType = evt.Type()
+		} else if evtString, ok := emptyEvent.(string); ok {
+			eType = evtString
+		}
 	}
 
 	if _, ok := eventListeners[eType]; !ok {
