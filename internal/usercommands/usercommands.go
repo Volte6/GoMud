@@ -251,19 +251,6 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 		return false, fmt.Errorf(`user %d not found`, userId)
 	}
 
-	// Experimental, not sure if will have unexpected consequences.
-	// Turn keywords for targetting self into actual string of self
-	for _, selfWord := range selfKeywords {
-		wordLen := len(selfWord)
-		if rest == selfWord {
-			rest = user.Character.Name
-			break
-		} else if len(rest) >= wordLen+1 && rest[len(rest)-(wordLen+1):] == ` `+selfWord {
-			rest = rest[:len(rest)-(wordLen+1)] + ` ` + user.Character.Name
-			break
-		}
-	}
-
 	room := rooms.LoadRoom(user.Character.RoomId)
 	if room == nil {
 		return false, fmt.Errorf(`room %d not found`, user.Character.RoomId)
@@ -310,6 +297,21 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 			}
 		}
 
+	}
+
+	// Experimental, not sure if will have unexpected consequences.
+	// Turn keywords for targetting self into actual string of self
+	if cmd == `look` || cmd == `cast` {
+		for _, selfWord := range selfKeywords {
+			wordLen := len(selfWord)
+			if rest == selfWord {
+				rest = user.Character.Name
+				break
+			} else if len(rest) >= wordLen+1 && rest[len(rest)-(wordLen+1):] == ` `+selfWord {
+				rest = rest[:len(rest)-(wordLen+1)] + ` ` + user.Character.Name
+				break
+			}
+		}
 	}
 
 	if cmdInfo, ok := userCommands[cmd]; ok {
