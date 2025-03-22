@@ -255,4 +255,4 @@ Documentation: [Translation](../_datafiles/guides/translation/README.md)
 
 _For example: Chinese translations._
 
-<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/i18n-translation-zh.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/i18n-translation-zh.png" width="600" alt="accessibility text"></a>
+<a href="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/translation-zh.png"><img src="https://raw.githubusercontent.com/Volte6/GoMud/refs/heads/master/feature-screenshots/translation-zh.png" width="600" alt="accessibility text"></a>
