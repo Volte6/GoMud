@@ -4,13 +4,14 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"maps"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
 	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/fileloader"
 	"github.com/volte6/gomud/internal/mobcommands"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/usercommands"
@@ -38,6 +39,99 @@ const (
 )
 
 type pluginRegistry []*Plugin
+
+// Plugin struct
+type dependency struct {
+	name    string
+	version string
+}
+
+type Plugin struct {
+	name    string
+	version string
+
+	dependencies []dependency
+
+	callbacks struct {
+		userCommands map[string]usercommands.CommandAccess
+		mobCommands  map[string]mobcommands.CommandAccess
+
+		onLoad func()
+		onSave func()
+	}
+
+	Config PluginConfig
+
+	// helper for embedded files
+	files PluginFiles
+
+	Web WebConfig
+}
+
+func New(name string, version string) *Plugin {
+
+	if !registrationOpen {
+		return nil
+	}
+
+	p := &Plugin{
+		name:         name,
+		version:      version,
+		dependencies: []dependency{},
+		Config: PluginConfig{
+			pluginName: name,
+		},
+		Web: NewWebConfig(),
+	}
+
+	p.callbacks.userCommands = map[string]usercommands.CommandAccess{}
+	p.callbacks.mobCommands = map[string]mobcommands.CommandAccess{}
+
+	registry = append(registry, p)
+	return p
+}
+
+// Receive functions to satisfy the web.WebPlugin interface
+func (p pluginRegistry) NavLinks() map[string]string {
+
+	allLinks := map[string]string{}
+
+	for _, pItem := range p {
+		maps.Copy(allLinks, pItem.Web.navLinks)
+	}
+
+	return allLinks
+}
+
+func (p pluginRegistry) WebRequest(r *http.Request) (html string, templateData map[string]any, ok bool) {
+
+	reqPath := filepath.Clean(r.URL.Path) // Example: / or /info/faq
+
+	rootFilePath := `html/public/`
+	for _, pItem := range p {
+
+		pageData, ok := pItem.Web.pages[reqPath]
+		if !ok {
+			continue
+		}
+
+		b, err := pItem.files.ReadFile(util.FilePath(rootFilePath, pageData.Filepath))
+
+		if err != nil {
+			continue
+		}
+
+		html = string(b)
+
+		if pageData.DataFunction != nil {
+			templateData = pageData.DataFunction()
+		}
+
+		return html, templateData, true
+	}
+
+	return html, templateData, false
+}
 
 // Iterator for all plugin file systems.
 // This allows you to process each one individually.
@@ -92,54 +186,6 @@ func (p pluginRegistry) Stat(name string) (fs.FileInfo, error) {
 
 	return nil, fs.ErrNotExist
 
-}
-
-// Plugin struct
-type dependency struct {
-	name    string
-	version string
-}
-
-type Plugin struct {
-	name    string
-	version string
-
-	dependencies []dependency
-
-	callbacks struct {
-		userCommands map[string]usercommands.CommandAccess
-		mobCommands  map[string]mobcommands.CommandAccess
-
-		onLoad func()
-		onSave func()
-	}
-
-	Config PluginConfig
-
-	// helper for embedded files
-	files PluginFiles
-}
-
-func New(name string, version string) *Plugin {
-
-	if !registrationOpen {
-		return nil
-	}
-
-	p := &Plugin{
-		name:         name,
-		version:      version,
-		dependencies: []dependency{},
-		Config: PluginConfig{
-			pluginName: name,
-		},
-	}
-
-	p.callbacks.userCommands = map[string]usercommands.CommandAccess{}
-	p.callbacks.mobCommands = map[string]mobcommands.CommandAccess{}
-
-	registry = append(registry, p)
-	return p
 }
 
 func (p *Plugin) Requires(modname string, modversion string) {
@@ -384,7 +430,7 @@ func Save() {
 	mudlog.Info("plugins", "saveCount", pluginCt)
 }
 
-func GetRegistryFS() fileloader.ReadableGroupFS {
+func GetPluginRegistry() pluginRegistry {
 	return registry
 }
 

@@ -131,7 +131,7 @@ func main() {
 	mudlog.Info(`========================`)
 
 	// Register the plugin filesystem with the template system
-	templates.RegisterFS(plugins.GetRegistryFS())
+	templates.RegisterFS(plugins.GetPluginRegistry())
 
 	//
 	// System Configurations
@@ -198,6 +198,8 @@ func main() {
 	plugins.Load(
 		configs.GetFilePathsConfig().DataFiles.String(),
 	)
+
+	web.SetWebPlugin(plugins.GetPluginRegistry())
 
 	//
 	// Capture OS signals to gracefully shutdown the server
@@ -805,7 +807,7 @@ func loadAllDataFiles(isReload bool) {
 	pets.LoadDataFiles()
 	quests.LoadDataFiles()
 	templates.LoadAliases()
-	keywords.LoadAliases(plugins.GetRegistryFS())
+	keywords.LoadAliases(plugins.GetPluginRegistry())
 	mutators.LoadDataFiles()
 	colorpatterns.LoadColorPatterns()
 	audio.LoadAudioConfig()

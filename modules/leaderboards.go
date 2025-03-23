@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/plugins"
@@ -25,7 +24,7 @@ var (
 	// It embeds the relative path into the var below it.
 	//////////////////////////////////////////////////////////////////////
 
-	//go:embed leaderboard/*
+	//go:embed leaderboards/*
 	leaderboard_Files embed.FS // All vars must be a unique name since the module package/namespace is shared between modules.
 )
 
@@ -63,6 +62,8 @@ func init() {
 	t.plug.SetOnLoad(t.loadLBs)
 	t.plug.SetOnSave(t.saveLBs)
 
+	t.plug.Web.WebPage(`Leaderboards`, `/leaderboards`, `leaderboards.html`, true, t.webLeaderboardData)
+
 	events.RegisterListener(events.NewRound{}, t.newRoundHandler)
 
 }
@@ -79,6 +80,7 @@ type LeaderboardModule struct {
 
 	lastCalculated time.Time // When the LB's were last generated
 
+	LBSize            int
 	GoldEnabled       bool
 	ExperienceEnabled bool
 	KillsEnabled      bool
@@ -88,9 +90,19 @@ type LeaderboardModule struct {
 	LB_Kills      leaderboardData `yaml:"LB_Kills,omitempty"`
 }
 
+func (l *LeaderboardModule) webLeaderboardData() map[string]any {
+
+	data := map[string]any{}
+
+	data[`leaderboards`] = l.getCurrentLeaderboards()
+
+	return data
+
+}
+
 func (l *LeaderboardModule) loadLBs() {
 
-	l.plug.ReadIntoStruct(`lastcalculated`, &l)
+	l.plug.ReadIntoStruct(`latest-leaderboards`, &l)
 
 	l.GoldEnabled = true
 	l.LB_Gold = leaderboardData{Name: `Gold`, ValueColor: `experience`}
@@ -103,12 +115,12 @@ func (l *LeaderboardModule) loadLBs() {
 }
 
 func (l *LeaderboardModule) saveLBs() {
-	l.plug.WriteStruct(`lastcalculated`, l)
+	l.plug.WriteStruct(`latest-leaderboards`, l)
 }
 
-func (t *LeaderboardModule) leaderboardCommand(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
+func (l *LeaderboardModule) leaderboardCommand(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
-	for _, lb := range t.getCurrentLeaderboards() {
+	for _, lb := range l.getCurrentLeaderboards() {
 
 		title := fmt.Sprintf(`%s Leaderboard`, lb.Name)
 
@@ -150,21 +162,36 @@ func (t *LeaderboardModule) leaderboardCommand(rest string, user *users.UserReco
 }
 
 func (l *LeaderboardModule) Reset(maxSize int) {
+	fmt.Println("maxSize", maxSize)
 	l.LB_Gold.Reset(maxSize)
 	l.LB_Experience.Reset(maxSize)
 	l.LB_Kills.Reset(maxSize)
 }
 
+func (l *LeaderboardModule) RefreshConfig() {
+
+	l.LBSize = 10
+	if size, ok := l.plug.Config.Get(`Size`).(int); ok {
+		l.LBSize = size
+	}
+
+	if goldEnabled, ok := l.plug.Config.Get(`GoldEnabled`).(bool); ok {
+		l.GoldEnabled = goldEnabled
+	}
+
+	if xpEnabled, ok := l.plug.Config.Get(`ExperienceEnabled`).(bool); ok {
+		l.ExperienceEnabled = xpEnabled
+	}
+
+	if killsEnabled, ok := l.plug.Config.Get(`KillsEnabled`).(bool); ok {
+		l.KillsEnabled = killsEnabled
+	}
+}
+
 func (l *LeaderboardModule) Update() {
 	start := time.Now()
 
-	lbConfig := configs.GetStatisticsConfig().Leaderboards
-
-	l.GoldEnabled = bool(lbConfig.GoldEnabled)
-	l.ExperienceEnabled = bool(lbConfig.ExperienceEnabled)
-	l.KillsEnabled = bool(lbConfig.KillsEnabled)
-
-	l.Reset(int(lbConfig.Size))
+	l.Reset(l.LBSize)
 
 	userCount := 0
 	characterCount := 0
@@ -268,23 +295,23 @@ func (l *LeaderboardModule) newRoundHandler(e events.Event) events.ListenerRetur
 
 func (l *LeaderboardModule) getCurrentLeaderboards() []leaderboardData {
 
+	l.RefreshConfig()
+
 	if l.lastCalculated.IsZero() {
 		l.Update()
 	}
 
 	ret := []leaderboardData{}
 
-	lbConfig := configs.GetStatisticsConfig().Leaderboards
-
-	if lbConfig.GoldEnabled {
+	if l.GoldEnabled {
 		ret = append(ret, l.LB_Gold)
 	}
 
-	if lbConfig.ExperienceEnabled {
+	if l.ExperienceEnabled {
 		ret = append(ret, l.LB_Experience)
 	}
 
-	if lbConfig.KillsEnabled {
+	if l.KillsEnabled {
 		ret = append(ret, l.LB_Kills)
 	}
 

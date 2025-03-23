@@ -452,29 +452,6 @@ SpecialRooms:
 
 ################################################################################
 #
-#   Statistics
-#   Configurations for stat tracking
-#
-################################################################################
-Statistics:
-  # - Leaderboards -
-  #   Configs for size and enabling of leaderboards
-  Leaderboards:
-    # - Size -
-    #   Maximum size of each leaderboard. 0 to disable.
-    Size: 10
-    # - ExperienceEnabled -
-    # Enable leaderboard for character with the most experience points
-    ExperienceEnabled: true
-    # - GoldEnabled -
-    # Enable leaderboard for character with the most gold in-bank+on-hand
-    GoldEnabled: true
-    # - KillsEnabled -
-    # Enable leaderboard for character with the most total kills
-    KillsEnabled: true
-
-################################################################################
-#
 #   Validation
 #   Special rules or filters for validation purposes
 #

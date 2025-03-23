@@ -46,7 +46,6 @@ type Config struct {
 	Network      Network      `yaml:"Network"`
 	Scripting    Scripting    `yaml:"Scripting"`
 	SpecialRooms SpecialRooms `yaml:"SpecialRooms"`
-	Statistics   Statistics   `yaml:"Statistics"`
 	Validation   Validation   `yaml:"Validation"`
 
 	// Plugins is a special case
@@ -197,7 +196,6 @@ func (c *Config) Validate() {
 	c.Network.Validate()
 	c.Scripting.Validate()
 	c.SpecialRooms.Validate()
-	c.Statistics.Validate()
 	c.Validation.Validate()
 	c.Modules.Validate()
 

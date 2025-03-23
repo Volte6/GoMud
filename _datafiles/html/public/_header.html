@@ -46,10 +46,10 @@
 
   <nav>
     <div class="nav-container">
-      <a href="/" {{ if eq .REQUEST.RequestURI "/" }}class="selected"{{end}}>Home</a>
-      <a href="/online" {{ if eq .REQUEST.RequestURI "/online" }}class="selected"{{end}}>Who's Online</a>
-      <a href="/webclient" {{ if eq .REQUEST.RequestURI "/webclient" }}class="selected"{{end}}>Web Client</a>
-      <a href="/viewconfig" {{ if eq .REQUEST.RequestURI "/viewconfig" }}class="selected"{{end}}>See Configuration</a>
+      {{ $reqPath := .REQUEST.RequestURI }}
+      {{ range $name, $path := .NAV }}
+        <a href="{{ $path }}" {{ if eq $reqPath $path }}class="selected"{{end}}>{{ $name }}</a>
+      {{ end }}
       {{ if eq .REQUEST.RequestURI "/webclient" }}<a id="hide-header-footer" href="/webclient-pure">⛶</a>{{ end }}
     </div>
   </nav>
