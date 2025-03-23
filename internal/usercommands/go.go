@@ -89,6 +89,8 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> quickly picks the lock on the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
 					user.UserId)
 
+				room.PlaySound(`change`, `other`)
+
 				exitInfo.Lock.SetUnlocked()
 				room.SetExitLock(exitName, false)
 
@@ -97,6 +99,8 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 				room.SendText(
 					fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to unlock the <ansi fg="exit">%s</ansi> exit.`, user.Character.Name, exitName),
 					user.UserId)
+
+				room.PlaySound(`change`, `other`)
 
 				exitInfo.Lock.SetUnlocked()
 				room.SetExitLock(exitName, false)
@@ -107,6 +111,8 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 				if backpackKeyItm, hasBackpackKey := user.Character.FindKeyInBackpack(lockId); hasBackpackKey {
 
 					itmSpec := backpackKeyItm.GetSpec()
+
+					room.PlaySound(`change`, `other`)
 
 					user.SendText(fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to unlock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName))
 					room.SendText(

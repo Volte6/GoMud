@@ -45,6 +45,8 @@ func Lock(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			container.Lock.SetLocked()
 			room.Containers[containerName] = container
 
+			room.PlaySound(`change`, `other`)
+
 			user.SendText(fmt.Sprintf(`You use a key to relock the <ansi fg="container">%s</ansi>.`, containerName))
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to relock the <ansi fg="container">%s</ansi>.`, user.Character.Name, containerName), user.UserId)
 		} else if hasBackpackKey {
@@ -64,6 +66,8 @@ func Lock(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				Item:   backpackKeyItm,
 				Gained: false,
 			})
+
+			room.PlaySound(`change`, `other`)
 
 			user.SendText(fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to lock the <ansi fg="container">%s</ansi>, and add it to your key ring for the future.`, itmSpec.Name, containerName))
 			room.SendText(
@@ -97,6 +101,8 @@ func Lock(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			exitInfo.Lock.SetLocked()
 			room.SetExitLock(exitName, true)
 
+			room.PlaySound(`change`, `other`)
+
 			user.SendText(fmt.Sprintf(`You use a key to relock the <ansi fg="exit">%s</ansi> lock.`, exitName))
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> uses a key to relock the <ansi fg="exit">%s</ansi> lock`, user.Character.Name, exitName), user.UserId)
 		} else if hasBackpackKey {
@@ -116,6 +122,8 @@ func Lock(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				Item:   backpackKeyItm,
 				Gained: false,
 			})
+
+			room.PlaySound(`change`, `other`)
 
 			user.SendText(fmt.Sprintf(`You use your <ansi fg="item">%s</ansi> to lock the <ansi fg="exit">%s</ansi> exit, and add it to your key ring for the future.`, itmSpec.Name, exitName))
 			room.SendText(

@@ -27,15 +27,31 @@ var (
 		},
 	}
 
-	httpRoot string
+	httpRoot = ``
+
+	// Used to interface with plugins and request web stuff
+	webPlugins WebPlugin = nil
 )
+
+type WebNav struct {
+	Name   string
+	Target string
+}
+
+type WebPlugin interface {
+	NavLinks() map[string]string                                                    // Name=>Path pairs
+	WebRequest(r *http.Request) (html string, templateData map[string]any, ok bool) // Get the first handler of a given request
+}
+
+func SetWebPlugin(wp WebPlugin) {
+	webPlugins = wp
+}
 
 // serveTemplate searches for the requested file in the HTTP_ROOT,
 // parses it as a template, and serves it.
 func serveTemplate(w http.ResponseWriter, r *http.Request) {
 
 	if httpRoot == "" {
-
 		httpRoot = filepath.Clean(configs.GetFilePathsConfig().PublicHtml.String())
 	}
 
@@ -58,23 +74,51 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 	fileExt := filepath.Ext(fullPath)
 	fileBase := filepath.Base(fullPath)
 
+	// All template files to load from the filesystem
+	templateFiles := []string{}
+
+	var pageFound bool = true
+
+	var pluginHtml string = ``
+	var pluginTplData map[string]any = nil
+	var ok bool = false
+	var fSize int64 = 0
+	var source string = `PublicHtml folder`
+
 	// Check if the file exists, else 404
 	fInfo, err := os.Stat(fullPath)
-	if err != nil || len(fileBase) > 0 && fileBase[0] == '_' {
-		mudlog.Info("Web", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "filePath", fullPath, "fileExtension", fileExt, "error", "Not found")
+	if err != nil {
+		pageFound = false
+	}
+
+	// Allow plugin to override request
+	if webPlugins != nil {
+		pluginHtml, pluginTplData, ok = webPlugins.WebRequest(r)
+		fSize = int64(len([]byte(pluginHtml)))
+		if ok {
+			source = `module`
+			pageFound = true
+		}
+	}
+
+	if !pageFound || len(fileBase) > 0 && fileBase[0] == '_' {
+		mudlog.Info("Web", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "file path", fullPath, "file extension", fileExt, "error", "Not found")
 
 		fullPath = filepath.Join(httpRoot, `404.html`)
 		fInfo, err = os.Stat(fullPath)
+
 		if err != nil {
 			http.NotFound(w, r)
 			return
 		}
 
+		fSize = fInfo.Size()
+
 		w.WriteHeader(http.StatusNotFound)
 	}
 
 	// Log the request
-	mudlog.Info("Web", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "filePath", fullPath, "fileExtension", fileExt, "size", fmt.Sprintf(`%.2fk`, float64(fInfo.Size())/1024))
+	mudlog.Info("Web", "ip", r.RemoteAddr, "ref", r.Header.Get("Referer"), "file path", fullPath, "file extension", fileExt, "file source", source, "size", fmt.Sprintf(`%.2fk`, float64(fSize)/1024))
 
 	// For non-HTML files, serve them statically.
 	if fileExt != ".html" {
@@ -82,13 +126,32 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templateData := map[string]interface{}{
+	templateData := map[string]any{
 		"REQUEST": r,
 		"CONFIG":  configs.GetConfig(),
 		"STATS":   GetStats(),
+		"NAV": []WebNav{
+			{`Home`, `/`},
+			{`Who's Online`, `/online`},
+			{`Web Client`, `/webclient`},
+			{`See Configuration`, `/viewconfig`},
+		},
 	}
 
-	templateFiles := []string{}
+	// Copy any plugin navigation
+	if webPlugins != nil {
+		for name, path := range webPlugins.NavLinks() {
+			templateData[`NAV`] = append(templateData[`NAV`].([]WebNav), WebNav{name, path})
+		}
+	}
+
+	// Copy over any plugin data loaded.
+	for name, value := range pluginTplData {
+		// Don't allow overwriting defaults
+		if _, ok := templateData[name]; !ok {
+			templateData[name] = value
+		}
+	}
 
 	// Parse special files intended to be used as template includes
 	globFiles, err := filepath.Glob(filepath.Join(httpRoot, "_*.html"))
@@ -106,14 +169,27 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add the final (actual) file
-	templateFiles = append(templateFiles, fullPath)
 
 	// Parse
-	tmpl, err := template.New(filepath.Base(fullPath)).Funcs(funcMap).ParseFiles(templateFiles...)
+	tmpl := template.New(filepath.Base(fullPath)).Funcs(funcMap)
 
+	if pluginHtml == `` {
+		templateFiles = append(templateFiles, fullPath)
+
+	}
+
+	tmpl, err = tmpl.ParseFiles(templateFiles...)
 	if err != nil {
 		mudlog.Error("HTML ERROR", "action", "ParseFiles", "error", err)
-		http.Error(w, "Error executing template", http.StatusInternalServerError)
+		http.Error(w, "Error parsing template files", http.StatusInternalServerError)
+	}
+
+	if pluginHtml != `` {
+		tmpl, err = tmpl.Parse(pluginHtml)
+		if err != nil {
+			mudlog.Error("HTML ERROR", "action", "Parse", "error", err)
+			http.Error(w, "Error parsing plugin html", http.StatusInternalServerError)
+		}
 	}
 
 	// Execute the template and write it to the response.

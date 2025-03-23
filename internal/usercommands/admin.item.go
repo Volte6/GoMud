@@ -54,32 +54,82 @@ func item_List(rest string, user *users.UserRecord, room *rooms.Room, flags even
 
 	itmNames := []templates.NameDescription{}
 
+	longestName := 0
 	for _, itm := range items.GetAllItemNames() {
+
+		entry := templates.NameDescription{
+			Name: itm,
+		}
 
 		// If searching for matches
 		if len(rest) > 0 {
 			if !strings.Contains(rest, `*`) {
 				rest += `*`
 			}
-			if !util.StringWildcardMatch(strings.ToLower(itm), rest) {
-				continue
+			if util.StringWildcardMatch(strings.ToLower(itm), rest) {
+				entry.Marked = true
 			}
 		}
 
-		itmNames = append(itmNames, templates.NameDescription{
-			Name: itm,
-		})
+		if len(itm) > longestName {
+			longestName = len(itm)
+		}
+
+		itmNames = append(itmNames, entry)
 	}
 
 	sort.SliceStable(itmNames, func(i, j int) bool {
 		return itmNames[i].Name < itmNames[j].Name
 	})
 
-	tplTxt, _ := templates.Process("tables/numbered-list-doubled", itmNames)
-	user.SendText(tplTxt)
+	numWidth := len(strconv.Itoa(len(itmNames)))
+	colWidth := 1 + numWidth + 2 +
+		longestName + 1
+	sw := 80
+	if user.ClientSettings().Display.ScreenWidth > 0 {
+		sw = int(user.ClientSettings().Display.ScreenWidth)
+	}
+
+	//cols := int(math.Floor(float64(sw) / float64(colWidth)))
+
+	user.SendText(``)
+	strOut := ``
+	totalLen := 0
+	for idx, itm := range itmNames {
+
+		if totalLen+colWidth > sw {
+			strOut += term.CRLFStr
+			totalLen = 0
+		}
+
+		numStr := strconv.Itoa(idx + 1)
+
+		strOut += ` `
+
+		if itm.Marked {
+			strOut += `<ansi fg="white-bold" bg="059">`
+		}
+
+		strOut += strings.Repeat(` `, numWidth-len(numStr)) + fmt.Sprintf(`<ansi fg="red-bold">%s</ansi>`, strconv.Itoa(idx+1)) + `. ` +
+			fmt.Sprintf(`<ansi fg="yellow-bold">%s</ansi>`, itm.Name) + strings.Repeat(` `, longestName-len(itm.Name))
+
+		if itm.Marked {
+			strOut += `</ansi>`
+		}
+
+		strOut += ` `
+
+		totalLen += colWidth
+
+	}
+
+	user.SendText(strOut)
+	user.SendText(``)
 
 	return true, nil
 }
+
+//  107. wooden shield                      108. worn boots
 
 func item_Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 

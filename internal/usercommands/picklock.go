@@ -124,6 +124,8 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room, flags event
 		user.SendText(`<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You can automatically pick this lock any time as long as you carry <ansi fg="item">lockpicks</ansi>!</ansi> <ansi fg="yellow-bold">***</ansi>`)
 		user.SendText(``)
 
+		room.PlaySound(`change`, `other`)
+
 		if containerName != `` {
 
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> picks the <ansi fg="container">%s</ansi> lock`, user.Character.Name, containerName), user.UserId)
@@ -228,6 +230,8 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room, flags event
 		user.SendText(`<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You Successfully picked the lock!</ansi> <ansi fg="yellow-bold">***</ansi>`)
 		user.SendText(`<ansi fg="yellow-bold">***</ansi> <ansi fg="green-bold">You can automatically pick this lock any time as long as you carry <ansi fg="item">lockpicks</ansi>!</ansi> <ansi fg="yellow-bold">***</ansi>`)
 		user.SendText(``)
+
+		room.PlaySound(`change`, `other`)
 
 		if containerName != `` {
 

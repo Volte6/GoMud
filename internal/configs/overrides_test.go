@@ -10,16 +10,14 @@ import (
 func TestOverlay(t *testing.T) {
 	// Start with a default config.
 	cfg := Config{
-		Statistics: Statistics{
-			Leaderboards: StatisticsLeaderboards{Size: 5},
+		Validation: Validation{
+			NameRejectRegex: "test",
 		},
 	}
 
 	newValues := map[string]any{
-		"Statistics": map[string]any{
-			"Leaderboards": map[string]any{
-				"Size": 10,
-			},
+		"Validation": map[string]any{
+			"NameRejectRegex": "test-changed",
 		},
 	}
 
@@ -27,8 +25,8 @@ func TestOverlay(t *testing.T) {
 		t.Fatalf("Overlay failed: %v", err)
 	}
 
-	if cfg.Statistics.Leaderboards.Size != 10 {
-		t.Errorf("Expected LeaderboardSize to be 10, got %d", cfg.Statistics.Leaderboards.Size)
+	if cfg.Validation.NameRejectRegex != "test-changed" {
+		t.Errorf("Expected NameRejectRegex to be \"test-changed\", got \"%s\"", cfg.Validation.NameRejectRegex)
 	}
 }
 
@@ -36,21 +34,21 @@ func TestOverlay(t *testing.T) {
 func TestOverlayDotMap(t *testing.T) {
 	// Start with a default config.
 	cfg := Config{
-		Statistics: Statistics{
-			Leaderboards: StatisticsLeaderboards{Size: 5},
+		Validation: Validation{
+			NameRejectRegex: "test",
 		},
 	}
 
 	dotValues := map[string]any{
-		"Statistics.Leaderboards.Size": 15,
+		"Validation.NameRejectRegex": "test-changed",
 	}
 
 	if err := cfg.OverlayOverrides(dotValues); err != nil {
 		t.Fatalf("OverlayDotMap failed: %v", err)
 	}
 
-	if cfg.Statistics.Leaderboards.Size != 15 {
-		t.Errorf("Expected LeaderboardSize to be 15, got %d", cfg.Statistics.Leaderboards.Size)
+	if cfg.Validation.NameRejectRegex != "test-changed" {
+		t.Errorf("Expected LeaderboardSize to be \"test-changed\", got \"%s\"", cfg.Validation.NameRejectRegex)
 	}
 }
 
