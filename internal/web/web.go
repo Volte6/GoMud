@@ -33,6 +33,11 @@ var (
 	webPlugins WebPlugin = nil
 )
 
+type WebNav struct {
+	Name   string
+	Target string
+}
+
 type WebPlugin interface {
 	NavLinks() map[string]string                                                    // Name=>Path pairs
 	WebRequest(r *http.Request) (html string, templateData map[string]any, ok bool) // Get the first handler of a given request
@@ -125,18 +130,18 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 		"REQUEST": r,
 		"CONFIG":  configs.GetConfig(),
 		"STATS":   GetStats(),
-		"NAV": map[string]string{
-			`Home`:              `/`,
-			`Who's Online`:      `/online`,
-			`Web Client`:        `/webclient`,
-			`See Configuration`: `/viewconfig`,
+		"NAV": []WebNav{
+			{`Home`, `/`},
+			{`Who's Online`, `/online`},
+			{`Web Client`, `/webclient`},
+			{`See Configuration`, `/viewconfig`},
 		},
 	}
 
 	// Copy any plugin navigation
 	if webPlugins != nil {
 		for name, path := range webPlugins.NavLinks() {
-			templateData[`NAV`].(map[string]string)[name] = path
+			templateData[`NAV`] = append(templateData[`NAV`].([]WebNav), WebNav{name, path})
 		}
 	}
 

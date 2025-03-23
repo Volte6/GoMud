@@ -47,8 +47,8 @@
   <nav>
     <div class="nav-container">
       {{ $reqPath := .REQUEST.RequestURI }}
-      {{ range $name, $path := .NAV }}
-        <a href="{{ $path }}" {{ if eq $reqPath $path }}class="selected"{{end}}>{{ $name }}</a>
+      {{ range $idx, $navDetails := .NAV }}
+        <a href="{{ $navDetails.Target }}" {{ if eq $reqPath $navDetails.Target }}class="selected"{{end}}>{{ $navDetails.Name }}</a>
       {{ end }}
       {{ if eq .REQUEST.RequestURI "/webclient" }}<a id="hide-header-footer" href="/webclient-pure">⛶</a>{{ end }}
     </div>
