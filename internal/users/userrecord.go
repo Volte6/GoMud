@@ -1,6 +1,7 @@
 package users
 
 import (
+	"crypto/md5"
 	"fmt"
 	"math"
 	"math/big"
@@ -427,8 +428,15 @@ func (u *UserRecord) SetUsername(un string) error {
 }
 
 func (u *UserRecord) TempName() string {
-	number := new(big.Int).SetBytes(util.Md5Bytes([]byte(u.Username)))
-	return fmt.Sprintf("nameless-%d", number.Uint64()%9087919)
+	hasher := md5.New()
+	hasher.Write([]byte([]byte(u.Username)))
+	hashInBytes := hasher.Sum(nil)
+	number := new(big.Int).SetBytes(hashInBytes)
+
+	mod := new(big.Int)
+	mod.SetInt64(9087919)
+
+	return fmt.Sprintf("nameless-%d", number.Mod(number, mod).Int64())
 }
 
 func (u *UserRecord) SetCharacterName(cn string) error {
