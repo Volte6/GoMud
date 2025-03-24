@@ -249,7 +249,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 	// Done adding mutator buffs
 	//
 
-	playerCt := newRoom.addPlayer(userId)
+	playerCt := newRoom.AddPlayer(userId)
 	roomManager.roomsWithUsers[newRoom.RoomId] = playerCt
 
 	formerRoomId := user.Character.RoomId

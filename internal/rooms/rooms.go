@@ -2042,7 +2042,13 @@ func (r *Room) RoundTick() {
 	r.UpdateCorpses(roundNow)
 }
 
-func (r *Room) addPlayer(userId int) int {
+func (r *Room) AddPlayer(userId int) int {
+
+	for _, v := range r.players {
+		if v == userId {
+			return len(r.players)
+		}
+	}
 
 	r.players = append(r.players, userId)
 

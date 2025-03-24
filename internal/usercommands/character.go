@@ -252,19 +252,23 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 
 			oldName := user.Character.Name
 
-			newAlts := []characters.Character{}
-			for _, c := range nameToAlt {
-				if c.Name != match {
-					newAlts = append(newAlts, c)
-				}
+			succes := user.SwapToAlt(match)
+			if !succes {
+				user.SendText(`<ansi fg="203">Something went wrong.</ansi>`)
+				user.ClearPrompt()
+				return true, nil
 			}
-			newAlts = append(newAlts, *user.Character)
-			characters.SaveAlts(user.UserId, newAlts)
 
-			char.Validate()
-			user.Character = &char
+			newRoom := rooms.LoadRoom(user.Character.RoomId)
+			if newRoom == nil {
+				user.Character.RoomId = 0
+				newRoom = rooms.LoadRoom(user.Character.RoomId)
+			}
 
-			user.Character.RoomId = room.RoomId
+			// Remove from old room
+			room.RemovePlayer(user.UserId)
+			// add to new room
+			newRoom.AddPlayer(user.UserId)
 
 			users.SaveUser(*user)
 

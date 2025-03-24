@@ -258,3 +258,20 @@ type RedrawPrompt struct {
 
 func (l RedrawPrompt) Type() string     { return `RedrawPrompt` }
 func (l RedrawPrompt) UniqueID() string { return `RedrawPrompt-` + strconv.Itoa(l.UserId) }
+
+// Fired after creating a new character and giving the character a name.
+type CharacterCreated struct {
+	UserId        int
+	CharacterName string
+}
+
+func (p CharacterCreated) Type() string { return `CharacterCreated` }
+
+// Fired when a character alt change has occured.
+type CharacterChanged struct {
+	UserId            int
+	LastCharacterName string
+	CharacterName     string
+}
+
+func (p CharacterChanged) Type() string { return `CharacterChanged` }

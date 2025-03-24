@@ -40,7 +40,6 @@ func Broadcast_SendToAll(e events.Event) events.ListenerReturn {
 		)
 
 	} else {
-
 		sentToConnectionIds = connections.Broadcast(
 			[]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized),
 			skipConnectionIds...,

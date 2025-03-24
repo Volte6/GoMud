@@ -531,3 +531,53 @@ func (u *UserRecord) WimpyCheck() {
 		}
 	}
 }
+
+func (u *UserRecord) SwapToAlt(targetAltName string) bool {
+
+	altNames := []string{}
+	nameToAlt := map[string]characters.Character{}
+
+	for _, char := range characters.LoadAlts(u.UserId) {
+		altNames = append(altNames, char.Name)
+		nameToAlt[char.Name] = char
+	}
+
+	match, closeMatch := util.FindMatchIn(targetAltName, altNames...)
+	if match == `` {
+		match = closeMatch
+	}
+
+	if match == `` {
+		return false
+	}
+
+	selectedChar, ok := nameToAlt[match]
+	if !ok {
+		return false
+	}
+
+	retiredCharName := u.Character.Name
+
+	newAlts := []characters.Character{}
+	for _, altChar := range nameToAlt {
+		if altChar.Name != selectedChar.Name {
+			newAlts = append(newAlts, altChar)
+		}
+	}
+
+	// add current char to the alts
+	newAlts = append(newAlts, *u.Character)
+	// Write them to disc
+	characters.SaveAlts(u.UserId, newAlts)
+
+	// Run validation on the new character
+	selectedChar.Validate()
+	// Replace the current character (has already been written to alts)
+	u.Character = &selectedChar
+
+	SaveUser(*u)
+
+	events.AddToQueue(events.CharacterChanged{UserId: u.UserId, LastCharacterName: retiredCharName, CharacterName: u.Character.Name})
+
+	return true
+}
