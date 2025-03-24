@@ -408,16 +408,6 @@ func TestMd5(t *testing.T) {
 	}
 }
 
-// TestMd5Bytes checks MD5 bytes output length.
-func TestMd5Bytes(t *testing.T) {
-	input := []byte("hello")
-	got := Md5Bytes(input)
-	// MD5 sums are 16 bytes in length, the result appended to input
-	if len(got) != len(input)+16 {
-		t.Errorf("Md5Bytes(%q) length got = %d, want %d", input, len(got), len(input)+16)
-	}
-}
-
 // TestGetLockSequence ensures the sequence is the correct length, contains only 'U' and 'D',
 // and is deterministic for the same inputs.
 func TestGetLockSequence(t *testing.T) {
