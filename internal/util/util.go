@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"math"
@@ -376,13 +377,16 @@ func HashBytes(input []byte) string {
 }
 
 func Md5(input string) string {
-	h := md5.New()
-	return string(h.Sum([]byte(input)))
+	hasher := md5.New()
+	hasher.Write([]byte([]byte(input)))
+	hashInBytes := hasher.Sum(nil)
+	return hex.EncodeToString(hashInBytes)
 }
 
 func Md5Bytes(input []byte) []byte {
-	h := md5.New()
-	return h.Sum(input)
+	hasher := md5.New()
+	hasher.Write([]byte(input))
+	return hasher.Sum(nil)
 }
 
 func GetLockSequence(lockIdentifier string, difficulty int, seed string) string {
