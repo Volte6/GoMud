@@ -45,8 +45,9 @@ type IndexUserRecord struct {
 // UserIndex is the central struct that holds the index filename and methods
 // to work with the index.
 type UserIndex struct {
-	metaData IndexMetaData
-	Filename string
+	metaData      IndexMetaData
+	highestUserId int
+	Filename      string
 }
 
 // NewUserIndex creates a new instance of UserIndex using the configured file path.
@@ -55,6 +56,7 @@ func NewUserIndex() *UserIndex {
 	idx := &UserIndex{Filename: filename}
 	if idx.Exists() {
 		idx.metaData = idx.getMetaDataFromFile()
+		idx.calculateHighestUserId()
 	}
 	return idx
 }
@@ -118,6 +120,41 @@ func (idx *UserIndex) Rebuild() error {
 
 func (idx *UserIndex) GetMetaData() IndexMetaData {
 	return idx.metaData
+}
+
+func (idx *UserIndex) GetHighestUserId() int {
+	return idx.highestUserId
+}
+
+func (idx *UserIndex) calculateHighestUserId() {
+
+	f, err := os.Open(idx.Filename)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	for i := uint64(0); i < idx.metaData.RecordCount; i++ {
+		offset := int64(idx.metaData.MetaDataSize) + int64(i*idx.metaData.RecordSize)
+		if _, err := f.Seek(offset, io.SeekStart); err != nil {
+			return
+		}
+
+		var recUsername [80]byte
+		if n, err := io.ReadFull(f, recUsername[:]); err != nil || n != 80 {
+			return
+		}
+
+		var userId int64
+		if err := binary.Read(f, binary.LittleEndian, &userId); err != nil {
+			return
+		}
+
+		if int(userId) > idx.highestUserId {
+			idx.highestUserId = int(userId)
+		}
+	}
+
 }
 
 // FindByUsername opens the index file, reads its header, then iterates over
@@ -267,6 +304,10 @@ func (idx *UserIndex) AddUser(userId int, username string) error {
 	}
 	if _, err := f.Write([]byte{IndexLineTerminatorV1}); err != nil {
 		return fmt.Errorf("error writing record terminator: %w", err)
+	}
+
+	if userId > idx.highestUserId {
+		idx.highestUserId = userId
 	}
 
 	idx.metaData.RecordCount++
