@@ -22,8 +22,7 @@ import (
 )
 
 var (
-	highestUserId int          = -1
-	userManager   *ActiveUsers = newUserManager()
+	userManager *ActiveUsers = newUserManager()
 )
 
 type ActiveUsers struct {
@@ -555,35 +554,33 @@ func SaveUser(u UserRecord, isAutoSave ...bool) error {
 func GetUniqueUserId() int {
 
 	// if highestUserId is zero, loop through users and get real highest.
-	if highestUserId < 0 {
 
-		highestUserId = 0
+	highestUserId := 0
 
-		idx := NewUserIndex()
-		if idx.Exists() {
+	idx := NewUserIndex()
+	if idx.Exists() {
 
-			highestUserId = int(idx.GetMetaData().RecordCount)
+		highestUserId = idx.GetHighestUserId()
 
-		} else {
+	} else {
 
-			// Check all user id's of offline users
-			SearchOfflineUsers(func(u *UserRecord) bool {
+		// Check all user id's of offline users
+		SearchOfflineUsers(func(u *UserRecord) bool {
 
-				if u.UserId > highestUserId {
-					highestUserId = u.UserId
-				}
-
-				return true
-			})
-
-			// Check all user id's of online users
-			for _, u := range GetAllActiveUsers() {
-				if u.UserId > highestUserId {
-					highestUserId = u.UserId
-				}
+			if u.UserId > highestUserId {
+				highestUserId = u.UserId
 			}
 
+			return true
+		})
+
+		// Check all user id's of online users
+		for _, u := range GetAllActiveUsers() {
+			if u.UserId > highestUserId {
+				highestUserId = u.UserId
+			}
 		}
+
 	}
 
 	// Increment the highestUserId before returning a new one
