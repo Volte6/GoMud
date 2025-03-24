@@ -162,7 +162,6 @@ func (l *LeaderboardModule) leaderboardCommand(rest string, user *users.UserReco
 }
 
 func (l *LeaderboardModule) Reset(maxSize int) {
-	fmt.Println("maxSize", maxSize)
 	l.LB_Gold.Reset(maxSize)
 	l.LB_Experience.Reset(maxSize)
 	l.LB_Kills.Reset(maxSize)

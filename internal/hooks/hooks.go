@@ -69,6 +69,9 @@ func RegisterListeners() {
 
 	events.RegisterListener(events.WebClientCommand{}, WebClientCommand_SendWebClientCommand)
 
+	events.RegisterListener(events.CharacterCreated{}, BroadcastNewChar)
+	events.RegisterListener(events.CharacterChanged{}, BroadcastNewChar)
+
 	events.RegisterListener(events.Broadcast{}, Broadcast_SendToAll)
 
 	// Log tee to users

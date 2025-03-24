@@ -159,6 +159,7 @@ color8:
   mob-corpse: 8
   user-corpse: 8
   tip-text: 5
+  character-joined: 5
 color256:
   table-title: 2
   userid: black
@@ -312,3 +313,4 @@ color256:
   mob-corpse: 67
   user-corpse: 143
   tip-text: 219
+  character-joined: 120
