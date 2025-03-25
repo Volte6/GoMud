@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"sort"
 	"strings"
 	"time"
 	"unicode"
@@ -821,7 +822,30 @@ func (r *mapper) getMapNode(roomId int) *mapNode {
 }
 
 func PreCacheMaps() {
+
+	// Sort the rooms by roomId before precaching.
+	// This ensures a somewhat predictable inferred coordinate system across
+	// MUD server starts.
+	type ZoneDetails struct {
+		Name       string
+		RootRoomId int
+	}
+
+	allZones := []ZoneDetails{}
+
 	for _, name := range rooms.GetAllZoneNames() {
-		GetZoneMapper(name)
+		rootRoomId, _ := rooms.GetZoneRoot(name)
+		allZones = append(allZones, ZoneDetails{
+			Name:       name,
+			RootRoomId: rootRoomId,
+		})
+	}
+
+	sort.Slice(allZones, func(i, j int) bool {
+		return allZones[i].RootRoomId < allZones[j].RootRoomId
+	})
+
+	for _, zInfo := range allZones {
+		GetZoneMapper(zInfo.Name)
 	}
 }
