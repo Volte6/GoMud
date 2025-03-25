@@ -3,7 +3,7 @@
 
 VERSION ?= $(shell git rev-parse HEAD)
 BIN ?= go-mud-server
-DOCKER_COMPOSE := docker-compose -f provisioning/docker-compose.yml
+DOCKER_COMPOSE := docker-compose -f compose.yml
 
 export GOFLAGS := -mod=mod
 

@@ -140,9 +140,32 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 
 	// Copy any plugin navigation
 	if webPlugins != nil {
+
+		currentNav := templateData[`NAV`].([]WebNav)
+
 		for name, path := range webPlugins.NavLinks() {
-			templateData[`NAV`] = append(templateData[`NAV`].([]WebNav), WebNav{name, path})
+
+			found := false
+			for i := len(currentNav) - 1; i >= 0; i-- {
+
+				if currentNav[i].Name == name {
+					found = true
+					if path == `` {
+						currentNav = append(currentNav[:i], currentNav[i+1:]...)
+					} else {
+						currentNav[i].Target = path
+					}
+					break
+				}
+
+			}
+
+			if !found {
+				currentNav = append(currentNav, WebNav{name, path})
+			}
 		}
+
+		templateData[`NAV`] = currentNav
 	}
 
 	// Copy over any plugin data loaded.
