@@ -41,7 +41,14 @@ func Cast(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 	}
 
 	spellName := args[0]
-	spellArg := strings.Join(args[1:], ` `)
+	args = args[1:]
+
+	if len(args) > 1 {
+		if args[0] == `on` {
+			args = args[1:]
+		}
+	}
+	spellArg := strings.Join(args, ` `)
 
 	spellInfo := spells.GetSpell(spellName)
 

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -60,6 +61,8 @@ type Plugin struct {
 		onSave func()
 	}
 
+	exportedFunctions map[string]any
+
 	Config PluginConfig
 
 	// helper for embedded files
@@ -89,6 +92,21 @@ func New(name string, version string) *Plugin {
 
 	registry = append(registry, p)
 	return p
+}
+
+func (p pluginRegistry) GetFunction(funcName string) (any, bool) {
+	for _, pItem := range p {
+
+		if pItem.exportedFunctions == nil {
+			continue
+		}
+
+		if f, ok := pItem.exportedFunctions[funcName]; ok {
+			return f, ok
+		}
+
+	}
+	return nil, false
 }
 
 // Receive functions to satisfy the web.WebPlugin interface
@@ -190,6 +208,18 @@ func (p pluginRegistry) Stat(name string) (fs.FileInfo, error) {
 
 func (p *Plugin) Requires(modname string, modversion string) {
 	p.dependencies = append(p.dependencies, dependency{modname, modversion})
+}
+
+func (p *Plugin) ExportFunction(stringId string, f any) {
+
+	if reflect.TypeOf(f).Kind() != reflect.Func {
+		panic("Non function passed to ExportFunction")
+	}
+
+	if p.exportedFunctions == nil {
+		p.exportedFunctions = map[string]any{}
+	}
+	p.exportedFunctions[stringId] = f
 }
 
 // Registers a UserCommand and callback
