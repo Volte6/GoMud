@@ -24,6 +24,19 @@ var (
 	ErrOutOfBounds  = errors.New(`out of bounds`)
 	ErrRoomNotFound = errors.New(`room not found`)
 
+	compassDirections = map[string]struct{}{
+		"north":     struct{}{},
+		"south":     struct{}{},
+		"west":      struct{}{},
+		"east":      struct{}{},
+		"northwest": struct{}{},
+		"northeast": struct{}{},
+		"southwest": struct{}{},
+		"southeast": struct{}{},
+		"down":      struct{}{},
+		"up":        struct{}{},
+	}
+
 	// TODO: Refactor this and remove string identifier from room data.
 	posDeltas = map[string]positionDelta{
 		"north":     {0, -1, 0, '│'},
@@ -86,6 +99,18 @@ var (
 
 	mapperZoneCache = map[string]*mapper{}
 )
+
+func GetDelta(exitName string) (x, y, z int) {
+	if delta, ok := posDeltas[exitName]; ok {
+		return delta.x, delta.y, delta.z
+	}
+	return 0, 0, 0
+}
+
+func IsCompassDirection(exitName string) bool {
+	_, ok := compassDirections[exitName]
+	return ok
+}
 
 func GetDirectionDeltaNames() []string {
 	ret := []string{}
