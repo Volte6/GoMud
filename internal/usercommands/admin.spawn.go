@@ -12,6 +12,10 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
+/*
+* Role Permissions:
+* spawn				(All)
+ */
 func Spawn(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(strings.ToLower(rest))

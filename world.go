@@ -299,7 +299,7 @@ func (w *World) GetAutoComplete(userId int, inputText string) []string {
 		return suggestions
 	}
 
-	isAdmin := user.Permission == users.PermissionAdmin
+	isAdmin := user.Role == users.RoleAdmin
 	parts := strings.Split(inputText, ` `)
 
 	// If only one part, probably a command
@@ -1003,10 +1003,10 @@ func (w *World) UpdateStats() {
 	}
 
 	sort.Slice(s.OnlineUsers, func(i, j int) bool {
-		if s.OnlineUsers[i].Permission == users.PermissionAdmin {
+		if s.OnlineUsers[i].Role == users.RoleAdmin {
 			return true
 		}
-		if s.OnlineUsers[j].Permission == users.PermissionAdmin {
+		if s.OnlineUsers[j].Role == users.RoleAdmin {
 			return false
 		}
 		return s.OnlineUsers[i].OnlineTime > s.OnlineUsers[j].OnlineTime

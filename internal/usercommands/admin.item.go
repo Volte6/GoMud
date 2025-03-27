@@ -17,12 +17,13 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
+/*
+* Role Permissions:
+* item 				(All)
+* item.create		(Create a new item)
+* item.spawn		(Spawn a new item in the room)
+ */
 func Item(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
-
-	if user.Permission != users.PermissionAdmin {
-		user.SendText(`<ansi fg="alert-4">Only admins can use this command</ansi>`)
-		return true, nil
-	}
 
 	args := util.SplitButRespectQuotes(rest)
 
@@ -34,16 +35,34 @@ func Item(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 	// create a new item
 	if args[0] == `create` {
+
+		if !user.HasRolePermission(`item.create`) {
+			user.SendText(`you do not have <ansi fg="command">item.create</ansi> permission`)
+			return true, nil
+		}
+
 		return item_Create(strings.TrimSpace(rest[6:]), user, room, flags)
 	}
 
 	// spawn an existing item
 	if args[0] == `spawn` {
+
+		if !user.HasRolePermission(`item.spawn`) {
+			user.SendText(`you do not have <ansi fg="command">item.create</ansi> permission`)
+			return true, nil
+		}
+
 		return item_Spawn(strings.TrimSpace(rest[5:]), user, room, flags)
 	}
 
 	// List existing items
 	if args[0] == `list` {
+
+		if !user.HasRolePermission(`item.spawn`) {
+			user.SendText(`you do not have <ansi fg="command">item.create</ansi> permission`)
+			return true, nil
+		}
+
 		return item_List(strings.TrimSpace(rest[4:]), user, room, flags)
 	}
 

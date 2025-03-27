@@ -9,5 +9,5 @@ type OnlineInfo struct {
 	OnlineTime    int64
 	OnlineTimeStr string
 	IsAFK         bool
-	Permission    string
+	Role          string
 }

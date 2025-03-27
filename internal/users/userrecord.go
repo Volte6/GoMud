@@ -12,6 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/prompt"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/stats"
@@ -20,22 +21,21 @@ import (
 )
 
 var (
-	PermissionGuest string = "guest" // Not logged in
-	PermissionUser  string = "user"  // Logged in but no special powers
-	PermissionMod   string = "mod"   // Logged in has limited special powers
-	PermissionAdmin string = "admin" // Logged in and has special powers
+	// immutable roles
+	RoleGuest string = "guest"
+	RoleUser  string = "user"
+	RoleAdmin string = "admin"
 )
 
 type UserRecord struct {
 	UserId         int                   `yaml:"userid"`
-	Permission     string                `yaml:"permission"`
+	Role           string                `yaml:"role"` // Roles group one or more admin commands
 	Username       string                `yaml:"username"`
 	Password       string                `yaml:"password"`
 	Joined         time.Time             `yaml:"joined"`
 	Macros         map[string]string     `yaml:"macros,omitempty"` // Up to 10 macros, just string commands.
 	Character      *characters.Character `yaml:"character,omitempty"`
 	ItemStorage    Storage               `yaml:"itemstorage,omitempty"`
-	AdminCommands  []string              `yaml:"admincommands,omitempty"`
 	ConfigOptions  map[string]any        `yaml:"configoptions,omitempty"`
 	Inbox          Inbox                 `yaml:"inbox,omitempty"`
 	Muted          bool                  `yaml:"muted,omitempty"`        // Cannot SEND custom communications to anyone but admin/mods
@@ -61,7 +61,7 @@ func NewUserRecord(userId int, connectionId uint64) *UserRecord {
 	u := &UserRecord{
 		connectionId:   connectionId,
 		UserId:         userId,
-		Permission:     PermissionGuest,
+		Role:           RoleUser,
 		Username:       "",
 		Password:       "",
 		Macros:         make(map[string]string),
@@ -347,16 +347,63 @@ func (u *UserRecord) GetTempData(key string) any {
 	return nil
 }
 
-func (u *UserRecord) HasAdminCommand(cmd string) bool {
-	if u.Permission != PermissionMod {
+func (u *UserRecord) HasRolePermission(permissionId string, simpleMatch ...bool) bool {
+
+	if u.Role == RoleAdmin {
+		return true
+	}
+
+	if len(simpleMatch) == 0 {
+		mudlog.Info("RoleCheck", "permissionId", permissionId, "userId", u.UserId, "username", u.Username, "characterName", u.Character.Name)
+	}
+
+	if u.Role == RoleUser {
 		return false
 	}
 
-	for _, adminCmd := range u.AdminCommands {
-		if adminCmd == cmd {
+	roles := configs.GetRolesConfig()
+	commandList, ok := roles[u.Role]
+	if !ok {
+		return false
+	}
+
+	permissionIdLen := len(permissionId)
+	cmdLen := 0
+	for _, cmdAccessId := range commandList {
+
+		mudlog.Info("RoleCheck", "comparing", cmdAccessId, "to", permissionId)
+		// room.info vs room
+		if permissionId == cmdAccessId {
+			return true
+		}
+
+		cmdLen = len(cmdAccessId)
+
+		// For helpfiles we match any portion
+		if len(simpleMatch) > 0 && simpleMatch[0] {
+
+			// room vs room.info
+			if permissionIdLen < cmdLen {
+				if cmdAccessId[0:permissionIdLen] == permissionId {
+					return true
+				}
+			} else if permissionIdLen > cmdLen {
+				if permissionId[0:permissionIdLen] == cmdAccessId {
+					return true
+				}
+			}
+		}
+
+		// If the permissionId is shorter than their permission on this, skip it
+		if permissionIdLen < cmdLen {
+			continue
+		}
+
+		if permissionId[0:cmdLen] == cmdAccessId {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -527,7 +574,7 @@ func (u *UserRecord) GetOnlineInfo() OnlineInfo {
 		int64(oTime.Seconds()),
 		timeStr,
 		isAfk,
-		u.Permission,
+		u.Role,
 	}
 }
 

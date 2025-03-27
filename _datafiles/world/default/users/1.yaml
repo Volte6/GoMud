@@ -1,5 +1,5 @@
 userid: 1
-permission: admin
+role: admin
 username: admin
 password: password
 joined: 2024-10-31T13:28:45.395873-07:00
@@ -15,6 +15,8 @@ character:
     other adventurers, granting them strength, wisdom, or fortune beyond their wildest
     dreams. Conversely, he can also mete out justice to those who would seek to disrupt
     the balance of the world, swiftly and decisively.
+  adjectives:
+  - zombie
   roomid: 1
   zone: Frostfang
   raceid: 2
@@ -61,17 +63,16 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 20
+      roundcounter: 3
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 43
+      roundcounter: 11
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
       permabuff: true
-      roundcounter: 2
       triggersleft: 1000000000
   equipment:
     weapon:

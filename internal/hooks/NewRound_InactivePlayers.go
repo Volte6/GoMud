@@ -32,7 +32,8 @@ func InactivePlayers(e events.Event) events.ListenerReturn {
 
 	for _, user := range users.GetAllActiveUsers() {
 
-		if !kickMods && user.Permission == users.PermissionAdmin || user.Permission == users.PermissionMod {
+		// If don't kick mods and they aren't a regular user, skip
+		if !kickMods && user.Role != users.RoleUser {
 			continue
 		}
 

@@ -12,18 +12,25 @@ import (
 	"github.com/volte6/gomud/internal/exit"
 	"github.com/volte6/gomud/internal/gamelock"
 	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/mapper"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/mutators"
-	"github.com/volte6/gomud/internal/parties"
 	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 )
 
+/*
+* Role Permissions:
+* room	 				(All)
+* room.edit				(All edit commands)
+* room.edit.container	(Edit containers)
+* room.edit.exits		(Edit exits)
+* room.edit.mutators	(Edit mutators)
+* room.edit.nouns		(Edit nouns)
+* room.copy				(Copy room properties from one room to another)
+* room.info				(See a room summary)
+* room.set				(Set properties of the room)
+ */
 func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	handled := true
@@ -47,15 +54,38 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 	// Interactive Editing
 	if roomCmd == `edit` {
 
+		if !user.HasRolePermission(`room.edit`) {
+			user.SendText(`you do not have <ansi fg="command">room.edit</ansi> permission`)
+			return true, nil
+		}
+
 		if rest == `edit container` || rest == `edit containers` {
+
+			if !user.HasRolePermission(`room.edit.container`) {
+				user.SendText(`you do not have <ansi fg="command">room.edit.container</ansi> permission`)
+				return true, nil
+			}
+
 			return room_Edit_Containers(``, user, room, flags)
 		}
 
 		if rest == `edit exit` || rest == `edit exits` {
+
+			if !user.HasRolePermission(`room.edit.exits`) {
+				user.SendText(`you do not have <ansi fg="command">room.edit.container</ansi> permission`)
+				return true, nil
+			}
+
 			return room_Edit_Exits(``, user, room, flags)
 		}
 
 		if rest == `edit mutator` || rest == `edit mutators` {
+
+			if !user.HasRolePermission(`room.edit.mutators`) {
+				user.SendText(`you do not have <ansi fg="command">room.edit.container</ansi> permission`)
+				return true, nil
+			}
+
 			return room_Edit_Mutators(``, user, room, flags)
 		}
 
@@ -68,6 +98,11 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 	}
 
 	if roomCmd == `noun` || roomCmd == `nouns` {
+
+		if !user.HasRolePermission(`room.nouns`) {
+			user.SendText(`you do not have <ansi fg="command">room.noun</ansi> permission`)
+			return true, nil
+		}
 
 		// room noun chair "a chair for sitting"
 		if len(args) > 2 {
@@ -109,6 +144,11 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 	if roomCmd == "copy" && len(args) >= 3 {
 
+		if !user.HasRolePermission(`room.copy`) {
+			user.SendText(`you do not have <ansi fg="command">room.copy</ansi> permission`)
+			return true, nil
+		}
+
 		property := args[1]
 
 		if property == "spawninfo" {
@@ -148,6 +188,12 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		}
 
 	} else if roomCmd == "info" {
+
+		if !user.HasRolePermission(`room.info`) {
+			user.SendText(`you do not have <ansi fg="command">room.info</ansi> permission`)
+			return true, nil
+		}
+
 		if len(args) == 1 {
 			roomId = room.RoomId
 		} else {
@@ -169,6 +215,11 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		user.SendText(infoOutput)
 
 	} else if len(args) >= 2 && roomCmd == "exit" {
+
+		if !user.HasRolePermission(`room.exits`) {
+			user.SendText(`you do not have <ansi fg="command">room.exit</ansi> permission`)
+			return true, nil
+		}
 
 		// exit west 159 <- Create/change exit with roomId as target room
 		// exit up climb <- Rename exit
@@ -219,6 +270,11 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 	} else if len(args) >= 2 && roomCmd == "secretexit" {
 
+		if !user.HasRolePermission(`room.exits`) {
+			user.SendText(`you do not have <ansi fg="command">room.exit</ansi> permission`)
+			return true, nil
+		}
+
 		direction := args[1]
 		if exit, ok := room.Exits[direction]; ok {
 			if exit.Secret {
@@ -237,6 +293,11 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		}
 
 	} else if len(args) >= 2 && roomCmd == "set" {
+
+		if !user.HasRolePermission(`room.set`) {
+			user.SendText(`you do not have <ansi fg="command">room.set</ansi> permission`)
+			return true, nil
+		}
 
 		propertyName := args[1]
 		propertyValue := ``
@@ -333,76 +394,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		}
 
 	} else {
-
-		var distance int
-		gotoRoomId, numError := strconv.Atoi(roomCmd)
-		if numError != nil {
-
-			zMapper := mapper.GetZoneMapper(room.Zone)
-			if zMapper == nil {
-				err := fmt.Errorf("Could not find mapper for zone: %s", room.Zone)
-				mudlog.Error("Map", "error", err)
-				user.SendText(`No map found (or an error occured)"`)
-				return true, err
-			}
-
-			gotoRoomId, distance = zMapper.FindAdjacentRoom(user.Character.RoomId, roomCmd)
-		}
-
-		if gotoRoomId > 0 {
-
-			previousRoomId := user.Character.RoomId
-
-			if err := rooms.MoveToRoom(user.UserId, gotoRoomId); err != nil {
-				user.SendText(err.Error())
-
-			} else {
-
-				scripting.TryRoomScriptEvent(`onExit`, user.UserId, previousRoomId)
-
-				user.SendText(fmt.Sprintf("Moved to room %d.", gotoRoomId))
-
-				gotoRoom := rooms.LoadRoom(gotoRoomId)
-				gotoRoom.SendText(
-					fmt.Sprintf(`<ansi fg="username">%s</ansi> appears in a flash of light!`, user.Character.Name),
-					user.UserId,
-				)
-
-				if party := parties.Get(user.UserId); party != nil {
-
-					newRoom := rooms.LoadRoom(gotoRoomId)
-					for _, uid := range room.GetPlayers() {
-						if party.IsMember(uid) {
-
-							partyUser := users.GetByUserId(uid)
-							if partyUser == nil {
-								continue
-							}
-
-							rooms.MoveToRoom(partyUser.UserId, gotoRoomId)
-							user.SendText(fmt.Sprintf("Moved to room %d (%d rooms away).", gotoRoomId, distance))
-							room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> appears in a flash of light!`, partyUser.Character.Name), partyUser.UserId)
-
-							for _, mInstanceId := range room.GetMobs(rooms.FindCharmed) {
-								if mob := mobs.GetInstance(mInstanceId); mob != nil {
-									if mob.Character.IsCharmed(partyUser.UserId) {
-										room.RemoveMob(mob.InstanceId)
-										newRoom.AddMob(mob.InstanceId)
-									}
-								}
-							}
-						}
-					}
-				}
-
-				Look(``, user, gotoRoom, flags)
-
-				scripting.TryRoomScriptEvent(`onEnter`, user.UserId, gotoRoomId)
-
-			}
-		} else {
-			user.SendText(fmt.Sprintf("Invalid room command: %s", args[0]))
-		}
+		user.SendText(fmt.Sprintf(`Invalid room command: <ansi fg="command">%s</ansi>`, roomCmd))
 	}
 
 	return handled, nil
@@ -953,6 +945,10 @@ func room_Edit_Containers(rest string, user *users.UserRecord, room *rooms.Room,
 	//
 	if currentlyEditing.Name != `` {
 		delete(room.Containers, currentlyEditing.Name)
+	}
+
+	if room.Containers == nil {
+		room.Containers = map[string]rooms.Container{}
 	}
 
 	room.Containers[currentlyEditing.NameNew] = currentlyEditing.Container

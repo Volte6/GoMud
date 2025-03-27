@@ -26,7 +26,6 @@ type RoomTemplateDetails struct {
 	TemporaryExits map[string]exit.TemporaryRoomExit
 	UserId         int
 	Character      *characters.Character
-	Permission     string
 	RoomSymbol     string
 	RoomLegend     string
 	Nouns          []string
@@ -71,9 +70,8 @@ func GetDetails(r *Room, user *users.UserRecord, tinymap ...[]string) RoomTempla
 		Zone:           r.Zone,
 		Title:          r.Title,
 		Description:    r.GetDescription(),
-		UserId:         user.UserId,     // Who is viewing the room
-		Character:      user.Character,  // The character of the user viewing the room
-		Permission:     user.Permission, // The permission level of the user viewing the room
+		UserId:         user.UserId,    // Who is viewing the room
+		Character:      user.Character, // The character of the user viewing the room
 		RoomSymbol:     roomSymbol,
 		RoomLegend:     roomLegend,
 		IsDark:         b.IsDark(),
@@ -109,7 +107,7 @@ func GetDetails(r *Room, user *users.UserRecord, tinymap ...[]string) RoomTempla
 	//
 	// End Room Alerts
 	//
-	renderNouns := user.Permission == users.PermissionAdmin
+	renderNouns := user.HasRolePermission(`room.nouns`)
 	if user.Character.Pet.Exists() && user.Character.HasBuffFlag(buffs.SeeNouns) {
 		renderNouns = true
 	}
@@ -308,7 +306,7 @@ func GetDetails(r *Room, user *users.UserRecord, tinymap ...[]string) RoomTempla
 	for exitStr, exitInfo := range r.Exits {
 
 		// If it's a secret room we need to make sure the player has recently been there before including it in the exits
-		if exitInfo.Secret { //&& user.Permission != users.PermissionAdmin {
+		if exitInfo.Secret {
 			if targetRm := LoadRoom(exitInfo.RoomId); targetRm != nil {
 				if targetRm.HasVisited(user.UserId, VisitorUser) {
 					details.VisibleExits[exitStr] = exitInfo

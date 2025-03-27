@@ -22,7 +22,7 @@ func Online(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 		language.T(`Role`),
 	}
 
-	if user.Permission != users.PermissionUser {
+	if user.Role != users.RoleUser {
 		headers = append([]string{language.T(`UserId`)}, headers...)
 		headers = append(headers, []string{language.T(`Zone`), language.T(`RoomId`)}...)
 	}
@@ -47,13 +47,22 @@ func Online(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 				onlineTime += ` <ansi fg="8">(afk)</ansi>`
 			}
 
+			permClass := `user`
+			if onlineInfo.Role != users.RoleUser {
+				if onlineInfo.Role == users.RoleAdmin {
+					permClass = `admin`
+				} else {
+					permClass = `mod`
+				}
+			}
+
 			row := []string{
 				onlineInfo.CharacterName,
 				strconv.Itoa(onlineInfo.Level),
 				onlineInfo.Alignment,
 				onlineInfo.Profession,
 				onlineTime,
-				onlineInfo.Permission,
+				onlineInfo.Role,
 			}
 
 			formatting := []string{
@@ -62,10 +71,10 @@ func Online(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 				`<ansi fg="` + onlineInfo.Alignment + `">%s</ansi>`,
 				`<ansi fg="white-bold">%s</ansi>`,
 				`<ansi fg="magenta">%s</ansi>`,
-				`<ansi fg="role-` + u.Permission + `-bold">%s</ansi>`,
+				`<ansi fg="role-` + permClass + `-bold">%s</ansi>`,
 			}
 
-			if user.Permission != users.PermissionUser {
+			if user.Role != users.RoleUser {
 				row = append([]string{strconv.Itoa(u.UserId)}, row...)
 				row = append(row, []string{u.Character.Zone, strconv.Itoa(u.Character.RoomId)}...)
 

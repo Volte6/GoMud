@@ -48,9 +48,8 @@ var (
 		`tackle`:      {Tackle, false, false},
 		`bank`:        {Bank, false, false},
 		`break`:       {Break, false, false},
-		`build`:       {Build, false, true},  // Admin only
-		`ibuild`:      {IBuild, false, true}, // Admin only
-		`buff`:        {Buff, false, true},   // Admin only
+		`build`:       {Build, false, true}, // Admin only
+		`buff`:        {Buff, false, true},  // Admin only
 		`bump`:        {Bump, false, false},
 		`buy`:         {Buy, false, false},
 		`cast`:        {Cast, false, false},
@@ -146,6 +145,7 @@ var (
 		`suicide`:     {Suicide, true, false},
 		`syslogs`:     {SysLogs, true, true}, // Admin only
 		`tame`:        {Tame, false, false},
+		`teleport`:    {Teleport, true, true}, // Admin only
 		`throw`:       {Throw, false, false},
 		`track`:       {Track, false, false},
 		`trash`:       {Trash, false, false},
@@ -245,7 +245,6 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 	}
 
 	userDisabled := false
-	isAdmin := false
 	user := users.GetByUserId(userId)
 	if user == nil {
 		return false, fmt.Errorf(`user %d not found`, userId)
@@ -279,8 +278,6 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 		user.Character.CancelBuffsWithFlag(buffs.CancelOnAction)
 
 		userDisabled = user.Character.IsDisabled()
-		isAdmin = user.Permission == users.PermissionAdmin
-		isAdmin = isAdmin || user.HasAdminCommand(cmd)
 
 		// Check if the "rest" is an item the character has
 		matchingItem, found := user.Character.FindInBackpack(rest)
@@ -330,14 +327,14 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 			}
 		}
 
-		if isAdmin || !cmdInfo.AdminOnly {
+		if !cmdInfo.AdminOnly || user.HasRolePermission(cmd, true) {
 
 			start := time.Now()
 			defer func() {
 				util.TrackTime(`usr-cmd[`+cmd+`]`, time.Since(start).Seconds())
 			}()
 
-			if isAdmin {
+			if cmdInfo.AdminOnly {
 				mudlog.Info("Admin Command", "cmd", cmd, "rest", rest, "userId", user.UserId)
 			}
 

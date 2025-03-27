@@ -11,6 +11,10 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
+/*
+* Role Permissions:
+* paz 				(All)
+ */
 func Paz(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	beamOfLight := colorpatterns.ApplyColorPattern(`beam of light`, `rainbow`)
