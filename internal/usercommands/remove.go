@@ -5,6 +5,7 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/users"
@@ -13,9 +14,17 @@ import (
 func Remove(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "all" {
+		removedItems := []items.Item{}
 		for _, item := range user.Character.Equipment.GetAllItems() {
 			Remove(item.Name(), user, room, flags)
+			removedItems = append(removedItems, item)
 		}
+
+		events.AddToQueue(events.EquipmentChange{
+			UserId:       user.UserId,
+			ItemsRemoved: removedItems,
+		})
+
 		return true, nil
 	}
 
@@ -52,6 +61,12 @@ func Remove(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 			)
 
 			user.Character.StoreItem(matchItem)
+
+			events.AddToQueue(events.EquipmentChange{
+				UserId:       user.UserId,
+				ItemsRemoved: []items.Item{matchItem},
+			})
+
 		} else {
 			user.SendText(
 				fmt.Sprintf(`You can't seem to remove your <ansi fg="item">%s</ansi>.`, matchItem.DisplayName()),

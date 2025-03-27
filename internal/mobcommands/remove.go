@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
 )
@@ -16,9 +18,17 @@ func Remove(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	}
 
 	if rest == "all" {
+		removedItems := []items.Item{}
 		for _, item := range mob.Character.Equipment.GetAllItems() {
 			Remove(item.Name(), mob, room)
+			removedItems = append(removedItems, item)
 		}
+
+		events.AddToQueue(events.EquipmentChange{
+			MobInstanceId: mob.InstanceId,
+			ItemsRemoved:  removedItems,
+		})
+
 		return true, nil
 	}
 
@@ -39,6 +49,11 @@ func Remove(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		}
 
 		mob.Character.Validate()
+
+		events.AddToQueue(events.EquipmentChange{
+			MobInstanceId: mob.InstanceId,
+			ItemsRemoved:  []items.Item{matchItem},
+		})
 
 	}
 

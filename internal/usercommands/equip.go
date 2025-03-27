@@ -90,6 +90,13 @@ func Equip(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			}
 
 			user.Character.Validate(true)
+
+			events.AddToQueue(events.EquipmentChange{
+				UserId:       user.UserId,
+				ItemsWorn:    []items.Item{matchItem},
+				ItemsRemoved: oldItems,
+			})
+
 		} else {
 			if len(failureReason) == 1 {
 				failureReason = fmt.Sprintf(`You can't figure out how to equip the <ansi fg="item">%s</ansi>.`, matchItem.DisplayName())
