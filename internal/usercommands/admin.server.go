@@ -20,6 +20,10 @@ var (
 	memoryReportCache = map[string]util.MemoryResult{}
 )
 
+/*
+* Role Permissions:
+* server 				(All)
+ */
 func Server(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {

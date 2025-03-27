@@ -16,6 +16,10 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
+/*
+* Role Permissions:
+* buff 				(All)
+ */
 func Buff(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	// args should look like one of the following:

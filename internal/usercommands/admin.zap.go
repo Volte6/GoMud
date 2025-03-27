@@ -11,6 +11,10 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
+/*
+* Role Permissions:
+* zap 				(All)
+ */
 func Zap(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	boltOfLightning := colorpatterns.ApplyColorPattern(`bolt of lightning`, `glowing`)

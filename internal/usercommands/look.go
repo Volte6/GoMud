@@ -323,7 +323,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 		if !isSneaking {
 
-			renderNouns := user.Permission == users.PermissionAdmin
+			renderNouns := user.HasRolePermission(`room.nouns`)
 			if user.Character.Pet.Exists() && user.Character.HasBuffFlag(buffs.SeeNouns) {
 				renderNouns = true
 			}

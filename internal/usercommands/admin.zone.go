@@ -15,6 +15,10 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
+/*
+* Role Permissions:
+* zone 				(All)
+ */
 func Zone(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	handled := true

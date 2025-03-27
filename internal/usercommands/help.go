@@ -53,10 +53,10 @@ func Help(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			templateFile := `help/` + keywords.TryHelpAlias(command.Command)
 
 			if command.AdminOnly {
-				if user.Permission == users.PermissionAdmin || user.HasAdminCommand(command.Command) {
+				if user.HasRolePermission(command.Command, true) {
 					helpCommandList.Admin[category] = append(
 						helpCommandList.Admin[category],
-						helpCommand{Command: command.Command, Type: "command-admin", Missing: !templates.Exists(templateFile)},
+						helpCommand{Command: command.Command, Type: "command-admin", Missing: false},
 					)
 				}
 				continue

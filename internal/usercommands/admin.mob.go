@@ -19,12 +19,13 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
+/*
+* Role Permissions:
+* mob 				(All)
+* mob.create		(Create new mobs)
+* mob.spawn			(Spawn a mob in the room)
+ */
 func Mob(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
-
-	if user.Permission != users.PermissionAdmin {
-		user.SendText(`<ansi fg="alert-4">Only admins can use this command</ansi>`)
-		return true, nil
-	}
 
 	args := util.SplitButRespectQuotes(rest)
 
@@ -36,16 +37,34 @@ func Mob(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 	// Create a new mob
 	if args[0] == `create` {
+
+		if !user.HasRolePermission(`mob.create`) {
+			user.SendText(`you do not have <ansi fg="command">mob.create</ansi> permission`)
+			return true, nil
+		}
+
 		return mob_Create(strings.TrimSpace(rest[6:]), user, room, flags)
 	}
 
 	// Spawn a mob instance
 	if args[0] == `spawn` {
+
+		if !user.HasRolePermission(`mob.spawn`) {
+			user.SendText(`you do not have <ansi fg="command">mob.spawn</ansi> permission`)
+			return true, nil
+		}
+
 		return mob_Spawn(strings.TrimSpace(rest[5:]), user, room, flags)
 	}
 
 	// List existing mobs
 	if args[0] == `list` {
+
+		if !user.HasRolePermission(`mob.spawn`) {
+			user.SendText(`you do not have <ansi fg="command">mob.spawn</ansi> permission`)
+			return true, nil
+		}
+
 		return mob_List(strings.TrimSpace(rest[4:]), user, room, flags)
 	}
 

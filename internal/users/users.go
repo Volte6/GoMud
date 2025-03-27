@@ -33,16 +33,6 @@ type ActiveUsers struct {
 	ZombieConnections map[connections.ConnectionId]uint64 // connectionId to turn they became a zombie
 }
 
-type Online struct {
-	UserId         string
-	Username       string
-	Permission     string
-	CharacterName  string
-	CharacterLevel int
-	Zone           string
-	RoomId         int
-}
-
 func newUserManager() *ActiveUsers {
 	return &ActiveUsers{
 		Users:             make(map[int]*UserRecord),
@@ -124,24 +114,6 @@ func GetOnlineUserIds() []int {
 	for _, user := range userManager.Users {
 		onlineList = append(onlineList, user.UserId)
 	}
-	return onlineList
-}
-
-func GetOnlineList() []Online {
-
-	onlineList := make([]Online, 0, len(userManager.Users))
-	for _, user := range userManager.Users {
-		onlineList = append(onlineList, Online{
-			UserId:         strconv.Itoa(int(user.UserId)),
-			Username:       user.Username,
-			Permission:     user.Permission,
-			CharacterName:  user.Character.Name,
-			CharacterLevel: user.Character.Level,
-			Zone:           user.Character.Zone,
-			RoomId:         user.Character.RoomId,
-		})
-	}
-
 	return onlineList
 }
 
@@ -230,10 +202,6 @@ func LoginUser(user *UserRecord, connectionId connections.ConnectionId) (*UserRe
 
 		// Otherwise, someone else is logged in, can't double-login!
 		return nil, "That user is already logged in.", errors.New("user is already logged in")
-	}
-
-	if len(user.AdminCommands) > 0 {
-		user.Permission = PermissionMod
 	}
 
 	mudlog.Info("LoginUser()", "Zombie", false)
@@ -340,7 +308,7 @@ func CreateUser(u *UserRecord) error {
 	}
 
 	u.UserId = GetUniqueUserId()
-	u.Permission = PermissionUser
+	u.Role = RoleUser
 
 	idx := NewUserIndex()
 	idx.AddUser(u.UserId, u.Username)

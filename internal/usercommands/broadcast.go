@@ -22,7 +22,7 @@ func Broadcast(rest string, user *users.UserRecord, room *rooms.Room, flags even
 	events.AddToQueue(events.Broadcast{
 		Text:            msg + term.CRLFStr,
 		IsCommunication: true,
-		SourceIsMod:     user.Permission == users.PermissionAdmin || user.Permission == users.PermissionMod,
+		SourceIsMod:     user.Role != users.RoleUser,
 	})
 
 	return true, nil

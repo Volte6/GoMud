@@ -11,6 +11,10 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
+/*
+* Role Permissions:
+* redescribe 				(All)
+ */
 func Redescribe(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(rest)

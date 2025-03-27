@@ -539,7 +539,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 				userObject = state.UserObject
 			}
 
-			if userObject.Permission == users.PermissionAdmin {
+			if userObject.Role == users.RoleAdmin {
 				connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
 			}
 
@@ -710,7 +710,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 				userObject = state.UserObject
 			}
 
-			if userObject.Permission == users.PermissionAdmin {
+			if userObject.Role == users.RoleAdmin {
 				connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
 			}
 

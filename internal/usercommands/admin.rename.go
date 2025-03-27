@@ -11,6 +11,10 @@ import (
 	"github.com/volte6/gomud/internal/util"
 )
 
+/*
+* Role Permissions:
+* rename 				(All)
+ */
 func Rename(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	args := util.SplitButRespectQuotes(rest)

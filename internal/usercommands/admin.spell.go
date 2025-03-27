@@ -16,12 +16,13 @@ import (
 	"github.com/volte6/gomud/internal/users"
 )
 
+/*
+* Role Permissions:
+* spell 				(All)
+* spell.create			(Create new spells)
+* spell.list			(List all spells)
+ */
 func Spell(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
-
-	if user.Permission != users.PermissionAdmin {
-		user.SendText(`<ansi fg="alert-4">Only admins can use this command</ansi>`)
-		return true, nil
-	}
 
 	args := util.SplitButRespectQuotes(rest)
 
@@ -33,11 +34,23 @@ func Spell(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 
 	// Create a new spell
 	if args[0] == `create` {
+
+		if !user.HasRolePermission(`spell.create`) {
+			user.SendText(`you do not have <ansi fg="command">spell.create</ansi> permission`)
+			return true, nil
+		}
+
 		return spell_Create(strings.TrimSpace(rest[6:]), user, room, flags)
 	}
 
 	// List existing spells
 	if args[0] == `list` {
+
+		if !user.HasRolePermission(`spell.list`) {
+			user.SendText(`you do not have <ansi fg="command">spell.list</ansi> permission`)
+			return true, nil
+		}
+
 		return spell_List(strings.TrimSpace(rest[4:]), user, room, flags)
 	}
 
