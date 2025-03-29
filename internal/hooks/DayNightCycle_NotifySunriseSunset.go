@@ -18,16 +18,23 @@ func NotifySunriseSunset(e events.Event) events.ListenerReturn {
 	}
 
 	if evt.IsSunrise {
+
 		sunriseTxt, _ := templates.Process("generic/sunrise", gametime.GetDate())
+		sunriseTxtSR, _ := templates.Process("generic/sunrise", gametime.GetDate(), templates.ForceScreenReaderUserId)
+
 		events.AddToQueue(events.Broadcast{
-			Text: sunriseTxt,
+			Text:             sunriseTxt,
+			TextScreenReader: sunriseTxtSR,
 		})
 		return events.Continue
 	}
 
 	sunsetTxt, _ := templates.Process("generic/sunset", nil)
+	sunsetTxtSR, _ := templates.Process("generic/sunset", nil, templates.ForceScreenReaderUserId)
+
 	events.AddToQueue(events.Broadcast{
-		Text: sunsetTxt,
+		Text:             sunsetTxt,
+		TextScreenReader: sunsetTxtSR,
 	})
 
 	return events.Continue

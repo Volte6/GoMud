@@ -11,7 +11,7 @@ func Exits(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 
 	details := rooms.GetDetails(room, user)
 
-	exitTxt, _ := templates.Process("descriptions/exits", details)
+	exitTxt, _ := templates.Process("descriptions/exits", details, user.UserId)
 	user.SendText(exitTxt)
 
 	return true, nil

@@ -20,7 +20,7 @@ import (
 func Locate(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
-		infoOutput, _ := templates.Process("admincommands/help/command.locate", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.locate", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}
@@ -144,7 +144,7 @@ func Locate(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 
 				if ct >= matchesPerPage {
 					onlineTableData := templates.GetTable(fmt.Sprintf(`Matches for "%s" [Page %d/%d]`, rest, pageNow+1, pageCt), headers, rows)
-					tplTxt, _ := templates.Process("tables/generic", onlineTableData)
+					tplTxt, _ := templates.Process("tables/generic", onlineTableData, user.UserId)
 					user.SendText(tplTxt)
 					rows = [][]string{}
 					ct = 0
@@ -157,7 +157,7 @@ func Locate(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 		// Final flush
 		if pageNow < pageCt {
 			onlineTableData := templates.GetTable(fmt.Sprintf(`Matches for "%s" [Page %d/%d]`, rest, pageNow+1, pageCt), headers, rows)
-			tplTxt, _ := templates.Process("tables/generic", onlineTableData)
+			tplTxt, _ := templates.Process("tables/generic", onlineTableData, user.UserId)
 			user.SendText(tplTxt)
 		}
 

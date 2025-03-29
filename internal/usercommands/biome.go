@@ -18,7 +18,7 @@ func Biome(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		return false, fmt.Errorf(`biome %s not found`, room.Biome)
 	}
 
-	biomeTxt, _ := templates.Process("descriptions/biome", biome)
+	biomeTxt, _ := templates.Process("descriptions/biome", biome, user.UserId)
 	user.SendText(biomeTxt)
 
 	return true, nil

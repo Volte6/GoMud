@@ -41,7 +41,7 @@ func Alias(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 	tableFormatting := []string{`<ansi fg="yellow">%s</ansi>`, `<ansi fg="command">%s</ansi>`}
 
 	aliasTableData := templates.GetTable(`Default Aliases`, headers, rows, tableFormatting)
-	aliasTxt, _ := templates.Process("tables/generic", aliasTableData)
+	aliasTxt, _ := templates.Process("tables/generic", aliasTableData, user.UserId)
 	user.SendText(aliasTxt)
 
 	return true, nil

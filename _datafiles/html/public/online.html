@@ -12,7 +12,7 @@
                 <th>Alignment</th>
                 <th>Profession</th>
                 <th>Time Online</th>
-                <th>Permission</th>
+                <th>Role</th>
             </tr>
             {{range $index, $uInfo := .STATS.OnlineUsers}}
             <tr>
@@ -22,7 +22,7 @@
                 <td align="center">{{ $uInfo.Alignment }}</td>
                 <td align="center">{{ $uInfo.Profession }}</td>
                 <td align="center">{{ $uInfo.OnlineTimeStr }}{{ if $uInfo.IsAFK }} (AFK){{end}}</td>
-                <td align="center">{{ $uInfo.Permission }}</td>
+                <td align="center">{{ $uInfo.Role }}</td>
             </tr>
             {{end}}
         </table>

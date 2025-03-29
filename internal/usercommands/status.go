@@ -28,7 +28,7 @@ func Status(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 		cmdPrompt, isNew := user.StartPrompt(`status`, rest)
 
 		if isNew {
-			tplTxt, _ := templates.Process("character/status-train", user)
+			tplTxt, _ := templates.Process("character/status-train", user, user.UserId)
 			user.SendText(tplTxt)
 		}
 
@@ -97,7 +97,7 @@ func Status(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 				fmt.Sprintf(term.CRLFStr+`<ansi fg="210">Your <ansi fg="yellow">%s</ansi> training improves from <ansi fg="201">%d</ansi> to <ansi fg="201">%d</ansi>!</ansi>`, selection, before, after))
 		}
 
-		tplTxt, _ := templates.Process("character/status-train", user)
+		tplTxt, _ := templates.Process("character/status-train", user, user.UserId)
 
 		if spent > 0 {
 			tplTxt = strings.Replace(tplTxt, `fakeprop="`+selection+`"`, `bg="highlight"`, 1)
@@ -108,7 +108,7 @@ func Status(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 		return true, nil
 	}
 
-	tplTxt, _ := templates.Process("character/status", user)
+	tplTxt, _ := templates.Process("character/status", user, user.UserId)
 	user.SendText(tplTxt)
 
 	Inventory(``, user, room, flags)

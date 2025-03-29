@@ -21,7 +21,7 @@ func Redescribe(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 
 	if len(args) < 2 {
 		// send some sort of help info?
-		infoOutput, _ := templates.Process("admincommands/help/command.rename", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.rename", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}

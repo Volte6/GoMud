@@ -17,7 +17,7 @@ import (
 func Mute(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
-		infoOutput, _ := templates.Process("admincommands/help/command.mute", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.mute", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}
@@ -44,7 +44,7 @@ func Mute(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 func UnMute(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
-		infoOutput, _ := templates.Process("admincommands/help/command.mute", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.mute", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}

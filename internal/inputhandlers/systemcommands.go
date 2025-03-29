@@ -114,7 +114,7 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 	if cmd == "quit" {
 
 		// Not building complex output, so just preparse the ansi in the template and cache that
-		tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
+		tplTxt, _ := templates.Process("goodbye", nil)
 
 		connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connectionId)
 
@@ -138,7 +138,7 @@ func trySystemCommand(cmd string, connectionId connections.ConnectionId) bool {
 		go func() {
 
 			// Not building complex output, so just preparse the ansi in the template and cache that
-			tplTxt, _ := templates.Process("admincommands/shutdown-countdown", nil, templates.AnsiTagsPreParse)
+			tplTxt, _ := templates.Process("admincommands/shutdown-countdown", nil)
 
 			for i := timeToShutdown; i > 0; i-- {
 

@@ -46,7 +46,7 @@ func Jobs(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		return strings.Compare(jobProgress[i].Name, jobProgress[j].Name) == -1
 	})
 
-	jobsTxt, _ := templates.Process("character/jobs", jobProgress)
+	jobsTxt, _ := templates.Process("character/jobs", jobProgress, user.UserId)
 	user.SendText(jobsTxt)
 
 	return true, nil

@@ -40,7 +40,7 @@ func Conditions(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 		afflictions = append(afflictions, newAffliction)
 	}
 
-	tplTxt, _ := templates.Process("character/conditions", afflictions)
+	tplTxt, _ := templates.Process("character/conditions", afflictions, user.UserId)
 	user.SendText(tplTxt)
 
 	return true, nil

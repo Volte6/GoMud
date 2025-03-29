@@ -136,7 +136,7 @@ func (mod *AuctionsModule) auctionCommand(rest string, user *users.UserRecord, r
 	if len(args) == 0 {
 
 		if currentAuction != nil {
-			auctionTxt, _ := templates.Process("auctions/auction-update", currentAuction)
+			auctionTxt, _ := templates.Process("auctions/auction-update", currentAuction, user.UserId)
 			user.SendText(auctionTxt)
 		} else {
 			user.SendText(`No current auctions. You can auction something, though!`)
@@ -179,7 +179,7 @@ func (mod *AuctionsModule) auctionCommand(rest string, user *users.UserRecord, r
 
 		historyTableData := templates.GetTable(`Past Auctions`, headers, rows, formatting)
 
-		tplTxt, _ := templates.Process("tables/generic", historyTableData)
+		tplTxt, _ := templates.Process("tables/generic", historyTableData, user.UserId)
 		user.SendText(tplTxt)
 
 		return true, nil
@@ -231,7 +231,7 @@ func (mod *AuctionsModule) auctionCommand(rest string, user *users.UserRecord, r
 		user.Character.Gold -= amt
 
 		// Broadcast the bid
-		auctionTxt, _ := templates.Process("auctions/auction-bid", currentAuction)
+		auctionTxt, _ := templates.Process("auctions/auction-bid", currentAuction, user.UserId)
 		for _, uid := range users.GetOnlineUserIds() {
 			if u := users.GetByUserId(uid); u != nil {
 				auctionOn := u.GetConfigOption(`auction`)
@@ -340,9 +340,11 @@ func (mod *AuctionsModule) newRoundHandler(e events.Event) events.ListenerReturn
 		mod.auctionMgr.EndAuction()
 
 		auctionNow.LastUpdate = evt.TimeNow
-		auctionTxt, _ := templates.Process("auctions/auction-end", auctionNow)
 
 		for _, uid := range users.GetOnlineUserIds() {
+
+			auctionTxt, _ := templates.Process("auctions/auction-end", auctionNow, uid)
+
 			if u := users.GetByUserId(uid); u != nil {
 				auctionOn := u.GetConfigOption(`auction`)
 				if auctionOn == nil || auctionOn.(bool) {
@@ -474,9 +476,11 @@ func (mod *AuctionsModule) newRoundHandler(e events.Event) events.ListenerReturn
 	} else if auctionNow.LastUpdate.IsZero() {
 
 		auctionNow.LastUpdate = evt.TimeNow
-		auctionTxt, _ := templates.Process("auctions/auction-start", auctionNow)
 
 		for _, uid := range users.GetOnlineUserIds() {
+
+			auctionTxt, _ := templates.Process("auctions/auction-start", auctionNow, uid)
+
 			if u := users.GetByUserId(uid); u != nil {
 				auctionOn := u.GetConfigOption(`auction`)
 				if auctionOn == nil || auctionOn.(bool) {
@@ -504,9 +508,11 @@ func (mod *AuctionsModule) newRoundHandler(e events.Event) events.ListenerReturn
 	} else if time.Since(auctionNow.LastUpdate) > time.Second*time.Duration(mod.plug.Config.Get(`UpdateSeconds`).(int)) {
 
 		auctionNow.LastUpdate = evt.TimeNow
-		auctionTxt, _ := templates.Process("auctions/auction-update", auctionNow)
 
 		for _, uid := range users.GetOnlineUserIds() {
+
+			auctionTxt, _ := templates.Process("auctions/auction-update", auctionNow, uid)
+
 			if u := users.GetByUserId(uid); u != nil {
 				auctionOn := u.GetConfigOption(`auction`)
 				if auctionOn == nil || auctionOn.(bool) {

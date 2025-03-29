@@ -921,3 +921,48 @@ func FormatNumber(n int) string {
 		}
 	}
 }
+
+func StripCharsForScreenReaders(s string) string {
+
+	// leave [ and ; off this list, it's special for ansi escape codes.
+	toReplace := "┌─┐└┘╔═╗╚╝│─•]╒═╕█░╲╱+"
+
+	// Create a lookup map for constant-time rune checks
+	replaceSet := make(map[rune]struct{}, len(toReplace))
+	for _, r := range toReplace {
+		replaceSet[r] = struct{}{}
+	}
+
+	strLen := len(s)
+	var b strings.Builder
+	b.Grow(strLen) // Pre-allocate some memory
+
+	ignoreNext := 0
+	for pos, r := range s {
+
+		if ignoreNext > 0 {
+			ignoreNext--
+			continue
+		}
+
+		if r == '[' && (pos == 0 || s[pos-1] != 27) {
+			b.WriteRune(' ')
+			continue
+		}
+
+		if r == '.' && pos < strLen-1 && s[pos+1] == ':' {
+			b.WriteRune(' ')
+			b.WriteRune(' ')
+			ignoreNext = 1
+			continue
+		}
+
+		if _, found := replaceSet[r]; found {
+			b.WriteRune(' ')
+		} else {
+			b.WriteRune(r)
+		}
+	}
+
+	return b.String()
+}

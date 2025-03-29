@@ -42,7 +42,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 	if len(args) == 0 {
 		// send some sort of help info?
-		infoOutput, _ := templates.Process("admincommands/help/command.room", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.room", nil, user.UserId)
 		user.SendText(infoOutput)
 
 		return handled, nil
@@ -211,7 +211,7 @@ func Room(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			`zone`: rooms.GetZoneConfig(targetRoom.Zone),
 		}
 
-		infoOutput, _ := templates.Process("admincommands/ingame/roominfo", roomInfo)
+		infoOutput, _ := templates.Process("admincommands/ingame/roominfo", roomInfo, user.UserId)
 		user.SendText(infoOutput)
 
 	} else if len(args) >= 2 && roomCmd == "exit" {
@@ -447,7 +447,7 @@ func room_Edit_Containers(rest string, user *users.UserRecord, room *rooms.Room,
 
 	question := cmdPrompt.Ask(`Choose one:`, []string{`new`}, `new`)
 	if !question.Done {
-		tplTxt, _ := templates.Process("tables/numbered-list", containerOptions)
+		tplTxt, _ := templates.Process("tables/numbered-list", containerOptions, user.UserId)
 		user.SendText(tplTxt)
 		return true, nil
 	}
@@ -629,7 +629,7 @@ func room_Edit_Containers(rest string, user *users.UserRecord, room *rooms.Room,
 
 				question := cmdPrompt.Ask(`Select a buff to add to the trap, or nothing to continue:`, []string{}, `0`)
 				if !question.Done {
-					tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions)
+					tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions, user.UserId)
 					user.SendText(tplTxt)
 					return true, nil
 				}
@@ -660,7 +660,7 @@ func room_Edit_Containers(rest string, user *users.UserRecord, room *rooms.Room,
 						user.SendText("Invalid selection.")
 						question.RejectResponse()
 
-						tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions)
+						tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions, user.UserId)
 						user.SendText(tplTxt)
 						return true, nil
 					}
@@ -691,7 +691,7 @@ func room_Edit_Containers(rest string, user *users.UserRecord, room *rooms.Room,
 						buffOptions[idx] = data
 					}
 
-					tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions)
+					tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions, user.UserId)
 					user.SendText(tplTxt)
 					return true, nil
 
@@ -801,7 +801,7 @@ func room_Edit_Containers(rest string, user *users.UserRecord, room *rooms.Room,
 
 				question := cmdPrompt.Ask(`Modify which (or new)?`, []string{`skip`}, `skip`)
 				if !question.Done {
-					tplTxt, _ := templates.Process("tables/numbered-list", recipeOptions)
+					tplTxt, _ := templates.Process("tables/numbered-list", recipeOptions, user.UserId)
 					user.SendText(tplTxt)
 					return true, nil
 				}
@@ -1043,7 +1043,7 @@ func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room, flag
 
 	question := cmdPrompt.Ask(`Choose one:`, []string{`new`}, `new`)
 	if !question.Done {
-		tplTxt, _ := templates.Process("tables/numbered-list", exitOptions)
+		tplTxt, _ := templates.Process("tables/numbered-list", exitOptions, user.UserId)
 		user.SendText(tplTxt)
 		return true, nil
 	}
@@ -1302,7 +1302,7 @@ func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room, flag
 
 				question := cmdPrompt.Ask(`Select a buff to add to the trap, or nothing to continue:`, []string{}, `0`)
 				if !question.Done {
-					tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions)
+					tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions, user.UserId)
 					user.SendText(tplTxt)
 					return true, nil
 				}
@@ -1333,7 +1333,7 @@ func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room, flag
 						user.SendText("Invalid selection.")
 						question.RejectResponse()
 
-						tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions)
+						tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions, user.UserId)
 						user.SendText(tplTxt)
 						return true, nil
 					}
@@ -1364,7 +1364,7 @@ func room_Edit_Exits(rest string, user *users.UserRecord, room *rooms.Room, flag
 						buffOptions[idx] = data
 					}
 
-					tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions)
+					tplTxt, _ := templates.Process("tables/numbered-list-doubled", buffOptions, user.UserId)
 					user.SendText(tplTxt)
 					return true, nil
 
@@ -1471,7 +1471,7 @@ func room_Edit_Mutators(rest string, user *users.UserRecord, room *rooms.Room, f
 
 	question := cmdPrompt.Ask(`Select a mutator to add to the room, or nothing to continue:`, []string{}, `0`)
 	if !question.Done {
-		tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions)
+		tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions, user.UserId)
 		user.SendText(tplTxt)
 		return true, nil
 	}
@@ -1500,7 +1500,7 @@ func room_Edit_Mutators(rest string, user *users.UserRecord, room *rooms.Room, f
 			user.SendText("Invalid selection.")
 			question.RejectResponse()
 
-			tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions, user.UserId)
 			user.SendText(tplTxt)
 			return true, nil
 		}
@@ -1531,7 +1531,7 @@ func room_Edit_Mutators(rest string, user *users.UserRecord, room *rooms.Room, f
 			mutatorOptions[idx] = data
 		}
 
-		tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions)
+		tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions, user.UserId)
 		user.SendText(tplTxt)
 		return true, nil
 

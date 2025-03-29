@@ -80,7 +80,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 		}
 
 		if len(nameToAlt) > 0 {
-			altTblTxt := getAltTable(nameToAlt, hiredOutChars)
+			altTblTxt := getAltTable(nameToAlt, hiredOutChars, user.UserId)
 			user.SendText(``)
 			user.SendText(altTblTxt)
 		}
@@ -147,7 +147,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 	if question.Response == `delete` {
 
 		if len(nameToAlt) > 0 {
-			altTblTxt := getAltTable(nameToAlt, hiredOutChars)
+			altTblTxt := getAltTable(nameToAlt, hiredOutChars, user.UserId)
 			user.SendText(``)
 			user.SendText(altTblTxt)
 		}
@@ -213,7 +213,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 	if question.Response == `change` {
 
 		if len(nameToAlt) > 0 {
-			altTblTxt := getAltTable(nameToAlt, hiredOutChars)
+			altTblTxt := getAltTable(nameToAlt, hiredOutChars, user.UserId)
 			user.SendText(``)
 			user.SendText(altTblTxt)
 		}
@@ -295,7 +295,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 	if question.Response == `view` {
 
 		if len(nameToAlt) > 0 {
-			altTblTxt := getAltTable(nameToAlt, hiredOutChars)
+			altTblTxt := getAltTable(nameToAlt, hiredOutChars, user.UserId)
 			user.SendText(``)
 			user.SendText(altTblTxt)
 		}
@@ -354,7 +354,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 
 		/*
 			if len(nameToAlt) > 0 {
-				altTblTxt := getAltTable(nameToAlt, hiredOutChars)
+				altTblTxt := getAltTable(nameToAlt, hiredOutChars, user.UserId)
 				user.SendText(``)
 				user.SendText(altTblTxt)
 			}
@@ -453,7 +453,7 @@ func Character(rest string, user *users.UserRecord, room *rooms.Room, flags even
 	return true, nil
 }
 
-func getAltTable(nameToAlt map[string]characters.Character, charmedChars map[string]characters.Character) string {
+func getAltTable(nameToAlt map[string]characters.Character, charmedChars map[string]characters.Character, viewingUserId int) string {
 
 	headers := []string{"Name", "Level", "Race", "Profession", "Alignment", "Status"}
 	rows := [][]string{}
@@ -491,7 +491,7 @@ func getAltTable(nameToAlt map[string]characters.Character, charmedChars map[str
 	})
 
 	altTableData := templates.GetTable(fmt.Sprintf(`Your alt characters (%d/%d)`, len(nameToAlt), configs.GetGamePlayConfig().MaxAltCharacters), headers, rows)
-	tplTxt, _ := templates.Process("tables/generic", altTableData)
+	tplTxt, _ := templates.Process("tables/generic", altTableData, viewingUserId)
 
 	return tplTxt
 }

@@ -64,7 +64,7 @@ func Peep(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			targetName := u.Character.GetPlayerName(user.UserId).String()
 
 			if skillLevel >= 2 {
-				statusTxt, _ = templates.Process("character/status-lite", u.Character)
+				statusTxt, _ = templates.Process("character/status-lite", u.Character, user.UserId)
 			}
 
 			if skillLevel >= 3 {
@@ -105,7 +105,7 @@ func Peep(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 					`Count`:              fmt.Sprintf(`(%d/%d)`, len(u.Character.Items), u.Character.CarryCapacity()),
 				}
 
-				invTxt, _ = templates.Process("character/inventory", invData)
+				invTxt, _ = templates.Process("character/inventory", invData, user.UserId)
 			}
 
 			if skillLevel >= 4 {
@@ -129,7 +129,7 @@ func Peep(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			targetName := m.Character.GetMobName(user.UserId).String()
 
 			if skillLevel >= 2 {
-				statusTxt, _ = templates.Process("character/status-lite", &m.Character)
+				statusTxt, _ = templates.Process("character/status-lite", &m.Character, user.UserId)
 			}
 
 			if skillLevel >= 3 {
@@ -169,7 +169,7 @@ func Peep(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 					`RaceInfo`:           raceInfo,
 				}
 
-				invTxt, _ = templates.Process("character/inventory", invData)
+				invTxt, _ = templates.Process("character/inventory", invData, user.UserId)
 
 			}
 

@@ -146,7 +146,7 @@ func Inventory(rest string, user *users.UserRecord, room *rooms.Room, flags even
 		`Count`:              fmt.Sprintf(`(%d/%d)`, len(itemList), user.Character.CarryCapacity()),
 	}
 
-	tplTxt, _ := templates.Process("character/inventory", invData)
+	tplTxt, _ := templates.Process("character/inventory", invData, user.UserId)
 	user.SendText(tplTxt)
 
 	return true, nil

@@ -153,7 +153,7 @@ func (l *LeaderboardModule) leaderboardCommand(rest string, user *users.UserReco
 		}
 
 		searchResultsTable := templates.GetTable(title, headers, rows, formatting)
-		tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
+		tplTxt, _ := templates.Process("tables/generic", searchResultsTable, user.UserId)
 		user.SendText("\n")
 		user.SendText(tplTxt)
 

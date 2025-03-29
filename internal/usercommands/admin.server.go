@@ -27,7 +27,7 @@ var (
 func Server(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
-		infoOutput, _ := templates.Process("admincommands/help/command.server", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.server", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}
@@ -123,10 +123,6 @@ func Server(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 		templates.SetAnsiFlag(templates.AnsiTagsMono)
 	}
 
-	if rest == "ansi-preparse" {
-		templates.SetAnsiFlag(templates.AnsiTagsPreParse)
-	}
-
 	if rest == "ansi-normal" {
 		templates.SetAnsiFlag(templates.AnsiTagsDefault)
 	}
@@ -171,7 +167,7 @@ func Server(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 		}
 
 		tblData := templates.GetTable(`Timer Stats`, headers, rows, formatting)
-		tplTxt, _ := templates.Process("tables/generic", tblData)
+		tplTxt, _ := templates.Process("tables/generic", tblData, user.UserId)
 		user.SendText(tplTxt)
 
 		//
@@ -285,7 +281,7 @@ func Server(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 
 		memRepRows = append(memRepRows, rowData)
 		memRepTblData := templates.GetTable(`Specific Memory`, memRepHeaders, memRepRows, memRepFormatting)
-		memRepTxt, _ := templates.Process("tables/generic", memRepTblData)
+		memRepTxt, _ := templates.Process("tables/generic", memRepTblData, user.UserId)
 		user.SendText(memRepTxt)
 	}
 

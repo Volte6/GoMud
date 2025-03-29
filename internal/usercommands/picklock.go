@@ -147,7 +147,7 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room, flags event
 	cmdPrompt, isNew := user.StartPrompt(`picklock`, rest)
 
 	if isNew {
-		user.SendText(GetLockRender(sequence, keyring_sequence))
+		user.SendText(GetLockRender(sequence, keyring_sequence, user.UserId))
 	}
 
 	entered := ``
@@ -217,7 +217,7 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room, flags event
 		return true, nil
 	}
 
-	user.SendText(GetLockRender(sequence, entered))
+	user.SendText(GetLockRender(sequence, entered, user.UserId))
 
 	if sequenceMatches(entered, sequence) {
 
@@ -260,7 +260,7 @@ func Picklock(rest string, user *users.UserRecord, room *rooms.Room, flags event
 	return true, nil
 }
 
-func GetLockRender(sequence string, entered string) string {
+func GetLockRender(sequence string, entered string, viewingUserId int) string {
 
 	rows := [][]string{}
 
@@ -315,7 +315,7 @@ func GetLockRender(sequence string, entered string) string {
 	rows = append(rows, row)
 
 	picklockTable := templates.GetTable(`The Lock Sequence Looks like:`, rows[0], rows, formatting)
-	tplTxt, _ := templates.Process("tables/lockpicking", picklockTable)
+	tplTxt, _ := templates.Process("tables/lockpicking", picklockTable, viewingUserId)
 
 	return tplTxt
 

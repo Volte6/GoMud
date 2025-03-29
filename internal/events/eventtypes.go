@@ -58,10 +58,11 @@ func (i Input) Type() string { return `Input` }
 
 // Messages that are intended to reach all users on the system
 type Broadcast struct {
-	Text            string
-	IsCommunication bool
-	SourceIsMod     bool
-	SkipLineRefresh bool
+	Text             string
+	TextScreenReader string // optional text for screenreader friendliness
+	IsCommunication  bool
+	SourceIsMod      bool
+	SkipLineRefresh  bool
 }
 
 func (b Broadcast) Type() string { return `Broadcast` }
@@ -285,3 +286,10 @@ type CharacterChanged struct {
 }
 
 func (p CharacterChanged) Type() string { return `CharacterChanged` }
+
+type UserSettingChanged struct {
+	UserId int
+	Name   string
+}
+
+func (i UserSettingChanged) Type() string { return `UserSettingChanged` }

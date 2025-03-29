@@ -20,7 +20,7 @@ import (
 func Grant(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
-		infoOutput, _ := templates.Process("admincommands/help/command.grant", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.grant", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}

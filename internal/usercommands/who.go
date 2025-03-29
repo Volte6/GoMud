@@ -11,7 +11,7 @@ func Who(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 	details := rooms.GetDetails(room, user)
 
-	whoTxt, _ := templates.Process("descriptions/who", details)
+	whoTxt, _ := templates.Process("descriptions/who", details, user.UserId)
 	user.SendText(whoTxt)
 
 	return true, nil

@@ -14,7 +14,7 @@ import (
 func Prepare(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
-		infoOutput, _ := templates.Process("admincommands/help/command.prepare", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.prepare", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}

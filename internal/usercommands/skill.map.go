@@ -202,7 +202,7 @@ func Map(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		},
 	}
 
-	mapTxt, err := templates.Process("maps/map", mapData)
+	mapTxt, err := templates.Process("maps/map", mapData, user.UserId)
 	if err != nil {
 		mudlog.Error("Map", "error", err.Error())
 		user.SendText(`No map found (or an error occured)"`)

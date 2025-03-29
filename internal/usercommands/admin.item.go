@@ -28,7 +28,7 @@ func Item(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 1 {
-		infoOutput, _ := templates.Process("admincommands/help/command.item", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.item", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}
@@ -227,7 +227,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room, flags ev
 
 		question := cmdPrompt.Ask(`What Type of item will it be?`, []string{string(newItemSpec.Type)}, string(newItemSpec.Type))
 		if !question.Done {
-			tplTxt, _ := templates.Process("tables/numbered-list", typeOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", typeOptions, user.UserId)
 			user.SendText(tplTxt)
 			return true, nil
 		}
@@ -248,7 +248,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room, flags ev
 		if newItemSpec.Type == `` {
 			question.RejectResponse()
 
-			tplTxt, _ := templates.Process("tables/numbered-list", typeOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", typeOptions, user.UserId)
 			user.SendText(tplTxt)
 
 			return true, nil
@@ -333,7 +333,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room, flags ev
 
 		question := cmdPrompt.Ask(`What Subtype of item will it be?`, []string{string(newItemSpec.Subtype)}, string(newItemSpec.Subtype))
 		if !question.Done {
-			tplTxt, _ := templates.Process("tables/numbered-list", subTypeOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", subTypeOptions, user.UserId)
 			user.SendText(tplTxt)
 			return true, nil
 		}
@@ -360,7 +360,7 @@ func item_Create(rest string, user *users.UserRecord, room *rooms.Room, flags ev
 		if newItemSpec.Subtype == `` {
 			question.RejectResponse()
 
-			tplTxt, _ := templates.Process("tables/numbered-list", subTypeOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", subTypeOptions, user.UserId)
 			user.SendText(tplTxt)
 
 			return true, nil

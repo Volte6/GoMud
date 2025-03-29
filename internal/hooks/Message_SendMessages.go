@@ -9,6 +9,7 @@ import (
 	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
+	"github.com/volte6/gomud/internal/util"
 )
 
 // Checks whether their level is too high for a guide
@@ -31,7 +32,11 @@ func Message_SendMessage(e events.Event) events.ListenerReturn {
 				return events.Continue
 			}
 
-			connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
+			textOut := templates.AnsiParse(message.Text)
+			if user.ScreenReader {
+				textOut = util.StripCharsForScreenReaders(textOut)
+			}
+			connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+textOut), user.ConnectionId())
 
 			events.AddToQueue(events.RedrawPrompt{UserId: user.UserId}, 100)
 
@@ -80,7 +85,12 @@ func Message_SendMessage(e events.Event) events.ListenerReturn {
 					}
 				}
 
-				connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+templates.AnsiParse(message.Text)), user.ConnectionId())
+				textOut := templates.AnsiParse(message.Text)
+				if user.ScreenReader {
+					textOut = util.StripCharsForScreenReaders(textOut)
+				}
+
+				connections.SendTo([]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+textOut), user.ConnectionId())
 
 				events.AddToQueue(events.RedrawPrompt{UserId: user.UserId}, 100)
 

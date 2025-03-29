@@ -73,7 +73,7 @@ func Help(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 		}
 
-		helpTxt, err = templates.Process("help/help", helpCommandList)
+		helpTxt, err = templates.Process("help/help", helpCommandList, user.UserId)
 		if err != nil {
 			helpTxt = err.Error()
 		}
@@ -118,7 +118,7 @@ func Help(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			}
 		}
 
-		helpTxt, err = templates.Process("help/"+helpName, helpVars)
+		helpTxt, err = templates.Process("help/"+helpName, helpVars, user.UserId)
 		if err != nil {
 			user.SendText(fmt.Sprintf(`No help found for "%s"`, helpName))
 			return true, err

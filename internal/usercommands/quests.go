@@ -106,7 +106,7 @@ func Quests(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 		return allQuests[i].Id < allQuests[j].Id
 	})
 
-	questTxt, _ := templates.Process("character/quests", qInfo)
+	questTxt, _ := templates.Process("character/quests", qInfo, user.UserId)
 	user.SendText(questTxt)
 
 	return true, nil

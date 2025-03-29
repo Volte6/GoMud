@@ -78,7 +78,7 @@ func HandleLeave(e events.Event) events.ListenerReturn {
 		}
 	}
 
-	tplTxt, _ := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
+	tplTxt, _ := templates.Process("goodbye", nil, evt.UserId)
 	connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connId)
 
 	if err := users.LogOutUserByConnectionId(connId); err != nil {
