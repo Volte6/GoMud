@@ -1,208 +1,251 @@
 package inputhandlers
 
 import (
+	// ... other imports
+
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/language"
 	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/templates"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 )
 
-type LoginState struct {
-	SentWelcome      bool
-	PasswordAttempts int
-	UserObject       *users.UserRecord
+// Condition Helpers
+
+func ConditionIsNewSignup(results map[string]string) bool {
+	return results["new-signup"] == `new`
 }
 
-func LoginInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
+// ConditionUserDoesNotExist checks if the username entered does *not* exist.
+func ConditionUserDoesNotExist(results map[string]string) bool {
+	username := results["username"] // Assumes previous step had ID "username"
+	return !users.Exists(username)
+}
 
-	usernamePrompt, _ := templates.Process("login/username.prompt", nil)
-	passwordPrompt, _ := templates.Process("login/password.prompt", nil)
-	passwordMask, _ := templates.Process("login/password.mask", nil)
+// ConditionUserExists checks if the username entered *does* exist.
+func ConditionUserExists(results map[string]string) bool {
+	username := results["username"] // Assumes previous step had ID "username"
+	return users.Exists(username)
+}
 
-	usernamePrompt = templates.AnsiParse(usernamePrompt)
-	passwordPrompt = templates.AnsiParse(passwordPrompt)
-	passwordMask = templates.AnsiParse(passwordMask)
+// FinalizeLoginOrCreate is called after all prompts are successfully answered.
+func FinalizeLoginOrCreate(results map[string]string, sharedState map[string]any, clientInput *connections.ClientInput) bool {
 
-	var state *LoginState
+	username := results["username"]
+	password := results["password"]
 
-	if val, ok := sharedState["LoginInputHandler"]; !ok {
-		state = &LoginState{
-			SentWelcome:      false,
-			PasswordAttempts: 0,
-			UserObject:       users.NewUserRecord(0, clientInput.ConnectionId),
-		}
-		sharedState["LoginInputHandler"] = state
-	} else {
-		state = val.(*LoginState)
-	}
+	if username != `new` {
+		userExists := users.Exists(username)
 
-	if !state.SentWelcome {
-		state.SentWelcome = true
-		splashTxt, _ := templates.Process("login/connect-splash", nil)
-
-		splashTxt = templates.AnsiParse(splashTxt)
-
-		connections.SendTo([]byte(splashTxt), clientInput.ConnectionId)
-		connections.SendTo([]byte(usernamePrompt), clientInput.ConnectionId)
-	}
-
-	if len(state.UserObject.Username) > 0 && len(state.UserObject.Password) < 1 {
-		// passwords we only sent back a * for each character
-		for i := 0; i < len(clientInput.DataIn); i++ {
-			connections.SendTo([]byte(passwordMask), clientInput.ConnectionId)
-		}
-	} else {
-		// Everything else gets echoed back normally.
-		connections.SendTo(clientInput.DataIn, clientInput.ConnectionId)
-	}
-	// We only care about processing input after they hit enter.
-	if !clientInput.EnterPressed {
-		return false
-	}
-
-	//
-	// If we've reached this point they hit enter.
-	//
-
-	// Special case to check up front if they just hit enter with no input.
-	// If waiting on the y/n answer, default to "n"
-	// maybe refactor some of this later.
-	if len(state.UserObject.Username) > 0 && len(state.UserObject.Password) > 0 && state.UserObject.UserId == 0 {
-		if len(clientInput.Buffer) < 1 {
-			clientInput.DataIn = []byte("no")
-			connections.SendTo(clientInput.DataIn, clientInput.ConnectionId)
-		}
-	}
-
-	connections.SendTo(term.CRLF, clientInput.ConnectionId)
-
-	submittedText := make([]byte, len(clientInput.Buffer))
-	copy(submittedText, clientInput.Buffer)
-	clientInput.Buffer = []byte{}
-
-	// If they haven't submitted a username yet, we need to process that.
-	if len(state.UserObject.Username) < 1 {
-		if err := state.UserObject.SetUsername(string(submittedText)); err != nil {
-			connections.SendTo([]byte(err.Error()), clientInput.ConnectionId)    // error message
-			connections.SendTo(term.CRLF, clientInput.ConnectionId)              // Newline
-			connections.SendTo([]byte(usernamePrompt), clientInput.ConnectionId) // prompt
-			return false
-		}
-
-		// Setting username was a success, send the password prompt
-		connections.SendTo([]byte(passwordPrompt), clientInput.ConnectionId)
-
-		events.AddToQueue(events.WebClientCommand{
-			ConnectionId: clientInput.ConnectionId,
-			Text:         `TEXTMASK:true`,
-		})
-
-		return false
-	}
-
-	if len(state.UserObject.Password) < 1 {
-
-		if err := state.UserObject.SetPassword(string(submittedText)); err != nil {
-			connections.SendTo([]byte(err.Error()), clientInput.ConnectionId)    // error message
-			connections.SendTo(term.CRLF, clientInput.ConnectionId)              // Newline
-			connections.SendTo([]byte(passwordPrompt), clientInput.ConnectionId) // prompt
-			return false
-		}
-
-		if users.Exists(state.UserObject.Username) {
-
-			tmpUser, err := users.LoadUser(state.UserObject.Username)
+		if userExists {
+			// Existing User Login Logic (No changes needed)
+			tmpUser, err := users.LoadUser(username)
 			if err != nil {
-
-				// If the user exists, but there's no file for them, this condition can occur
-				// This is because users aren't necessarily saved immediately, being ephemeral until they finish the tutorial
-
-				connections.SendTo([]byte("Already logged in!"), clientInput.ConnectionId)
-				connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
+				mudlog.Error("Failed to load existing user during login", "username", username, "error", err)
+				connections.SendTo([]byte(language.T("Error.LoginFailedGeneric")), clientInput.ConnectionId)
+				connections.SendTo(term.CRLF, clientInput.ConnectionId)
 				connections.Remove(clientInput.ConnectionId)
-
-			} else if !tmpUser.PasswordMatches(state.UserObject.Password) {
-				connections.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
-				connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
-				connections.Remove(clientInput.ConnectionId)
-			} else {
-
-				events.AddToQueue(events.WebClientCommand{
-					ConnectionId: clientInput.ConnectionId,
-					Text:         `TEXTMASK:false`,
-				})
-
-				tmpUser, msg, err := users.LoginUser(tmpUser, clientInput.ConnectionId)
-
-				// Password matched, assign the loaded data
-				if tmpUser != nil {
-					state.UserObject = tmpUser
-				}
-
-				if len(msg) > 0 {
-					connections.SendTo([]byte(language.T(msg)), clientInput.ConnectionId)
-					connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
-				}
-
-				if err != nil {
-					connections.Remove(clientInput.ConnectionId)
-					return false
-				}
-
-				return true
+				return false // Indicate failure, connection removed
 			}
 
+			if !tmpUser.PasswordMatches(password) {
+				connections.SendTo([]byte(`Nope. Bye!`), clientInput.ConnectionId)
+				connections.SendTo(term.CRLF, clientInput.ConnectionId)
+				connections.Remove(clientInput.ConnectionId)
+				return false // Indicate failure, connection removed
+			}
+
+			loggedInUser, msg, err := users.LoginUser(tmpUser, clientInput.ConnectionId)
+			if err != nil {
+				connections.SendTo([]byte(msg), clientInput.ConnectionId)
+				connections.SendTo(term.CRLF, clientInput.ConnectionId)
+				connections.Remove(clientInput.ConnectionId)
+				return false // Indicate failure, connection removed
+			}
+
+			sharedState["UserObject"] = loggedInUser // For main loop
+
+			if len(msg) > 0 {
+				connections.SendTo([]byte(msg), clientInput.ConnectionId)
+				connections.SendTo(term.CRLF, clientInput.ConnectionId)
+			}
+			mudlog.Info("User logged in", "username", username, "connectionId", clientInput.ConnectionId)
+			return true // Indicate success, handler can be removed
+
 		} else {
+			connections.SendTo([]byte(`Invalid login.`), clientInput.ConnectionId)
+			connections.SendTo(term.CRLF, clientInput.ConnectionId)
+			connections.Remove(clientInput.ConnectionId)
+			return false // Indicate failure, connection removed
+		}
+	} else {
+		/*
+			username-new
+			password-new
+			password-new-verify
+			email-new
+			screen-reader-new y/n
+			confirm_create y/n
+		*/
 
-			events.AddToQueue(events.WebClientCommand{
-				ConnectionId: clientInput.ConnectionId,
-				Text:         `TEXTMASK:false`,
-			})
-
-			newUserPromptPrompt, _ := templates.Process("generic/prompt.yn", map[string]any{
-				"prompt": language.T("Login.CreateUser", map[any]any{
-					"Username": state.UserObject.Username,
-				}),
-				"options": []string{"y", "n"},
-				"default": "n",
-			})
-
-			newUserPromptPrompt = templates.AnsiParse(newUserPromptPrompt)
-
-			connections.SendTo([]byte(newUserPromptPrompt), clientInput.ConnectionId)
+		confirmCreate, exists := results["confirm_create"] // Assumes step ID "confirm_create"
+		if !exists || confirmCreate != "y" {
+			connections.SendTo([]byte(`Okay, bye!`), clientInput.ConnectionId) // Use language key
+			connections.SendTo(term.CRLF, clientInput.ConnectionId)
+			connections.Remove(clientInput.ConnectionId)
+			return false // Indicate failure, connection removed
 		}
 
-		return false
+		username := results["username-new"]
+		password := results["password-new"]
 
+		if users.Exists(results["username-new"]) {
+			connections.SendTo([]byte(`I'm sorry, that user already exists!`), clientInput.ConnectionId) // Use language key
+			connections.SendTo(term.CRLF, clientInput.ConnectionId)
+			connections.Remove(clientInput.ConnectionId)
+			return false
+		}
+
+		newUser := users.NewUserRecord(0, clientInput.ConnectionId)
+		newUser.EmailAddress = results["email-new"]
+		newUser.ScreenReader = results["screen-reader-new"] == `y`
+
+		// Error handling for SetUsername/SetPassword might be redundant if validation passed, but good practice
+		if err := newUser.SetUsername(username); err != nil {
+			mudlog.Error("Internal error setting username post-validation", "username", username, "error", err)
+			connections.SendTo([]byte(language.T("Error.UserCreationFailed")), clientInput.ConnectionId) // Generic creation error
+			connections.SendTo(term.CRLF, clientInput.ConnectionId)
+			connections.Remove(clientInput.ConnectionId)
+			return false
+		}
+		if err := newUser.SetPassword(password); err != nil {
+			mudlog.Error("Internal error setting password post-validation", "username", username, "error", err)
+			connections.SendTo([]byte(language.T("Error.UserCreationFailed")), clientInput.ConnectionId) // Generic creation error
+			connections.SendTo(term.CRLF, clientInput.ConnectionId)
+			connections.Remove(clientInput.ConnectionId)
+			return false
+		}
+
+		if err := users.CreateUser(newUser); err != nil {
+			mudlog.Error("Could not create user", "username", username, "error", err)
+			// Try to give specific feedback if possible, otherwise generic
+			connections.SendTo([]byte(err.Error()), clientInput.ConnectionId)
+			connections.SendTo(term.CRLF, clientInput.ConnectionId)
+			connections.Remove(clientInput.ConnectionId)
+			return false // Indicate failure, connection removed
+		}
+
+		sharedState["UserObject"] = newUser // For main loop
+
+		mudlog.Info("New user created", "username", username, "connectionId", clientInput.ConnectionId)
+
+		return true // Indicate success, handler can be removed
+	}
+}
+
+func GetLoginPromptHandler() connections.InputHandler {
+
+	// Define the steps for the login process
+	loginSteps := []*PromptStep{
+		{
+			ID:             "username",
+			PromptTemplate: "login/username.prompt",
+			MaskInput:      false,
+			Validator:      ValidateNewEntry,
+		},
+		//////////////////////////////////////////////////
+		// If NOT a new user signup (Just a login)
+		//////////////////////////////////////////////////
+		{
+			ID:             "password",
+			PromptTemplate: "login/password.prompt",
+			MaskInput:      true,
+			MaskTemplate:   "login/password.mask", // Optional: specify if different from "*"
+			Validator:      ValidatePassword,
+			Condition:      func(results map[string]string) bool { return results["username"] != `new` }, // Only run if username was not "new"
+		},
+		//////////////////////////////////////////////////
+		// End If NOT a new user signup (Just a login)
+		//////////////////////////////////////////////////
+		//////////////////////////////////////////////////
+		// If a new user signup
+		//////////////////////////////////////////////////
+		{
+			ID:             "username-new",
+			PromptTemplate: "login/username-new.prompt",
+			MaskInput:      false,
+			Validator:      ValidateUsername,
+			Condition:      func(results map[string]string) bool { return results["username"] == `new` }, // Only run if username was "new"
+		},
+		{
+			ID:             "password-new",
+			PromptTemplate: "login/password-new.prompt",
+			MaskInput:      true,
+			MaskTemplate:   "login/password.mask", // Optional: specify if different from "*"
+			Validator:      ValidatePassword,
+			Condition:      func(results map[string]string) bool { return results["username"] == `new` }, // Only run if username was "new"
+		},
+		{
+			ID:             "password-new-verify",
+			PromptTemplate: "login/password-new-verify.prompt",
+			MaskInput:      true,
+			MaskTemplate:   "login/password.mask", // Optional: specify if different from "*"
+			Validator:      ValidatePassword2,
+			Condition:      func(results map[string]string) bool { return results["username"] == `new` }, // Only run if username was "new"
+		},
+		{
+			ID:             "email-new",
+			PromptTemplate: "login/email-new.prompt",
+			GetDataFunc: func(results map[string]string) map[string]any {
+				// Dynamically generate the data for the generic y/n prompt
+				return map[string]any{
+					"emailIsOptional": configs.GetValidationConfig().EmailOnJoin != `required`,
+				}
+			},
+			MaskInput: false,
+			Validator: ValidateEmail,
+			Condition: func(results map[string]string) bool {
+				return results["username"] == `new` && configs.GetValidationConfig().EmailOnJoin != `none` // Only run if username was "new" and email is enabled
+			},
+		},
+		{
+			ID:             "screen-reader-new",
+			PromptTemplate: "generic/prompt.yn",
+			GetDataFunc: func(results map[string]string) map[string]any {
+				// Dynamically generate the data for the generic y/n prompt
+				return map[string]any{
+					"prompt":  "Are you using a screen reader?",
+					"options": []string{"y", "n"},
+					"default": "n", // Default shown in the prompt, actual default on empty input handled by validator
+				}
+			},
+			MaskInput: false,
+			Validator: ValidateYesNo,
+			Condition: func(results map[string]string) bool { return results["username"] == `new` }, // Only run if username was "new"
+		},
+		{
+			ID:             "confirm_create",
+			PromptTemplate: "generic/prompt.yn", // Use the generic yes/no template
+			GetDataFunc: func(results map[string]string) map[string]any {
+				// Dynamically generate the data for the generic y/n prompt
+				return map[string]any{
+					"prompt": language.T("Login.CreateUser", map[any]any{ // Use language.T for the prompt text
+						"Username": results["username-new"], // Inject username
+					}),
+					"options": []string{"y", "n"},
+					"default": "n", // Default shown in the prompt, actual default on empty input handled by validator
+				}
+			},
+			MaskInput: false,
+			Validator: ValidateYesNo,
+			Condition: func(results map[string]string) bool { return results["username"] == `new` }, // Only run if username was "new"
+		},
+		//////////////////////////////////////////////////
+		// End If a new user signup
+		//////////////////////////////////////////////////
 	}
 
-	// If no user id, must be a new user.
-	if len(submittedText) < 1 {
-		submittedText = []byte("n")
-
-	}
-	if submittedText[0] != 'y' && submittedText[0] != 'Y' {
-		connections.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
-		connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
-		connections.Remove(clientInput.ConnectionId)
-		return false
-	}
-
-	if err := users.CreateUser(state.UserObject); err != nil {
-		mudlog.Error("Could not create user", "error", err.Error())
-
-		connections.SendTo([]byte("Could not create user: "+err.Error()+"\n"), clientInput.ConnectionId)
-
-		connections.SendTo([]byte("Oops, bye!"), clientInput.ConnectionId)
-		connections.SendTo(term.CRLF, clientInput.ConnectionId) // Newline
-		connections.Remove(clientInput.ConnectionId)
-		return false
-	}
-
-	// Once complete, return true to let main.go know we're done with this handler.
-	return true
-
+	// Create and return the handler using the generic factory function
+	return CreatePromptHandler(loginSteps, FinalizeLoginOrCreate)
 }

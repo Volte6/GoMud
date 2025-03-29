@@ -299,6 +299,10 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 	mudlog.Info("New Connection", "connectionID", connDetails.ConnectionId(), "remoteAddr", connDetails.RemoteAddr().String())
 
+	// Setup shared state map for this connection's handlers
+	// Needs to be created BEFORE the first handler call
+	var sharedState map[string]any = make(map[string]any)
+
 	// Add starting handlers
 
 	// Special escape handlers
@@ -307,7 +311,9 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 	// Consider a macro handler at this point?
 	// Text Processing
 	connDetails.AddInputHandler("CleanserInputHandler", inputhandlers.CleanserInputHandler)
-	connDetails.AddInputHandler("LoginInputHandler", inputhandlers.LoginInputHandler)
+
+	loginHandler := inputhandlers.GetLoginPromptHandler()           // Get the configured handler func
+	connDetails.AddInputHandler("LoginPromptHandler", loginHandler) // Add it with a unique name
 
 	// Turn off "line at a time", send chars as typed
 	connections.SendTo(
@@ -381,12 +387,6 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		History:      connections.InputHistory{},
 	}
 
-	var sharedState map[string]any = make(map[string]any)
-
-	// Invoke the login handler for the first time
-	// The default behavior is to just send a welcome screen first
-	inputhandlers.LoginInputHandler(clientInput, sharedState)
-
 	if audioConfig := audio.GetFile(`intro`); audioConfig.FilePath != `` {
 		v := 100
 		if audioConfig.Volume > 0 && audioConfig.Volume <= 100 {
@@ -397,6 +397,24 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 			clientInput.ConnectionId,
 		)
 	}
+
+	// --- Send Initial Welcome/Splash ---
+	// (This part was mostly correct before)
+	splashTxt, _ := templates.Process("login/connect-splash", nil, templates.AnsiTagsPreParse)
+	connections.SendTo([]byte(templates.AnsiParse(splashTxt)), connDetails.ConnectionId())
+
+	// --- Trigger the Prompt Handler to initialize state and send the FIRST prompt ---
+	// Create a dummy input that signifies "start the process" but has no actual user data/control codes.
+	initialTriggerInput := &connections.ClientInput{
+		ConnectionId: connDetails.ConnectionId(),
+		// Ensure flags like EnterPressed are false
+	}
+	// Call the handler function directly ONCE.
+	// This executes the `!ok` block inside the handler, which:
+	// 1. Creates the PromptHandlerState in sharedState.
+	// 2. Calls advanceAndSendPromptCustom -> sendPromptFunc for the *first* step (username).
+	// 3. Returns false (which we ignore here, as we aren't in the main loop yet).
+	loginHandler(initialTriggerInput, sharedState)
 
 	var userObject *users.UserRecord
 	var sug suggestions.Suggestions
@@ -443,101 +461,116 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		}
 
 		clientInput.DataIn = inputBuffer[:n]
-
 		// Input handler processes any special commands, transforms input, sets flags from input, etc
-		okContinue, lastHandler, err := connDetails.HandleInput(clientInput, sharedState)
-
+		okContinue, lastHandlerName, err := connDetails.HandleInput(clientInput, sharedState)
 		// Was there an error? If so, we should probably just stop processing input
 		if err != nil {
-			mudlog.Warn("InputHandler", "error", err)
+			mudlog.Warn("InputHandler Error", "handler", lastHandlerName, "error", err)
+			// Decide if disconnect is needed based on error type
 			continue
 		}
 
 		// If a handler aborted processing, just keep track of where we are so
 		// far and jump back to waiting.
 		if !okContinue {
-			if userObject != nil {
 
-				_, suggested := userObject.GetUnsentText()
+			// if no user signed in, loop back
+			if userObject == nil {
+				continue
+			}
 
-				redrawPrompt := false
+			_, suggested := userObject.GetUnsentText()
 
-				if clientInput.TabPressed {
+			redrawPrompt := false
 
-					if sug.Count() < 1 {
-						sug.Set(worldManager.GetAutoComplete(userObject.UserId, string(clientInput.Buffer)))
-					}
+			if clientInput.TabPressed {
 
-					if sug.Count() > 0 {
-						suggested = sug.Next()
+				if sug.Count() < 1 {
+					sug.Set(worldManager.GetAutoComplete(userObject.UserId, string(clientInput.Buffer)))
+				}
+
+				if sug.Count() > 0 {
+					suggested = sug.Next()
+					userObject.SetUnsentText(string(clientInput.Buffer), suggested)
+					redrawPrompt = true
+				}
+
+			} else if clientInput.BSPressed {
+				// If a suggestion is pending, remove it
+				// otherwise just do a normal backspace operation
+				userObject.SetUnsentText(string(clientInput.Buffer), ``)
+				if suggested != `` {
+					suggested = ``
+					sug.Clear()
+					redrawPrompt = true
+				}
+
+			} else {
+
+				if suggested != `` {
+
+					// If they hit space, accept the suggestion
+					if len(clientInput.Buffer) > 0 && clientInput.Buffer[len(clientInput.Buffer)-1] == term.ASCII_SPACE {
+						clientInput.Buffer = append(clientInput.Buffer[0:len(clientInput.Buffer)-1], []byte(suggested)...)
+						clientInput.Buffer = append(clientInput.Buffer[0:len(clientInput.Buffer)], []byte(` `)...)
+						redrawPrompt = true
+						userObject.SetUnsentText(string(clientInput.Buffer), ``)
+						sug.Clear()
+					} else {
+						suggested = ``
+						sug.Clear()
+						// Otherwise, just keep the suggestion
 						userObject.SetUnsentText(string(clientInput.Buffer), suggested)
 						redrawPrompt = true
 					}
-
-				} else if clientInput.BSPressed {
-					// If a suggestion is pending, remove it
-					// otherwise just do a normal backspace operation
-					userObject.SetUnsentText(string(clientInput.Buffer), ``)
-					if suggested != `` {
-						suggested = ``
-						sug.Clear()
-						redrawPrompt = true
-					}
-
-				} else {
-
-					if suggested != `` {
-
-						// If they hit space, accept the suggestion
-						if len(clientInput.Buffer) > 0 && clientInput.Buffer[len(clientInput.Buffer)-1] == term.ASCII_SPACE {
-							clientInput.Buffer = append(clientInput.Buffer[0:len(clientInput.Buffer)-1], []byte(suggested)...)
-							clientInput.Buffer = append(clientInput.Buffer[0:len(clientInput.Buffer)], []byte(` `)...)
-							redrawPrompt = true
-							userObject.SetUnsentText(string(clientInput.Buffer), ``)
-							sug.Clear()
-						} else {
-							suggested = ``
-							sug.Clear()
-							// Otherwise, just keep the suggestion
-							userObject.SetUnsentText(string(clientInput.Buffer), suggested)
-							redrawPrompt = true
-						}
-					}
-
-					userObject.SetUnsentText(string(clientInput.Buffer), suggested)
 				}
 
-				if redrawPrompt {
-					pTxt := userObject.GetCommandPrompt()
-					if connections.IsWebsocket(clientInput.ConnectionId) {
-						connections.SendTo([]byte(pTxt), clientInput.ConnectionId)
-					} else {
-						connections.SendTo([]byte(templates.AnsiParse(pTxt)), clientInput.ConnectionId)
-					}
-				}
-
+				userObject.SetUnsentText(string(clientInput.Buffer), suggested)
 			}
+
+			if redrawPrompt {
+				pTxt := userObject.GetCommandPrompt()
+				if connections.IsWebsocket(clientInput.ConnectionId) {
+					connections.SendTo([]byte(pTxt), clientInput.ConnectionId)
+				} else {
+					connections.SendTo([]byte(templates.AnsiParse(pTxt)), clientInput.ConnectionId)
+				}
+			}
+
 			continue
 		}
 
-		if lastHandler == "LoginInputHandler" {
+		// The prompt handler returns 'true' from its HandleInput func only when
+		// the entire sequence is complete *and* successful (e.g., login or creation ok).
+		// If it returns true, it means we should proceed to the logged-in state.
+		if okContinue && lastHandlerName == "LoginPromptHandler" {
 
+			// Prompt sequence finished successfully
+
+			// Stop intro music if playing
 			connections.SendTo(
 				term.MspCommand.BytesWithPayload([]byte("!!MUSIC(Off)")),
 				clientInput.ConnectionId,
 			)
 
-			// Remove the login handler
-			connDetails.RemoveInputHandler("LoginInputHandler")
+			// Retrieve the UserObject stored by the completion function
+			if uo, exists := sharedState["UserObject"]; exists {
+				userObject = uo.(*users.UserRecord)
+				// Remove it from shared state if no longer needed there
+				delete(sharedState, "UserObject")
+			} else {
+				// This shouldn't happen if the completion function worked correctly
+				mudlog.Error("Login process completed but UserObject not found in sharedState", "connectionId", clientInput.ConnectionId)
+				connections.Remove(clientInput.ConnectionId) // Disconnect problematic connection
+				break                                        // Exit the read loop for this connection
+			}
+
+			// Remove the prompt handler (it signaled completion by returning true)
+			connDetails.RemoveInputHandler("LoginPromptHandler")
 			// Replace it with a regular echo handler.
 			connDetails.AddInputHandler("EchoInputHandler", inputhandlers.EchoInputHandler)
 			// Add admin command handler
 			connDetails.AddInputHandler("HistoryInputHandler", inputhandlers.HistoryInputHandler) // Put history tracking after login handling, since login handling aborts input until complete
-
-			if val, ok := sharedState["LoginInputHandler"]; ok {
-				state := val.(*inputhandlers.LoginState)
-				userObject = state.UserObject
-			}
 
 			if userObject.Role == users.RoleAdmin {
 				connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
@@ -551,6 +584,20 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 			worldManager.SendEnterWorld(userObject.UserId, userObject.Character.RoomId)
 
+			clientInput.Reset()
+			continue
+		}
+
+		// If okContinue is false OR the last handler was *not* the prompt handler,
+		// it means either an error occurred (handled above), a handler aborted (like IAC/ANSI),
+		// or the prompt handler is still waiting for input for the current/next step.
+		// The existing logic for handling Tab/Backspace suggestions AFTER the input handlers run
+		// might need slight adjustment depending on exactly how you want suggestions during prompts.
+		// For simplicity, you might disable suggestions during the prompt sequence.
+		if !okContinue {
+			if userObject == nil {
+				continue
+			}
 		}
 
 		// If they have pressed enter (submitted their input), and nothing else has handled/aborted
@@ -623,7 +670,13 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 	var userObject *users.UserRecord
 	connDetails := connections.Add(nil, conn)
-	connDetails.AddInputHandler("LoginInputHandler", inputhandlers.LoginInputHandler)
+
+	// Setup shared state map for this connection's handlers
+	// Needs to be created BEFORE the first handler call
+	var sharedState map[string]any = make(map[string]any)
+
+	loginHandler := inputhandlers.GetLoginPromptHandler()           // Get the configured handler func
+	connDetails.AddInputHandler("LoginPromptHandler", loginHandler) // Add it with a unique name
 
 	// Describes whatever the client sent us
 	clientInput := &connections.ClientInput{
@@ -634,12 +687,6 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		Clipboard:    []byte{},
 		History:      connections.InputHistory{},
 	}
-
-	var sharedState map[string]any = make(map[string]any)
-
-	// Invoke the login handler for the first time
-	// The default behavior is to just send a welcome screen first
-	inputhandlers.LoginInputHandler(clientInput, sharedState)
 
 	connections.SendTo(
 		[]byte("!!SOUND(Off U="+configs.GetConfig().FilePaths.WebCDNLocation.String()+")"),
@@ -656,6 +703,24 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 			clientInput.ConnectionId,
 		)
 	}
+
+	// --- Send Initial Welcome/Splash ---
+	// (This part was mostly correct before)
+	splashTxt, _ := templates.Process("login/connect-splash", nil, templates.AnsiTagsPreParse)
+	connections.SendTo([]byte(templates.AnsiParse(splashTxt)), connDetails.ConnectionId())
+
+	// --- Trigger the Prompt Handler to initialize state and send the FIRST prompt ---
+	// Create a dummy input that signifies "start the process" but has no actual user data/control codes.
+	initialTriggerInput := &connections.ClientInput{
+		ConnectionId: connDetails.ConnectionId(),
+		// Ensure flags like EnterPressed are false
+	}
+	// Call the handler function directly ONCE.
+	// This executes the `!ok` block inside the handler, which:
+	// 1. Creates the PromptHandlerState in sharedState.
+	// 2. Calls advanceAndSendPromptCustom -> sendPromptFunc for the *first* step (username).
+	// 3. Returns false (which we ignore here, as we aren't in the main loop yet).
+	loginHandler(initialTriggerInput, sharedState)
 
 	c := configs.GetConfig()
 
@@ -692,23 +757,62 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		clientInput.EnterPressed = true
 
 		// Input handler processes any special commands, transforms input, sets flags from input, etc
-		okContinue, lastHandler, err := connDetails.HandleInput(clientInput, sharedState)
+		okContinue, lastHandlerName, err := connDetails.HandleInput(clientInput, sharedState)
+		// Was there an error? If so, we should probably just stop processing input
+		if err != nil {
+			mudlog.Warn("InputHandler Error", "handler", lastHandlerName, "error", err)
+			// Decide if disconnect is needed based on error type
+			continue
+		}
+
+		// If okContinue is false OR the last handler was *not* the prompt handler,
+		// it means either an error occurred (handled above), a handler aborted (like IAC/ANSI),
+		// or the prompt handler is still waiting for input for the current/next step.
+		// The existing logic for handling Tab/Backspace suggestions AFTER the input handlers run
+		// might need slight adjustment depending on exactly how you want suggestions during prompts.
+		// For simplicity, you might disable suggestions during the prompt sequence.
 		if !okContinue {
 			continue
 		}
 
-		if lastHandler == "LoginInputHandler" {
-			// Remove the login handler
-			connDetails.RemoveInputHandler("LoginInputHandler")
+		// The prompt handler returns 'true' from its HandleInput func only when
+		// the entire sequence is complete *and* successful (e.g., login or creation ok).
+		// If it returns true, it means we should proceed to the logged-in state.
+		if okContinue && lastHandlerName == "LoginPromptHandler" {
+
+			// Prompt sequence finished successfully
+
+			// Make sure web client text masking is off
+
+			events.AddToQueue(events.WebClientCommand{
+				ConnectionId: clientInput.ConnectionId,
+				Text:         `TEXTMASK:false`,
+			})
+
+			// Stop intro music if playing
+			connections.SendTo(
+				[]byte("!!MUSIC(Off)"),
+				clientInput.ConnectionId,
+			)
+
+			// Retrieve the UserObject stored by the completion function
+			if uo, exists := sharedState["UserObject"]; exists {
+				userObject = uo.(*users.UserRecord)
+				// Remove it from shared state if no longer needed there
+				delete(sharedState, "UserObject")
+			} else {
+				// This shouldn't happen if the completion function worked correctly
+				mudlog.Error("Login process completed but UserObject not found in sharedState", "connectionId", clientInput.ConnectionId)
+				connections.Remove(clientInput.ConnectionId) // Disconnect problematic connection
+				break                                        // Exit the read loop for this connection
+			}
+
+			// Remove the prompt handler (it signaled completion by returning true)
+			connDetails.RemoveInputHandler("LoginPromptHandler")
 			// Replace it with a regular echo handler.
 			connDetails.AddInputHandler("EchoInputHandler", inputhandlers.EchoInputHandler)
 			// Add admin command handler
 			connDetails.AddInputHandler("HistoryInputHandler", inputhandlers.HistoryInputHandler) // Put history tracking after login handling, since login handling aborts input until complete
-
-			if val, ok := sharedState["LoginInputHandler"]; ok {
-				state := val.(*inputhandlers.LoginState)
-				userObject = state.UserObject
-			}
 
 			if userObject.Role == users.RoleAdmin {
 				connDetails.AddInputHandler("SystemCommandInputHandler", inputhandlers.SystemCommandInputHandler)
@@ -722,6 +826,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 			worldManager.SendEnterWorld(userObject.UserId, userObject.Character.RoomId)
 
+			clientInput.Reset()
 			continue
 		}
 

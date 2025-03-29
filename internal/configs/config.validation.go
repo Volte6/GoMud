@@ -12,6 +12,7 @@ type Validation struct {
 	PasswordSizeMax  ConfigInt         `yaml:"PasswordSizeMax"`
 	NameRejectRegex  ConfigString      `yaml:"NameRejectRegex"`
 	NameRejectReason ConfigString      `yaml:"NameRejectReason"`
+	EmailOnJoin      ConfigString      `yaml:"EmailOnJoin"`
 	BannedNames      ConfigSliceString `yaml:"BannedNames"` // List of names that are not allowed to be used
 }
 
@@ -38,6 +39,10 @@ func (v *Validation) Validate() {
 	}
 	if v.PasswordSizeMax < v.PasswordSizeMin {
 		v.PasswordSizeMax = v.PasswordSizeMin
+	}
+
+	if v.EmailOnJoin != `required` && v.EmailOnJoin != `none` {
+		v.EmailOnJoin = `optional`
 	}
 
 }

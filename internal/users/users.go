@@ -293,20 +293,6 @@ func CreateUser(u *UserRecord) error {
 		return errors.New("that username is not allowed: " + err.Error())
 	}
 
-	if bannedPattern, ok := configs.GetConfig().IsBannedName(u.Username); ok {
-		return errors.New(`that username matched the prohibited name pattern: "` + bannedPattern + `"`)
-	}
-
-	for _, name := range mobs.GetAllMobNames() {
-		if strings.EqualFold(name, u.Username) {
-			return errors.New("that username is in use")
-		}
-	}
-
-	if Exists(u.Username) {
-		return errors.New("that username is in use")
-	}
-
 	u.UserId = GetUniqueUserId()
 	u.Role = RoleUser
 
@@ -423,6 +409,31 @@ func ValidateName(name string) error {
 		if !regexp.MustCompile(validation.NameRejectRegex.String()).MatchString(name) {
 			return errors.New(validation.NameRejectReason.String())
 		}
+	}
+
+	if bannedPattern, ok := configs.GetConfig().IsBannedName(name); ok {
+		return errors.New(`that username matched the prohibited name pattern: "` + bannedPattern + `"`)
+	}
+
+	for _, mobName := range mobs.GetAllMobNames() {
+		if strings.EqualFold(mobName, name) {
+			return errors.New("that username is in use")
+		}
+	}
+
+	if Exists(name) {
+		return errors.New("that username is in use")
+	}
+
+	return nil
+}
+
+func ValidatePassword(pw string) error {
+
+	validation := configs.GetValidationConfig()
+
+	if len(pw) < int(validation.PasswordSizeMin) || len(pw) > int(validation.PasswordSizeMax) {
+		return fmt.Errorf("password must be between %d and %d characters long", validation.PasswordSizeMin, validation.PasswordSizeMax)
 	}
 
 	return nil
