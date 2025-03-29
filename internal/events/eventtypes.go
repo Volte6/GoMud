@@ -148,6 +148,16 @@ type NewTurn struct {
 func (n NewTurn) Type() string { return `NewTurn` }
 
 // Gained or lost an item
+type EquipmentChange struct {
+	UserId        int
+	MobInstanceId int
+	ItemsWorn     []items.Item
+	ItemsRemoved  []items.Item
+}
+
+func (i EquipmentChange) Type() string { return `EquipmentChange` }
+
+// Gained or lost an item
 type ItemOwnership struct {
 	UserId        int
 	MobInstanceId int

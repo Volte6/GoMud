@@ -16,8 +16,6 @@ RoomId: '房间ID'
 '%d user online': '在线用户 %d 人'
 
 Login.CreateUser: |-
-  <ansi fg="alert-5">注意:</ansi> 这将是您的登录用户名, 而不是您的角色名!
-  如果您选择此名称作为登录名, 则不能将其用作角色名.
   您想创建一个登录名为 <ansi fg="magenta">{{ .Username }}</ansi> 的新用户吗?
 
 Inbox.UnreadMessageWithCheck: >-

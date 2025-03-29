@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/volte6/gomud/internal/term"
 )
 
 type ConnectState uint32
@@ -189,9 +190,22 @@ func (cd *ConnectionDetails) Write(p []byte) (n int, err error) {
 
 	p = []byte(strings.ReplaceAll(string(p), "\n", "\r\n"))
 
+	if len(p) == 0 {
+		return 0, nil
+	}
+
 	if cd.wsConn != nil {
 		cd.wsLock.Lock()
 		defer cd.wsLock.Unlock()
+
+		// If this isn't caught and avoided, lots of stuff goes wrong.
+		// Websocket client complains, disconnects, error is rasised: close 1002 (protocol error): Invalid UTF-8 in text frame
+		// Then a panic ensues as the server tries to write to a socket that's nil.
+		// TODO: Investigate cleaning up this condition better.
+		if p[0] == term.TELNET_IAC {
+			mudlog.Error("conn.Write", "error", "Trying to send telnet command to websocket!", "bytes", p, "string", string(p))
+			return 0, nil
+		}
 
 		err := cd.wsConn.WriteMessage(websocket.TextMessage, p)
 		if err != nil {

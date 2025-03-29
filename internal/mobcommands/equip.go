@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
@@ -89,6 +90,12 @@ func Equip(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 				}
 
 				mob.Character.Validate()
+
+				events.AddToQueue(events.EquipmentChange{
+					MobInstanceId: mob.InstanceId,
+					ItemsWorn:     []items.Item{matchItem},
+					ItemsRemoved:  oldItems,
+				})
 			}
 		}
 

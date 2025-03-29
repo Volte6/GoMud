@@ -465,6 +465,11 @@ Validation:
   #   Min/Max size of passwords allowed.
   PasswordSizeMin: 4
   PasswordSizeMax: 16
+  # - EmailOnJoin -
+  #   Whether to ask for email addresses on signup.
+  #   Can be "required", "optional", "none"
+  #   Default: "optional"
+  EmailOnJoin: optional
   # - NameRejectRegex -
   #   A special pattern to reject usernames that match it.
   #   (This is a regular expression, you must understand how to create them)
