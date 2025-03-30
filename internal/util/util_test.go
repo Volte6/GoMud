@@ -304,6 +304,19 @@ func TestSplitString(t *testing.T) {
 				`test!`,
 			},
 		},
+		{
+			"SplitString mixed charactors and punctuation at eol",
+			args{
+				`测试的文本，用于验证CJK字符。`,
+				10,
+			},
+			[]string{
+				`测试的文`,
+				`本，用于验`,
+				`证CJK字`,
+				`符。`,
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -413,6 +426,17 @@ func TestSplitStringNL(t *testing.T) {
 				`world,` + "\r\n" +
 				`this is a` + "\r\n" +
 				`test!`,
+		},
+		{
+			"SplitString mixed charactors and punctuation at eol",
+			args{
+				`测试的文本，用于验证CJK字符。`,
+				10, nil,
+			},
+			`测试的文` + "\r\n" +
+				`本，用于验` + "\r\n" +
+				`证CJK字` + "\r\n" +
+				`符。`,
 		},
 	}
 
