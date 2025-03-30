@@ -58,7 +58,8 @@ var (
 	// \w: alphanumeric
 	// \p{P}: punctuation
 	// \p{S}: symbol
-	wordRegex = regexp.MustCompile(`([\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]|\w+|[\p{P}\p{S}\s]+)`)
+	wordRegex        = regexp.MustCompile(`([\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]|\w+|[\p{P}\p{S}\s]+)`)
+	punctuationRegex = regexp.MustCompile(`[\p{P}]+`)
 
 	mudLock = sync.RWMutex{}
 )
@@ -191,8 +192,25 @@ func SplitString(input string, lineWidth int) []string {
 	for _, textLine := range parts {
 		words := wordRegex.FindAllString(textLine, -1)
 
-		for _, word := range words {
+		l := len(words)
+
+		skip := false
+		for idx, word := range words {
+			if skip {
+				skip = false
+				continue
+			}
+
 			wordLen := runewidth.StringWidth(word)
+
+			if idx < l-1 && punctuationRegex.MatchString(words[idx+1]) {
+				wordLen += runewidth.StringWidth(words[idx+1])
+				word += words[idx+1]
+				skip = true
+			} else {
+				skip = false
+			}
+
 			if wordLen > lineWidth {
 				result = append(result, word)
 				continue

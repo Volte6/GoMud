@@ -232,6 +232,31 @@ func TestSplitString(t *testing.T) {
 			},
 		},
 		{
+			"SplitString punctuation at eol",
+			args{
+				`Hello alex, this is a test.`,
+				10,
+			},
+			[]string{
+				`Hello`,
+				`alex, this`,
+				`is a test.`,
+			},
+		},
+		{
+			"SplitString punctuation at eol 2",
+			args{
+				`Hello alex, this is a test!!!`,
+				10,
+			},
+			[]string{
+				`Hello`,
+				`alex, this`,
+				`is a`,
+				`test!!!`,
+			},
+		},
+		{
 			"SplitString long text",
 			args{
 				`As your senses attune to the stillness around, you find yourself engulfed in an impenetrable void, ` +
@@ -312,6 +337,27 @@ func TestSplitStringNL(t *testing.T) {
 				`sentence` + "\r\n" +
 				`to be` + "\r\n" +
 				`tested.`,
+		},
+		{
+			"SplitStringNL punctuation at eol",
+			args{
+				`Hello alex, this is a test.`,
+				10, nil,
+			},
+			`Hello` + "\r\n" +
+				`alex, this` + "\r\n" +
+				`is a test.`,
+		},
+		{
+			"SplitStringNL punctuation at eol 2",
+			args{
+				`Hello alex, this is a test!!!`,
+				10, nil,
+			},
+			`Hello` + "\r\n" +
+				`alex, this` + "\r\n" +
+				`is a` + "\r\n" +
+				`test!!!`,
 		},
 		{
 			"SplitStringNL long text",
