@@ -103,6 +103,14 @@ type GMCPOut struct {
 
 func (g GMCPOut) Type() string { return `GMCPOut` }
 
+// Tell the system a wish to send specific GMCP Update data
+type GMCPUpdate struct {
+	UserId     int
+	Identifier string
+}
+
+func (g GMCPUpdate) Type() string { return `GMCPUpdate` }
+
 // Messages that are intended to reach all users on the system
 type System struct {
 	Command string

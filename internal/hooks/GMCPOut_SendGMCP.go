@@ -39,6 +39,7 @@ func GMCPOut_SendGMCP(e events.Event) events.ListenerReturn {
 			mudlog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
 			return events.Continue
 		}
+
 		connections.SendTo(term.GmcpPayload.BytesWithPayload(payload), connId)
 	}
 

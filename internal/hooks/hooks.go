@@ -66,6 +66,11 @@ func RegisterListeners() {
 	events.RegisterListener(events.Message{}, Message_SendMessage)
 	// Prompt
 	events.RegisterListener(events.RedrawPrompt{}, RedrawPrompt_SendRedraw)
+
+	// Temporary listener for testing purposes
+	events.RegisterListener(events.NewRound{}, ForceGMCPCharUpdate)
+	events.RegisterListener(events.GMCPUpdate{}, BuildGMCPPayload)
+
 	// User Settings change
 	events.RegisterListener(events.UserSettingChanged{}, ClearSettingCaches)
 
