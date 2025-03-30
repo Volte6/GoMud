@@ -112,25 +112,25 @@ func Spells(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 	}
 
 	onlineResultsTable := templates.GetTable(`Spells`, headers, rows, rowFormatting...)
-	tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
+	tplTxt, _ := templates.Process("tables/generic", onlineResultsTable, user.UserId)
 	user.SendText(tplTxt)
 
 	/*
 		if len(neutralRows) > 0 {
 			onlineResultsTable := templates.GetTable(`<ansi fg="spell-neutral">Neutral</ansi> Spells`, headers, neutralRows, neutralRowFormatting...)
-			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
+			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable, user.UserId)
 			user.SendText( tplTxt)
 		}
 
 		if len(harmfulRows) > 0 {
 			onlineResultsTable := templates.GetTable(`<ansi fg="spell-helpful">Helpful</ansi> Spells`, headers, harmfulRows, harmfulRowFormatting...)
-			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
+			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable, user.UserId)
 			user.SendText( tplTxt)
 		}
 
 		if len(helpfulRows) > 0 {
 			onlineResultsTable := templates.GetTable(`<ansi fg="spell-harmful">Harmful</ansi> Spells`, headers, helpfulRows, helpfulRowFormatting...)
-			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable)
+			tplTxt, _ := templates.Process("tables/generic", onlineResultsTable, user.UserId)
 			user.SendText( tplTxt)
 		}
 	*/

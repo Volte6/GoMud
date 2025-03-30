@@ -29,7 +29,7 @@ func Skills(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 		TrainingPoints: user.Character.TrainingPoints,
 	}
 
-	skillTxt, _ := templates.Process("character/skills", skillData)
+	skillTxt, _ := templates.Process("character/skills", skillData, user.UserId)
 	user.SendText(skillTxt)
 
 	if rest == `extra` {

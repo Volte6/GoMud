@@ -112,7 +112,7 @@ func Search(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 				)
 			}
 
-			whoTxt, _ := templates.Process("descriptions/who", details)
+			whoTxt, _ := templates.Process("descriptions/who", details, user.UserId)
 			user.SendText(whoTxt)
 
 		}
@@ -149,7 +149,7 @@ func Search(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 				)
 			}
 
-			whoTxt, _ := templates.Process("descriptions/who", details)
+			whoTxt, _ := templates.Process("descriptions/who", details, user.UserId)
 			user.SendText(whoTxt)
 
 		}
@@ -160,7 +160,7 @@ func Search(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 			`IsNight`:     gametime.IsNight(),
 		}
 
-		textOut, _ := templates.Process("descriptions/ontheground", groundDetails)
+		textOut, _ := templates.Process("descriptions/ontheground", groundDetails, user.UserId)
 		user.SendText(textOut)
 	}
 

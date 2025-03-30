@@ -18,38 +18,57 @@ func Broadcast_SendToAll(e events.Event) events.ListenerReturn {
 		return events.Continue
 	}
 
-	messageColorized := templates.AnsiParse(broadcast.Text)
+	textOut := ``
+	if len(broadcast.Text) > 0 {
+		textOut = templates.AnsiParse(broadcast.Text)
+	}
 
-	var sentToConnectionIds []connections.ConnectionId
+	textOutSR := ``
+	if len(broadcast.TextScreenReader) > 0 {
+		textOutSR = templates.AnsiParse(broadcast.TextScreenReader)
+	}
 
-	// If it's communication, respect deafeaning rules
-	skipConnectionIds := []connections.ConnectionId{}
-	if broadcast.IsCommunication {
-		for _, u := range users.GetAllActiveUsers() {
+	for _, u := range users.GetAllActiveUsers() {
+
+		if broadcast.IsCommunication {
 			if u.Deafened && !broadcast.SourceIsMod {
-				skipConnectionIds = append(skipConnectionIds, u.ConnectionId())
+				continue
 			}
 		}
-	}
 
-	if broadcast.SkipLineRefresh {
+		events.AddToQueue(events.RedrawPrompt{UserId: u.UserId}, 100)
 
-		sentToConnectionIds = connections.Broadcast(
-			[]byte(messageColorized),
-			skipConnectionIds...,
-		)
+		if u.ScreenReader {
 
-	} else {
-		sentToConnectionIds = connections.Broadcast(
-			[]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+messageColorized),
-			skipConnectionIds...,
-		)
+			if len(textOutSR) > 0 {
 
-	}
+				if broadcast.SkipLineRefresh {
+					connections.SendTo(
+						[]byte(textOutSR),
+						u.ConnectionId(),
+					)
+				} else {
+					connections.SendTo(
+						[]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+textOutSR),
+						u.ConnectionId(),
+					)
+				}
 
-	for _, connId := range sentToConnectionIds {
-		if user := users.GetByConnectionId(connId); user != nil {
-			events.AddToQueue(events.RedrawPrompt{UserId: user.UserId}, 100)
+				continue
+			}
+
+		}
+
+		if broadcast.SkipLineRefresh {
+			connections.SendTo(
+				[]byte(textOut),
+				u.ConnectionId(),
+			)
+		} else {
+			connections.SendTo(
+				[]byte(term.AnsiMoveCursorColumn.String()+term.AnsiEraseLine.String()+textOut),
+				u.ConnectionId(),
+			)
 		}
 	}
 

@@ -30,7 +30,7 @@ func Mob(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 1 {
-		infoOutput, _ := templates.Process("admincommands/help/command.mob", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.mob", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}
@@ -97,7 +97,7 @@ func mob_List(rest string, user *users.UserRecord, room *rooms.Room, flags event
 		return mobNames[i].Name < mobNames[j].Name
 	})
 
-	tplTxt, _ := templates.Process("tables/numbered-list-doubled", mobNames)
+	tplTxt, _ := templates.Process("tables/numbered-list-doubled", mobNames, user.UserId)
 	user.SendText(tplTxt)
 
 	return true, nil
@@ -212,7 +212,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 
 	question = cmdPrompt.Ask(`What race will the mob be?`, []string{raceName}, raceName)
 	if !question.Done {
-		tplTxt, _ := templates.Process("tables/numbered-list", raceOptions)
+		tplTxt, _ := templates.Process("tables/numbered-list", raceOptions, user.UserId)
 		user.SendText(tplTxt)
 		user.SendText(`  <ansi fg="black-bold">Enter <ansi fg="command">help {racename}</ansi> or <ansi fg="command">help {number}</ansi> for details.</ansi>`)
 		user.SendText(``)
@@ -260,7 +260,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 	if newMob.Character.RaceId == 0 {
 		question.RejectResponse()
 
-		tplTxt, _ := templates.Process("tables/numbered-list", raceOptions)
+		tplTxt, _ := templates.Process("tables/numbered-list", raceOptions, user.UserId)
 		user.SendText(tplTxt)
 		user.SendText(`  <ansi fg="black-bold">Enter <ansi fg="command">help {racename}</ansi> or <ansi fg="command">help {number}</ansi> for details.</ansi>`)
 		user.SendText(``)
@@ -287,7 +287,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 
 	question = cmdPrompt.Ask(`What zone is this mob from?`, []string{newMob.Zone}, newMob.Zone)
 	if !question.Done {
-		tplTxt, _ := templates.Process("tables/numbered-list-doubled", zoneOptions)
+		tplTxt, _ := templates.Process("tables/numbered-list-doubled", zoneOptions, user.UserId)
 		user.SendText(tplTxt)
 		return true, nil
 	}
@@ -315,7 +315,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 	if newMob.Zone == `` {
 		question.RejectResponse()
 
-		tplTxt, _ := templates.Process("tables/numbered-list", zoneOptions)
+		tplTxt, _ := templates.Process("tables/numbered-list", zoneOptions, user.UserId)
 		user.SendText(tplTxt)
 		return true, nil
 	}
@@ -382,7 +382,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 
 		question = cmdPrompt.Ask(`Which sample script?`, []string{})
 		if !question.Done {
-			tplTxt, _ := templates.Process("tables/numbered-list", scriptOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", scriptOptions, user.UserId)
 			user.SendText(tplTxt)
 			return true, nil
 		}
@@ -398,7 +398,7 @@ func mob_Create(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 		if _, ok := mobs.SampleScripts[scriptType]; !ok {
 			question.RejectResponse()
 
-			tplTxt, _ := templates.Process("tables/numbered-list", scriptOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", scriptOptions, user.UserId)
 			user.SendText(tplTxt)
 			return true, nil
 		}

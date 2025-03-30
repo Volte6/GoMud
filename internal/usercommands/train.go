@@ -98,7 +98,7 @@ func Train(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 	}
 
 	if rest == "" {
-		exitTxt, _ := templates.Process("descriptions/train", trainingData)
+		exitTxt, _ := templates.Process("descriptions/train", trainingData, user.UserId)
 		user.SendText(exitTxt)
 	} else {
 
@@ -155,7 +155,7 @@ func Train(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 					SkillLevel: newLevel,
 				}
 
-				skillUpTxt, _ := templates.Process("character/skillup", skillData)
+				skillUpTxt, _ := templates.Process("character/skillup", skillData, user.UserId)
 
 				user.SendText("The trainer grimly considers you for a moment, and then his demeanor changes dramatically.")
 				user.SendText(skillUpTxt)

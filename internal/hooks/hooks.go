@@ -66,6 +66,8 @@ func RegisterListeners() {
 	events.RegisterListener(events.Message{}, Message_SendMessage)
 	// Prompt
 	events.RegisterListener(events.RedrawPrompt{}, RedrawPrompt_SendRedraw)
+	// User Settings change
+	events.RegisterListener(events.UserSettingChanged{}, ClearSettingCaches)
 
 	events.RegisterListener(events.WebClientCommand{}, WebClientCommand_SendWebClientCommand)
 

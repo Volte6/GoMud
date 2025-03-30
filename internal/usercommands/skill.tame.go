@@ -57,7 +57,7 @@ func Tame(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		}
 
 		tameTableData := templates.GetTable(`Your taming proficiency`, headers, rows)
-		tplTxt, _ := templates.Process("tables/generic", tameTableData)
+		tplTxt, _ := templates.Process("tables/generic", tameTableData, user.UserId)
 		user.SendText(tplTxt)
 		user.SendText(`<ansi fg="command">help tame</ansi> to find out more.`)
 

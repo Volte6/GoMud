@@ -30,7 +30,7 @@ func Zone(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 	if len(args) == 0 {
 		// send some sort of help info?
-		infoOutput, _ := templates.Process("admincommands/help/command.zone", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.zone", nil, user.UserId)
 		user.SendText(infoOutput)
 
 		return handled, nil
@@ -159,7 +159,7 @@ func zone_Edit(rest string, user *users.UserRecord, room *rooms.Room, flags even
 
 	question := cmdPrompt.Ask(`Select a mutator to add/remove, or nothing to continue:`, []string{}, `0`)
 	if !question.Done {
-		tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions)
+		tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions, user.UserId)
 		user.SendText(tplTxt)
 		return true, nil
 	}
@@ -188,7 +188,7 @@ func zone_Edit(rest string, user *users.UserRecord, room *rooms.Room, flags even
 			user.SendText("Invalid selection.")
 			question.RejectResponse()
 
-			tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions, user.UserId)
 			user.SendText(tplTxt)
 			return true, nil
 		}
@@ -219,7 +219,7 @@ func zone_Edit(rest string, user *users.UserRecord, room *rooms.Room, flags even
 			mutatorOptions[idx] = data
 		}
 
-		tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions)
+		tplTxt, _ := templates.Process("tables/numbered-list-doubled", mutatorOptions, user.UserId)
 		user.SendText(tplTxt)
 		return true, nil
 

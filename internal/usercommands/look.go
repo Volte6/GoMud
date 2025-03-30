@@ -94,7 +94,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 					u.UserId)
 			}
 
-			descTxt, _ := templates.Process("character/description", u.Character)
+			descTxt, _ := templates.Process("character/description", u.Character, user.UserId)
 			user.SendText(descTxt)
 
 			itemNames := []string{}
@@ -107,7 +107,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				`ItemNames`: itemNames,
 			}
 
-			inventoryTxt, _ := templates.Process("character/inventory-look", invData)
+			inventoryTxt, _ := templates.Process("character/inventory-look", invData, user.UserId)
 			user.SendText(inventoryTxt)
 
 		} else if mobId > 0 {
@@ -122,7 +122,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				)
 			}
 
-			descTxt, _ := templates.Process("character/description", &m.Character)
+			descTxt, _ := templates.Process("character/description", &m.Character, user.UserId)
 			user.SendText(descTxt)
 
 			itemNames := []string{}
@@ -135,7 +135,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				`ItemNames`: itemNames,
 			}
 
-			inventoryTxt, _ := templates.Process("character/inventory-look", invData)
+			inventoryTxt, _ := templates.Process("character/inventory-look", invData, user.UserId)
 			user.SendText(inventoryTxt)
 		}
 
@@ -215,7 +215,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			`ItemNamesFormatted`: itemNamesFormatted,
 		}
 
-		textOut, _ := templates.Process("descriptions/insidecontainer", chestStuff)
+		textOut, _ := templates.Process("descriptions/insidecontainer", chestStuff, user.UserId)
 
 		user.SendText(``)
 		user.SendText(textOut)
@@ -361,7 +361,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at %s.`, user.Character.Name, petUser.Character.Pet.DisplayName()), user.UserId)
 
-			textOut, _ := templates.Process("character/pet", petUser)
+			textOut, _ := templates.Process("character/pet", petUser, user.UserId)
 			user.SendText(textOut)
 
 			return true, nil
@@ -407,7 +407,7 @@ func Look(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			user.SendText(fmt.Sprintf(`You look at the <ansi fg="%s">%s corpse</ansi>.`, corpseColor, corpse.Character.Name))
 			room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> is looking at the <ansi fg="%s">%s corpse</ansi>.`, user.Character.Name, corpseColor, corpse.Character.Name), user.UserId)
 
-			descTxt, _ := templates.Process("character/description-corpse", &corpse.Character)
+			descTxt, _ := templates.Process("character/description-corpse", &corpse.Character, user.UserId)
 			user.SendText(descTxt)
 
 			return true, nil
@@ -459,6 +459,10 @@ func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 		tinyMapOn = true
 	}
 
+	if user.ScreenReader {
+		tinyMapOn = false
+	}
+
 	if tinyMapOn.(bool) && roomId > 0 {
 
 		zMapper := mapper.GetZoneMapper(room.Zone)
@@ -495,10 +499,10 @@ func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 		details = rooms.GetDetails(room, user)
 	}
 
-	textOut, _ := templates.Process("descriptions/room-title", details)
+	textOut, _ := templates.Process("descriptions/room-title", details, user.UserId)
 	user.SendText(textOut)
 
-	textOut, _ = templates.Process("descriptions/room", details)
+	textOut, _ = templates.Process("descriptions/room", details, user.UserId)
 	user.SendText(textOut)
 
 	signCt := 0
@@ -506,7 +510,7 @@ func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 	for _, sign := range privateSigns {
 		if sign.VisibleUserId == user.UserId {
 			signCt++
-			textOut, _ = templates.Process("descriptions/rune", sign)
+			textOut, _ = templates.Process("descriptions/rune", sign, user.UserId)
 			user.SendText(textOut)
 		}
 	}
@@ -514,7 +518,7 @@ func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 	publicSigns := room.GetPublicSigns()
 	for _, sign := range publicSigns {
 		signCt++
-		textOut, _ = templates.Process("descriptions/sign", sign)
+		textOut, _ = templates.Process("descriptions/sign", sign, user.UserId)
 		user.SendText(textOut)
 	}
 
@@ -522,7 +526,7 @@ func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 		user.SendText("")
 	}
 
-	textOut, _ = templates.Process("descriptions/who", details)
+	textOut, _ = templates.Process("descriptions/who", details, user.UserId)
 	if len(textOut) > 0 {
 		user.SendText(textOut)
 	}
@@ -575,12 +579,12 @@ func lookRoom(user *users.UserRecord, roomId int, secretLook bool) {
 		`IsDark`:      room.GetBiome().IsDark(),
 		`IsNight`:     gametime.IsNight(),
 	}
-	textOut, _ = templates.Process("descriptions/ontheground", groundDetails)
+	textOut, _ = templates.Process("descriptions/ontheground", groundDetails, user.UserId)
 	if len(textOut) > 0 {
 		user.SendText(textOut)
 	}
 
-	textOut, _ = templates.Process("descriptions/exits", details)
+	textOut, _ = templates.Process("descriptions/exits", details, user.UserId)
 	user.SendText(textOut)
 
 }

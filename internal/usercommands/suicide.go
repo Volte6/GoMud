@@ -111,7 +111,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events
 			user.EventLog.Add(`death`, fmt.Sprintf(`<ansi fg="username">%s</ansi> has <ansi fg="red-bold">PERMA-DIED</ansi>`, user.Character.Name))
 
 			// Perma-died!!!
-			textOut, _ := templates.Process("character/permadeath", nil)
+			textOut, _ := templates.Process("character/permadeath", nil, user.UserId)
 			user.SendText(colorpatterns.ApplyColorPattern(textOut, `red`))
 
 			// Unequip everything

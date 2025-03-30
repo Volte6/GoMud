@@ -216,7 +216,7 @@ func CreatePromptHandler(steps []*PromptStep, onComplete CompletionFunc) connect
 					// Cache the mask template string if needed
 					if state.maskTemplate == "" && currentStep.MaskTemplate != "" {
 
-						if maskStr, err := templates.Process(currentStep.MaskTemplate, nil, templates.AnsiTagsPreParse); err != nil {
+						if maskStr, err := templates.Process(currentStep.MaskTemplate, nil); err != nil {
 							mudlog.Error("Mask template error", "template", currentStep.MaskTemplate, "error", err)
 							state.maskTemplate = "*" // Fallback mask
 						} else {
@@ -331,7 +331,7 @@ func sendPrompt(step *PromptStep, clientInput *connections.ClientInput, results 
 	}
 
 	// Process the template
-	promptTxt, err := templates.Process(templateName, templateData, templates.AnsiTagsPreParse)
+	promptTxt, err := templates.Process(templateName, templateData)
 	if err != nil {
 		mudlog.Error("Prompt template error", "template", templateName, "error", err)
 		promptTxt = fmt.Sprintf("Error generating prompt '%s'", step.ID) // Fallback

@@ -15,6 +15,7 @@ import (
 	"github.com/volte6/gomud/internal/colorpatterns"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/volte6/gomud/internal/users"
 
 	"github.com/volte6/gomud/internal/util"
 )
@@ -22,11 +23,13 @@ import (
 type AnsiFlag uint8
 
 const (
-	AnsiTagsDefault  AnsiFlag = iota // Do not parse tags
-	AnsiTagsParse                    // Parse ansi tags before returning contents of template
-	AnsiTagsStrip                    // strip out all ansi tags and leave text plain
-	AnsiTagsMono                     // Parse ansi tags, but strip out all color information
-	AnsiTagsPreParse                 // Parse tags before executing the template
+	AnsiTagsDefault AnsiFlag          = iota // Do not parse tags
+	AnsiTagsParse                            // Parse ansi tags before returning contents of template
+	AnsiTagsStrip                            // strip out all ansi tags and leave text plain
+	AnsiTagsMono                             // Parse ansi tags, but strip out all color information
+	AnsiTagsNone    = AnsiTagsDefault        // alias to default
+
+	ForceScreenReaderUserId = -1
 )
 
 type cacheEntry struct {
@@ -42,6 +45,7 @@ func (t *cacheEntry) older(compareTime time.Time) bool {
 var (
 	cacheLock            sync.Mutex
 	templateCache        = make(map[string]cacheEntry)
+	templateConfigCache  = make(map[int]templateConfig)
 	forceAnsiFlags       = AnsiTagsParse
 	ansiLock             sync.RWMutex
 	ansiAliasFileModTime time.Time
@@ -87,31 +91,154 @@ func SetAnsiFlag(flag AnsiFlag) {
 	forceAnsiFlags = flag
 }
 
-func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
+type templateConfig struct {
+	ScreenReader bool // If they are using a screen reader, attempt to load a SR friendly template
+	AnsiFlags    AnsiFlag
+}
+
+type templateDetails struct {
+	name string
+	path string
+}
+
+func ClearTemplateConfigCache(userId int) {
+	delete(templateConfigCache, userId)
+}
+
+func Process(fname string, data any, receivingUserId ...int) (string, error) {
 	ansiLock.RLock()
 	defer ansiLock.RUnlock()
 
 	var parseAnsiTags bool = false
-	var preParseAnsiTags bool = false
 
-	var ansitagsParseBehavior []ansitags.ParseBehavior = make([]ansitags.ParseBehavior, 0, 5)
+	var ansitagsParseBehavior []ansitags.ParseBehavior = make([]ansitags.ParseBehavior, 0, 2)
 
 	if forceAnsiFlags != AnsiTagsDefault {
 		//	ansiFlags = append(ansiFlags, forceAnsiFlags)
 	}
 
-	for _, flag := range ansiFlags {
-		switch flag {
-		case AnsiTagsStrip:
-			ansitagsParseBehavior = append(ansitagsParseBehavior, ansitags.StripTags)
-		case AnsiTagsMono:
-			ansitagsParseBehavior = append(ansitagsParseBehavior, ansitags.Monochrome)
-		case AnsiTagsParse:
-			parseAnsiTags = true
-		case AnsiTagsPreParse:
-			preParseAnsiTags = true
-		}
+	userId := 0
+	if len(receivingUserId) > 0 {
+		userId = receivingUserId[0]
 	}
+
+	tplConfig, configFound := templateConfigCache[userId]
+	if !configFound {
+
+		tplConfig = templateConfig{}
+
+		if userId > 0 {
+			if tmpU := users.GetByUserId(userId); tmpU != nil {
+				tplConfig.ScreenReader = tmpU.ScreenReader
+			}
+		} else if userId == ForceScreenReaderUserId {
+			tplConfig.ScreenReader = true
+		}
+
+		templateConfigCache[userId] = tplConfig
+	}
+
+	var buf bytes.Buffer
+
+	// Contains each template to attempt to load, in order.
+	// This allows us to attempt optional adjusted template paths first.
+	filesToAttempt := []templateDetails{}
+
+	// Try a screen-reader friendly template first?
+	if tplConfig.ScreenReader {
+		filesToAttempt = append(filesToAttempt,
+			templateDetails{
+				name: fname,
+				path: util.FilePath(`templates/`, fname+`.screenreader.template`), // All templates must end with .template
+			},
+		)
+	}
+
+	filesToAttempt = append(filesToAttempt,
+		templateDetails{
+			name: fname,
+			path: util.FilePath(`templates/`, fname+`.template`), // All templates must end with .template
+		},
+	)
+
+	for _, tplInfo := range filesToAttempt {
+
+		if fileBytes, err := readFile(tplInfo.path); err == nil {
+
+			tpl, err := template.New(tplInfo.name).Funcs(funcMap).Parse(string(fileBytes))
+			if err != nil {
+				return string(fileBytes), err
+			}
+
+			err = tpl.Execute(&buf, data)
+			if err != nil {
+				mudlog.Error("could not parse template file", "module", true, "filepath", tplInfo.path, "error", err)
+				return "[TEMPLATE ERROR]", err
+			}
+
+			// return the final data as a string, parse ansi tags if needed (No need to parse if it was preparsed)
+			if parseAnsiTags {
+				return ansitags.Parse(buf.String(), ansitagsParseBehavior...), nil
+			}
+			return buf.String(), nil
+		}
+
+		//
+		// nothing able to load from the plugin files, lets try the normal filesystem.
+		//
+
+		fullPath := util.FilePath(string(configs.GetFilePathsConfig().DataFiles), `/`, tplInfo.path)
+
+		// Get the file contents
+		fileContents, err := os.ReadFile(fullPath)
+		if err != nil {
+			continue
+		}
+
+		// parse the file contents as a template
+		tpl, err := template.New(tplInfo.name).Funcs(funcMap).Parse(string(fileContents))
+		if err != nil {
+			return string(fileContents), err
+		}
+
+		// execute the template and store the results into a buffer
+
+		err = tpl.Execute(&buf, data)
+		if err != nil {
+			mudlog.Error("could not parse template file", "module", false, "filepath", fullPath, "error", err)
+			return "[TEMPLATE ERROR]", err
+		}
+
+		if tplConfig.ScreenReader {
+			strippedOut := util.StripCharsForScreenReaders(buf.String())
+
+			// return the final data as a string, parse ansi tags if needed (No need to parse if it was preparsed)
+			if parseAnsiTags {
+				return ansitags.Parse(strippedOut, ansitagsParseBehavior...), nil
+			}
+			return strippedOut, nil
+		}
+
+		// return the final data as a string, parse ansi tags if needed (No need to parse if it was preparsed)
+		if parseAnsiTags {
+			return ansitags.Parse(buf.String(), ansitagsParseBehavior...), nil
+		}
+		return buf.String(), nil
+	}
+
+	//
+	// If template never found, return details.
+	//
+	allFiles := []string{}
+	for _, tplInfo := range filesToAttempt {
+		allFiles = append(allFiles, tplInfo.path)
+	}
+	return fmt.Sprintf(`[TEMPLATE READ ERROR: FNF (%s) `, strings.Join(allFiles, `, `)), fmt.Errorf(`Files not found: %s`, strings.Join(allFiles, `, `))
+}
+
+func ProcessOld(name string, data any) (string, error) {
+	ansiLock.RLock()
+	defer ansiLock.RUnlock()
 
 	var buf bytes.Buffer
 
@@ -129,9 +256,7 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 		}
 
 		// return the final data as a string, parse ansi tags if needed (No need to parse if it was preparsed)
-		if parseAnsiTags {
-			return ansitags.Parse(buf.String(), ansitagsParseBehavior...), nil
-		}
+		return ansitags.Parse(buf.String()), nil
 
 	} else {
 		// All templates must end with .template
@@ -159,10 +284,6 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 				return "[TEMPLATE READ ERROR]", err
 			}
 
-			if parseAnsiTags && preParseAnsiTags {
-				fileContents = []byte(ansitags.Parse(string(fileContents), ansitagsParseBehavior...))
-			}
-
 			// parse the file contents as a template
 			tpl, err := template.New(name).Funcs(funcMap).Parse(string(fileContents))
 			if err != nil {
@@ -170,7 +291,7 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 			}
 
 			// add the template to the cache
-			cache = cacheEntry{tpl: tpl, modified: fInfo.ModTime(), ansiPreparsed: preParseAnsiTags}
+			cache = cacheEntry{tpl: tpl, modified: fInfo.ModTime()}
 			templateCache[name] = cache
 		}
 
@@ -183,17 +304,16 @@ func Process(name string, data any, ansiFlags ...AnsiFlag) (string, error) {
 		}
 
 		// return the final data as a string, parse ansi tags if needed (No need to parse if it was preparsed)
-		if parseAnsiTags && !cache.ansiPreparsed {
-			return ansitags.Parse(buf.String(), ansitagsParseBehavior...), nil
-		}
+		return ansitags.Parse(buf.String()), nil
+
 	}
 
 	return buf.String(), nil
 }
 
 func ProcessText(text string, data any, ansiFlags ...AnsiFlag) (string, error) {
+
 	var parseAnsiTags bool = false
-	var preParseAnsiTags bool = false
 
 	var ansitagsParseBehavior []ansitags.ParseBehavior = make([]ansitags.ParseBehavior, 0, 5)
 
@@ -209,13 +329,7 @@ func ProcessText(text string, data any, ansiFlags ...AnsiFlag) (string, error) {
 			ansitagsParseBehavior = append(ansitagsParseBehavior, ansitags.Monochrome)
 		case AnsiTagsParse:
 			parseAnsiTags = true
-		case AnsiTagsPreParse:
-			preParseAnsiTags = true
 		}
-	}
-
-	if parseAnsiTags && preParseAnsiTags {
-		text = ansitags.Parse(text, ansitagsParseBehavior...)
 	}
 
 	// parse the file contents as a template
@@ -233,7 +347,7 @@ func ProcessText(text string, data any, ansiFlags ...AnsiFlag) (string, error) {
 	}
 
 	// return the final data as a string, parse ansi tags if needed (No need to parse if it was preparsed)
-	if parseAnsiTags && !preParseAnsiTags {
+	if parseAnsiTags {
 		return ansitags.Parse(buf.String(), ansitagsParseBehavior...), nil
 	}
 

@@ -28,7 +28,7 @@ func Command(rest string, user *users.UserRecord, room *rooms.Room, flags events
 		// send some sort of help info?
 		mobCommands := mobcommands.GetAllMobCommands()
 
-		infoOutput, _ := templates.Process("admincommands/help/command.command", mobCommands)
+		infoOutput, _ := templates.Process("admincommands/help/command.command", mobCommands, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}

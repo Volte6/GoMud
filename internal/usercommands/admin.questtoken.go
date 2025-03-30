@@ -24,7 +24,7 @@ func QuestToken(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 
 	if len(args) == 0 {
 		// send some sort of help info?
-		infoOutput, _ := templates.Process("admincommands/help/command.questtoken", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.questtoken", nil, user.UserId)
 		user.SendText(infoOutput)
 	} else if args[0] == "list" {
 
@@ -51,7 +51,7 @@ func QuestToken(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 		}
 
 		searchResultsTable := templates.GetTable("Quest Tokens", headers, rows)
-		tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
+		tplTxt, _ := templates.Process("tables/generic", searchResultsTable, user.UserId)
 		user.SendText(tplTxt)
 
 	} else if args[0] == "all" {
@@ -73,7 +73,7 @@ func QuestToken(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 		}
 
 		searchResultsTable := templates.GetTable("Quest Tokens", headers, rows)
-		tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
+		tplTxt, _ := templates.Process("tables/generic", searchResultsTable, user.UserId)
 		user.SendText(tplTxt)
 
 	} else {

@@ -235,7 +235,7 @@ func main() {
 	// block until a signal comes in
 	<-sigChan
 
-	tplTxt, err := templates.Process("goodbye", nil, templates.AnsiTagsPreParse)
+	tplTxt, err := templates.Process("goodbye", nil)
 	if err != nil {
 		mudlog.Error("Template Error", "error", err)
 	}
@@ -400,7 +400,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 	// --- Send Initial Welcome/Splash ---
 	// (This part was mostly correct before)
-	splashTxt, _ := templates.Process("login/connect-splash", nil, templates.AnsiTagsPreParse)
+	splashTxt, _ := templates.Process("login/connect-splash", nil)
 	connections.SendTo([]byte(templates.AnsiParse(splashTxt)), connDetails.ConnectionId())
 
 	// --- Trigger the Prompt Handler to initialize state and send the FIRST prompt ---
@@ -706,7 +706,7 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 
 	// --- Send Initial Welcome/Splash ---
 	// (This part was mostly correct before)
-	splashTxt, _ := templates.Process("login/connect-splash", nil, templates.AnsiTagsPreParse)
+	splashTxt, _ := templates.Process("login/connect-splash", nil)
 	connections.SendTo([]byte(templates.AnsiParse(splashTxt)), connDetails.ConnectionId())
 
 	// --- Trigger the Prompt Handler to initialize state and send the FIRST prompt ---

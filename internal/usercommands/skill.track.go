@@ -152,7 +152,7 @@ func Track(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		// If a any visitors are revealed...
 		//
 		if len(visitorData) > 0 {
-			trackTxt, _ := templates.Process("descriptions/track", visitorData)
+			trackTxt, _ := templates.Process("descriptions/track", visitorData, user.UserId)
 			user.SendText(trackTxt)
 		} else {
 			user.SendText("You don't see any tracks.")
@@ -407,7 +407,7 @@ func Track(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		// If a any visitors are revealed...
 		//
 		if len(visitorData) > 0 {
-			trackTxt, _ := templates.Process("descriptions/track", visitorData)
+			trackTxt, _ := templates.Process("descriptions/track", visitorData, user.UserId)
 			user.SendText(trackTxt)
 		} else {
 			user.SendText("You don't see any tracks.")

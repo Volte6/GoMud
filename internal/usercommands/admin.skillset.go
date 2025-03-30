@@ -28,7 +28,7 @@ func Skillset(rest string, user *users.UserRecord, room *rooms.Room, flags event
 
 	if len(args) < 2 {
 		// send some sort of help info?
-		infoOutput, _ := templates.Process("admincommands/help/command.skillset", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.skillset", nil, user.UserId)
 		user.SendText(infoOutput)
 
 		user.SendText(`Skill Names:`)
@@ -49,7 +49,7 @@ func Skillset(rest string, user *users.UserRecord, room *rooms.Room, flags event
 
 	if len(args) < 2 {
 		// send some sort of help info?
-		infoOutput, _ := templates.Process("admincommands/help/command.skillset", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.skillset", nil, user.UserId)
 		user.SendText(infoOutput)
 
 		user.SendText(`Skill Names:`)

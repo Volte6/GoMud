@@ -252,7 +252,7 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			}
 
 			partyTableData := templates.GetTable(`Party Members`, headers, rows, formatting...)
-			partyTxt, _ := templates.Process("tables/generic", partyTableData)
+			partyTxt, _ := templates.Process("tables/generic", partyTableData, user.UserId)
 			user.SendText(partyTxt)
 
 			if isInvited {

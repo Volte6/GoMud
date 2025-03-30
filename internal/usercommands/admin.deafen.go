@@ -17,7 +17,7 @@ import (
 func Deafen(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
-		infoOutput, _ := templates.Process("admincommands/help/command.deafen", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.deafen", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}
@@ -44,7 +44,7 @@ func Deafen(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 func UnDeafen(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
 
 	if rest == "" {
-		infoOutput, _ := templates.Process("admincommands/help/command.deafen", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.deafen", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}

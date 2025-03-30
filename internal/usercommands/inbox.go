@@ -41,7 +41,7 @@ func Inbox(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			continue
 		}
 
-		tplTxt, _ := templates.Process("mail/message", msg)
+		tplTxt, _ := templates.Process("mail/message", msg, user.UserId)
 		user.SendText(tplTxt)
 
 		user.SendText(border)

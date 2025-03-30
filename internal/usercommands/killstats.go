@@ -137,7 +137,7 @@ func Killstats(rest string, user *users.UserRecord, room *rooms.Room, flags even
 	}
 
 	searchResultsTable := templates.GetTable(tableTitle+` by `+strings.Title(rest), headers, rows, formatting)
-	tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
+	tplTxt, _ := templates.Process("tables/generic", searchResultsTable, user.UserId)
 	tplTxt += fmt.Sprintf("Also try: %s\n", strings.Join(otherSuggestions, `, `))
 	user.SendText(tplTxt)
 

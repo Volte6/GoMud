@@ -23,6 +23,14 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		user.SendText(`<ansi fg="yellow">` + util.SplitStringNL(user.Character.Description, 80) + `</ansi>`)
 		user.SendText(``)
 
+		user.SendText(`<ansi fg="yellow-bold">ScreenReader:</ansi> `)
+		if user.ScreenReader {
+			user.SendText(`<ansi fg="green">ON</ansi>`)
+		} else {
+			user.SendText(`<ansi fg="red">OFF</ansi>`)
+		}
+		user.SendText(``)
+
 		on := user.GetConfigOption(`auction`)
 		onTxt := `<ansi fg="red">OFF</ansi>`
 		if on == nil || on.(bool) {
@@ -91,6 +99,12 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		user.Character.Description = rest
 
 		user.SendText("Description set. Look at yourself to confirm.")
+
+		events.AddToQueue(events.UserSettingChanged{
+			UserId: user.UserId,
+			Name:   `description`,
+		})
+
 		return true, nil
 	}
 
@@ -108,6 +122,11 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		}
 
 		user.SetConfigOption(`auction`, on)
+
+		events.AddToQueue(events.UserSettingChanged{
+			UserId: user.UserId,
+			Name:   `auction`,
+		})
 
 		return true, nil
 
@@ -128,6 +147,11 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 		user.SetConfigOption(`shortadjectives`, on)
 
+		events.AddToQueue(events.UserSettingChanged{
+			UserId: user.UserId,
+			Name:   `shortadjectives`,
+		})
+
 		return true, nil
 
 	}
@@ -146,6 +170,11 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		}
 
 		user.SetConfigOption(`tinymap`, on)
+
+		events.AddToQueue(events.UserSettingChanged{
+			UserId: user.UserId,
+			Name:   `tinymap`,
+		})
 
 		return true, nil
 
@@ -180,6 +209,12 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		}
 
 		user.SendText("Prompt set.")
+
+		events.AddToQueue(events.UserSettingChanged{
+			UserId: user.UserId,
+			Name:   `prompt`,
+		})
+
 		return true, nil
 
 	}
@@ -211,6 +246,12 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		}
 
 		user.SendText("fprompt set.")
+
+		events.AddToQueue(events.UserSettingChanged{
+			UserId: user.UserId,
+			Name:   `fprompt`,
+		})
+
 		return true, nil
 
 	}
@@ -238,8 +279,30 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		}
 
 		user.SendText("wimpy set.")
+
+		events.AddToQueue(events.UserSettingChanged{
+			UserId: user.UserId,
+			Name:   `wimpy`,
+		})
+
 		return true, nil
 
+	}
+
+	if setTarget == `screenreader` {
+		if user.ScreenReader {
+			user.SendText(`ScreenReader mode toggled <ansi fg="red">OFF</ansi>.`)
+		} else {
+			user.SendText(`ScreenReader mode toggled <ansi fg="red">ON</ansi>.`)
+		}
+		user.ScreenReader = !user.ScreenReader
+
+		events.AddToQueue(events.UserSettingChanged{
+			UserId: user.UserId,
+			Name:   `screenreader`,
+		})
+
+		return true, nil
 	}
 
 	// Are they setting a macro? // setTarget should be "=1" etc
@@ -296,6 +359,11 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 			user.SendText(fmt.Sprintf(`Macro set. Type <ansi fg="command">=%d</ansi> or (if your terminal supports it) press <ansi fg="command">F%d</ansi> to use it.`, macroNum, macroNum))
 		}
+
+		events.AddToQueue(events.UserSettingChanged{
+			UserId: user.UserId,
+			Name:   `macro`,
+		})
 
 		return true, nil
 	}

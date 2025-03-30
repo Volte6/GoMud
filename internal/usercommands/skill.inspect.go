@@ -69,7 +69,7 @@ func Inspect(rest string, user *users.UserRecord, room *rooms.Room, flags events
 			ItemSpec:     &iSpec,
 		}
 
-		inspectTxt, _ := templates.Process("descriptions/inspect", details)
+		inspectTxt, _ := templates.Process("descriptions/inspect", details, user.UserId)
 		user.SendText(inspectTxt)
 
 	}

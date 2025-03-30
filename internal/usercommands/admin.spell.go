@@ -27,7 +27,7 @@ func Spell(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 1 {
-		infoOutput, _ := templates.Process("admincommands/help/command.spell", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.spell", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}
@@ -83,7 +83,7 @@ func spell_List(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 		return spellNames[i].Name < spellNames[j].Name
 	})
 
-	tplTxt, _ := templates.Process("tables/numbered-list", spellNames)
+	tplTxt, _ := templates.Process("tables/numbered-list", spellNames, user.UserId)
 	user.SendText(tplTxt)
 
 	return true, nil
@@ -202,7 +202,7 @@ func spell_Create(rest string, user *users.UserRecord, room *rooms.Room, flags e
 
 		question := cmdPrompt.Ask(`What kind of spell affect is it?`, []string{string(newSpell.Type)}, string(newSpell.Type))
 		if !question.Done {
-			tplTxt, _ := templates.Process("tables/numbered-list", typeOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", typeOptions, user.UserId)
 			user.SendText(tplTxt)
 			return true, nil
 		}
@@ -210,7 +210,7 @@ func spell_Create(rest string, user *users.UserRecord, room *rooms.Room, flags e
 		if question.Response == `` {
 			question.RejectResponse()
 
-			tplTxt, _ := templates.Process("tables/numbered-list", typeOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", typeOptions, user.UserId)
 			user.SendText(tplTxt)
 			return true, nil
 		}

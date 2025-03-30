@@ -61,7 +61,7 @@ func Buff(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			}
 
 			searchResultsTable := templates.GetTable("Search Results", headers, rows)
-			tplTxt, _ := templates.Process("tables/generic", searchResultsTable)
+			tplTxt, _ := templates.Process("tables/generic", searchResultsTable, user.UserId, user.UserId)
 			user.SendText(tplTxt)
 		} else {
 
@@ -157,7 +157,7 @@ func Buff(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 	user.SendText("target not found.")
 
 	// send some sort of help info?
-	infoOutput, _ := templates.Process("admincommands/help/command.buff", nil)
+	infoOutput, _ := templates.Process("admincommands/help/command.buff", nil, user.UserId, user.UserId)
 	user.SendText(infoOutput)
 
 	return true, nil

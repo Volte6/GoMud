@@ -41,7 +41,7 @@ func Storage(rest string, user *users.UserRecord, room *rooms.Room, flags events
 			itemNames = append(itemNames, item.NameComplex())
 		}
 
-		storageTxt, _ := templates.Process("character/storage", itemNames)
+		storageTxt, _ := templates.Process("character/storage", itemNames, user.UserId)
 		user.SendText(storageTxt)
 
 		return true, nil

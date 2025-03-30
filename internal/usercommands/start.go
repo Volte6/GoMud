@@ -54,7 +54,7 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		question := cmdPrompt.Ask(`Which race will you be?`, []string{})
 		if !question.Done {
 
-			tplTxt, _ := templates.Process("tables/numbered-list", raceOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", raceOptions, user.UserId)
 			user.SendText(tplTxt)
 			user.SendText(`  Want to know more details? Type <ansi fg="command">help {racename}</ansi> or <ansi fg="command">help {number}</ansi>`)
 			user.SendText(``)
@@ -107,7 +107,7 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		if !matchFound {
 			question.RejectResponse()
 
-			tplTxt, _ := templates.Process("tables/numbered-list", raceOptions)
+			tplTxt, _ := templates.Process("tables/numbered-list", raceOptions, user.UserId)
 			user.SendText(tplTxt)
 			user.SendText(`  Want to know more details? Type <ansi fg="command">help {racename}</ansi> or <ansi fg="command">help {number}</ansi>`)
 			user.SendText(``)

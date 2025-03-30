@@ -23,7 +23,7 @@ func Modify(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 	args := util.SplitButRespectQuotes(rest)
 
 	if len(args) < 3 {
-		infoOutput, _ := templates.Process("admincommands/help/command.modify", nil)
+		infoOutput, _ := templates.Process("admincommands/help/command.modify", nil, user.UserId)
 		user.SendText(infoOutput)
 		return true, nil
 	}

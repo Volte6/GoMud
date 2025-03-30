@@ -22,7 +22,7 @@ func Mudmail(rest string, user *users.UserRecord, room *rooms.Room, flags events
 		args := util.SplitButRespectQuotes(rest)
 		if len(args) < 2 {
 			// send some sort of help info?
-			infoOutput, _ := templates.Process("admincommands/help/command.mudmail", nil)
+			infoOutput, _ := templates.Process("admincommands/help/command.mudmail", nil, user.UserId)
 			user.SendText(infoOutput)
 			return true, nil
 		}
@@ -103,7 +103,7 @@ func Mudmail(rest string, user *users.UserRecord, room *rooms.Room, flags events
 	question = cmdPrompt.Ask(`Send this message to everyone?`, []string{`Yes`, `No`}, `No`)
 	if !question.Done {
 
-		tplTxt, _ := templates.Process("mail/message", msg)
+		tplTxt, _ := templates.Process("mail/message", msg, user.UserId)
 		user.SendText(tplTxt)
 
 		return true, nil
