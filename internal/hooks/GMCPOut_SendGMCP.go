@@ -44,9 +44,11 @@ func GMCPOut_SendGMCP(e events.Event) events.ListenerReturn {
 
 		// DEBUG ONLY
 		// TODO: REMOVE
-		var prettyJSON bytes.Buffer
-		json.Indent(&prettyJSON, payload, "", "\t")
-		fmt.Println(string(prettyJSON.Bytes()))
+		if gmcp.UserId == 1 {
+			var prettyJSON bytes.Buffer
+			json.Indent(&prettyJSON, payload, "", "\t")
+			fmt.Println(string(prettyJSON.Bytes()))
+		}
 
 		connections.SendTo(term.GmcpPayload.BytesWithPayload(payload), connId)
 	}
