@@ -112,18 +112,9 @@ var (
 		"pct":          pct,
 		"numberFormat": numberFormat,
 		"mod":          func(a, b int) int { return a % b },
-		"stringor": func(a string, b string, padding ...int) string {
-			str := a
-			if str == "" {
-				str = b
-			}
-			if len(padding) > 0 {
-				str = fmt.Sprintf("%-"+strconv.Itoa(padding[0])+"s", str)
-			}
-			return str
-		},
-		"splitstring": SplitStringNL,
-		"ansiparse":   TplAnsiParse,
+		"stringor":     stringOr,
+		"splitstring":  SplitStringNL,
+		"ansiparse":    TplAnsiParse,
 		"buffname": func(buffId int) string {
 			buffSpec := buffs.GetBuffSpec(buffId)
 			if buffSpec == nil {
@@ -245,10 +236,12 @@ func padLeft(totalWidth int, stringArgs ...string) string {
 		}
 	}
 
-	if len(stringIn) >= totalWidth {
+	stringInWidth := runewidth.StringWidth(stringIn)
+
+	if stringInWidth >= totalWidth {
 		return stringIn
 	}
-	paddingLength := totalWidth - len(stringIn)
+	paddingLength := totalWidth - stringInWidth
 	if paddingLength < 1 {
 		return stringIn
 	}
@@ -272,10 +265,12 @@ func padRight(totalWidth int, stringArgs ...string) string {
 		}
 	}
 
-	if len(stringIn) >= totalWidth {
+	stringInWidth := runewidth.StringWidth(stringIn)
+
+	if stringInWidth >= totalWidth {
 		return stringIn
 	}
-	paddingLength := totalWidth - len(stringIn)
+	paddingLength := totalWidth - stringInWidth
 	if paddingLength < 1 {
 		return stringIn
 	}
@@ -286,6 +281,10 @@ func padRightX(input, padding string, length int) string {
 
 	padLen := runewidth.StringWidth(padding)
 	inputLen := runewidth.StringWidth(input)
+
+	if length < inputLen {
+		length = inputLen
+	}
 
 	// Calculate how many times the padding string should be repeated
 	paddingRepeats := int(math.Ceil((float64(length) - float64(inputLen)) / float64(padLen)))
@@ -309,7 +308,7 @@ func padRightX(input, padding string, length int) string {
 // Usage:
 //
 //	{{ pad 10 }}
-//		OUTPUT: "		  "
+//		OUTPUT: "          "
 //	{{ pad 11 "hello" "-" }}
 //		OUTPUT: "---hello---"
 func pad(totalWidth int, stringArgs ...string) string {
@@ -323,10 +322,12 @@ func pad(totalWidth int, stringArgs ...string) string {
 		}
 	}
 
-	if len(stringIn) >= totalWidth {
+	stringInWidth := runewidth.StringWidth(stringIn)
+
+	if stringInWidth >= totalWidth {
 		return stringIn
 	}
-	paddingLength := totalWidth - len(stringIn)
+	paddingLength := totalWidth - stringInWidth
 	leftPad := paddingLength >> 1
 	if leftPad < 1 {
 		return stringIn
@@ -363,6 +364,17 @@ func numberFormat(num int) string {
 
 func TplAnsiParse(input string) string {
 	return AnsiParse(input)
+}
+
+func stringOr(a string, b string, padding ...int) string {
+	str := a
+	if str == "" {
+		str = b
+	}
+	if len(padding) > 0 {
+		str = padRight(padding[0], str)
+	}
+	return str
 }
 
 // Splits a string by adding line breaks at the end of each line
