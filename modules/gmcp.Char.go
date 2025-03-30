@@ -28,9 +28,6 @@ func init() {
 		plug: plugins.New(`gmcp.Char`, `1.0`),
 	}
 
-	// Temporary for testing purposes.
-	//events.RegisterListener(events.NewRound{}, g.forceGMCPCharUpdate)
-
 	events.RegisterListener(events.EquipmentChange{}, g.equipmentChangeHandler)
 	events.RegisterListener(events.PlayerSpawn{}, g.playSpawnHandler)
 	events.RegisterListener(events.CharacterVitalsChanged{}, g.vitalsChangedHandler)
@@ -54,39 +51,6 @@ type GMCPUpdate struct {
 }
 
 func (g GMCPUpdate) Type() string { return `GMCPUpdate` }
-
-// This is temporary, remove after done testing.
-func (g *GMCPCharModule) forceGMCPCharUpdate(e events.Event) events.ListenerReturn {
-
-	evt, _ := e.(events.NewRound)
-	for _, userId := range users.GetOnlineUserIds() {
-
-		ask := `Char`
-
-		switch evt.RoundNumber % 6 {
-		case 0:
-			ask = `Char`
-		case 1:
-			ask = `Char.Info`
-		case 2:
-			ask = `Char.Inventory`
-		case 3:
-			ask = `Char.Stats`
-		case 4:
-			ask = `Char.Vitals`
-		case 5:
-			ask = `Char.Worth`
-		}
-
-		events.AddToQueue(GMCPUpdate{
-			UserId:     userId,
-			Identifier: ask, // char, char.info, char.inventory, char.stats, char.vitals, char.worth *Can comma seaparate for multiple*
-		})
-
-	}
-
-	return events.Continue
-}
 
 func (g *GMCPCharModule) vitalsChangedHandler(e events.Event) events.ListenerReturn {
 
