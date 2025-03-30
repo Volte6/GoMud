@@ -37,11 +37,15 @@ func (c ClientSettings) IsMsp() bool {
 
 // Check whether a GMCP module is enabled on the client
 func (c ClientSettings) GmcpEnabled(moduleName string) bool {
+
 	if len(c.GMCPModules) == 0 {
 		return false
 	}
 
 	_, ok := c.GMCPModules[moduleName]
+	if !ok {
+		_, ok = c.GMCPModules[`*`]
+	}
 
 	return ok
 }
