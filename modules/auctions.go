@@ -230,6 +230,11 @@ func (mod *AuctionsModule) auctionCommand(rest string, user *users.UserRecord, r
 
 		user.Character.Gold -= amt
 
+		events.AddToQueue(events.EquipmentChange{
+			UserId:     user.UserId,
+			GoldChange: -amt,
+		})
+
 		// Broadcast the bid
 		auctionTxt, _ := templates.Process("auctions/auction-bid", currentAuction, user.UserId)
 		for _, uid := range users.GetOnlineUserIds() {
@@ -400,6 +405,12 @@ func (mod *AuctionsModule) newRoundHandler(e events.Event) events.ListenerReturn
 				if sellerUser := users.GetByUserId(auctionNow.SellerUserId); sellerUser != nil {
 					sellerUser.Character.Bank += auctionNow.HighestBid
 					sellerUser.SendText(`<ansi fg="yellow">` + msg + `</ansi>`)
+
+					events.AddToQueue(events.EquipmentChange{
+						UserId:     sellerUser.UserId,
+						BankChange: auctionNow.HighestBid,
+					})
+
 				} else {
 
 					msg := fmt.Sprintf(`Your auction of the <ansi fg="item">%s</ansi> has ended while you were offline. The highest bid was made by <ansi fg="username">%s</ansi> for <ansi fg="gold">%d gold</ansi>.`, auctionNow.ItemData.DisplayName(), auctionNow.HighestBidderName, auctionNow.HighestBid)

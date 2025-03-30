@@ -49,6 +49,12 @@ func Inbox(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		if !msg.Read {
 			if msg.Gold > 0 {
 				user.Character.Bank += msg.Gold
+
+				events.AddToQueue(events.EquipmentChange{
+					UserId:     user.UserId,
+					BankChange: msg.Gold,
+				})
+
 			}
 			if msg.Item != nil {
 				user.Character.StoreItem(*msg.Item)

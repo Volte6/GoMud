@@ -61,6 +61,12 @@ func Bank(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		user.Character.Gold -= amount
 		user.Character.Bank += amount
 
+		events.AddToQueue(events.EquipmentChange{
+			UserId:     user.UserId,
+			GoldChange: -amount,
+			BankChange: amount,
+		})
+
 		user.SendText(fmt.Sprintf(`You deposit <ansi fg="gold">%d gold</ansi>.`, amount))
 		user.SendText(fmt.Sprintf(`You now have <ansi fg="gold">%d gold</ansi> on hand and <ansi fg="gold">%d gold</ansi> in the bank.`, user.Character.Gold, user.Character.Bank))
 
@@ -76,6 +82,12 @@ func Bank(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 		user.Character.Bank -= amount
 		user.Character.Gold += amount
+
+		events.AddToQueue(events.EquipmentChange{
+			UserId:     user.UserId,
+			GoldChange: -amount,
+			BankChange: amount,
+		})
 
 		user.SendText(fmt.Sprintf(`You withdraw <ansi fg="gold">%d gold</ansi>.`, amount))
 		user.SendText(fmt.Sprintf(`You now have <ansi fg="gold">%d gold</ansi> on hand and <ansi fg="gold">%d gold</ansi> in the bank.`, user.Character.Gold, user.Character.Bank))

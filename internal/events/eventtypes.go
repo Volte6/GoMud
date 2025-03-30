@@ -152,6 +152,8 @@ func (n NewTurn) Type() string { return `NewTurn` }
 type EquipmentChange struct {
 	UserId        int
 	MobInstanceId int
+	GoldChange    int
+	BankChange    int
 	ItemsWorn     []items.Item
 	ItemsRemoved  []items.Item
 }
@@ -262,14 +264,6 @@ type Looking struct {
 
 func (l Looking) Type() string { return `Looking` }
 
-type RedrawPrompt struct {
-	UserId        int
-	OnlyIfChanged bool
-}
-
-func (l RedrawPrompt) Type() string     { return `RedrawPrompt` }
-func (l RedrawPrompt) UniqueID() string { return `RedrawPrompt-` + strconv.Itoa(l.UserId) }
-
 // Fired after creating a new character and giving the character a name.
 type CharacterCreated struct {
 	UserId        int
@@ -293,3 +287,25 @@ type UserSettingChanged struct {
 }
 
 func (i UserSettingChanged) Type() string { return `UserSettingChanged` }
+
+// Health, mana, etc.
+type CharacterVitalsChanged struct {
+	UserId int
+}
+
+func (p CharacterVitalsChanged) Type() string { return `CharacterVitalsChanged` }
+
+// Health, mana, etc.
+type CharacterTrained struct {
+	UserId int
+}
+
+func (p CharacterTrained) Type() string { return `CharacterTrained` }
+
+type RedrawPrompt struct {
+	UserId        int
+	OnlyIfChanged bool
+}
+
+func (l RedrawPrompt) Type() string     { return `RedrawPrompt` }
+func (l RedrawPrompt) UniqueID() string { return `RedrawPrompt-` + strconv.Itoa(l.UserId) }

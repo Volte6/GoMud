@@ -88,6 +88,11 @@ func Pickpocket(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 						m.Character.Gold -= goldStolen
 						user.Character.Gold += goldStolen
 						stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="yellow-bold">%d gold</ansi>`, goldStolen))
+
+						events.AddToQueue(events.EquipmentChange{
+							UserId:     user.UserId,
+							GoldChange: goldStolen,
+						})
 					}
 				}
 
@@ -180,6 +185,16 @@ func Pickpocket(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 						p.Character.Gold -= goldStolen
 						user.Character.Gold += goldStolen
 						stolenStuff = append(stolenStuff, fmt.Sprintf(`<ansi fg="yellow-bold">%d gold</ansi>`, goldStolen))
+
+						events.AddToQueue(events.EquipmentChange{
+							UserId:     user.UserId,
+							GoldChange: goldStolen,
+						})
+
+						events.AddToQueue(events.EquipmentChange{
+							UserId:     p.UserId,
+							GoldChange: -goldStolen,
+						})
 					}
 				}
 

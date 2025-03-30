@@ -1211,6 +1211,7 @@ func (c *Character) ApplyHealthChange(healthChange int) int {
 	}
 
 	c.Health = newHealth
+
 	return newHealth - oldHealth
 }
 
@@ -1291,7 +1292,10 @@ func (c *Character) LevelUp() (bool, stats.Statistics) {
 	return true, statsDelta
 }
 
-func (c *Character) Heal(hp int, mana int) {
+func (c *Character) Heal(hp int, mana int) (int, int) {
+	startHP := c.Health
+	startMP := c.Mana
+
 	c.Health += hp
 	if c.Health > c.HealthMax.Value {
 		c.Health = c.HealthMax.Value
@@ -1300,6 +1304,8 @@ func (c *Character) Heal(hp int, mana int) {
 	if c.Mana > c.ManaMax.Value {
 		c.Mana = c.ManaMax.Value
 	}
+
+	return c.Health - startHP, c.Mana - startMP
 }
 
 func (c *Character) HealthPerRound() int {

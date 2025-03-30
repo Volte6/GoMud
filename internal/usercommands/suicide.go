@@ -210,6 +210,7 @@ func Suicide(rest string, user *users.UserRecord, room *rooms.Room, flags events
 
 	user.Character.Health = -10
 	user.Character.Mana = 0
+	events.AddToQueue(events.CharacterVitalsChanged{UserId: user.UserId})
 
 	clear(user.Character.PlayerDamage)
 

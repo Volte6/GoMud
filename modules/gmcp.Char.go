@@ -33,6 +33,10 @@ func init() {
 
 	events.RegisterListener(events.EquipmentChange{}, g.equipmentChangeHandler)
 	events.RegisterListener(events.PlayerSpawn{}, g.playSpawnHandler)
+	events.RegisterListener(events.CharacterVitalsChanged{}, g.vitalsChangedHandler)
+
+	events.RegisterListener(events.LevelUp{}, g.levelUpHandler)
+	events.RegisterListener(events.CharacterTrained{}, g.charTrainedHandler)
 
 	events.RegisterListener(GMCPUpdate{}, g.buildAndSendGMCPPayload)
 
@@ -84,6 +88,26 @@ func (g *GMCPCharModule) forceGMCPCharUpdate(e events.Event) events.ListenerRetu
 	return events.Continue
 }
 
+func (g *GMCPCharModule) vitalsChangedHandler(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(events.CharacterVitalsChanged)
+	if !typeOk {
+		return events.Continue // Return false to stop halt the event chain for this event
+	}
+
+	if evt.UserId == 0 {
+		return events.Continue
+	}
+
+	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
+	events.AddToQueue(GMCPUpdate{
+		UserId:     evt.UserId,
+		Identifier: `char.vitals`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth *Can comma seaparate for multiple*
+	})
+
+	return events.Continue
+}
+
 func (g *GMCPCharModule) equipmentChangeHandler(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.EquipmentChange)
@@ -95,16 +119,59 @@ func (g *GMCPCharModule) equipmentChangeHandler(e events.Event) events.ListenerR
 		return events.Continue
 	}
 
-	// Make sure they have this gmcp module enabled.
-	user := users.GetByUserId(evt.UserId)
-	if user == nil || !connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
+	statsToChange := ``
+
+	if len(evt.ItemsRemoved) > 0 || len(evt.ItemsWorn) > 0 {
+		statsToChange += `char.inventory, char.stats, char.vitals`
+	}
+
+	if evt.BankChange != 0 || evt.GoldChange != 0 {
+		statsToChange += `, char.worth`
+	}
+
+	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
+	events.AddToQueue(GMCPUpdate{
+		UserId:     evt.UserId,
+		Identifier: statsToChange, // char, char.info, char.inventory, char.stats, char.vitals, char.worth *Can comma seaparate for multiple*
+	})
+
+	return events.Continue
+}
+
+func (g *GMCPCharModule) charTrainedHandler(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(events.CharacterTrained)
+	if !typeOk {
+		return events.Continue // Return false to stop halt the event chain for this event
+	}
+
+	if evt.UserId == 0 {
 		return events.Continue
 	}
 
 	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
 	events.AddToQueue(GMCPUpdate{
 		UserId:     evt.UserId,
-		Identifier: `char.inventory, char.stats, char.vitals`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth *Can comma seaparate for multiple*
+		Identifier: `char`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth *Can comma seaparate for multiple*
+	})
+
+	return events.Continue
+}
+func (g *GMCPCharModule) levelUpHandler(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(events.LevelUp)
+	if !typeOk {
+		return events.Continue // Return false to stop halt the event chain for this event
+	}
+
+	if evt.UserId == 0 {
+		return events.Continue
+	}
+
+	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
+	events.AddToQueue(GMCPUpdate{
+		UserId:     evt.UserId,
+		Identifier: `char`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth *Can comma seaparate for multiple*
 	})
 
 	return events.Continue
@@ -118,12 +185,6 @@ func (g *GMCPCharModule) playSpawnHandler(e events.Event) events.ListenerReturn 
 	}
 
 	if evt.UserId == 0 {
-		return events.Continue
-	}
-
-	// Make sure they have this gmcp module enabled.
-	user := users.GetByUserId(evt.UserId)
-	if user == nil || !connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
 		return events.Continue
 	}
 
@@ -149,8 +210,9 @@ func (g *GMCPCharModule) buildAndSendGMCPPayload(e events.Event) events.Listener
 		return events.Continue
 	}
 
+	// Make sure they have this gmcp module enabled.
 	user := users.GetByUserId(evt.UserId)
-	if user == nil {
+	if user == nil || !connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
 		return events.Continue
 	}
 
@@ -163,6 +225,9 @@ func (g *GMCPCharModule) buildAndSendGMCPPayload(e events.Event) events.Listener
 		for _, requestIdPart := range strings.Split(requestedId, `,`) {
 
 			requestIdPart = strings.TrimSpace(requestIdPart)
+			if len(requestIdPart) == 0 {
+				continue
+			}
 
 			// Info
 			if g.wantsGMCPPayload(`char.info`, requestIdPart) {

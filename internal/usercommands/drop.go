@@ -58,6 +58,11 @@ func Drop(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		room.Gold += dropAmt
 		user.Character.Gold -= dropAmt
 
+		events.AddToQueue(events.EquipmentChange{
+			UserId:     user.UserId,
+			GoldChange: -dropAmt,
+		})
+
 		user.SendText(
 			fmt.Sprintf(`You drop <ansi fg="gold">%d gold</ansi> on the floor.`, dropAmt),
 		)
