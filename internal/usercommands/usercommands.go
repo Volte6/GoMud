@@ -264,6 +264,16 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 		cmd = "go"
 	} else {
 
+		if alias := user.TryCommandAlias(cmd); alias != cmd {
+			if strings.Contains(alias, ` `) {
+				parts := strings.Split(alias, ` `)
+				cmd = parts[0]                                         // grab the first word as the new cmd
+				rest = strings.TrimPrefix(alias, cmd+` `) + ` ` + rest // add the remaining alias to the rest
+			} else {
+				cmd = alias
+			}
+		}
+
 		if alias := keywords.TryCommandAlias(cmd); alias != cmd {
 			if strings.Contains(alias, ` `) {
 				parts := strings.Split(alias, ` `)

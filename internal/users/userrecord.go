@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/volte6/gomud/internal/audio"
@@ -33,7 +34,8 @@ type UserRecord struct {
 	Username       string                `yaml:"username"`
 	Password       string                `yaml:"password"`
 	Joined         time.Time             `yaml:"joined"`
-	Macros         map[string]string     `yaml:"macros,omitempty"` // Up to 10 macros, just string commands.
+	Macros         map[string]string     `yaml:"macros,omitempty"`  // Up to 10 macros, just string commands.
+	Aliases        map[string]string     `yaml:"aliases,omitempty"` // string=>string remapping of commands
 	Character      *characters.Character `yaml:"character,omitempty"`
 	ItemStorage    Storage               `yaml:"itemstorage,omitempty"`
 	ConfigOptions  map[string]any        `yaml:"configoptions,omitempty"`
@@ -102,6 +104,49 @@ func (u *UserRecord) PasswordMatches(input string) bool {
 	}
 
 	return false
+}
+
+func (u *UserRecord) AddCommandAlias(input string, output string) (addedAlias string, deletedAlias string) {
+
+	if u.Aliases == nil {
+		u.Aliases = map[string]string{}
+	}
+
+	input = strings.ToLower(strings.TrimSpace(input))
+	if input == `alias` {
+		return
+	}
+
+	if output == `` {
+		delete(u.Aliases, input)
+		return ``, input
+	}
+
+	if len(input) >= 64 {
+		input = input[0:64]
+	}
+
+	if len(output) >= 64 {
+		output = output[0:64]
+	}
+
+	u.Aliases[input] = strings.TrimSpace(output)
+
+	return input, ``
+}
+
+func (u *UserRecord) TryCommandAlias(input string) string {
+
+	if u.Aliases == nil {
+		u.Aliases = map[string]string{}
+		return input
+	}
+
+	if alias, ok := u.Aliases[strings.ToLower(input)]; ok {
+		return alias
+	}
+
+	return input
 }
 
 func (u *UserRecord) ShorthandId() string {
