@@ -26,11 +26,11 @@ func TestPad(t *testing.T) {
 		{"Pad with space and zero width", args{0, "test", ""}, "test"},
 		{"Pad with space and smaller width", args{3, "test", ""}, "test"},
 		{"Pad with space and same width", args{4, "test", ""}, "test"},
-		{"Pad wild charactors with space", args{10, "宽字符", ""}, "  宽字符  "},
-		{"Pad wild charactors with space 2", args{10, "宽字符A", ""}, " 宽字符A  "},
-		{"Pad wild charactors with space and zero width", args{0, "宽字符", ""}, "宽字符"},
-		{"Pad wild charactors with space and smaller width", args{5, "宽字符", ""}, "宽字符"},
-		{"Pad wild charactors with space and same width", args{6, "宽字符", ""}, "宽字符"},
+		{"Pad wide charactors with space", args{10, "宽字符", ""}, "  宽字符  "},
+		{"Pad wide charactors with space 2", args{10, "宽字符A", ""}, " 宽字符A  "},
+		{"Pad wide charactors with space and zero width", args{0, "宽字符", ""}, "宽字符"},
+		{"Pad wide charactors with space and smaller width", args{5, "宽字符", ""}, "宽字符"},
+		{"Pad wide charactors with space and same width", args{6, "宽字符", ""}, "宽字符"},
 	}
 
 	for _, tt := range tests {
@@ -68,11 +68,11 @@ func TestPadLeft(t *testing.T) {
 		{"PadLeft with space and zero width", args{0, "test", ""}, "test"},
 		{"PadLeft with space and smaller width", args{3, "test", ""}, "test"},
 		{"PadLeft with space and same width", args{4, "test", ""}, "test"},
-		{"PadLeft wild charactors with space", args{10, "宽字符", ""}, "    宽字符"},
-		{"PadLeft wild charactors with space 2", args{10, "宽字符A", ""}, "   宽字符A"},
-		{"PadLeft wild charactors with space and zero width", args{0, "宽字符", ""}, "宽字符"},
-		{"PadLeft wild charactors with space and smaller width", args{5, "宽字符", ""}, "宽字符"},
-		{"PadLeft wild charactors with space and same width", args{6, "宽字符", ""}, "宽字符"},
+		{"PadLeft wide charactors with space", args{10, "宽字符", ""}, "    宽字符"},
+		{"PadLeft wide charactors with space 2", args{10, "宽字符A", ""}, "   宽字符A"},
+		{"PadLeft wide charactors with space and zero width", args{0, "宽字符", ""}, "宽字符"},
+		{"PadLeft wide charactors with space and smaller width", args{5, "宽字符", ""}, "宽字符"},
+		{"PadLeft wide charactors with space and same width", args{6, "宽字符", ""}, "宽字符"},
 	}
 
 	for _, tt := range tests {
@@ -110,11 +110,11 @@ func TestPadRight(t *testing.T) {
 		{"PadRight with space and zero width", args{0, "test", ""}, "test"},
 		{"PadRight with space and smaller width", args{3, "test", ""}, "test"},
 		{"PadRight with space and same width", args{4, "test", ""}, "test"},
-		{"PadRight wild charactors with space", args{10, "宽字符", ""}, "宽字符    "},
-		{"PadRight wild charactors with space 2", args{10, "宽字符A", ""}, "宽字符A   "},
-		{"PadRight wild charactors with space and zero width", args{0, "宽字符", ""}, "宽字符"},
-		{"PadRight wild charactors with space and smaller width", args{5, "宽字符", ""}, "宽字符"},
-		{"PadRight wild charactors with space and same width", args{6, "宽字符", ""}, "宽字符"},
+		{"PadRight wide charactors with space", args{10, "宽字符", ""}, "宽字符    "},
+		{"PadRight wide charactors with space 2", args{10, "宽字符A", ""}, "宽字符A   "},
+		{"PadRight wide charactors with space and zero width", args{0, "宽字符", ""}, "宽字符"},
+		{"PadRight wide charactors with space and smaller width", args{5, "宽字符", ""}, "宽字符"},
+		{"PadRight wide charactors with space and same width", args{6, "宽字符", ""}, "宽字符"},
 	}
 
 	for _, tt := range tests {
@@ -154,11 +154,11 @@ func TestPadRightX(t *testing.T) {
 		{"PadRightX with space and zero width", args{0, "test", " "}, "test"},
 		{"PadRightX with space and smaller width", args{3, "test", " "}, "test"},
 		{"PadRightX with space and same width", args{4, "test", " "}, "test"},
-		{"PadRightX wild charactors with space", args{10, "宽字符", " "}, "宽字符    "},
-		{"PadRightX wild charactors with space 2", args{10, "宽字符A", " "}, "宽字符A   "},
-		{"PadRightX wild charactors with space and zero width", args{0, "宽字符", " "}, "宽字符"},
-		{"PadRightX wild charactors with space and smaller width", args{5, "宽字符", " "}, "宽字符"},
-		{"PadRightX wild charactors with space and same width", args{6, "宽字符", " "}, "宽字符"},
+		{"PadRightX wide charactors with space", args{10, "宽字符", " "}, "宽字符    "},
+		{"PadRightX wide charactors with space 2", args{10, "宽字符A", " "}, "宽字符A   "},
+		{"PadRightX wide charactors with space and zero width", args{0, "宽字符", " "}, "宽字符"},
+		{"PadRightX wide charactors with space and smaller width", args{5, "宽字符", " "}, "宽字符"},
+		{"PadRightX wide charactors with space and same width", args{6, "宽字符", " "}, "宽字符"},
 	}
 
 	for _, tt := range tests {
@@ -189,11 +189,11 @@ func TestStringOr(t *testing.T) {
 		{"StringOr with zero width", args{"test", "b", []int{0}}, "test"},
 		{"StringOr with smaller width", args{"test", "b", []int{3}}, "test"},
 		{"StringOr with same width", args{"test", "b", []int{4}}, "test"},
-		{"StringOr wild charactors", args{"宽字符", "", []int{10}}, "宽字符    "},
-		{"StringOr wild charactors 2", args{"宽字符A", "", []int{10}}, "宽字符A   "},
-		{"StringOr wild charactors with zero width", args{"宽字符", "", []int{0}}, "宽字符"},
-		{"StringOr wild charactors with smaller width", args{"宽字符", "", []int{5}}, "宽字符"},
-		{"StringOr wild charactors with same width", args{"宽字符", "", []int{6}}, "宽字符"},
+		{"StringOr wide charactors", args{"宽字符", "", []int{10}}, "宽字符    "},
+		{"StringOr wide charactors 2", args{"宽字符A", "", []int{10}}, "宽字符A   "},
+		{"StringOr wide charactors with zero width", args{"宽字符", "", []int{0}}, "宽字符"},
+		{"StringOr wide charactors with smaller width", args{"宽字符", "", []int{5}}, "宽字符"},
+		{"StringOr wide charactors with same width", args{"宽字符", "", []int{6}}, "宽字符"},
 	}
 
 	for _, tt := range tests {

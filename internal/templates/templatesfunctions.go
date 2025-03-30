@@ -17,7 +17,6 @@ import (
 	"github.com/volte6/gomud/internal/language"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/skills"
-	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 	"github.com/volte6/gomud/internal/util"
 )
@@ -113,7 +112,7 @@ var (
 		"numberFormat": numberFormat,
 		"mod":          func(a, b int) int { return a % b },
 		"stringor":     stringOr,
-		"splitstring":  SplitStringNL,
+		"splitstring":  util.SplitStringNL,
 		"ansiparse":    TplAnsiParse,
 		"buffname": func(buffId int) string {
 			buffSpec := buffs.GetBuffSpec(buffId)
@@ -375,46 +374,6 @@ func stringOr(a string, b string, padding ...int) string {
 		str = padRight(padding[0], str)
 	}
 	return str
-}
-
-// Splits a string by adding line breaks at the end of each line
-func SplitStringNL(input string, lineWidth int, nlPrefix ...string) string {
-
-	output := strings.Builder{}
-
-	words := strings.Fields(input) // Split the input into words
-
-	linePrefix := ""
-	if len(nlPrefix) > 0 {
-		linePrefix = nlPrefix[0]
-	}
-
-	currentLine := ""
-	for _, word := range words {
-		if len(currentLine)+len(word)+1 <= lineWidth { // +1 for the space
-			if currentLine == "" {
-				currentLine = word
-			} else {
-				currentLine += " " + word
-			}
-		} else {
-			if linePrefix != "" && output.Len() > 0 {
-				output.WriteString(linePrefix)
-			}
-			output.WriteString(currentLine)
-			output.WriteString(term.CRLFStr)
-			currentLine = word
-		}
-	}
-
-	if currentLine != "" {
-		if linePrefix != "" && output.Len() > 0 {
-			output.WriteString(linePrefix)
-		}
-		output.WriteString(currentLine)
-	}
-
-	return output.String()
 }
 
 func formatDuration(seconds int) string {

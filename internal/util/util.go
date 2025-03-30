@@ -21,6 +21,7 @@ import (
 
 	"crypto/md5"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/term"
 )
@@ -48,6 +49,16 @@ var (
 	}
 
 	colorShortTagRegex = regexp.MustCompile(`\{(\d*)(?::)?(\d*)?\}`)
+
+	// One CJK character, punctuation, and symbol is one word.
+	// \p{Han}: chinese
+	// \p{Hiragana}: Japanese
+	// \p{Katakana}: Japanese
+	// \p{Hangul}: Korean
+	// \w: alphanumeric
+	// \p{P}: punctuation
+	// \p{S}: symbol
+	wordRegex = regexp.MustCompile(`([\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]|\w+|[\p{P}\p{S}\s]+)`)
 
 	mudLock = sync.RWMutex{}
 )
@@ -172,24 +183,31 @@ func LogRoll(name string, rollResult int, targetNumber int) {
 
 func SplitString(input string, lineWidth int) []string {
 	var result []string
+	var currentLine string
+	currentLen := 0
 
 	parts := strings.Split(input, "\n")
 
 	for _, textLine := range parts {
+		words := wordRegex.FindAllString(textLine, -1)
 
-		words := strings.Fields(textLine) // Split the input into words
-
-		currentLine := ""
 		for _, word := range words {
-			if len(currentLine)+len(word)+1 <= lineWidth { // +1 for the space
-				if currentLine == "" {
-					currentLine = word
-				} else {
-					currentLine += " " + word
+			wordLen := runewidth.StringWidth(word)
+			if wordLen > lineWidth {
+				result = append(result, word)
+				continue
+			}
+
+			if currentLen+wordLen > lineWidth {
+				if currentLine != "" {
+					result = append(result, strings.TrimRight(currentLine, " "))
 				}
+				// clear spaces at the beginning of the line
+				currentLine = strings.TrimLeft(word, " ")
+				currentLen = runewidth.StringWidth(currentLine)
 			} else {
-				result = append(result, currentLine)
-				currentLine = word
+				currentLine += word
+				currentLen += wordLen
 			}
 		}
 
@@ -203,42 +221,14 @@ func SplitString(input string, lineWidth int) []string {
 
 // Splits a string by adding line breaks at the end of each line
 func SplitStringNL(input string, lineWidth int, nlPrefix ...string) string {
-
-	output := strings.Builder{}
-
-	words := strings.Fields(input) // Split the input into words
+	lines := SplitString(input, lineWidth)
 
 	linePrefix := ""
 	if len(nlPrefix) > 0 {
 		linePrefix = nlPrefix[0]
 	}
 
-	currentLine := ""
-	for _, word := range words {
-		if len(currentLine)+len(word)+1 <= lineWidth { // +1 for the space
-			if currentLine == "" {
-				currentLine = word
-			} else {
-				currentLine += " " + word
-			}
-		} else {
-			if linePrefix != "" && output.Len() > 0 {
-				output.WriteString(linePrefix)
-			}
-			output.WriteString(currentLine)
-			output.WriteString(term.CRLFStr)
-			currentLine = word
-		}
-	}
-
-	if currentLine != "" {
-		if linePrefix != "" && output.Len() > 0 {
-			output.WriteString(linePrefix)
-		}
-		output.WriteString(currentLine)
-	}
-
-	return output.String()
+	return strings.Join(lines, term.CRLFStr+linePrefix)
 }
 
 func SplitButRespectQuotes(s string) []string {
