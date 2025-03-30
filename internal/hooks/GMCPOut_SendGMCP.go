@@ -1,7 +1,9 @@
 package hooks
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
@@ -39,6 +41,12 @@ func GMCPOut_SendGMCP(e events.Event) events.ListenerReturn {
 			mudlog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
 			return events.Continue
 		}
+
+		// DEBUG ONLY
+		// TODO: REMOVE
+		var prettyJSON bytes.Buffer
+		json.Indent(&prettyJSON, payload, "", "\t")
+		fmt.Println(string(prettyJSON.Bytes()))
 
 		connections.SendTo(term.GmcpPayload.BytesWithPayload(payload), connId)
 	}

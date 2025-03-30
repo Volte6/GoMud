@@ -1,6 +1,8 @@
 package hooks
 
 import (
+	"strings"
+
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/skills"
@@ -32,7 +34,7 @@ func ForceGMCPCharUpdate(e events.Event) events.ListenerReturn {
 
 		events.AddToQueue(events.GMCPUpdate{
 			UserId:     userId,
-			Identifier: ask,
+			Identifier: ask, // char, char.info, char.inventory, char.stats, char.vitals, char.worth *Can comma seaparate for multiple*
 		})
 
 	}
@@ -60,66 +62,73 @@ func BuildGMCPPayload(e events.Event) events.ListenerReturn {
 
 	if len(evt.Identifier) >= 4 {
 
+		requestedId := strings.ToLower(evt.Identifier)
+
 		payload := GMCPChar{}
 
-		// Info
-		if WantsGMCPPayload(`Char.Info`, evt.Identifier) {
-			payload.Info.Account = user.Username
-			payload.Info.Name = user.Character.Name
-			payload.Info.Class = skills.GetProfession(user.Character.GetAllSkillRanks())
-			payload.Info.Race = user.Character.Race()
-			payload.Info.Alignment = user.Character.AlignmentName()
-			payload.Info.Level = user.Character.Level
-		}
+		for _, requestIdPart := range strings.Split(requestedId, `,`) {
 
-		// Inventory
-		if WantsGMCPPayload(`Char.Inventory`, evt.Identifier) {
-			// // Backpack
-			payload.Inventory.Backpack.Count = len(user.Character.Items)
-			payload.Inventory.Backpack.Items = []string{}
-			for _, itm := range user.Character.Items {
-				payload.Inventory.Backpack.Items = append(payload.Inventory.Backpack.Items, itm.Name())
+			requestIdPart = strings.TrimSpace(requestIdPart)
+
+			// Info
+			if WantsGMCPPayload(`char.info`, requestIdPart) {
+				payload.Info.Account = user.Username
+				payload.Info.Name = user.Character.Name
+				payload.Info.Class = skills.GetProfession(user.Character.GetAllSkillRanks())
+				payload.Info.Race = user.Character.Race()
+				payload.Info.Alignment = user.Character.AlignmentName()
+				payload.Info.Level = user.Character.Level
 			}
-			payload.Inventory.Backpack.Max = user.Character.CarryCapacity()
-			// // Worn
-			payload.Inventory.Worn.Weapon = user.Character.Equipment.Weapon.Name()
-			payload.Inventory.Worn.Offhand = user.Character.Equipment.Offhand.Name()
-			payload.Inventory.Worn.Head = user.Character.Equipment.Head.Name()
-			payload.Inventory.Worn.Neck = user.Character.Equipment.Neck.Name()
-			payload.Inventory.Worn.Body = user.Character.Equipment.Body.Name()
-			payload.Inventory.Worn.Belt = user.Character.Equipment.Belt.Name()
-			payload.Inventory.Worn.Gloves = user.Character.Equipment.Gloves.Name()
-			payload.Inventory.Worn.Ring = user.Character.Equipment.Ring.Name()
-			payload.Inventory.Worn.Legs = user.Character.Equipment.Legs.Name()
-			payload.Inventory.Worn.Feet = user.Character.Equipment.Feet.Name()
-		}
 
-		if WantsGMCPPayload(`Char.Stats`, evt.Identifier) {
-			// Stats
-			payload.Stats.Strength = user.Character.Stats.Strength.ValueAdj
-			payload.Stats.Speed = user.Character.Stats.Speed.ValueAdj
-			payload.Stats.Smarts = user.Character.Stats.Smarts.ValueAdj
-			payload.Stats.Vitality = user.Character.Stats.Vitality.ValueAdj
-			payload.Stats.Mysticism = user.Character.Stats.Mysticism.ValueAdj
-			payload.Stats.Perception = user.Character.Stats.Perception.ValueAdj
-		}
+			// Inventory
+			if WantsGMCPPayload(`char.inventory`, requestIdPart) {
+				// // Backpack
+				payload.Inventory.Backpack.Count = len(user.Character.Items)
+				payload.Inventory.Backpack.Items = []string{}
+				for _, itm := range user.Character.Items {
+					payload.Inventory.Backpack.Items = append(payload.Inventory.Backpack.Items, itm.Name())
+				}
+				payload.Inventory.Backpack.Max = user.Character.CarryCapacity()
+				// // Worn
+				payload.Inventory.Worn.Weapon = user.Character.Equipment.Weapon.Name()
+				payload.Inventory.Worn.Offhand = user.Character.Equipment.Offhand.Name()
+				payload.Inventory.Worn.Head = user.Character.Equipment.Head.Name()
+				payload.Inventory.Worn.Neck = user.Character.Equipment.Neck.Name()
+				payload.Inventory.Worn.Body = user.Character.Equipment.Body.Name()
+				payload.Inventory.Worn.Belt = user.Character.Equipment.Belt.Name()
+				payload.Inventory.Worn.Gloves = user.Character.Equipment.Gloves.Name()
+				payload.Inventory.Worn.Ring = user.Character.Equipment.Ring.Name()
+				payload.Inventory.Worn.Legs = user.Character.Equipment.Legs.Name()
+				payload.Inventory.Worn.Feet = user.Character.Equipment.Feet.Name()
+			}
 
-		if WantsGMCPPayload(`Char.Vitals`, evt.Identifier) {
-			// Vitals
-			payload.Vitals.Hp = user.Character.Health
-			payload.Vitals.HpMax = user.Character.HealthMax.Value
-			payload.Vitals.Sp = user.Character.Mana
-			payload.Vitals.SpMax = user.Character.ManaMax.Value
-		}
+			if WantsGMCPPayload(`char.stats`, requestIdPart) {
+				// Stats
+				payload.Stats.Strength = user.Character.Stats.Strength.ValueAdj
+				payload.Stats.Speed = user.Character.Stats.Speed.ValueAdj
+				payload.Stats.Smarts = user.Character.Stats.Smarts.ValueAdj
+				payload.Stats.Vitality = user.Character.Stats.Vitality.ValueAdj
+				payload.Stats.Mysticism = user.Character.Stats.Mysticism.ValueAdj
+				payload.Stats.Perception = user.Character.Stats.Perception.ValueAdj
+			}
 
-		if WantsGMCPPayload(`Char.Worth`, evt.Identifier) {
-			// Worth
-			payload.Worth.Gold = user.Character.Gold
-			payload.Worth.Bank = user.Character.Bank
-			payload.Worth.SkillPoints = user.Character.StatPoints
-			payload.Worth.TrainingPoints = user.Character.TrainingPoints
-			payload.Worth.TNL = user.Character.XPTL(user.Character.Level + 1)
-			payload.Worth.XP = user.Character.Experience
+			if WantsGMCPPayload(`char.vitals`, requestIdPart) {
+				// Vitals
+				payload.Vitals.Hp = user.Character.Health
+				payload.Vitals.HpMax = user.Character.HealthMax.Value
+				payload.Vitals.Sp = user.Character.Mana
+				payload.Vitals.SpMax = user.Character.ManaMax.Value
+			}
+
+			if WantsGMCPPayload(`char.worth`, requestIdPart) {
+				// Worth
+				payload.Worth.Gold = user.Character.Gold
+				payload.Worth.Bank = user.Character.Bank
+				payload.Worth.SkillPoints = user.Character.StatPoints
+				payload.Worth.TrainingPoints = user.Character.TrainingPoints
+				payload.Worth.TNL = user.Character.XPTL(user.Character.Level + 1)
+				payload.Worth.XP = user.Character.Experience
+			}
 		}
 
 		events.AddToQueue(events.GMCPOut{

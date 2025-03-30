@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/rooms"
@@ -59,18 +58,6 @@ func HandleJoin(e events.Event) events.ListenerReturn {
 			})
 
 		}
-
-	}
-
-	//
-	// Send GMCP for their char name
-	//
-	if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
-
-		events.AddToQueue(events.GMCPOut{
-			UserId:  user.UserId,
-			Payload: fmt.Sprintf(`Char.Name {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name),
-		})
 
 	}
 
