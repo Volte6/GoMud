@@ -3,7 +3,6 @@ package modules
 import (
 	"strings"
 
-	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/plugins"
@@ -175,7 +174,7 @@ func (g *GMCPCharModule) buildAndSendGMCPPayload(e events.Event) events.Listener
 
 	// Make sure they have this gmcp module enabled.
 	user := users.GetByUserId(evt.UserId)
-	if user == nil || !connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
+	if user == nil {
 		return events.Continue
 	}
 

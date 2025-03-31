@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/mudlog"
@@ -426,13 +425,12 @@ func TryRoomScripts(input, alias, rest string, userId int) (bool, error) {
 			alias == "southwest" || alias == "southeast") {
 
 			// Send GMCP message for script-blocked direction
-			if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-				if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
-					if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok { // make sure the func definition is `func(int, any, ...string)`
-						gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, alias))
-					}
+			if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
+				if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok { // make sure the func definition is `func(int, any, ...string)`
+					gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, alias))
 				}
 			}
+
 		}
 	}
 
