@@ -139,7 +139,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 					// Send GMCP message
 					if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
 						if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
-							if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok {
+							if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok { // make sure the func definition is `func(int, any, ...string)`
 								gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, exitName))
 							}
 						}
@@ -367,7 +367,7 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 			if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
 
 				if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
-					if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok {
+					if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok { // make sure the func definition is `func(int, any, ...string)`
 						gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, rest))
 					}
 				}

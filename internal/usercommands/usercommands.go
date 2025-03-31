@@ -428,7 +428,7 @@ func TryRoomScripts(input, alias, rest string, userId int) (bool, error) {
 			// Send GMCP message for script-blocked direction
 			if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
 				if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
-					if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok {
+					if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok { // make sure the func definition is `func(int, any, ...string)`
 						gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, alias))
 					}
 				}
