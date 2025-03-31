@@ -86,15 +86,6 @@ type WebClientCommand struct {
 
 func (w WebClientCommand) Type() string { return `WebClientCommand` }
 
-// GMCP Commands from clients to server
-type GMCPIn struct {
-	ConnectionId uint64
-	Command      string
-	Json         []byte
-}
-
-func (g GMCPIn) Type() string { return `GMCPIn` }
-
 // Messages that are intended to reach all users on the system
 type System struct {
 	Command string
