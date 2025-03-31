@@ -98,6 +98,7 @@ func (g GMCPIn) Type() string { return `GMCPIn` }
 // GMCP Commands from server to client
 type GMCPOut struct {
 	UserId  int
+	Module  string
 	Payload any
 }
 

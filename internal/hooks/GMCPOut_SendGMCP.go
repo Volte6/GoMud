@@ -32,8 +32,36 @@ func GMCPOut_SendGMCP(e events.Event) events.ListenerReturn {
 
 	switch v := gmcp.Payload.(type) {
 	case []byte:
+
+		// DEBUG ONLY
+		// TODO: REMOVE
+		if gmcp.UserId == 1 {
+			if len(gmcp.Module) > 0 {
+				fmt.Print(gmcp.Module + ` `)
+			}
+			fmt.Println(string(v))
+		}
+
+		if len(gmcp.Module) > 0 {
+			v = append([]byte(gmcp.Module), v...)
+		}
+
 		connections.SendTo(term.GmcpPayload.BytesWithPayload(v), connId)
 	case string:
+
+		// DEBUG ONLY
+		// TODO: REMOVE
+		if gmcp.UserId == 1 {
+			if len(gmcp.Module) > 0 {
+				fmt.Print(gmcp.Module + ` `)
+			}
+			fmt.Println(string(v))
+		}
+
+		if len(gmcp.Module) > 0 {
+			v = gmcp.Module + v
+		}
+
 		connections.SendTo(term.GmcpPayload.BytesWithPayload([]byte(v)), connId)
 	default:
 		payload, err := json.Marshal(gmcp.Payload)
@@ -47,7 +75,15 @@ func GMCPOut_SendGMCP(e events.Event) events.ListenerReturn {
 		if gmcp.UserId == 1 {
 			var prettyJSON bytes.Buffer
 			json.Indent(&prettyJSON, payload, "", "\t")
+
+			if len(gmcp.Module) > 0 {
+				fmt.Print(gmcp.Module + ` `)
+			}
 			fmt.Println(string(prettyJSON.Bytes()))
+		}
+
+		if len(gmcp.Module) > 0 {
+			payload = append([]byte(gmcp.Module), payload...)
 		}
 
 		connections.SendTo(term.GmcpPayload.BytesWithPayload(payload), connId)
