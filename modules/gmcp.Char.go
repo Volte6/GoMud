@@ -27,14 +27,13 @@ func init() {
 	g := GMCPCharModule{
 		plug: plugins.New(`gmcp.Char`, `1.0`),
 	}
+	g.plug.Requires(`gmcp`, `1.0`)
 
 	events.RegisterListener(events.EquipmentChange{}, g.equipmentChangeHandler)
 	events.RegisterListener(events.PlayerSpawn{}, g.playSpawnHandler)
 	events.RegisterListener(events.CharacterVitalsChanged{}, g.vitalsChangedHandler)
-
 	events.RegisterListener(events.LevelUp{}, g.levelUpHandler)
 	events.RegisterListener(events.CharacterTrained{}, g.charTrainedHandler)
-
 	events.RegisterListener(GMCPUpdate{}, g.buildAndSendGMCPPayload)
 
 }

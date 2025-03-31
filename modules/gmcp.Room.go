@@ -30,6 +30,7 @@ func init() {
 	g := GMCPRoomModule{
 		plug: plugins.New(`gmcp.Room`, `1.0`),
 	}
+	g.plug.Requires(`gmcp`, `1.0`)
 
 	// Temporary for testing purposes.
 	events.RegisterListener(events.RoomChange{}, g.rommChangeHandler)

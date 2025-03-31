@@ -27,7 +27,7 @@ func init() {
 	// how to use a struct
 	//
 	g := GMCPModule{
-		plug: plugins.New(`gmcp.Char`, `1.0`),
+		plug: plugins.New(`gmcp`, `1.0`),
 	}
 
 	g.plug.ExportFunction(`SendGMCPEvent`, g.sendGMCPEvent)
