@@ -15,6 +15,7 @@ type DisplaySettings struct {
 	ScreenWidth  uint32
 	ScreenHeight uint32
 }
+
 type DiscordSettings struct {
 	User    string // person#1234
 	Private bool

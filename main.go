@@ -134,6 +134,7 @@ func main() {
 	// Register the plugin filesystem with the template system
 	templates.RegisterFS(plugins.GetPluginRegistry())
 	usercommands.AddFunctionExporter(plugins.GetPluginRegistry())
+	inputhandlers.AddIACHandler(plugins.GetPluginRegistry())
 
 	//
 	// System Configurations
@@ -348,10 +349,12 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 	)
 
 	// Send request to enable GMCP
-	connections.SendTo(
-		term.GmcpEnable.BytesWithPayload(nil),
-		connDetails.ConnectionId(),
-	)
+	/*
+		connections.SendTo(
+			term.GmcpEnable.BytesWithPayload(nil),
+			connDetails.ConnectionId(),
+		)
+	*/
 
 	// Send request to enable MSP
 	connections.SendTo(

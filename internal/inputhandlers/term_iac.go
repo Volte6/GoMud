@@ -1,14 +1,23 @@
 package inputhandlers
 
 import (
-	"encoding/json"
-	"strings"
-
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/term"
 )
+
+var (
+	iacHandlers = []IACHandler{}
+)
+
+type IACHandler interface {
+	HandleIAC(uint64, []byte) bool
+}
+
+func AddIACHandler(h IACHandler) {
+	iacHandlers = append(iacHandlers, h)
+}
 
 func TelnetIACHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {
 
@@ -40,101 +49,15 @@ func TelnetIACHandler(clientInput *connections.ClientInput, sharedState map[stri
 	for _, iacCmd := range iacCmds {
 		// Check incoming Telnet IAC commands for anything useful...
 
-		if term.IsGMCPCommand(iacCmd) {
-
-			if ok, payload := term.Matches(iacCmd, term.GmcpAccept); ok {
-				mudlog.Debug("Received", "type", "IAC (Client-GMCP Accept)", "data", term.BytesString(payload))
-				continue
+		handlerFound := false
+		for _, h := range iacHandlers {
+			if h.HandleIAC(clientInput.ConnectionId, iacCmd) {
+				handlerFound = true
+				break
 			}
+		}
 
-			if ok, payload := term.Matches(iacCmd, term.GmcpRefuse); ok {
-				mudlog.Debug("Received", "type", "IAC (Client-GMCP Refuse)", "data", term.BytesString(payload))
-				continue
-			}
-
-			if len(iacCmd) >= 5 && iacCmd[len(iacCmd)-2] == term.TELNET_IAC && iacCmd[len(iacCmd)-1] == term.TELNET_SE {
-				// Unhanlded IAC command, log it
-
-				requestBody := iacCmd[3 : len(iacCmd)-2]
-				//mudlog.Debug("Received", "type", "GMCP", "size", len(iacCmd), "data", string(requestBody))
-
-				spaceAt := 0
-				for i := 0; i < len(requestBody); i++ {
-					if requestBody[i] == 32 {
-						spaceAt = i
-						break
-					}
-				}
-
-				command := ``
-				payload := []byte{}
-
-				if spaceAt > 0 && spaceAt < len(requestBody) {
-					command = string(requestBody[0:spaceAt])
-					payload = requestBody[spaceAt+1:]
-				} else {
-					command = string(requestBody)
-				}
-
-				if _, ok := term.SupportedGMCP[command]; !ok {
-					mudlog.Error("Received", "type", "GMCP (Ignored)", "command", command, "payload", string(payload))
-					continue
-				}
-
-				mudlog.Debug("Received", "type", "GMCP (Handling)", "command", command, "payload", string(payload))
-
-				switch command {
-
-				case `External.Discord.Hello`:
-					decoded := term.GMCPDiscord{}
-					if err := json.Unmarshal(payload, &decoded); err == nil {
-						cs := connections.GetClientSettings(clientInput.ConnectionId)
-						cs.Discord.User = decoded.User
-						cs.Discord.Private = decoded.Private
-						connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
-					}
-				case `Core.Hello`:
-					decoded := term.GMCPHello{}
-					if err := json.Unmarshal(payload, &decoded); err == nil {
-						cs := connections.GetClientSettings(clientInput.ConnectionId)
-						cs.Client.Name = decoded.Client
-						cs.Client.Version = decoded.Version
-						if strings.EqualFold(decoded.Client, `mudlet`) {
-							cs.Client.IsMudlet = true
-						}
-						connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
-					}
-				case `Core.Supports.Set`:
-					decoded := term.GMCPSupportsSet{}
-					if err := json.Unmarshal(payload, &decoded); err == nil {
-						cs := connections.GetClientSettings(clientInput.ConnectionId)
-						cs.GMCPModules = decoded.GetSupportedModules()
-						connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
-					}
-				case `Core.Supports.Remove`:
-					decoded := term.GMCPSupportsRemove{}
-					if err := json.Unmarshal(payload, &decoded); err == nil {
-						cs := connections.GetClientSettings(clientInput.ConnectionId)
-						if len(cs.GMCPModules) > 0 {
-							for _, name := range decoded {
-								delete(cs.GMCPModules, name)
-							}
-						}
-						connections.OverwriteClientSettings(clientInput.ConnectionId, cs)
-					}
-				case `Char.Login`:
-					decoded := term.GMCPLogin{}
-					if err := json.Unmarshal(payload, &decoded); err == nil {
-						mudlog.Debug("GMCP LOGIN", "username", decoded.Name, "password", decoded.Password)
-					}
-				}
-
-				continue
-			}
-
-			// Unhanlded IAC command, log it
-			mudlog.Debug("Received", "type", "GMCP?", "size", len(iacCmd), "data", string(iacCmd))
-
+		if handlerFound {
 			continue
 		}
 

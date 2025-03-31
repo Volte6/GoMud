@@ -57,8 +57,9 @@ type Plugin struct {
 		userCommands map[string]usercommands.CommandAccess
 		mobCommands  map[string]mobcommands.CommandAccess
 
-		onLoad func()
-		onSave func()
+		iacHandler func(uint64, []byte) bool
+		onLoad     func()
+		onSave     func()
 	}
 
 	exportedFunctions map[string]any
@@ -119,6 +120,20 @@ func (p pluginRegistry) NavLinks() map[string]string {
 	}
 
 	return allLinks
+}
+
+func (p pluginRegistry) HandleIAC(connectionId uint64, iacCmd []byte) bool {
+
+	for _, pItem := range p {
+		if pItem.callbacks.iacHandler == nil {
+			continue
+		}
+		if pItem.callbacks.iacHandler(connectionId, iacCmd) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (p pluginRegistry) WebRequest(r *http.Request) (html string, templateData map[string]any, ok bool) {
@@ -294,6 +309,10 @@ func (p *Plugin) AttachFileSystem(f embed.FS) error {
 	}
 
 	return nil
+}
+
+func (p *Plugin) SetIACHandler(f func(uint64, []byte) bool) {
+	p.callbacks.iacHandler = f
 }
 
 func (p *Plugin) SetOnLoad(f func()) {
