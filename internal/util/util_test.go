@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/mattn/go-runewidth"
+	"github.com/stretchr/testify/assert"
 )
 
 // Because turnCount, roundCount and timeTrackers are package-level globals,
@@ -206,52 +207,244 @@ func TestRand(t *testing.T) {
 }
 
 func TestSplitString(t *testing.T) {
-	// Basic test
-	input := "This is a sample sentence to be tested."
-	lines := SplitString(input, 10)
-
-	// We expect lines of around 10 characters wide
-	// For instance:
-	// "This is a" => length 10
-	// "sample" => length 6
-	// "sentence" => length 8
-	// "to be" => length 5
-	// "tested." => length 7
-	// This exact break-up can vary depending on spaces, etc.
-
-	if len(lines) < 3 {
-		t.Fatalf("Expected at least 3 lines, got %d", len(lines))
+	type args struct {
+		input string
+		width int
 	}
 
-	// Also test an input that includes explicit newlines
-	inputWithNewline := "This line fits\nand this line might not"
-	lines2 := SplitString(inputWithNewline, 10)
-	if len(lines2) < 2 {
-		t.Fatalf("Expected at least 2 lines because of explicit newline, got %d", len(lines2))
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			"SplitString",
+			args{
+				`This is a sample sentence to be tested.`,
+				10,
+			},
+			[]string{
+				`This is a`,
+				`sample`,
+				`sentence`,
+				`to be`,
+				`tested.`,
+			},
+		},
+		{
+			"SplitString punctuation at eol",
+			args{
+				`Hello alex, this is a test.`,
+				10,
+			},
+			[]string{
+				`Hello`,
+				`alex, this`,
+				`is a test.`,
+			},
+		},
+		{
+			"SplitString punctuation at eol 2",
+			args{
+				`Hello alex, this is a test!!!`,
+				10,
+			},
+			[]string{
+				`Hello`,
+				`alex, this`,
+				`is a`,
+				`test!!!`,
+			},
+		},
+		{
+			"SplitString long text",
+			args{
+				`As your senses attune to the stillness around, you find yourself engulfed in an impenetrable void, ` +
+					`a realm where darkness reigns supreme. ` +
+					`The abyss seems to stretch infinitely in all directions, ` +
+					`and you feel a chilling isolation seeping into your very bones.`,
+				79,
+			},
+			[]string{
+				`As your senses attune to the stillness around, you find yourself engulfed in an`,
+				`impenetrable void, a realm where darkness reigns supreme. The abyss seems to`,
+				`stretch infinitely in all directions, and you feel a chilling isolation seeping`,
+				`into your very bones.`,
+			},
+		},
+		{
+			"SplitString wide charactors",
+			args{
+				`当你的感官与周围的静谧相适应时，你发现自己被吞噬在一个无法穿透的虚空中，一个黑` +
+					`暗至上的领域。深渊似乎向四面八方无限延伸，你感到一种令人不寒而栗的孤独感正渗入` +
+					`你的骨髓。`,
+				79,
+			},
+			[]string{
+				`当你的感官与周围的静谧相适应时，你发现自己被吞噬在一个无法穿透的虚空中，一个黑`,
+				`暗至上的领域。深渊似乎向四面八方无限延伸，你感到一种令人不寒而栗的孤独感正渗入`,
+				`你的骨髓。`,
+			},
+		},
+		{
+			"SplitString mixed charactors",
+			args{
+				`这是一个测试文本，用于验证CJK字符和英文单词的分割行为。Hello world, this is a test!`,
+				10,
+			},
+			[]string{`这是一个测`,
+				`试文本，用`,
+				`于验证CJK`,
+				`字符和英文`,
+				`单词的分割`,
+				`行为。`,
+				`Hello`,
+				`world,`,
+				`this is a`,
+				`test!`,
+			},
+		},
+		{
+			"SplitString mixed charactors and punctuation at eol",
+			args{
+				`测试的文本，用于验证CJK字符。`,
+				10,
+			},
+			[]string{
+				`测试的文`,
+				`本，用于验`,
+				`证CJK字`,
+				`符。`,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := SplitString(tt.args.input, tt.args.width)
+			assert.Equal(t, tt.want, got)
+		})
 	}
 }
 
 func TestSplitStringNL(t *testing.T) {
-	input := "This is a longer line that we want to wrap around nicely."
-	wrapped := SplitStringNL(input, 10)
-
-	// We can simply check that the output does not exceed width 10 (excluding the optional prefix),
-	// and that it's separated by CRLF from the term package, though we won't check the CRLF specifically here.
-	lines := strings.Split(wrapped, "\r\n") // from term.CRLFStr
-	for _, line := range lines {
-		if len(line) > 10 {
-			t.Fatalf("Line %q exceeded the width of 10", line)
-		}
+	type args struct {
+		input  string
+		width  int
+		prefix []string
 	}
 
-	// Also check with prefix
-	prefixed := SplitStringNL(input, 10, "> ")
-	lines = strings.Split(prefixed, "\r\n")
-	// If there's more than one line, subsequent lines should have prefix
-	for i, line := range lines {
-		if i > 0 && !strings.HasPrefix(line, "> ") && line != "" {
-			t.Fatalf("Expected prefix '> ' on line %d, got %q", i, line)
-		}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			"SplitStringNL",
+			args{
+				`This is a sample sentence to be tested.`,
+				10, nil,
+			},
+			`This is a` + "\r\n" +
+				`sample` + "\r\n" +
+				`sentence` + "\r\n" +
+				`to be` + "\r\n" +
+				`tested.`,
+		},
+		{
+			"SplitStringNL punctuation at eol",
+			args{
+				`Hello alex, this is a test.`,
+				10, nil,
+			},
+			`Hello` + "\r\n" +
+				`alex, this` + "\r\n" +
+				`is a test.`,
+		},
+		{
+			"SplitStringNL punctuation at eol 2",
+			args{
+				`Hello alex, this is a test!!!`,
+				10, nil,
+			},
+			`Hello` + "\r\n" +
+				`alex, this` + "\r\n" +
+				`is a` + "\r\n" +
+				`test!!!`,
+		},
+		{
+			"SplitStringNL long text",
+			args{
+				`As your senses attune to the stillness around, you find yourself engulfed in an impenetrable void, ` +
+					`a realm where darkness reigns supreme. ` +
+					`The abyss seems to stretch infinitely in all directions, ` +
+					`and you feel a chilling isolation seeping into your very bones.`,
+				79, nil,
+			},
+			`As your senses attune to the stillness around, you find yourself engulfed in an` + "\r\n" +
+				`impenetrable void, a realm where darkness reigns supreme. The abyss seems to` + "\r\n" +
+				`stretch infinitely in all directions, and you feel a chilling isolation seeping` + "\r\n" +
+				`into your very bones.`,
+		},
+		{
+			"SplitStringNL with prefix",
+			args{
+				`As your senses attune to the stillness around, you find yourself engulfed in an impenetrable void, ` +
+					`a realm where darkness reigns supreme. ` +
+					`The abyss seems to stretch infinitely in all directions, ` +
+					`and you feel a chilling isolation seeping into your very bones.`,
+				79, []string{"> "},
+			},
+			`As your senses attune to the stillness around, you find yourself engulfed in an` + "\r\n" +
+				`> impenetrable void, a realm where darkness reigns supreme. The abyss seems to` + "\r\n" +
+				`> stretch infinitely in all directions, and you feel a chilling isolation seeping` + "\r\n" +
+				`> into your very bones.`,
+		},
+		{
+			"SplitStringNL wide charactors",
+			args{
+				`当你的感官与周围的静谧相适应时，你发现自己被吞噬在一个无法穿透的虚空中，一个黑` +
+					`暗至上的领域。深渊似乎向四面八方无限延伸，你感到一种令人不寒而栗的孤独感正渗入` +
+					`你的骨髓。`,
+				79, nil},
+			`当你的感官与周围的静谧相适应时，你发现自己被吞噬在一个无法穿透的虚空中，一个黑` + "\r\n" +
+				`暗至上的领域。深渊似乎向四面八方无限延伸，你感到一种令人不寒而栗的孤独感正渗入` + "\r\n" +
+				`你的骨髓。`,
+		},
+		{
+			"SplitStringNL mixed charactors",
+			args{
+				`这是一个测试文本，用于验证CJK字符和英文单词的分割行为。Hello world, this is a test!`,
+				10, nil},
+			`这是一个测` + "\r\n" +
+				`试文本，用` + "\r\n" +
+				`于验证CJK` + "\r\n" +
+				`字符和英文` + "\r\n" +
+				`单词的分割` + "\r\n" +
+				`行为。` + "\r\n" +
+				`Hello` + "\r\n" +
+				`world,` + "\r\n" +
+				`this is a` + "\r\n" +
+				`test!`,
+		},
+		{
+			"SplitString mixed charactors and punctuation at eol",
+			args{
+				`测试的文本，用于验证CJK字符。`,
+				10, nil,
+			},
+			`测试的文` + "\r\n" +
+				`本，用于验` + "\r\n" +
+				`证CJK字` + "\r\n" +
+				`符。`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := SplitStringNL(tt.args.input, tt.args.width, tt.args.prefix...)
+			assert.Equal(t, tt.want, got)
+		})
 	}
 }
 
