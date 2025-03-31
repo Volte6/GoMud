@@ -92,7 +92,11 @@ type GMCPLogin struct {
 
 func (g *GMCPModule) getModules(connectionId uint64) map[string]int {
 	data, ok := g.cache.Get(connectionId)
+
+	// It may not be here, or it may have been evicted.
+	// Re-request if this happens.
 	if !ok {
+		g.sendGMCPEnableRequest(connectionId)
 		data = map[string]int{}
 		g.cache.Add(connectionId, data)
 	}
@@ -190,7 +194,7 @@ func (g *GMCPModule) HandleIAC(connectionId uint64, iacCmd []byte) bool {
 	}
 
 	// Unhanlded IAC command, log it
-	mudlog.Debug("Received", "type", "GMCP?", "size", len(iacCmd), "data", string(iacCmd))
+	mudlog.Debug("Received", "type", "GMCP?", "data-size", len(iacCmd), "data-string", string(iacCmd), "data-bytes", iacCmd)
 
 	return true
 }
@@ -227,12 +231,17 @@ func (g *GMCPModule) handlePlayerJoin(e events.Event) events.ListenerReturn {
 	}
 
 	// Send request to enable GMCP
-	connections.SendTo(
-		GmcpEnable.BytesWithPayload(nil),
-		user.ConnectionId(),
-	)
+	g.getModules(user.ConnectionId())
 
 	return events.Continue
+}
+
+// Sends a telnet IAC request to enable GMCP
+func (g *GMCPModule) sendGMCPEnableRequest(connectionId uint64) {
+	connections.SendTo(
+		GmcpEnable.BytesWithPayload(nil),
+		connectionId,
+	)
 }
 
 // Checks whether their level is too high for a guide
@@ -254,12 +263,11 @@ func (g *GMCPModule) dispatchGMCP(e events.Event) events.ListenerReturn {
 	}
 
 	// Get enabled modules... if none, skip out.
-	/*
-		enabledModules := g.getModules(connId)
-		if len(enabledModules) == 0 {
-			return events.Continue
-		}
-	*/
+
+	enabledModules := g.getModules(connId)
+	if len(enabledModules) == 0 {
+		return events.Continue
+	}
 
 	switch v := gmcp.Payload.(type) {
 	case []byte:

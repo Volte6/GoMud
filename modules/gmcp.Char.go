@@ -34,6 +34,7 @@ func init() {
 	events.RegisterListener(events.LevelUp{}, g.levelUpHandler)
 	events.RegisterListener(events.CharacterTrained{}, g.charTrainedHandler)
 	events.RegisterListener(GMCPUpdate{}, g.buildAndSendGMCPPayload)
+	events.RegisterListener(events.GainExperience{}, g.xpGainHandler)
 
 }
 
@@ -65,6 +66,26 @@ func (g *GMCPCharModule) vitalsChangedHandler(e events.Event) events.ListenerRet
 	events.AddToQueue(GMCPUpdate{
 		UserId:     evt.UserId,
 		Identifier: `char.vitals`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth *Can comma seaparate for multiple*
+	})
+
+	return events.Continue
+}
+
+func (g *GMCPCharModule) xpGainHandler(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(events.GainExperience)
+	if !typeOk {
+		return events.Continue // Return false to stop halt the event chain for this event
+	}
+
+	if evt.UserId == 0 {
+		return events.Continue
+	}
+
+	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
+	events.AddToQueue(GMCPUpdate{
+		UserId:     evt.UserId,
+		Identifier: `char.worth`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth *Can comma seaparate for multiple*
 	})
 
 	return events.Continue
@@ -191,64 +212,83 @@ func (g *GMCPCharModule) buildAndSendGMCPPayload(e events.Event) events.Listener
 				continue
 			}
 
-			// Info
 			if g.wantsGMCPPayload(`char.info`, requestIdPart) {
-				payload.Info.Account = user.Username
-				payload.Info.Name = user.Character.Name
-				payload.Info.Class = skills.GetProfession(user.Character.GetAllSkillRanks())
-				payload.Info.Race = user.Character.Race()
-				payload.Info.Alignment = user.Character.AlignmentName()
-				payload.Info.Level = user.Character.Level
+				payload.Info = &GMCPCharModule_Payload_Info{
+					Account:   user.Username,
+					Name:      user.Character.Name,
+					Class:     skills.GetProfession(user.Character.GetAllSkillRanks()),
+					Race:      user.Character.Race(),
+					Alignment: user.Character.AlignmentName(),
+					Level:     user.Character.Level,
+				}
+
 			}
 
-			// Inventory
 			if g.wantsGMCPPayload(`char.inventory`, requestIdPart) {
-				// // Backpack
-				payload.Inventory.Backpack.Count = len(user.Character.Items)
-				payload.Inventory.Backpack.Items = []string{}
+
+				payload.Inventory = &GMCPCharModule_Payload_Inventory{
+
+					Backpack: &GMCPCharModule_Payload_Inventory_Backpack{
+						Count: len(user.Character.Items),
+						Items: []string{},
+						Max:   user.Character.CarryCapacity(),
+					},
+
+					Worn: &GMCPCharModule_Payload_Inventory_Worn{
+						Weapon:  user.Character.Equipment.Weapon.Name(),
+						Offhand: user.Character.Equipment.Offhand.Name(),
+						Head:    user.Character.Equipment.Head.Name(),
+						Neck:    user.Character.Equipment.Neck.Name(),
+						Body:    user.Character.Equipment.Body.Name(),
+						Belt:    user.Character.Equipment.Belt.Name(),
+						Gloves:  user.Character.Equipment.Gloves.Name(),
+						Ring:    user.Character.Equipment.Ring.Name(),
+						Legs:    user.Character.Equipment.Legs.Name(),
+						Feet:    user.Character.Equipment.Feet.Name(),
+					},
+				}
+
+				// Fill the items list
 				for _, itm := range user.Character.Items {
 					payload.Inventory.Backpack.Items = append(payload.Inventory.Backpack.Items, itm.Name())
 				}
-				payload.Inventory.Backpack.Max = user.Character.CarryCapacity()
-				// // Worn
-				payload.Inventory.Worn.Weapon = user.Character.Equipment.Weapon.Name()
-				payload.Inventory.Worn.Offhand = user.Character.Equipment.Offhand.Name()
-				payload.Inventory.Worn.Head = user.Character.Equipment.Head.Name()
-				payload.Inventory.Worn.Neck = user.Character.Equipment.Neck.Name()
-				payload.Inventory.Worn.Body = user.Character.Equipment.Body.Name()
-				payload.Inventory.Worn.Belt = user.Character.Equipment.Belt.Name()
-				payload.Inventory.Worn.Gloves = user.Character.Equipment.Gloves.Name()
-				payload.Inventory.Worn.Ring = user.Character.Equipment.Ring.Name()
-				payload.Inventory.Worn.Legs = user.Character.Equipment.Legs.Name()
-				payload.Inventory.Worn.Feet = user.Character.Equipment.Feet.Name()
 			}
 
 			if g.wantsGMCPPayload(`char.stats`, requestIdPart) {
-				// Stats
-				payload.Stats.Strength = user.Character.Stats.Strength.ValueAdj
-				payload.Stats.Speed = user.Character.Stats.Speed.ValueAdj
-				payload.Stats.Smarts = user.Character.Stats.Smarts.ValueAdj
-				payload.Stats.Vitality = user.Character.Stats.Vitality.ValueAdj
-				payload.Stats.Mysticism = user.Character.Stats.Mysticism.ValueAdj
-				payload.Stats.Perception = user.Character.Stats.Perception.ValueAdj
+
+				payload.Stats = &GMCPCharModule_Payload_Stats{
+					Strength:   user.Character.Stats.Strength.ValueAdj,
+					Speed:      user.Character.Stats.Speed.ValueAdj,
+					Smarts:     user.Character.Stats.Smarts.ValueAdj,
+					Vitality:   user.Character.Stats.Vitality.ValueAdj,
+					Mysticism:  user.Character.Stats.Mysticism.ValueAdj,
+					Perception: user.Character.Stats.Perception.ValueAdj,
+				}
+
 			}
 
 			if g.wantsGMCPPayload(`char.vitals`, requestIdPart) {
-				// Vitals
-				payload.Vitals.Hp = user.Character.Health
-				payload.Vitals.HpMax = user.Character.HealthMax.Value
-				payload.Vitals.Sp = user.Character.Mana
-				payload.Vitals.SpMax = user.Character.ManaMax.Value
+
+				payload.Vitals = &GMCPCharModule_Payload_Vitals{
+					Hp:    user.Character.Health,
+					HpMax: user.Character.HealthMax.Value,
+					Sp:    user.Character.Mana,
+					SpMax: user.Character.ManaMax.Value,
+				}
+
 			}
 
 			if g.wantsGMCPPayload(`char.worth`, requestIdPart) {
-				// Worth
-				payload.Worth.Gold = user.Character.Gold
-				payload.Worth.Bank = user.Character.Bank
-				payload.Worth.SkillPoints = user.Character.StatPoints
-				payload.Worth.TrainingPoints = user.Character.TrainingPoints
-				payload.Worth.TNL = user.Character.XPTL(user.Character.Level + 1)
-				payload.Worth.XP = user.Character.Experience
+
+				payload.Worth = &GMCPCharModule_Payload_Worth{
+					Gold:           user.Character.Gold,
+					Bank:           user.Character.Bank,
+					SkillPoints:    user.Character.StatPoints,
+					TrainingPoints: user.Character.TrainingPoints,
+					TNL:            user.Character.XPTL(user.Character.Level),
+					XP:             user.Character.Experience,
+				}
+
 			}
 		}
 
@@ -282,61 +322,82 @@ func (g *GMCPCharModule) wantsGMCPPayload(searchName string, identifier string) 
 }
 
 type GMCPCharModule_Payload struct {
-	//
-	Info struct {
-		Account   string `json:"account,omitempty"`
-		Name      string `json:"name,omitempty"`
-		Class     string `json:"class,omitempty"`
-		Race      string `json:"race,omitempty"`
-		Alignment string `json:"alignment,omitempty"`
-		Level     int    `json:"level,omitempty"`
-	} `json:"Info,omitempty"`
-	//
-	Inventory struct {
-		//
-		Backpack struct {
-			Count int      `json:"count,omitempty"`
-			Items []string `json:"items,omitempty"`
-			Max   int      `json:"max,omitempty"`
-		} `json:"Backpack,omitempty"`
+	Info      *GMCPCharModule_Payload_Info      `json:"Info,omitempty"`
+	Inventory *GMCPCharModule_Payload_Inventory `json:"Inventory,omitempty"`
+	Stats     *GMCPCharModule_Payload_Stats     `json:"Stats,omitempty"`
+	Vitals    *GMCPCharModule_Payload_Vitals    `json:"Vitals,omitempty"`
+	Worth     *GMCPCharModule_Payload_Worth     `json:"Worth,omitempty"`
+}
 
-		Worn struct {
-			Weapon  string `json:"weapon,omitempty"`
-			Offhand string `json:"offhand,omitempty"`
-			Head    string `json:"head,omitempty"`
-			Neck    string `json:"neck,omitempty"`
-			Body    string `json:"body,omitempty"`
-			Belt    string `json:"belt,omitempty"`
-			Gloves  string `json:"gloves,omitempty"`
-			Ring    string `json:"ring,omitempty"`
-			Legs    string `json:"legs,omitempty"`
-			Feet    string `json:"feet,omitempty"`
-		} `json:"Worn"`
-		//
-	} `json:"Inventory,omitempty"`
-	//
-	Stats struct {
-		Strength   int `json:"strength,omitempty"`
-		Speed      int `json:"speed,omitempty"`
-		Smarts     int `json:"smarts,omitempty"`
-		Vitality   int `json:"vitality,omitempty"`
-		Mysticism  int `json:"mysticism,omitempty"`
-		Perception int `json:"perception,omitempty"`
-	} `json:"Stats,omitempty"`
-	//
-	Vitals struct {
-		Hp    int `json:"hp,omitempty"`
-		HpMax int `json:"hp_max,omitempty"`
-		Sp    int `json:"sp,omitempty"`
-		SpMax int `json:"sp_max,omitempty"`
-	} `json:"Vitals,omitempty"`
-	//
-	Worth struct {
-		Gold           int `json:"gold_carry,omitempty"`
-		Bank           int `json:"gold_bank,omitempty"`
-		SkillPoints    int `json:"skillpoints,omitempty"`
-		TrainingPoints int `json:"trainingpoints,omitempty"`
-		TNL            int `json:"tnl,omitempty"`
-		XP             int `json:"xp,omitempty"`
-	} `json:"Worth,omitempty"`
+// /////////////////
+// Char.Info
+// /////////////////
+type GMCPCharModule_Payload_Info struct {
+	Account   string `json:"account,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Class     string `json:"class,omitempty"`
+	Race      string `json:"race,omitempty"`
+	Alignment string `json:"alignment,omitempty"`
+	Level     int    `json:"level,omitempty"`
+}
+
+// /////////////////
+// Char.Inventory
+// /////////////////
+type GMCPCharModule_Payload_Inventory struct {
+	Backpack *GMCPCharModule_Payload_Inventory_Backpack `json:"Backpack,omitempty"`
+	Worn     *GMCPCharModule_Payload_Inventory_Worn     `json:"Worn"`
+}
+
+type GMCPCharModule_Payload_Inventory_Backpack struct {
+	Count int      `json:"count,omitempty"`
+	Items []string `json:"items,omitempty"`
+	Max   int      `json:"max,omitempty"`
+}
+
+type GMCPCharModule_Payload_Inventory_Worn struct {
+	Weapon  string `json:"weapon,omitempty"`
+	Offhand string `json:"offhand,omitempty"`
+	Head    string `json:"head,omitempty"`
+	Neck    string `json:"neck,omitempty"`
+	Body    string `json:"body,omitempty"`
+	Belt    string `json:"belt,omitempty"`
+	Gloves  string `json:"gloves,omitempty"`
+	Ring    string `json:"ring,omitempty"`
+	Legs    string `json:"legs,omitempty"`
+	Feet    string `json:"feet,omitempty"`
+}
+
+// /////////////////
+// Char.Stats
+// /////////////////
+type GMCPCharModule_Payload_Stats struct {
+	Strength   int `json:"strength,omitempty"`
+	Speed      int `json:"speed,omitempty"`
+	Smarts     int `json:"smarts,omitempty"`
+	Vitality   int `json:"vitality,omitempty"`
+	Mysticism  int `json:"mysticism,omitempty"`
+	Perception int `json:"perception,omitempty"`
+}
+
+// /////////////////
+// Char.Vitals
+// /////////////////
+type GMCPCharModule_Payload_Vitals struct {
+	Hp    int `json:"hp,omitempty"`
+	HpMax int `json:"hp_max,omitempty"`
+	Sp    int `json:"sp,omitempty"`
+	SpMax int `json:"sp_max,omitempty"`
+}
+
+// /////////////////
+// Char.Worth
+// /////////////////
+type GMCPCharModule_Payload_Worth struct {
+	Gold           int `json:"gold_carry,omitempty"`
+	Bank           int `json:"gold_bank,omitempty"`
+	SkillPoints    int `json:"skillpoints,omitempty"`
+	TrainingPoints int `json:"trainingpoints,omitempty"`
+	TNL            int `json:"tnl,omitempty"`
+	XP             int `json:"xp,omitempty"`
 }

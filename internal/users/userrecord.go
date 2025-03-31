@@ -184,6 +184,12 @@ func (u *UserRecord) GrantXP(amt int, source string) {
 		u.EventLog.Add(`xp`, fmt.Sprintf(`Gained <ansi fg="yellow-bold">%d experience points</ansi>! <ansi fg="7">(%s)</ansi>`, grantXP, source))
 	}
 
+	events.AddToQueue(events.GainExperience{
+		UserId:     u.UserId,
+		Experience: grantXP,
+		Scale:      xpScale,
+	})
+
 	if newLevel, statsDelta := u.Character.LevelUp(); newLevel {
 
 		c := configs.GetGamePlayConfig()

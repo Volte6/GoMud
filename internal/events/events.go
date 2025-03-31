@@ -2,7 +2,11 @@ package events
 
 import (
 	"container/heap"
+	"math/rand"
 	"sync"
+	"time"
+
+	"github.com/volte6/gomud/internal/util"
 )
 
 type EventType string
@@ -157,6 +161,15 @@ func addToRequeue(e Event, priority ...int) {
 // It processes events one at a time in order of priority.
 // Any events enqueued (even from within a handler) will be picked up in order.
 func ProcessEvents() {
+
+	// Since this is intended to run frequently and quickly
+	// Only sample the runtime 1 in 100 times
+	if rand.Intn(100) == 0 {
+		start := time.Now()
+		defer func() {
+			util.TrackTime(`events.ProcessEvents()`, time.Since(start).Seconds())
+		}()
+	}
 
 	qLock.Lock()
 

@@ -191,6 +191,14 @@ type Log struct {
 
 func (l Log) Type() string { return `Log` }
 
+type GainExperience struct {
+	UserId     int
+	Experience int
+	Scale      int
+}
+
+func (l GainExperience) Type() string { return `GainExperience` }
+
 type LevelUp struct {
 	UserId         int
 	RoomId         int
