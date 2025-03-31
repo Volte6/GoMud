@@ -9,7 +9,6 @@ import (
 
 //
 // RoomChangeHandler waits for RoomChange events
-// It then sends out GMCP data updates
 // Also sends music changes out
 //
 
