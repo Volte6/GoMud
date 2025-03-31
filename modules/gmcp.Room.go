@@ -32,7 +32,8 @@ func init() {
 	}
 
 	// Temporary for testing purposes.
-	events.RegisterListener(events.RoomChange{}, g.LocationGMCPUpdates)
+	events.RegisterListener(events.RoomChange{}, g.rommChangeHandler)
+	events.RegisterListener(events.PlayerDespawn{}, g.despawnHandler)
 
 }
 
@@ -41,7 +42,53 @@ type GMCPRoomModule struct {
 	plug *plugins.Plugin
 }
 
-func (g *GMCPRoomModule) LocationGMCPUpdates(e events.Event) events.ListenerReturn {
+func (g *GMCPRoomModule) despawnHandler(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(events.PlayerDespawn)
+	if !typeOk {
+		mudlog.Error("Event", "Expected Type", "PlayerDespawn", "Actual Type", e.Type())
+		return events.Cancel
+	}
+
+	// If this isn't a user changing rooms, just pass it along.
+	if evt.UserId == 0 {
+		return events.Continue
+	}
+
+	room := rooms.LoadRoom(evt.RoomId)
+	if room == nil {
+		return events.Continue
+	}
+
+	//
+	// Send GMCP Updates for players leaving
+	//
+	for _, uid := range room.GetPlayers() {
+
+		if uid == evt.UserId {
+			continue
+		}
+
+		u := users.GetByUserId(uid)
+		if u == nil {
+			continue
+		}
+
+		if !connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
+			continue
+		}
+
+		events.AddToQueue(events.GMCPOut{
+			UserId:  uid,
+			Payload: fmt.Sprintf(`Room.RemovePlayer "%s"`, evt.CharacterName),
+		})
+
+	}
+
+	return events.Continue
+}
+
+func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.RoomChange)
 	if !typeOk {

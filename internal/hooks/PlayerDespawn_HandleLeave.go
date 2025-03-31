@@ -57,27 +57,6 @@ func HandleLeave(e events.Event) events.ListenerReturn {
 		room.SendText(tplTxt)
 	}
 
-	//
-	// Send GMCP Updates for players leaving
-	//
-	for _, uid := range room.GetPlayers() {
-
-		if uid == user.UserId {
-			continue
-		}
-
-		if u := users.GetByUserId(uid); u != nil {
-			if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
-
-				events.AddToQueue(events.GMCPOut{
-					UserId:  uid,
-					Payload: fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name),
-				})
-
-			}
-		}
-	}
-
 	tplTxt, _ := templates.Process("goodbye", nil, evt.UserId)
 	connections.SendTo([]byte(templates.AnsiParse(tplTxt)), connId)
 
