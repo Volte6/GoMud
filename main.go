@@ -348,14 +348,6 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		connDetails.ConnectionId(),
 	)
 
-	// Send request to enable GMCP
-	/*
-		connections.SendTo(
-			term.GmcpEnable.BytesWithPayload(nil),
-			connDetails.ConnectionId(),
-		)
-	*/
-
 	// Send request to enable MSP
 	connections.SendTo(
 		term.MspEnable.BytesWithPayload(nil),
