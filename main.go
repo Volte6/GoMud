@@ -32,6 +32,7 @@ import (
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/language"
+	"github.com/volte6/gomud/internal/usercommands"
 
 	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mobs"
@@ -132,6 +133,7 @@ func main() {
 
 	// Register the plugin filesystem with the template system
 	templates.RegisterFS(plugins.GetPluginRegistry())
+	usercommands.AddFunctionExporter(plugins.GetPluginRegistry())
 
 	//
 	// System Configurations

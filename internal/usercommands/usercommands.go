@@ -32,7 +32,17 @@ type CommandAccess struct {
 // Signature of user command
 type UserCommand func(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error)
 
+type FunctionExporter interface {
+	GetExportedFunction(funcName string) (any, bool)
+}
+
+func AddFunctionExporter(f FunctionExporter) {
+	functionExporters = append(functionExporters, f)
+}
+
 var (
+	functionExporters = []FunctionExporter{}
+
 	userCommands map[string]CommandAccess = map[string]CommandAccess{
 		`aid`:         {Aid, false, false},
 		`alias`:       {Alias, true, false},
@@ -172,6 +182,15 @@ var (
 		`myself`,
 	}
 )
+
+func GetExportedFunction(fName string) (any, bool) {
+	for _, x := range functionExporters {
+		if f, ok := x.GetExportedFunction(fName); ok {
+			return f, ok
+		}
+	}
+	return nil, false
+}
 
 // Returns a list of close match commands
 func GetCmdSuggestions(text string, includeAdmin bool) []string {
@@ -408,10 +427,11 @@ func TryRoomScripts(input, alias, rest string, userId int) (bool, error) {
 
 			// Send GMCP message for script-blocked direction
 			if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-				events.AddToQueue(events.GMCPOut{
-					UserId:  userId,
-					Payload: fmt.Sprintf(`Room.WrongDir "%s"`, alias),
-				})
+				if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
+					if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok {
+						gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, alias))
+					}
+				}
 			}
 		}
 	}

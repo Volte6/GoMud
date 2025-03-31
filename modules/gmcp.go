@@ -1,4 +1,4 @@
-package hooks
+package modules
 
 import (
 	"bytes"
@@ -8,14 +8,66 @@ import (
 	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/volte6/gomud/internal/plugins"
 	"github.com/volte6/gomud/internal/term"
 	"github.com/volte6/gomud/internal/users"
 )
 
-// Checks whether their level is too high for a guide
-func GMCPOut_SendGMCP(e events.Event) events.ListenerReturn {
+// ////////////////////////////////////////////////////////////////////
+// NOTE: The init function in Go is a special function that is
+// automatically executed before the main function within a package.
+// It is used to initialize variables, set up configurations, or
+// perform any other setup tasks that need to be done before the
+// program starts running.
+// ////////////////////////////////////////////////////////////////////
+func init() {
 
-	gmcp, typeOk := e.(events.GMCPOut)
+	//
+	// We can use all functions only, but this demonstrates
+	// how to use a struct
+	//
+	g := GMCPModule{
+		plug: plugins.New(`gmcp.Char`, `1.0`),
+	}
+
+	g.plug.ExportFunction(`SendGMCPEvent`, g.sendGMCPEvent)
+
+	events.RegisterListener(GMCPOut{}, g.dispatchGMCP)
+
+}
+
+// GMCP Commands from server to client
+type GMCPOut struct {
+	UserId  int
+	Module  string
+	Payload any
+}
+
+func (g GMCPOut) Type() string { return `GMCPOut` }
+
+type GMCPModule struct {
+	// Keep a reference to the plugin when we create it so that we can call ReadBytes() and WriteBytes() on it.
+	plug *plugins.Plugin
+}
+
+func (g *GMCPModule) sendGMCPEvent(userId int, payload any, moduleName ...string) {
+
+	evt := GMCPOut{
+		UserId:  userId,
+		Payload: payload,
+	}
+
+	if len(moduleName) > 0 {
+		evt.Module = moduleName[0]
+	}
+
+	events.AddToQueue(evt)
+}
+
+// Checks whether their level is too high for a guide
+func (g *GMCPModule) dispatchGMCP(e events.Event) events.ListenerReturn {
+
+	gmcp, typeOk := e.(GMCPOut)
 	if !typeOk {
 		mudlog.Error("Event", "Expected Type", "GMCPOut", "Actual Type", e.Type())
 		return events.Cancel

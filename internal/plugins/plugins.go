@@ -94,8 +94,8 @@ func New(name string, version string) *Plugin {
 	return p
 }
 
-func (p pluginRegistry) GetFunction(funcName string) (any, bool) {
-	for _, pItem := range p {
+func (p pluginRegistry) GetExportedFunction(funcName string) (any, bool) {
+	for _, pItem := range registry {
 
 		if pItem.exportedFunctions == nil {
 			continue

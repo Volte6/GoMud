@@ -138,11 +138,13 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 					user.SendText(`There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.`)
 					// Send GMCP message
 					if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-						events.AddToQueue(events.GMCPOut{
-							UserId:  user.UserId,
-							Payload: fmt.Sprintf(`Room.WrongDir "%s"`, exitName),
-						})
+						if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
+							if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok {
+								gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, exitName))
+							}
+						}
 					}
+
 					return true, nil
 				}
 			}
@@ -363,10 +365,13 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 
 			// Send GMCP message
 			if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-				events.AddToQueue(events.GMCPOut{
-					UserId:  user.UserId,
-					Payload: fmt.Sprintf(`Room.WrongDir "%s"`, rest),
-				})
+
+				if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
+					if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok {
+						gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, rest))
+					}
+				}
+
 			}
 
 			if !user.Character.HasBuffFlag(buffs.Hidden) {

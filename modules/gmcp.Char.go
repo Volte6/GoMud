@@ -254,7 +254,7 @@ func (g *GMCPCharModule) buildAndSendGMCPPayload(e events.Event) events.Listener
 			}
 		}
 
-		events.AddToQueue(events.GMCPOut{
+		events.AddToQueue(GMCPOut{
 			UserId:  evt.UserId,
 			Module:  `Char`,
 			Payload: payload,

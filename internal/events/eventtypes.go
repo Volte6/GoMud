@@ -95,15 +95,6 @@ type GMCPIn struct {
 
 func (g GMCPIn) Type() string { return `GMCPIn` }
 
-// GMCP Commands from server to client
-type GMCPOut struct {
-	UserId  int
-	Module  string
-	Payload any
-}
-
-func (g GMCPOut) Type() string { return `GMCPOut` }
-
 // Messages that are intended to reach all users on the system
 type System struct {
 	Command string

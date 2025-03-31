@@ -78,7 +78,7 @@ func (g *GMCPRoomModule) despawnHandler(e events.Event) events.ListenerReturn {
 			continue
 		}
 
-		events.AddToQueue(events.GMCPOut{
+		events.AddToQueue(GMCPOut{
 			UserId:  uid,
 			Payload: fmt.Sprintf(`Room.RemovePlayer "%s"`, evt.CharacterName),
 		})
@@ -261,7 +261,7 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 		// End room info
 
 		// send big 'ol room info object
-		events.AddToQueue(events.GMCPOut{
+		events.AddToQueue(GMCPOut{
 			UserId:  user.UserId,
 			Payload: "Room.Info " + roomInfoStr.String(),
 		})
@@ -287,7 +287,7 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 
 			if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
 
-				events.AddToQueue(events.GMCPOut{
+				events.AddToQueue(GMCPOut{
 					UserId:  uid,
 					Payload: fmt.Sprintf(`Room.AddPlayer {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name),
 				})
@@ -299,7 +299,7 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 	if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
 
 		// send player list for room
-		events.AddToQueue(events.GMCPOut{
+		events.AddToQueue(GMCPOut{
 			UserId:  user.UserId,
 			Payload: "Room.Players {" + newRoomPlayers.String() + `}`,
 		})
@@ -319,7 +319,7 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 				continue
 			}
 
-			events.AddToQueue(events.GMCPOut{
+			events.AddToQueue(GMCPOut{
 				UserId:  uid,
 				Payload: fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name),
 			})

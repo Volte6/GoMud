@@ -59,8 +59,6 @@ func RegisterListeners() {
 	// Looking
 	events.RegisterListener(events.Looking{}, HandleLookHints)
 
-	// GMCPOut
-	events.RegisterListener(events.GMCPOut{}, GMCPOut_SendGMCP)
 	// Messages
 	events.RegisterListener(events.Message{}, Message_SendMessage)
 	// Prompt
