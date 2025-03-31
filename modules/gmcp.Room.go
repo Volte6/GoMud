@@ -296,11 +296,15 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 		}
 	}
 
-	// send player list for room
-	events.AddToQueue(events.GMCPOut{
-		UserId:  user.UserId,
-		Payload: "Room.Players {" + newRoomPlayers.String() + `}`,
-	})
+	if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
+
+		// send player list for room
+		events.AddToQueue(events.GMCPOut{
+			UserId:  user.UserId,
+			Payload: "Room.Players {" + newRoomPlayers.String() + `}`,
+		})
+
+	}
 
 	// Send to everyone in the old room that a player left
 	for _, uid := range oldRoom.GetPlayers() {
@@ -310,12 +314,16 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 		}
 
 		if u := users.GetByUserId(uid); u != nil {
-			if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
-				events.AddToQueue(events.GMCPOut{
-					UserId:  uid,
-					Payload: fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name),
-				})
+
+			if !connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
+				continue
 			}
+
+			events.AddToQueue(events.GMCPOut{
+				UserId:  uid,
+				Payload: fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name),
+			})
+
 		}
 	}
 
