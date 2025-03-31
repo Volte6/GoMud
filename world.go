@@ -725,7 +725,6 @@ loop:
 			statsTimer.Reset(time.Duration(10) * time.Second)
 
 		case <-roomUpdateTimer.C:
-			mudlog.Debug(`MainWorker`, `action`, `rooms.RoomMaintenance()`)
 
 			// TODO: Move this to events
 			util.LockMud()

@@ -225,9 +225,6 @@ func iacByteString(b byte) string {
 		return "OPT_LINE_MODE"
 	case TELNET_OPT_ENV:
 		return "OPT_ENV"
-	// GMCP code
-	case GMCP:
-		return "GMCP"
 	// Random have come up
 	case TELNET_OPT_NEW_ENV: // 39
 		return "OPT_NEW_ENV"

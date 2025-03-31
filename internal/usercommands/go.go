@@ -5,7 +5,6 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
@@ -137,11 +136,9 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 				if exitInfo.Lock.IsLocked() {
 					user.SendText(`There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.`)
 					// Send GMCP message
-					if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-						if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
-							if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok { // make sure the func definition is `func(int, any, ...string)`
-								gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, exitName))
-							}
+					if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
+						if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok { // make sure the func definition is `func(int, any, ...string)`
+							gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, exitName))
 						}
 					}
 
@@ -364,14 +361,10 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 			user.SendText("You're bumping into walls.")
 
 			// Send GMCP message
-			if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-
-				if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
-					if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok { // make sure the func definition is `func(int, any, ...string)`
-						gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, rest))
-					}
+			if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
+				if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok { // make sure the func definition is `func(int, any, ...string)`
+					gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, rest))
 				}
-
 			}
 
 			if !user.Character.HasBuffFlag(buffs.Hidden) {

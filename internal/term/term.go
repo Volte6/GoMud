@@ -197,74 +197,74 @@ func IsAnsiCommand(b []byte) bool {
 }
 
 type TerminalCommand struct {
-	chars    []byte
-	endChars []byte
+	Chars    []byte
+	EndChars []byte
 }
 
 func (cmd *TerminalCommand) BytesWithPayload(payload []byte) []byte {
 	result := []byte{}
-	result = append(result, cmd.chars...)
+	result = append(result, cmd.Chars...)
 	if len(payload) > 0 {
 		result = append(result, payload...)
 	}
-	result = append(result, cmd.endChars...)
+	result = append(result, cmd.EndChars...)
 	return result
 }
 
 func (cmd *TerminalCommand) ExtractBody(input []byte) []byte {
-	if len(cmd.chars) == 0 {
+	if len(cmd.Chars) == 0 {
 		return input
 	}
-	return input[len(cmd.chars) : len(input)-len(cmd.endChars)]
+	return input[len(cmd.Chars) : len(input)-len(cmd.EndChars)]
 }
 
 func Matches(input []byte, cmd TerminalCommand) (ok bool, payload []byte) {
 	// The length of the testBytes should at least be the same as the chars plus endchars
-	if len(input) < len(cmd.chars)+len(cmd.endChars) {
+	if len(input) < len(cmd.Chars)+len(cmd.EndChars) {
 		return false, nil
 	}
 	// Check the start chars
-	for i, b := range cmd.chars {
+	for i, b := range cmd.Chars {
 		if b != input[i] {
 			return false, nil
 		}
 	}
 
-	if len(cmd.endChars) == 0 {
-		if len(input) == len(cmd.chars) {
+	if len(cmd.EndChars) == 0 {
+		if len(input) == len(cmd.Chars) {
 			return true, nil
 		}
 		// Return any remaining ("payload") bytes
-		return true, input[len(cmd.chars):]
+		return true, input[len(cmd.Chars):]
 	}
 
 	// Check the end chars
-	for i, b := range cmd.endChars {
-		if b != input[len(input)-len(cmd.endChars)+i] {
+	for i, b := range cmd.EndChars {
+		if b != input[len(input)-len(cmd.EndChars)+i] {
 			return false, nil
 		}
 	}
 
-	if len(input) == len(cmd.chars)+len(cmd.endChars) {
+	if len(input) == len(cmd.Chars)+len(cmd.EndChars) {
 		return true, nil
 	}
 	// Return any "payload" bytes
-	return true, input[len(cmd.chars) : len(input)-len(cmd.endChars)]
+	return true, input[len(cmd.Chars) : len(input)-len(cmd.EndChars)]
 }
 
 func (c *TerminalCommand) String() string {
-	return string(c.chars) + string(c.endChars)
+	return string(c.Chars) + string(c.EndChars)
 }
 
 func (c *TerminalCommand) StringWithPayload(payload string) string {
-	return string(c.chars) + payload + string(c.endChars)
+	return string(c.Chars) + payload + string(c.EndChars)
 }
 
 func (c *TerminalCommand) DebugString() string {
-	if c.chars[0] == TELNET_IAC {
-		return TelnetCommandToString(c.chars) + TelnetCommandToString(c.endChars)
-	} else if c.chars[0] == ANSI_ESC {
-		return AnsiCommandToString(c.chars) + AnsiCommandToString(c.endChars)
+	if c.Chars[0] == TELNET_IAC {
+		return TelnetCommandToString(c.Chars) + TelnetCommandToString(c.EndChars)
+	} else if c.Chars[0] == ANSI_ESC {
+		return AnsiCommandToString(c.Chars) + AnsiCommandToString(c.EndChars)
 	}
 	return "???"
 }

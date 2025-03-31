@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
@@ -302,26 +301,6 @@ func Set(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 			UserId: user.UserId,
 			Name:   `screenreader`,
 		})
-
-		return true, nil
-	}
-
-	// hidden command for debugging purposes.
-	if setTarget == `gmcp` {
-
-		cs := connections.GetClientSettings(user.ConnectionId())
-		if cs.GMCPModules == nil {
-			cs.GMCPModules = map[string]int{}
-		}
-
-		if _, ok := cs.GMCPModules[`*`]; ok {
-			user.SendText(`GMCP forced support toggled <ansi fg="red">OFF</ansi>.`)
-			delete(cs.GMCPModules, `*`)
-		} else {
-			user.SendText(`GMCP forced support toggled <ansi fg="red">ON</ansi>.`)
-			cs.GMCPModules[`*`] = 1
-		}
-		connections.OverwriteClientSettings(user.ConnectionId(), cs)
 
 		return true, nil
 	}
