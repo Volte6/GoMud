@@ -689,9 +689,6 @@ func (w *World) MainWorker(shutdown chan bool, wg *sync.WaitGroup) {
 	turnTimer := time.NewTimer(time.Duration(c.Timing.TurnMs) * time.Millisecond)
 	statsTimer := time.NewTimer(time.Duration(10) * time.Second)
 
-	var accLoopCounter int = 0
-	var accLoopDuration time.Duration
-	var accMaintCounter int = 0
 loop:
 	for {
 
@@ -728,11 +725,6 @@ loop:
 			statsTimer.Reset(time.Duration(10) * time.Second)
 
 		case <-roomUpdateTimer.C:
-			accMaintCounter++
-			if accMaintCounter == 10 {
-				mudlog.Debug(`MainWorker`, `action`, `rooms.RoomMaintenance()`, `sample rate`, `x`+strconv.Itoa(accMaintCounter))
-				accMaintCounter = 0
-			}
 
 			// TODO: Move this to events
 			util.LockMud()
@@ -755,23 +747,7 @@ loop:
 			eventLoopTimer.Reset(time.Millisecond)
 
 			util.LockMud()
-
-			tStart := time.Now()
-
 			w.EventLoop()
-
-			tEnd := time.Now()
-			duration := tEnd.Sub(tStart)
-			accLoopDuration += duration
-			accLoopCounter++
-
-			if accLoopDuration > time.Minute {
-				averageDuration := accLoopDuration / time.Duration(accLoopCounter)
-				mudlog.Info(`EventLoop`, `Time Taken`, averageDuration)
-				accLoopCounter = 0
-				accLoopDuration = 0
-			}
-
 			util.UnlockMud()
 
 		case <-turnTimer.C:
