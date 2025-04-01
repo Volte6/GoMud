@@ -60,6 +60,8 @@ func init() {
 	events.RegisterListener(GMCPOut{}, g.dispatchGMCP)
 	events.RegisterListener(events.PlayerSpawn{}, g.handlePlayerJoin)
 
+	events.RegisterListener(GMCPRequestModules{}, g.handleGMCPUpdateRequest)
+
 }
 
 // ///////////////////
@@ -81,6 +83,13 @@ type GMCPModules struct {
 }
 
 func (g GMCPModules) Type() string { return `GMCPModules` }
+
+// Sent by modules that are missing module data and need it resent
+type GMCPRequestModules struct {
+	ConnectionId uint64
+}
+
+func (g GMCPRequestModules) Type() string { return `GMCPRequestModules` }
 
 // ///////////////////
 // END EVENTS
@@ -307,6 +316,28 @@ func (g *GMCPModule) supportsModule(connectionId uint64, moduleName string) bool
 	}
 
 	return false
+}
+
+func (g *GMCPModule) handleGMCPUpdateRequest(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(GMCPRequestModules)
+	if !typeOk {
+		mudlog.Error("Event", "Expected Type", "GMCPRequestModules", "Actual Type", e.Type())
+		return events.Cancel
+	}
+
+	if evt.ConnectionId == 0 {
+		return events.Continue
+	}
+
+	modules := g.getModules(evt.ConnectionId)
+
+	events.AddToQueue(GMCPModules{
+		ConnectionId: evt.ConnectionId,
+		Modules:      modules,
+	})
+
+	return events.Continue
 }
 
 // Checks whether their level is too high for a guide

@@ -354,10 +354,14 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 }
 
 func (g *GMCPRoomModule) supportsModule(connectionId uint64, moduleName string) bool {
-	if supportedModules, ok := g.cache.Get(connectionId); ok {
+	supportedModules, ok := g.cache.Get(connectionId)
+	if ok {
 		if _, ok := supportedModules[moduleName]; ok {
 			return true
 		}
+	} else {
+		// Request that the gmcp module get the data and send the event
+		events.AddToQueue(GMCPRequestModules{ConnectionId: connectionId})
 	}
 	return false
 }

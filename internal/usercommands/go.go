@@ -345,12 +345,14 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 			}
 
 			handled = true
-			Look(``, user, destRoom, events.CmdSecretly) // Do a secret look.
+			//Look(``, user, destRoom, events.CmdSecretly) // Do a secret look.
+			user.CommandFlagged(`look`, events.CmdSecretly) // Do a secret look.
 
 			scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId)
 
 			room.PlaySound(`room-exit`, `movement`, user.UserId)
 			destRoom.PlaySound(`room-enter`, `movement`, user.UserId)
+
 		}
 
 	}
