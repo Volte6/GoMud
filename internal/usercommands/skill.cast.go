@@ -282,6 +282,7 @@ func Cast(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 		if continueCasting {
 			user.Character.Mana -= spellInfo.Cost
+			events.AddToQueue(events.CharacterVitalsChanged{UserId: user.UserId})
 			user.Character.SetCast(spellInfo.WaitRounds, spellAggro)
 		}
 

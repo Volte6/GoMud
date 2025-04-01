@@ -32,7 +32,7 @@ func HandlePlayerSpawn(e events.Event) events.ListenerReturn {
 
 	message := fmt.Sprintf(":white_check_mark: **%s** connected", user.Character.Name)
 
-	if connDetails.IsWebsocket() {
+	if connDetails.IsWebSocket() {
 		message += ` (via websocket)`
 	}
 

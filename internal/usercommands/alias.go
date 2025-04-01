@@ -1,7 +1,9 @@
 package usercommands
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/keywords"
@@ -11,6 +13,28 @@ import (
 )
 
 func Alias(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
+
+	if rest != `` {
+		if strings.Index(rest, `=`) != -1 {
+			parts := strings.SplitN(rest, `=`, 2)
+			aliasName := parts[0]
+			aliasVal := ``
+			if len(parts) > 1 {
+				aliasVal = parts[1]
+			}
+
+			addedAlias, deletedAlias := user.AddCommandAlias(aliasName, aliasVal)
+
+			if addedAlias != `` {
+				user.SendText(fmt.Sprintf(`<ansi fg="yellow">Custom Alias Added:</ansi> <ansi fg="command">%s</ansi>=<ansi fg="command">%s</ansi>`, addedAlias, aliasVal))
+			}
+			if deletedAlias != `` {
+				user.SendText(fmt.Sprintf(`<ansi fg="yellow">Custom Alias Removed:</ansi> <ansi fg="command">%s</ansi>`, deletedAlias))
+			}
+			return true, nil
+
+		}
+	}
 
 	// biuld array and look up table for sorting purposes
 	allOutCmds := []string{}
@@ -29,8 +53,6 @@ func Alias(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 	headers := []string{"Alias", "Command"}
 	rows := [][]string{}
 
-	user.SendText(`<ansi fg="yellow">Built in Aliases:</ansi>`)
-
 	for _, outCmd := range allOutCmds {
 		inCmds := reverseLookup[outCmd]
 		for _, inCmd := range inCmds {
@@ -40,9 +62,26 @@ func Alias(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 
 	tableFormatting := []string{`<ansi fg="yellow">%s</ansi>`, `<ansi fg="command">%s</ansi>`}
 
-	aliasTableData := templates.GetTable(`Default Aliases`, headers, rows, tableFormatting)
+	aliasTableData := templates.GetTable(`Built in Aliases`, headers, rows, tableFormatting)
 	aliasTxt, _ := templates.Process("tables/generic", aliasTableData, user.UserId)
 	user.SendText(aliasTxt)
+
+	if len(user.Aliases) > 0 {
+
+		headers = []string{"Alias", "Command"}
+		rows = [][]string{}
+
+		for inCmd, outCmd := range user.Aliases {
+			rows = append(rows, []string{inCmd, outCmd})
+		}
+
+		aliasTableData := templates.GetTable(`Custom Aliases`, headers, rows, tableFormatting)
+		aliasTxt, _ := templates.Process("tables/generic", aliasTableData, user.UserId)
+		user.SendText(aliasTxt)
+	}
+
+	user.SendText(`<ansi fg="yellow"><ansi fg="command">help alias</ansi> for more information on setting custom aliases.</ansi>`)
+	user.SendText(``)
 
 	return true, nil
 }

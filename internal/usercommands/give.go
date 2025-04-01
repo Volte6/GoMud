@@ -113,6 +113,16 @@ func Give(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				targetUser.Character.Gold += giveGoldAmount
 				user.Character.Gold -= giveGoldAmount
 
+				events.AddToQueue(events.EquipmentChange{
+					UserId:     targetUser.UserId,
+					GoldChange: giveGoldAmount,
+				})
+
+				events.AddToQueue(events.EquipmentChange{
+					UserId:     user.UserId,
+					GoldChange: -giveGoldAmount,
+				})
+
 				user.SendText(
 					fmt.Sprintf(`You give <ansi fg="gold">%d gold</ansi> to <ansi fg="username">%s</ansi>.`, giveGoldAmount, targetUser.Character.Name),
 				)
@@ -149,6 +159,11 @@ func Give(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				if giveGoldAmount > 0 {
 					m.Character.Gold += giveGoldAmount
 					user.Character.Gold -= giveGoldAmount
+
+					events.AddToQueue(events.EquipmentChange{
+						UserId:     user.UserId,
+						GoldChange: -giveGoldAmount,
+					})
 
 					user.SendText(
 						fmt.Sprintf(`You give <ansi fg="gold">%d gold</ansi> to <ansi fg="username">%s</ansi>.`, giveGoldAmount, m.Character.Name),

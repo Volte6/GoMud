@@ -74,7 +74,7 @@ func IsWebsocket(id ConnectionId) bool {
 	defer lock.Unlock()
 
 	if cd, ok := netConnections[id]; ok {
-		return cd.IsWebsocket()
+		return cd.IsWebSocket()
 	}
 
 	return false

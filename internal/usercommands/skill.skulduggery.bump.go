@@ -129,6 +129,11 @@ func Bump(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 					goldDropped = util.Rand(p.Character.Gold >> 2)
 					if goldDropped > 0 {
 						p.Character.Gold -= goldDropped
+
+						events.AddToQueue(events.EquipmentChange{
+							UserId:     p.UserId,
+							GoldChange: -goldDropped,
+						})
 					}
 				}
 			}

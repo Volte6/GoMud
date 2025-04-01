@@ -89,6 +89,12 @@ func Put(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 	if goldAmt > 0 {
 		user.Character.Gold -= goldAmt
+
+		events.AddToQueue(events.EquipmentChange{
+			UserId:     user.UserId,
+			GoldChange: goldAmt,
+		})
+
 		container.Gold += goldAmt
 		user.SendText(fmt.Sprintf(`You place <ansi fg="gold">%d gold</ansi> into the <ansi fg="container">%s</ansi>`, goldAmt, containerName))
 		room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> places some <ansi fg="gold">gold</ansi> into the <ansi fg="container">%s</ansi>`, user.Character.Name, containerName), user.UserId)

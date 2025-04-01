@@ -86,23 +86,6 @@ type WebClientCommand struct {
 
 func (w WebClientCommand) Type() string { return `WebClientCommand` }
 
-// GMCP Commands from clients to server
-type GMCPIn struct {
-	ConnectionId uint64
-	Command      string
-	Json         []byte
-}
-
-func (g GMCPIn) Type() string { return `GMCPIn` }
-
-// GMCP Commands from server to client
-type GMCPOut struct {
-	UserId  int
-	Payload any
-}
-
-func (g GMCPOut) Type() string { return `GMCPOut` }
-
 // Messages that are intended to reach all users on the system
 type System struct {
 	Command string
@@ -152,6 +135,8 @@ func (n NewTurn) Type() string { return `NewTurn` }
 type EquipmentChange struct {
 	UserId        int
 	MobInstanceId int
+	GoldChange    int
+	BankChange    int
 	ItemsWorn     []items.Item
 	ItemsRemoved  []items.Item
 }
@@ -205,6 +190,14 @@ type Log struct {
 }
 
 func (l Log) Type() string { return `Log` }
+
+type GainExperience struct {
+	UserId     int
+	Experience int
+	Scale      int
+}
+
+func (l GainExperience) Type() string { return `GainExperience` }
 
 type LevelUp struct {
 	UserId         int
@@ -262,14 +255,6 @@ type Looking struct {
 
 func (l Looking) Type() string { return `Looking` }
 
-type RedrawPrompt struct {
-	UserId        int
-	OnlyIfChanged bool
-}
-
-func (l RedrawPrompt) Type() string     { return `RedrawPrompt` }
-func (l RedrawPrompt) UniqueID() string { return `RedrawPrompt-` + strconv.Itoa(l.UserId) }
-
 // Fired after creating a new character and giving the character a name.
 type CharacterCreated struct {
 	UserId        int
@@ -293,3 +278,25 @@ type UserSettingChanged struct {
 }
 
 func (i UserSettingChanged) Type() string { return `UserSettingChanged` }
+
+// Health, mana, etc.
+type CharacterVitalsChanged struct {
+	UserId int
+}
+
+func (p CharacterVitalsChanged) Type() string { return `CharacterVitalsChanged` }
+
+// Health, mana, etc.
+type CharacterTrained struct {
+	UserId int
+}
+
+func (p CharacterTrained) Type() string { return `CharacterTrained` }
+
+type RedrawPrompt struct {
+	UserId        int
+	OnlyIfChanged bool
+}
+
+func (l RedrawPrompt) Type() string     { return `RedrawPrompt` }
+func (l RedrawPrompt) UniqueID() string { return `RedrawPrompt-` + strconv.Itoa(l.UserId) }

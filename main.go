@@ -32,6 +32,7 @@ import (
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/language"
+	"github.com/volte6/gomud/internal/usercommands"
 
 	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mobs"
@@ -132,6 +133,9 @@ func main() {
 
 	// Register the plugin filesystem with the template system
 	templates.RegisterFS(plugins.GetPluginRegistry())
+	usercommands.AddFunctionExporter(plugins.GetPluginRegistry())
+
+	inputhandlers.AddIACHandler(plugins.GetPluginRegistry())
 
 	//
 	// System Configurations
@@ -204,6 +208,9 @@ func main() {
 	//
 	// Capture OS signals to gracefully shutdown the server
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// for testing purposes, enable event debugging
+	//events.SetDebug(true)
 
 	//
 	// Spin up server listeners
@@ -345,12 +352,6 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		connDetails.ConnectionId(),
 	)
 
-	// Send request to enable GMCP
-	connections.SendTo(
-		term.GmcpEnable.BytesWithPayload(nil),
-		connDetails.ConnectionId(),
-	)
-
 	// Send request to enable MSP
 	connections.SendTo(
 		term.MspEnable.BytesWithPayload(nil),
@@ -373,6 +374,8 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		[]byte(clientSetupCommands),
 		connDetails.ConnectionId(),
 	)
+
+	plugins.OnNetConnect(connDetails)
 
 	// an input buffer for reading data sent over the network
 	inputBuffer := make([]byte, connections.ReadBufferSize)
@@ -449,7 +452,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 			}
 
-			mudlog.Warn("Telnet", "error", err)
+			mudlog.Warn("Telnet", "connectionID", connDetails.ConnectionId(), "error", err)
 
 			connections.Remove(connDetails.ConnectionId())
 
@@ -692,6 +695,8 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		[]byte("!!SOUND(Off U="+configs.GetConfig().FilePaths.WebCDNLocation.String()+")"),
 		clientInput.ConnectionId,
 	)
+
+	plugins.OnNetConnect(connDetails)
 
 	if audioConfig := audio.GetFile(`intro`); audioConfig.FilePath != `` {
 		v := 100

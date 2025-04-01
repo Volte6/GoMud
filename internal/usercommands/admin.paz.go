@@ -49,6 +49,8 @@ func Paz(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 				u.Character.Health = u.Character.HealthMax.Value
 				u.Character.Mana = u.Character.ManaMax.Value
 
+				events.AddToQueue(events.CharacterVitalsChanged{UserId: u.UserId})
+
 				return true, nil
 			}
 		}
@@ -58,8 +60,12 @@ func Paz(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 	user.SendText(`You paz yourself with a ` + beamOfLight + `!`)
 	room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> illuminates <ansi fg="username">%s</ansi> with a %s!`, user.Character.Name, user.Character.Name, beamOfLight), user.UserId)
 
-	user.Character.Health = user.Character.HealthMax.Value
-	user.Character.Mana = user.Character.ManaMax.Value
+	if user.Character.Health != user.Character.HealthMax.Value || user.Character.Mana != user.Character.ManaMax.Value {
+		user.Character.Health = user.Character.HealthMax.Value
+		user.Character.Mana = user.Character.ManaMax.Value
+
+		events.AddToQueue(events.CharacterVitalsChanged{UserId: user.UserId})
+	}
 
 	return true, nil
 }

@@ -12,7 +12,7 @@ type WebPage struct {
 	DataFunction func() map[string]any
 }
 
-func NewWebConfig() WebConfig {
+func newWebConfig() WebConfig {
 	return WebConfig{
 		navLinks: map[string]string{},
 		pages:    map[string]WebPage{},

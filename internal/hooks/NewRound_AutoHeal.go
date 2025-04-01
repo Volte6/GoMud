@@ -3,7 +3,6 @@ package hooks
 import (
 	"fmt"
 
-	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
@@ -32,6 +31,8 @@ func AutoHeal(e events.Event) events.ListenerReturn {
 			continue
 		}
 
+		healthStart := user.Character.Health
+
 		if user.Character.Health < 1 {
 			if user.Character.RoomId != 75 {
 
@@ -58,25 +59,14 @@ func AutoHeal(e events.Event) events.ListenerReturn {
 			}
 		}
 
-		// Trigger a redraw, but only if the users prompt has changed.
-		events.AddToQueue(events.RedrawPrompt{UserId: user.UserId, OnlyIfChanged: true}, 100)
+		// If it has changed, send an update
+		if user.Character.Health-healthStart != 0 {
 
-		//
-		// Send GMCP status update
-		//
-		if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Char`) {
+			// Trigger a redraw, but only if the users prompt has changed.
+			events.AddToQueue(events.RedrawPrompt{UserId: user.UserId, OnlyIfChanged: true}, 100)
 
-			realXPNow, realXPTNL := user.Character.XPTNLActual()
+			events.AddToQueue(events.CharacterVitalsChanged{UserId: user.UserId})
 
-			events.AddToQueue(events.GMCPOut{
-				UserId: user.UserId,
-				Payload: fmt.Sprintf(`Char.Vitals { "hp": "%d", "maxhp": "%d", "mp": "%d", "maxmp": "%d", "xp": "%d", "xptnl": "%d", "energy": "%d", "maxenergy": "%d" }`,
-					user.Character.Health, user.Character.HealthMax.Value,
-					user.Character.Mana, user.Character.ManaMax.Value,
-					realXPNow, realXPTNL,
-					user.Character.ActionPoints, user.Character.ActionPointsMax.Value,
-				),
-			})
 		}
 
 	}

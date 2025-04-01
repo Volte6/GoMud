@@ -2,7 +2,12 @@ package events
 
 import (
 	"container/heap"
+	"fmt"
+	"math/rand"
 	"sync"
+	"time"
+
+	"github.com/volte6/gomud/internal/util"
 )
 
 type EventType string
@@ -14,8 +19,10 @@ var (
 	requeues = []requeue{}
 
 	globalQueue  priorityQueue
-	orderCounter int                         // global counter to maintain insertion order.
+	orderCounter uint64                      // global counter to maintain insertion order.
 	uniqueMap    = make(map[string]struct{}) // map to enforce uniqueness
+
+	eventDebugging bool
 )
 
 type requeue struct {
@@ -37,8 +44,8 @@ type GenericEvent interface {
 // prioritizedEvent wraps an Event with a priority and an order field.
 type prioritizedEvent struct {
 	event    Event
-	priority int // Lower numbers indicate higher priority. Default is 0.
-	order    int // Used to preserve FIFO order among events with the same priority.
+	priority int    // Lower numbers indicate higher priority. Default is 0.
+	order    uint64 // Used to preserve FIFO order among events with the same priority.
 }
 
 // UniqueEvent is implemented by events that should be unique in the queue.
@@ -107,6 +114,11 @@ func AddToQueue(e Event, priority ...int) {
 		priority: prio,
 		order:    orderCounter,
 	}
+
+	if eventDebugging {
+		fmt.Println(`events.AddToQueue`, "type:", e.Type(), `priority`, prio, `order`, orderCounter)
+	}
+
 	heap.Push(&globalQueue, pe)
 }
 
@@ -136,6 +148,11 @@ func reAddToQueue(e Event, priority ...int) {
 		priority: prio,
 		order:    orderCounter,
 	}
+
+	if eventDebugging {
+		fmt.Println(`events.reAddToQueue`, "type:", e.Type(), `priority:`, prio, `order:`, orderCounter)
+	}
+
 	heap.Push(&globalQueue, pe)
 }
 
@@ -158,6 +175,19 @@ func addToRequeue(e Event, priority ...int) {
 // Any events enqueued (even from within a handler) will be picked up in order.
 func ProcessEvents() {
 
+	// Since this is intended to run frequently and quickly
+	// Only sample the runtime 1 in 100 times
+	eventCounter := 0
+	if eventDebugging || rand.Intn(100) == 0 {
+		start := time.Now()
+		defer func() {
+			util.TrackTime(`events.ProcessEvents()`, time.Since(start).Seconds())
+			if time.Since(start).Seconds() > 0.00125 {
+				fmt.Println(`events.ProcessEvents`, "events handled:", eventCounter, "time taken:", time.Since(start).Seconds())
+			}
+		}()
+	}
+
 	qLock.Lock()
 
 	// Requeues are a special group that has been deferred to the next processevents loop
@@ -176,6 +206,11 @@ func ProcessEvents() {
 
 		pe := heap.Pop(&globalQueue).(*prioritizedEvent)
 
+		if eventDebugging {
+			eventCounter++
+			fmt.Println(`events.ProcessEvents`, "type:", pe.event.Type(), `remain:`, globalQueue.Len())
+		}
+
 		// If this is a unique event, remove it from the uniqueMap.
 		if ue, ok := pe.event.(uniqueEvent); ok {
 			delete(uniqueMap, ue.UniqueID())
@@ -193,6 +228,12 @@ func ProcessEvents() {
 	}
 
 	qLock.Unlock()
+}
+
+func SetDebug(on bool) {
+	qLock.Lock()
+	defer qLock.Unlock()
+	eventDebugging = on
 }
 
 // Initialize the priority queue.

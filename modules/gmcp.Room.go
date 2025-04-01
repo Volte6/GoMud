@@ -1,25 +1,101 @@
-package hooks
+package modules
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/volte6/gomud/internal/connections"
+	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/volte6/gomud/internal/plugins"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/users"
 )
 
-//
-// RoomChangeHandler waits for RoomChange events
-// It then sends out GMCP data updates
-// Also sends music changes out
-//
+// ////////////////////////////////////////////////////////////////////
+// NOTE: The init function in Go is a special function that is
+// automatically executed before the main function within a package.
+// It is used to initialize variables, set up configurations, or
+// perform any other setup tasks that need to be done before the
+// program starts running.
+// ////////////////////////////////////////////////////////////////////
+func init() {
 
-func LocationGMCPUpdates(e events.Event) events.ListenerReturn {
+	//
+	// We can use all functions only, but this demonstrates
+	// how to use a struct
+	//
+	g := GMCPRoomModule{
+		plug: plugins.New(`gmcp.Room`, `1.0`),
+	}
+	g.plug.Requires(`gmcp`, `1.0`)
+
+	// connectionId to map[string]int
+	g.cache, _ = lru.New[uint64, map[string]int](256)
+
+	// Temporary for testing purposes.
+	events.RegisterListener(events.RoomChange{}, g.rommChangeHandler)
+	events.RegisterListener(events.PlayerDespawn{}, g.despawnHandler)
+
+	events.RegisterListener(GMCPModules{}, func(e events.Event) events.ListenerReturn {
+		if evt, ok := e.(GMCPModules); ok {
+			g.cache.Add(evt.ConnectionId, evt.Modules)
+		}
+		return events.Continue
+	})
+}
+
+type GMCPRoomModule struct {
+	// Keep a reference to the plugin when we create it so that we can call ReadBytes() and WriteBytes() on it.
+	plug  *plugins.Plugin
+	cache *lru.Cache[uint64, map[string]int]
+}
+
+func (g *GMCPRoomModule) despawnHandler(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(events.PlayerDespawn)
+	if !typeOk {
+		mudlog.Error("Event", "Expected Type", "PlayerDespawn", "Actual Type", e.Type())
+		return events.Cancel
+	}
+
+	// If this isn't a user changing rooms, just pass it along.
+	if evt.UserId == 0 {
+		return events.Continue
+	}
+
+	room := rooms.LoadRoom(evt.RoomId)
+	if room == nil {
+		return events.Continue
+	}
+
+	//
+	// Send GMCP Updates for players leaving
+	//
+	for _, uid := range room.GetPlayers() {
+
+		if uid == evt.UserId {
+			continue
+		}
+
+		u := users.GetByUserId(uid)
+		if u == nil {
+			continue
+		}
+
+		events.AddToQueue(GMCPOut{
+			UserId:  uid,
+			Payload: fmt.Sprintf(`Room.RemovePlayer "%s"`, evt.CharacterName),
+		})
+
+	}
+
+	return events.Continue
+}
+
+func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.RoomChange)
 	if !typeOk {
@@ -50,55 +126,23 @@ func LocationGMCPUpdates(e events.Event) events.ListenerReturn {
 		return events.Cancel
 	}
 
-	//
-	// Send GMCP Updates
-	//
-	if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-
-		newRoomPlayers := strings.Builder{}
-
-		// Send to everyone in the new room that a player arrived
-		for _, uid := range newRoom.GetPlayers() {
-
-			if uid == user.UserId {
-				continue
-			}
-
-			if u := users.GetByUserId(uid); u != nil {
-
-				if newRoomPlayers.Len() > 0 {
-					newRoomPlayers.WriteString(`, `)
-				}
-
-				newRoomPlayers.WriteString(`"` + u.Character.Name + `": ` + `"` + u.Character.Name + `"`)
-
-				if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
-
-					events.AddToQueue(events.GMCPOut{
-						UserId:  uid,
-						Payload: fmt.Sprintf(`Room.AddPlayer {"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name),
-					})
-
-				}
-			}
+	////////////////////////////////////
+	// Check for support of this module
+	////////////////////////////////////
+	userHasModule := false
+	if supportedModules, ok := g.cache.Get(user.ConnectionId()); ok {
+		if _, ok := supportedModules[`Room`]; ok {
+			userHasModule = true
 		}
+	}
+	////////////////////////////////////
+	// End check for support of this module
+	////////////////////////////////////
 
-		// Send to everyone in the old room that a player left
-		for _, uid := range oldRoom.GetPlayers() {
-
-			if uid == user.UserId {
-				continue
-			}
-
-			if u := users.GetByUserId(uid); u != nil {
-				if connections.GetClientSettings(u.ConnectionId()).GmcpEnabled(`Room`) {
-					events.AddToQueue(events.GMCPOut{
-						UserId:  uid,
-						Payload: fmt.Sprintf(`Room.RemovePlayer "%s"`, user.Character.Name),
-					})
-				}
-			}
-		}
+	if userHasModule {
+		//
+		// Send GMCP Updates
+		//
 
 		roomInfoStr := strings.Builder{}
 		roomInfoStr.WriteString(`{ `)
@@ -237,17 +281,87 @@ func LocationGMCPUpdates(e events.Event) events.ListenerReturn {
 		// End room info
 
 		// send big 'ol room info object
-		events.AddToQueue(events.GMCPOut{
+		events.AddToQueue(GMCPOut{
 			UserId:  user.UserId,
-			Payload: "Room.Info " + roomInfoStr.String(),
+			Module:  "Room.Info",
+			Payload: roomInfoStr.String(),
 		})
 
+	} // end user specific room info
+
+	newRoomPlayers := strings.Builder{}
+
+	// Send to everyone in the new room that a player arrived
+	for _, uid := range newRoom.GetPlayers() {
+
+		if uid == user.UserId {
+			continue
+		}
+
+		if u := users.GetByUserId(uid); u != nil {
+
+			if newRoomPlayers.Len() > 0 {
+				newRoomPlayers.WriteString(`, `)
+			}
+
+			newRoomPlayers.WriteString(`"` + u.Character.Name + `": ` + `"` + u.Character.Name + `"`)
+
+			if !g.supportsModule(u.ConnectionId(), `Room`) {
+				continue
+			}
+
+			events.AddToQueue(GMCPOut{
+				UserId:  uid,
+				Module:  `Room.AddPlayer`,
+				Payload: fmt.Sprintf(`{"name": "%s", "fullname": "%s"}`, user.Character.Name, user.Character.Name),
+			})
+
+		}
+	}
+
+	if userHasModule {
 		// send player list for room
-		events.AddToQueue(events.GMCPOut{
+		events.AddToQueue(GMCPOut{
 			UserId:  user.UserId,
-			Payload: "Room.Players {" + newRoomPlayers.String() + `}`,
+			Module:  `Room.Players`,
+			Payload: "{" + newRoomPlayers.String() + `}`,
 		})
 	}
 
+	// Send to everyone in the old room that a player left
+	for _, uid := range oldRoom.GetPlayers() {
+
+		if uid == user.UserId {
+			continue
+		}
+
+		if u := users.GetByUserId(uid); u != nil {
+
+			if !g.supportsModule(u.ConnectionId(), `Room`) {
+				continue
+			}
+
+			events.AddToQueue(GMCPOut{
+				UserId:  uid,
+				Module:  `Room.RemovePlayer`,
+				Payload: fmt.Sprintf(`"%s"`, user.Character.Name),
+			})
+
+		}
+	}
+
 	return events.Continue
+}
+
+func (g *GMCPRoomModule) supportsModule(connectionId uint64, moduleName string) bool {
+	supportedModules, ok := g.cache.Get(connectionId)
+	if ok {
+		if _, ok := supportedModules[moduleName]; ok {
+			return true
+		}
+	} else {
+		// Request that the gmcp module get the data and send the event
+		events.AddToQueue(GMCPRequestModules{ConnectionId: connectionId})
+	}
+	return false
 }

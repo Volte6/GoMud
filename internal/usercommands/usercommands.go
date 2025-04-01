@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/keywords"
 	"github.com/volte6/gomud/internal/mudlog"
@@ -32,7 +31,17 @@ type CommandAccess struct {
 // Signature of user command
 type UserCommand func(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error)
 
+type FunctionExporter interface {
+	GetExportedFunction(funcName string) (any, bool)
+}
+
+func AddFunctionExporter(f FunctionExporter) {
+	functionExporters = append(functionExporters, f)
+}
+
 var (
+	functionExporters = []FunctionExporter{}
+
 	userCommands map[string]CommandAccess = map[string]CommandAccess{
 		`aid`:         {Aid, false, false},
 		`alias`:       {Alias, true, false},
@@ -173,6 +182,15 @@ var (
 	}
 )
 
+func GetExportedFunction(fName string) (any, bool) {
+	for _, x := range functionExporters {
+		if f, ok := x.GetExportedFunction(fName); ok {
+			return f, ok
+		}
+	}
+	return nil, false
+}
+
 // Returns a list of close match commands
 func GetCmdSuggestions(text string, includeAdmin bool) []string {
 
@@ -263,6 +281,16 @@ func TryCommand(cmd string, rest string, userId int, flags events.EventFlag) (bo
 		rest = cmd
 		cmd = "go"
 	} else {
+
+		if alias := user.TryCommandAlias(cmd); alias != cmd {
+			if strings.Contains(alias, ` `) {
+				parts := strings.Split(alias, ` `)
+				cmd = parts[0]                                         // grab the first word as the new cmd
+				rest = strings.TrimPrefix(alias, cmd+` `) + ` ` + rest // add the remaining alias to the rest
+			} else {
+				cmd = alias
+			}
+		}
 
 		if alias := keywords.TryCommandAlias(cmd); alias != cmd {
 			if strings.Contains(alias, ` `) {
@@ -397,12 +425,12 @@ func TryRoomScripts(input, alias, rest string, userId int) (bool, error) {
 			alias == "southwest" || alias == "southeast") {
 
 			// Send GMCP message for script-blocked direction
-			if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-				events.AddToQueue(events.GMCPOut{
-					UserId:  userId,
-					Payload: fmt.Sprintf(`Room.WrongDir "%s"`, alias),
-				})
+			if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
+				if gmcpSendFunc, ok := f.(func(int, string, any)); ok { // make sure the func definition is `func(int, string, any)`
+					gmcpSendFunc(user.UserId, `Room.WrongDir`, fmt.Sprintf(`"%s"`, alias))
+				}
 			}
+
 		}
 	}
 

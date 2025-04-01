@@ -148,6 +148,11 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 				container.Gold -= goldAmt
 				room.Containers[containerName] = container
 
+				events.AddToQueue(events.EquipmentChange{
+					UserId:     user.UserId,
+					GoldChange: -goldAmt,
+				})
+
 				user.SendText(
 					fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi> from the <ansi fg="container">%s</ansi>.`, goldAmt, containerName),
 				)
@@ -213,6 +218,11 @@ func Get(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 				goldAmt := room.Gold
 				user.Character.Gold += goldAmt
 				room.Gold -= goldAmt
+
+				events.AddToQueue(events.EquipmentChange{
+					UserId:     user.UserId,
+					GoldChange: -goldAmt,
+				})
 
 				user.SendText(
 					fmt.Sprintf(`You pick up <ansi fg="gold">%d gold</ansi>.`, goldAmt),

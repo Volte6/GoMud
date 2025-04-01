@@ -97,6 +97,12 @@ func HandleQuestUpdate(e events.Event) events.ListenerReturn {
 		if questInfo.Rewards.Gold > 0 {
 			questUser.SendText(fmt.Sprintf(`You receive <ansi fg="gold">%d gold</ansi>!`, questInfo.Rewards.Gold))
 			questUser.Character.Gold += questInfo.Rewards.Gold
+
+			events.AddToQueue(events.EquipmentChange{
+				UserId:     questUser.UserId,
+				GoldChange: questInfo.Rewards.Gold,
+			})
+
 		}
 		// Item reward?
 		if questInfo.Rewards.ItemId > 0 {

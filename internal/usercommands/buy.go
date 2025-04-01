@@ -300,11 +300,22 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 		}
 	}
 
+	events.AddToQueue(events.EquipmentChange{
+		UserId:     user.UserId,
+		GoldChange: -price,
+	})
+
 	user.Character.Gold -= price
 	if shopMob != nil {
 		shopMob.Character.Gold += 1 // only gains 1 gold with each sale
 	} else if shopUser != nil {
 		shopUser.Character.Gold += price
+
+		events.AddToQueue(events.EquipmentChange{
+			UserId:     shopUser.UserId,
+			GoldChange: price,
+		})
+
 	}
 
 	tradeInString := ``

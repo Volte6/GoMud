@@ -4,6 +4,7 @@ These guides assume you want to build from the source. You can also download the
 
 - [Raspberry PI Zero 2W](RASPBERRY-PI.md)
 - [Running via Docker](DOCKER.md)
+- [Setting Up an EC2 Instance](EC2.md)
 
 
 # Quick Start

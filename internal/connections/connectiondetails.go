@@ -126,7 +126,7 @@ type ConnectionDetails struct {
 	heartbeat         *heartbeatManager
 }
 
-func (cd *ConnectionDetails) IsWebsocket() bool {
+func (cd *ConnectionDetails) IsWebSocket() bool {
 	return cd.wsConn != nil
 }
 

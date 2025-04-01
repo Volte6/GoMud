@@ -49,6 +49,8 @@ func Zap(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 				u.Character.Health = 1
 				u.Character.Mana = 1
 
+				events.AddToQueue(events.CharacterVitalsChanged{UserId: u.UserId})
+
 				return true, nil
 			}
 		}
@@ -83,6 +85,8 @@ func Zap(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 
 			u.Character.Health = 1
 			u.Character.Mana = 1
+
+			events.AddToQueue(events.CharacterVitalsChanged{UserId: u.UserId})
 		}
 	}
 

@@ -5,6 +5,8 @@ password: password
 joined: 2024-10-31T13:28:45.395873-07:00
 macros:
   =1: e;e;e;e;e;e;e;e
+aliases:
+  tp: teleport
 character:
   name: AdminAnt
   description: AdminAnt possesses the ability to manipulate the very fabric of the
@@ -63,16 +65,17 @@ character:
     - buffid: 28
       onstartevent: true
       permabuff: true
-      roundcounter: 3
+      roundcounter: 28
       triggersleft: 1000000000
     - buffid: 29
       onstartevent: true
       permabuff: true
-      roundcounter: 11
+      roundcounter: 6
       triggersleft: 1000000000
     - buffid: 39
       onstartevent: false
       permabuff: true
+      roundcounter: 10
       triggersleft: 1000000000
   equipment:
     weapon:

@@ -11,7 +11,6 @@ func RegisterListeners() {
 	events.RegisterListener(events.Buff{}, ApplyBuffs)
 
 	// RoomChange Listeners
-	events.RegisterListener(events.RoomChange{}, LocationGMCPUpdates)
 	events.RegisterListener(events.RoomChange{}, LocationMusicChange)
 
 	// NewRound Listeners
@@ -60,12 +59,11 @@ func RegisterListeners() {
 	// Looking
 	events.RegisterListener(events.Looking{}, HandleLookHints)
 
-	// GMCPOut
-	events.RegisterListener(events.GMCPOut{}, GMCPOut_SendGMCP)
 	// Messages
 	events.RegisterListener(events.Message{}, Message_SendMessage)
 	// Prompt
 	events.RegisterListener(events.RedrawPrompt{}, RedrawPrompt_SendRedraw)
+
 	// User Settings change
 	events.RegisterListener(events.UserSettingChanged{}, ClearSettingCaches)
 

@@ -62,6 +62,11 @@ func Sell(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 			Gained: false,
 		})
 
+		events.AddToQueue(events.EquipmentChange{
+			UserId:     user.UserId,
+			GoldChange: sellValue,
+		})
+
 		mob.Character.Shop.StockItem(item.ItemId)
 
 		user.EventLog.Add(`shop`, fmt.Sprintf(`Sold your <ansi fg="itemname">%s</ansi> to <ansi fg="mobname">%s</ansi> for <ansi fg="gold">%d gold</ansi>`, item.DisplayName(), mob.Character.Name, sellValue))

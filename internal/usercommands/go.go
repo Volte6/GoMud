@@ -5,7 +5,6 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/connections"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
@@ -29,6 +28,8 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 		user.SendText("You can't do that!")
 		return true, nil
 	}
+
+	c := configs.GetTextFormatsConfig()
 
 	isSneaking := user.Character.HasBuffFlag(buffs.Hidden)
 
@@ -137,12 +138,12 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 				if exitInfo.Lock.IsLocked() {
 					user.SendText(`There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.`)
 					// Send GMCP message
-					if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-						events.AddToQueue(events.GMCPOut{
-							UserId:  user.UserId,
-							Payload: fmt.Sprintf(`Room.WrongDir "%s"`, exitName),
-						})
+					if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
+						if gmcpSendFunc, ok := f.(func(int, string, any)); ok { // make sure the func definition is `func(int, string, any)`
+							gmcpSendFunc(user.UserId, `Room.WrongDir`, fmt.Sprintf(`"%s"`, exitName))
+						}
 					}
+
 					return true, nil
 				}
 			}
@@ -183,8 +184,6 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 		} else {
 
 			scripting.TryRoomScriptEvent(`onExit`, user.UserId, originRoomId)
-
-			c := configs.GetTextFormatsConfig()
 
 			// Tell the player they are moving
 			if isSneaking {
@@ -346,12 +345,14 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 			}
 
 			handled = true
-			Look(``, user, destRoom, events.CmdSecretly) // Do a secret look.
+			//Look(``, user, destRoom, events.CmdSecretly) // Do a secret look.
+			user.CommandFlagged(`look`, events.CmdSecretly) // Do a secret look.
 
 			scripting.TryRoomScriptEvent(`onEnter`, user.UserId, destRoom.RoomId)
 
 			room.PlaySound(`room-exit`, `movement`, user.UserId)
 			destRoom.PlaySound(`room-enter`, `movement`, user.UserId)
+
 		}
 
 	}
@@ -362,17 +363,16 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 			user.SendText("You're bumping into walls.")
 
 			// Send GMCP message
-			if connections.GetClientSettings(user.ConnectionId()).GmcpEnabled(`Room`) {
-				events.AddToQueue(events.GMCPOut{
-					UserId:  user.UserId,
-					Payload: fmt.Sprintf(`Room.WrongDir "%s"`, rest),
-				})
+			if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
+				if gmcpSendFunc, ok := f.(func(int, string, any)); ok { // make sure the func definition is `func(int, string, any)`
+					gmcpSendFunc(user.UserId, `Room.WrongDir`, fmt.Sprintf(`"%s"`, rest))
+				}
 			}
 
 			if !user.Character.HasBuffFlag(buffs.Hidden) {
 
 				room.SendText(
-					fmt.Sprintf(string(configs.GetTextFormatsConfig().ExitRoomMessageWrapper),
+					fmt.Sprintf(string(c.ExitRoomMessageWrapper),
 						fmt.Sprintf(`<ansi fg="username">%s</ansi> is bumping into walls.`, user.Character.Name),
 					),
 					user.UserId)
