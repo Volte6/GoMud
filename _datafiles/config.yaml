@@ -182,6 +182,10 @@ Timing:
 #
 ################################################################################
 FilePaths:
+  # - WebDomain -
+  #   This can be mysite.com, or www.mysite.com, etc.
+  #   Do not include the protocol such as http:// or https://
+  WebDomain: "localhost"
   # - WebCDNLocation -
   #   Optional alternative location to serve static files from such as audio
   #   Example: http://files.gomud.net

@@ -1,6 +1,7 @@
 package configs
 
 type FilePaths struct {
+	WebDomain        ConfigString `yaml:"WebDomain"`
 	WebCDNLocation   ConfigString `yaml:"WebCDNLocation"`
 	DataFiles        ConfigString `yaml:"DataFiles"`
 	PublicHtml       ConfigString `yaml:"PublicHtml"`
@@ -12,6 +13,7 @@ type FilePaths struct {
 
 func (f *FilePaths) Validate() {
 
+	// Ignore WebDomain
 	// Ignore WebCDNLocation
 	// Ignore PublicHtml
 	// Ignore AdminHtml
