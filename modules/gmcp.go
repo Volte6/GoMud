@@ -388,10 +388,6 @@ func (g *GMCPModule) dispatchGMCP(e events.Event) events.ListenerReturn {
 			fmt.Println(string(v))
 		}
 
-		if len(gmcp.Module) > 0 {
-			v = gmcp.Module + ` ` + v
-		}
-
 		connections.SendTo(GmcpPayload.BytesWithPayload([]byte(v)), connId)
 	default:
 		payload, err := json.Marshal(gmcp.Payload)
