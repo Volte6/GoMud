@@ -51,7 +51,7 @@ func init() {
 	}
 
 	// connectionId to map[string]int
-	g.cache, _ = lru.New[uint64, map[string]int](256)
+	g.cache, _ = lru.New[uint64, map[string]int](128)
 
 	g.plug.ExportFunction(`SendGMCPEvent`, g.sendGMCPEvent)
 	g.plug.Callbacks.SetIACHandler(g.HandleIAC)
@@ -62,7 +62,10 @@ func init() {
 
 }
 
-// GMCP Commands from server to client
+// ///////////////////
+// EVENTS
+// ///////////////////
+
 type GMCPOut struct {
 	UserId  int
 	Module  string
@@ -71,6 +74,17 @@ type GMCPOut struct {
 
 func (g GMCPOut) Type() string { return `GMCPOut` }
 
+// Sent when supported modules are updated.
+type GMCPModules struct {
+	ConnectionId uint64
+	Modules      map[string]int
+}
+
+func (g GMCPModules) Type() string { return `GMCPModules` }
+
+// ///////////////////
+// END EVENTS
+// ///////////////////
 type GMCPModule struct {
 	// Keep a reference to the plugin when we create it so that we can call ReadBytes() and WriteBytes() on it.
 	plug  *plugins.Plugin
@@ -104,6 +118,7 @@ func (g *GMCPModule) getModules(connectionId uint64) map[string]int {
 	// Re-request if this happens.
 	if !ok {
 		g.sendGMCPEnableRequest(connectionId)
+		data = map[string]int{}
 	}
 
 	return data
@@ -171,7 +186,29 @@ func (g *GMCPModule) HandleIAC(connectionId uint64, iacCmd []byte) bool {
 		case `Core.Supports.Set`:
 			decoded := GMCPSupportsSet{}
 			if err := json.Unmarshal(payload, &decoded); err == nil {
-				enabledModules := decoded.GetSupportedModules()
+				enabledModules := map[string]int{}
+				for name, value := range decoded.GetSupportedModules() {
+
+					// Break it down into:
+					// Char.Inventory.Backpack
+					// Char.Inventory
+					// Char
+					for {
+						enabledModules[name] = value
+						idx := strings.LastIndex(name, ".")
+						if idx == -1 {
+							break
+						}
+						name = name[:idx]
+					}
+
+				}
+
+				events.AddToQueue(GMCPModules{
+					ConnectionId: connectionId,
+					Modules:      enabledModules,
+				})
+
 				g.setModules(connectionId, enabledModules)
 			}
 		case `Core.Supports.Remove`:
@@ -184,6 +221,11 @@ func (g *GMCPModule) HandleIAC(connectionId uint64, iacCmd []byte) bool {
 						delete(enabledModules, name)
 					}
 				}
+
+				events.AddToQueue(GMCPModules{
+					ConnectionId: connectionId,
+					Modules:      enabledModules,
+				})
 
 				g.setModules(connectionId, enabledModules)
 
@@ -208,15 +250,12 @@ func (g *GMCPModule) isGMCPCommand(b []byte) bool {
 	return len(b) > 2 && b[0] == term.TELNET_IAC && b[2] == TELNET_GMCP
 }
 
-func (g *GMCPModule) sendGMCPEvent(userId int, payload any, moduleName ...string) {
+func (g *GMCPModule) sendGMCPEvent(userId int, moduleName string, payload any) {
 
 	evt := GMCPOut{
 		UserId:  userId,
+		Module:  moduleName,
 		Payload: payload,
-	}
-
-	if len(moduleName) > 0 {
-		evt.Module = moduleName[0]
 	}
 
 	events.AddToQueue(evt)
@@ -251,6 +290,25 @@ func (g *GMCPModule) sendGMCPEnableRequest(connectionId uint64) {
 	g.cache.Add(connectionId, data)
 }
 
+func (g *GMCPModule) supportsModule(connectionId uint64, moduleName string) bool {
+
+	enabledModules := g.getModules(connectionId)
+	if len(enabledModules) > 0 {
+		if _, ok := enabledModules[moduleName]; ok {
+			return true
+		}
+
+		if pos := strings.Index(moduleName, `.`); pos != -1 {
+			if _, ok := enabledModules[moduleName[0:pos]]; ok {
+				return true
+			}
+		}
+
+	}
+
+	return false
+}
+
 // Checks whether their level is too high for a guide
 func (g *GMCPModule) dispatchGMCP(e events.Event) events.ListenerReturn {
 
@@ -270,37 +328,32 @@ func (g *GMCPModule) dispatchGMCP(e events.Event) events.ListenerReturn {
 	}
 
 	// Get enabled modules... if none, skip out.
-
-	enabledModules := g.getModules(connId)
-	if len(enabledModules) == 0 {
+	if !g.supportsModule(connId, gmcp.Module) {
 		return events.Continue
 	}
 
 	switch v := gmcp.Payload.(type) {
 	case []byte:
 
-		// DEBUG ONLY
-		// TODO: REMOVE
-		if gmcp.UserId == 1 {
-			if len(gmcp.Module) > 0 {
-				fmt.Print(gmcp.Module + ` `)
-			}
-			fmt.Println(string(v))
-		}
-
 		if len(gmcp.Module) > 0 {
 			v = append([]byte(gmcp.Module+` `), v...)
 		}
 
+		// DEBUG ONLY
+		// TODO: REMOVE
+		if gmcp.UserId == 1 {
+			fmt.Println(string(v))
+		}
+
 		connections.SendTo(GmcpPayload.BytesWithPayload(v), connId)
 	case string:
+		if len(gmcp.Module) > 0 {
+			v = gmcp.Module + ` ` + v
+		}
 
 		// DEBUG ONLY
 		// TODO: REMOVE
 		if gmcp.UserId == 1 {
-			if len(gmcp.Module) > 0 {
-				fmt.Print(gmcp.Module + ` `)
-			}
 			fmt.Println(string(v))
 		}
 
@@ -310,15 +363,10 @@ func (g *GMCPModule) dispatchGMCP(e events.Event) events.ListenerReturn {
 
 		connections.SendTo(GmcpPayload.BytesWithPayload([]byte(v)), connId)
 	default:
-
 		payload, err := json.Marshal(gmcp.Payload)
 		if err != nil {
 			mudlog.Error("Event", "Type", "GMCPOut", "data", gmcp.Payload, "error", err)
 			return events.Continue
-		}
-
-		if len(gmcp.Module) > 0 {
-			payload = append([]byte(gmcp.Module+` `), payload...)
 		}
 
 		// DEBUG ONLY
@@ -326,7 +374,12 @@ func (g *GMCPModule) dispatchGMCP(e events.Event) events.ListenerReturn {
 		if gmcp.UserId == 1 {
 			var prettyJSON bytes.Buffer
 			json.Indent(&prettyJSON, payload, "", "\t")
+			fmt.Print(gmcp.Module + ` `)
 			fmt.Println(string(prettyJSON.Bytes()))
+		}
+
+		if len(gmcp.Module) > 0 {
+			payload = append([]byte(gmcp.Module+` `), payload...)
 		}
 
 		connections.SendTo(GmcpPayload.BytesWithPayload(payload), connId)

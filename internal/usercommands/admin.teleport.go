@@ -76,7 +76,7 @@ func Teleport(rest string, user *users.UserRecord, room *rooms.Room, flags event
 		}
 	}
 
-	if gotoRoomId > 0 {
+	if gotoRoomId != 0 || rest == `0` {
 
 		previousRoomId := user.Character.RoomId
 

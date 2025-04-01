@@ -137,8 +137,8 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 					user.SendText(`There's a lock preventing you from going that way. You'll need a <ansi fg="item">Key</ansi> or to <ansi fg="command">pick</ansi> the lock with <ansi fg="item">lockpicks</ansi>.`)
 					// Send GMCP message
 					if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
-						if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok { // make sure the func definition is `func(int, any, ...string)`
-							gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, exitName))
+						if gmcpSendFunc, ok := f.(func(int, string, any)); ok { // make sure the func definition is `func(int, string, any)`
+							gmcpSendFunc(user.UserId, `Room.WrongDir`, fmt.Sprintf(`"%s"`, exitName))
 						}
 					}
 
@@ -362,8 +362,8 @@ func Go(rest string, user *users.UserRecord, room *rooms.Room, flags events.Even
 
 			// Send GMCP message
 			if f, ok := GetExportedFunction(`SendGMCPEvent`); ok {
-				if gmcpSendFunc, ok := f.(func(int, any, ...string)); ok { // make sure the func definition is `func(int, any, ...string)`
-					gmcpSendFunc(user.UserId, fmt.Sprintf(`Room.WrongDir "%s"`, rest))
+				if gmcpSendFunc, ok := f.(func(int, string, any)); ok { // make sure the func definition is `func(int, string, any)`
+					gmcpSendFunc(user.UserId, `Room.WrongDir`, fmt.Sprintf(`"%s"`, rest))
 				}
 			}
 
