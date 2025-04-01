@@ -63,8 +63,8 @@ func init() {
 	//
 	// Register callbacks for load/unload
 	//
-	a.plug.SetOnLoad(a.load)
-	a.plug.SetOnSave(a.save)
+	a.plug.Callbacks.SetOnLoad(a.load)
+	a.plug.Callbacks.SetOnSave(a.save)
 
 	events.RegisterListener(events.NewRound{}, a.newRoundHandler)
 }

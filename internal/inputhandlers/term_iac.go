@@ -49,16 +49,20 @@ func TelnetIACHandler(clientInput *connections.ClientInput, sharedState map[stri
 	for _, iacCmd := range iacCmds {
 		// Check incoming Telnet IAC commands for anything useful...
 
-		handlerFound := false
-		for _, h := range iacHandlers {
-			if h.HandleIAC(clientInput.ConnectionId, iacCmd) {
-				handlerFound = true
-				break
-			}
-		}
+		if len(iacHandlers) > 0 {
 
-		if handlerFound {
-			continue
+			handlerFound := false
+			for _, h := range iacHandlers {
+				if h.HandleIAC(clientInput.ConnectionId, iacCmd) {
+					handlerFound = true
+					break
+				}
+			}
+
+			if handlerFound {
+				continue
+			}
+
 		}
 
 		if term.IsMSPCommand(iacCmd) {

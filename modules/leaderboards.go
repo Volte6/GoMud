@@ -59,8 +59,8 @@ func init() {
 	//
 	// Register callbacks for load/unload
 	//
-	t.plug.SetOnLoad(t.loadLBs)
-	t.plug.SetOnSave(t.saveLBs)
+	t.plug.Callbacks.SetOnLoad(t.loadLBs)
+	t.plug.Callbacks.SetOnSave(t.saveLBs)
 
 	t.plug.Web.WebPage(`Leaderboards`, `/leaderboards`, `leaderboards.html`, true, t.webLeaderboardData)
 

@@ -134,6 +134,7 @@ func main() {
 	// Register the plugin filesystem with the template system
 	templates.RegisterFS(plugins.GetPluginRegistry())
 	usercommands.AddFunctionExporter(plugins.GetPluginRegistry())
+
 	inputhandlers.AddIACHandler(plugins.GetPluginRegistry())
 
 	//
@@ -371,6 +372,8 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 		connDetails.ConnectionId(),
 	)
 
+	plugins.OnNetConnect(connDetails)
+
 	// an input buffer for reading data sent over the network
 	inputBuffer := make([]byte, connections.ReadBufferSize)
 
@@ -446,7 +449,7 @@ func handleTelnetConnection(connDetails *connections.ConnectionDetails, wg *sync
 
 			}
 
-			mudlog.Warn("Telnet", "error", err)
+			mudlog.Warn("Telnet", "connectionID", connDetails.ConnectionId(), "error", err)
 
 			connections.Remove(connDetails.ConnectionId())
 
@@ -689,6 +692,8 @@ func HandleWebSocketConnection(conn *websocket.Conn) {
 		[]byte("!!SOUND(Off U="+configs.GetConfig().FilePaths.WebCDNLocation.String()+")"),
 		clientInput.ConnectionId,
 	)
+
+	plugins.OnNetConnect(connDetails)
 
 	if audioConfig := audio.GetFile(`intro`); audioConfig.FilePath != `` {
 		v := 100

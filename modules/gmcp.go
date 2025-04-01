@@ -51,10 +51,11 @@ func init() {
 	}
 
 	// connectionId to map[string]int
-	g.cache, _ = lru.New[uint64, map[string]int](128)
+	g.cache, _ = lru.New[uint64, map[string]int](256)
 
 	g.plug.ExportFunction(`SendGMCPEvent`, g.sendGMCPEvent)
-	g.plug.SetIACHandler(g.HandleIAC)
+	g.plug.Callbacks.SetIACHandler(g.HandleIAC)
+	g.plug.Callbacks.SetOnNetConnect(g.onNetConnect)
 
 	events.RegisterListener(GMCPOut{}, g.dispatchGMCP)
 	events.RegisterListener(events.PlayerSpawn{}, g.handlePlayerJoin)
@@ -90,6 +91,12 @@ type GMCPLogin struct {
 	Password string
 }
 
+func (g *GMCPModule) onNetConnect(n plugins.NetConnection) {
+	if !n.IsWebSocket() {
+		g.sendGMCPEnableRequest(n.ConnectionId())
+	}
+}
+
 func (g *GMCPModule) getModules(connectionId uint64) map[string]int {
 	data, ok := g.cache.Get(connectionId)
 
@@ -97,8 +104,6 @@ func (g *GMCPModule) getModules(connectionId uint64) map[string]int {
 	// Re-request if this happens.
 	if !ok {
 		g.sendGMCPEnableRequest(connectionId)
-		data = map[string]int{}
-		g.cache.Add(connectionId, data)
 	}
 
 	return data
@@ -242,6 +247,8 @@ func (g *GMCPModule) sendGMCPEnableRequest(connectionId uint64) {
 		GmcpEnable.BytesWithPayload(nil),
 		connectionId,
 	)
+	data := map[string]int{}
+	g.cache.Add(connectionId, data)
 }
 
 // Checks whether their level is too high for a guide

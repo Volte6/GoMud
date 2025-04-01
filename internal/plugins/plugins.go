@@ -53,14 +53,7 @@ type Plugin struct {
 
 	dependencies []dependency
 
-	callbacks struct {
-		userCommands map[string]usercommands.CommandAccess
-		mobCommands  map[string]mobcommands.CommandAccess
-
-		iacHandler func(uint64, []byte) bool
-		onLoad     func()
-		onSave     func()
-	}
+	Callbacks PluginCallbacks
 
 	exportedFunctions map[string]any
 
@@ -85,11 +78,9 @@ func New(name string, version string) *Plugin {
 		Config: PluginConfig{
 			pluginName: name,
 		},
-		Web: NewWebConfig(),
+		Callbacks: newPluginCallbacks(),
+		Web:       newWebConfig(),
 	}
-
-	p.callbacks.userCommands = map[string]usercommands.CommandAccess{}
-	p.callbacks.mobCommands = map[string]mobcommands.CommandAccess{}
 
 	registry = append(registry, p)
 	return p
@@ -125,10 +116,10 @@ func (p pluginRegistry) NavLinks() map[string]string {
 func (p pluginRegistry) HandleIAC(connectionId uint64, iacCmd []byte) bool {
 
 	for _, pItem := range p {
-		if pItem.callbacks.iacHandler == nil {
+		if pItem.Callbacks.iacHandler == nil {
 			continue
 		}
-		if pItem.callbacks.iacHandler(connectionId, iacCmd) {
+		if pItem.Callbacks.iacHandler(connectionId, iacCmd) {
 			return true
 		}
 	}
@@ -240,11 +231,11 @@ func (p *Plugin) ExportFunction(stringId string, f any) {
 // Registers a UserCommand and callback
 func (p *Plugin) AddUserCommand(command string, handlerFunc usercommands.UserCommand, allowWhenDowned bool, isAdminOnly bool) {
 
-	if p.callbacks.userCommands == nil {
-		p.callbacks.userCommands = map[string]usercommands.CommandAccess{}
+	if p.Callbacks.userCommands == nil {
+		p.Callbacks.userCommands = map[string]usercommands.CommandAccess{}
 	}
 
-	p.callbacks.userCommands[command] = usercommands.CommandAccess{
+	p.Callbacks.userCommands[command] = usercommands.CommandAccess{
 		Func:              handlerFunc,
 		AllowedWhenDowned: allowWhenDowned,
 		AdminOnly:         isAdminOnly,
@@ -254,11 +245,11 @@ func (p *Plugin) AddUserCommand(command string, handlerFunc usercommands.UserCom
 // Registers a MobCommand and callback
 func (p *Plugin) AddMobCommand(command string, handlerFunc mobcommands.MobCommand, allowWhenDowned bool) {
 
-	if p.callbacks.mobCommands == nil {
-		p.callbacks.mobCommands = map[string]mobcommands.CommandAccess{}
+	if p.Callbacks.mobCommands == nil {
+		p.Callbacks.mobCommands = map[string]mobcommands.CommandAccess{}
 	}
 
-	p.callbacks.mobCommands[command] = mobcommands.CommandAccess{
+	p.Callbacks.mobCommands[command] = mobcommands.CommandAccess{
 		Func:              handlerFunc,
 		AllowedWhenDowned: allowWhenDowned,
 	}
@@ -309,18 +300,6 @@ func (p *Plugin) AttachFileSystem(f embed.FS) error {
 	}
 
 	return nil
-}
-
-func (p *Plugin) SetIACHandler(f func(uint64, []byte) bool) {
-	p.callbacks.iacHandler = f
-}
-
-func (p *Plugin) SetOnLoad(f func()) {
-	p.callbacks.onLoad = f
-}
-
-func (p *Plugin) SetOnSave(f func()) {
-	p.callbacks.onSave = f
 }
 
 func (p *Plugin) WriteBytes(identifier string, bytes []byte) error {
@@ -434,11 +413,11 @@ func Load(dataFilesPath string) {
 
 		pluginCt++
 
-		for cmd, info := range p.callbacks.userCommands {
+		for cmd, info := range p.Callbacks.userCommands {
 			usercommands.RegisterCommand(cmd, info.Func, info.AllowedWhenDowned, info.AdminOnly)
 		}
 
-		for cmd, info := range p.callbacks.mobCommands {
+		for cmd, info := range p.Callbacks.mobCommands {
 			mobcommands.RegisterCommand(cmd, info.Func, info.AllowedWhenDowned)
 		}
 
@@ -457,8 +436,8 @@ func Load(dataFilesPath string) {
 			}
 		}
 
-		if p.callbacks.onLoad != nil {
-			p.callbacks.onLoad()
+		if p.Callbacks.onLoad != nil {
+			p.Callbacks.onLoad()
 		}
 	}
 
@@ -470,8 +449,8 @@ func Save() {
 	pluginCt := 0
 	for _, p := range registry {
 
-		if p.callbacks.onSave != nil {
-			p.callbacks.onSave()
+		if p.Callbacks.onSave != nil {
+			p.Callbacks.onSave()
 			pluginCt++
 		}
 
@@ -481,6 +460,16 @@ func Save() {
 
 func GetPluginRegistry() pluginRegistry {
 	return registry
+}
+
+func OnNetConnect(n NetConnection) {
+
+	for _, p := range registry {
+		if p.Callbacks.onNetConnect != nil {
+			p.Callbacks.onNetConnect(n)
+		}
+	}
+
 }
 
 func ReadFile(dfPath string) ([]byte, error) {
