@@ -168,13 +168,19 @@ func main() {
 		"name", string(c.Server.MudName),
 	)
 
+	mudlog.Info(`========================`)
+
 	// Load all the data files up front.
 	loadAllDataFiles(false)
+
+	mudlog.Info(`========================`)
 
 	mudlog.Info("Mapper", "status", "precaching")
 	timeStart := time.Now()
 	mapper.PreCacheMaps()
 	mudlog.Info("Mapper", "status", "done", "time taken", time.Since(timeStart))
+
+	mudlog.Info(`========================`)
 
 	// Create the user index
 	idx := users.NewUserIndex()
@@ -195,7 +201,6 @@ func main() {
 
 	scripting.Setup(int(c.Scripting.LoadTimeoutMs), int(c.Scripting.RoomTimeoutMs))
 
-	//
 	mudlog.Info(`========================`)
 
 	// Trigger the load plugins event
@@ -219,6 +224,7 @@ func main() {
 	// Set the server to be alive
 	serverAlive.Store(true)
 
+	mudlog.Info(`========================`)
 	web.Listen(int(c.Network.WebPort), int(c.Network.HttpsPort), &wg, HandleWebSocketConnection)
 
 	allServerListeners := make([]net.Listener, 0, len(c.Network.TelnetPort))

@@ -27,6 +27,10 @@ func (n *Network) Validate() {
 		n.WebPort = 0 // default
 	}
 
+	if n.HttpsPort < 0 {
+		n.HttpsPort = 0 // default
+	}
+
 	if n.AfkSeconds < 0 {
 		n.AfkSeconds = 0
 	}

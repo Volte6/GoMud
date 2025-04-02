@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net/http"
@@ -297,13 +298,12 @@ func Listen(webPort int, webHttpsPort int, wg *sync.WaitGroup, webSocketHandler 
 	// HTTP Server
 	wg.Add(1)
 	httpServer = &http.Server{Addr: fmt.Sprintf(`:%d`, webPort)}
+
+	mudlog.Info("HTTP", "stage", "Starting http server", "webport", webPort)
 	go func() {
-
-		mudlog.Info("Starting http server", "webport", webPort)
-
 		defer wg.Done()
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			mudlog.Error("Error starting web server", "error", err)
+			mudlog.Error("HTTP", "error", fmt.Errorf("Error starting web server: %w", err))
 		}
 	}()
 
@@ -311,28 +311,54 @@ func Listen(webPort int, webHttpsPort int, wg *sync.WaitGroup, webSocketHandler 
 
 		filePaths := configs.GetFilePathsConfig()
 
-		certFile := ``
-		keyFile := ``
+		if len(filePaths.HttpsCertFile) == 0 || len(filePaths.HttpsKeyFile) == 0 {
 
-		if _, err := os.Stat(string(filePaths.HttpsCertFile)); err == nil {
-			certFile = string(filePaths.HttpsCertFile)
-		}
-		if _, err := os.Stat(string(filePaths.HttpsKeyFile)); err == nil {
-			keyFile = string(filePaths.HttpsKeyFile)
-		}
+			mudlog.Info("HTTPS", "stage", "skipping", "error", "Undefined key file", "Public Cert", filePaths.HttpsCertFile, "Private Key", filePaths.HttpsKeyFile)
 
-		if certFile != `` && keyFile != `` {
-			wg.Add(1)
-			httpsServer = &http.Server{Addr: fmt.Sprintf(`:%d`, webHttpsPort)}
-			go func() {
+		} else {
 
-				mudlog.Info("Starting https server", "webHttpsPort", webHttpsPort)
+			certFile := ``
+			keyFile := ``
 
-				defer wg.Done()
-				if err := httpsServer.ListenAndServeTLS(certFile, keyFile); err != nil && err != http.ErrServerClosed {
-					mudlog.Error("Error starting HTTPS web server", "error", err)
+			if _, err := os.Stat(string(filePaths.HttpsCertFile)); err == nil {
+				certFile = string(filePaths.HttpsCertFile)
+			}
+			if _, err := os.Stat(string(filePaths.HttpsKeyFile)); err == nil {
+				keyFile = string(filePaths.HttpsKeyFile)
+			}
+
+			if certFile != `` && keyFile != `` {
+
+				mudlog.Info("HTTPS", "stage", "Validating public/private key pair", "Public Cert", certFile, "Private Key", keyFile)
+
+				cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+
+				if err != nil {
+
+					mudlog.Error("HTTPS", "error", fmt.Errorf("Error loading certificate and key: %w", err))
+
+				} else {
+
+					tlsConfig := &tls.Config{
+						Certificates: []tls.Certificate{cert},
+					}
+
+					wg.Add(1)
+
+					httpsServer = &http.Server{
+						Addr:      fmt.Sprintf(`:%d`, webHttpsPort),
+						TLSConfig: tlsConfig,
+					}
+
+					mudlog.Info("HTTPS", "stage", "Starting https server", "webHttpsPort", webHttpsPort)
+					go func() {
+						defer wg.Done()
+						if err := httpsServer.ListenAndServeTLS("", ""); err != nil && err != http.ErrServerClosed {
+							mudlog.Error("HTTPS", "error", fmt.Errorf("Error starting HTTPS web server: %w", err))
+						}
+					}()
 				}
-			}()
+			}
 		}
 	}
 
@@ -357,13 +383,17 @@ func Shutdown() {
 
 	if httpServer != nil {
 		if err := httpServer.Shutdown(ctx); err != nil {
-			log.Printf("HTTP server shutdown failed:%+v", err)
+			mudlog.Error("HTTP", "error", fmt.Errorf("HTTP server shutdown failed: %w", err))
+		} else {
+			mudlog.Info("HTTPS", "stage", "stopped")
 		}
 	}
 
 	if httpsServer != nil {
 		if err := httpsServer.Shutdown(ctx); err != nil {
-			log.Printf("HTTPS server shutdown failed:%+v", err)
+			mudlog.Error("HTTPS", "error", fmt.Errorf("HTTP server shutdown failed: %w", err))
+		} else {
+			mudlog.Info("HTTPS", "stage", "stopped")
 		}
 	}
 }
