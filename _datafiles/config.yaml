@@ -129,7 +129,7 @@ LootGoblin:
   RoundCount: 900
   # - MinimumItems -
   #   How many items there must be on the room to attract the loot goblin
-  MinimumItems: 2
+  MinimumItems: 3
   # - MinimumGold -
   #   How much gold there must be on the room to attract the loot goblin
   MinimumGold: 100
@@ -137,7 +137,7 @@ LootGoblin:
   #   If true, the loot goblin will also clean recently visited by players rooms
   #   If allowed, this could create a situation where a lot of loot drops and the
   #   suddenly the goblin shows up.
-  IncludeRecentRooms: false
+  IncludeRecentRooms: true
 
 
 ################################################################################
@@ -165,7 +165,7 @@ Timing:
   #   How often the server will automatically save the game state. This is a
   #   backup feature in case the server crashes. The game state is also saved
   #   whenever the server is shut down.
-  RoundsPerAutoSave: 450
+  RoundsPerAutoSave: 225
   # - RoundsPerDay -
   #   How many rounds are in a day? This is used to calculate the time of day.
   #   The lower this number, the faster the day/night cycle will be.
@@ -377,7 +377,7 @@ Translation:
 Network:
   # - MaxTelnetConnections -
   #   The maximum number of telnet connections the server will accept.
-  MaxTelnetConnections: 50
+  MaxTelnetConnections: 100
   # - TelnetPort -
   #   The port the server listens on for telnet connections. Listen on multiple
   #   ports by separating them with commas. For example, [33333, 33334, 33335]
@@ -387,13 +387,16 @@ Network:
   LocalPort: 9999
   # - HttpPort -
   #   The port the server listens on for web requests
+  #   0 (zero) means none.
   HttpPort: 80
   # - HttpsPort -
   #   The port the server listens on for web requests
   #   Note: Must have a cert/key file (See FilePaths)
-  HttpsPort: 443
+  #   0 (zero) means none.
+  HttpsPort: 0
   # - HttpsRedirect -
   #   If true, will send all http traffic to https with a redirect
+  #   Requires both Http and Https to be working.
   HttpsRedirect: false
   # - AfkSeconds -
   #   If this many seconds pass without player input, they are flagged as afk
@@ -411,7 +414,7 @@ Network:
     # - ZombieSeconds -
   #   How many seconds a character stays active/in game after a network connection
   #   is lost. Set to 0 to instantly log out characters (exploitable).
-  ZombieSeconds: 30
+  ZombieSeconds: 60
   # - LogoutRounds -
   #   How many rounds of meditation a player must complete before they are
   #   logged out. If interrupted, they must start over.
@@ -557,8 +560,3 @@ Roles:
 #
 ################################################################################
 Modules: {}
-
-
-
-
-
