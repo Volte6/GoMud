@@ -225,7 +225,7 @@ func main() {
 	serverAlive.Store(true)
 
 	mudlog.Info(`========================`)
-	web.Listen(int(c.Network.WebPort), int(c.Network.HttpsPort), &wg, HandleWebSocketConnection)
+	web.Listen(&wg, HandleWebSocketConnection)
 
 	allServerListeners := make([]net.Listener, 0, len(c.Network.TelnetPort))
 	for _, port := range c.Network.TelnetPort {

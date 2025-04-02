@@ -5,9 +5,12 @@ import (
 	"crypto/tls"
 	"fmt"
 	"log"
+	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"text/template"
 	"time"
@@ -223,7 +226,14 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Listen(webPort int, webHttpsPort int, wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
+func Listen(wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
+
+	networkConfig := configs.GetNetworkConfig()
+
+	if networkConfig.HttpPort == 0 && networkConfig.HttpsPort == 0 {
+		slog.Error(`Web`, "error", "No ports defined. No web server will be started.")
+		return
+	}
 
 	// Routing
 	// Basic homepage
@@ -295,19 +305,56 @@ func Listen(webPort int, webHttpsPort int, wg *sync.WaitGroup, webSocketHandler 
 		doBasicAuth(roomData),
 	))
 
-	// HTTP Server
-	wg.Add(1)
-	httpServer = &http.Server{Addr: fmt.Sprintf(`:%d`, webPort)}
+	//
+	// Http server start up
+	//
 
-	mudlog.Info("HTTP", "stage", "Starting http server", "webport", webPort)
-	go func() {
-		defer wg.Done()
-		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			mudlog.Error("HTTP", "error", fmt.Errorf("Error starting web server: %w", err))
+	if networkConfig.HttpPort > 0 {
+
+		httpServer = &http.Server{
+			Addr: fmt.Sprintf(`:%d`, networkConfig.HttpPort),
 		}
-	}()
 
-	if webHttpsPort > 0 {
+		if networkConfig.HttpsRedirect {
+
+			var redirectHandler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
+
+				host := r.Host
+
+				// If the host header includes a port (e.g. "example.com:80"), strip it out.
+				if strings.Contains(host, ":") {
+					host, _, _ = net.SplitHostPort(host)
+				}
+
+				// Build the target URL with your known HTTPS port (443 in this case).
+				target := fmt.Sprintf("https://%s:%d%s", host, networkConfig.HttpsPort, r.RequestURI)
+
+				http.Redirect(w, r, target, http.StatusMovedPermanently)
+
+			}
+
+			httpServer.Handler = redirectHandler
+
+		}
+
+		// HTTP Server
+		wg.Add(1)
+
+		mudlog.Info("HTTP", "stage", "Starting http server", "port", networkConfig.HttpPort)
+		go func() {
+			defer wg.Done()
+
+			if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				mudlog.Error("HTTP", "error", fmt.Errorf("Error starting web server: %w", err))
+			}
+		}()
+	}
+
+	//
+	// Https server start up
+	//
+
+	if networkConfig.HttpsPort > 0 {
 
 		filePaths := configs.GetFilePathsConfig()
 
@@ -317,21 +364,11 @@ func Listen(webPort int, webHttpsPort int, wg *sync.WaitGroup, webSocketHandler 
 
 		} else {
 
-			certFile := ``
-			keyFile := ``
+			if filePaths.HttpsCertFile != `` && filePaths.HttpsKeyFile != `` {
 
-			if _, err := os.Stat(string(filePaths.HttpsCertFile)); err == nil {
-				certFile = string(filePaths.HttpsCertFile)
-			}
-			if _, err := os.Stat(string(filePaths.HttpsKeyFile)); err == nil {
-				keyFile = string(filePaths.HttpsKeyFile)
-			}
+				mudlog.Info("HTTPS", "stage", "Validating public/private key pair", "Public Cert", filePaths.HttpsCertFile, "Private Key", filePaths.HttpsKeyFile)
 
-			if certFile != `` && keyFile != `` {
-
-				mudlog.Info("HTTPS", "stage", "Validating public/private key pair", "Public Cert", certFile, "Private Key", keyFile)
-
-				cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+				cert, err := tls.LoadX509KeyPair(string(filePaths.HttpsCertFile), string(filePaths.HttpsKeyFile))
 
 				if err != nil {
 
@@ -346,11 +383,11 @@ func Listen(webPort int, webHttpsPort int, wg *sync.WaitGroup, webSocketHandler 
 					wg.Add(1)
 
 					httpsServer = &http.Server{
-						Addr:      fmt.Sprintf(`:%d`, webHttpsPort),
+						Addr:      fmt.Sprintf(`:%d`, networkConfig.HttpsPort),
 						TLSConfig: tlsConfig,
 					}
 
-					mudlog.Info("HTTPS", "stage", "Starting https server", "webHttpsPort", webHttpsPort)
+					mudlog.Info("HTTPS", "stage", "Starting https server", "port", networkConfig.HttpsPort)
 					go func() {
 						defer wg.Done()
 						if err := httpsServer.ListenAndServeTLS("", ""); err != nil && err != http.ErrServerClosed {
