@@ -1018,7 +1018,7 @@ func (w *World) UpdateStats() {
 		}
 	}
 
-	s.WebSocketPort = int(c.WebPort)
+	s.WebSocketPort = int(c.HttpPort)
 
 	web.UpdateStats(s)
 }
