@@ -315,7 +315,7 @@ func Listen(wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
 			Addr: fmt.Sprintf(`:%d`, networkConfig.HttpPort),
 		}
 
-		if networkConfig.HttpsRedirect {
+		if networkConfig.HttpsRedirect && networkConfig.HttpsPort != 0 {
 
 			var redirectHandler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
 
