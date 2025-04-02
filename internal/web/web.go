@@ -306,51 +306,6 @@ func Listen(wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
 	))
 
 	//
-	// Http server start up
-	//
-
-	if networkConfig.HttpPort > 0 {
-
-		httpServer = &http.Server{
-			Addr: fmt.Sprintf(`:%d`, networkConfig.HttpPort),
-		}
-
-		if networkConfig.HttpsRedirect && networkConfig.HttpsPort != 0 {
-
-			var redirectHandler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
-
-				host := r.Host
-
-				// If the host header includes a port (e.g. "example.com:80"), strip it out.
-				if strings.Contains(host, ":") {
-					host, _, _ = net.SplitHostPort(host)
-				}
-
-				// Build the target URL with your known HTTPS port (443 in this case).
-				target := fmt.Sprintf("https://%s:%d%s", host, networkConfig.HttpsPort, r.RequestURI)
-
-				http.Redirect(w, r, target, http.StatusMovedPermanently)
-
-			}
-
-			httpServer.Handler = redirectHandler
-
-		}
-
-		// HTTP Server
-		wg.Add(1)
-
-		mudlog.Info("HTTP", "stage", "Starting http server", "port", networkConfig.HttpPort)
-		go func() {
-			defer wg.Done()
-
-			if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				mudlog.Error("HTTP", "error", fmt.Errorf("Error starting web server: %w", err))
-			}
-		}()
-	}
-
-	//
 	// Https server start up
 	//
 
@@ -360,7 +315,7 @@ func Listen(wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
 
 		if len(filePaths.HttpsCertFile) == 0 || len(filePaths.HttpsKeyFile) == 0 {
 
-			mudlog.Info("HTTPS", "stage", "skipping", "error", "Undefined key file", "Public Cert", filePaths.HttpsCertFile, "Private Key", filePaths.HttpsKeyFile)
+			mudlog.Info("HTTPS", "stage", "skipping", "error", "Undefined public/private key files", "Public Cert", filePaths.HttpsCertFile, "Private Key", filePaths.HttpsKeyFile)
 
 		} else {
 
@@ -397,6 +352,57 @@ func Listen(wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
 				}
 			}
 		}
+	}
+
+	//
+	// Http server start up
+	//
+
+	if networkConfig.HttpPort > 0 {
+
+		httpServer = &http.Server{
+			Addr: fmt.Sprintf(`:%d`, networkConfig.HttpPort),
+		}
+
+		if networkConfig.HttpsRedirect {
+
+			if httpsServer == nil {
+
+				mudlog.Error("HTTP", "error", "Cannot enable https redirect. There is no https server configured/running.")
+
+			} else {
+
+				var redirectHandler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
+
+					host := r.Host
+					// If the host header includes a port (e.g. "example.com:80"), strip it out.
+					if strings.Contains(host, ":") {
+						host, _, _ = net.SplitHostPort(host)
+					}
+
+					// Build the target URL with your known HTTPS port (443 in this case).
+					target := fmt.Sprintf("https://%s:%d%s", host, networkConfig.HttpsPort, r.RequestURI)
+
+					http.Redirect(w, r, target, http.StatusMovedPermanently)
+				}
+
+				httpServer.Handler = redirectHandler
+
+			}
+
+		}
+
+		// HTTP Server
+		wg.Add(1)
+
+		mudlog.Info("HTTP", "stage", "Starting http server", "port", networkConfig.HttpPort)
+		go func() {
+			defer wg.Done()
+
+			if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				mudlog.Error("HTTP", "error", fmt.Errorf("Error starting web server: %w", err))
+			}
+		}()
 	}
 
 }
