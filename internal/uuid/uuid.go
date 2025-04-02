@@ -11,17 +11,22 @@ import (
 )
 
 const (
+	// Configs
+	currentVersion uint8 = 1 // The default version to use when generating a UUID.
+	// Parse rule values
 	sequenceBits = 4 // 4-bit sequence counter: up to 16 UUIDs per nanosecond.
 	versionBits  = 4 // 4-bit version field.
 	typeBits     = 8 // 8-bit type identifier: supports up to 256 types.
 	// Lower 64 bits total = 64 bits.
 	// Unused bits = 64 - (sequenceBits + versionBits + typeBits)
 	unusedBits = 64 - (sequenceBits + versionBits + typeBits) // 64 - (4+4+8)=48 bits.
+	// Useful lookups
+	nilUUIDString string = "00000000000000000-0-00-000000000000"
+	unusedString  string = "000000000000" // Expected constant for unused field (12 hex digits).
 )
 
-const (
-	currentVersion uint8  = 1              // The default version to use when generating a UUID.
-	unusedString   string = "000000000000" // Expected constant for unused field (12 hex digits).
+var (
+	NilUUID = UUID{}
 )
 
 // UUID is a 128-bit custom identifier.

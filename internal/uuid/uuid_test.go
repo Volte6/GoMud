@@ -132,3 +132,13 @@ func TestIsNil(t *testing.T) {
 		t.Error("expected non-nil UUID to be IsNil() false")
 	}
 }
+
+func TestIsNilString(t *testing.T) {
+
+	nilTest, _ := FromString(`00000000000000000-0-00-000000000000`)
+
+	var nilUUID UUID
+	if nilUUID != nilTest {
+		t.Error("expected nil UUID to be IsNil() true")
+	}
+}
