@@ -25,5 +25,12 @@ func Broadcast(rest string, user *users.UserRecord, room *rooms.Room, flags even
 		SourceIsMod:     user.Role != users.RoleUser,
 	})
 
+	events.AddToQueue(events.Communication{
+		SourceUserId: user.UserId,
+		CommType:     `broadcast`,
+		Name:         user.Character.Name,
+		Message:      rest,
+	})
+
 	return true, nil
 }

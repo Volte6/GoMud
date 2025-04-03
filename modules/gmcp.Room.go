@@ -30,13 +30,12 @@ func init() {
 	g := GMCPRoomModule{
 		plug: plugins.New(`gmcp.Room`, `1.0`),
 	}
-	g.plug.Requires(`gmcp`, `1.0`)
 
 	// connectionId to map[string]int
-	g.cache, _ = lru.New[uint64, map[string]int](256)
+	g.cache, _ = lru.New[uint64, map[string]int](128)
 
 	// Temporary for testing purposes.
-	events.RegisterListener(events.RoomChange{}, g.rommChangeHandler)
+	events.RegisterListener(events.RoomChange{}, g.roomChangeHandler)
 	events.RegisterListener(events.PlayerDespawn{}, g.despawnHandler)
 
 	events.RegisterListener(GMCPModules{}, func(e events.Event) events.ListenerReturn {
@@ -95,7 +94,7 @@ func (g *GMCPRoomModule) despawnHandler(e events.Event) events.ListenerReturn {
 	return events.Continue
 }
 
-func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn {
+func (g *GMCPRoomModule) roomChangeHandler(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.RoomChange)
 	if !typeOk {

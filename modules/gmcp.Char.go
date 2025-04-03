@@ -33,10 +33,9 @@ func init() {
 	g := GMCPCharModule{
 		plug: plugins.New(`gmcp.Char`, `1.0`),
 	}
-	g.plug.Requires(`gmcp`, `1.0`)
 
 	// connectionId to map[string]int
-	g.cache, _ = lru.New[uint64, map[string]int](256)
+	g.cache, _ = lru.New[uint64, map[string]int](128)
 
 	events.RegisterListener(events.EquipmentChange{}, g.equipmentChangeHandler)
 	events.RegisterListener(events.ItemOwnership{}, g.ownershipChangeHandler)

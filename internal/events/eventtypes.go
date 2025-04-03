@@ -78,6 +78,17 @@ type Message struct {
 
 func (m Message) Type() string { return `Message` }
 
+type Communication struct {
+	SourceUserId        int    // User that sent the message
+	SourceMobInstanceId int    // Mob that sent the message
+	TargetUserId        int    // Sent to only 1 person
+	CommType            string // say, party, broadcast, whisper, shout
+	Name                string
+	Message             string
+}
+
+func (m Communication) Type() string { return `Communication` }
+
 // Special commands that only the webclient is equipped to handle
 type WebClientCommand struct {
 	ConnectionId uint64

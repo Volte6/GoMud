@@ -51,5 +51,13 @@ func Whisper(rest string, user *users.UserRecord, room *rooms.Room, flags events
 
 	user.SendText(fmt.Sprintf(`You sent a <ansi fg="command">whisper</ansi> to <ansi fg="username">%s</ansi>`, toUser.Character.Name))
 
+	events.AddToQueue(events.Communication{
+		SourceUserId: user.UserId,
+		TargetUserId: toUser.UserId,
+		CommType:     `whisper`,
+		Name:         user.Character.Name,
+		Message:      rest,
+	})
+
 	return true, nil
 }
