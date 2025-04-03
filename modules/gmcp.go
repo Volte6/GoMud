@@ -301,6 +301,9 @@ func (g *GMCPModule) sendGMCPEnableRequest(connectionId uint64) {
 
 func (g *GMCPModule) supportsModule(connectionId uint64, moduleName string) bool {
 
+	// TODO: Remove this true for proper detection
+	return true
+
 	enabledModules := g.getModules(connectionId)
 	if len(enabledModules) > 0 {
 		if _, ok := enabledModules[moduleName]; ok {
