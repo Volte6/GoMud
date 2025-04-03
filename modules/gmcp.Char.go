@@ -1,12 +1,18 @@
 package modules
 
 import (
+	"strconv"
 	"strings"
 
 	lru "github.com/hashicorp/golang-lru/v2"
+	"github.com/volte6/gomud/internal/buffs"
+	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
+	"github.com/volte6/gomud/internal/items"
+	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/plugins"
+	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/users"
 )
@@ -275,33 +281,72 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 		}
 	}
 
+	if all || g.wantsGMCPPayload(`Char.Enemies`, gmcpModule) {
+
+		payload.Enemies = []GMCPCharModule_Enemy{}
+
+		aggroMobInstanceId := 0
+		if user.Character.Aggro != nil {
+			if user.Character.Aggro.MobInstanceId > 0 {
+				aggroMobInstanceId = user.Character.Aggro.MobInstanceId
+			}
+		}
+
+		if roomInfo := rooms.LoadRoom(user.Character.RoomId); roomInfo != nil {
+
+			for _, mobInstanceId := range roomInfo.GetMobs(rooms.FindFighting) {
+				mob := mobs.GetInstance(mobInstanceId)
+				if mob == nil {
+					continue
+				}
+
+				e := GMCPCharModule_Enemy{
+					Id:      mob.ShorthandId(),
+					Name:    mob.Character.Name,
+					Level:   mob.Character.Level,
+					Hp:      mob.Character.Health,
+					MaxHp:   mob.Character.HealthMax.Value,
+					Engaged: mob.InstanceId == aggroMobInstanceId,
+				}
+
+				payload.Enemies = append(payload.Enemies, e)
+			}
+
+		}
+
+		if !all {
+			return payload.Enemies, `Char.Enemies`
+		}
+
+	}
+
 	if all || g.wantsGMCPPayload(`Char.Inventory`, gmcpModule) {
 
 		payload.Inventory = &GMCPCharModule_Payload_Inventory{
 
 			Backpack: &GMCPCharModule_Payload_Inventory_Backpack{
 				Count: len(user.Character.Items),
-				Items: []string{},
+				Items: []GMCPCharModule_Payload_Inventory_Item{},
 				Max:   user.Character.CarryCapacity(),
 			},
 
 			Worn: &GMCPCharModule_Payload_Inventory_Worn{
-				Weapon:  user.Character.Equipment.Weapon.Name(),
-				Offhand: user.Character.Equipment.Offhand.Name(),
-				Head:    user.Character.Equipment.Head.Name(),
-				Neck:    user.Character.Equipment.Neck.Name(),
-				Body:    user.Character.Equipment.Body.Name(),
-				Belt:    user.Character.Equipment.Belt.Name(),
-				Gloves:  user.Character.Equipment.Gloves.Name(),
-				Ring:    user.Character.Equipment.Ring.Name(),
-				Legs:    user.Character.Equipment.Legs.Name(),
-				Feet:    user.Character.Equipment.Feet.Name(),
+				Weapon:  newInventory_Item(user.Character.Equipment.Weapon),
+				Offhand: newInventory_Item(user.Character.Equipment.Offhand),
+				Head:    newInventory_Item(user.Character.Equipment.Head),
+				Neck:    newInventory_Item(user.Character.Equipment.Neck),
+				Body:    newInventory_Item(user.Character.Equipment.Body),
+				Belt:    newInventory_Item(user.Character.Equipment.Belt),
+				Gloves:  newInventory_Item(user.Character.Equipment.Gloves),
+				Ring:    newInventory_Item(user.Character.Equipment.Ring),
+				Legs:    newInventory_Item(user.Character.Equipment.Legs),
+				Feet:    newInventory_Item(user.Character.Equipment.Feet),
 			},
 		}
 
 		// Fill the items list
 		for _, itm := range user.Character.Items {
-			payload.Inventory.Backpack.Items = append(payload.Inventory.Backpack.Items, itm.Name())
+			payload.Inventory.Backpack.Items = append(payload.Inventory.Backpack.Items, newInventory_Item(itm))
 		}
 
 		if !all {
@@ -355,6 +400,56 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 		}
 	}
 
+	if all || g.wantsGMCPPayload(`Char.Affects`, gmcpModule) {
+
+		c := configs.GetTimingConfig()
+
+		payload.Affects = make(map[string]GMCPCharModule_Payload_Affect)
+
+		nameIncrement := 0
+		for _, buff := range user.Character.GetBuffs() {
+
+			buffSpec := buffs.GetBuffSpec(buff.BuffId)
+			if buffSpec == nil {
+				continue
+			}
+
+			timeLeft, timeMax := -1, -1
+
+			if !buff.PermaBuff {
+				roundsLeft, totalRounds := buffs.GetDurations(buff, buffSpec)
+				timeMax = c.RoundsToSeconds(totalRounds)
+				timeLeft = c.RoundsToSeconds(roundsLeft)
+			}
+
+			name, desc := buffSpec.VisibleNameDesc()
+
+			aff := GMCPCharModule_Payload_Affect{
+				Name:         name,
+				Description:  desc,
+				DurationMax:  timeMax,
+				DurationLeft: timeLeft,
+				Type:         `unknown`,
+			}
+
+			aff.Mods = make(map[string]int)
+			for name, value := range buffSpec.StatMods {
+				aff.Mods[name] = value
+			}
+
+			if _, ok := payload.Affects[name]; ok {
+				nameIncrement++
+				name += `#` + strconv.Itoa(nameIncrement)
+			}
+
+			payload.Affects[name] = aff
+		}
+
+		if !all {
+			return payload.Affects, `Char.Affects`
+		}
+	}
+
 	// If we reached this point and Char wasn't requested, we have a problem.
 	if !all {
 		mudlog.Error(`gmcp.Char`, `error`, `Bad module requested`, `module`, gmcpModule)
@@ -395,11 +490,13 @@ func (g *GMCPCharModule) supportsModule(connectionId uint64, moduleName string) 
 }
 
 type GMCPCharModule_Payload struct {
-	Info      *GMCPCharModule_Payload_Info      `json:"Info,omitempty"`
-	Inventory *GMCPCharModule_Payload_Inventory `json:"Inventory,omitempty"`
-	Stats     *GMCPCharModule_Payload_Stats     `json:"Stats,omitempty"`
-	Vitals    *GMCPCharModule_Payload_Vitals    `json:"Vitals,omitempty"`
-	Worth     *GMCPCharModule_Payload_Worth     `json:"Worth,omitempty"`
+	Info      *GMCPCharModule_Payload_Info             `json:"Info,omitempty"`
+	Affects   map[string]GMCPCharModule_Payload_Affect `json:"Affects,omitempty"`
+	Enemies   []GMCPCharModule_Enemy                   `json:"Enemies,omitempty"`
+	Inventory *GMCPCharModule_Payload_Inventory        `json:"Inventory,omitempty"`
+	Stats     *GMCPCharModule_Payload_Stats            `json:"Stats,omitempty"`
+	Vitals    *GMCPCharModule_Payload_Vitals           `json:"Vitals,omitempty"`
+	Worth     *GMCPCharModule_Payload_Worth            `json:"Worth,omitempty"`
 }
 
 // /////////////////
@@ -415,6 +512,18 @@ type GMCPCharModule_Payload_Info struct {
 }
 
 // /////////////////
+// Char.Enemies
+// /////////////////
+type GMCPCharModule_Enemy struct {
+	Id      string `json:"id"`
+	Name    string `json:"name"`
+	Level   int    `json:"level"`
+	Hp      int    `json:"hp"`
+	MaxHp   int    `json:"hp_max"`
+	Engaged bool   `json:"engaged"`
+}
+
+// /////////////////
 // Char.Inventory
 // /////////////////
 type GMCPCharModule_Payload_Inventory struct {
@@ -423,22 +532,44 @@ type GMCPCharModule_Payload_Inventory struct {
 }
 
 type GMCPCharModule_Payload_Inventory_Backpack struct {
-	Count int      `json:"count,omitempty"`
-	Items []string `json:"items,omitempty"`
-	Max   int      `json:"max,omitempty"`
+	Count int                                     `json:"count,omitempty"`
+	Items []GMCPCharModule_Payload_Inventory_Item `json:"items,omitempty"`
+	Max   int                                     `json:"max,omitempty"`
 }
 
 type GMCPCharModule_Payload_Inventory_Worn struct {
-	Weapon  string `json:"weapon,omitempty"`
-	Offhand string `json:"offhand,omitempty"`
-	Head    string `json:"head,omitempty"`
-	Neck    string `json:"neck,omitempty"`
-	Body    string `json:"body,omitempty"`
-	Belt    string `json:"belt,omitempty"`
-	Gloves  string `json:"gloves,omitempty"`
-	Ring    string `json:"ring,omitempty"`
-	Legs    string `json:"legs,omitempty"`
-	Feet    string `json:"feet,omitempty"`
+	Weapon  GMCPCharModule_Payload_Inventory_Item `json:"weapon,omitempty"`
+	Offhand GMCPCharModule_Payload_Inventory_Item `json:"offhand,omitempty"`
+	Head    GMCPCharModule_Payload_Inventory_Item `json:"head,omitempty"`
+	Neck    GMCPCharModule_Payload_Inventory_Item `json:"neck,omitempty"`
+	Body    GMCPCharModule_Payload_Inventory_Item `json:"body,omitempty"`
+	Belt    GMCPCharModule_Payload_Inventory_Item `json:"belt,omitempty"`
+	Gloves  GMCPCharModule_Payload_Inventory_Item `json:"gloves,omitempty"`
+	Ring    GMCPCharModule_Payload_Inventory_Item `json:"ring,omitempty"`
+	Legs    GMCPCharModule_Payload_Inventory_Item `json:"legs,omitempty"`
+	Feet    GMCPCharModule_Payload_Inventory_Item `json:"feet,omitempty"`
+}
+
+type GMCPCharModule_Payload_Inventory_Item struct {
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	Type      string `json:"type"`
+	SubType   string `json:"subtype"`
+	Uses      int    `json:"uses"`
+	Cursed    bool   `json:"cursed"`
+	QuestItem bool   `json:"quest_item"`
+}
+
+func newInventory_Item(itm items.Item) GMCPCharModule_Payload_Inventory_Item {
+	return GMCPCharModule_Payload_Inventory_Item{
+		Id:        itm.ShorthandId(),
+		Name:      itm.Name(),
+		Type:      string(itm.GetSpec().Type),
+		SubType:   string(itm.GetSpec().Subtype),
+		Uses:      itm.Uses,
+		Cursed:    !itm.Uncursed && itm.GetSpec().Cursed,
+		QuestItem: itm.GetSpec().QuestToken != ``,
+	}
 }
 
 // /////////////////
@@ -473,4 +604,16 @@ type GMCPCharModule_Payload_Worth struct {
 	TrainingPoints int `json:"trainingpoints,omitempty"`
 	TNL            int `json:"tnl,omitempty"`
 	XP             int `json:"xp,omitempty"`
+}
+
+// /////////////////
+// Char.Affects
+// /////////////////
+type GMCPCharModule_Payload_Affect struct {
+	Name         string         `json:"name"`
+	Description  string         `json:"description"`
+	DurationMax  int            `json:"duration_max"`
+	DurationLeft int            `json:"duration_cur"`
+	Type         string         `json:"type"`
+	Mods         map[string]int `json:"affects"`
 }

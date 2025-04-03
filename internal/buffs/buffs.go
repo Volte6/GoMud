@@ -1,6 +1,8 @@
 package buffs
 
 import (
+	"math"
+
 	"github.com/volte6/gomud/internal/mudlog"
 )
 
@@ -309,4 +311,11 @@ func (bs *Buffs) Prune() (prunedBuffs []*Buff) {
 	}
 
 	return prunedBuffs
+}
+
+func GetDurations(buff *Buff, spec *BuffSpec) (roundsLeft int, totalRounds int) {
+	totalRounds = int(math.Ceil(float64(buff.TriggersLeft) * float64(spec.RoundInterval)))
+	roundsLeft = totalRounds - buff.RoundCounter
+
+	return roundsLeft, totalRounds
 }
