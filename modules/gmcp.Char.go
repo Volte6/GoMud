@@ -423,12 +423,16 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 
 			name, desc := buffSpec.VisibleNameDesc()
 
+			buffSource := buff.Source
+			if buffSource == `` {
+				buffSource = `unknown`
+			}
 			aff := GMCPCharModule_Payload_Affect{
 				Name:         name,
 				Description:  desc,
 				DurationMax:  timeMax,
 				DurationLeft: timeLeft,
-				Type:         `unknown`,
+				Type:         buffSource,
 			}
 
 			aff.Mods = make(map[string]int)

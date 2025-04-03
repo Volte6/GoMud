@@ -74,12 +74,12 @@ function onCommand(cmd, rest, user, room) {
             break;
         case 3:
             teacherMob.Command('emote touches you and you feel more focused.');
-            user.GiveBuff(32);
+            user.GiveBuff(32, "training");
             teacherMob.Command('say Sometimes you might become afflicted with a condition. Conditions can have good or bad effects.');
             teacherMob.Command('say type <ansi fg="command">conditions</ansi> to see any statuses affecting you.');
             break;
         case 4:
-            user.GiveBuff(-32);
+            user.GiveBuff(-32, "training");
             teacherMob.Command('say head <ansi fg="command">south</ansi> for the next lesson.');
             canGoSouth = true;
         default:

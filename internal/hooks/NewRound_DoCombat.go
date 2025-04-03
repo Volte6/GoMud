@@ -379,23 +379,11 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 			}
 
 			for _, buffId := range roundResult.BuffSource {
-
-				events.AddToQueue(events.Buff{
-					UserId:        user.UserId,
-					MobInstanceId: 0,
-					BuffId:        buffId,
-				})
-
+				user.AddBuff(buffId, `combat`)
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-
-				events.AddToQueue(events.Buff{
-					UserId:        defUser.UserId,
-					MobInstanceId: 0,
-					BuffId:        buffId,
-				})
-
+				defUser.AddBuff(buffId, `combat`)
 			}
 
 			for _, msg := range roundResult.MessagesToSource {
@@ -550,23 +538,11 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 			roundResult = combat.AttackPlayerVsMob(user, defMob)
 
 			for _, buffId := range roundResult.BuffSource {
-
-				events.AddToQueue(events.Buff{
-					UserId:        user.UserId,
-					MobInstanceId: 0,
-					BuffId:        buffId,
-				})
-
+				user.AddBuff(buffId, `combat`)
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-
-				events.AddToQueue(events.Buff{
-					UserId:        0,
-					MobInstanceId: defMob.InstanceId,
-					BuffId:        buffId,
-				})
-
+				defMob.AddBuff(buffId, `combat`)
 			}
 
 			for _, msg := range roundResult.MessagesToSource {
@@ -878,23 +854,11 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 			}
 
 			for _, buffId := range roundResult.BuffSource {
-
-				events.AddToQueue(events.Buff{
-					UserId:        0,
-					MobInstanceId: mob.InstanceId,
-					BuffId:        buffId,
-				})
-
+				mob.AddBuff(buffId, `combat`)
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-
-				events.AddToQueue(events.Buff{
-					UserId:        defUser.UserId,
-					MobInstanceId: 0,
-					BuffId:        buffId,
-				})
-
+				defUser.AddBuff(buffId, `combat`)
 			}
 
 			for _, msg := range roundResult.MessagesToTarget {
@@ -1009,22 +973,11 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 			roundResult = combat.AttackMobVsMob(mob, defMob)
 
 			for _, buffId := range roundResult.BuffSource {
-
-				events.AddToQueue(events.Buff{
-					UserId:        0,
-					MobInstanceId: mob.InstanceId,
-					BuffId:        buffId,
-				})
-
+				mob.AddBuff(buffId, `combat`)
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-
-				events.AddToQueue(events.Buff{
-					UserId:        0,
-					MobInstanceId: defMob.InstanceId,
-					BuffId:        buffId,
-				})
+				defMob.AddBuff(buffId, `combat`)
 			}
 
 			for _, msg := range roundResult.MessagesToSourceRoom {

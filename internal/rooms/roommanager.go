@@ -241,7 +241,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		}
 		for _, buffId := range spec.PlayerBuffIds {
 			if !user.Character.HasBuff(buffId) {
-				user.AddBuff(buffId)
+				user.AddBuff(buffId, `area`)
 			}
 		}
 	}

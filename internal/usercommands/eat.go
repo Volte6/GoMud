@@ -45,13 +45,7 @@ func Eat(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		}
 
 		for _, buffId := range itemSpec.BuffIds {
-
-			events.AddToQueue(events.Buff{
-				UserId:        user.UserId,
-				MobInstanceId: 0,
-				BuffId:        buffId,
-			})
-
+			user.AddBuff(buffId, `food`)
 		}
 
 	}

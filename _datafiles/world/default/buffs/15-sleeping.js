@@ -19,5 +19,5 @@ function onEnd(actor, triggersLeft) {
     SendUserMessage(actor.UserId(),     'You wake up!');
     SendRoomMessage(actor.GetRoomId(),  actor.GetCharacterName(true)+' wakes up.', actor.UserId());
     actor.SetAdjective("sleeping", false);
-    actor.GiveBuff(16) // Well Rested
+    actor.GiveBuff(16, "sleep") // Well Rested
 }

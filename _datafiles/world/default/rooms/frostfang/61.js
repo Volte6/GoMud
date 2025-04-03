@@ -5,7 +5,7 @@ function onCommand_sleep(rest, user, room) {
     SendRoomMessage(room.RoomId(), user.GetCharacterName(true)+" says something to the Inn keeper and is escorted to another room.", user.UserId());
     
     user.MoveRoom(432);
-    user.GiveBuff(15);
+    user.GiveBuff(15, "sleep");
 
     return true;
 }

@@ -21,6 +21,7 @@ type Buff struct {
 	UserId        int
 	MobInstanceId int
 	BuffId        int
+	Source        string // optional source such as spell,
 }
 
 func (b Buff) Type() string { return `Buff` }

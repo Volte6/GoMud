@@ -38,11 +38,7 @@ func Sneak(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		return true, nil
 	}
 
-	events.AddToQueue(events.Buff{
-		UserId:        user.UserId,
-		MobInstanceId: 0,
-		BuffId:        9,
-	})
+	user.AddBuff(9, `skill`)
 
 	return true, nil
 }

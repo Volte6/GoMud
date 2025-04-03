@@ -348,11 +348,12 @@ func (u *UserRecord) CommandFlagged(inputTxt string, flagData events.EventFlag, 
 
 }
 
-func (u *UserRecord) AddBuff(buffId int) {
+func (u *UserRecord) AddBuff(buffId int, source string) {
 
 	events.AddToQueue(events.Buff{
 		UserId: u.UserId,
 		BuffId: buffId,
+		Source: source,
 	})
 
 }
