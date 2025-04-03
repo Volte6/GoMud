@@ -115,7 +115,7 @@ func (g *GMCPCommModule) onComm(e events.Event) events.ListenerReturn {
 
 		events.AddToQueue(GMCPOut{
 			UserId:  userId,
-			Module:  `Room.Comm`,
+			Module:  `Comm.Channel`,
 			Payload: msgPayload,
 		})
 
