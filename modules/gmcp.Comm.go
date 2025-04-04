@@ -97,9 +97,10 @@ func (g *GMCPCommModule) onComm(e events.Event) events.ListenerReturn {
 
 	for _, userId := range sendToUserIds {
 
-		if userId == evt.SourceUserId && evt.CommType != `broadcast` {
-			continue
-		}
+		// Exclude user from receiving their own messages?
+		//if userId == evt.SourceUserId && evt.CommType != `broadcast` {
+		//continue
+		//}
 
 		events.AddToQueue(GMCPOut{
 			UserId:  userId,
