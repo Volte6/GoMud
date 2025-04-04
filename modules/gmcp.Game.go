@@ -3,7 +3,6 @@ package modules
 import (
 	"strconv"
 
-	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/plugins"
@@ -27,25 +26,14 @@ func init() {
 		plug: plugins.New(`gmcp.Game`, `1.0`),
 	}
 
-	// connectionId to map[string]int
-	g.cache, _ = lru.New[uint64, map[string]int](128)
-
 	events.RegisterListener(events.PlayerDespawn{}, g.onJoinLeave)
 	events.RegisterListener(events.PlayerSpawn{}, g.onJoinLeave)
-
-	events.RegisterListener(GMCPModules{}, func(e events.Event) events.ListenerReturn {
-		if evt, ok := e.(GMCPModules); ok {
-			g.cache.Add(evt.ConnectionId, evt.Modules)
-		}
-		return events.Continue
-	})
 
 }
 
 type GMCPGameModule struct {
 	// Keep a reference to the plugin when we create it so that we can call ReadBytes() and WriteBytes() on it.
-	plug  *plugins.Plugin
-	cache *lru.Cache[uint64, map[string]int]
+	plug *plugins.Plugin
 }
 
 func (g *GMCPGameModule) onJoinLeave(e events.Event) events.ListenerReturn {

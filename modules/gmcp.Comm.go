@@ -3,7 +3,6 @@ package modules
 import (
 	"strings"
 
-	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
@@ -30,24 +29,13 @@ func init() {
 		plug: plugins.New(`gmcp.Comm`, `1.0`),
 	}
 
-	// connectionId to map[string]int
-	g.cache, _ = lru.New[uint64, map[string]int](128)
-
 	events.RegisterListener(events.Communication{}, g.onComm)
-
-	events.RegisterListener(GMCPModules{}, func(e events.Event) events.ListenerReturn {
-		if evt, ok := e.(GMCPModules); ok {
-			g.cache.Add(evt.ConnectionId, evt.Modules)
-		}
-		return events.Continue
-	})
 
 }
 
 type GMCPCommModule struct {
 	// Keep a reference to the plugin when we create it so that we can call ReadBytes() and WriteBytes() on it.
-	plug  *plugins.Plugin
-	cache *lru.Cache[uint64, map[string]int]
+	plug *plugins.Plugin
 }
 
 func (g *GMCPCommModule) onComm(e events.Event) events.ListenerReturn {
@@ -58,7 +46,7 @@ func (g *GMCPCommModule) onComm(e events.Event) events.ListenerReturn {
 		return events.Cancel
 	}
 
-	msgPayload := `{channel: "` + evt.CommType + `", sender: "` + evt.Name + `", text: "` + strings.ReplaceAll(evt.Message, `"`, `\\"`) + `"}`
+	msgPayload := `{ "channel": "` + evt.CommType + `", "sender": "` + evt.Name + `", "text": "` + strings.ReplaceAll(evt.Message, `"`, `\\"`) + `"}`
 
 	// Sent to everyone.
 	// say, party, broadcast, whisper
@@ -122,17 +110,4 @@ func (g *GMCPCommModule) onComm(e events.Event) events.ListenerReturn {
 	}
 
 	return events.Continue
-}
-
-func (g *GMCPCommModule) supportsModule(connectionId uint64, moduleName string) bool {
-	supportedModules, ok := g.cache.Get(connectionId)
-	if ok {
-		if _, ok := supportedModules[moduleName]; ok {
-			return true
-		}
-	} else {
-		// Request that the gmcp module get the data and send the event
-		events.AddToQueue(GMCPRequestModules{ConnectionId: connectionId})
-	}
-	return false
 }

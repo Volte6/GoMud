@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"strings"
 
-	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
@@ -34,9 +33,6 @@ func init() {
 		plug: plugins.New(`gmcp.Char`, `1.0`),
 	}
 
-	// connectionId to map[string]int
-	g.cache, _ = lru.New[uint64, map[string]int](128)
-
 	events.RegisterListener(events.EquipmentChange{}, g.equipmentChangeHandler)
 	events.RegisterListener(events.ItemOwnership{}, g.ownershipChangeHandler)
 
@@ -46,20 +42,11 @@ func init() {
 	events.RegisterListener(events.CharacterTrained{}, g.charTrainedHandler)
 	events.RegisterListener(GMCPUpdate{}, g.buildAndSendGMCPPayload)
 	events.RegisterListener(events.GainExperience{}, g.xpGainHandler)
-
-	events.RegisterListener(GMCPModules{}, func(e events.Event) events.ListenerReturn {
-		if evt, ok := e.(GMCPModules); ok {
-			g.cache.Add(evt.ConnectionId, evt.Modules)
-		}
-		return events.Continue
-	})
-
 }
 
 type GMCPCharModule struct {
 	// Keep a reference to the plugin when we create it so that we can call ReadBytes() and WriteBytes() on it.
-	plug  *plugins.Plugin
-	cache *lru.Cache[uint64, map[string]int]
+	plug *plugins.Plugin
 }
 
 // Tell the system a wish to send specific GMCP Update data
@@ -232,6 +219,10 @@ func (g *GMCPCharModule) buildAndSendGMCPPayload(e events.Event) events.Listener
 		return events.Continue
 	}
 
+	if !isGMCPEnabled(user.ConnectionId()) {
+		return events.Cancel
+	}
+
 	if len(evt.Identifier) >= 4 {
 
 		identifierParts := strings.Split(strings.ToLower(evt.Identifier), `.`)
@@ -239,12 +230,7 @@ func (g *GMCPCharModule) buildAndSendGMCPPayload(e events.Event) events.Listener
 			identifierParts[i] = strings.Title(identifierParts[i])
 		}
 
-		rootModule := identifierParts[0]
 		requestedId := strings.Join(identifierParts, `.`)
-
-		if !g.supportsModule(user.ConnectionId(), rootModule) {
-			return events.Continue
-		}
 
 		payload, moduleName := g.GetCharNode(user, requestedId)
 
@@ -476,19 +462,6 @@ func (g *GMCPCharModule) wantsGMCPPayload(searchName string, identifier string) 
 		return true
 	}
 
-	return false
-}
-
-func (g *GMCPCharModule) supportsModule(connectionId uint64, moduleName string) bool {
-	supportedModules, ok := g.cache.Get(connectionId)
-	if ok {
-		if _, ok := supportedModules[moduleName]; ok {
-			return true
-		}
-	} else {
-		// Request that the gmcp module get the data and send the event
-		events.AddToQueue(GMCPRequestModules{ConnectionId: connectionId})
-	}
 	return false
 }
 

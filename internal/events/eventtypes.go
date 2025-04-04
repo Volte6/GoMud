@@ -176,6 +176,7 @@ func (s ScriptedEvent) Type() string { return `ScriptedEvent` }
 // Entered the world
 type PlayerSpawn struct {
 	UserId        int
+	ConnectionId  uint64
 	RoomId        int
 	Username      string
 	CharacterName string
