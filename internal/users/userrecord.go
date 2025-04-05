@@ -681,6 +681,10 @@ func (u *UserRecord) SwapToAlt(targetAltName string) bool {
 
 	// Run validation on the new character
 	selectedChar.Validate()
+
+	// Set userId
+	selectedChar.SetUserId(u.UserId)
+
 	// Replace the current character (has already been written to alts)
 	u.Character = &selectedChar
 

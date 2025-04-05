@@ -39,10 +39,13 @@ func MobRoundTick(e events.Event) events.ListenerReturn {
 			//
 			// Fire onTrigger for buff script
 			//
+			triggeredBuffIds := []int{}
 			for _, buff := range triggeredBuffs {
 				scripting.TryBuffScriptEvent(`onTrigger`, 0, mobInstanceId, buff.BuffId)
+				triggeredBuffIds = append(triggeredBuffIds, buff.BuffId)
 			}
 
+			events.AddToQueue(events.BuffsTriggered{MobInstanceId: mobInstanceId, BuffIds: triggeredBuffIds})
 		}
 
 		// Do charm cleanup

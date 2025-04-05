@@ -369,20 +369,22 @@ func (g *GMCPModule) dispatchGMCP(e events.Event) events.ListenerReturn {
 		return events.Continue
 	}
 
-	gmcpSettings, ok := g.cache.Get(connId)
-	if !ok {
+	if !isGMCPEnabled(connId) {
+		gmcpSettings, ok := g.cache.Get(connId)
+		if !ok {
 
-		gmcpSettings = GMCPSettings{}
-		g.cache.Add(connId, gmcpSettings)
+			gmcpSettings = GMCPSettings{}
+			g.cache.Add(connId, gmcpSettings)
 
-		g.sendGMCPEnableRequest(connId)
+			g.sendGMCPEnableRequest(connId)
 
-		return events.Continue
-	}
+			return events.Continue
+		}
 
-	// Get enabled modules... if none, skip out.
-	if !gmcpSettings.GMCPAccepted {
-		return events.Continue
+		// Get enabled modules... if none, skip out.
+		if !gmcpSettings.GMCPAccepted {
+			return events.Continue
+		}
 	}
 
 	switch v := gmcp.Payload.(type) {

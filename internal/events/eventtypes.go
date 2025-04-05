@@ -26,6 +26,14 @@ type Buff struct {
 
 func (b Buff) Type() string { return `Buff` }
 
+type BuffsTriggered struct {
+	UserId        int
+	MobInstanceId int
+	BuffIds       []int
+}
+
+func (b BuffsTriggered) Type() string { return `BuffsTriggered` }
+
 // Used for giving/taking quest progress
 type Quest struct {
 	UserId     int
@@ -305,6 +313,13 @@ type CharacterTrained struct {
 }
 
 func (p CharacterTrained) Type() string { return `CharacterTrained` }
+
+// any stats or healthmax etc. have changed
+type CharacterStatsChanged struct {
+	UserId int
+}
+
+func (p CharacterStatsChanged) Type() string { return `CharacterStatsChanged` }
 
 type RedrawPrompt struct {
 	UserId        int

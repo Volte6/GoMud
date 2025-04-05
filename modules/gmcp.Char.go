@@ -42,6 +42,10 @@ func init() {
 	events.RegisterListener(events.CharacterTrained{}, g.charTrainedHandler)
 	events.RegisterListener(GMCPUpdate{}, g.buildAndSendGMCPPayload)
 	events.RegisterListener(events.GainExperience{}, g.xpGainHandler)
+	events.RegisterListener(events.CharacterStatsChanged{}, g.statsChangeHandler)
+	events.RegisterListener(events.CharacterChanged{}, g.charChangeHandler)
+	events.RegisterListener(events.BuffsTriggered{}, g.buffTriggeredHandler)
+
 }
 
 type GMCPCharModule struct {
@@ -56,6 +60,44 @@ type GMCPUpdate struct {
 }
 
 func (g GMCPUpdate) Type() string { return `GMCPUpdate` }
+
+func (g *GMCPCharModule) buffTriggeredHandler(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(events.BuffsTriggered)
+	if !typeOk {
+		return events.Continue // Return false to stop halt the event chain for this event
+	}
+
+	if evt.UserId == 0 {
+		return events.Continue
+	}
+
+	events.AddToQueue(GMCPUpdate{
+		UserId:     evt.UserId,
+		Identifier: `Char.Stats, Char.Vitals, Char.Affects`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+	})
+
+	return events.Continue
+}
+
+func (g *GMCPCharModule) charChangeHandler(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(events.CharacterChanged)
+	if !typeOk {
+		return events.Continue // Return false to stop halt the event chain for this event
+	}
+
+	if evt.UserId == 0 {
+		return events.Continue
+	}
+
+	events.AddToQueue(GMCPUpdate{
+		UserId:     evt.UserId,
+		Identifier: `Char`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+	})
+
+	return events.Continue
+}
 
 func (g *GMCPCharModule) vitalsChangedHandler(e events.Event) events.ListenerReturn {
 
@@ -106,8 +148,25 @@ func (g *GMCPCharModule) ownershipChangeHandler(e events.Event) events.ListenerR
 
 	events.AddToQueue(GMCPUpdate{
 		UserId:     evt.UserId,
-		Identifier: `Char.Inventory`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+		Identifier: `Char.Stats, Char.Vitals`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
 	})
+
+	return events.Continue
+}
+
+func (g *GMCPCharModule) statsChangeHandler(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(events.CharacterStatsChanged)
+	if !typeOk {
+		return events.Continue // Return false to stop halt the event chain for this event
+	}
+
+	if evt.UserId == 0 {
+		return events.Continue
+	}
+
+	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
+	events.AddToQueue(GMCPUpdate{UserId: evt.UserId, Identifier: `Char.Stats, Char.Vitals, Char.Inventory.Backpack.Summary`})
 
 	return events.Continue
 }
@@ -123,20 +182,27 @@ func (g *GMCPCharModule) equipmentChangeHandler(e events.Event) events.ListenerR
 		return events.Continue
 	}
 
-	statsToChange := `Char`
+	statsToChange := ``
 
 	// If only gold or bank changed
-	if len(evt.ItemsRemoved) == 0 && len(evt.ItemsWorn) == 0 {
-		if evt.BankChange != 0 || evt.GoldChange != 0 {
-			statsToChange = `Char.Worth`
-		}
+	if len(evt.ItemsRemoved) > 0 || len(evt.ItemsWorn) > 0 {
+		statsToChange += `Char.Inventory`
 	}
 
-	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
-	events.AddToQueue(GMCPUpdate{
-		UserId:     evt.UserId,
-		Identifier: statsToChange, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
-	})
+	if evt.BankChange != 0 || evt.GoldChange != 0 {
+		if statsToChange != `` {
+			statsToChange += `, `
+		}
+		statsToChange += `Char.Worth`
+	}
+
+	if statsToChange != `` {
+		// Changing equipment might affect stats, inventory, maxhp/maxmp etc
+		events.AddToQueue(GMCPUpdate{
+			UserId:     evt.UserId,
+			Identifier: statsToChange, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+		})
+	}
 
 	return events.Continue
 }
@@ -153,10 +219,7 @@ func (g *GMCPCharModule) charTrainedHandler(e events.Event) events.ListenerRetur
 	}
 
 	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
-	events.AddToQueue(GMCPUpdate{
-		UserId:     evt.UserId,
-		Identifier: `Char`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
-	})
+	events.AddToQueue(GMCPUpdate{UserId: evt.UserId, Identifier: `Char.Stats, Char.Worth, Char.Vitals, Char.Inventory.Backpack.Summary`})
 
 	return events.Continue
 }
@@ -225,20 +288,26 @@ func (g *GMCPCharModule) buildAndSendGMCPPayload(e events.Event) events.Listener
 
 	if len(evt.Identifier) >= 4 {
 
-		identifierParts := strings.Split(strings.ToLower(evt.Identifier), `.`)
-		for i := 0; i < len(identifierParts); i++ {
-			identifierParts[i] = strings.Title(identifierParts[i])
+		for _, identifier := range strings.Split(evt.Identifier, `,`) {
+
+			identifier = strings.TrimSpace(identifier)
+
+			identifierParts := strings.Split(strings.ToLower(identifier), `.`)
+			for i := 0; i < len(identifierParts); i++ {
+				identifierParts[i] = strings.Title(identifierParts[i])
+			}
+
+			requestedId := strings.Join(identifierParts, `.`)
+
+			payload, moduleName := g.GetCharNode(user, requestedId)
+
+			events.AddToQueue(GMCPOut{
+				UserId:  evt.UserId,
+				Module:  moduleName,
+				Payload: payload,
+			})
+
 		}
-
-		requestedId := strings.Join(identifierParts, `.`)
-
-		payload, moduleName := g.GetCharNode(user, requestedId)
-
-		events.AddToQueue(GMCPOut{
-			UserId:  evt.UserId,
-			Module:  moduleName,
-			Payload: payload,
-		})
 
 	}
 
@@ -303,6 +372,21 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 			return payload.Enemies, `Char.Enemies`
 		}
 
+	}
+
+	// Allow specifically updating the Backpack Summary
+	if `Char.Inventory.Backpack.Summary` == gmcpModule {
+
+		payload.Inventory = &GMCPCharModule_Payload_Inventory{
+			Backpack: &GMCPCharModule_Payload_Inventory_Backpack{
+				Summary: GMCPCharModule_Payload_Inventory_Backpack_Summary{
+					Count: len(user.Character.Items),
+					Max:   user.Character.CarryCapacity(),
+				},
+			},
+		}
+
+		return payload.Inventory.Backpack.Summary, `Char.Inventory.Backpack.Summary`
 	}
 
 	if all || g.wantsGMCPPayload(`Char.Inventory`, gmcpModule) {
@@ -508,9 +592,15 @@ type GMCPCharModule_Payload_Inventory struct {
 }
 
 type GMCPCharModule_Payload_Inventory_Backpack struct {
-	Count int                                     `json:"count,omitempty"`
-	Items []GMCPCharModule_Payload_Inventory_Item `json:"items,omitempty"`
-	Max   int                                     `json:"max,omitempty"`
+	Items   []GMCPCharModule_Payload_Inventory_Item           `json:"items,omitempty"`
+	Count   int                                               `json:"count,omitempty"`
+	Max     int                                               `json:"max,omitempty"`
+	Summary GMCPCharModule_Payload_Inventory_Backpack_Summary `json:"Summary,omitempty"`
+}
+
+type GMCPCharModule_Payload_Inventory_Backpack_Summary struct {
+	Count int `json:"count,omitempty"`
+	Max   int `json:"max,omitempty"`
 }
 
 type GMCPCharModule_Payload_Inventory_Worn struct {
