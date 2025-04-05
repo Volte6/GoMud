@@ -17,16 +17,17 @@ function onAsk(mob, room, eventDetails) {
     match = UtilFindMatchIn(eventDetails.askText, nouns);
     if ( match.found ) {
 
-        if ( user.HasQuest("4-start") ) {
+        if ( !user.HasQuest("4-start") ) {
 
-            mob.Command("sayto @" + String(user.UserId()) + " Thanks, but you've done enough. Too much, really.");
-
-        } else {
             mob.Command("emote rubs his belly.")
             mob.Command("say I forgot my lunch today, and I'm so hungry.")
             mob.Command("say Do you think you could find a cheese sandwich for me?")
 
             user.GiveQuest("4-start")
+        } else if ( user.HasQuest("4-end") ) {
+            mob.Command("sayto @" + String(user.UserId()) + " Thanks, but you've done enough. Too much, really.");
+        } else {
+            mob.Command("emote rubs his belly.")
         }
 
         return true;

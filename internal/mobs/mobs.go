@@ -248,11 +248,12 @@ func (m *Mob) ShorthandId() string {
 	return fmt.Sprintf(`#%d`, m.InstanceId)
 }
 
-func (m *Mob) AddBuff(buffId int) {
+func (m *Mob) AddBuff(buffId int, source string) {
 
 	events.AddToQueue(events.Buff{
 		MobInstanceId: m.InstanceId,
 		BuffId:        buffId,
+		Source:        source,
 	})
 
 }

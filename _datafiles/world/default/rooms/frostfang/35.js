@@ -22,7 +22,7 @@ function onCommand_west(rest, user, room) {
     SendUserMessage(user.UserId(), 'You feel a sense of warmth wash over you, and the biting cold air no longer bothers you.');
     SendUserMessage(user.UserId(), '');
 
-    user.GiveBuff(3);
+    user.GiveBuff(3, "enchantment");
 
     // Queue it with an input blocking flag and ignore further scripts flag
     user.CommandFlagged('west', EventFlags.CmdSkipScripts|EventFlags.CmdBlockInputUntilComplete, 1)
@@ -51,7 +51,7 @@ function onCommand_say(rest, user, room) {
 
     user.GiveQuest("3-end");
 
-    user.GiveBuff(3);
+    user.GiveBuff(3, "enchantment");
 
     return true;
 }

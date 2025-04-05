@@ -110,14 +110,7 @@ func Buff(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				if targetUser := users.GetByUserId(targetUserId); targetUser != nil {
 					// Get the buff
 					if buffSpec := buffs.GetBuffSpec(buffId); buffSpec != nil {
-
-						// Apply the buff
-						events.AddToQueue(events.Buff{
-							UserId:        targetUserId,
-							MobInstanceId: 0,
-							BuffId:        buffId,
-						})
-
+						targetUser.AddBuff(buffId, `admin`)
 						user.SendText(fmt.Sprintf("Buff %d (%s) applied to %s.", buffId, buffSpec.Name, targetUser.Character.Name))
 
 					} else {
@@ -133,14 +126,7 @@ func Buff(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				if targetMob := mobs.GetInstance(targetMobInstanceId); targetMob != nil {
 					// Get the buff
 					if buffSpec := buffs.GetBuffSpec(buffId); buffSpec != nil {
-
-						// Apply the buff
-						events.AddToQueue(events.Buff{
-							UserId:        0,
-							MobInstanceId: targetMobInstanceId,
-							BuffId:        buffId,
-						})
-
+						targetMob.AddBuff(buffId, `admin`)
 						user.SendText(fmt.Sprintf("Buff %d (%s) applied to %s.", buffSpec.BuffId, buffSpec.Name, targetMob.Character.Name))
 
 					} else {

@@ -21,9 +21,18 @@ type Buff struct {
 	UserId        int
 	MobInstanceId int
 	BuffId        int
+	Source        string // optional source such as spell,
 }
 
 func (b Buff) Type() string { return `Buff` }
+
+type BuffsTriggered struct {
+	UserId        int
+	MobInstanceId int
+	BuffIds       []int
+}
+
+func (b BuffsTriggered) Type() string { return `BuffsTriggered` }
 
 // Used for giving/taking quest progress
 type Quest struct {
@@ -77,6 +86,17 @@ type Message struct {
 }
 
 func (m Message) Type() string { return `Message` }
+
+type Communication struct {
+	SourceUserId        int    // User that sent the message
+	SourceMobInstanceId int    // Mob that sent the message
+	TargetUserId        int    // Sent to only 1 person
+	CommType            string // say, party, broadcast, whisper, shout
+	Name                string
+	Message             string
+}
+
+func (m Communication) Type() string { return `Communication` }
 
 // Special commands that only the webclient is equipped to handle
 type WebClientCommand struct {
@@ -164,6 +184,7 @@ func (s ScriptedEvent) Type() string { return `ScriptedEvent` }
 // Entered the world
 type PlayerSpawn struct {
 	UserId        int
+	ConnectionId  uint64
 	RoomId        int
 	Username      string
 	CharacterName string
@@ -292,6 +313,13 @@ type CharacterTrained struct {
 }
 
 func (p CharacterTrained) Type() string { return `CharacterTrained` }
+
+// any stats or healthmax etc. have changed
+type CharacterStatsChanged struct {
+	UserId int
+}
+
+func (p CharacterStatsChanged) Type() string { return `CharacterStatsChanged` }
 
 type RedrawPrompt struct {
 	UserId        int

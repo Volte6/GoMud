@@ -122,13 +122,7 @@ func HandleQuestUpdate(e events.Event) events.ListenerReturn {
 		}
 		// Buff reward?
 		if questInfo.Rewards.BuffId > 0 {
-
-			events.AddToQueue(events.Buff{
-				UserId:        questUser.UserId,
-				MobInstanceId: 0,
-				BuffId:        questInfo.Rewards.BuffId,
-			})
-
+			questUser.AddBuff(questInfo.Rewards.BuffId, `quest`)
 		}
 		// Experience reward?
 		if questInfo.Rewards.Experience > 0 {

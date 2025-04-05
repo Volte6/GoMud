@@ -1,8 +1,6 @@
 package usercommands
 
 import (
-	"math"
-
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
@@ -24,18 +22,15 @@ func Conditions(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 	for _, buff := range charBuffs {
 
 		spec := buffs.GetBuffSpec(buff.BuffId)
-		totalRounds := int(math.Ceil(float64(buff.TriggersLeft) * float64(spec.RoundInterval)))
+
+		_, roundsLeft := buffs.GetDurations(buff, spec)
 
 		newAffliction := buffInfo{
 			Name:        spec.Name,
 			Description: spec.Description,
-			RoundsLeft:  totalRounds - (buff.RoundCounter),
+			RoundsLeft:  roundsLeft,
 		}
-
-		if spec.Secret {
-			newAffliction.Name = "Mysterious Affliction"
-			newAffliction.Description = "Unknown"
-		}
+		newAffliction.Name, newAffliction.Description = spec.VisibleNameDesc()
 
 		afflictions = append(afflictions, newAffliction)
 	}

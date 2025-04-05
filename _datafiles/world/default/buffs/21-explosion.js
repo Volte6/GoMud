@@ -14,5 +14,5 @@ function onTrigger(actor, triggersLeft) {
 
 // Invoked when the buff has run its course.
 function onEnd(actor, triggersLeft) {
-    actor.GiveBuff(22) // On fire
+    actor.GiveBuff(22, "explosion") // On fire
 }

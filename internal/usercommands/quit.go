@@ -12,12 +12,7 @@ func Quit(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 		user.SendText("You're too busy to quit right now!")
 		return true, nil
 	}
-
-	events.AddToQueue(events.Buff{
-		UserId:        user.UserId,
-		MobInstanceId: 0,
-		BuffId:        0,
-	})
+	user.AddBuff(0, `quitting`)
 
 	return true, nil
 }

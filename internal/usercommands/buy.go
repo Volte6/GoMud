@@ -471,11 +471,7 @@ func tryPurchase(request string, user *users.UserRecord, room *rooms.Room, shopM
 			shopUser.Command(`emote mutters a soft incantation.`, 1)
 		}
 
-		events.AddToQueue(events.Buff{
-			UserId:        user.UserId,
-			MobInstanceId: 0,
-			BuffId:        matchedShopItem.BuffId,
-		})
+		user.AddBuff(matchedShopItem.BuffId, `shop`)
 
 		if shopMob != nil {
 			shopMob.Command(`say I've done what I can.`, 1)

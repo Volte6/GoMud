@@ -9,6 +9,7 @@ import (
 
 	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/configs"
+	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/pets"
@@ -86,6 +87,7 @@ type Character struct {
 	LastPlayerDamage uint64            `yaml:"-"` // last round a player damaged this character
 	followers        []int             // everyone following this user
 	permaBuffIds     []int             // Buff Id's that are always present for this character
+	userId           int               // User ID of the character if any
 }
 
 func New() *Character {
@@ -228,6 +230,11 @@ func (c *Character) DeductActionPoints(amount int) bool {
 		c.ActionPoints = 0
 	}
 	return true
+}
+
+// Sometimes it's useful for a character to know what user it belongs to.
+func (c *Character) SetUserId(userId int) {
+	c.userId = userId
 }
 
 func (c *Character) SetMiscData(key string, value any) {
@@ -1342,9 +1349,13 @@ func (c *Character) StatMod(statName string) int {
 	return c.Equipment.StatMod(statName) + c.Buffs.StatMod(statName) + c.Pet.StatMod(statName)
 }
 
+// returns true if something has changed.
 func (c *Character) RecalculateStats() {
 
 	// Make sure racial base stats are set
+	beforeHealthMax := c.HealthMax
+	beforeManaMax := c.ManaMax
+	beforeStats := c.Stats
 
 	if raceInfo := races.GetRace(c.RaceId); raceInfo != nil {
 		c.TNLScale = raceInfo.TNLScale
@@ -1404,6 +1415,33 @@ func (c *Character) RecalculateStats() {
 	if c.ActionPointsMax.Value < 50 {
 		c.ActionPointsMax.Value = 50
 	}
+
+	if c.userId != 0 {
+		changed := false
+		// return true if something has changed.
+		if beforeStats.Strength.ValueAdj != c.Stats.Strength.ValueAdj {
+			changed = true
+		} else if beforeStats.Speed.ValueAdj != c.Stats.Speed.ValueAdj {
+			changed = true
+		} else if beforeStats.Smarts.ValueAdj != c.Stats.Smarts.ValueAdj {
+			changed = true
+		} else if beforeStats.Vitality.ValueAdj != c.Stats.Vitality.ValueAdj {
+			changed = true
+		} else if beforeStats.Mysticism.ValueAdj != c.Stats.Mysticism.ValueAdj {
+			changed = true
+		} else if beforeStats.Perception.ValueAdj != c.Stats.Perception.ValueAdj {
+			changed = true
+		} else if beforeHealthMax != c.HealthMax {
+			changed = true
+		} else if beforeManaMax != c.ManaMax {
+			changed = true
+		}
+
+		if changed {
+			events.AddToQueue(events.CharacterStatsChanged{UserId: c.userId})
+		}
+	}
+
 }
 
 // AutoTrain() spends any training points for this character

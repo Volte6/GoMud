@@ -182,8 +182,10 @@ func ProcessEvents() {
 		start := time.Now()
 		defer func() {
 			util.TrackTime(`events.ProcessEvents()`, time.Since(start).Seconds())
-			if time.Since(start).Seconds() > 0.00125 {
-				fmt.Println(`events.ProcessEvents`, "events handled:", eventCounter, "time taken:", time.Since(start).Seconds())
+			if eventDebugging {
+				if time.Since(start).Seconds() > 0.00125 {
+					fmt.Println(`events.ProcessEvents`, "events handled:", eventCounter, "time taken:", time.Since(start).Seconds())
+				}
 			}
 		}()
 	}

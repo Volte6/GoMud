@@ -106,12 +106,15 @@ func UserRoundTick(e events.Event) events.ListenerReturn {
 					//
 					// Fire onTrigger for buff script
 					//
+					triggeredBuffIds := []int{}
 					for _, buff := range triggeredBuffs {
 						if !buff.Expired() {
 							scripting.TryBuffScriptEvent(`onTrigger`, uId, 0, buff.BuffId)
 						}
+						triggeredBuffIds = append(triggeredBuffIds, buff.BuffId)
 					}
 
+					events.AddToQueue(events.BuffsTriggered{UserId: user.UserId, BuffIds: triggeredBuffIds})
 				}
 
 				// Recalculate all stats at the end of the round tick

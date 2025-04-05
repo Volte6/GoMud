@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mapper"
 	"github.com/volte6/gomud/internal/mudlog"
@@ -30,27 +29,16 @@ func init() {
 	g := GMCPRoomModule{
 		plug: plugins.New(`gmcp.Room`, `1.0`),
 	}
-	g.plug.Requires(`gmcp`, `1.0`)
-
-	// connectionId to map[string]int
-	g.cache, _ = lru.New[uint64, map[string]int](256)
 
 	// Temporary for testing purposes.
-	events.RegisterListener(events.RoomChange{}, g.rommChangeHandler)
+	events.RegisterListener(events.RoomChange{}, g.roomChangeHandler)
 	events.RegisterListener(events.PlayerDespawn{}, g.despawnHandler)
 
-	events.RegisterListener(GMCPModules{}, func(e events.Event) events.ListenerReturn {
-		if evt, ok := e.(GMCPModules); ok {
-			g.cache.Add(evt.ConnectionId, evt.Modules)
-		}
-		return events.Continue
-	})
 }
 
 type GMCPRoomModule struct {
 	// Keep a reference to the plugin when we create it so that we can call ReadBytes() and WriteBytes() on it.
-	plug  *plugins.Plugin
-	cache *lru.Cache[uint64, map[string]int]
+	plug *plugins.Plugin
 }
 
 func (g *GMCPRoomModule) despawnHandler(e events.Event) events.ListenerReturn {
@@ -95,7 +83,7 @@ func (g *GMCPRoomModule) despawnHandler(e events.Event) events.ListenerReturn {
 	return events.Continue
 }
 
-func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn {
+func (g *GMCPRoomModule) roomChangeHandler(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.RoomChange)
 	if !typeOk {
@@ -126,20 +114,9 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 		return events.Cancel
 	}
 
-	////////////////////////////////////
-	// Check for support of this module
-	////////////////////////////////////
-	userHasModule := false
-	if supportedModules, ok := g.cache.Get(user.ConnectionId()); ok {
-		if _, ok := supportedModules[`Room`]; ok {
-			userHasModule = true
-		}
-	}
-	////////////////////////////////////
-	// End check for support of this module
-	////////////////////////////////////
+	userGMCPEnabled := isGMCPEnabled(user.ConnectionId())
 
-	if userHasModule {
+	if userGMCPEnabled {
 		//
 		// Send GMCP Updates
 		//
@@ -306,7 +283,7 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 
 			newRoomPlayers.WriteString(`"` + u.Character.Name + `": ` + `"` + u.Character.Name + `"`)
 
-			if !g.supportsModule(u.ConnectionId(), `Room`) {
+			if !isGMCPEnabled(u.ConnectionId()) {
 				continue
 			}
 
@@ -319,7 +296,7 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 		}
 	}
 
-	if userHasModule {
+	if userGMCPEnabled {
 		// send player list for room
 		events.AddToQueue(GMCPOut{
 			UserId:  user.UserId,
@@ -337,7 +314,7 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 
 		if u := users.GetByUserId(uid); u != nil {
 
-			if !g.supportsModule(u.ConnectionId(), `Room`) {
+			if !isGMCPEnabled(u.ConnectionId()) {
 				continue
 			}
 
@@ -351,17 +328,4 @@ func (g *GMCPRoomModule) rommChangeHandler(e events.Event) events.ListenerReturn
 	}
 
 	return events.Continue
-}
-
-func (g *GMCPRoomModule) supportsModule(connectionId uint64, moduleName string) bool {
-	supportedModules, ok := g.cache.Get(connectionId)
-	if ok {
-		if _, ok := supportedModules[moduleName]; ok {
-			return true
-		}
-	} else {
-		// Request that the gmcp module get the data and send the event
-		events.AddToQueue(GMCPRequestModules{ConnectionId: connectionId})
-	}
-	return false
 }

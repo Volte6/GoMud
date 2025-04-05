@@ -1,6 +1,8 @@
 package buffs
 
 import (
+	"math"
+
 	"github.com/volte6/gomud/internal/mudlog"
 )
 
@@ -10,9 +12,10 @@ const (
 )
 
 type Buff struct {
-	BuffId       int  // Which buff template does it refer to?
-	OnStartEvent bool // Has the onStart event been triggered?
-	PermaBuff    bool `yaml:"permabuff,omitempty"` // Is this buff from a worn item or race?
+	BuffId       int    // Which buff template does it refer to?
+	Source       string // Optional source identifier for where this buff originated. Example: spell, item, area
+	OnStartEvent bool   // Has the onStart event been triggered?
+	PermaBuff    bool   `yaml:"permabuff,omitempty"` // Is this buff from a worn item or race?
 	// Need to instance track the following:
 	RoundCounter int `yaml:"roundcounter,omitempty"` // How many rounds have passed. Triggers on (RoundCounter%RoundInterval == 0)
 	TriggersLeft int `yaml:"triggersleft,omitempty"` // How many times it triggers
@@ -309,4 +312,11 @@ func (bs *Buffs) Prune() (prunedBuffs []*Buff) {
 	}
 
 	return prunedBuffs
+}
+
+func GetDurations(buff *Buff, spec *BuffSpec) (roundsLeft int, totalRounds int) {
+	totalRounds = int(math.Ceil(float64(buff.TriggersLeft) * float64(spec.RoundInterval)))
+	roundsLeft = totalRounds - buff.RoundCounter
+
+	return roundsLeft, totalRounds
 }

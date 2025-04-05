@@ -110,6 +110,13 @@ func (b *BuffSpec) GetValue() int {
 	return val
 }
 
+func (b *BuffSpec) VisibleNameDesc() (name, description string) {
+	if b.Secret {
+		return "Mysterious Affliction", "Unknown"
+	}
+	return b.Name, b.Description
+}
+
 type BuffMessage struct {
 	User string
 	Room string

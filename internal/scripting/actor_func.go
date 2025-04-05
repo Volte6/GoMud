@@ -456,12 +456,13 @@ func (a ScriptActor) HasBuff(buffId int) bool {
 	return a.characterRecord.HasBuff(buffId)
 }
 
-func (a ScriptActor) GiveBuff(buffId int) {
+func (a ScriptActor) GiveBuff(buffId int, source string) {
 
 	events.AddToQueue(events.Buff{
 		UserId:        a.userId,
 		MobInstanceId: a.mobInstanceId,
 		BuffId:        buffId,
+		Source:        source,
 	})
 
 }
