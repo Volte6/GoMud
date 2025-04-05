@@ -784,6 +784,7 @@ func (r *Room) AddMob(mobInstanceId int) {
 		MobInstanceId: mobInstanceId,
 		FromRoomId:    mob.Character.RoomId,
 		ToRoomId:      r.RoomId,
+		Unseen:        mob.Character.HasBuffFlag(buffs.Hidden),
 	})
 
 	mob.Character.RoomId = r.RoomId

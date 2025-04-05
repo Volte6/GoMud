@@ -42,7 +42,7 @@ func init() {
 	events.RegisterListener(events.CharacterVitalsChanged{}, g.vitalsChangedHandler)
 	events.RegisterListener(events.LevelUp{}, g.levelUpHandler)
 	events.RegisterListener(events.CharacterTrained{}, g.charTrainedHandler)
-	events.RegisterListener(GMCPUpdate{}, g.buildAndSendGMCPPayload)
+	events.RegisterListener(GMCPCharUpdate{}, g.buildAndSendGMCPPayload)
 	events.RegisterListener(events.GainExperience{}, g.xpGainHandler)
 	events.RegisterListener(events.CharacterStatsChanged{}, g.statsChangeHandler)
 	events.RegisterListener(events.CharacterChanged{}, g.charChangeHandler)
@@ -58,12 +58,12 @@ type GMCPCharModule struct {
 }
 
 // Tell the system a wish to send specific GMCP Update data
-type GMCPUpdate struct {
+type GMCPCharUpdate struct {
 	UserId     int
 	Identifier string
 }
 
-func (g GMCPUpdate) Type() string { return `GMCPUpdate` }
+func (g GMCPCharUpdate) Type() string { return `GMCPCharUpdate` }
 
 func (g *GMCPCharModule) questProgressHandler(e events.Event) events.ListenerReturn {
 
@@ -76,7 +76,7 @@ func (g *GMCPCharModule) questProgressHandler(e events.Event) events.ListenerRet
 		return events.Continue
 	}
 
-	events.AddToQueue(GMCPUpdate{
+	events.AddToQueue(GMCPCharUpdate{
 		UserId:     evt.UserId,
 		Identifier: `Char.Quests`,
 	})
@@ -95,7 +95,7 @@ func (g *GMCPCharModule) buffTriggeredHandler(e events.Event) events.ListenerRet
 		return events.Continue
 	}
 
-	events.AddToQueue(GMCPUpdate{
+	events.AddToQueue(GMCPCharUpdate{
 		UserId:     evt.UserId,
 		Identifier: `Char.Affects`,
 	})
@@ -114,7 +114,7 @@ func (g *GMCPCharModule) charChangeHandler(e events.Event) events.ListenerReturn
 		return events.Continue
 	}
 
-	events.AddToQueue(GMCPUpdate{
+	events.AddToQueue(GMCPCharUpdate{
 		UserId:     evt.UserId,
 		Identifier: `Char`,
 	})
@@ -134,7 +134,7 @@ func (g *GMCPCharModule) vitalsChangedHandler(e events.Event) events.ListenerRet
 	}
 
 	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
-	events.AddToQueue(GMCPUpdate{
+	events.AddToQueue(GMCPCharUpdate{
 		UserId:     evt.UserId,
 		Identifier: `Char.Vitals`,
 	})
@@ -154,7 +154,7 @@ func (g *GMCPCharModule) xpGainHandler(e events.Event) events.ListenerReturn {
 	}
 
 	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
-	events.AddToQueue(GMCPUpdate{
+	events.AddToQueue(GMCPCharUpdate{
 		UserId:     evt.UserId,
 		Identifier: `Char.Worth`,
 	})
@@ -169,7 +169,7 @@ func (g *GMCPCharModule) ownershipChangeHandler(e events.Event) events.ListenerR
 		return events.Continue // Return false to stop halt the event chain for this event
 	}
 
-	events.AddToQueue(GMCPUpdate{
+	events.AddToQueue(GMCPCharUpdate{
 		UserId:     evt.UserId,
 		Identifier: `Char.Stats, Char.Vitals`,
 	})
@@ -189,7 +189,7 @@ func (g *GMCPCharModule) statsChangeHandler(e events.Event) events.ListenerRetur
 	}
 
 	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
-	events.AddToQueue(GMCPUpdate{UserId: evt.UserId, Identifier: `Char.Stats, Char.Vitals, Char.Inventory.Backpack.Summary`})
+	events.AddToQueue(GMCPCharUpdate{UserId: evt.UserId, Identifier: `Char.Stats, Char.Vitals, Char.Inventory.Backpack.Summary`})
 
 	return events.Continue
 }
@@ -221,7 +221,7 @@ func (g *GMCPCharModule) equipmentChangeHandler(e events.Event) events.ListenerR
 
 	if statsToChange != `` {
 		// Changing equipment might affect stats, inventory, maxhp/maxmp etc
-		events.AddToQueue(GMCPUpdate{
+		events.AddToQueue(GMCPCharUpdate{
 			UserId:     evt.UserId,
 			Identifier: statsToChange,
 		})
@@ -242,7 +242,7 @@ func (g *GMCPCharModule) charTrainedHandler(e events.Event) events.ListenerRetur
 	}
 
 	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
-	events.AddToQueue(GMCPUpdate{UserId: evt.UserId, Identifier: `Char.Stats, Char.Worth, Char.Vitals, Char.Inventory.Backpack.Summary`})
+	events.AddToQueue(GMCPCharUpdate{UserId: evt.UserId, Identifier: `Char.Stats, Char.Worth, Char.Vitals, Char.Inventory.Backpack.Summary`})
 
 	return events.Continue
 }
@@ -258,7 +258,7 @@ func (g *GMCPCharModule) levelUpHandler(e events.Event) events.ListenerReturn {
 	}
 
 	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
-	events.AddToQueue(GMCPUpdate{
+	events.AddToQueue(GMCPCharUpdate{
 		UserId:     evt.UserId,
 		Identifier: `Char`,
 	})
@@ -278,7 +278,7 @@ func (g *GMCPCharModule) playerSpawnHandler(e events.Event) events.ListenerRetur
 	}
 
 	// Send full update
-	events.AddToQueue(GMCPUpdate{
+	events.AddToQueue(GMCPCharUpdate{
 		UserId:     evt.UserId,
 		Identifier: `Char`,
 	})
@@ -286,12 +286,11 @@ func (g *GMCPCharModule) playerSpawnHandler(e events.Event) events.ListenerRetur
 	return events.Continue
 }
 
-// Checks whether their level is too high for a guide
 func (g *GMCPCharModule) buildAndSendGMCPPayload(e events.Event) events.ListenerReturn {
 
-	evt, typeOk := e.(GMCPUpdate)
+	evt, typeOk := e.(GMCPCharUpdate)
 	if !typeOk {
-		mudlog.Error("Event", "Expected Type", "GMCPUpdate", "Actual Type", e.Type())
+		mudlog.Error("Event", "Expected Type", "GMCPCharUpdate", "Actual Type", e.Type())
 		return events.Cancel
 	}
 
@@ -397,22 +396,22 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 
 	}
 
-	if all || g.wantsGMCPPayload(`Char.Inventory`, gmcpModule) {
+	// Allow specifically updating the Backpack Summary
+	if `Char.Inventory.Backpack.Summary` == gmcpModule {
 
-		// Allow specifically updating the Backpack Summary
-		if `Char.Inventory.Backpack.Summary` == gmcpModule {
-
-			payload.Inventory = &GMCPCharModule_Payload_Inventory{
-				Backpack: &GMCPCharModule_Payload_Inventory_Backpack{
-					Summary: GMCPCharModule_Payload_Inventory_Backpack_Summary{
-						Count: len(user.Character.Items),
-						Max:   user.Character.CarryCapacity(),
-					},
+		payload.Inventory = &GMCPCharModule_Payload_Inventory{
+			Backpack: &GMCPCharModule_Payload_Inventory_Backpack{
+				Summary: GMCPCharModule_Payload_Inventory_Backpack_Summary{
+					Count: len(user.Character.Items),
+					Max:   user.Character.CarryCapacity(),
 				},
-			}
-
-			return payload.Inventory.Backpack.Summary, `Char.Inventory.Backpack.Summary`
+			},
 		}
+
+		return payload.Inventory.Backpack.Summary, `Char.Inventory.Backpack.Summary`
+	}
+
+	if all || g.wantsGMCPPayload(`Char.Inventory`, gmcpModule) {
 
 		payload.Inventory = &GMCPCharModule_Payload_Inventory{
 
@@ -512,6 +511,9 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 				roundsLeft, totalRounds := buffs.GetDurations(buff, buffSpec)
 				timeMax = c.RoundsToSeconds(totalRounds)
 				timeLeft = c.RoundsToSeconds(roundsLeft)
+				if timeLeft < 0 {
+					timeLeft = 0
+				}
 			}
 
 			name, desc := buffSpec.VisibleNameDesc()
@@ -601,17 +603,17 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 }
 
 // wantsGMCPPayload(`Char.Info`, `Char`)
-func (g *GMCPCharModule) wantsGMCPPayload(searchName string, identifier string) bool {
+func (g *GMCPCharModule) wantsGMCPPayload(packageToConsider string, packageRequested string) bool {
 
-	if searchName == identifier {
+	if packageToConsider == packageRequested {
 		return true
 	}
 
-	if len(searchName) < len(identifier) {
+	if len(packageToConsider) < len(packageRequested) {
 		return false
 	}
 
-	if searchName[0:len(identifier)] == identifier {
+	if packageToConsider[0:len(packageRequested)] == packageRequested {
 		return true
 	}
 

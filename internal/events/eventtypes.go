@@ -131,6 +131,7 @@ type RoomChange struct {
 	MobInstanceId int
 	FromRoomId    int
 	ToRoomId      int
+	Unseen        bool
 }
 
 func (r RoomChange) Type() string { return `RoomChange` }

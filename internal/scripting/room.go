@@ -93,7 +93,7 @@ func TryRoomScriptEvent(eventName string, userId int, roomId int) (bool, error) 
 		}
 	}
 
-	return false, nil
+	return false, ErrEventNotFound
 }
 
 func TryRoomIdleEvent(roomId int) (bool, error) {
@@ -152,7 +152,7 @@ func TryRoomIdleEvent(roomId int) (bool, error) {
 		}
 	}
 
-	return false, nil
+	return false, ErrEventNotFound
 }
 
 func TryRoomCommand(cmd string, rest string, userId int) (bool, error) {
@@ -283,7 +283,7 @@ func TryRoomCommand(cmd string, rest string, userId int) (bool, error) {
 		}
 	}
 
-	return false, nil
+	return false, ErrEventNotFound
 }
 
 func getRoomVM(roomId int) (*VMWrapper, error) {

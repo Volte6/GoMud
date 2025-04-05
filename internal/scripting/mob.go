@@ -85,7 +85,7 @@ func TryMobScriptEvent(eventName string, mobInstanceId int, sourceId int, source
 		}
 	}
 
-	return false, nil
+	return false, ErrEventNotFound
 }
 
 func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sourceType string) (bool, error) {
@@ -192,7 +192,7 @@ func TryMobCommand(cmd string, rest string, mobInstanceId int, sourceId int, sou
 		}
 	}
 
-	return false, nil
+	return false, ErrEventNotFound
 }
 
 func getMobVM(mobActor *ScriptActor) (*VMWrapper, error) {
