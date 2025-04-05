@@ -1,12 +1,14 @@
 package modules
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mapper"
+	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/plugins"
 	"github.com/volte6/gomud/internal/rooms"
@@ -202,7 +204,6 @@ func (g *GMCPRoomModule) roomChangeHandler(e events.Event) events.ListenerReturn
 				roomInfoStr.WriteString(`, "locked": true`)
 
 				lockId := fmt.Sprintf(`%d-%s`, newRoom.RoomId, name)
-
 				hasKey, hasSequence := user.Character.HasKey(lockId, int(exitInfo.Lock.Difficulty))
 
 				roomInfoStr.WriteString(`, "haskey": `)
@@ -251,8 +252,104 @@ func (g *GMCPRoomModule) roomChangeHandler(e events.Event) events.ListenerReturn
 			detailCt++
 			roomInfoStr.WriteString(`"storage"`)
 		}
-		roomInfoStr.WriteString(`]`)
+		if newRoom.IsCharacterRoom {
+			if detailCt > 0 {
+				roomInfoStr.WriteString(`, `)
+			}
+			detailCt++
+			roomInfoStr.WriteString(`"character"`)
+		}
+		roomInfoStr.WriteString(`], `)
 		// end details
+
+		// Room Contents
+		roomInfoStr.WriteString(`"Contents": `)
+
+		contents := GMCPRoomModule_Payload_Contents{}
+
+		// Room.Contents.Containers
+		contents.Containers = []GMCPRoomModule_Payload_Contents_Container{}
+		for name, container := range newRoom.Containers {
+
+			c := GMCPRoomModule_Payload_Contents_Container{
+				Name:   name,
+				Usable: len(container.Recipes) > 0,
+			}
+
+			if container.HasLock() {
+				c.Locked = true
+				lockId := fmt.Sprintf(`%d-%s`, newRoom.RoomId, name)
+				c.HasKey, c.HasPickCombo = user.Character.HasKey(lockId, int(container.Lock.Difficulty))
+			}
+
+			contents.Containers = append(contents.Containers, c)
+		}
+
+		// Room.Contents.Items
+		contents.Items = []GMCPRoomModule_Payload_Contents_Item{}
+		for _, itm := range newRoom.Items {
+			contents.Items = append(contents.Items, GMCPRoomModule_Payload_Contents_Item{
+				Id:        itm.ShorthandId(),
+				Name:      itm.Name(),
+				QuestFlag: itm.GetSpec().QuestToken != ``,
+			})
+		}
+
+		// Room.Contents.Players
+		contents.Players = []GMCPRoomModule_Payload_Contents_Character{}
+		for _, uId := range newRoom.GetPlayers() {
+
+			// Exclude viewing player
+			if uId == user.UserId {
+				continue
+			}
+
+			u := users.GetByUserId(uId)
+			if u == nil {
+				continue
+			}
+
+			contents.Players = append(contents.Players, GMCPRoomModule_Payload_Contents_Character{
+				Id:         u.ShorthandId(),
+				Name:       u.Character.Name,
+				Adjectives: u.Character.GetAdjectives(),
+				Aggro:      u.Character.Aggro != nil,
+				Shop:       len(u.Character.Shop) > 0,
+			})
+		}
+
+		// Room.Contents.Npcs
+		contents.Npcs = []GMCPRoomModule_Payload_Contents_Character{}
+		for _, mIId := range newRoom.GetMobs() {
+			mob := mobs.GetInstance(mIId)
+			if mob == nil {
+				continue
+			}
+
+			c := GMCPRoomModule_Payload_Contents_Character{
+				Id:         mob.ShorthandId(),
+				Name:       mob.Character.Name,
+				Adjectives: mob.Character.GetAdjectives(),
+				Aggro:      mob.Character.Aggro != nil,
+				Shop:       len(mob.Character.Shop) > 0,
+			}
+
+			if len(mob.QuestFlags) > 0 {
+				for _, qFlag := range mob.QuestFlags {
+					if user.Character.HasQuest(qFlag) || (len(qFlag) >= 5 && qFlag[len(qFlag)-5:] == `start`) {
+						c.QuestFlag = true
+						break
+					}
+				}
+			}
+
+			contents.Npcs = append(contents.Npcs, c)
+		}
+
+		b, _ := json.Marshal(contents)
+		roomInfoStr.WriteString(string(b))
+
+		// End Room Contents
 
 		roomInfoStr.WriteString(` }`)
 		// End room info
@@ -328,4 +425,37 @@ func (g *GMCPRoomModule) roomChangeHandler(e events.Event) events.ListenerReturn
 	}
 
 	return events.Continue
+}
+
+// /////////////////
+// Room.Contents
+// /////////////////
+type GMCPRoomModule_Payload_Contents struct {
+	Players    []GMCPRoomModule_Payload_Contents_Character `json:"Players"`
+	Npcs       []GMCPRoomModule_Payload_Contents_Character `json:"Npcs"`
+	Items      []GMCPRoomModule_Payload_Contents_Item      `json:"Items"`
+	Containers []GMCPRoomModule_Payload_Contents_Container `json:"Containers"`
+}
+
+type GMCPRoomModule_Payload_Contents_Character struct {
+	Id         string   `json:"id"`
+	Name       string   `json:"name"`
+	Adjectives []string `json:"adjectives"`
+	Aggro      bool     `json:"aggro"`
+	Shop       bool     `json:"shop"`
+	QuestFlag  bool     `json:"quest_flag"`
+}
+
+type GMCPRoomModule_Payload_Contents_Item struct {
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	QuestFlag bool   `json:"quest_flag"`
+}
+
+type GMCPRoomModule_Payload_Contents_Container struct {
+	Name         string `yaml:"name"`
+	Locked       bool   `yaml:"locked"`
+	HasKey       bool   `yaml:"haskey"`
+	HasPickCombo bool   `yaml:"haspickcombo"`
+	Usable       bool   `yaml:"usable"`
 }

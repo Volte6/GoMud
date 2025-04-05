@@ -397,22 +397,22 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 
 	}
 
-	// Allow specifically updating the Backpack Summary
-	if `Char.Inventory.Backpack.Summary` == gmcpModule {
-
-		payload.Inventory = &GMCPCharModule_Payload_Inventory{
-			Backpack: &GMCPCharModule_Payload_Inventory_Backpack{
-				Summary: GMCPCharModule_Payload_Inventory_Backpack_Summary{
-					Count: len(user.Character.Items),
-					Max:   user.Character.CarryCapacity(),
-				},
-			},
-		}
-
-		return payload.Inventory.Backpack.Summary, `Char.Inventory.Backpack.Summary`
-	}
-
 	if all || g.wantsGMCPPayload(`Char.Inventory`, gmcpModule) {
+
+		// Allow specifically updating the Backpack Summary
+		if `Char.Inventory.Backpack.Summary` == gmcpModule {
+
+			payload.Inventory = &GMCPCharModule_Payload_Inventory{
+				Backpack: &GMCPCharModule_Payload_Inventory_Backpack{
+					Summary: GMCPCharModule_Payload_Inventory_Backpack_Summary{
+						Count: len(user.Character.Items),
+						Max:   user.Character.CarryCapacity(),
+					},
+				},
+			}
+
+			return payload.Inventory.Backpack.Summary, `Char.Inventory.Backpack.Summary`
+		}
 
 		payload.Inventory = &GMCPCharModule_Payload_Inventory{
 
@@ -693,7 +693,7 @@ type GMCPCharModule_Payload_Inventory_Item struct {
 	SubType   string `json:"subtype"`
 	Uses      int    `json:"uses"`
 	Cursed    bool   `json:"cursed"`
-	QuestItem bool   `json:"quest_item"`
+	QuestFlag bool   `json:"quest_flag"`
 }
 
 func newInventory_Item(itm items.Item) GMCPCharModule_Payload_Inventory_Item {
@@ -704,7 +704,7 @@ func newInventory_Item(itm items.Item) GMCPCharModule_Payload_Inventory_Item {
 		SubType:   string(itm.GetSpec().Subtype),
 		Uses:      itm.Uses,
 		Cursed:    !itm.Uncursed && itm.GetSpec().Cursed,
-		QuestItem: itm.GetSpec().QuestToken != ``,
+		QuestFlag: itm.GetSpec().QuestToken != ``,
 	}
 }
 

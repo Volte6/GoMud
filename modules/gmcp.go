@@ -67,7 +67,7 @@ func init() {
 }
 
 func isGMCPEnabled(connectionId uint64) bool {
-	return true
+	//return true
 	if gmcpData, ok := gmcpModule.cache.Get(connectionId); ok {
 		return gmcpData.GMCPAccepted
 	}
@@ -394,26 +394,35 @@ func (g *GMCPModule) dispatchGMCP(e events.Event) events.ListenerReturn {
 	switch v := gmcp.Payload.(type) {
 	case []byte:
 
+		// DEBUG ONLY
+		// TODO: REMOVE
+		if gmcp.UserId == 1 {
+			var prettyJSON bytes.Buffer
+			json.Indent(&prettyJSON, v, "", "\t")
+			fmt.Print(gmcp.Module + ` `)
+			fmt.Println(string(prettyJSON.Bytes()))
+		}
+
+		// Regular code follows...
 		if len(gmcp.Module) > 0 {
 			v = append([]byte(gmcp.Module+` `), v...)
 		}
 
-		// DEBUG ONLY
-		// TODO: REMOVE
-		if gmcp.UserId == 1 {
-			fmt.Println(string(v))
-		}
-
 		connections.SendTo(GmcpPayload.BytesWithPayload(v), connId)
 	case string:
-		if len(gmcp.Module) > 0 {
-			v = gmcp.Module + ` ` + v
-		}
 
 		// DEBUG ONLY
 		// TODO: REMOVE
 		if gmcp.UserId == 1 {
-			fmt.Println(string(v))
+			var prettyJSON bytes.Buffer
+			json.Indent(&prettyJSON, []byte(v), "", "\t")
+			fmt.Print(gmcp.Module + ` `)
+			fmt.Println(string(prettyJSON.Bytes()))
+		}
+
+		// Regular code follows...
+		if len(gmcp.Module) > 0 {
+			v = gmcp.Module + ` ` + v
 		}
 
 		connections.SendTo(GmcpPayload.BytesWithPayload([]byte(v)), connId)
@@ -433,6 +442,7 @@ func (g *GMCPModule) dispatchGMCP(e events.Event) events.ListenerReturn {
 			fmt.Println(string(prettyJSON.Bytes()))
 		}
 
+		// Regular code follows...
 		if len(gmcp.Module) > 0 {
 			payload = append([]byte(gmcp.Module+` `), payload...)
 		}
