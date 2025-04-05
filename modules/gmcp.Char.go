@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"math"
 	"strconv"
 	"strings"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
 	"github.com/volte6/gomud/internal/plugins"
+	"github.com/volte6/gomud/internal/quests"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/skills"
 	"github.com/volte6/gomud/internal/users"
@@ -36,7 +38,7 @@ func init() {
 	events.RegisterListener(events.EquipmentChange{}, g.equipmentChangeHandler)
 	events.RegisterListener(events.ItemOwnership{}, g.ownershipChangeHandler)
 
-	events.RegisterListener(events.PlayerSpawn{}, g.playSpawnHandler)
+	events.RegisterListener(events.PlayerSpawn{}, g.playerSpawnHandler)
 	events.RegisterListener(events.CharacterVitalsChanged{}, g.vitalsChangedHandler)
 	events.RegisterListener(events.LevelUp{}, g.levelUpHandler)
 	events.RegisterListener(events.CharacterTrained{}, g.charTrainedHandler)
@@ -45,6 +47,8 @@ func init() {
 	events.RegisterListener(events.CharacterStatsChanged{}, g.statsChangeHandler)
 	events.RegisterListener(events.CharacterChanged{}, g.charChangeHandler)
 	events.RegisterListener(events.BuffsTriggered{}, g.buffTriggeredHandler)
+
+	events.RegisterListener(events.Quest{}, g.questProgressHandler)
 
 }
 
@@ -61,6 +65,25 @@ type GMCPUpdate struct {
 
 func (g GMCPUpdate) Type() string { return `GMCPUpdate` }
 
+func (g *GMCPCharModule) questProgressHandler(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(events.Quest)
+	if !typeOk {
+		return events.Continue // Return false to stop halt the event chain for this event
+	}
+
+	if evt.UserId == 0 {
+		return events.Continue
+	}
+
+	events.AddToQueue(GMCPUpdate{
+		UserId:     evt.UserId,
+		Identifier: `Char.Quests`,
+	})
+
+	return events.Continue
+}
+
 func (g *GMCPCharModule) buffTriggeredHandler(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.BuffsTriggered)
@@ -74,7 +97,7 @@ func (g *GMCPCharModule) buffTriggeredHandler(e events.Event) events.ListenerRet
 
 	events.AddToQueue(GMCPUpdate{
 		UserId:     evt.UserId,
-		Identifier: `Char.Stats, Char.Vitals, Char.Affects`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+		Identifier: `Char.Affects`,
 	})
 
 	return events.Continue
@@ -93,7 +116,7 @@ func (g *GMCPCharModule) charChangeHandler(e events.Event) events.ListenerReturn
 
 	events.AddToQueue(GMCPUpdate{
 		UserId:     evt.UserId,
-		Identifier: `Char`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+		Identifier: `Char`,
 	})
 
 	return events.Continue
@@ -113,7 +136,7 @@ func (g *GMCPCharModule) vitalsChangedHandler(e events.Event) events.ListenerRet
 	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
 	events.AddToQueue(GMCPUpdate{
 		UserId:     evt.UserId,
-		Identifier: `Char.Vitals`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+		Identifier: `Char.Vitals`,
 	})
 
 	return events.Continue
@@ -133,7 +156,7 @@ func (g *GMCPCharModule) xpGainHandler(e events.Event) events.ListenerReturn {
 	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
 	events.AddToQueue(GMCPUpdate{
 		UserId:     evt.UserId,
-		Identifier: `Char.Worth`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+		Identifier: `Char.Worth`,
 	})
 
 	return events.Continue
@@ -148,7 +171,7 @@ func (g *GMCPCharModule) ownershipChangeHandler(e events.Event) events.ListenerR
 
 	events.AddToQueue(GMCPUpdate{
 		UserId:     evt.UserId,
-		Identifier: `Char.Stats, Char.Vitals`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+		Identifier: `Char.Stats, Char.Vitals`,
 	})
 
 	return events.Continue
@@ -200,7 +223,7 @@ func (g *GMCPCharModule) equipmentChangeHandler(e events.Event) events.ListenerR
 		// Changing equipment might affect stats, inventory, maxhp/maxmp etc
 		events.AddToQueue(GMCPUpdate{
 			UserId:     evt.UserId,
-			Identifier: statsToChange, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+			Identifier: statsToChange,
 		})
 	}
 
@@ -237,13 +260,13 @@ func (g *GMCPCharModule) levelUpHandler(e events.Event) events.ListenerReturn {
 	// Changing equipment might affect stats, inventory, maxhp/maxmp etc
 	events.AddToQueue(GMCPUpdate{
 		UserId:     evt.UserId,
-		Identifier: `Char`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+		Identifier: `Char`,
 	})
 
 	return events.Continue
 }
 
-func (g *GMCPCharModule) playSpawnHandler(e events.Event) events.ListenerReturn {
+func (g *GMCPCharModule) playerSpawnHandler(e events.Event) events.ListenerReturn {
 
 	evt, typeOk := e.(events.PlayerSpawn)
 	if !typeOk {
@@ -257,7 +280,7 @@ func (g *GMCPCharModule) playSpawnHandler(e events.Event) events.ListenerReturn 
 	// Send full update
 	events.AddToQueue(GMCPUpdate{
 		UserId:     evt.UserId,
-		Identifier: `Char`, // char, char.info, char.inventory, char.stats, char.vitals, char.worth
+		Identifier: `Char`,
 	})
 
 	return events.Continue
@@ -523,6 +546,52 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 		}
 	}
 
+	if all || g.wantsGMCPPayload(`Char.Quests`, gmcpModule) {
+
+		payload.Quests = []GMCPCharModule_Payload_Quest{}
+
+		for questId, questStep := range user.Character.GetQuestProgress() {
+
+			questToken := quests.PartsToToken(questId, questStep)
+
+			questInfo := quests.GetQuest(questToken)
+			if questInfo == nil {
+				continue
+			}
+
+			// Secret quests are not sent
+			if questInfo.Secret {
+				continue
+			}
+
+			completedSteps := 0
+			totalSteps := len(questInfo.Steps)
+
+			questPayload := GMCPCharModule_Payload_Quest{
+				Name:        questInfo.Name,
+				Completion:  0,
+				Description: questInfo.Description,
+			}
+
+			for _, step := range questInfo.Steps {
+				completedSteps++
+				if step.Id == questStep {
+					questPayload.Description = step.Description
+					break
+				}
+			}
+
+			questPayload.Completion = int(math.Floor(float64(completedSteps)/float64(totalSteps)) * 100)
+
+			// Add to the returned output
+			payload.Quests = append(payload.Quests, questPayload)
+		}
+
+		if !all {
+			return payload.Quests, `Char.Quests`
+		}
+	}
+
 	// If we reached this point and Char wasn't requested, we have a problem.
 	if !all {
 		mudlog.Error(`gmcp.Char`, `error`, `Bad module requested`, `module`, gmcpModule)
@@ -557,6 +626,7 @@ type GMCPCharModule_Payload struct {
 	Stats     *GMCPCharModule_Payload_Stats            `json:"Stats,omitempty"`
 	Vitals    *GMCPCharModule_Payload_Vitals           `json:"Vitals,omitempty"`
 	Worth     *GMCPCharModule_Payload_Worth            `json:"Worth,omitempty"`
+	Quests    []GMCPCharModule_Payload_Quest           `json:"Quests,omitempty"`
 }
 
 // /////////////////
@@ -682,4 +752,13 @@ type GMCPCharModule_Payload_Affect struct {
 	DurationLeft int            `json:"duration_cur"`
 	Type         string         `json:"type"`
 	Mods         map[string]int `json:"affects"`
+}
+
+// /////////////////
+// Char.Quests
+// /////////////////
+type GMCPCharModule_Payload_Quest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Completion  int    `json:"completion"`
 }

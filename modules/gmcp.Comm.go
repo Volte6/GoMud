@@ -46,7 +46,9 @@ func (g *GMCPCommModule) onComm(e events.Event) events.ListenerReturn {
 		return events.Cancel
 	}
 
-	msgPayload := `{ "channel": "` + evt.CommType + `", "sender": "` + evt.Name + `", "text": "` + strings.ReplaceAll(evt.Message, `"`, `\\"`) + `"}`
+	msgPayload := `{ "channel": "` + evt.CommType +
+		`", "sender": "` + evt.Name +
+		`", "text": "` + strings.ReplaceAll(evt.Message, `"`, `\\"`) + `"}`
 
 	// Sent to everyone.
 	// say, party, broadcast, whisper

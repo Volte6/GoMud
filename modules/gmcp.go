@@ -67,6 +67,7 @@ func init() {
 }
 
 func isGMCPEnabled(connectionId uint64) bool {
+	return true
 	if gmcpData, ok := gmcpModule.cache.Get(connectionId); ok {
 		return gmcpData.GMCPAccepted
 	}
@@ -172,8 +173,11 @@ func (g *GMCPModule) handlePlayerJoin(e events.Event) events.ListenerReturn {
 		return events.Cancel
 	}
 
-	// Send request to enable GMCP
-	g.sendGMCPEnableRequest(evt.ConnectionId)
+	if _, ok := g.cache.Get(evt.ConnectionId); !ok {
+		g.cache.Add(evt.ConnectionId, GMCPSettings{})
+		// Send request to enable GMCP
+		g.sendGMCPEnableRequest(evt.ConnectionId)
+	}
 
 	return events.Continue
 }
