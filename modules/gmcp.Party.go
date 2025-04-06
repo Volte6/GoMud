@@ -53,6 +53,7 @@ func (g *GMCPPartyModule) onPartyChange(e events.Event) events.ListenerReturn {
 		Leader:  `None`,
 		Members: []GMCPPartyModule_Payload_User{},
 		Invited: []GMCPPartyModule_Payload_User{},
+		Vitals:  map[string]GMCPPartyModule_Payload_Vitals{},
 	}
 
 	var party *parties.Party
@@ -91,15 +92,17 @@ func (g *GMCPPartyModule) onPartyChange(e events.Event) events.ListenerReturn {
 				}
 				partyPayload.Members = append(partyPayload.Members,
 					GMCPPartyModule_Payload_User{
-						Name:          user.Character.Name,
-						Status:        `In Party`,
-						Level:         user.Character.Level,
-						HealthPercent: hPct,
-						Location:      roomTitle,
-						Position:      party.GetRank(user.UserId),
+						Name:     user.Character.Name,
+						Status:   `In Party`,
+						Position: party.GetRank(user.UserId),
 					},
 				)
 
+				partyPayload.Vitals[user.Character.Name] = GMCPPartyModule_Payload_Vitals{
+					Level:         user.Character.Level,
+					HealthPercent: hPct,
+					Location:      roomTitle,
+				}
 			}
 
 		}
@@ -120,14 +123,17 @@ func (g *GMCPPartyModule) onPartyChange(e events.Event) events.ListenerReturn {
 
 				partyPayload.Invited = append(partyPayload.Invited,
 					GMCPPartyModule_Payload_User{
-						Name:          user.Character.Name,
-						Status:        `Invited`,
-						Level:         0,
-						HealthPercent: 0,
-						Location:      ``,
-						Position:      ``,
+						Name:     user.Character.Name,
+						Status:   `Invited`,
+						Position: ``,
 					},
 				)
+
+				partyPayload.Vitals[user.Character.Name] = GMCPPartyModule_Payload_Vitals{
+					Level:         0,
+					HealthPercent: 0,
+					Location:      ``,
+				}
 
 			}
 
@@ -161,16 +167,20 @@ func (g *GMCPPartyModule) onPartyChange(e events.Event) events.ListenerReturn {
 }
 
 type GMCPPartyModule_Payload struct {
-	Leader  string                         `json:"leader"`
-	Members []GMCPPartyModule_Payload_User `json:"members"`
-	Invited []GMCPPartyModule_Payload_User `json:"invited"`
+	Leader  string
+	Members []GMCPPartyModule_Payload_User
+	Invited []GMCPPartyModule_Payload_User
+	Vitals  map[string]GMCPPartyModule_Payload_Vitals
 }
 
 type GMCPPartyModule_Payload_User struct {
-	Name          string `json:"name"`
-	Status        string `json:"status"`         // party/leader/invited
-	Level         int    `json:"level"`          // level of user
-	HealthPercent int    `json:"health_percent"` // 1 = 1%, 23 = 23% etc.
-	Location      string `json:"location"`       // Title of room they are in
-	Position      string `json:"position"`       // frontrank/middle/backrank
+	Name     string `json:"name"`
+	Status   string `json:"status"`   // party/leader/invited
+	Position string `json:"position"` // frontrank/middle/backrank
+}
+
+type GMCPPartyModule_Payload_Vitals struct {
+	Level         int    `json:"level"`    // level of user
+	HealthPercent int    `json:"health"`   // 1 = 1%, 23 = 23% etc.
+	Location      string `json:"location"` // Title of room they are in
 }
