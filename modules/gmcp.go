@@ -67,7 +67,7 @@ func init() {
 }
 
 func isGMCPEnabled(connectionId uint64) bool {
-	//return true
+	return true
 	if gmcpData, ok := gmcpModule.cache.Get(connectionId); ok {
 		return gmcpData.GMCPAccepted
 	}

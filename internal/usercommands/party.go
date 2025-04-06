@@ -44,6 +44,15 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		if currentParty = parties.New(user.UserId); currentParty != nil {
 			user.EventLog.Add(`party`, `Started a new party`)
 			user.SendText(`You started a new party!`)
+
+			//
+			// User started a new party
+			//
+			events.AddToQueue(events.PartyUpdated{
+				Action:  `created`,
+				UserIds: append(currentParty.GetMembers(), currentParty.GetInvited()...),
+			})
+
 		} else {
 			user.SendText(`Something went wrong.`)
 		}
@@ -94,6 +103,14 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			user.SendText(`Something went wrong.`)
 		}
 
+		//
+		// A new user was invited to the party
+		//
+		events.AddToQueue(events.PartyUpdated{
+			Action:  `invited`,
+			UserIds: append(currentParty.GetMembers(), currentParty.GetInvited()...),
+		})
+
 		return true, nil
 	}
 
@@ -109,6 +126,7 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 	if partyCommand == `accept` || partyCommand == `join` {
 
 		if currentParty.AcceptInvite(user.UserId) {
+
 			user.EventLog.Add(`party`, `Joined a party`)
 			user.SendText(`You joined the party!`)
 			for _, uid := range currentParty.UserIds {
@@ -120,6 +138,14 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 				}
 			}
 
+			//
+			// A user joined the party
+			//
+			events.AddToQueue(events.PartyUpdated{
+				Action:  `joined`,
+				UserIds: append(currentParty.GetMembers(), currentParty.GetInvited()...),
+			})
+
 		} else {
 			user.SendText(`Something went wrong.`)
 		}
@@ -128,12 +154,21 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 
 	if partyCommand == `decline` {
 
+		//
+		// User declined invitation
+		//
+		events.AddToQueue(events.PartyUpdated{
+			Action:  `declined`,
+			UserIds: append(currentParty.GetMembers(), currentParty.GetInvited()...),
+		})
+
 		if currentParty.DeclineInvite(user.UserId) {
 
 			if u := users.GetByUserId(currentParty.LeaderUserId); u != nil {
 				u.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> declined the invitation.`, user.Character.Name))
 			}
 			user.SendText(`You decline the invitation.`)
+
 		} else {
 			user.SendText(`Something went wrong.`)
 		}
@@ -295,6 +330,14 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 				user.SendText(`You already have auto-attacking disabled.`)
 			}
 		}
+
+		//
+		// User party behavior changed
+		//
+		events.AddToQueue(events.PartyUpdated{
+			Action:  `behavior`,
+			UserIds: append(currentParty.GetMembers(), currentParty.GetInvited()...),
+		})
 	}
 
 	if partyCommand == `leave` || partyCommand == `quit` {
@@ -302,9 +345,19 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		if currentParty.IsLeader(user.UserId) {
 
 			if len(currentParty.UserIds) <= 1 {
+
+				//
+				// Party is disbanded
+				//
+				events.AddToQueue(events.PartyUpdated{
+					Action:  `disbanded`,
+					UserIds: append(currentParty.GetMembers(), currentParty.GetInvited()...),
+				})
+
 				user.EventLog.Add(`party`, `Disbanded your party`)
 				user.SendText(`You disbanded the party.`)
 				currentParty.Disband()
+
 				return true, nil
 			}
 
@@ -339,8 +392,30 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 						}
 					}
 				}
+
+				//
+				// New user is promoted to leader
+				//
+				events.AddToQueue(events.PartyUpdated{
+					Action:  `promotion`,
+					UserIds: append(currentParty.GetMembers(), currentParty.GetInvited()...),
+				})
 			}
+
+			currentParty.Leave(user.UserId)
+			user.EventLog.Add(`party`, `Left the party`)
+			user.SendText(`You left the party.`)
+
+			return true, nil
 		}
+
+		//
+		// User is leaving the party
+		//
+		events.AddToQueue(events.PartyUpdated{
+			Action:  `left`,
+			UserIds: append(currentParty.GetMembers(), currentParty.GetInvited()...),
+		})
 
 		currentParty.Leave(user.UserId)
 		user.EventLog.Add(`party`, `Left the party`)
@@ -378,6 +453,14 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			}
 		}
 
+		//
+		// The party is being disbanded
+		//
+		events.AddToQueue(events.PartyUpdated{
+			Action:  `disbanded`,
+			UserIds: append(currentParty.GetMembers(), currentParty.GetInvited()...),
+		})
+
 		currentParty.Disband()
 		user.EventLog.Add(`party`, `Disbanded the party`)
 		user.SendText(`You disbanded the party.`)
@@ -412,6 +495,14 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			user.SendText(fmt.Sprintf(`%s not found.`, rest))
 			return true, nil
 		}
+
+		//
+		// The user was kicked from the party
+		//
+		events.AddToQueue(events.PartyUpdated{
+			Action:  `left`,
+			UserIds: append(currentParty.GetMembers(), currentParty.GetInvited()...),
+		})
 
 		kickUserId := memberIds[matchUser]
 
@@ -455,6 +546,14 @@ func Party(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			user.SendText(fmt.Sprintf(`%s not found.`, rest))
 			return true, nil
 		}
+
+		//
+		// User was promoted to leader
+		//
+		events.AddToQueue(events.PartyUpdated{
+			Action:  `promotion`,
+			UserIds: append(currentParty.GetMembers(), currentParty.GetInvited()...),
+		})
 
 		promoteUserId := memberIds[matchUser]
 

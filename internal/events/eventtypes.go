@@ -322,6 +322,22 @@ type CharacterStatsChanged struct {
 
 func (p CharacterStatsChanged) Type() string { return `CharacterStatsChanged` }
 
+// any stats or healthmax etc. have changed
+type PartyUpdated struct {
+	Action  string // create, disband, membership
+	UserIds []int
+}
+
+func (p PartyUpdated) Type() string { return `PartyUpdated` }
+
+type Party struct {
+	LeaderUserId  int
+	UserIds       []int
+	InviteUserIds []int
+	AutoAttackers []int
+	Position      map[int]string
+}
+
 type RedrawPrompt struct {
 	UserId        int
 	OnlyIfChanged bool
