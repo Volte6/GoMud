@@ -1,7 +1,9 @@
 package modules
 
 import (
+	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mudlog"
@@ -28,13 +30,79 @@ func init() {
 		plug: plugins.New(`gmcp.Comm`, `1.0`),
 	}
 
+	events.RegisterListener(events.RoomChange{}, g.roomChangeHandler)
 	events.RegisterListener(events.PartyUpdated{}, g.onPartyChange)
+	events.RegisterListener(PartyUpdateVitals{}, g.onUpdateVitals)
 
 }
 
 type GMCPPartyModule struct {
 	// Keep a reference to the plugin when we create it so that we can call ReadBytes() and WriteBytes() on it.
 	plug *plugins.Plugin
+}
+
+// This is a uniqu event so that multiple party members moving thorugh an area all at once don't queue up a bunch for just one party
+type PartyUpdateVitals struct {
+	LeaderId int
+}
+
+func (g PartyUpdateVitals) Type() string     { return `PartyUpdateVitals` }
+func (g PartyUpdateVitals) UniqueID() string { return `PartyVitals-` + strconv.Itoa(g.LeaderId) }
+
+func (g *GMCPPartyModule) roomChangeHandler(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(events.RoomChange)
+	if !typeOk {
+		mudlog.Error("Event", "Expected Type", "RoomChange", "Actual Type", e.Type())
+		return events.Cancel
+	}
+
+	if evt.MobInstanceId > 0 {
+		return events.Continue
+	}
+
+	party := parties.Get(evt.UserId)
+	if party == nil {
+		return events.Continue
+	}
+
+	events.AddToQueue(PartyUpdateVitals{
+		LeaderId: party.LeaderUserId,
+	})
+
+	fmt.Println("Added", party.LeaderUserId)
+
+	return events.Continue
+}
+
+func (g *GMCPPartyModule) onUpdateVitals(e events.Event) events.ListenerReturn {
+
+	evt, typeOk := e.(PartyUpdateVitals)
+	if !typeOk {
+		mudlog.Error("Event", "Expected Type", "PartyUpdateVitals", "Actual Type", e.Type())
+		return events.Cancel
+	}
+
+	fmt.Println("Got", evt.LeaderId)
+
+	party := parties.Get(evt.LeaderId)
+	if party == nil {
+		return events.Cancel
+	}
+
+	payload, moduleName := g.GetPartyNode(party, `Party.Vitals`)
+
+	for _, userId := range party.GetMembers() {
+
+		events.AddToQueue(GMCPOut{
+			UserId:  userId,
+			Module:  moduleName,
+			Payload: payload,
+		})
+
+	}
+
+	return events.Continue
 }
 
 func (g *GMCPPartyModule) onPartyChange(e events.Event) events.ListenerReturn {
@@ -49,13 +117,6 @@ func (g *GMCPPartyModule) onPartyChange(e events.Event) events.ListenerReturn {
 		return events.Cancel
 	}
 
-	partyPayload := GMCPPartyModule_Payload{
-		Leader:  `None`,
-		Members: []GMCPPartyModule_Payload_User{},
-		Invited: []GMCPPartyModule_Payload_User{},
-		Vitals:  map[string]GMCPPartyModule_Payload_Vitals{},
-	}
-
 	var party *parties.Party
 	for _, uId := range evt.UserIds {
 		if party = parties.Get(uId); party != nil {
@@ -63,82 +124,16 @@ func (g *GMCPPartyModule) onPartyChange(e events.Event) events.ListenerReturn {
 		}
 	}
 
-	inParty := map[int]string{}
-	roomTitles := map[int]string{}
+	payload, moduleName := g.GetPartyNode(party, `Party`)
 
+	inParty := map[int]struct{}{}
 	if party != nil {
-
 		for _, uId := range party.GetMembers() {
-
-			if user := users.GetByUserId(uId); user != nil {
-
-				if user.UserId == party.LeaderUserId {
-					partyPayload.Leader = user.Character.Name
-				}
-
-				inParty[user.UserId] = user.Character.Name
-
-				roomTitle, ok := roomTitles[user.Character.RoomId]
-				if !ok {
-					if uRoom := rooms.LoadRoom(user.Character.RoomId); uRoom != nil {
-						roomTitle = uRoom.Title
-						roomTitles[user.Character.RoomId] = roomTitle
-					}
-				}
-
-				hPct := int(math.Floor((float64(user.Character.Health) / float64(user.Character.HealthMax.Value)) * 100))
-				if hPct < 0 {
-					hPct = 0
-				}
-				partyPayload.Members = append(partyPayload.Members,
-					GMCPPartyModule_Payload_User{
-						Name:     user.Character.Name,
-						Status:   `In Party`,
-						Position: party.GetRank(user.UserId),
-					},
-				)
-
-				partyPayload.Vitals[user.Character.Name] = GMCPPartyModule_Payload_Vitals{
-					Level:         user.Character.Level,
-					HealthPercent: hPct,
-					Location:      roomTitle,
-				}
-			}
-
+			inParty[uId] = struct{}{}
 		}
-
 		for _, uId := range party.GetInvited() {
-
-			if user := users.GetByUserId(uId); user != nil {
-
-				inParty[user.UserId] = user.Character.Name
-
-				roomTitle, ok := roomTitles[user.Character.RoomId]
-				if !ok {
-					if uRoom := rooms.LoadRoom(user.Character.RoomId); uRoom != nil {
-						roomTitle = uRoom.Title
-						roomTitles[user.Character.RoomId] = roomTitle
-					}
-				}
-
-				partyPayload.Invited = append(partyPayload.Invited,
-					GMCPPartyModule_Payload_User{
-						Name:     user.Character.Name,
-						Status:   `Invited`,
-						Position: ``,
-					},
-				)
-
-				partyPayload.Vitals[user.Character.Name] = GMCPPartyModule_Payload_Vitals{
-					Level:         0,
-					HealthPercent: 0,
-					Location:      ``,
-				}
-
-			}
-
+			inParty[uId] = struct{}{}
 		}
-
 	}
 
 	for _, userId := range evt.UserIds {
@@ -147,8 +142,8 @@ func (g *GMCPPartyModule) onPartyChange(e events.Event) events.ListenerReturn {
 
 			events.AddToQueue(GMCPOut{
 				UserId:  userId,
-				Module:  `Party`,
-				Payload: partyPayload,
+				Module:  moduleName,
+				Payload: payload,
 			})
 
 		} else {
@@ -164,6 +159,105 @@ func (g *GMCPPartyModule) onPartyChange(e events.Event) events.ListenerReturn {
 	}
 
 	return events.Continue
+}
+
+func (g *GMCPPartyModule) GetPartyNode(party *parties.Party, gmcpModule string) (data any, moduleName string) {
+
+	all := gmcpModule == `Party`
+
+	if party == nil {
+		return GMCPPartyModule_Payload_Vitals{}, `Party`
+	}
+
+	partyPayload := GMCPPartyModule_Payload{
+		Leader:  `None`,
+		Members: []GMCPPartyModule_Payload_User{},
+		Invited: []GMCPPartyModule_Payload_User{},
+		Vitals:  map[string]GMCPPartyModule_Payload_Vitals{},
+	}
+
+	roomTitles := map[int]string{}
+
+	for _, uId := range party.GetMembers() {
+
+		if user := users.GetByUserId(uId); user != nil {
+
+			hPct := int(math.Floor((float64(user.Character.Health) / float64(user.Character.HealthMax.Value)) * 100))
+			if hPct < 0 {
+				hPct = 0
+			}
+
+			roomTitle, ok := roomTitles[user.Character.RoomId]
+			if !ok {
+				if uRoom := rooms.LoadRoom(user.Character.RoomId); uRoom != nil {
+					roomTitle = uRoom.Title
+					roomTitles[user.Character.RoomId] = roomTitle
+				}
+			}
+
+			partyPayload.Vitals[user.Character.Name] = GMCPPartyModule_Payload_Vitals{
+				Level:         user.Character.Level,
+				HealthPercent: hPct,
+				Location:      roomTitle,
+			}
+
+			if gmcpModule == `Party.Vitals` {
+				continue
+			}
+
+			if user.UserId == party.LeaderUserId {
+				partyPayload.Leader = user.Character.Name
+			}
+
+			partyPayload.Members = append(partyPayload.Members,
+				GMCPPartyModule_Payload_User{
+					Name:     user.Character.Name,
+					Status:   `In Party`,
+					Position: party.GetRank(user.UserId),
+				},
+			)
+
+		}
+
+	}
+
+	for _, uId := range party.GetInvited() {
+
+		if user := users.GetByUserId(uId); user != nil {
+
+			partyPayload.Vitals[user.Character.Name] = GMCPPartyModule_Payload_Vitals{
+				Level:         0,
+				HealthPercent: 0,
+				Location:      ``,
+			}
+
+			if gmcpModule == `Party.Vitals` {
+				continue
+			}
+
+			partyPayload.Invited = append(partyPayload.Invited,
+				GMCPPartyModule_Payload_User{
+					Name:     user.Character.Name,
+					Status:   `Invited`,
+					Position: ``,
+				},
+			)
+
+		}
+
+	}
+
+	if gmcpModule == `Party.Vitals` {
+		return partyPayload.Vitals, `Party.Vitals`
+	}
+
+	// If we reached this point and Char wasn't requested, we have a problem.
+	if !all {
+		mudlog.Error(`gmcp.Room`, `error`, `Bad module requested`, `module`, gmcpModule)
+	}
+
+	return partyPayload, `Party`
+
 }
 
 type GMCPPartyModule_Payload struct {
