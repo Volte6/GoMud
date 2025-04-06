@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"fmt"
 	"math"
 	"strconv"
 
@@ -70,8 +69,6 @@ func (g *GMCPPartyModule) roomChangeHandler(e events.Event) events.ListenerRetur
 		LeaderId: party.LeaderUserId,
 	})
 
-	fmt.Println("Added", party.LeaderUserId)
-
 	return events.Continue
 }
 
@@ -82,8 +79,6 @@ func (g *GMCPPartyModule) onUpdateVitals(e events.Event) events.ListenerReturn {
 		mudlog.Error("Event", "Expected Type", "PartyUpdateVitals", "Actual Type", e.Type())
 		return events.Cancel
 	}
-
-	fmt.Println("Got", evt.LeaderId)
 
 	party := parties.Get(evt.LeaderId)
 	if party == nil {
