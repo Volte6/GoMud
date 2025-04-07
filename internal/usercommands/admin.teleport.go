@@ -109,6 +109,10 @@ func Teleport(rest string, user *users.UserRecord, room *rooms.Room, flags event
 								continue
 							}
 
+							if partyUser.Character.RoomId != room.RoomId {
+								continue
+							}
+
 							rooms.MoveToRoom(partyUser.UserId, gotoRoomId)
 							partyUser.SendText(fmt.Sprintf("Moved to room %d.", gotoRoomId))
 							room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> appears in a flash of light!`, partyUser.Character.Name), partyUser.UserId)
