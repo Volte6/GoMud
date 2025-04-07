@@ -14,6 +14,7 @@ func Conditions(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 		Name        string
 		Description string
 		RoundsLeft  int
+		PermaBuff   bool
 	}
 
 	afflictions := []buffInfo{}
@@ -29,6 +30,7 @@ func Conditions(rest string, user *users.UserRecord, room *rooms.Room, flags eve
 			Name:        spec.Name,
 			Description: spec.Description,
 			RoundsLeft:  roundsLeft,
+			PermaBuff:   buff.PermaBuff,
 		}
 		newAffliction.Name, newAffliction.Description = spec.VisibleNameDesc()
 
