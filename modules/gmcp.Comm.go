@@ -3,6 +3,7 @@ package modules
 import (
 	"strings"
 
+	"github.com/Volte6/ansitags"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/mudlog"
@@ -48,7 +49,7 @@ func (g *GMCPCommModule) onComm(e events.Event) events.ListenerReturn {
 
 	msgPayload := `{ "channel": "` + evt.CommType +
 		`", "sender": "` + evt.Name +
-		`", "text": "` + strings.ReplaceAll(evt.Message, `"`, `\\"`) + `"}`
+		`", "text": "` + strings.ReplaceAll(ansitags.Parse(evt.Message, ansitags.StripTags), `"`, `\\"`) + `"}`
 
 	// Sent to everyone.
 	// say, party, broadcast, whisper
