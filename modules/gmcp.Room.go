@@ -468,7 +468,7 @@ type GMCPRoomModule_Payload struct {
 	Exits       map[string]int                                      `json:"exits"`
 	ExitsV2     map[string]GMCPRoomModule_Payload_Contents_ExitInfo `json:"exitsv2"`
 	Details     []string                                            `json:"details"`
-	Contents    GMCPRoomModule_Payload_Contents                     `json:"Contents,omitempty"`
+	Contents    GMCPRoomModule_Payload_Contents                     `json:"Contents"`
 }
 
 type GMCPRoomModule_Payload_Contents_ExitInfo struct {
