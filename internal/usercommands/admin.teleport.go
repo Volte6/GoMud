@@ -32,7 +32,6 @@ func Teleport(rest string, user *users.UserRecord, room *rooms.Room, flags event
 		return true, nil
 	}
 
-	var distance int
 	gotoRoomId, numError := strconv.Atoi(rest)
 	// If not a number, check if it's a direction
 	if numError != nil {
@@ -52,7 +51,7 @@ func Teleport(rest string, user *users.UserRecord, room *rooms.Room, flags event
 				return true, err
 			}
 
-			gotoRoomId, distance = zMapper.FindAdjacentRoom(user.Character.RoomId, rest)
+			gotoRoomId, _ = zMapper.FindAdjacentRoom(user.Character.RoomId, rest)
 
 		} else {
 
