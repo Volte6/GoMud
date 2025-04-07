@@ -97,29 +97,37 @@ func Teleport(rest string, user *users.UserRecord, room *rooms.Room, flags event
 
 			if party := parties.Get(user.UserId); party != nil {
 
-				newRoom := rooms.LoadRoom(gotoRoomId)
-				for _, uid := range room.GetPlayers() {
-					if party.IsMember(uid) {
+				// Party leaders can move the whole party.
+				if party.LeaderUserId == user.UserId {
 
-						partyUser := users.GetByUserId(uid)
-						if partyUser == nil {
-							continue
-						}
+					newRoom := rooms.LoadRoom(gotoRoomId)
+					for _, uid := range room.GetPlayers() {
+						if party.IsMember(uid) {
 
-						rooms.MoveToRoom(partyUser.UserId, gotoRoomId)
-						user.SendText(fmt.Sprintf("Moved to room %d (%d rooms away).", gotoRoomId, distance))
-						room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> appears in a flash of light!`, partyUser.Character.Name), partyUser.UserId)
+							partyUser := users.GetByUserId(uid)
+							if partyUser == nil {
+								continue
+							}
 
-						for _, mInstanceId := range room.GetMobs(rooms.FindCharmed) {
-							if mob := mobs.GetInstance(mInstanceId); mob != nil {
-								if mob.Character.IsCharmed(partyUser.UserId) {
-									room.RemoveMob(mob.InstanceId)
-									newRoom.AddMob(mob.InstanceId)
+							rooms.MoveToRoom(partyUser.UserId, gotoRoomId)
+							partyUser.SendText(fmt.Sprintf("Moved to room %d.", gotoRoomId))
+							room.SendText(fmt.Sprintf(`<ansi fg="username">%s</ansi> appears in a flash of light!`, partyUser.Character.Name), partyUser.UserId)
+
+							Look(``, partyUser, gotoRoom, flags)
+
+							for _, mInstanceId := range room.GetMobs(rooms.FindCharmed) {
+								if mob := mobs.GetInstance(mInstanceId); mob != nil {
+									if mob.Character.IsCharmed(partyUser.UserId) {
+										room.RemoveMob(mob.InstanceId)
+										newRoom.AddMob(mob.InstanceId)
+									}
 								}
 							}
 						}
 					}
+
 				}
+
 			}
 
 			Look(``, user, gotoRoom, flags)
