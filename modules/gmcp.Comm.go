@@ -1,8 +1,6 @@
 package modules
 
 import (
-	"strings"
-
 	"github.com/Volte6/ansitags"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/mobs"
@@ -47,9 +45,11 @@ func (g *GMCPCommModule) onComm(e events.Event) events.ListenerReturn {
 		return events.Cancel
 	}
 
-	msgPayload := `{ "channel": "` + evt.CommType +
-		`", "sender": "` + evt.Name +
-		`", "text": "` + strings.ReplaceAll(ansitags.Parse(evt.Message, ansitags.StripTags), `"`, `\\"`) + `"}`
+	payload := GMCPCommModule_Payload{
+		Channel: evt.CommType,
+		Sender:  evt.Name,
+		Text:    ansitags.Parse(evt.Message, ansitags.StripTags),
+	}
 
 	// Sent to everyone.
 	// say, party, broadcast, whisper
@@ -108,10 +108,16 @@ func (g *GMCPCommModule) onComm(e events.Event) events.ListenerReturn {
 		events.AddToQueue(GMCPOut{
 			UserId:  userId,
 			Module:  `Comm.Channel`,
-			Payload: msgPayload,
+			Payload: payload,
 		})
 
 	}
 
 	return events.Continue
+}
+
+type GMCPCommModule_Payload struct {
+	Channel string `json:"channel"`
+	Sender  string `json:"sender"`
+	Text    string `json:"text"`
 }
