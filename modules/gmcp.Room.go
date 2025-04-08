@@ -372,7 +372,11 @@ func (g *GMCPRoomModule) GetRoomNode(user *users.UserRecord, gmcpModule string) 
 		for exitName, exitInfo := range room.Exits {
 
 			if exitInfo.Secret {
-				continue
+				if exitRoom := rooms.LoadRoom(exitInfo.RoomId); exitRoom != nil {
+					if !exitRoom.HasVisited(user.UserId, rooms.VisitorUser) {
+						continue
+					}
+				}
 			}
 
 			if !mapper.IsCompassDirection(exitName) {
@@ -396,19 +400,23 @@ func (g *GMCPRoomModule) GetRoomNode(user *users.UserRecord, gmcpModule string) 
 				DeltaZ: deltaZ,
 			}
 
+			if exitInfo.Secret {
+				exitV2.Details = append(exitV2.Details, `secret`)
+			}
+
 			if exitInfo.HasLock() {
 
-				exitV2.Details = append(exitV2.Details, `haslock`)
+				exitV2.Details = append(exitV2.Details, `locked`)
 
 				lockId := fmt.Sprintf(`%d-%s`, room.RoomId, exitName)
 				haskey, hascombo := user.Character.HasKey(lockId, int(exitInfo.Lock.Difficulty))
 
 				if haskey {
-					exitV2.Details = append(exitV2.Details, `haskey`)
+					exitV2.Details = append(exitV2.Details, `player_has_key`)
 				}
 
 				if hascombo {
-					exitV2.Details = append(exitV2.Details, `haspickcombo`)
+					exitV2.Details = append(exitV2.Details, `player_has_pick_combo`)
 				}
 			}
 
