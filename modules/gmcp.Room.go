@@ -379,8 +379,9 @@ func (g *GMCPRoomModule) GetRoomNode(user *users.UserRecord, gmcpModule string) 
 				}
 			}
 
+			// Skip non compass directions?
 			if !mapper.IsCompassDirection(exitName) {
-				continue
+				//continue
 			}
 
 			payload.Exits[exitName] = exitInfo.RoomId
@@ -394,10 +395,11 @@ func (g *GMCPRoomModule) GetRoomNode(user *users.UserRecord, gmcpModule string) 
 			}
 
 			exitV2 := GMCPRoomModule_Payload_Contents_ExitInfo{
-				RoomId: exitInfo.RoomId,
-				DeltaX: deltaX,
-				DeltaY: deltaY,
-				DeltaZ: deltaZ,
+				RoomId:  exitInfo.RoomId,
+				DeltaX:  deltaX,
+				DeltaY:  deltaY,
+				DeltaZ:  deltaZ,
+				Details: []string{},
 			}
 
 			if exitInfo.Secret {
