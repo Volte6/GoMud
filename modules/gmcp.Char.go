@@ -171,7 +171,7 @@ func (g *GMCPCharModule) ownershipChangeHandler(e events.Event) events.ListenerR
 
 	events.AddToQueue(GMCPCharUpdate{
 		UserId:     evt.UserId,
-		Identifier: `Char.Stats, Char.Vitals`,
+		Identifier: `Char.Inventory.Backpack`,
 	})
 
 	return events.Continue
@@ -207,11 +207,11 @@ func (g *GMCPCharModule) equipmentChangeHandler(e events.Event) events.ListenerR
 
 	statsToChange := ``
 
-	// If only gold or bank changed
 	if len(evt.ItemsRemoved) > 0 || len(evt.ItemsWorn) > 0 {
-		statsToChange += `Char.Inventory`
+		statsToChange += `Char.Inventory, Char.Stats, Char.Vitals`
 	}
 
+	// If only gold or bank changed
 	if evt.BankChange != 0 || evt.GoldChange != 0 {
 		if statsToChange != `` {
 			statsToChange += `, `
@@ -357,6 +357,26 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 		}
 	}
 
+	if all || g.wantsGMCPPayload(`Char.Pets`, gmcpModule) {
+
+		payload.Pets = []GMCPCharModule_Payload_Pet{}
+
+		if user.Character.Pet.Exists() {
+
+			p := GMCPCharModule_Payload_Pet{
+				Name:   user.Character.Pet.Name,
+				Type:   user.Character.Pet.Type,
+				Hunger: `full`,
+			}
+
+			payload.Pets = append(payload.Pets, p)
+		}
+
+		if !all {
+			return payload.Pets, `Char.Pets`
+		}
+	}
+
 	if all || g.wantsGMCPPayload(`Char.Enemies`, gmcpModule) {
 
 		payload.Enemies = []GMCPCharModule_Enemy{}
@@ -411,14 +431,16 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 		return payload.Inventory.Backpack.Summary, `Char.Inventory.Backpack.Summary`
 	}
 
-	if all || g.wantsGMCPPayload(`Char.Inventory`, gmcpModule) {
+	if all || g.wantsGMCPPayload(`Char.Inventory`, gmcpModule) || g.wantsGMCPPayload(`Char.Inventory.Backpack`, gmcpModule) {
 
 		payload.Inventory = &GMCPCharModule_Payload_Inventory{
 
 			Backpack: &GMCPCharModule_Payload_Inventory_Backpack{
-				Count: len(user.Character.Items),
 				Items: []GMCPCharModule_Payload_Inventory_Item{},
-				Max:   user.Character.CarryCapacity(),
+				Summary: GMCPCharModule_Payload_Inventory_Backpack_Summary{
+					Count: len(user.Character.Items),
+					Max:   user.Character.CarryCapacity(),
+				},
 			},
 
 			Worn: &GMCPCharModule_Payload_Inventory_Worn{
@@ -441,6 +463,11 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 		}
 
 		if !all {
+
+			if `Char.Inventory.Backpack` == gmcpModule {
+				return payload.Inventory.Backpack, `Char.Inventory.Backpack`
+			}
+
 			return payload.Inventory, `Char.Inventory`
 		}
 	}
@@ -629,6 +656,7 @@ type GMCPCharModule_Payload struct {
 	Vitals    *GMCPCharModule_Payload_Vitals           `json:"Vitals,omitempty"`
 	Worth     *GMCPCharModule_Payload_Worth            `json:"Worth,omitempty"`
 	Quests    []GMCPCharModule_Payload_Quest           `json:"Quests,omitempty"`
+	Pets      []GMCPCharModule_Payload_Pet             `json:"Pets,omitempty"`
 }
 
 // /////////////////
@@ -665,8 +693,6 @@ type GMCPCharModule_Payload_Inventory struct {
 
 type GMCPCharModule_Payload_Inventory_Backpack struct {
 	Items   []GMCPCharModule_Payload_Inventory_Item           `json:"items,omitempty"`
-	Count   int                                               `json:"count,omitempty"`
-	Max     int                                               `json:"max,omitempty"`
 	Summary GMCPCharModule_Payload_Inventory_Backpack_Summary `json:"Summary,omitempty"`
 }
 
@@ -689,25 +715,35 @@ type GMCPCharModule_Payload_Inventory_Worn struct {
 }
 
 type GMCPCharModule_Payload_Inventory_Item struct {
-	Id        string `json:"id"`
-	Name      string `json:"name"`
-	Type      string `json:"type"`
-	SubType   string `json:"subtype"`
-	Uses      int    `json:"uses"`
-	Cursed    bool   `json:"cursed"`
-	QuestFlag bool   `json:"quest_flag"`
+	Id      string   `json:"id"`
+	Name    string   `json:"name"`
+	Type    string   `json:"type"`
+	SubType string   `json:"subtype"`
+	Uses    int      `json:"uses"`
+	Details []string `json:"details"`
 }
 
 func newInventory_Item(itm items.Item) GMCPCharModule_Payload_Inventory_Item {
-	return GMCPCharModule_Payload_Inventory_Item{
-		Id:        itm.ShorthandId(),
-		Name:      itm.Name(),
-		Type:      string(itm.GetSpec().Type),
-		SubType:   string(itm.GetSpec().Subtype),
-		Uses:      itm.Uses,
-		Cursed:    !itm.Uncursed && itm.GetSpec().Cursed,
-		QuestFlag: itm.GetSpec().QuestToken != ``,
+
+	itmSpec := itm.GetSpec()
+	d := GMCPCharModule_Payload_Inventory_Item{
+		Id:      itm.ShorthandId(),
+		Name:    itm.Name(),
+		Type:    string(itmSpec.Type),
+		SubType: string(itmSpec.Subtype),
+		Uses:    itm.Uses,
+		Details: []string{},
 	}
+
+	if !itm.Uncursed && itmSpec.Cursed {
+		d.Details = append(d.Details, `cursed`)
+	}
+
+	if itmSpec.QuestToken != `` {
+		d.Details = append(d.Details, `quest`)
+	}
+
+	return d
 }
 
 // /////////////////
@@ -763,4 +799,13 @@ type GMCPCharModule_Payload_Quest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Completion  int    `json:"completion"`
+}
+
+// /////////////////
+// Char.Pets
+// /////////////////
+type GMCPCharModule_Payload_Pet struct {
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+	Hunger string `json:"hunger"`
 }

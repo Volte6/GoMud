@@ -111,12 +111,6 @@ func Drop(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 
 		room.AddItem(matchItem, false)
 
-		events.AddToQueue(events.ItemOwnership{
-			UserId: user.UserId,
-			Item:   matchItem,
-			Gained: false,
-		})
-
 	}
 
 	return true, nil
