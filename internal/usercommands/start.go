@@ -233,31 +233,39 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 
 	user.ClearPrompt()
 
-	user.SendText(fmt.Sprintf(`<ansi fg="magenta">Suddenly, a vortex appears before you, drawing you in before you have any chance to react!</ansi>%s`, term.CRLFStr))
-
 	for _, ridStr := range configs.GetSpecialRoomsConfig().TutorialStartRooms {
 
 		rid, _ := strconv.ParseInt(ridStr, 10, 64)
 		skip := false
 
 		for _, populatedRoomId := range rooms.GetRoomsWithPlayers() {
-			roomCt := 10
-			for i := 0; i < roomCt; i++ {
+
+			for i := 0; i < 10; i++ {
+
 				if int(rid)+i == populatedRoomId {
 					skip = true
-					continue
+					break
 				}
+
 			}
+
+			if skip {
+				break
+			}
+
 		}
 
 		if skip {
 			continue
 		}
 
-		if _, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, int(rid)); err == nil {
-			rooms.MoveToRoom(user.UserId, int(rid))
-			return true, nil
-		}
+		scripting.TryRoomScriptEvent(`onEnter`, user.UserId, int(rid))
+
+		user.SendText(fmt.Sprintf(`<ansi fg="magenta">Suddenly, a vortex appears before you, drawing you in before you have any chance to react!</ansi>%s`, term.CRLFStr))
+
+		rooms.MoveToRoom(user.UserId, int(rid))
+
+		return true, nil
 
 	}
 

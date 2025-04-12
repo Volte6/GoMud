@@ -8,6 +8,10 @@ import (
 	"github.com/volte6/gomud/internal/colorpatterns"
 )
 
+var (
+	ErrEventNotFound = errors.New(`event not found`)
+)
+
 type TextWrapperStyle struct {
 	cache             string
 	Fg                string // ansi class name for foreground

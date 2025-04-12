@@ -81,7 +81,7 @@ func TryBuffScriptEvent(eventName string, userId int, mobInstanceId int, buffId 
 		}
 	}
 
-	return false, nil
+	return false, ErrEventNotFound
 }
 
 func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buffId int) (bool, error) {
@@ -172,7 +172,7 @@ func TryBuffCommand(cmd string, rest string, userId int, mobInstanceId int, buff
 		}
 	}
 
-	return false, nil
+	return false, ErrEventNotFound
 }
 
 func getBuffVM(buffId int) (*VMWrapper, error) {

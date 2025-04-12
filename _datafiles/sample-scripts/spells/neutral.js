@@ -48,6 +48,6 @@ function onMagic(sourceActor, targetActor) {
     }
 
     // Apply the illumination
-    targetActor.GiveBuff(1);
+    targetActor.GiveBuff(1, "spell");
     
 }

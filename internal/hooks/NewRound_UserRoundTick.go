@@ -4,6 +4,7 @@ package hooks
 import (
 	"strconv"
 
+	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/rooms"
 	"github.com/volte6/gomud/internal/scripting"
@@ -106,12 +107,23 @@ func UserRoundTick(e events.Event) events.ListenerReturn {
 					//
 					// Fire onTrigger for buff script
 					//
+					triggeredBuffIds := []int{}
 					for _, buff := range triggeredBuffs {
-						if !buff.Expired() {
-							scripting.TryBuffScriptEvent(`onTrigger`, uId, 0, buff.BuffId)
+
+						if buff.Expired() {
+							triggeredBuffIds = append(triggeredBuffIds, buff.BuffId)
+							continue
 						}
+
+						_, err := scripting.TryBuffScriptEvent(`onTrigger`, uId, 0, buff.BuffId)
+
+						if buff.TriggersLeft != buffs.TriggersLeftUnlimited || err != scripting.ErrEventNotFound {
+							triggeredBuffIds = append(triggeredBuffIds, buff.BuffId)
+						}
+
 					}
 
+					events.AddToQueue(events.BuffsTriggered{UserId: user.UserId, BuffIds: triggeredBuffIds})
 				}
 
 				// Recalculate all stats at the end of the round tick

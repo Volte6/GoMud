@@ -71,6 +71,7 @@ func Pray(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				UserId:        prayPlayerId,
 				MobInstanceId: 0,
 				BuffId:        possibleBuffIds[randBuffIndex],
+				Source:        `skill`,
 			})
 
 			possibleBuffIds = append(possibleBuffIds[:randBuffIndex], possibleBuffIds[randBuffIndex+1:]...)
@@ -89,6 +90,7 @@ func Pray(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 					UserId:        0,
 					MobInstanceId: prayMobId,
 					BuffId:        possibleBuffIds[randBuffIndex],
+					Source:        `skill`,
 				})
 
 				possibleBuffIds = append(possibleBuffIds[:randBuffIndex], possibleBuffIds[randBuffIndex+1:]...)

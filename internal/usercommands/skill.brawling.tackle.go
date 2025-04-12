@@ -63,10 +63,13 @@ func Tackle(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 					user.UserId,
 				)
 
+				// Warriors respite
+
 				events.AddToQueue(events.Buff{
 					UserId:        0,
 					MobInstanceId: attackMobInstanceId,
 					BuffId:        12, // buff 12 is tackled
+					Source:        `skill`,
 				})
 
 			} else {
@@ -118,6 +121,7 @@ func Tackle(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 					UserId:        attackPlayerId,
 					MobInstanceId: 0,
 					BuffId:        12, // buff 12 is tackled
+					Source:        `skill`,
 				})
 
 			} else {

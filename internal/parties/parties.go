@@ -200,3 +200,7 @@ func (p *Party) Disband() {
 func (p *Party) GetMembers() []int {
 	return append([]int{}, p.UserIds...)
 }
+
+func (p *Party) GetInvited() []int {
+	return append([]int{}, p.InviteUserIds...)
+}

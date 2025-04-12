@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/events"
 	"github.com/volte6/gomud/internal/items"
 	"github.com/volte6/gomud/internal/mobs"
 	"github.com/volte6/gomud/internal/rooms"
@@ -27,13 +26,7 @@ func Eat(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> eats some <ansi fg="itemname">%s</ansi>.`, mob.Character.Name, matchItem.DisplayName()))
 
 		for _, buffId := range itemSpec.BuffIds {
-
-			events.AddToQueue(events.Buff{
-				UserId:        0,
-				MobInstanceId: mob.InstanceId,
-				BuffId:        buffId,
-			})
-
+			mob.AddBuff(buffId, `food`)
 		}
 	}
 

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volte6/gomud/internal/buffs"
 	"github.com/volte6/gomud/internal/characters"
 	"github.com/volte6/gomud/internal/configs"
 	"github.com/volte6/gomud/internal/events"
@@ -241,7 +242,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		}
 		for _, buffId := range spec.PlayerBuffIds {
 			if !user.Character.HasBuff(buffId) {
-				user.AddBuff(buffId)
+				user.AddBuff(buffId, `area`)
 			}
 		}
 	}
@@ -310,6 +311,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		UserId:     userId,
 		FromRoomId: currentRoom.RoomId,
 		ToRoomId:   newRoom.RoomId,
+		Unseen:     user.Character.HasBuffFlag(buffs.Hidden),
 	})
 
 	return nil

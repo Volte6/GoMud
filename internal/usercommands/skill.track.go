@@ -230,11 +230,7 @@ func Track(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 				user.Character.SetMiscData("tracking-user", match)
 				user.Character.SetMiscData("tracking-mob", nil)
 
-				events.AddToQueue(events.Buff{
-					UserId:        user.UserId,
-					MobInstanceId: 0,
-					BuffId:        26, // 26 is the buff for active tracking
-				})
+				user.AddBuff(26, `skill`) // 26 is the buff for active tracking
 
 				return true, nil
 
@@ -243,11 +239,7 @@ func Track(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 				user.Character.SetMiscData("tracking-user", closeMatch)
 				user.Character.SetMiscData("tracking-mob", nil)
 
-				events.AddToQueue(events.Buff{
-					UserId:        user.UserId,
-					MobInstanceId: 0,
-					BuffId:        26, // 26 is the buff for active tracking
-				})
+				user.AddBuff(26, `skill`) // 26 is the buff for active tracking
 
 				return true, nil
 
@@ -267,11 +259,7 @@ func Track(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 				user.Character.SetMiscData("tracking-user", nil)
 				user.Character.SetMiscData("tracking-mob", match)
 
-				events.AddToQueue(events.Buff{
-					UserId:        user.UserId,
-					MobInstanceId: 0,
-					BuffId:        26, // 26 is the buff for active tracking
-				})
+				user.AddBuff(26, `skill`) // 26 is the buff for active tracking
 
 				return true, nil
 
@@ -280,11 +268,7 @@ func Track(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 				user.Character.SetMiscData("tracking-user", nil)
 				user.Character.SetMiscData("tracking-mob", closeMatch)
 
-				events.AddToQueue(events.Buff{
-					UserId:        user.UserId,
-					MobInstanceId: 0,
-					BuffId:        26, // 26 is the buff for active tracking
-				})
+				user.AddBuff(26, `skill`) // 26 is the buff for active tracking
 
 				return true, nil
 

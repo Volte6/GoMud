@@ -241,6 +241,7 @@ func (w *World) enterWorld(userId int, roomId int) {
 	if userInfo := users.GetByUserId(userId); userInfo != nil {
 		events.AddToQueue(events.PlayerSpawn{
 			UserId:        userInfo.UserId,
+			ConnectionId:  userInfo.ConnectionId(),
 			RoomId:        userInfo.Character.RoomId,
 			Username:      userInfo.Username,
 			CharacterName: userInfo.Character.Name,

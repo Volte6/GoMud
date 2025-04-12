@@ -151,7 +151,7 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 
 	}
 
-	return false, nil
+	return false, ErrEventNotFound
 
 }
 

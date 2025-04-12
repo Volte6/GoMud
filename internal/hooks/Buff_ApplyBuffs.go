@@ -77,8 +77,11 @@ func ApplyBuffs(e events.Event) events.ListenerReturn {
 				MobInstanceId: evt.MobInstanceId,
 				InputText:     `suicide`,
 			})
+
 		}
 	}
+
+	events.AddToQueue(events.BuffsTriggered{UserId: evt.UserId, MobInstanceId: evt.MobInstanceId, BuffIds: []int{evt.BuffId}})
 
 	return events.Continue
 }
