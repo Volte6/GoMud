@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"unicode"
 
-	"github.com/volte6/gomud/internal/colorpatterns"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/colorpatterns"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 //

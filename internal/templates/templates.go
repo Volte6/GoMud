@@ -10,14 +10,14 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/Volte6/ansitags"
+	"github.com/GoMudEngine/GoMud/internal/colorpatterns"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/ansitags"
 	"github.com/mattn/go-runewidth"
-	"github.com/volte6/gomud/internal/colorpatterns"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/users"
 
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 type AnsiFlag uint8

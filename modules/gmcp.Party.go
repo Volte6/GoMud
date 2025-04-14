@@ -4,12 +4,12 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/parties"
-	"github.com/volte6/gomud/internal/plugins"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/parties"
+	"github.com/GoMudEngine/GoMud/internal/plugins"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 // ////////////////////////////////////////////////////////////////////

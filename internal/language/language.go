@@ -4,9 +4,9 @@ import (
 	"errors"
 	"path"
 
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/mudlog"
 	"golang.org/x/text/language"
 	"gopkg.in/yaml.v2"
 )

@@ -1,7 +1,7 @@
 package inputhandlers
 
 import (
-	"github.com/volte6/gomud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/connections"
 )
 
 //

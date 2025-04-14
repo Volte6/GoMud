@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/volte6/gomud/internal/colorpatterns"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/exit"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/colorpatterns"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/exit"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
 )
 
 // Mob portaling is different than player portaling.

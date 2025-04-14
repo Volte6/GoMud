@@ -4,7 +4,7 @@ If you plan to host GoMUD on a remote server using AWS, EC2 is a solid option. H
 
 Note: Configuration of the separate datafiles repository is optional, but be aware that different GoMud configuration options might be necessary
 
-Before embarking on this journey, please familiarize yourself with the [general running guide](https://github.com/Volte6/GoMud/blob/master/_datafiles/guides/running/README.md).
+Before embarking on this journey, please familiarize yourself with the [general running guide](https://github.com/GoMudEngine/GoMud/blob/master/_datafiles/guides/running/README.md).
 
 
 #### Step 1: Create EC2 Instance
@@ -44,7 +44,7 @@ world/default/users/*
 Optional pre-step if you have a private github repository for your world files.
 * [Create a keypair and add it to your github account](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 
-1. From /home/ec2-user `git clone git@github.com:Volte6/GoMud.git`
+1. From /home/ec2-user `git clone git@github.com:GoMudEngine/GoMud.git`
 2. If you have a separate datafiles repository `git clone git@github.com:YOURNAME/YourRepo.git _datafiles`
 
 ### Step 5: Build GoMud and launch the service for the first time

@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/GoMudEngine/GoMud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/plugins"
+	"github.com/GoMudEngine/GoMud/internal/term"
+	"github.com/GoMudEngine/GoMud/internal/users"
 	lru "github.com/hashicorp/golang-lru/v2"
-	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/plugins"
-	"github.com/volte6/gomud/internal/term"
-	"github.com/volte6/gomud/internal/users"
 )
 
 const (

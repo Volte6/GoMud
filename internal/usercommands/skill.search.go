@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/gametime"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/skills"
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/gametime"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/skills"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 /*

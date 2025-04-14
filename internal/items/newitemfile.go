@@ -3,8 +3,8 @@ package items
 import (
 	"errors"
 
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/fileloader"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/fileloader"
 )
 
 func CreateNewItemFile(newItemInfo ItemSpec) (int, error) {

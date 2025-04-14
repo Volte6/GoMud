@@ -6,12 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/exit"
-	"github.com/volte6/gomud/internal/fileloader"
-	"github.com/volte6/gomud/internal/gametime"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/exit"
+	"github.com/GoMudEngine/GoMud/internal/fileloader"
+	"github.com/GoMudEngine/GoMud/internal/gametime"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/util"
 	"gopkg.in/yaml.v2"
 )
 

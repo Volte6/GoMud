@@ -3,7 +3,7 @@ package clans
 import (
 	"time"
 
-	"github.com/volte6/gomud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/items"
 )
 
 type ClanRank string

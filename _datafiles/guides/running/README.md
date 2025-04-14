@@ -1,6 +1,6 @@
 # Getting Running on Various Platforms
 
-These guides assume you want to build from the source. You can also download the latest package and run the appropriate pre-compiled binary for your platform from the [releases section](https://github.com/Volte6/GoMud/releases) of the repo.
+These guides assume you want to build from the source. You can also download the latest package and run the appropriate pre-compiled binary for your platform from the [releases section](https://github.com/GoMudEngine/GoMud/releases) of the repo.
 
 - [Raspberry PI Zero 2W](RASPBERRY-PI.md)
 - [Running via Docker](DOCKER.md)
@@ -9,7 +9,7 @@ These guides assume you want to build from the source. You can also download the
 
 # Quick Start
 
-You can download the latest release from the [releases page](https://github.com/Volte6/GoMud/releases), unzip it and run the binary to get started, or if you prefer to build it yourself, follow the instructions below.
+You can download the latest release from the [releases page](https://github.com/GoMudEngine/GoMud/releases), unzip it and run the binary to get started, or if you prefer to build it yourself, follow the instructions below.
 
 A youtube playlist to getting started has been set up here:
 

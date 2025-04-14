@@ -3,8 +3,8 @@ package users
 import (
 	"time"
 
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/items"
 )
 
 type Inbox []Message

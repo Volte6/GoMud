@@ -1,8 +1,8 @@
 package inputhandlers
 
 import (
-	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/term"
+	"github.com/GoMudEngine/GoMud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/term"
 )
 
 func EchoInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {

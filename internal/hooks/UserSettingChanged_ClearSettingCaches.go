@@ -3,9 +3,9 @@ package hooks
 import (
 	"strings"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/templates"
 )
 
 func ClearSettingCaches(e events.Event) events.ListenerReturn {

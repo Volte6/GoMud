@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/mapper"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/mutators"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/skills"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/mapper"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/mutators"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/skills"
 )
 
 type ZoneDetails struct {

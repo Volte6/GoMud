@@ -8,17 +8,17 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/colorpatterns"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/gametime"
+	"github.com/GoMudEngine/GoMud/internal/language"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/skills"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 	"github.com/mattn/go-runewidth"
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/colorpatterns"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/gametime"
-	"github.com/volte6/gomud/internal/language"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/skills"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
 )
 
 var (

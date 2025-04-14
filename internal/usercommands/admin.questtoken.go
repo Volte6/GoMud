@@ -3,12 +3,12 @@ package usercommands
 import (
 	"fmt"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/quests"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/quests"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 /*

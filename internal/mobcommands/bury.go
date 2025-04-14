@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 func Bury(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {

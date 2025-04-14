@@ -7,10 +7,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/templates"
 )
 
 func SystemCommandInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {

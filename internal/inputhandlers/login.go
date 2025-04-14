@@ -3,12 +3,12 @@ package inputhandlers
 import (
 	// ... other imports
 
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/language"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/term"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/language"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/term"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 // Condition Helpers

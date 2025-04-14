@@ -3,9 +3,9 @@ package rooms
 import (
 	"testing"
 
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/gametime"
 	"github.com/stretchr/testify/assert"
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/gametime"
 )
 
 // Test that if the corpse is already prunable, calling Update does nothing.

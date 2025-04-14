@@ -4,9 +4,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/stats"
+	"github.com/GoMudEngine/GoMud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/stats"
 )
 
 // EVENT DEFINITIONS FOLLOW

@@ -21,9 +21,9 @@ import (
 
 	"crypto/md5"
 
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/term"
 	"github.com/mattn/go-runewidth"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/term"
 )
 
 var (

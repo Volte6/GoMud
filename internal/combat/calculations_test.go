@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/volte6/gomud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/characters"
 )
 
 // The unit tests
