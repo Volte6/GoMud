@@ -1,8 +1,8 @@
 package mobcommands
 
 import (
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
 )
 
 // This is a no-op, mob does nothing

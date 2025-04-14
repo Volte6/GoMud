@@ -8,9 +8,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/term"
 	"github.com/gorilla/websocket"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/term"
 )
 
 type ConnectState uint32

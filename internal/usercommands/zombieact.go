@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 // Later this can be used for zombie specific decision making, such as when players intentionally zombify and let "ai" take over

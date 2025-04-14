@@ -6,17 +6,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/exit"
-	"github.com/volte6/gomud/internal/gamelock"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/mutators"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/exit"
+	"github.com/GoMudEngine/GoMud/internal/gamelock"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/mutators"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 /*

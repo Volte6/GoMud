@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 	"github.com/dop251/goja"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/mudlog"
 )
 
 var (

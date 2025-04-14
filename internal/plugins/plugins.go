@@ -12,11 +12,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/mobcommands"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/usercommands"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/mobcommands"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/usercommands"
+	"github.com/GoMudEngine/GoMud/internal/util"
 	"gopkg.in/yaml.v2"
 )
 

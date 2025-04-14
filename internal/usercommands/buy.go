@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/pets"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/skills"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/pets"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/skills"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 func Buy(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {

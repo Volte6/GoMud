@@ -7,18 +7,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/conversations"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/conversations"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 	"gopkg.in/yaml.v2"
 
-	"github.com/volte6/gomud/internal/fileloader"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/races"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/fileloader"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/races"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 var (

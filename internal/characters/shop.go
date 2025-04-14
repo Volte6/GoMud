@@ -1,9 +1,9 @@
 package characters
 
 import (
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/gametime"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/gametime"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 const (

@@ -21,6 +21,6 @@
 <ansi fg="black-bold">.:</ansi> Welcome to <ansi fg="45">GoMud</ansi>, an open source MUD Library written in <ansi fg="45">Go</ansi>.
 
                                             <ansi fg="black-bold">Find out more (or get the code) at:
-                                                        <ansi fg="51">github.com/Volte6/GoMud</ansi></ansi>
+                                                        <ansi fg="51">github.com/GoMudEngine/GoMud</ansi></ansi>
 
 <ansi fg="black-bold">{{ repeat "=" 80 }}</ansi>

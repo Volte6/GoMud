@@ -1,8 +1,8 @@
 package rooms
 
 import (
-	"github.com/volte6/gomud/internal/mutators"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/mutators"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 type ZoneConfig struct {

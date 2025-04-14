@@ -16,7 +16,7 @@ There are a few template variables defined for use:
 
 `.REQUEST` - This is an object containing the web request data. See [Request.go](https://go.dev/src/net/http/request.go) for details.
 
-`.CONFIG` - This is an object containing the MUD config data. See [configs.go](https://github.com/Volte6/GoMud/blob/master/internal/configs/configs.go) for details.
+`.CONFIG` - This is an object containing the MUD config data. See [configs.go](https://github.com/GoMudEngine/GoMud/blob/master/internal/configs/configs.go) for details.
 
-`.STATS` - This object contains a little bit of data about the server. See [stats.go](https://github.com/Volte6/GoMud/blob/master/internal/web/stats.go#L9-L13) for details.
+`.STATS` - This object contains a little bit of data about the server. See [stats.go](https://github.com/GoMudEngine/GoMud/blob/master/internal/web/stats.go#L9-L13) for details.
 

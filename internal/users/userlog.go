@@ -3,7 +3,7 @@ package users
 import (
 	"time"
 
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 const (

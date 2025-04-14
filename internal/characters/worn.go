@@ -1,6 +1,6 @@
 package characters
 
-import "github.com/volte6/gomud/internal/items"
+import "github.com/GoMudEngine/GoMud/internal/items"
 
 type Worn struct {
 	Weapon  items.Item `yaml:"weapon,omitempty"`

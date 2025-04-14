@@ -10,7 +10,7 @@ It ships with a default world to play in, but can be overwritten or modified to 
 
 If you have comments, questions, suggestions:
 
-[Github Discussions](https://github.com/volte6/gomud/discussions) - Don't be shy. Your questions or requests might help others too.
+[Github Discussions](https://github.com/GoMudEngine/GoMud/discussions) - Don't be shy. Your questions or requests might help others too.
 
 [Discord Server](https://discord.gg/cjukKvQWyy) - Get more interactive help in the GoMud Discord server.
 
@@ -24,7 +24,7 @@ Click below to see in-game screenshots of just a handful of features:
 
 ## ANSI Colors
 
-Colorization is handled through extensive use of my [github.com/Volte6/ansitags](https://github.com/Volte6/ansitags) library.
+Colorization is handled through extensive use of my [github.com/GoMudEngine/ansitags](https://github.com/GoMudEngine/ansitags) library.
 
 ## Small Feature Demos
 

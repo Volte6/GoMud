@@ -1,6 +1,6 @@
 package exit
 
-import "github.com/volte6/gomud/internal/gamelock"
+import "github.com/GoMudEngine/GoMud/internal/gamelock"
 
 // There is a magic portal of Chuckles, magic portal of Henry here!
 // There is a magical hole in the east wall here!

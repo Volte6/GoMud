@@ -50,7 +50,7 @@ Hello:
 
 ```golang
 import (
-	"github.com/volte6/gomud/internal/language"
+	"github.com/GoMudEngine/GoMud/internal/language"
 )
 
 // Simple message
@@ -69,7 +69,7 @@ fmt.Sprintf(language.T(`%d users online`), userCt)
 
 ```golang
 import (
-	"github.com/volte6/gomud/internal/lauguage"
+	"github.com/GoMudEngine/GoMud/internal/lauguage"
 )
 
 // Passing arguments to template

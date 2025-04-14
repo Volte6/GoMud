@@ -1,7 +1,7 @@
 package mobs
 
 import (
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 func GetMemoryUsage() map[string]util.MemoryResult {

@@ -67,10 +67,10 @@ Your Raspberry Pi Zero 2 W is now ready to host GoMUD. Proceed to the next secti
 
 #### Step 1: Download and Install
 
-1. Visit the official GoMUD GitHub repository: [GoMUD GitHub](https://github.com/Volte6/GoMud)[.](https://github.com/Volte6/GoMud)
+1. Visit the official GoMUD GitHub repository: [GoMUD GitHub](https://github.com/GoMudEngine/GoMud)[.](https://github.com/GoMudEngine/GoMud)
 2. Clone the repository using Git or download the ZIP file. Cloning is preferable for beginners as it allows you to easily pull updates and contribute back to the project.
    ```bash
-   git clone https://github.com/Volte6/GoMud.git
+   git clone https://github.com/GoMudEngine/GoMud.git
    ```
 3. Navigate to the project directory and build the application using the provided build instructions.
    ```bash
@@ -154,7 +154,7 @@ This will fetch the latest updates and rebuild the application.
 ### Other Tips
 
 \- Join the GoMUD community forums or Discord for tips and inspiration:
-https://github.com/Volte6/GoMud/discussions
+https://github.com/GoMudEngine/GoMud/discussions
 https://discord.gg/TqeM85QFdJ
 
 ### Problems?

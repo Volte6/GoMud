@@ -3,20 +3,20 @@ package scripting
 import (
 	"strings"
 
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/combat"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/parties"
+	"github.com/GoMudEngine/GoMud/internal/pets"
+	"github.com/GoMudEngine/GoMud/internal/races"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/skills"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/users"
 	"github.com/dop251/goja"
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/combat"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/parties"
-	"github.com/volte6/gomud/internal/pets"
-	"github.com/volte6/gomud/internal/races"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/skills"
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/users"
 )
 
 func setActorFunctions(vm *goja.Runtime) {

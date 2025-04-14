@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/fileloader"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/stats"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/fileloader"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/stats"
+	"github.com/GoMudEngine/GoMud/internal/util"
 	"gopkg.in/yaml.v2"
 )
 

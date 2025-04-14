@@ -3,7 +3,7 @@ package events
 import (
 	"sync"
 
-	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 )
 
 type ListenerReturn int8

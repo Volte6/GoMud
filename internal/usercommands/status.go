@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/term"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/term"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 func Status(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {

@@ -3,11 +3,11 @@ package hooks
 import (
 	"fmt"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/term"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/term"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 func SendLevelNotifications(e events.Event) events.ListenerReturn {

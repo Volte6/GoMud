@@ -1,8 +1,8 @@
 package rooms
 
 import (
-	"github.com/volte6/gomud/internal/gamelock"
-	"github.com/volte6/gomud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/gamelock"
+	"github.com/GoMudEngine/GoMud/internal/items"
 )
 
 type Container struct {

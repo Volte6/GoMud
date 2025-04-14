@@ -4,8 +4,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/term"
+	"github.com/GoMudEngine/GoMud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/term"
 )
 
 // CleanserInputHandler's job is to remove any bad characters from the input stream

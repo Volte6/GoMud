@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Volte6/ansitags"
-	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
+	"github.com/GoMudEngine/ansitags"
 )
 
 var (

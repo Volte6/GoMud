@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/colorpatterns"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 	"github.com/dop251/goja"
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/colorpatterns"
-	"github.com/volte6/gomud/internal/mudlog"
 )
 
 var (

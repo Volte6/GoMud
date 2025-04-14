@@ -3,10 +3,10 @@ package hooks
 import (
 	"strings"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/scripting"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/scripting"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 func MobRoundTick(e events.Event) events.ListenerReturn {

@@ -3,10 +3,10 @@ package combat
 import (
 	"math"
 
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/races"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/races"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 func PowerRanking(atkChar characters.Character, defChar characters.Character) float64 {

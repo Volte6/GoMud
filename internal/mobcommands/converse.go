@@ -3,10 +3,10 @@ package mobcommands
 import (
 	"strconv"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/conversations"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/conversations"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
 )
 
 func Converse(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {

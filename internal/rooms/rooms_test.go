@@ -3,8 +3,8 @@ package rooms
 import (
 	"testing"
 
+	"github.com/GoMudEngine/GoMud/internal/characters"
 	"github.com/stretchr/testify/assert"
-	"github.com/volte6/gomud/internal/characters"
 )
 
 func TestRoom_AddCorpse(t *testing.T) {

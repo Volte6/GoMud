@@ -1,7 +1,7 @@
 package buffs
 
 import (
-	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 )
 
 const (

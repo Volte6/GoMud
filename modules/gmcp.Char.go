@@ -5,17 +5,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/plugins"
-	"github.com/volte6/gomud/internal/quests"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/skills"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/plugins"
+	"github.com/GoMudEngine/GoMud/internal/quests"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/skills"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 // ////////////////////////////////////////////////////////////////////

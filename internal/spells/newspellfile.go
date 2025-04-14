@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/fileloader"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/fileloader"
 
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 func CreateNewSpellFile(newSpellInfo SpellData) (string, error) {

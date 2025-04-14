@@ -9,9 +9,9 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 const (
