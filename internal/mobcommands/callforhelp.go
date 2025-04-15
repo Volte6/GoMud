@@ -3,8 +3,8 @@ package mobcommands
 import (
 	"fmt"
 
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
 )
 
 // Should check adjacent rooms for mobs and call them into the room to help if of the same group

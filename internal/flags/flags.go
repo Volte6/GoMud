@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 )
 
 func HandleFlags() {

@@ -3,10 +3,10 @@ package usercommands
 import (
 	"fmt"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/term"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/term"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 // Global chat room
@@ -23,6 +23,13 @@ func Broadcast(rest string, user *users.UserRecord, room *rooms.Room, flags even
 		Text:            msg + term.CRLFStr,
 		IsCommunication: true,
 		SourceIsMod:     user.Role != users.RoleUser,
+	})
+
+	events.AddToQueue(events.Communication{
+		SourceUserId: user.UserId,
+		CommType:     `broadcast`,
+		Name:         user.Character.Name,
+		Message:      rest,
 	})
 
 	return true, nil

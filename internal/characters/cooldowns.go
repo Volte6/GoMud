@@ -1,7 +1,7 @@
 package characters
 
 import (
-	"github.com/volte6/gomud/internal/gametime"
+	"github.com/GoMudEngine/GoMud/internal/gametime"
 )
 
 type Cooldowns map[string]int

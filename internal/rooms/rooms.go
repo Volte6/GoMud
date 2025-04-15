@@ -8,17 +8,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/gomud/internal/audio"
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/exit"
-	"github.com/volte6/gomud/internal/gametime"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/mutators"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/audio"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/exit"
+	"github.com/GoMudEngine/GoMud/internal/gametime"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/mutators"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 const visitorTrackingTimeout = 180 // 180 seconds (3 minutes?)
@@ -443,9 +443,9 @@ func (r *Room) AddTemporaryExit(exitName string, t exit.TemporaryRoomExit) bool 
 
 // applies buffs to any players in the room that don't
 // already have it
-func (r *Room) ApplyBuffIdToPlayers(buffId ...int) {
+func (r *Room) ApplyBuffIdToPlayers(buffIds []int, source string) {
 
-	if len(buffId) == 0 {
+	if len(buffIds) == 0 {
 		return
 	}
 
@@ -453,11 +453,11 @@ func (r *Room) ApplyBuffIdToPlayers(buffId ...int) {
 
 		if u := users.GetByUserId(uid); u != nil {
 
-			for _, bId := range buffId {
+			for _, bId := range buffIds {
 				if u.Character.HasBuff(bId) {
 					continue
 				}
-				u.AddBuff(bId)
+				u.AddBuff(bId, source)
 			}
 		}
 
@@ -467,9 +467,9 @@ func (r *Room) ApplyBuffIdToPlayers(buffId ...int) {
 
 // applies buffs to any mobs in the room that don't
 // already have it
-func (r *Room) ApplyBuffIdToMobs(buffId ...int) {
+func (r *Room) ApplyBuffIdToMobs(buffIds []int, source string) {
 
-	if len(buffId) == 0 {
+	if len(buffIds) == 0 {
 		return
 	}
 
@@ -477,11 +477,11 @@ func (r *Room) ApplyBuffIdToMobs(buffId ...int) {
 
 		if m := mobs.GetInstance(miid); m != nil {
 
-			for _, bId := range buffId {
+			for _, bId := range buffIds {
 				if m.Character.HasBuff(bId) {
 					continue
 				}
-				m.AddBuff(bId)
+				m.AddBuff(bId, source)
 			}
 		}
 
@@ -491,9 +491,9 @@ func (r *Room) ApplyBuffIdToMobs(buffId ...int) {
 
 // applies buffs to any mobs in the room that don't
 // already have it
-func (r *Room) ApplyBuffIdToNativeMobs(buffId ...int) {
+func (r *Room) ApplyBuffIdToNativeMobs(buffIds []int, source string) {
 
-	if len(buffId) == 0 {
+	if len(buffIds) == 0 {
 		return
 	}
 
@@ -501,11 +501,11 @@ func (r *Room) ApplyBuffIdToNativeMobs(buffId ...int) {
 
 		if m := mobs.GetInstance(miid); m != nil {
 
-			for _, bId := range buffId {
+			for _, bId := range buffIds {
 				if m.Character.HasBuff(bId) {
 					continue
 				}
-				m.AddBuff(bId)
+				m.AddBuff(bId, source)
 			}
 		}
 
@@ -784,6 +784,7 @@ func (r *Room) AddMob(mobInstanceId int) {
 		MobInstanceId: mobInstanceId,
 		FromRoomId:    mob.Character.RoomId,
 		ToRoomId:      r.RoomId,
+		Unseen:        mob.Character.HasBuffFlag(buffs.Hidden),
 	})
 
 	mob.Character.RoomId = r.RoomId
@@ -2005,9 +2006,9 @@ func (r *Room) RoundTick() {
 
 	for mut := range r.ActiveMutators {
 		spec := mut.GetSpec()
-		r.ApplyBuffIdToPlayers(spec.PlayerBuffIds...)
-		r.ApplyBuffIdToMobs(spec.MobBuffIds...)
-		r.ApplyBuffIdToNativeMobs(spec.NativeBuffIds...)
+		r.ApplyBuffIdToPlayers(spec.PlayerBuffIds, `area`)
+		r.ApplyBuffIdToMobs(spec.MobBuffIds, `area`)
+		r.ApplyBuffIdToNativeMobs(spec.NativeBuffIds, `area`)
 	}
 	//
 	// Done adding mutator buffs

@@ -3,7 +3,7 @@ package web
 import (
 	"sync"
 
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 type Stats struct {

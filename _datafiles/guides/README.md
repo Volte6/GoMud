@@ -19,6 +19,6 @@
 Join the GoMUD community forums or Discord for tips and inspiration:
 
 - [GoMud Central Discord](https://discord.gg/TqeM85QFdJ)
-- [Github Discussions](https://github.com/Volte6/GoMud/discussions)
+- [Github Discussions](https://github.com/GoMudEngine/GoMud/discussions)
 
 

@@ -6,14 +6,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/util"
 
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 /*
@@ -110,14 +110,7 @@ func Buff(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				if targetUser := users.GetByUserId(targetUserId); targetUser != nil {
 					// Get the buff
 					if buffSpec := buffs.GetBuffSpec(buffId); buffSpec != nil {
-
-						// Apply the buff
-						events.AddToQueue(events.Buff{
-							UserId:        targetUserId,
-							MobInstanceId: 0,
-							BuffId:        buffId,
-						})
-
+						targetUser.AddBuff(buffId, `admin`)
 						user.SendText(fmt.Sprintf("Buff %d (%s) applied to %s.", buffId, buffSpec.Name, targetUser.Character.Name))
 
 					} else {
@@ -133,14 +126,7 @@ func Buff(rest string, user *users.UserRecord, room *rooms.Room, flags events.Ev
 				if targetMob := mobs.GetInstance(targetMobInstanceId); targetMob != nil {
 					// Get the buff
 					if buffSpec := buffs.GetBuffSpec(buffId); buffSpec != nil {
-
-						// Apply the buff
-						events.AddToQueue(events.Buff{
-							UserId:        0,
-							MobInstanceId: targetMobInstanceId,
-							BuffId:        buffId,
-						})
-
+						targetMob.AddBuff(buffId, `admin`)
 						user.SendText(fmt.Sprintf("Buff %d (%s) applied to %s.", buffSpec.BuffId, buffSpec.Name, targetMob.Character.Name))
 
 					} else {

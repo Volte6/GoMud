@@ -9,23 +9,23 @@ import (
 	"sync"
 	"time"
 
-	"github.com/volte6/gomud/internal/badinputtracker"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/keywords"
-	"github.com/volte6/gomud/internal/mobcommands"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/prompt"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/term"
-	"github.com/volte6/gomud/internal/usercommands"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
-	"github.com/volte6/gomud/internal/web"
+	"github.com/GoMudEngine/GoMud/internal/badinputtracker"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/keywords"
+	"github.com/GoMudEngine/GoMud/internal/mobcommands"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/prompt"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/term"
+	"github.com/GoMudEngine/GoMud/internal/usercommands"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/web"
 )
 
 type WorldInput struct {
@@ -241,6 +241,7 @@ func (w *World) enterWorld(userId int, roomId int) {
 	if userInfo := users.GetByUserId(userId); userInfo != nil {
 		events.AddToQueue(events.PlayerSpawn{
 			UserId:        userInfo.UserId,
+			ConnectionId:  userInfo.ConnectionId(),
 			RoomId:        userInfo.Character.RoomId,
 			Username:      userInfo.Username,
 			CharacterName: userInfo.Character.Name,

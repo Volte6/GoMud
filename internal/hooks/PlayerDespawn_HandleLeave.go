@@ -3,14 +3,14 @@ package hooks
 import (
 	"fmt"
 
-	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/parties"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/parties"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 //

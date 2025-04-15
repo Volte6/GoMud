@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/util"
 	"gopkg.in/yaml.v2"
 )
 

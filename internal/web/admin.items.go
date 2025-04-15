@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 )
 
 func itemsIndex(w http.ResponseWriter, r *http.Request) {

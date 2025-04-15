@@ -1,9 +1,9 @@
 package mobcommands
 
 import (
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
 )
 
 func Despawn(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {

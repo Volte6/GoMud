@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 var (

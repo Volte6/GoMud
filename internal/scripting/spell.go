@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/colorpatterns"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/spells"
 	"github.com/dop251/goja"
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/colorpatterns"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/spells"
 )
 
 var (
@@ -151,7 +151,7 @@ func TrySpellScriptEvent(eventName string, sourceUserId int, sourceMobInstanceId
 
 	}
 
-	return false, nil
+	return false, ErrEventNotFound
 
 }
 

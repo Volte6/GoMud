@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/Volte6/ansitags"
-	"github.com/volte6/gomud/internal/colorpatterns"
-	"github.com/volte6/gomud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/colorpatterns"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/ansitags"
 )
 
 type adjectiveStyle struct {

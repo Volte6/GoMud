@@ -3,11 +3,11 @@ package usercommands
 import (
 	"fmt"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 func Use(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
@@ -92,13 +92,7 @@ func Use(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 		}
 
 		for _, buffId := range itemSpec.BuffIds {
-
-			events.AddToQueue(events.Buff{
-				UserId:        user.UserId,
-				MobInstanceId: 0,
-				BuffId:        buffId,
-			})
-
+			user.AddBuff(buffId, `item`)
 		}
 	}
 

@@ -1,9 +1,8 @@
-module github.com/volte6/gomud
+module github.com/GoMudEngine/GoMud
 
 go 1.24
 
 require (
-	github.com/Volte6/ansitags v0.0.0-20240205002851-61e010ad9511
 	github.com/dop251/goja v0.0.0-20231027120936-b396bb4c349d
 	github.com/gorilla/websocket v1.5.3
 	github.com/natefinch/lumberjack v2.0.0+incompatible
@@ -12,6 +11,7 @@ require (
 )
 
 require (
+	github.com/GoMudEngine/ansitags v0.0.0-20250414221109-c8b646c08209
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect

@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 	"github.com/gorilla/websocket"
-	"github.com/volte6/gomud/internal/mudlog"
 )
 
 type HeartbeatConfig struct {

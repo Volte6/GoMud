@@ -15,10 +15,10 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/util"
 	"github.com/gorilla/websocket"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/util"
 )
 
 var (

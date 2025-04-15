@@ -5,20 +5,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/combat"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
-	"github.com/volte6/gomud/internal/spells"
-	"github.com/volte6/gomud/internal/usercommands"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/combat"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/scripting"
+	"github.com/GoMudEngine/GoMud/internal/spells"
+	"github.com/GoMudEngine/GoMud/internal/usercommands"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 func DoCombat(e events.Event) events.ListenerReturn {
@@ -379,23 +379,11 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 			}
 
 			for _, buffId := range roundResult.BuffSource {
-
-				events.AddToQueue(events.Buff{
-					UserId:        user.UserId,
-					MobInstanceId: 0,
-					BuffId:        buffId,
-				})
-
+				user.AddBuff(buffId, `combat`)
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-
-				events.AddToQueue(events.Buff{
-					UserId:        defUser.UserId,
-					MobInstanceId: 0,
-					BuffId:        buffId,
-				})
-
+				defUser.AddBuff(buffId, `combat`)
 			}
 
 			for _, msg := range roundResult.MessagesToSource {
@@ -550,23 +538,11 @@ func handlePlayerCombat(evt events.NewRound) (affectedPlayerIds []int, affectedM
 			roundResult = combat.AttackPlayerVsMob(user, defMob)
 
 			for _, buffId := range roundResult.BuffSource {
-
-				events.AddToQueue(events.Buff{
-					UserId:        user.UserId,
-					MobInstanceId: 0,
-					BuffId:        buffId,
-				})
-
+				user.AddBuff(buffId, `combat`)
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-
-				events.AddToQueue(events.Buff{
-					UserId:        0,
-					MobInstanceId: defMob.InstanceId,
-					BuffId:        buffId,
-				})
-
+				defMob.AddBuff(buffId, `combat`)
 			}
 
 			for _, msg := range roundResult.MessagesToSource {
@@ -878,23 +854,11 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 			}
 
 			for _, buffId := range roundResult.BuffSource {
-
-				events.AddToQueue(events.Buff{
-					UserId:        0,
-					MobInstanceId: mob.InstanceId,
-					BuffId:        buffId,
-				})
-
+				mob.AddBuff(buffId, `combat`)
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-
-				events.AddToQueue(events.Buff{
-					UserId:        defUser.UserId,
-					MobInstanceId: 0,
-					BuffId:        buffId,
-				})
-
+				defUser.AddBuff(buffId, `combat`)
 			}
 
 			for _, msg := range roundResult.MessagesToTarget {
@@ -1009,22 +973,11 @@ func handleMobCombat(evt events.NewRound) (affectedPlayerIds []int, affectedMobI
 			roundResult = combat.AttackMobVsMob(mob, defMob)
 
 			for _, buffId := range roundResult.BuffSource {
-
-				events.AddToQueue(events.Buff{
-					UserId:        0,
-					MobInstanceId: mob.InstanceId,
-					BuffId:        buffId,
-				})
-
+				mob.AddBuff(buffId, `combat`)
 			}
 
 			for _, buffId := range roundResult.BuffTarget {
-
-				events.AddToQueue(events.Buff{
-					UserId:        0,
-					MobInstanceId: defMob.InstanceId,
-					BuffId:        buffId,
-				})
+				defMob.AddBuff(buffId, `combat`)
 			}
 
 			for _, msg := range roundResult.MessagesToSourceRoom {

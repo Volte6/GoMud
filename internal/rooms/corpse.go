@@ -1,8 +1,8 @@
 package rooms
 
 import (
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/gametime"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/gametime"
 )
 
 type Corpse struct {

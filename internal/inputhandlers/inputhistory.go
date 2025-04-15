@@ -1,6 +1,6 @@
 package inputhandlers
 
-import "github.com/volte6/gomud/internal/connections"
+import "github.com/GoMudEngine/GoMud/internal/connections"
 
 // All this does is manage the input history stack
 func HistoryInputHandler(clientInput *connections.ClientInput, sharedState map[string]any) (nextHandler bool) {

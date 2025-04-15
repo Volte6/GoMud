@@ -13,7 +13,7 @@ import (
 //
 // goos: darwin
 // goarch: arm64
-// pkg: github.com/volte6/gomud/internal/configs
+// pkg: github.com/GoMudEngine/GoMud/internal/configs
 // cpu: Apple M3 Max
 // Benchmark_Config_Pointer-14      	1000000000	         0.2590 ns/op	       0 B/op	       0 allocs/op
 // Benchmark_Config_Copy-14         	1000000000	         0.2583 ns/op	       0 B/op	       0 allocs/op

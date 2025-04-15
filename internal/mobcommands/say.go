@@ -3,9 +3,10 @@ package mobcommands
 import (
 	"fmt"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
 )
 
 func Say(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
@@ -23,6 +24,13 @@ func Say(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 	} else {
 		room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says, "<ansi fg="saytext-mob">%s</ansi>"`, mob.Character.Name, rest))
 	}
+
+	events.AddToQueue(events.Communication{
+		SourceMobInstanceId: mob.InstanceId,
+		CommType:            `say`,
+		Name:                mob.Character.Name,
+		Message:             rest,
+	})
 
 	room.SendTextToExits(`You hear someone talking.`, true)
 

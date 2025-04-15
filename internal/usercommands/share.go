@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/parties"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/parties"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 func Share(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {

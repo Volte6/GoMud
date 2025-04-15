@@ -3,10 +3,10 @@ package hooks
 import (
 	"strings"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/scripting"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/scripting"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 func MobRoundTick(e events.Event) events.ListenerReturn {
@@ -39,10 +39,13 @@ func MobRoundTick(e events.Event) events.ListenerReturn {
 			//
 			// Fire onTrigger for buff script
 			//
+			triggeredBuffIds := []int{}
 			for _, buff := range triggeredBuffs {
 				scripting.TryBuffScriptEvent(`onTrigger`, 0, mobInstanceId, buff.BuffId)
+				triggeredBuffIds = append(triggeredBuffIds, buff.BuffId)
 			}
 
+			events.AddToQueue(events.BuffsTriggered{MobInstanceId: mobInstanceId, BuffIds: triggeredBuffIds})
 		}
 
 		// Do charm cleanup

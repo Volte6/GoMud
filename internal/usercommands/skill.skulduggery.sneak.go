@@ -1,11 +1,11 @@
 package usercommands
 
 import (
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/skills"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/skills"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 /*
@@ -38,11 +38,7 @@ func Sneak(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 		return true, nil
 	}
 
-	events.AddToQueue(events.Buff{
-		UserId:        user.UserId,
-		MobInstanceId: 0,
-		BuffId:        9,
-	})
+	user.AddBuff(9, `skill`)
 
 	return true, nil
 }

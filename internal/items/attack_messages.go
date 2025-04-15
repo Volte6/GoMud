@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 var (

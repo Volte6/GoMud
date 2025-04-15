@@ -4,8 +4,12 @@ import (
 	"errors"
 	"time"
 
+	"github.com/GoMudEngine/GoMud/internal/colorpatterns"
 	"github.com/dop251/goja"
-	"github.com/volte6/gomud/internal/colorpatterns"
+)
+
+var (
+	ErrEventNotFound = errors.New(`event not found`)
 )
 
 type TextWrapperStyle struct {

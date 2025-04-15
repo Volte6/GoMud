@@ -3,12 +3,12 @@ package usercommands
 import (
 	"fmt"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/skills"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/skills"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 /*
@@ -63,10 +63,13 @@ func Tackle(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 					user.UserId,
 				)
 
+				// Warriors respite
+
 				events.AddToQueue(events.Buff{
 					UserId:        0,
 					MobInstanceId: attackMobInstanceId,
 					BuffId:        12, // buff 12 is tackled
+					Source:        `skill`,
 				})
 
 			} else {
@@ -118,6 +121,7 @@ func Tackle(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 					UserId:        attackPlayerId,
 					MobInstanceId: 0,
 					BuffId:        12, // buff 12 is tackled
+					Source:        `skill`,
 				})
 
 			} else {

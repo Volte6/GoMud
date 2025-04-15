@@ -39,7 +39,7 @@ ActorObjects are the basic object that represents Users and NPCs
   - [ActorObject.GiveItem(itemId ItemObject)](#actorobjectgiveitemitemid-itemobject)
   - [ActorObject.TakeItem(itemId ItemObject)](#actorobjecttakeitemitemid-itemobject)
   - [ActorObject.HasBuff(buffId int) bool](#actorobjecthasbuffbuffid-int-bool)
-  - [ActorObject.GiveBuff(buffId int)](#actorobjectgivebuffbuffid-int)
+  - [ActorObject.GiveBuff(buffId int, source string)](#actorobjectgivebuffbuffid-int-source-string)
   - [ActorObject.HasBuffFlag(buffFlag string) bool](#actorobjecthasbuffflagbuffflag-string-bool)
   - [ActorObject.CancelBuffWithFlag(buffFlag string) bool](#actorobjectcancelbuffwithflagbuffflag-string-bool)
   - [ActorObject.RemoveBuff(buffId int)](#actorobjectremovebuffbuffid-int)
@@ -339,12 +339,13 @@ Returns true if the Actor has the buffId supplied
 | --- | --- |
 | buffId | The ID of the buff to look for. |
 
-## [ActorObject.GiveBuff(buffId int)](/internal/scripting/actor_func.go)
+## [ActorObject.GiveBuff(buffId int, source string)](/internal/scripting/actor_func.go)
 Grants an ActorObject a Buff
 
 |  Argument | Explanation |
 | --- | --- |
 | buffId | The ID of the buff to give them. |
+| source | The source of the buff, "item", "spell", "trap", "curse", etc. or empty. |
 
 ## [ActorObject.HasBuffFlag(buffFlag string) bool](/internal/scripting/actor_func.go)
 Find out if an ActorObject has a specific buff flag

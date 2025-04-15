@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 func Say(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
@@ -35,6 +35,13 @@ func Say(rest string, user *users.UserRecord, room *rooms.Room, flags events.Eve
 	user.SendText(fmt.Sprintf(`You say, "<ansi fg="saytext">%s</ansi>"`, rest))
 
 	room.SendTextToExits(`You hear someone talking.`, true)
+
+	events.AddToQueue(events.Communication{
+		SourceUserId: user.UserId,
+		CommType:     `say`,
+		Name:         user.Character.Name,
+		Message:      rest,
+	})
 
 	return true, nil
 }

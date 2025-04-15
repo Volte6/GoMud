@@ -5,14 +5,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/quests"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/skills"
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/quests"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/skills"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 //
@@ -122,13 +122,7 @@ func HandleQuestUpdate(e events.Event) events.ListenerReturn {
 		}
 		// Buff reward?
 		if questInfo.Rewards.BuffId > 0 {
-
-			events.AddToQueue(events.Buff{
-				UserId:        questUser.UserId,
-				MobInstanceId: 0,
-				BuffId:        questInfo.Rewards.BuffId,
-			})
-
+			questUser.AddBuff(questInfo.Rewards.BuffId, `quest`)
 		}
 		// Experience reward?
 		if questInfo.Rewards.Experience > 0 {

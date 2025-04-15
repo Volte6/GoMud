@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 func SayTo(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
@@ -33,9 +34,25 @@ func SayTo(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 		if isSneaking {
 			toUser.SendText(fmt.Sprintf(`someone says to you, "<ansi fg="saytext-mob">%s</ansi>"`, rest))
+
+			events.AddToQueue(events.Communication{
+				SourceMobInstanceId: mob.InstanceId,
+				TargetUserId:        toUser.UserId,
+				CommType:            `say`,
+				Name:                mob.Character.Name,
+				Message:             rest,
+			})
+
 		} else {
 			toUser.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to you, "<ansi fg="saytext-mob">%s</ansi>"`, mob.Character.Name, rest))
 			room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to <ansi fg="username">%s</ansi>, "<ansi fg="saytext-mob">%s</ansi>"`, mob.Character.Name, toUser.Character.Name, rest), toUser.UserId)
+
+			events.AddToQueue(events.Communication{
+				SourceMobInstanceId: mob.InstanceId,
+				CommType:            `say`,
+				Name:                mob.Character.Name,
+				Message:             rest,
+			})
 		}
 	} else if mobInstanceId > 0 {
 
@@ -46,6 +63,14 @@ func SayTo(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 
 		if !isSneaking {
 			room.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to <ansi fg="mobname">%s</ansi>, "<ansi fg="saytext-mob">%s</ansi>"`, mob.Character.Name, toMob.Character.Name, rest))
+
+			events.AddToQueue(events.Communication{
+				SourceMobInstanceId: mob.InstanceId,
+				CommType:            `say`,
+				Name:                mob.Character.Name,
+				Message:             rest,
+			})
+
 		}
 	}
 
@@ -77,6 +102,14 @@ func SayToOnly(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {
 		} else {
 			toUser.SendText(fmt.Sprintf(`<ansi fg="mobname">%s</ansi> says to you, "<ansi fg="saytext-mob">%s</ansi>"`, mob.Character.Name, rest))
 		}
+
+		events.AddToQueue(events.Communication{
+			SourceMobInstanceId: mob.InstanceId,
+			TargetUserId:        toUser.UserId,
+			CommType:            `say`,
+			Name:                mob.Character.Name,
+			Message:             rest,
+		})
 	}
 
 	return true, nil

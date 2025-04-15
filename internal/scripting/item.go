@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/GoMudEngine/GoMud/internal/items"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 	"github.com/dop251/goja"
-	"github.com/volte6/gomud/internal/items"
-	"github.com/volte6/gomud/internal/mudlog"
 )
 
 var (
@@ -82,7 +82,7 @@ func TryItemScriptEvent(eventName string, item items.Item, userId int) (bool, er
 
 	}
 
-	return false, nil
+	return false, ErrEventNotFound
 }
 
 func TryItemCommand(cmd string, item items.Item, userId int) (bool, error) {
@@ -182,7 +182,7 @@ func TryItemCommand(cmd string, item items.Item, userId int) (bool, error) {
 
 	}
 
-	return false, nil
+	return false, ErrEventNotFound
 }
 
 func getItemVM(sItem *ScriptItem) (*VMWrapper, error) {

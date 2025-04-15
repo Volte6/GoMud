@@ -8,16 +8,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/gomud/internal/audio"
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/prompt"
-	"github.com/volte6/gomud/internal/skills"
-	"github.com/volte6/gomud/internal/stats"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/audio"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/prompt"
+	"github.com/GoMudEngine/GoMud/internal/skills"
+	"github.com/GoMudEngine/GoMud/internal/stats"
+	"github.com/GoMudEngine/GoMud/internal/util"
 	//
 )
 
@@ -348,11 +348,12 @@ func (u *UserRecord) CommandFlagged(inputTxt string, flagData events.EventFlag, 
 
 }
 
-func (u *UserRecord) AddBuff(buffId int) {
+func (u *UserRecord) AddBuff(buffId int, source string) {
 
 	events.AddToQueue(events.Buff{
 		UserId: u.UserId,
 		BuffId: buffId,
+		Source: source,
 	})
 
 }
@@ -680,6 +681,10 @@ func (u *UserRecord) SwapToAlt(targetAltName string) bool {
 
 	// Run validation on the new character
 	selectedChar.Validate()
+
+	// Set userId
+	selectedChar.SetUserId(u.UserId)
+
 	// Replace the current character (has already been written to alts)
 	u.Character = &selectedChar
 

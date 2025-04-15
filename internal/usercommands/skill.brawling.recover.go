@@ -3,10 +3,10 @@ package usercommands
 import (
 	"fmt"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/skills"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/skills"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 /*
@@ -34,11 +34,7 @@ func Recover(rest string, user *users.UserRecord, room *rooms.Room, flags events
 		return true, nil
 	}
 
-	events.AddToQueue(events.Buff{
-		UserId:        user.UserId,
-		MobInstanceId: 0,
-		BuffId:        23, // Warriors respite
-	})
+	user.AddBuff(23, `skill`) // Warriors respite
 
 	return true, nil
 }

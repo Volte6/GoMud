@@ -1,14 +1,14 @@
 package mobcommands
 
 import (
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/races"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
-	"github.com/volte6/gomud/internal/spells"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/races"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/scripting"
+	"github.com/GoMudEngine/GoMud/internal/spells"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 func Aid(rest string, mob *mobs.Mob, room *rooms.Room) (bool, error) {

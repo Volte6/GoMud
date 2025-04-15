@@ -8,16 +8,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/races"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/scripting"
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/term"
-	"github.com/volte6/gomud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/races"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/scripting"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/term"
+	"github.com/GoMudEngine/GoMud/internal/users"
 )
 
 func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
@@ -233,31 +233,39 @@ func Start(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 
 	user.ClearPrompt()
 
-	user.SendText(fmt.Sprintf(`<ansi fg="magenta">Suddenly, a vortex appears before you, drawing you in before you have any chance to react!</ansi>%s`, term.CRLFStr))
-
 	for _, ridStr := range configs.GetSpecialRoomsConfig().TutorialStartRooms {
 
 		rid, _ := strconv.ParseInt(ridStr, 10, 64)
 		skip := false
 
 		for _, populatedRoomId := range rooms.GetRoomsWithPlayers() {
-			roomCt := 10
-			for i := 0; i < roomCt; i++ {
+
+			for i := 0; i < 10; i++ {
+
 				if int(rid)+i == populatedRoomId {
 					skip = true
-					continue
+					break
 				}
+
 			}
+
+			if skip {
+				break
+			}
+
 		}
 
 		if skip {
 			continue
 		}
 
-		if _, err := scripting.TryRoomScriptEvent(`onEnter`, user.UserId, int(rid)); err == nil {
-			rooms.MoveToRoom(user.UserId, int(rid))
-			return true, nil
-		}
+		scripting.TryRoomScriptEvent(`onEnter`, user.UserId, int(rid))
+
+		user.SendText(fmt.Sprintf(`<ansi fg="magenta">Suddenly, a vortex appears before you, drawing you in before you have any chance to react!</ansi>%s`, term.CRLFStr))
+
+		rooms.MoveToRoom(user.UserId, int(rid))
+
+		return true, nil
 
 	}
 

@@ -1,6 +1,6 @@
 package users
 
-import "github.com/volte6/gomud/internal/util"
+import "github.com/GoMudEngine/GoMud/internal/util"
 
 func GetMemoryUsage() map[string]util.MemoryResult {
 

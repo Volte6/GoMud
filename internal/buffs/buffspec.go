@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/fileloader"
-	"github.com/volte6/gomud/internal/gametime"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/statmods"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/fileloader"
+	"github.com/GoMudEngine/GoMud/internal/gametime"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/statmods"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 // Something temporarily attached to a character
@@ -110,6 +110,13 @@ func (b *BuffSpec) GetValue() int {
 	return val
 }
 
+func (b *BuffSpec) VisibleNameDesc() (name, description string) {
+	if b.Secret {
+		return "Mysterious Affliction", "Unknown"
+	}
+	return b.Name, b.Description
+}
+
 type BuffMessage struct {
 	User string
 	Room string
@@ -168,6 +175,11 @@ func (b *BuffSpec) Id() int {
 
 // Presumably to ensure the datafile hasn't messed something up.
 func (b *BuffSpec) Validate() error {
+
+	// If this is the quit/meditating buff, override the trigger count
+	if b.BuffId == 0 {
+		b.TriggerCount = int(configs.GetNetworkConfig().LogoutRounds)
+	}
 
 	b.RoundInterval = int(validationCalculator.AddPeriod(b.TriggerRate) - validationRound)
 

@@ -1,9 +1,12 @@
 package language
 
 import (
+	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/language"
+	"gopkg.in/yaml.v3"
 )
 
 func TestTranslate(t *testing.T) {
@@ -231,18 +234,67 @@ func TestTranslate(t *testing.T) {
 
 			got, err := trans.Translate(tt.args.lng, tt.args.msgID, tt.args.tplData)
 			if got != tt.want {
-				t.Errorf("TranslateWithConfig() = %v, want %v", got, tt.want)
+				t.Errorf("Translate() = %v, want %v", got, tt.want)
 			}
 
 			if tt.errFunc == nil {
 				if err != nil {
-					t.Errorf("TranslateWithConfig(),  msgID = %v, unexpected error: %v", tt.args.msgID, err)
+					t.Errorf("Translate(),  msgID = %v, unexpected error: %v", tt.args.msgID, err)
 				}
 			} else {
 				if !tt.errFunc(err) {
-					t.Errorf("TranslateWithConfig(),  msgID = %v, unexpected error: %v", tt.args.msgID, err)
+					t.Errorf("Translate(),  msgID = %v, unexpected error: %v", tt.args.msgID, err)
 				}
 			}
 		})
 	}
+}
+
+func TestTranslateReload(t *testing.T) {
+	// Initial
+	args := map[string]string{
+		"welcome": "hallo",
+	}
+	bs, _ := yaml.Marshal(args)
+	os.WriteFile("testdata/reload-test/de.yaml", bs, 0644)
+
+	trans := NewTranslation(BundleCfg{
+		DefaultLanguage: language.English,
+		Language:        language.German,
+		LanguagePaths:   []string{"testdata/reload-test"},
+	})
+
+	got, _ := trans.Translate(language.German, "welcome")
+	assert.Equal(t, "hallo", got)
+	got, _ = trans.Translate(language.German, "welcomeWithName")
+	assert.Equal(t, "welcomeWithName", got)
+
+	// First modification (update & add)
+	args = map[string]string{
+		"welcome":         "willkommen",
+		"welcomeWithName": "hallo {{ .name }}",
+	}
+	bs, _ = yaml.Marshal(args)
+	os.WriteFile("testdata/reload-test/de.yaml", bs, 0644)
+
+	trans.ReloadTranslation()
+
+	got, _ = trans.Translate(language.German, "welcome")
+	assert.Equal(t, "willkommen", got)
+	got, _ = trans.Translate(language.German, "welcomeWithName", map[any]any{"name": "alex"})
+	assert.Equal(t, "hallo alex", got)
+
+	// Second modification (update & delete)
+	args = map[string]string{
+		"welcomeWithName": "willkommen {{ .name }}",
+	}
+	bs, _ = yaml.Marshal(args)
+	os.WriteFile("testdata/reload-test/de.yaml", bs, 0644)
+
+	trans.ReloadTranslation()
+
+	got, _ = trans.Translate(language.German, "welcome")
+	assert.Equal(t, "welcome", got)
+	got, _ = trans.Translate(language.German, "welcomeWithName", map[any]any{"name": "alex"})
+	assert.Equal(t, "willkommen alex", got)
 }

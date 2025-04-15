@@ -48,6 +48,6 @@ function onMagic(sourceActor, targetActor) {
     }
 
     // Apply the heal to the target
-    targetActor.GiveBuff(1);
+    targetActor.GiveBuff(1, "spell");
     
 }

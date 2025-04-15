@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/rooms"
-	"github.com/volte6/gomud/internal/templates"
-	"github.com/volte6/gomud/internal/term"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/templates"
+	"github.com/GoMudEngine/GoMud/internal/term"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 func Status(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
@@ -62,27 +62,27 @@ func Status(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 
 		switch selection {
 		case `strength`:
-			before = user.Character.Stats.Strength.Training
+			before = user.Character.Stats.Strength.Value - user.Character.Stats.Strength.Mods
 			user.Character.Stats.Strength.Training += 1
 			spent = 1
 		case `speed`:
-			before = user.Character.Stats.Speed.Training
+			before = user.Character.Stats.Speed.Value - user.Character.Stats.Speed.Mods
 			user.Character.Stats.Speed.Training += 1
 			spent = 1
 		case `smarts`:
-			before = user.Character.Stats.Smarts.Training
+			before = user.Character.Stats.Smarts.Value - user.Character.Stats.Smarts.Mods
 			user.Character.Stats.Smarts.Training += 1
 			spent = 1
 		case `vitality`:
-			before = user.Character.Stats.Vitality.Training
+			before = user.Character.Stats.Vitality.Value - user.Character.Stats.Vitality.Mods
 			user.Character.Stats.Vitality.Training += 1
 			spent = 1
 		case `mysticism`:
-			before = user.Character.Stats.Mysticism.Training
+			before = user.Character.Stats.Mysticism.Value - user.Character.Stats.Mysticism.Mods
 			user.Character.Stats.Mysticism.Training += 1
 			spent = 1
 		case `perception`:
-			before = user.Character.Stats.Perception.Training
+			before = user.Character.Stats.Perception.Value - user.Character.Stats.Perception.Mods
 			user.Character.Stats.Perception.Training += 1
 			spent = 1
 		}
@@ -93,8 +93,9 @@ func Status(rest string, user *users.UserRecord, room *rooms.Room, flags events.
 
 			user.Character.Validate()
 
-			user.SendText(
-				fmt.Sprintf(term.CRLFStr+`<ansi fg="210">Your <ansi fg="yellow">%s</ansi> training improves from <ansi fg="201">%d</ansi> to <ansi fg="201">%d</ansi>!</ansi>`, selection, before, after))
+			user.SendText(fmt.Sprintf(term.CRLFStr+`<ansi fg="210">Your <ansi fg="yellow">%s</ansi> training improves from <ansi fg="201">%d</ansi> to <ansi fg="201">%d</ansi>!</ansi>`, selection, before, after))
+
+			events.AddToQueue(events.CharacterTrained{UserId: user.UserId})
 		}
 
 		tplTxt, _ := templates.Process("character/status-train", user, user.UserId)

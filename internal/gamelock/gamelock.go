@@ -1,8 +1,8 @@
 package gamelock
 
 import (
-	"github.com/volte6/gomud/internal/gametime"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/gametime"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 const (

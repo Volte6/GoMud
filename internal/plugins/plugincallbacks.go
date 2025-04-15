@@ -3,8 +3,8 @@ package plugins
 import (
 	"net"
 
-	"github.com/volte6/gomud/internal/mobcommands"
-	"github.com/volte6/gomud/internal/usercommands"
+	"github.com/GoMudEngine/GoMud/internal/mobcommands"
+	"github.com/GoMudEngine/GoMud/internal/usercommands"
 )
 
 type PluginCallbacks struct {

@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/volte6/gomud/internal/buffs"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/connections"
-	"github.com/volte6/gomud/internal/gametime"
-	"github.com/volte6/gomud/internal/term"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/connections"
+	"github.com/GoMudEngine/GoMud/internal/gametime"
+	"github.com/GoMudEngine/GoMud/internal/term"
+	"github.com/GoMudEngine/GoMud/internal/util"
 )
 
 //

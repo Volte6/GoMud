@@ -1,7 +1,7 @@
 package hooks
 
 import (
-	"github.com/volte6/gomud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/events"
 )
 
 // Register hooks here...

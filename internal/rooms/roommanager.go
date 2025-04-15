@@ -10,15 +10,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/volte6/gomud/internal/characters"
-	"github.com/volte6/gomud/internal/configs"
-	"github.com/volte6/gomud/internal/events"
-	"github.com/volte6/gomud/internal/exit"
-	"github.com/volte6/gomud/internal/fileloader"
-	"github.com/volte6/gomud/internal/mobs"
-	"github.com/volte6/gomud/internal/mudlog"
-	"github.com/volte6/gomud/internal/users"
-	"github.com/volte6/gomud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/buffs"
+	"github.com/GoMudEngine/GoMud/internal/characters"
+	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/events"
+	"github.com/GoMudEngine/GoMud/internal/exit"
+	"github.com/GoMudEngine/GoMud/internal/fileloader"
+	"github.com/GoMudEngine/GoMud/internal/mobs"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/util"
 	"gopkg.in/yaml.v2"
 )
 
@@ -241,7 +242,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		}
 		for _, buffId := range spec.PlayerBuffIds {
 			if !user.Character.HasBuff(buffId) {
-				user.AddBuff(buffId)
+				user.AddBuff(buffId, `area`)
 			}
 		}
 	}
@@ -310,6 +311,7 @@ func MoveToRoom(userId int, toRoomId int, isSpawn ...bool) error {
 		UserId:     userId,
 		FromRoomId: currentRoom.RoomId,
 		ToRoomId:   newRoom.RoomId,
+		Unseen:     user.Character.HasBuffFlag(buffs.Hidden),
 	})
 
 	return nil
