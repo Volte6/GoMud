@@ -868,7 +868,6 @@ func SaveRoundCount(fpath string) {
 
 	err := os.WriteFile(fpath, []byte(strconv.FormatUint(roundCount, 10)), 0644)
 	if err != nil {
-
 		mudlog.Error("SaveRoundCount()", "error", err)
 	}
 
@@ -879,16 +878,14 @@ func LoadRoundCount(fpath string) uint64 {
 	roundCountData, err := os.ReadFile(fpath)
 	if err != nil {
 		roundCount = RoundCountMinimum
-		roundCount = RoundCountMinimum
-		mudlog.Warn("LoadRoundCount()", "error", err, "message", "Trying to create...")
+		mudlog.Warn("LoadRoundCount()", "error", err, "message", "Trying to create... (First time running?)")
 		SaveRoundCount(fpath)
+		roundCountData = []byte(strconv.FormatUint(roundCount, 10))
 	}
 
 	roundCountUint64, err := strconv.ParseUint(string(roundCountData), 10, 64)
 	if err != nil {
-
 		mudlog.Warn("LoadRoundCount()", "error", err, "file-contents", string(roundCountData))
-
 	} else {
 		roundCount = roundCountUint64
 	}

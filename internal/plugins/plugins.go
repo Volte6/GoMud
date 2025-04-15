@@ -340,7 +340,7 @@ func (p *Plugin) ReadBytes(identifier string) ([]byte, error) {
 	fullPath := util.FilePath(folderPath, `/`, fileName)
 
 	bytes, err := os.ReadFile(fullPath)
-	if err != nil && err != fs.ErrNotExist {
+	if err != nil && !os.IsNotExist(err) {
 		mudlog.Warn(`plugin.ReadBytes`, `name`, p.name, `path`, fullPath, `error`, err)
 	}
 
