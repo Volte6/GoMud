@@ -1,8 +1,5 @@
 The <ansi fg="command">room</ansi> command can be used in the following ways:
 
-<ansi fg="command">room [room_id]</ansi> - e.g. <ansi fg="command">room 1</ansi>
-Move to a specific room id
-
 <ansi fg="command">room info [room_id]</ansi> - e.g. <ansi fg="command">room info 1</ansi>
 Get information on a room. If ommitted, defaults to current room.
 
