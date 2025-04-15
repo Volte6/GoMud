@@ -25,6 +25,7 @@ type BundleCfg struct {
 
 type Translation struct {
 	bundle          *i18n.Bundle
+	bundleCfg       BundleCfg
 	localizerByLng  map[language.Tag]*i18n.Localizer
 	defaultLanguage language.Tag
 }
@@ -40,24 +41,49 @@ func NewTranslation(c BundleCfg) *Translation {
 	bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
 
 	t.bundle = bundle
+	t.bundleCfg = c
 	t.defaultLanguage = c.DefaultLanguage
 	t.localizerByLng = map[language.Tag]*i18n.Localizer{}
 
+	t.LoadTranslation(c)
+
+	return t
+}
+
+func ReloadTranslation() bool {
+	if trans == nil {
+		return false
+	}
+
+	trans.ReloadTranslation()
+
+	return true
+}
+
+func (t *Translation) ReloadTranslation() {
+	bundle := i18n.NewBundle(t.bundleCfg.DefaultLanguage)
+	bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
+
+	t.bundle = bundle
+	t.localizerByLng = map[language.Tag]*i18n.Localizer{}
+
+	t.LoadTranslation(t.bundleCfg)
+}
+
+func (t *Translation) LoadTranslation(c BundleCfg) {
 	for _, p := range c.LanguagePaths {
-		bundle.LoadMessageFile(path.Join(p, c.DefaultLanguage.String()+".yaml"))
+		t.bundle.LoadMessageFile(path.Join(p, c.DefaultLanguage.String()+".yaml"))
 		if c.DefaultLanguage != c.Language {
-			bundle.LoadMessageFile(path.Join(p, c.Language.String()+".yaml"))
+			t.bundle.LoadMessageFile(path.Join(p, c.Language.String()+".yaml"))
 		}
 	}
 
 	t.localizerByLng[c.Language] = t.newLocalizer(c.Language)
 
-	// Add defaultLanguage if it isn't exist
+	// Load defaultLanguage if it isn't exist
 	if _, hasDefaultLng := t.localizerByLng[t.defaultLanguage]; !hasDefaultLng {
 		t.localizerByLng[t.defaultLanguage] = t.newLocalizer(t.defaultLanguage)
 	}
-
-	return t
 }
 
 func (t *Translation) newLocalizer(lng language.Tag) *i18n.Localizer {
