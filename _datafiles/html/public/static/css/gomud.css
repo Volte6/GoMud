@@ -1,11 +1,11 @@
 :root {
-  --header-background: #495659;
-  --nav-background: #6c7682;
-  --footer-background: #495659;
-  --button-background: #6c7682;;
-  --button-background-hover: #80a5a9;
-  --button-shadow: #80a5a9;
-  --text-primary-color: #c9e2db;
+  --header-background: #0f3333;
+  --nav-background: #1c6b60;
+  --footer-background: #0f3333;
+  --button-background: #279888;
+  --button-background-hover: #0f3333;
+  --button-shadow: #bbcf9d;
+  --text-primary-color: #dffbd1;
   --text-secondary-color: #6c869f;
   /* Table Specific Colors */
   --table-border-color: #000;
@@ -19,7 +19,7 @@
 body {
   margin: 0;
   padding: 0;
-  background: var(--background-image, url('/static/images/web_bg.webp') center center / cover no-repeat fixed); /* This var is defined in _header.html so we can pull from config */
+  background: var(--background-image, url('/static/images/web_bg.png') center center / cover no-repeat fixed); /* This var is defined in _header.html so we can pull from config */
   color: var(--text-primary-color);
   font-family: 'Press Start 2P', monospace;
   display: flex;
@@ -45,15 +45,16 @@ header {
   padding: 6px 10px;
   color: var(--text-primary-color);
   background-color: var(--button-background);
-  border: 2px solid var(--text-primary-color);
+  box-shadow: 2px 2px 0px 0px var(--button-shadow);
+  border-radius: 5px;
   text-transform: uppercase;
   letter-spacing: 2px;
   transition: all 0.2s ease; 
 }
 
 .gomud-btn:hover {
-  box-shadow: 6px 6px 0px 0px var(--button-shadow);
-  color: var(--button-background-hover);
+  color: var(--button-background);
+  background-color: var(--button-background-hover);
 }
 
 nav {
@@ -72,21 +73,22 @@ nav {
 
 .nav-container a {
   color: var(--text-primary-color);
+  background-color: var(--button-background);
+  box-shadow: 2px 2px 0px 0px var(--button-shadow);
   text-decoration: none;
   padding: 8px 16px;
   height: 18px;
   border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 2px 2px 0px 0px var(--button-shadow);
 }
 
 .nav-container a.selected  {
-  background-color: rgba(85, 85, 85, 1) !important
+  color: var(--button-background);
+  background-color: var(--button-background-hover);
 }
 
 .nav-container a:hover {
-  color: var(--button-background-hover);
-  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--button-background);
+  background-color: var(--button-background-hover);
 }
 
 /* Mobile Navigation */
@@ -155,9 +157,12 @@ nav {
   width: 100%;
   max-width: 300px;
 }
+.play-button img:hover {
+  filter: brightness(125%);
+}
 
 footer {
-  background-color: var(--header-background);
+  background-color: var(--footer-background);
   text-align: center;
   color: var(--text-primary-color);
   padding: 16px 0;
