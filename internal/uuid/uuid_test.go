@@ -6,12 +6,9 @@ import (
 )
 
 func TestUUIDStringAndParse(t *testing.T) {
-	gen := NewUUIDGenerator()
+	gen := newUUIDGenerator()
 	typeID := uint8(42)
-	uuid, err := gen.NewUUID(typeID)
-	if err != nil {
-		t.Fatalf("failed to generate UUID: %v", err)
-	}
+	uuid := gen.NewUUID(typeID)
 	uuidStr := uuid.String()
 	parsed, err := FromString(uuidStr)
 	if err != nil {
@@ -25,9 +22,9 @@ func TestUUIDStringAndParse(t *testing.T) {
 func TestFromStringInvalidFormat(t *testing.T) {
 	invalidInputs := []string{
 		"1234",                                // Not enough parts.
-		"1234567890abcdef1-1-01",              // Only 3 parts.
-		"1234567890abcdef1-1-01-xyz",          // Invalid unused part.
-		"1234567890abcdef1-g-01-000000000000", // Invalid version part.
+		"1234567890abcd-1-01",                 // Only 3 parts.
+		"1234567890abcd-1-01-xyz",             // Fourth part (unused) invalid (should be 15 hex digits).
+		"1234567890abcd-g-01-000000000000000", // Invalid version part.
 	}
 	for _, s := range invalidInputs {
 		if _, err := FromString(s); err == nil {
@@ -37,13 +34,10 @@ func TestFromStringInvalidFormat(t *testing.T) {
 }
 
 func TestUniqueness(t *testing.T) {
-	gen := NewUUIDGenerator()
+	gen := newUUIDGenerator()
 	uuidSet := make(map[string]struct{})
 	for i := 0; i < 100; i++ {
-		uuid, err := gen.NewUUID(1)
-		if err != nil {
-			t.Fatalf("failed to generate UUID: %v", err)
-		}
+		uuid := gen.NewUUID(1)
 		s := uuid.String()
 		if _, exists := uuidSet[s]; exists {
 			t.Errorf("duplicate UUID generated: %s", s)
@@ -53,22 +47,19 @@ func TestUniqueness(t *testing.T) {
 }
 
 func TestUUIDStringFormat(t *testing.T) {
-	gen := NewUUIDGenerator()
-	uuid, err := gen.NewUUID(1)
-	if err != nil {
-		t.Fatalf("failed to generate UUID: %v", err)
-	}
+	gen := newUUIDGenerator()
+	uuid := gen.NewUUID(1)
 	// Expected string format: <timestamp><sequence>-<version>-<type>-<unused>
-	// First part: 17 hex digits (16 for timestamp, 1 for sequence)
-	// Second part: 1 hex digit (version)
-	// Third part: 2 hex digits (type)
-	// Fourth part: 12 hex digits (unused), must equal "000000000000"
+	//   - First part: 14 hex digits (13 for timestamp, 1 for sequence)
+	//   - Second part: 1 hex digit (version)
+	//   - Third part: 2 hex digits (type)
+	//   - Fourth part: 15 hex digits (unused)
 	parts := strings.Split(uuid.String(), "-")
 	if len(parts) != 4 {
 		t.Fatalf("expected 4 parts, got %d", len(parts))
 	}
-	if len(parts[0]) != 17 {
-		t.Errorf("expected first part to be 17 hex digits, got %d: %s", len(parts[0]), parts[0])
+	if len(parts[0]) != 14 {
+		t.Errorf("expected first part to be 14 hex digits, got %d: %s", len(parts[0]), parts[0])
 	}
 	if len(parts[1]) != 1 {
 		t.Errorf("expected version part to be 1 hex digit, got %d: %s", len(parts[1]), parts[1])
@@ -76,26 +67,30 @@ func TestUUIDStringFormat(t *testing.T) {
 	if len(parts[2]) != 2 {
 		t.Errorf("expected type part to be 2 hex digits, got %d: %s", len(parts[2]), parts[2])
 	}
-	if parts[3] != unusedString {
-		t.Errorf("expected unused part to be '%s', got %s", unusedString, parts[3])
+	if len(parts[3]) != 15 {
+		t.Errorf("expected unused part to be 15 hex digits, got %d: %s", len(parts[3]), parts[3])
+	}
+	// The unused field is expected to be all zeros.
+	if parts[3] != "000000000000000" {
+		t.Errorf("expected unused part to be '000000000000000', got %s", parts[3])
 	}
 }
 
 func TestFromStringUnusedNonZero(t *testing.T) {
 	// Construct a string with a nonzero unused field.
-	invalidStr := "00000000000000001-1-01-000000000001"
+	// First part: 14 hex digits, version: 1 hex digit, type: 2 hex digits,
+	// and unused: 15 hex digits (should be "000000000000000").
+	// Here the unused field is "000000000000001" (nonzero).
+	invalidStr := "00000000000000-1-01-000000000000001"
 	if _, err := FromString(invalidStr); err == nil {
 		t.Error("expected error for nonzero unused field, got nil")
 	}
 }
 
 func TestUUIDExtractors(t *testing.T) {
-	gen := NewUUIDGenerator()
+	gen := newUUIDGenerator()
 	typeID := uint8(42)
-	uuid, err := gen.NewUUID(typeID)
-	if err != nil {
-		t.Fatalf("failed to generate UUID: %v", err)
-	}
+	uuid := gen.NewUUID(typeID)
 	// Check that Timestamp is non-zero.
 	if uuid.Timestamp() == 0 {
 		t.Error("Timestamp() returned 0; expected nonzero")
@@ -123,22 +118,26 @@ func TestIsNil(t *testing.T) {
 	if !nilUUID.IsNil() {
 		t.Error("expected nil UUID to be IsNil() true")
 	}
-	gen := NewUUIDGenerator()
-	uuid, err := gen.NewUUID(1)
-	if err != nil {
-		t.Fatalf("failed to generate UUID: %v", err)
-	}
+	gen := newUUIDGenerator()
+	uuid := gen.NewUUID(1)
 	if uuid.IsNil() {
 		t.Error("expected non-nil UUID to be IsNil() false")
 	}
 }
 
 func TestIsNilString(t *testing.T) {
-
-	nilTest, _ := FromString(`00000000000000000-0-00-000000000000`)
-
+	// For an all-zero UUID, the expected string is:
+	//   - First part: 14 hex digits (13 for timestamp, 1 for sequence): "00000000000000"
+	//   - Second part: 1 hex digit (version): "0"
+	//   - Third part: 2 hex digits (type): "00"
+	//   - Fourth part: 15 hex digits (unused): "000000000000000"
+	// Concatenated: "00000000000000-0-00-000000000000000"
+	nilTest, err := FromString("00000000000000-0-00-000000000000000")
+	if err != nil {
+		t.Fatalf("failed to parse nil UUID string: %v", err)
+	}
 	var nilUUID UUID
 	if nilUUID != nilTest {
-		t.Error("expected nil UUID to be IsNil() true")
+		t.Error("expected nil UUID parsed from string to equal nil UUID")
 	}
 }
