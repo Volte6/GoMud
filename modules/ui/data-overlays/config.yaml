@@ -1,0 +1,10 @@
+# UI Module Configuration
+
+# URL for the UI package
+UIUrl: "https://github.com/MorquinDevlar/GoMudUI/releases/latest/download/GoMudUI.mpackage"
+
+# Version of the UI package
+UIVersion: "1.0.0"
+
+# Field name for the removal flag
+RemoveField: "remove" 

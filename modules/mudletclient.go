@@ -86,22 +86,37 @@ func (g *MudletClientModule) RefreshConfig() {
 	// Load config values from the plugin's config file
 	if uiUrl, ok := g.plug.Config.Get(`Mudlet.UIUrl`).(string); ok && uiUrl != "" {
 		g.uiUrl = uiUrl
+		mudlog.Info("MudletClientModule", "config", "Loaded UIUrl from config", "value", g.uiUrl)
+	} else {
+		mudlog.Info("MudletClientModule", "config", "Using default UIUrl", "value", g.uiUrl)
 	}
 
 	if uiVersion, ok := g.plug.Config.Get(`Mudlet.UIVersion`).(string); ok && uiVersion != "" {
 		g.uiVersion = uiVersion
+		mudlog.Info("MudletClientModule", "config", "Loaded UIVersion from config", "value", g.uiVersion)
+	} else {
+		mudlog.Info("MudletClientModule", "config", "Using default UIVersion", "value", g.uiVersion)
 	}
 
 	if mapUrl, ok := g.plug.Config.Get(`Mudlet.MapUrl`).(string); ok && mapUrl != "" {
 		g.mapUrl = mapUrl
+		mudlog.Info("MudletClientModule", "config", "Loaded MapUrl from config", "value", g.mapUrl)
+	} else {
+		mudlog.Info("MudletClientModule", "config", "Using default MapUrl", "value", g.mapUrl)
 	}
 
 	if mapperUrl, ok := g.plug.Config.Get(`Mudlet.MapperUrl`).(string); ok && mapperUrl != "" {
 		g.mapperUrl = mapperUrl
+		mudlog.Info("MudletClientModule", "config", "Loaded MapperUrl from config", "value", g.mapperUrl)
+	} else {
+		mudlog.Info("MudletClientModule", "config", "Using default MapperUrl", "value", g.mapperUrl)
 	}
 
 	if mapperVersion, ok := g.plug.Config.Get(`Mudlet.MapperVersion`).(string); ok && mapperVersion != "" {
 		g.mapperVersion = mapperVersion
+		mudlog.Info("MudletClientModule", "config", "Loaded MapperVersion from config", "value", g.mapperVersion)
+	} else {
+		mudlog.Info("MudletClientModule", "config", "Using default MapperVersion", "value", g.mapperVersion)
 	}
 }
 
