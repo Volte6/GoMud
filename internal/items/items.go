@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"sync/atomic"
 	"unicode"
 
 	"github.com/GoMudEngine/GoMud/internal/colorpatterns"
 	"github.com/GoMudEngine/GoMud/internal/util"
+	"github.com/GoMudEngine/GoMud/internal/uuid"
 )
 
 //
@@ -19,7 +19,6 @@ import (
 
 var (
 	ItemDisabledSlot = Item{ItemId: -1}
-	uniqueIdCounter  uint64
 
 	// -short suffix should also be defined in case shorthand symbols are preferred
 	adjectiveSwaps = map[string]string{
@@ -29,16 +28,15 @@ var (
 	}
 )
 
-// A simple "generator" to uniquely identify items
-func getUniqueId() uint64 {
-	atomic.AddUint64(&uniqueIdCounter, 1)
-	return atomic.LoadUint64(&uniqueIdCounter)
-}
+const (
+	// TODO: Centralize these types somewhere, eventually?
+	UUIDItem = uuid.IDType(0b00000001)
+)
 
 // Instance properties that may change
 type Item struct {
 	ItemId        int            `yaml:"itemid,omitempty"`
-	uid           uint64         `yaml:"-"`
+	UUID          uuid.UUID      `yaml:"-"`                       // `yaml:"uuid,omitempty"`
 	Blob          string         `yaml:"blob,omitempty"`          // Does this item have a blob? Should be base64 encoded.
 	Uses          int            `yaml:"uses,omitempty"`          // How many uses it has left
 	LastUsedRound uint64         `yaml:"lastusedround,omitempty"` // Last round this item was used
@@ -55,6 +53,7 @@ func New(itemId int) Item {
 
 	newItm := Item{}
 	if itemSpec != nil {
+		newItm.UUID = uuid.New(UUIDItem)
 		newItm.ItemId = itemId
 		if itemSpec.Uses > 0 {
 			newItm.Uses = itemSpec.Uses
@@ -150,22 +149,15 @@ func (i Item) IsDisabled() bool {
 	return i.ItemId < 0
 }
 
-func (i *Item) UniqueId() uint64 {
-
-	if i.uid == 0 {
-		i.uid = getUniqueId()
-	}
-
-	return i.uid
-}
-
 func (i *Item) Validate() {
 	if i.ItemId < 1 {
 		return
 	}
 
 	// Make sure has a uid
-	i.UniqueId()
+	if i.UUID.IsNil() {
+		i.UUID = uuid.New(UUIDItem)
+	}
 
 	iSpec := i.GetSpec()
 	if iSpec.ItemId > 0 {
@@ -388,33 +380,7 @@ func (i *Item) GetDefense() int {
 }
 
 func (i *Item) Equals(b Item) bool {
-
-	if i.UniqueId() == b.UniqueId() {
-		return true
-	}
-
-	if i.ItemId != b.ItemId {
-		return false
-	}
-
-	if i.Blob != b.Blob {
-		return false
-	}
-
-	if i.Uses != b.Uses {
-		return false
-	}
-
-	if i.Spec != b.Spec {
-		return false
-	}
-
-	// If there is a spec defined on this item, then the other item should also have a spec defined pointing to the same address.
-	if i.Spec != nil && i.Spec != b.Spec {
-		return false
-	}
-
-	return true
+	return i.ItemId == b.ItemId && i.UUID == b.UUID
 }
 
 func (i *Item) IsValid() bool {
@@ -516,7 +482,7 @@ func (i *Item) ShorthandId() string {
 		return ``
 	}
 
-	return fmt.Sprintf(`!%d:%d`, i.ItemId, i.UniqueId())
+	return fmt.Sprintf(`!%d:%s`, i.ItemId, i.UUID.String())
 }
 
 func (i *Item) NameSimple() string {
@@ -611,20 +577,20 @@ func FindMatchIn(itemName string, items ...Item) (pMatch Item, fMatch Item) {
 		if itemName[0] == '!' { // Special meaning to specify an item
 
 			var itemIdMatch int = 0
-			var itemUidMatch uint64 = 0
+			var itemUUIDMatch uuid.UUID = uuid.UUID{}
 
 			parts := strings.Split(itemName[1:], `:`)
 			itemIdMatch, _ = strconv.Atoi(parts[0])
 
 			if len(parts) > 1 {
-				itemUidMatch, _ = strconv.ParseUint(parts[1], 10, 64)
+				itemUUIDMatch, _ = uuid.FromString(parts[1])
 			}
 
 			for _, itm := range items {
 
 				// If a uid was included, it takes priority over qualifying/disqualifying
-				if itemUidMatch > 0 {
-					if itm.UniqueId() != itemUidMatch {
+				if !itemUUIDMatch.IsNil() {
+					if itm.UUID != itemUUIDMatch {
 						continue
 					}
 					return itm, itm

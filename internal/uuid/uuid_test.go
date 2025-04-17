@@ -23,9 +23,9 @@ func TestUUIDStringAndParse(t *testing.T) {
 func TestFromStringInvalidFormat(t *testing.T) {
 	invalidInputs := []string{
 		"1234",                                // Not enough parts.
-		"1234567890abcd-1-01",                 // Only 3 parts.
-		"1234567890abcd-1-01-xyz",             // Fourth part (unused) invalid (should be 15 hex digits).
-		"1234567890abcd-g-01-000000000000000", // Invalid version part.
+		"1234567890abcde-1-01",                // Only 3 parts.
+		"1234567890abcde-1-01-xyz",            // Fourth part invalid length.
+		"1234567890abcde-g-01-00000000000000", // Invalid version part.
 	}
 	for _, s := range invalidInputs {
 		if _, err := FromString(s); err == nil {
@@ -51,16 +51,16 @@ func TestUUIDStringFormat(t *testing.T) {
 	gen := newUUIDGenerator()
 	uuid := gen.NewUUID(1)
 	// Expected string format: <timestamp><sequence>-<version>-<type>-<unused>
-	//   - First part: 14 hex digits (13 for timestamp, 1 for sequence)
+	//   - First part: 15 hex digits (13 for timestamp, 2 for sequence)
 	//   - Second part: 1 hex digit (version)
 	//   - Third part: 2 hex digits (type)
-	//   - Fourth part: 15 hex digits (unused)
+	//   - Fourth part: 14 hex digits (unused)
 	parts := strings.Split(uuid.String(), "-")
 	if len(parts) != 4 {
 		t.Fatalf("expected 4 parts, got %d", len(parts))
 	}
-	if len(parts[0]) != 14 {
-		t.Errorf("expected first part to be 14 hex digits, got %d: %s", len(parts[0]), parts[0])
+	if len(parts[0]) != 15 {
+		t.Errorf("expected first part to be 15 hex digits, got %d: %s", len(parts[0]), parts[0])
 	}
 	if len(parts[1]) != 1 {
 		t.Errorf("expected version part to be 1 hex digit, got %d: %s", len(parts[1]), parts[1])
@@ -68,13 +68,8 @@ func TestUUIDStringFormat(t *testing.T) {
 	if len(parts[2]) != 2 {
 		t.Errorf("expected type part to be 2 hex digits, got %d: %s", len(parts[2]), parts[2])
 	}
-	if len(parts[3]) != 15 {
-		t.Errorf("expected unused part to be 15 hex digits, got %d: %s", len(parts[3]), parts[3])
-	}
-	// The unused field is expected to be all zeros.
-	if parts[3] != "000000000000000" {
-		// Ignore and allow
-		//t.Errorf("expected unused part to be '000000000000000', got %s", parts[3])
+	if len(parts[3]) != 14 {
+		t.Errorf("expected unused part to be 14 hex digits, got %d: %s", len(parts[3]), parts[3])
 	}
 }
 
@@ -82,23 +77,18 @@ func TestUUIDExtractors(t *testing.T) {
 	gen := newUUIDGenerator()
 	typeID := IDType(42)
 	uuid := gen.NewUUID(typeID)
-	// Check that Timestamp is non-zero.
 	if uuid.Timestamp() == 0 {
 		t.Error("Timestamp() returned 0; expected nonzero")
 	}
-	// For a freshly generated UUID the sequence should be 0.
 	if uuid.Sequence() != 0 {
 		t.Errorf("Sequence() = %d; expected 0", uuid.Sequence())
 	}
-	// Check that Version equals the default version.
 	if uuid.Version() != currentVersion {
 		t.Errorf("Version() = %d; expected %d", uuid.Version(), currentVersion)
 	}
-	// Check Type.
 	if uuid.Type() != typeID {
 		t.Errorf("Type() = %d; expected %d", uuid.Type(), typeID)
 	}
-	// Check Unused.
 	if uuid.Unused() != 0 {
 		t.Errorf("Unused() = %d; expected 0", uuid.Unused())
 	}
@@ -117,13 +107,7 @@ func TestIsNil(t *testing.T) {
 }
 
 func TestIsNilString(t *testing.T) {
-	// For an all-zero UUID, the expected string is:
-	//   - First part: 14 hex digits (13 for timestamp, 1 for sequence): "00000000000000"
-	//   - Second part: 1 hex digit (version): "0"
-	//   - Third part: 2 hex digits (type): "00"
-	//   - Fourth part: 15 hex digits (unused): "000000000000000"
-	// Concatenated: "00000000000000-0-00-000000000000000"
-	nilTest, err := FromString("00000000000000-0-00-000000000000000")
+	nilTest, err := FromString("000000000000000-0-00-00000000000000")
 	if err != nil {
 		t.Fatalf("failed to parse nil UUID string: %v", err)
 	}
@@ -133,22 +117,14 @@ func TestIsNilString(t *testing.T) {
 	}
 }
 
-// TestFromStringRoundTrip verifies that parsing and then re‑stringifying
-// yields exactly the original valid input.
 func TestFromStringRoundTrip(t *testing.T) {
 	validStrings := []string{
-		// nil UUID
-		"00000000000000-0-00-000000000000000",
-		// tiny nonzero timestamp, seq=0, version=1, type=2
-		"00000000000001-1-02-000000000000000",
-		// tiny nonzero timestamp, seq=0, version=1, type=2
-		"00000000000001-1-02-010101010101010",
-		// small timestamp, seq=3, version=1, type=42
-		fmt.Sprintf("%013x%01x-%01x-%02x-%015x", 0x2A, 0x3, currentVersion, 42, 0),
-		// max sequence (f), version=1, type=255
-		fmt.Sprintf("%013x%01x-%01x-%02x-%015x", 0x10, 0xF, currentVersion, 0xFF, 0),
+		"000000000000000-0-00-00000000000000",
+		"000000000000100-1-02-00000000000000",
+		"000000000000100-1-02-01010101010101",
+		fmt.Sprintf("%013x%02x-%01x-%02x-%014x", 0x2A, 0x03, currentVersion, 42, 0),
+		fmt.Sprintf("%013x%02x-%01x-%02x-%014x", 0x10, 0xFF, currentVersion, 0xFF, 0),
 	}
-
 	for _, s := range validStrings {
 		u, err := FromString(s)
 		if err != nil {
@@ -162,44 +138,20 @@ func TestFromStringRoundTrip(t *testing.T) {
 	}
 }
 
-// TestFromStringValidFields parses a handful of simple, hand‑crafted UUID
-// strings and checks each extractor against the known literal values.
 func TestFromStringValidFields(t *testing.T) {
 	type fixture struct {
-		str              string
-		wantTS           uint64
-		wantSeq, wantVer uint8
-		wantType         IDType
-		wantUnused       uint64
+		str        string
+		wantTS     uint64
+		wantSeq    uint8
+		wantVer    uint8
+		wantType   IDType
+		wantUnused uint64
 	}
-
 	fixtures := []fixture{
-		{
-			str:        "00000000000000-0-00-000000000000000",
-			wantTS:     0,
-			wantSeq:    0,
-			wantVer:    0,
-			wantType:   0,
-			wantUnused: 0,
-		},
-		{
-			str:        "000000000000a5-2-7f-000000000000000",
-			wantTS:     0xA,
-			wantSeq:    5,
-			wantVer:    2,
-			wantType:   0x7F,
-			wantUnused: 0,
-		},
-		{
-			str:        "0000000000ffff-f-ff-000000000000000",
-			wantTS:     0xFFF,
-			wantSeq:    0xF,
-			wantVer:    0xF,
-			wantType:   0xFF,
-			wantUnused: 0,
-		},
+		{"000000000000000-0-00-00000000000000", 0, 0, 0, 0, 0},
+		{"000000000000a05-2-7f-00000000000000", 0xA, 5, 2, 0x7F, 0},
+		{"0000000000fff0f-f-ff-00000000000000", 0xFFF, 0xF, 0xF, 0xFF, 0},
 	}
-
 	for _, f := range fixtures {
 		u, err := FromString(f.str)
 		if err != nil {
@@ -221,5 +173,29 @@ func TestFromStringValidFields(t *testing.T) {
 		if un := u.Unused(); un != f.wantUnused {
 			t.Errorf("%q: Unused() = %d; want %d", f.str, un, f.wantUnused)
 		}
+	}
+}
+
+func BenchmarkStringComparison(b *testing.B) {
+	uuid1 := New()
+	uuid2 := New()
+	s1 := uuid1.String()
+	s2 := uuid2.String()
+	for i := 0; i < b.N; i++ {
+		_ = s1 == s2
+	}
+}
+
+func BenchmarkByteArrayComparison(b *testing.B) {
+	uuid1 := New()
+	uuid2 := New()
+	for i := 0; i < b.N; i++ {
+		_ = uuid1 == uuid2
+	}
+}
+
+func BenchmarkUUIDCreation(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = New()
 	}
 }
