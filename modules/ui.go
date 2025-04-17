@@ -38,8 +38,9 @@ func init() {
 		uiModule.RefreshConfig()
 	})
 
-	// Register the user command
+	// Register the user commands
 	uiModule.plug.AddUserCommand(`gui`, GUICommand, true, false)
+	uiModule.plug.AddUserCommand(`checkgui`, CheckGUICommand, true, false)
 }
 
 // UIModule stores configuration and state for the UI module
@@ -80,6 +81,38 @@ func (g *UIModule) RefreshConfig() {
 	} else {
 		mudlog.Info("UIModule", "config", "Using default RemoveField", "value", g.removeField)
 	}
+}
+
+// CheckGUICommand silently checks if the user is using Mudlet and provides information about the GUI command
+// This is designed to be used in the login process without interrupting non-Mudlet users
+func CheckGUICommand(rest string, user *users.UserRecord, room *rooms.Room, flags events.EventFlag) (bool, error) {
+	// Check if this is a Mudlet client
+	isMudlet := checkIfMudletClient(user.ConnectionId())
+	if !isMudlet {
+		// Do nothing for non-Mudlet clients - completely silent
+		return true, nil
+	}
+	
+	// Check if the user has disabled these notifications
+	if suppress, ok := user.GetConfigOption("ui_suppress_mudlet_notice").(bool); ok && suppress {
+		// User has opted out of these notifications
+		return true, nil
+	}
+	
+	// Display a helpful message for Mudlet users
+	message := `
+<ansi fg="h3">Mudlet Client Detected</ansi>
+
+<ansi fg="emphasis">This MUD has special Mudlet GUI features available!</ansi>
+
+Type <ansi fg="command">gui install</ansi> to enhance your interface with clickable maps,
+status bars, and other useful widgets.
+
+To stop seeing this message, type <ansi fg="command">gui stop</ansi>
+`
+	user.SendText(message)
+	
+	return true, nil
 }
 
 // GUICommand handles the 'gui' command for users

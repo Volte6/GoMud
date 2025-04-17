@@ -186,22 +186,13 @@ func (g *GMCPModule) handlePlayerJoin(e events.Event) events.ListenerReturn {
 		g.sendGMCPEnableRequest(evt.ConnectionId)
 	}
 
-	// Only try to send Discord info when a player joins with a Mudlet client
 	// We'll check inside sendExternalDiscordInfo if it's actually a Mudlet client
 	// and only log if it is
 	if user := users.GetByUserId(evt.UserId); user != nil {
 		g.sendExternalDiscordInfo(user)
 		
-		// Check if this is a Mudlet client and send UI notification if appropriate
-		connectionId := uint64(user.ConnectionId())
-		gmcpData, ok := g.cache.Get(connectionId)
-		if ok && gmcpData.Client.IsMudlet {
-			// Check if the user has disabled the UI notice
-			if suppress, ok := user.GetConfigOption("ui_suppress_mudlet_notice").(bool); !ok || !suppress {
-				// Send the notification about the UI
-				user.SendText("\n<ansi fg=\"highlight\">Mudlet client detected.</ansi> If you want to use our Mudlet UI, you can use the '<ansi fg=\"command\">ui install</ansi>' command to install it into Mudlet automatically.")
-			}
-		}
+		// The Mudlet UI notification is now handled by the checkgui command
+		// during login, so we don't need to show it here anymore
 	}
 
 	return events.Continue
@@ -320,11 +311,8 @@ func (g *GMCPModule) HandleIAC(connectionId uint64, iacCmd []byte) bool {
 						if user != nil {
 							g.sendExternalDiscordInfo(user)
 							
-							// Send UI notification if appropriate
-							if suppress, ok := user.GetConfigOption("ui_suppress_mudlet_notice").(bool); !ok || !suppress {
-								// Send the notification about the UI
-								user.SendText("\n<ansi fg=\"highlight\">Mudlet client detected.</ansi> If you want to use our Mudlet UI, you can use the '<ansi fg=\"command\">ui install</ansi>' command to install it into Mudlet automatically.")
-							}
+							// The Mudlet UI notification is now handled by the checkgui command
+							// during login, so we don't need to show it here anymore
 						}
 					}
 				} else {
