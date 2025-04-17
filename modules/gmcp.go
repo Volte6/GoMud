@@ -14,6 +14,7 @@ import (
 	"github.com/GoMudEngine/GoMud/internal/term"
 	"github.com/GoMudEngine/GoMud/internal/users"
 	lru "github.com/hashicorp/golang-lru/v2"
+	"github.com/GoMudEngine/GoMud/internal/configs"
 )
 
 const (
@@ -64,6 +65,10 @@ func init() {
 	events.RegisterListener(GMCPOut{}, gmcpModule.dispatchGMCP)
 	events.RegisterListener(events.PlayerSpawn{}, gmcpModule.handlePlayerJoin)
 
+	// Set up a callback to run after the system is fully loaded
+	gmcpModule.plug.Callbacks.SetOnLoad(func() {
+		ensureExternalModulesRegistered()
+	})
 }
 
 func isGMCPEnabled(connectionId uint64) bool {
@@ -181,6 +186,13 @@ func (g *GMCPModule) handlePlayerJoin(e events.Event) events.ListenerReturn {
 		g.sendGMCPEnableRequest(evt.ConnectionId)
 	}
 
+	// Only try to send Discord info when a player joins with a Mudlet client
+	// We'll check inside sendExternalDiscordInfo if it's actually a Mudlet client
+	// and only log if it is
+	if user := users.GetByUserId(evt.UserId); user != nil {
+		g.sendExternalDiscordInfo(user)
+	}
+
 	return events.Continue
 }
 
@@ -225,6 +237,8 @@ func (g *GMCPModule) HandleIAC(connectionId uint64, iacCmd []byte) bool {
 		g.cache.Add(connectionId, gmcpData)
 
 		mudlog.Debug("Received", "type", "IAC (Client-GMCP Accept)", "data", term.BytesString(payload))
+		
+		// We'll check for Mudlet later in Core.Hello, not here
 		return true
 	}
 
@@ -282,10 +296,19 @@ func (g *GMCPModule) HandleIAC(connectionId uint64, iacCmd []byte) bool {
 				gmcpData.Client.Name = decoded.Client
 				gmcpData.Client.Version = decoded.Version
 
-				if strings.EqualFold(decoded.Client, `mudlet`) {
-
-					gmcpData.Client.IsMudlet = true
-
+				// Record if this is a Mudlet client
+				isMudlet := strings.EqualFold(decoded.Client, `mudlet`)
+				gmcpData.Client.IsMudlet = isMudlet
+				
+				if isMudlet {
+					mudlog.Info("Client", "status", "Mudlet client detected", "connectionId", connectionId)
+					userId := g.findUserIdForConnection(connectionId)
+					if userId > 0 {
+						user := users.GetByUserId(userId)
+						if user != nil {
+							g.sendExternalDiscordInfo(user)
+						}
+					}
 				}
 
 				g.cache.Add(connectionId, gmcpData)
@@ -453,4 +476,89 @@ func (g *GMCPModule) dispatchGMCP(e events.Event) events.ListenerReturn {
 	}
 
 	return events.Continue
+}
+
+// Helper method to find a user ID for a connection ID
+func (g *GMCPModule) findUserIdForConnection(connectionId uint64) int {
+	// Try to find the user that has this connection ID
+	for _, user := range users.GetAllActiveUsers() {
+		if uint64(user.ConnectionId()) == connectionId {
+			return user.UserId
+		}
+	}
+	return 0
+}
+
+// This function ensures Discord info is sent to all Mudlet clients
+func ensureExternalModulesRegistered() {
+	// Only log when we actually find a Mudlet client
+	mudletFound := false
+	
+	// Check all active users with Mudlet clients
+	for _, user := range users.GetAllActiveUsers() {
+		// Only send to Mudlet clients
+		if gmcpData, ok := gmcpModule.cache.Get(uint64(user.ConnectionId())); ok && gmcpData.Client.IsMudlet {
+			if !mudletFound {
+				mudlog.Info("GMCP", "status", "Detected existing Mudlet client(s)")
+				mudletFound = true
+			}
+			
+			// Send all GMCP modules - the sendExternalDiscordInfo function will log each module
+			gmcpModule.sendExternalDiscordInfo(user)
+		}
+	}
+}
+
+// Helper function to directly send Discord info for Mudlet clients
+func (g *GMCPModule) sendExternalDiscordInfo(user *users.UserRecord) {
+	// Check if this is a Mudlet client first
+	connectionId := uint64(user.ConnectionId())
+	gmcpData, ok := g.cache.Get(connectionId)
+	if !ok || !gmcpData.Client.IsMudlet {
+		// Not a Mudlet client, don't send Discord info or log anything
+		return
+	}
+	
+	// Get config for MUD name
+	c := configs.GetConfig()
+	mudName := "GoMud"
+	if c.Server.MudName != "" {
+		mudName = string(c.Server.MudName)
+	}
+	
+	// Send Discord Info
+	infoPayload := `{ 
+		"inviteurl": "https://discord.gg/FaauSYej3n",	
+		"applicationid": "1234",
+		"largeImageKey": "server-icon"
+	}`
+
+	// Log specific module being sent
+	mudlog.Info("GMCP", "action", "Sending External.Discord.Info to Mudlet user", "userId", user.UserId)
+	
+	events.AddToQueue(GMCPOut{
+		UserId:  user.UserId,
+		Module:  `External.Discord.Info`,
+		Payload: infoPayload,
+	})
+
+	// Send Discord Status
+	statusPayload := `{ 
+		"game": "` + mudName + `",
+		"startTimestamp": ` + strconv.FormatInt(user.GetConnectTime().Unix(), 10) + `,
+		"state": "Playing GoMud",
+		"details": "using GoMud Engine"
+	}`
+
+	// Log specific module being sent
+	mudlog.Info("GMCP", "action", "Sending External.Discord.Status to Mudlet user", "userId", user.UserId)
+	
+	events.AddToQueue(GMCPOut{
+		UserId:  user.UserId,
+		Module:  `External.Discord.Status`,
+		Payload: statusPayload,
+	})
+	
+	// Also send Mudlet client info
+	mudletClientModule.SendClientInfoExported(user.UserId)
 }
