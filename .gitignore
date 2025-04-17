@@ -8,3 +8,9 @@ vendor/
 server.crt
 server.key
 __debug*
+logs/log.txt
+.DS_Store
+mud.sh
+WillowdaleMUD
+WillowdaleMUD.pid
+_datafiles/willowdale-config.yaml
