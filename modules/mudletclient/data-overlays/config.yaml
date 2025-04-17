@@ -1,0 +1,31 @@
+################################################################################
+# If modified, these settings will be copied into your config overrides 
+# folder under `Modules.mudletclient`:
+#
+# Modules:
+#   mudletclient:
+#     Mudlet:
+#       UIUrl: ""
+#       UIVersion: "1.0.0"
+#       MapUrl: ""
+#       MapperUrl: ""
+#       MapperVersion: "1.0.0"
+################################################################################
+# - Mudlet -
+#   Mudlet client integration settings
+Mudlet:
+  # - UIUrl -
+  #   URL for the Mudlet UI package
+  UIUrl: ""
+  # - UIVersion -
+  #   Version of the Mudlet UI package
+  UIVersion: "1.0.0"
+  # - MapUrl -
+  #   URL for the Mudlet map package
+  MapUrl: ""
+  # - MapperUrl -
+  #   URL for the Mudlet mapper package
+  MapperUrl: ""
+  # - MapperVersion -
+  #   Version of the Mudlet mapper package
+  MapperVersion: "1.0.0" 
