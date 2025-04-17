@@ -191,6 +191,17 @@ func (g *GMCPModule) handlePlayerJoin(e events.Event) events.ListenerReturn {
 	// and only log if it is
 	if user := users.GetByUserId(evt.UserId); user != nil {
 		g.sendExternalDiscordInfo(user)
+		
+		// Check if this is a Mudlet client and send UI notification if appropriate
+		connectionId := uint64(user.ConnectionId())
+		gmcpData, ok := g.cache.Get(connectionId)
+		if ok && gmcpData.Client.IsMudlet {
+			// Check if the user has disabled the UI notice
+			if suppress, ok := user.GetConfigOption("ui_suppress_mudlet_notice").(bool); !ok || !suppress {
+				// Send the notification about the UI
+				user.SendText("\n<ansi fg=\"highlight\">Mudlet client detected.</ansi> If you want to use our Mudlet UI, you can use the '<ansi fg=\"command\">ui install</ansi>' command to install it into Mudlet automatically.")
+			}
+		}
 	}
 
 	return events.Continue
@@ -300,6 +311,7 @@ func (g *GMCPModule) HandleIAC(connectionId uint64, iacCmd []byte) bool {
 				isMudlet := strings.EqualFold(decoded.Client, `mudlet`)
 				gmcpData.Client.IsMudlet = isMudlet
 				
+				// Only send Discord and client info for Mudlet clients
 				if isMudlet {
 					mudlog.Info("Client", "status", "Mudlet client detected", "connectionId", connectionId)
 					userId := g.findUserIdForConnection(connectionId)
@@ -307,8 +319,16 @@ func (g *GMCPModule) HandleIAC(connectionId uint64, iacCmd []byte) bool {
 						user := users.GetByUserId(userId)
 						if user != nil {
 							g.sendExternalDiscordInfo(user)
+							
+							// Send UI notification if appropriate
+							if suppress, ok := user.GetConfigOption("ui_suppress_mudlet_notice").(bool); !ok || !suppress {
+								// Send the notification about the UI
+								user.SendText("\n<ansi fg=\"highlight\">Mudlet client detected.</ansi> If you want to use our Mudlet UI, you can use the '<ansi fg=\"command\">ui install</ansi>' command to install it into Mudlet automatically.")
+							}
 						}
 					}
+				} else {
+					mudlog.Info("GMCP", "status", "Non-Mudlet client detected", "client", decoded.Client)
 				}
 
 				g.cache.Add(connectionId, gmcpData)

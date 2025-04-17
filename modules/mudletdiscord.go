@@ -8,6 +8,7 @@ import (
 	"github.com/GoMudEngine/GoMud/internal/events"
 	"github.com/GoMudEngine/GoMud/internal/plugins"
 	"github.com/GoMudEngine/GoMud/internal/users"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 )
 
 var (
@@ -90,28 +91,46 @@ func (g *MudletDiscordModule) RefreshConfig() {
 	// Using direct config properties like auctions.go does
 	if inviteUrl, ok := g.plug.Config.Get(`InviteUrl`).(string); ok && inviteUrl != "" {
 		g.inviteUrl = inviteUrl
+		mudlog.Info("MudletDiscordModule", "config", "Loaded InviteUrl from config", "value", g.inviteUrl)
+	} else {
+		mudlog.Info("MudletDiscordModule", "config", "Using default InviteUrl", "value", g.inviteUrl)
 	}
 
 	if applicationId, ok := g.plug.Config.Get(`ApplicationId`).(string); ok && applicationId != "" {
 		g.applicationId = applicationId
+		mudlog.Info("MudletDiscordModule", "config", "Loaded ApplicationId from config", "value", g.applicationId)
+	} else {
+		mudlog.Info("MudletDiscordModule", "config", "Using default ApplicationId", "value", g.applicationId)
 	}
 
 	if largeImageKey, ok := g.plug.Config.Get(`LargeImageKey`).(string); ok && largeImageKey != "" {
 		g.largeImageKey = largeImageKey
+		mudlog.Info("MudletDiscordModule", "config", "Loaded LargeImageKey from config", "value", g.largeImageKey)
+	} else {
+		mudlog.Info("MudletDiscordModule", "config", "Using default LargeImageKey", "value", g.largeImageKey)
 	}
 
 	if state, ok := g.plug.Config.Get(`State`).(string); ok && state != "" {
 		g.state = state
+		mudlog.Info("MudletDiscordModule", "config", "Loaded State from config", "value", g.state)
+	} else {
+		mudlog.Info("MudletDiscordModule", "config", "Using default State", "value", g.state)
 	}
 
 	if details, ok := g.plug.Config.Get(`Details`).(string); ok && details != "" {
 		g.details = details
+		mudlog.Info("MudletDiscordModule", "config", "Loaded Details from config", "value", g.details)
+	} else {
+		mudlog.Info("MudletDiscordModule", "config", "Using default Details", "value", g.details)
 	}
 
 	// Always get MudName from main config
 	c := configs.GetConfig()
 	if c.Server.MudName != "" {
 		g.mudName = string(c.Server.MudName)
+		mudlog.Info("MudletDiscordModule", "config", "Loaded MudName from main config", "value", g.mudName)
+	} else {
+		mudlog.Info("MudletDiscordModule", "config", "Using default MudName", "value", g.mudName)
 	}
 }
 
