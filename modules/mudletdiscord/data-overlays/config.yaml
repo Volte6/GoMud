@@ -1,0 +1,32 @@
+################################################################################
+# If modified, these settings will be copied into your config overrides 
+# folder under `Modules.mudletdiscord`:
+#
+# Modules:
+#   mudletdiscord:
+#     InviteUrl: "https://discord.gg/wT2pdJa5Qu"
+#     ApplicationId: "1282230193876111380"
+#     LargeImageKey: "server-icon"
+#     State: "Playing Willowdale"
+#     Details: "using GoMud Engine"
+################################################################################
+# - InviteUrl -
+#   Discord invite URL for the server
+# InviteUrl: "https://discord.gg/wT2pdJa5Qu"
+InviteUrl: ""
+# - ApplicationId -
+#   Discord application ID for rich presence
+#ApplicationId: "1282230193876111380"
+ApplicationId: ""
+# - LargeImageKey -
+#   Key for the large image in rich presence
+#LargeImageKey: "server-icon"
+LargeImageKey: ""
+# - Details -
+#   Details text for rich presence
+# Details: "using GoMud Engine"
+Details: ""
+# - State -
+#   State text for rich presence
+# State: "https://www.willowdalemud.com"
+State: ""

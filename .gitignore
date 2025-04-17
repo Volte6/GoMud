@@ -8,3 +8,17 @@ vendor/
 server.crt
 server.key
 __debug*
+<<<<<<< HEAD
+logs/log.txt
+.DS_Store
+=======
+>>>>>>> 0de7238d1a7d497014d4cab3dc5b0554a0c16019
+mud.sh
+WillowdaleMUD
+WillowdaleMUD.pid
+_datafiles/willowdale-config.yaml
+<<<<<<< HEAD
+=======
+logs/*
+*.DS_Store
+>>>>>>> 0de7238d1a7d497014d4cab3dc5b0554a0c16019
