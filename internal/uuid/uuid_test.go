@@ -8,7 +8,7 @@ import (
 
 func TestUUIDStringAndParse(t *testing.T) {
 	gen := newUUIDGenerator()
-	typeID := uint8(42)
+	typeID := IDType(42)
 	uuid := gen.NewUUID(typeID)
 	uuidStr := uuid.String()
 	parsed, err := FromString(uuidStr)
@@ -80,7 +80,7 @@ func TestUUIDStringFormat(t *testing.T) {
 
 func TestUUIDExtractors(t *testing.T) {
 	gen := newUUIDGenerator()
-	typeID := uint8(42)
+	typeID := IDType(42)
 	uuid := gen.NewUUID(typeID)
 	// Check that Timestamp is non-zero.
 	if uuid.Timestamp() == 0 {
@@ -166,10 +166,11 @@ func TestFromStringRoundTrip(t *testing.T) {
 // strings and checks each extractor against the known literal values.
 func TestFromStringValidFields(t *testing.T) {
 	type fixture struct {
-		str                        string
-		wantTS                     uint64
-		wantSeq, wantVer, wantType uint8
-		wantUnused                 uint64
+		str              string
+		wantTS           uint64
+		wantSeq, wantVer uint8
+		wantType         IDType
+		wantUnused       uint64
 	}
 
 	fixtures := []fixture{

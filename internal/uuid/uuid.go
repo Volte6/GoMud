@@ -31,6 +31,8 @@ var (
 	currentVersion uint8 = 1
 )
 
+type IDType uint8
+
 // UUID is a 128-bit identifier.
 type UUID [16]byte
 
@@ -72,12 +74,12 @@ func (u UUID) Version() uint8 {
 // Type returns the 8-bit type identifier, which is split across the high and low 64-bit words.
 // • Type high nibble: bits 67–64 (stored as the lower 4 bits of the high word).
 // • Type low nibble:  bits 63–60 (stored as the upper 4 bits of the low word).
-func (u UUID) Type() uint8 {
+func (u UUID) Type() IDType {
 	high := binary.BigEndian.Uint64(u[0:8])
 	low := binary.BigEndian.Uint64(u[8:16])
-	typeHigh := high & 0xF                  // lower 4 bits of high word.
-	typeLow := (low >> 60) & 0xF            // top 4 bits of low word.
-	return uint8((typeHigh << 4) | typeLow) // Combine into one 8-bit value.
+	typeHigh := high & 0xF                   // lower 4 bits of high word.
+	typeLow := (low >> 60) & 0xF             // top 4 bits of low word.
+	return IDType((typeHigh << 4) | typeLow) // Combine into one 8-bit value.
 }
 
 // Unused returns the 60-bit unused field from the low 64 bits (bits 59–0).
@@ -179,7 +181,7 @@ func newUUIDGenerator() UUIDGenerator {
 }
 
 // NewUUID generates a new UUID for the given typeID (must be < 256).
-func (g *UUIDGenerator) NewUUID(typeID uint8) UUID {
+func (g *UUIDGenerator) NewUUID(typeID IDType) UUID {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
@@ -217,7 +219,7 @@ func (g *UUIDGenerator) NewUUID(typeID uint8) UUID {
 }
 
 // New creates a new UUID, optionally using a provided type identifier.
-func New(typeId ...uint8) UUID {
+func New(typeId ...IDType) UUID {
 	if len(typeId) > 0 {
 		return generator.NewUUID(typeId[0])
 	}
