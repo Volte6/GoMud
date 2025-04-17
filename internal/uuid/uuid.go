@@ -123,26 +123,28 @@ func FromString(s string) (UUID, error) {
 	}
 
 	// Parse timestamp (first 13 hex digits) and sequence (last hex digit of first part).
-	ts, err := strconv.ParseUint(parts[0][:13], 16, 52)
+	ts, err := strconv.ParseUint(parts[0][:13], 16, timestampBits)
 	if err != nil {
 		return UUID{}, fmt.Errorf("invalid timestamp: %w", err)
 	}
-	seq, err := strconv.ParseUint(parts[0][13:], 16, 4)
+	seq, err := strconv.ParseUint(parts[0][13:], 16, sequenceBits)
 	if err != nil {
 		return UUID{}, fmt.Errorf("invalid sequence: %w", err)
 	}
-	ver, err := strconv.ParseUint(parts[1], 16, 4)
+	ver, err := strconv.ParseUint(parts[1], 16, versionBits)
 	if err != nil {
 		return UUID{}, fmt.Errorf("invalid version: %w", err)
 	}
 	// Parse type (2 hex digits → 8 bits).
-	typ, err := strconv.ParseUint(parts[2], 16, 8)
+	typ, err := strconv.ParseUint(parts[2], 16, typeBits)
 	if err != nil {
 		return UUID{}, fmt.Errorf("invalid type: %w", err)
 	}
-	// The unused field must be all zeros.
-	if parts[3] != "000000000000000" {
-		return UUID{}, errors.New("unused field must be zero")
+
+	// Parse type (2 hex digits → 8 bits).
+	unused, err := strconv.ParseUint(parts[3], 16, unusedBits)
+	if err != nil {
+		return UUID{}, fmt.Errorf("invalid type: %w", err)
 	}
 
 	// Pack fields into the two 64-bit words.
@@ -158,7 +160,7 @@ func FromString(s string) (UUID, error) {
 	// • Type low nibble: lower 4 bits of type, placed in the upper 4 bits of the low word.
 	// • Unused: occupies the lower 60 bits.
 	typeLow := typ & 0xF
-	low := (typeLow << 60) // Unused is zero.
+	low := (typeLow << unusedBits) | unused
 	var uuid UUID
 	binary.BigEndian.PutUint64(uuid[0:8], high)
 	binary.BigEndian.PutUint64(uuid[8:16], low)
@@ -207,7 +209,7 @@ func (g *UUIDGenerator) NewUUID(typeID uint8) UUID {
 
 	// Low 64 bits: (type low nibble << 60) | unused (zero).
 	typeLow := uint64(typeID) & 0xF
-	low := (typeLow << 60)
+	low := (typeLow << unusedBits)
 	var uuid UUID
 	binary.BigEndian.PutUint64(uuid[0:8], high)
 	binary.BigEndian.PutUint64(uuid[8:16], low)
