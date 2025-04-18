@@ -81,11 +81,12 @@ func Equip(rest string, user *users.UserRecord, room *rooms.Room, flags events.E
 			// Trigger any outstanding buff onStart events
 			if len(matchItem.GetSpec().WornBuffIds) > 0 {
 				for _, buff := range user.Character.Buffs.List {
-					if !buff.OnStartEvent {
+					if buff.OnStartWaiting {
 						if _, err := scripting.TryBuffScriptEvent(`onStart`, user.UserId, 0, buff.BuffId); err == nil {
 							user.Character.TrackBuffStarted(buff.BuffId)
 						}
 					}
+
 				}
 			}
 

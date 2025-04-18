@@ -10,10 +10,10 @@ const (
 )
 
 type Buff struct {
-	BuffId       int    // Which buff template does it refer to?
-	Source       string // Optional source identifier for where this buff originated. Example: spell, item, area
-	OnStartEvent bool   // Has the onStart event been triggered?
-	PermaBuff    bool   `yaml:"permabuff,omitempty"` // Is this buff from a worn item or race?
+	BuffId         int    // Which buff template does it refer to?
+	Source         string `yaml:"source,omitempty"`         // Optional source identifier for where this buff originated. Example: spell, item, area
+	OnStartWaiting bool   `yaml:"onstartwaiting,omitempty"` // Is the onstart event waiting to trigger?
+	PermaBuff      bool   `yaml:"permabuff,omitempty"`      // Is this buff from a worn item or race?
 	// Need to instance track the following:
 	RoundCounter int `yaml:"roundcounter,omitempty"` // How many rounds have passed. Triggers on (RoundCounter%RoundInterval == 0)
 	TriggersLeft int `yaml:"triggersleft,omitempty"` // How many times it triggers
@@ -167,7 +167,7 @@ func (bs *Buffs) HasBuff(buffId int) bool {
 
 func (bs *Buffs) Started(buffId int) {
 	if idx, ok := bs.buffIds[buffId]; ok {
-		bs.List[idx].OnStartEvent = true
+		bs.List[idx].OnStartWaiting = false
 	}
 }
 
