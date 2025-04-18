@@ -44,8 +44,8 @@ func toString_v1(u UUID) string {
 	seq := u.Sequence()
 	typ := u.Type()
 	un := u.Unused()
-	// 1-000000000000000-00-00000000000000
-	return fmt.Sprintf("1-%013x%02x-%02x-%014x", ts, seq, typ, un)
+
+	return fmt.Sprintf("1-%013x%02x-%02x-%014x", ts, seq, typ, un) // 1-000000000000000-00-00000000000000
 }
 
 // 1-000000000000000-00-00000000000000

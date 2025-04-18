@@ -2,6 +2,7 @@ package uuid
 
 import (
 	"encoding/binary"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -90,7 +91,7 @@ func (u UUID) IsNil() bool {
 func (u UUID) String() string {
 
 	if u.IsNil() {
-		return ``
+		return `0`
 	}
 
 	// As new versions are incremented, the stringification may change as well
@@ -98,7 +99,7 @@ func (u UUID) String() string {
 		return toString_v1(u)
 	}
 
-	return ``
+	return `0-INVALID-CURRENT-VERSION:` + strconv.Itoa(int(currentVersion))
 }
 
 // MarshalText implements encoding.TextMarshaler.

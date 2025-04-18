@@ -73,8 +73,8 @@ func TestIsNil(t *testing.T) {
 	if !nilUUID.IsNil() {
 		t.Error("expected nil UUID to be IsNil() true")
 	}
-	if nilUUID.String() != `` {
-		t.Error("expected nil UUID String() to be empty")
+	if nilUUID.String() != `0` {
+		t.Error("expected nil UUID String() to be 0")
 	}
 	gen := newUUIDGenerator()
 	u := gen.NewUUID(1)
