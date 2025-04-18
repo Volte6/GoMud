@@ -19,9 +19,8 @@ const (
 )
 
 var (
-	// NilUUID is the zero-valued UUID.
-	NilUUID UUID = UUID{}
-
+	// Pre-allocated nil value for comparison purposes
+	nilUUID UUID = UUID{}
 	// Generator singleton.
 	generator = newUUIDGenerator()
 	// currentVersion is the default version.
@@ -84,7 +83,7 @@ func (u UUID) Unused() uint64 {
 
 // IsNil indicates whether the UUID is the zero value.
 func (u UUID) IsNil() bool {
-	return u == NilUUID
+	return u == nilUUID
 }
 
 // String returns the UUID as a formatted string.

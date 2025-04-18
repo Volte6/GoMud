@@ -22,7 +22,7 @@ func FromString(s string) (UUID, error) {
 	// empty string is a nil UUID
 	// 0 version reserved for nil
 	if strLen < 1 || s[0:1] == `0` {
-		return NilUUID, nil
+		return UUID{}, nil
 	}
 
 	vUint, err := strconv.ParseUint(s[0:1], 16, 8)
@@ -114,5 +114,6 @@ func fromString_v1(s string) (UUID, error) {
 	var uuid UUID
 	binary.BigEndian.PutUint64(uuid[0:8], high)
 	binary.BigEndian.PutUint64(uuid[8:16], low)
+
 	return uuid, nil
 }

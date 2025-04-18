@@ -22,10 +22,10 @@ func TestUUIDStringAndParse(t *testing.T) {
 
 func TestFromStringInvalidFormat(t *testing.T) {
 	invalidInputs := []string{
-		"1234",                                // Not enough parts
-		"1-234567890abcde-01",                 // Only 3 parts
-		"1-234567890abcde-01-xyz",             // Fourth part invalid length
-		"g-000000000000000-00-00000000000000", // Invalid version digit
+		"1234",                                // Invalid length
+		"1-234567890abcde-010000000000000000", // Only 3 parts
+		"1-234567890abcde-01-xyz",             // 4 parts but invalid length
+		"g-000000000000000-00-00000000000000", // Invalid version
 	}
 	for _, s := range invalidInputs {
 		if _, err := FromString(s); err == nil {
@@ -73,6 +73,9 @@ func TestIsNil(t *testing.T) {
 	if !nilUUID.IsNil() {
 		t.Error("expected nil UUID to be IsNil() true")
 	}
+	if nilUUID.String() != `` {
+		t.Error("expected nil UUID String() to be empty")
+	}
 	gen := newUUIDGenerator()
 	u := gen.NewUUID(1)
 	if u.IsNil() {
@@ -81,21 +84,29 @@ func TestIsNil(t *testing.T) {
 }
 
 func TestIsNilString(t *testing.T) {
-	// version=0, ts+seq=15 zeros, type=00, unused=14 zeros
-	nilStr := "0-000000000000000-00-00000000000000"
+	nilStr := "0anythingfollows"
 	parsed, err := FromString(nilStr)
 	if err != nil {
 		t.Fatalf("failed to parse nil UUID string: %v", err)
 	}
 	var zero UUID
 	if zero != parsed {
-		t.Error("expected nil UUID parsed from string to equal nil UUID")
+		t.Error("expected nil UUID parsed from string starting with 0 to equal nil UUID")
+	}
+
+	nilStr = ""
+	parsed, err = FromString(nilStr)
+	if err != nil {
+		t.Fatalf("failed to parse nil UUID string: %v", err)
+	}
+	if zero != parsed {
+		t.Error("expected nil UUID parsed from empty string to equal nil UUID")
 	}
 }
 
 func TestFromStringRoundTrip(t *testing.T) {
 	valid := []string{
-		"1-000000000000000-00-00000000000000",
+		"1-000000000000000-00-00000000000002",
 		"1-000000000000100-02-00000000000000",
 		"1-000000000000100-02-01010101010101",
 		fmt.Sprintf("%01x-%013x%02x-%02x-%014x", currentVersion, 0x2A, 0x03, 42, 0),
