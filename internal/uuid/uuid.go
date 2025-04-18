@@ -2,10 +2,6 @@ package uuid
 
 import (
 	"encoding/binary"
-	"errors"
-	"fmt"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -24,7 +20,8 @@ const (
 
 var (
 	// NilUUID is the zero-valued UUID.
-	NilUUID = UUID{}
+	NilUUID UUID = UUID{}
+
 	// Generator singleton.
 	generator = newUUIDGenerator()
 	// currentVersion is the default version.
@@ -48,8 +45,8 @@ type UUID [16]byte
 func (u UUID) Time() time.Time {
 	t := int64(u.Timestamp() + customEpoch)
 	seconds := t / 1e6
-	nanoseconds := (t % 1e6) * 1000
-	return time.Unix(seconds, nanoseconds)
+	nano := (t % 1e6) * 1000
+	return time.Unix(seconds, nano)
 }
 
 // Timestamp returns the 52-bit timestamp (microseconds since Jan 1, 2025).
@@ -91,69 +88,18 @@ func (u UUID) IsNil() bool {
 }
 
 // String returns the UUID as a formatted string.
-// "<timestamp:13 hex digits><sequence:2 hex digits>-<version:1 hex digit>-<type:2 hex digits>-<unused:14 hex digits>"
 func (u UUID) String() string {
-	ts := u.Timestamp()
-	seq := u.Sequence()
-	ver := u.Version()
-	typ := u.Type()
-	un := u.Unused()
-	return fmt.Sprintf("%013x%02x-%01x-%02x-%014x", ts, seq, ver, typ, un)
-}
 
-// FromString parses a UUID from its string representation.
-func FromString(s string) (UUID, error) {
-	parts := strings.Split(s, "-")
-	if len(parts) != 4 {
-		return UUID{}, errors.New("invalid UUID format: must have four parts")
-	}
-	if len(parts[0]) != 15 {
-		return UUID{}, errors.New("invalid first part length, expected 15 hex digits")
-	}
-	if len(parts[1]) != 1 {
-		return UUID{}, errors.New("invalid version part length, expected 1 hex digit")
-	}
-	if len(parts[2]) != 2 {
-		return UUID{}, errors.New("invalid type part length, expected 2 hex digits")
-	}
-	if len(parts[3]) != unusedBits/4 {
-		return UUID{}, errors.New("invalid unused part length, expected 14 hex digits")
+	if u.IsNil() {
+		return ``
 	}
 
-	ts, err := strconv.ParseUint(parts[0][:13], 16, timestampBits)
-	if err != nil {
-		return UUID{}, fmt.Errorf("invalid timestamp: %w", err)
-	}
-	seq, err := strconv.ParseUint(parts[0][13:], 16, sequenceBits)
-	if err != nil {
-		return UUID{}, fmt.Errorf("invalid sequence: %w", err)
-	}
-	ver, err := strconv.ParseUint(parts[1], 16, versionBits)
-	if err != nil {
-		return UUID{}, fmt.Errorf("invalid version: %w", err)
-	}
-	typVal, err := strconv.ParseUint(parts[2], 16, typeBits)
-	if err != nil {
-		return UUID{}, fmt.Errorf("invalid type: %w", err)
-	}
-	unused, err := strconv.ParseUint(parts[3], 16, unusedBits)
-	if err != nil {
-		return UUID{}, fmt.Errorf("invalid unused: %w", err)
+	// As new versions are incremented, the stringification may change as well
+	if currentVersion == 1 {
+		return toString_v1(u)
 	}
 
-	typeHigh := (typVal >> (typeBits / 2)) & ((1 << (typeBits / 2)) - 1)
-	high := (ts << (sequenceBits + versionBits + (typeBits / 2))) |
-		(seq << (versionBits + (typeBits / 2))) |
-		(ver << (typeBits / 2)) |
-		typeHigh
-
-	typeLow := typVal & ((1 << (typeBits / 2)) - 1)
-	low := (typeLow << unusedBits) | unused
-
-	var uuid UUID
-	binary.BigEndian.PutUint64(uuid[0:8], high)
-	binary.BigEndian.PutUint64(uuid[8:16], low)
-	return uuid, nil
+	return ``
 }
 
 // MarshalText implements encoding.TextMarshaler.
@@ -182,7 +128,7 @@ func newUUIDGenerator() UUIDGenerator {
 	return UUIDGenerator{}
 }
 
-// NewUUID generates a new UUID for the given typeID (0 < typeID < 256).
+// NewUUID generates a new UUID for the given typeID (0 ≤ typeID < 256).
 func (g *UUIDGenerator) NewUUID(typeID IDType) UUID {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -191,6 +137,7 @@ func (g *UUIDGenerator) NewUUID(typeID IDType) UUID {
 	if now == g.lastTimestamp {
 		g.sequence++
 		if g.sequence >= (1 << sequenceBits) {
+			// wait for next microsecond
 			for {
 				now = uint64(time.Now().UnixMicro()) - customEpoch
 				if now > g.lastTimestamp {
@@ -220,10 +167,10 @@ func (g *UUIDGenerator) NewUUID(typeID IDType) UUID {
 	return uuid
 }
 
-// New creates a new UUID with optional typeID.
-func New(typeId ...IDType) UUID {
-	if len(typeId) > 0 {
-		return generator.NewUUID(typeId[0])
+// New creates a new UUID with an optional typeID.
+func New(typeID ...IDType) UUID {
+	if len(typeID) > 0 {
+		return generator.NewUUID(typeID[0])
 	}
 	return generator.NewUUID(0)
 }
