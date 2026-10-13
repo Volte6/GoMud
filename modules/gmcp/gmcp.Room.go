@@ -314,7 +314,12 @@ func (g *GMCPRoomModule) GetRoomNode(user *users.UserRecord, gmcpModule string) 
 		for _, itm := range room.Items {
 			payload.Contents.Items = append(payload.Contents.Items, GMCPRoomModule_Payload_Contents_Item{
 				Id:        itm.ShorthandId(),
+				ItemId:      itm.ItemId,
 				Name:      itm.Name(),
+				SimpleName:  itm.NameSimple(),
+				DisplayName: itm.DisplayName(),
+				Type:        string(spec.Type),
+				SubType:     string(spec.Subtype),
 				QuestFlag: itm.GetSpec().QuestToken != ``,
 			})
 		}
@@ -589,6 +594,11 @@ type GMCPRoomModule_Payload_Contents_Item struct {
 	Id        string `json:"id"`
 	Name      string `json:"name"`
 	QuestFlag bool   `json:"quest_flag"`
+	ItemId      int    `json:"itemid,omitempty"`
+	SimpleName  string `json:"simple_name,omitempty"`
+	DisplayName string `json:"display_name,omitempty"`
+	Type        string `json:"type,omitempty"`
+	SubType     string `json:"subtype,omitempty"`
 }
 
 type GMCPRoomModule_Payload_Contents_Container struct {
