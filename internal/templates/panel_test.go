@@ -186,6 +186,23 @@ func TestRenderPanel_BlankRow(t *testing.T) {
 	assert.Equal(t, charsetSingle.VerticalLeft+strings.Repeat(" ", inner+2*panelPad)+charsetSingle.VerticalRight, got[2])
 }
 
+func TestRenderPanel_BlockRow(t *testing.T) {
+	p := makePanel("x", "X", 40, borderFull, []PanelRow{
+		{
+			ShortLabel: "A:",
+			FullLabel:  "Alpha:",
+			Value:      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966, when designers at Letraset and James Mosley, the librarian at St Bride Printing Library in London, took a 1914 Cicero translation and scrambled it to make dummy text for Letraset's Body Type sheets.",
+			WrapWidth:  80,
+			Block:      true,
+		},
+	})
+	got := renderPanel(p)
+	require.Equal(t, 13, len(got))
+	for i, line := range got {
+		assert.LessOrEqual(t, panelVisualWidth(line), p.width, "line %d longer than panel width", i)
+	}
+}
+
 func TestRenderPanel_AllLinesEqualVisualWidth(t *testing.T) {
 	p := makePanel("x", "Title", 19, borderFull, []PanelRow{
 		{FullLabel: "Short:", ShortLabel: "S:", Value: "v"},

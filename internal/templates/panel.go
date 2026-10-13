@@ -90,6 +90,7 @@ type PanelRow struct {
 	Value      string
 	Blank      bool
 	WrapWidth  int
+	Block      bool
 }
 
 // Panel holds the rows for one titled box. Obtain via PanelLayout.Panel(id).
@@ -150,6 +151,20 @@ func (p *Panel) AddWithWrapWidth(fullLabel, shortLabel, value string, wrapWidth 
 // AddBlank appends an empty spacer row and returns the panel for chaining.
 func (p *Panel) AddBlank() *Panel {
 	p.rows = append(p.rows, PanelRow{Blank: true})
+	return p
+}
+
+// AddBlock appends a block of text as a single row with an explicit value wrap width.
+// When the block's visual width exceeds wrapWidth, it is wrapped onto continuation
+// lines indented to align with the value column of the first line.
+// Pass -1 to disable wrapping entirely for this row, even when the panel has a
+// fixed width that would otherwise trigger automatic wrapping.
+func (p *Panel) AddBlock(value string, wrapWidth int) *Panel {
+	p.rows = append(p.rows, PanelRow{
+		Value:     value,
+		WrapWidth: wrapWidth,
+		Block:     true,
+	})
 	return p
 }
 
@@ -740,6 +755,19 @@ func panelInnerWidth(p *Panel) int {
 			if row.Blank {
 				continue
 			}
+			if row.Block {
+				bw := panelVisualWidth(row.Value)
+				effectiveWrap := row.WrapWidth
+				if effectiveWrap > 0 && target > 0 {
+					effectiveWrap = min(effectiveWrap, target)
+				} else if effectiveWrap <= 0 && target > 0 {
+					effectiveWrap = target
+				} else if effectiveWrap <= 0 && target <= 0 {
+					effectiveWrap = bw
+				}
+				bw = min(bw, effectiveWrap)
+				return max(bw, width)
+			}
 			lw := panelVisualWidth(row.FullLabel)
 			if p.labelWidth > lw {
 				lw = p.labelWidth
@@ -777,9 +805,14 @@ func panelInnerWidth(p *Panel) int {
 		if row.Blank {
 			continue
 		}
-		lw := panelVisualWidth(row.FullLabel)
-		vw := panelVisualWidth(row.Value)
-		cell := lw + 1 + vw
+		var cell int
+		if row.Block {
+			cell = panelVisualWidth(row.Value)
+		} else {
+			lw := panelVisualWidth(row.FullLabel)
+			vw := panelVisualWidth(row.Value)
+			cell = lw + 1 + vw
+		}
 		if cell > widestCell {
 			widestCell = cell
 		}
@@ -819,14 +852,26 @@ func chooseLabel(row PanelRow, innerWidth int) string {
 
 // renderCellContent renders one label+value cell right-padded to colWidth.
 func renderCellContent(row PanelRow, colWidth int) string {
-	label := chooseLabel(row, colWidth)
-	lw := panelVisualWidth(label)
-	vw := panelVisualWidth(row.Value)
-	rightPad := colWidth - lw - 1 - vw
-	if rightPad < 0 {
-		rightPad = 0
+	if row.Block {
+		vw := panelVisualWidth(row.Value)
+
+		rightPad := max(colWidth-vw, 0)
+
+		return row.Value + strings.Repeat(" ", rightPad)
+
+	} else {
+
+		label := chooseLabel(row, colWidth)
+		lw := panelVisualWidth(label)
+		vw := panelVisualWidth(row.Value)
+
+		rightPad := colWidth - lw - 1 - vw
+		if rightPad < 0 {
+			rightPad = 0
+		}
+
+		return label + " " + row.Value + strings.Repeat(" ", rightPad)
 	}
-	return label + " " + row.Value + strings.Repeat(" ", rightPad)
 }
 
 // renderPanel renders a single panel into a slice of terminal lines.
@@ -925,6 +970,10 @@ func renderSingleColumnLines(p *Panel, row PanelRow, inner int, isFirst, isLast 
 		return []string{borderLine(strings.Repeat(" ", inner+2*panelPad))}
 	}
 
+	if row.Block {
+		return renderSingleBlockColumnLines(p, row, inner, isFirst, isLast)
+	}
+
 	label := chooseLabel(row, inner)
 	lw := panelVisualWidth(label)
 	if p.labelWidth > lw {
@@ -996,6 +1045,60 @@ func renderSingleColumnLines(p *Panel, row PanelRow, inner int, isFirst, isLast 
 			}
 		}
 	}
+	return result
+}
+
+// renderSingleBlockColumnLines renders one block content row for a single-column
+// panel returning one or more lines. When a wrap width is determined (from the row's
+// WrapWidth or the panel's target width), the value is split and continuation lines
+// are indented to align with the value column of the first line.
+func renderSingleBlockColumnLines(p *Panel, row PanelRow, inner int, isFirst, isLast bool) []string {
+	c := p.chars
+	borderLine := func(content string) string {
+		if p.border == borderFull || isFirst || isLast {
+			return c.VerticalLeft + content + c.VerticalRight
+		}
+		return " " + content + " "
+	}
+
+	effectiveWrap := row.WrapWidth
+	if effectiveWrap == 0 && p.width > 0 {
+		effectiveWrap = inner
+	}
+
+	effectiveWrap = min(effectiveWrap, inner)
+
+	var chunks []string
+	if effectiveWrap > 0 {
+		for _, chunk := range ansitags.SplitStringOnSpaces(row.Value, effectiveWrap, true) {
+			if panelVisualWidth(chunk) > 0 {
+				chunks = append(chunks, chunk)
+			}
+		}
+	}
+
+	if len(chunks) == 0 {
+		chunks = []string{row.Value}
+	}
+
+	var result []string
+	for ci, chunk := range chunks {
+		vw := panelVisualWidth(chunk)
+		rightPad := max(inner-vw, 0)
+
+		content := strings.Repeat(" ", panelPad) + chunk + strings.Repeat(" ", rightPad) + strings.Repeat(" ", panelPad)
+
+		if ci == 0 {
+			result = append(result, borderLine(content))
+		} else {
+			if p.border == borderFull {
+				result = append(result, c.VerticalLeft+content+c.VerticalRight)
+			} else {
+				result = append(result, " "+content+" ")
+			}
+		}
+	}
+
 	return result
 }
 
