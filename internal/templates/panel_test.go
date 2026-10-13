@@ -198,6 +198,30 @@ func TestRenderPanel_AllLinesEqualVisualWidth(t *testing.T) {
 	}
 }
 
+func TestRenderPanel_AllLinesFitInsideWidth(t *testing.T) {
+	p := makePanel("x", "X", 20, borderFull, []PanelRow{
+		{FullLabel: "Short:", ShortLabel: "S:", Value: "This is a short description."},
+		{FullLabel: "HowItBe:", ShortLabel: "HIB:", Value: "This is an extremely long line of text. It is unnecessarily long. There's no reason for it to be this long, but we want to make sure wrapping is working correctly, so I will continue to make this line longer as necessary to get back good testing data."},
+	})
+	got := renderPanel(p)
+	for i, line := range got {
+		assert.LessOrEqual(t, panelVisualWidth(line), p.width, "line %d is longer than panel width", i)
+	}
+}
+
+func TestRenderPanel_AllLinesFitInsideWidthWithMismatchedWrap(t *testing.T) {
+	p := makePanel("x", "X", 20, borderFull, []PanelRow{
+		{FullLabel: "Short:", ShortLabel: "S:", Value: "This is a short description."},
+		{FullLabel: "HowItBe:", ShortLabel: "HIB:", WrapWidth: 50, Value: "This is an extremely long line of text. It is unnecessarily long. There's no reason for it to be this long, but we want to make sure wrapping is working correctly, so I will continue to make this line longer as necessary to get back good testing data."},
+		{FullLabel: "HowItBe:", ShortLabel: "HIB:", WrapWidth: 15, Value: "This is an extremely long line of text. It is unnecessarily long. There's no reason for it to be this long, but we want to make sure wrapping is working correctly, so I will continue to make this line longer as necessary to get back good testing data."},
+		{FullLabel: "HowItBe:", ShortLabel: "HIB:", WrapWidth: 20, Value: "This is an extremely long line of text. It is unnecessarily long. There's no reason for it to be this long, but we want to make sure wrapping is working correctly, so I will continue to make this line longer as necessary to get back good testing data."},
+	})
+	got := renderPanel(p)
+	for i, line := range got {
+		assert.LessOrEqual(t, panelVisualWidth(line), p.width, "line %d is longer than panel width", i)
+	}
+}
+
 func TestRenderPanel_AnsiTagsDoNotAffectWidth(t *testing.T) {
 	p := makePanel("x", "X", 19, borderFull, []PanelRow{
 		{FullLabel: `<ansi fg="yellow">Name:</ansi>`, ShortLabel: "N:", Value: `<ansi fg="green">Alice</ansi>`},

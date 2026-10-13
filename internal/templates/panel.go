@@ -941,12 +941,15 @@ func renderSingleColumnLines(p *Panel, row PanelRow, inner int, isFirst, isLast 
 	// WrapWidth < 0 disables wrapping entirely for this row.
 	// WrapWidth > 0 uses that as the explicit wrap width.
 	// WrapWidth == 0 falls back to the panel's target width.
+	// If your wrap is greater than visible width it is adjusted.
 	effectiveWrap := row.WrapWidth
+	visibleWidth := inner - lw - 1
 	if effectiveWrap == 0 && p.width > 0 {
-		availForValue := inner - lw - 1
-		if availForValue > 0 {
-			effectiveWrap = availForValue
+		if visibleWidth > 0 {
+			effectiveWrap = visibleWidth
 		}
+	} else if effectiveWrap > visibleWidth {
+		effectiveWrap = visibleWidth
 	}
 
 	var chunks []string
