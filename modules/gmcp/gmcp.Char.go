@@ -16,6 +16,7 @@ import (
 	"github.com/GoMudEngine/GoMud/internal/quests"
 	"github.com/GoMudEngine/GoMud/internal/races"
 	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/spells"
 	"github.com/GoMudEngine/GoMud/internal/skills"
 	"github.com/GoMudEngine/GoMud/internal/users"
 )
@@ -806,6 +807,45 @@ func (g *GMCPCharModule) GetCharNode(user *users.UserRecord, gmcpModule string) 
 		}
 	}
 
+	if all || g.wantsGMCPPayload(`Char.Spells`, gmcpModule) {
+
+		payload.Spells = []GMCPCharModule_Payload_Spell{}
+	
+		for spellId, casts := range user.Character.GetSpells() {
+			if casts < 0 {
+				continue
+			}
+	
+			displayCasts := casts - 1
+			if displayCasts < 0 {
+				displayCasts = 0
+			}
+	
+			sp := spells.GetSpell(spellId)
+			if sp == nil {
+				continue
+			}
+	
+			payload.Spells = append(payload.Spells, GMCPCharModule_Payload_Spell{
+				SpellId:     sp.SpellId,
+				Name:        sp.Name,
+				Description: sp.Description,
+				Type:        string(sp.Type),
+				School:      string(sp.School),
+				Target:      sp.Type.TargetTypeString(true),
+				HelpOrHarm:  sp.Type.HelpOrHarmString(),
+				Cost:        sp.Cost,
+				WaitRounds:  sp.WaitRounds,
+				Casts:       displayCasts,
+				Chance:      user.Character.GetBaseCastSuccessChance(sp.SpellId),
+			})
+		}
+	
+		if !all {
+			return payload.Spells, `Char.Spells`
+		}
+	}
+
 	if all || g.wantsGMCPPayload(`Char.Jobs`, gmcpModule) {
 
 		payload.Jobs = []GMCPCharModule_Payload_Job{}
@@ -926,6 +966,7 @@ type GMCPCharModule_Payload struct {
 	Quests    []GMCPCharModule_Payload_Quest           `json:"Quests,omitempty"`
 	Pets      []GMCPCharModule_Payload_Pet             `json:"Pets,omitempty"`
 	Skills    []GMCPCharModule_Payload_Skill           `json:"Skills,omitempty"`
+	Spells    []GMCPCharModule_Payload_Spell           `json:"Spells,omitempty"`
 	Jobs      []GMCPCharModule_Payload_Job             `json:"Jobs,omitempty"`
 	Kills     *GMCPCharModule_Payload_Kills            `json:"Kills,omitempty"`
 }
@@ -1114,6 +1155,23 @@ type GMCPCharModule_Payload_Pet_Ability struct {
 	CombatChance int            `json:"combat_chance"`
 	DiceRoll     string         `json:"dice_roll"`
 	StatMods     map[string]int `json:"stat_mods,omitempty"`
+}
+
+///////////////////
+// Char.Spells
+///////////////////
+type GMCPCharModule_Payload_Spell struct {
+	SpellId     string `json:"spellid"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Type        string `json:"type,omitempty"`
+	School      string `json:"school,omitempty"`
+	Target      string `json:"target,omitempty"`
+	HelpOrHarm  string `json:"help_or_harm,omitempty"`
+	Cost        int    `json:"cost"`
+	WaitRounds  int    `json:"wait_rounds"`
+	Casts       int    `json:"casts"`
+	Chance      int    `json:"chance"`
 }
 
 // /////////////////
