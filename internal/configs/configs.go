@@ -82,7 +82,15 @@ func AddOverlayOverrides(dotMap map[string]any) error {
 	if len(newKeys) == 0 {
 		return nil
 	}
-	return configData.OverlayOverrides(newKeys)
+
+	// Overlay the full override set rather than just the new keys. Overlaying
+	// only the new keys would unmarshal a partial Modules block into the live
+	// config, replacing the inner Modules[<name>] map wholesale and discarding
+	// every operator-supplied value for that module. Flatten first: at this
+	// point `overrides` is mixed-shape (nested maps loaded from
+	// config-overrides.yaml plus the flat dotted keys added above), and
+	// OverlayOverrides re-nests it internally.
+	return configData.OverlayOverrides(Flatten(overrides))
 }
 
 // OverlayDotMap overlays values from a dot-syntax map onto the Config.

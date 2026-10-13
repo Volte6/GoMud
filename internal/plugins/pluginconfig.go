@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/mudlog"
 )
 
 type PluginConfig struct {
@@ -11,7 +12,9 @@ type PluginConfig struct {
 }
 
 func (p *PluginConfig) Set(name string, val any) {
-	configs.SetVal(fmt.Sprintf(`Modules.%s.%s`, p.pluginName, name), fmt.Sprintf(`%v`, val))
+	if err := configs.SetVal(fmt.Sprintf(`Modules.%s.%s`, p.pluginName, name), fmt.Sprintf(`%v`, val)); err != nil {
+		mudlog.Error(`PluginConfig.Set`, `plugin`, p.pluginName, `key`, name, `error`, err)
+	}
 }
 
 func (p *PluginConfig) Get(name string) any {
